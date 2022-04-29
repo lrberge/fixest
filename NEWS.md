@@ -17,6 +17,8 @@
  
  - fix bug in `confint.fixest` when only one variable was estimated (thanks to @joachim-gassen [#296](https://github.com/lrberge/fixest/issues/296)).
  
+ - fix several bugs in predict when using `i()`, in particular when used in combination with a factor or `poly()` (reported by @rfbressan [#301](https://github.com/lrberge/fixest/issues/301)).
+ 
 ## New functions
 
  - new function `degrees_freedom_iid` which is a more user-friendly version of `degrees_freedom`.
@@ -102,7 +104,7 @@ etable(est, fitstat = ~..fit_ols)
  ```
  - now there is support for models with no coefficient (only fixed-effects).
  
- - the application of markdown markup is now more robust.
+ - the application of markdown markup is now more robust and can also be escaped with a backslash.
  
 ## coeftable
 

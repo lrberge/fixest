@@ -1322,6 +1322,11 @@ i = function(factor_var, var, ref, keep, bin, ref2, keep2, bin2, ...){
 
     check_arg(ref2, keep, keep2, "vector no na")
 
+    NO_ERROR = FALSE
+    if(is_calling_fun("fixest_model_matrix_extra", full_search = TRUE, full_name = TRUE)){
+        NO_ERROR = TRUE
+    }
+
     no_rm = TRUE
     id_drop = c()
     if(!missing(ref)){
@@ -1330,29 +1335,36 @@ i = function(factor_var, var, ref, keep, bin, ref2, keep2, bin2, ...){
             # Que ce soit items ici est normal (et pas f_items)
             id_drop = which(items == items[1])
         } else {
-            id_drop = items_to_drop(f_items, ref, "factor_var")
+            id_drop = items_to_drop(f_items, ref, "factor_var", no_error = NO_ERROR)
         }
         ref_id = id_drop
     }
 
 
     if(!missing(keep)){
-        id_drop = c(id_drop, items_to_drop(f_items, keep, "factor_var", keep = TRUE))
+        id_drop = c(id_drop, items_to_drop(f_items, keep, "factor_var", keep = TRUE, no_error = NO_ERROR))
     }
 
     if(IS_INTER_FACTOR){
         if(!missing(ref2)){
-            id_drop = c(id_drop, items_to_drop(var_items, ref2, "var"))
+            id_drop = c(id_drop, items_to_drop(var_items, ref2, "var", no_error = NO_ERROR))
         }
 
         if(!missing(keep2)){
-            id_drop = c(id_drop, items_to_drop(var_items, keep2, "var", keep = TRUE))
+            id_drop = c(id_drop, items_to_drop(var_items, keep2, "var", keep = TRUE, no_error = NO_ERROR))
         }
     }
 
     if(length(id_drop) > 0){
         id_drop = unique(sort(id_drop))
-        if(length(id_drop) == length(items)) stop("All items from the interaction have been removed.")
+        if(length(id_drop) == length(items)){
+            if(FROM_FIXEST) {
+                # we return something neutral in an estimation
+                return(rep(0, length(f)))
+            }
+
+            stop("All items from the interaction have been removed.")
+        }
         who_is_dropped = id_drop
         no_rm = FALSE
     } else {
@@ -3640,8 +3652,14 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
 
     if(useModel.matrix){
         # to catch the NAs, model.frame needs to be used....
+
         if(is.null(mf)){
             mf = stats::model.frame(fml, data, na.action = na.pass)
+        } else {
+            # => predict, newdata
+            # case i() + anything that requires evaluation based on the raw data (poly, factor, etc)
+            # is there any drawback?
+            fml = formula(mf)
         }
 
         linear.mat = stats::model.matrix(fml, mf)
@@ -3774,6 +3792,8 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_i
     }
 
     GLOBAL_fixest_mm_info = list()
+
+    I_IGNORE_ERRORS = TRUE
 
     new_matrix = fixest_model_matrix(fml, newdata, fake_intercept, i_noref, mf = mf)
 
@@ -6600,22 +6620,38 @@ is_user_level_call = function(){
 }
 
 
-is_calling_fun = function(pattern){
+is_calling_fun = function(pattern, full_search = FALSE, full_name = FALSE){
     sc_all = sys.calls()
     n_sc = length(sc_all)
     if(n_sc > 2){
 
-        if(grepl(".fixest", sc_all[[n_sc - 1]][[1]], fixed = TRUE)){
-            if(n_sc == 3){
-                return(FALSE)
+        if(full_search){
+            fun_all = sapply(sc_all, function(x) as.character(x[[1]])[1])
+            if(full_name){
+                res = pattern %in% fun_all
+            } else {
+                res = any(grepl(pattern, fun_all))
+            }
+        } else {
+            if(grepl(".fixest", sc_all[[n_sc - 1]][[1]], fixed = TRUE)){
+                if(n_sc == 3){
+                    return(FALSE)
+                }
+
+                sc = sc_all[[n_sc - 3]]
+            } else {
+                sc = sc_all[[n_sc - 2]]
             }
 
-            sc = sc_all[[n_sc - 3]]
-        } else {
-            sc = sc_all[[n_sc - 2]]
+            fun_name = as.character(sc[[1]])[1]
+            if(full_name){
+                res = pattern %in% fun_name
+            } else {
+                res = grepl(pattern, fun_name)
+            }
         }
 
-        return(grepl(pattern, as.character(sc[[1]])[1]))
+        return(res)
     }
 
     FALSE

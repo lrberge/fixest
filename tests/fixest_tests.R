@@ -1962,6 +1962,34 @@ test(predict(aw, se.fit = TRUE, interval = "pre")$fit[, 2],
      predict(bw, se.fit = TRUE, interval = "pre")$ci_low)
 
 
+#
+# data contains poly/factor
+#
+
+est = feols(y ~ poly(x1, 2) + i(period, treat, 5) | id, data = base_did)
+
+new_data = base_did
+new_data$treat = 0
+
+poly_x1 = poly(new_data$x1, 2)
+new_data$px1_1 = poly_x1[, 1]
+new_data$px1_2 = poly_x1[, 2]
+
+value = poly_x1 %*% coef(est)[1:2] + fixef(est)$id[as.character(new_data$id)]
+
+test(predict(est, newdata = new_data), value)
+
+# should work => same results as before
+new_data = base_did
+new_data$period = 5
+
+test(predict(est, newdata = new_data), value)
+
+# should also work (differently from factor which raises an error)
+new_data = base_did
+new_data$period = 1955
+
+test(predict(est, newdata = new_data), value)
 
 
 ####

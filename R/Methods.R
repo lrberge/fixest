@@ -2555,7 +2555,10 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
         }
 
         # we create the matrix
-        matrix_linear = error_sender(fixest_model_matrix_extra(object = object, newdata = newdata, original_data = FALSE, fml = rhs_fml, i_noref = TRUE), "Error when creating the linear matrix: ")
+        matrix_linear = error_sender(fixest_model_matrix_extra(object = object, newdata = newdata,
+                                                               original_data = FALSE, fml = rhs_fml,
+                                                               i_noref = TRUE),
+                                     "Error when creating the linear matrix: ")
 
         # Checking the levels created with i()
         mm_info_new = attr(matrix_linear, "model_matrix_info")
