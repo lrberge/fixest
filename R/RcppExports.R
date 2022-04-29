@@ -213,6 +213,10 @@ cpp_hash_string <- function(x) {
     .Call(`_fixest_cpp_hash_string`, x)
 }
 
+cpp_md_markup <- function(Rstr) {
+    .Call(`_fixest_cpp_md_markup`, Rstr)
+}
+
 cpp_get_nb_threads <- function() {
     .Call(`_fixest_cpp_get_nb_threads`)
 }

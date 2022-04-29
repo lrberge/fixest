@@ -158,6 +158,8 @@
 #'
 #' Within anything that is Latex-escaped (see previous section), you can use a markdown-style markup to put the text in italic and/or bold. Use \code{*text*}, \code{**text**} or \code{***text***} to put some text in, respectively, italic (with \code{\\textit}), bold (with \code{\\textbf}) and italic-bold.
 #'
+#' The markup can be escaped by using an backslash first. For example \code{"***This: \\***, are three stars***"} will leave the three stars in the middle untouched.
+#'
 #' @return
 #' If \code{tex = TRUE}, the lines composing the Latex table are returned invisibly while the table is directly prompted on the console.
 #'
@@ -5873,9 +5875,10 @@ pmatch_varname = function(x, coef_names, arg_name){
 markup_apply = function(x){
     # x: if len > 1, means it contains equations that have been split
     # the function is slow, but we don't apply it to many things anyway, so that's OK
-    # Update: now I use lookbehind/after: the function is REALLY super slow
+    # UPDATE: now I use lookbehind/after: the function is REALLY super slow
     # maybe port it to c++ at come point?
     # from 150us => 2ms BIG DIFF!!!!
+    # UPDATE: OK, now in c++ => 5us. And I added escaping.
 
     if(!any(grepl("*", x, fixed = TRUE))){
         return(x)
@@ -5894,43 +5897,7 @@ markup_apply = function(x){
         x = paste0(x, collapse = "|$|")
     }
 
-    res = x
-
-    # patterns
-    dict_pat = c("***" = "\\textbf{\\textit{___}}",
-                 "**" = "\\textbf{___}",
-                 "*" = "\\textit{___}")
-    failed = rep(FALSE, 3)
-
-    for(i in 1:3){
-        pat = names(dict_pat)[i]
-        pat_re = paste0("(?<!\\*)", dsb("`nchar(pat)`*c!\\*"), "(?!\\*)")
-
-        if(grepl(pat_re, x, perl = TRUE)){
-            markup = dict_pat[i]
-
-            location = gregexpr(pat_re, x, perl = TRUE)[[1]]
-            n_match = length(location)
-
-            if(!n_match %% 2 == 0){
-                # failed markup
-                res = gsub(pat_re, .dsb("__.[`i`*c!$]__"), res, perl = TRUE)
-                failed[i] = TRUE
-            } else {
-                x_split = strsplit(res, pat_re, perl = TRUE)[[1]]
-                n = length(x_split)
-                for(j in (1:n)[(1:n) %% 2 == 0]){
-                    x_split[j] = sub("___", x_split[j], markup, fixed = TRUE)
-                }
-                res = paste0(x_split, collapse = "")
-            }
-        }
-    }
-
-    for(i in which(failed)){
-        pat = names(dict_pat)[i]
-        res = gsub(.dsb("__.[`i`*c!$]__"), pat, res, fixed = TRUE)
-    }
+    res = cpp_md_markup(x)
 
     if(is_eq){
         if(is_eq_star){

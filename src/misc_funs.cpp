@@ -1308,8 +1308,134 @@ double cpp_hash_string(std::string x){
     return res;
 }
 
+bool is_md_markup(const char * x, int i, int n){
+    if(x[i] != '*') return false;
+
+    if(i + 1 >= n || x[i + 1] != '*') return true;
+    if(i + 2 >= n ||  x[i + 2] != '*') return true;
+    if(i + 3 < n && x[i + 3] == '*') return false;
+    return true;
+}
+
+int find_id_markup(const char * x, int i, int n){
+    if(i + 1 >= n || x[i + 1] != '*') return 1;
+    if(i + 2 >= n ||  x[i + 2] != '*') return 2;
+    return 3;
+}
+
+std::string apply_md_markup(const char * x){
+    //
+    //
+    //
+    // element 0 is the main character vector: it is never closed
+
+    int n = std::strlen(x);
+    std::vector<std::string> tmp_all(4, "");
+    std::string tmp = "", res = "";
+
+    std::vector<bool> is_open(4, false);
+    std::vector<int> id_open;
+    id_open.push_back(0);
+
+    std::vector<std::string> open_tags{"", "\\textit{", "\\textbf{", "\\textbf{\\textit{"};
+    std::vector<std::string> closing_tags{"", "}", "}", "}}"};
+    std::vector<std::string> stars{"", "*", "**", "***"};
+
+    int id_mkp = 0;
+
+    int i = 0;
+    while(i < n){
+        if(x[i] == '\\'){
+            if(i + 1 < n && x[i + 1] == '*'){
+                // escape
+                ++i;
+                while(i < n && x[i] == '*'){
+                    tmp_all[id_mkp] += '*';
+                    ++i;
+                }
+                --i; // compensated at the end of the main while
+            } else {
+                tmp_all[id_mkp] += '\\';
+            }
+        } else if(is_md_markup(x, i, n)){
+            id_mkp = find_id_markup(x, i, n);
+            i += id_mkp - 1;
+
+            if(is_open[id_mkp]){
+
+                for(int j=id_open.size() - 1 ; j >= 1 ; --j){
+
+                    int id_j = id_open[j];
+                    int id_prev = id_open[j - 1];
+
+                    if(id_j == id_mkp){
+                        // we apply the markup
+                        tmp = open_tags[id_mkp] + tmp_all[id_mkp] + closing_tags[id_mkp];
+
+                        tmp_all[id_prev] += tmp;
+
+                        is_open[id_mkp] = false;
+                        id_open.pop_back();
+                        tmp_all[id_mkp] = "";
+                        id_mkp = id_prev;
+                        break;
+
+                    } else {
+                        // we flush: the markup is invalid
+                        // example:  "** bonjour * les gens **"
+
+                        tmp = stars[id_j] + tmp_all[id_j];
+                        tmp_all[id_j] = "";
+                        tmp_all[id_prev] += tmp;
+
+                        is_open[id_j] = false;
+                        id_open.pop_back();
+                    }
+                }
+
+            } else {
+                is_open[id_mkp] = true;
+                id_open.push_back(id_mkp);
+            }
+
+        } else {
+            tmp_all[id_mkp] += x[i];
+        }
+        ++i;
+    }
+
+    // we flush the rest if needed
+    for(int j=id_open.size() - 1 ; j >= 1 ; --j){
+        int id_j = id_open[j];
+        int id_prev = id_open[j - 1];
+
+        tmp = stars[id_j] + tmp_all[id_j];
+        tmp_all[id_j] = "";
+        tmp_all[id_prev] += tmp;
+    }
+
+    return tmp_all[0];
+}
 
 
+// [[Rcpp::export]]
+StringVector cpp_md_markup(SEXP Rstr){
+    // cpp_md_markup("**bonjour** *les* ***gens * \\***heureux*** ")
+    // cpp_md_markup("stars: 10%: *, 5%: **, 1%: ***")
+
+    int n = LENGTH(Rstr);
+    StringVector res(n);
+
+    if(n == 0){
+        return res;
+    }
+
+    for(int i=0 ; i<n ; ++i){
+        res[i] = apply_md_markup(CHAR(STRING_ELT(Rstr, i)));
+    }
+
+    return res;
+}
 
 
 
