@@ -33,6 +33,7 @@ export(xpd)
 export(models)
 # utilities
 export(to_integer, demean, obs)
+export(as.dict)
 # setters & getters
 exportPattern("^(s|g)etFixest")
 

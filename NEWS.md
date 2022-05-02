@@ -155,6 +155,25 @@ etable(est)
  - fix environment problems when `lean = TRUE`, leading to large objects when saved on disk.
  
  - `print.fixest` now displays the information on the sample/subset/offset/weights.
+ 
+ - add a new way to create dictionaries with `as.dict`:
+```R
+x = "
+# Main vars
+mpg: Miles per gallon
+hp: Horsepower
+
+# Categorical variables
+cyl: Number of cylinders; vs: Engine"
+
+as.dict(x)
+#>                   mpg                    hp                   cyl                    vs 
+#>    "Miles per gallon"          "Horsepower" "Number of cylinders"              "Engine" 
+
+# setFixest_dict works directly with x
+setFixest_dict(x)
+```
+- `setFixest_dict`: i) now the dictionary only grows, ii) you can define variables directly in the arguments of `setFixest_dict`, iii) `as.dict` is applied to the dictionary if relevant, iv) there's a new argument `reset`.
 
 
 # fixest 0.10.4

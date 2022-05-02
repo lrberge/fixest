@@ -5,26 +5,51 @@
 \alias{getFixest_dict}
 \title{Sets/gets the dictionary relabeling the variables}
 \usage{
-setFixest_dict(dict)
+setFixest_dict(dict = NULL, ..., reset = FALSE)
 
 getFixest_dict()
 }
 \arguments{
-\item{dict}{A named character vector. E.g. to change my variable named "a" and "b" to (resp.) "$log(a)$" and "$bonus^3$", then use \code{dict = c(a="$log(a)$", b3="$bonus^3$")}. This dictionary is used in Latex tables or in graphs by the function \code{\link[fixest]{coefplot}}. If you want to separate Latex rendering from rendering in graphs, use an ampersand first to make the variable specific to \code{coefplot}.}
+\item{dict}{A named character vector or a character scalar. E.g. to change my variable named "a" and "b" to (resp.) "$log(a)$" and "$bonus^3$", then use \code{dict = c(a="$log(a)$", b3="$bonus^3$")}. Alternatively you can feed a character scalar containing the dictionary in the form "variable 1: definition \n variable 2: definition". In that case the function \code{\link[fixest]{as.dict}} will be applied to get a proper dictionary. This dictionary is used in Latex tables or in graphs by the function \code{\link[fixest]{coefplot}}. If you want to separate Latex rendering from rendering in graphs, use an ampersand first to make the variable specific to \code{coefplot}.}
+
+\item{...}{You can add arguments of the form: \code{variable_name = "Definition"}. This is an alternative to using a named vector in the argument \code{dict}.}
+
+\item{reset}{Logical, default is \code{FALSE}. If \code{TRUE}, then the dictionary is reset. Note that the default dictionary always relabels the variable "(Intercept)" in to "Constant". To overwrite it, you need to add "(Intercept)" explicitly in your dictionary.}
 }
 \description{
 Sets/gets the default dictionary used in the function \code{\link[fixest]{etable}}, \code{\link[fixest]{did_means}} and \code{\link[fixest]{coefplot}}. The dictionaries are used to relabel variables (usually towards a fancier, more explicit formatting) when exporting them into a Latex table or displaying in graphs. By setting the dictionary with \code{setFixest_dict}, you can avoid providing the argument \code{dict}.
+}
+\details{
+By default the dictionary only grows. This means that successive calls with not erase the previous definitions unless the argument \code{reset} has been set to \code{TRUE}.
+
+The default dictionary is equivalent to having \code{setFixest_dict("(Intercept)" = "Constant")}. To change this default, you need to provide a new definition to \code{"(Intercept)"} explicitly.
 }
 \examples{
 
 data(trade)
 est = feols(log(Euros) ~ log(dist_km)|Origin+Destination+Product, trade)
 # we export the result & rename some variables
-esttex(est, dict = c("log(Euros)"="Euros (ln)", Origin="Country of Origin"))
+etable(est, dict = c("log(Euros)"="Euros (ln)", Origin="Country of Origin"))
 
 # If you export many tables, it can be more convenient to use setFixest_dict:
 setFixest_dict(c("log(Euros)"="Euros (ln)", Origin="Country of Origin"))
-esttex(est) # variables are properly relabeled
+etable(est) # variables are properly relabeled
+
+# The dictionary only 'grows'
+# Here you get the previous two variables + the new one that are relabeled
+# Btw you set the dictionary directly using the argument names:
+setFixest_dict(Destination = "Country of Destination")
+etable(est)
+
+# Another way to set a dictionary: with a character string:
+# See the help page of as.dict
+dict = "log(dist_km): Distance (ln); Product: Type of Good"
+setFixest_dict(dict)
+etable(est)
+
+# And now we reset:
+setFixest_dict(reset = TRUE)
+etable(est)
 
 }
 \author{

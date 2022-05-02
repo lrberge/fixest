@@ -6781,12 +6781,76 @@ getFixest_nthreads = function(){
     x
 }
 
+
+
+#' Transforms a character string into a dictionary
+#'
+#' Transforms a single character string containing a dictionary in a textual format into a proper dictionary, that is a named character vector
+#'
+#' @param x A character scalar of the form \code{"variable 1: definition \n variable 2: definition"} etc. Each line of this character must contain at most one definition with, on the left the variable name, and on the right its definition. The separation between the variable and its definition must be a colon followed with a single space (i.e. ": "). You can stack definitions within a single line by making use of a semi colon: \code{"var1: def; var2: def"}. White spaces on the left and right are ignored. You can add commented lines with a \code{"#"}. Non-empty, non-commented lines that don't have the proper format witll raise an error.
+#'
+#' @details
+#' This function is mostly used in combination with \code{\link[fixest]{setFixest_dict}} to set the dictionary to be used in the function \code{\link[fixest]{etable}}.
+#'
+#' @return
+#' It returns a named character vector.
+#'
+#' @author
+#' Laurent Berge
+#'
+#' @seealso
+#' \code{\link[fixest]{etable}}, \code{\link[fixest]{setFixest_dict}}
+#'
+#' @examples
+#'
+#' x = "# Main vars
+#'      mpg: Miles per gallon
+#'      hp: Horsepower
+#'
+#'      # Categorical variables
+#'      cyl: Number of cylinders; vs: Engine"
+#'
+#' as.dict(x)
+#'
+#'
+#'
+as.dict = function(x){
+    check_arg(x, "character scalar")
+
+    text_split = strsplit(x, ";|\n")[[1]]
+
+    text_clean = trimws(text_split)
+    text_clean = text_clean[nchar(text_clean) > 0 & !grepl("^#", text_clean)]
+
+    if(any(!grepl(": ", text_clean))){
+        stop("All definitions must be of the form 'variable: definition', the colon and space are indispensible. Currently the following line is not valid:\n", text_clean[!grepl(": ", text_clean)][1])
+    }
+
+    dict_names = sapply(strsplit(text_clean, ": ", fixed = TRUE), `[[`, 1)
+    if(anyDuplicated(dict_names)){
+        tb = sort(table(dict_names), decreasing = TRUE)[1]
+        stop("The names contain duplicate entries: this is not allowed. The value ",
+             names(tb), " appears ", dreamerr::n_times(tb), ".")
+    }
+
+    values = substr(text_clean, nchar(dict_names) + 3, nchar(text_clean))
+
+    setNames(values, dict_names)
+}
+
 #' Sets/gets the dictionary relabeling the variables
 #'
 #' Sets/gets the default dictionary used in the function \code{\link[fixest]{etable}}, \code{\link[fixest]{did_means}} and \code{\link[fixest]{coefplot}}. The dictionaries are used to relabel variables (usually towards a fancier, more explicit formatting) when exporting them into a Latex table or displaying in graphs. By setting the dictionary with \code{setFixest_dict}, you can avoid providing the argument \code{dict}.
 #'
 #'
-#' @param dict A named character vector. E.g. to change my variable named "a" and "b" to (resp.) "$log(a)$" and "$bonus^3$", then use \code{dict = c(a="$log(a)$", b3="$bonus^3$")}. This dictionary is used in Latex tables or in graphs by the function \code{\link[fixest]{coefplot}}. If you want to separate Latex rendering from rendering in graphs, use an ampersand first to make the variable specific to \code{coefplot}.
+#' @param dict A named character vector or a character scalar. E.g. to change my variable named "a" and "b" to (resp.) "$log(a)$" and "$bonus^3$", then use \code{dict = c(a="$log(a)$", b3="$bonus^3$")}. Alternatively you can feed a character scalar containing the dictionary in the form "variable 1: definition \n variable 2: definition". In that case the function \code{\link[fixest]{as.dict}} will be applied to get a proper dictionary. This dictionary is used in Latex tables or in graphs by the function \code{\link[fixest]{coefplot}}. If you want to separate Latex rendering from rendering in graphs, use an ampersand first to make the variable specific to \code{coefplot}.
+#' @param ... You can add arguments of the form: \code{variable_name = "Definition"}. This is an alternative to using a named vector in the argument \code{dict}.
+#' @param reset Logical, default is \code{FALSE}. If \code{TRUE}, then the dictionary is reset. Note that the default dictionary always relabels the variable "(Intercept)" in to "Constant". To overwrite it, you need to add "(Intercept)" explicitly in your dictionary.
+#'
+#' @details
+#' By default the dictionary only grows. This means that successive calls with not erase the previous definitions unless the argument \code{reset} has been set to \code{TRUE}.
+#'
+#' The default dictionary is equivalent to having \code{setFixest_dict("(Intercept)" = "Constant")}. To change this default, you need to provide a new definition to \code{"(Intercept)"} explicitly.
 #'
 #' @author
 #' Laurent Berge
@@ -6797,46 +6861,55 @@ getFixest_nthreads = function(){
 #' data(trade)
 #' est = feols(log(Euros) ~ log(dist_km)|Origin+Destination+Product, trade)
 #' # we export the result & rename some variables
-#' esttex(est, dict = c("log(Euros)"="Euros (ln)", Origin="Country of Origin"))
+#' etable(est, dict = c("log(Euros)"="Euros (ln)", Origin="Country of Origin"))
 #'
 #' # If you export many tables, it can be more convenient to use setFixest_dict:
 #' setFixest_dict(c("log(Euros)"="Euros (ln)", Origin="Country of Origin"))
-#' esttex(est) # variables are properly relabeled
+#' etable(est) # variables are properly relabeled
 #'
-setFixest_dict = function(dict){
+#' # The dictionary only 'grows'
+#' # Here you get the previous two variables + the new one that are relabeled
+#' # Btw you set the dictionary directly using the argument names:
+#' setFixest_dict(Destination = "Country of Destination")
+#' etable(est)
+#'
+#' # Another way to set a dictionary: with a character string:
+#' # See the help page of as.dict
+#' dict = "log(dist_km): Distance (ln); Product: Type of Good"
+#' setFixest_dict(dict)
+#' etable(est)
+#'
+#' # And now we reset:
+#' setFixest_dict(reset = TRUE)
+#' etable(est)
+#'
+setFixest_dict = function(dict = NULL, ..., reset = FALSE){
 
-	if(missing(dict) || is.null(dict)){
-		options("fixest_dict" = NULL)
-		return(invisible())
-	}
+    check_arg(dict, "NULL named character vector no na | character scalar")
 
-	#
-	# Controls
-	#
+    if(is.null(names(dict))){
+        dict = error_sender(as.dict(dict), "In setFixest_dict, problem when coercing the dictionay with as.dict().")
+    }
 
-	if(!is.character(dict) || !isVector(dict)){
-		stop("Argument 'dict' must be a character vector.")
-	}
+    check_arg(..., "dotnames character scalar",
+              .message = .dsb("In '...', each argument must be named. ",
+                              "The argument name corresponds to the variable to be renamed while",
+                              " the value must be a character scalar (how the variable should be renamed)."))
 
-	if(anyNA(dict)){
-		stop("Argument 'dict' must be a character vector without NAs.")
-	}
+    dots = list(...)
+    dict = as.list(dict)
+    dict[names(dots)] = dots
 
-	# Formatting the names
-	dict_names = names(dict)
-	if(is.null(dict_names)){
-		stop("Argument 'dict', the dictionary, must be a named vector. Currently it has no names.")
-	}
+    if(reset){
+        core_dict = list("(Intercept)" = "Constant")
+    } else {
+        core_dict = getOption("fixest_dict")
+        if(is.null(core_dict)) core_dict = list()
+    }
 
-	dict_names = gsub(" +", "", dict_names)
-	td = table(dict_names)
-	if(any(td > 1)){
-		qui = which(dict_names %in% names(td)[td > 1])
-		name_dup = unique(names(dict)[qui])
-		stop("Argument 'dict' contains duplicated names: ", enumerate_items(name_dup))
-	}
+    core_dict[names(dict)] = dict
 
-	options("fixest_dict" = dict)
+	options("fixest_dict" = unlist(core_dict))
 }
 
 #' @rdname setFixest_dict
