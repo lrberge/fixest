@@ -2989,11 +2989,12 @@ etable_internal_latex = function(info){
     # we need to loop not to lose names
     all_vars = c()
     for(vars in var_list){
-        all_vars = c(all_vars, setdiff(vars, all_vars))
+        # setdiff drops names
+        all_vars = c(all_vars, vars[!vars %in% all_vars])
     }
 
     # dealing with the special case of only-fixef estimations
-    all_vars = setdiff(all_vars, "TO_BE_REMOVED")
+    all_vars = all_vars[all_vars != "TO_BE_REMOVED"]
     if(length(all_vars) == 0){
         drop.section = c(drop.section, "coef")
     }
@@ -3687,11 +3688,12 @@ etable_internal_df = function(info){
     # we need to loop not to lose names
     all_vars = c()
     for(vars in var_list){
-        all_vars = c(all_vars, setdiff(vars, all_vars))
+        # setdiff drops names
+        all_vars = c(all_vars, vars[!vars %in% all_vars])
     }
 
     # dealing with the special case of only-fixef estimations
-    all_vars = setdiff(all_vars, "TO_BE_REMOVED")
+    all_vars = all_vars[all_vars != "TO_BE_REMOVED"]
     if(length(all_vars) == 0){
         drop.section = c(drop.section, "coef")
     }
