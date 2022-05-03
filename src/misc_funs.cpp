@@ -1308,7 +1308,7 @@ double cpp_hash_string(std::string x){
     return res;
 }
 
-bool is_md_markup(const char * x, int i, int n){
+inline bool is_md_markup(const char * x, int i, int n){
     if(x[i] != '*') return false;
 
     if(i + 1 >= n || x[i + 1] != '*') return true;
@@ -1317,13 +1317,17 @@ bool is_md_markup(const char * x, int i, int n){
     return true;
 }
 
-int find_id_markup(const char * x, int i, int n){
+inline bool is_special_char(const char x){
+    return x == '&' || x == '%' || x == '_' || x == '^' || x == '#';
+}
+
+inline int find_id_markup(const char * x, int i, int n){
     if(i + 1 >= n || x[i + 1] != '*') return 1;
     if(i + 2 >= n ||  x[i + 2] != '*') return 2;
     return 3;
 }
 
-std::string apply_md_markup(const char * x){
+std::string apply_escape_markup(const char * x){
     //
     //
     //
@@ -1343,11 +1347,44 @@ std::string apply_md_markup(const char * x){
 
     int id_mkp = 0;
 
-    int i = 0;
+    int i = 0, i_save = 0;
     while(i < n){
-        if(x[i] == '\\'){
+        if(x[i] == '$'){
+            if(i > 0 && x[i - 1] == '\\'){
+                tmp_all[id_mkp] += '$';
+            } else {
+                // This is an equation
+                i_save = i;
+                ++i;
+                tmp = "$";
+                while(i < n && (x[i] != '$' || x[i - 1] == '\\')){
+                    tmp += x[i];
+                    ++i;
+                }
+
+                if(i == n){
+                    // we went all the way without a closing $
+                    // => we come back, escape it and continue
+                    tmp_all[id_mkp] += "\\$";
+                    i = i_save;
+
+                } else {
+                    tmp_all[id_mkp] += tmp + "$";
+                }
+            }
+        } else if(is_special_char(x[i])){
+            if(i > 0 && x[i - 1] == '\\'){
+                // we do nothing
+                tmp_all[id_mkp] += x[i];
+            } else {
+                // we escape
+                tmp_all[id_mkp] += "\\";
+                tmp_all[id_mkp] += x[i];
+            }
+
+        } else if(x[i] == '\\'){
             if(i + 1 < n && x[i + 1] == '*'){
-                // escape
+                // escape of MD markup
                 ++i;
                 while(i < n && x[i] == '*'){
                     tmp_all[id_mkp] += '*';
@@ -1419,9 +1456,9 @@ std::string apply_md_markup(const char * x){
 
 
 // [[Rcpp::export]]
-StringVector cpp_md_markup(SEXP Rstr){
-    // cpp_md_markup("**bonjour** *les* ***gens * \\***heureux*** ")
-    // cpp_md_markup("stars: 10%: *, 5%: **, 1%: ***")
+StringVector cpp_escape_markup(SEXP Rstr){
+    // cpp_escape_markup("**bonjour** *les* ***gens * \\***heureux*** ")
+    // cpp_escape_markup("stars: 10%: *, 5%: **, 1%: ***")
 
     int n = LENGTH(Rstr);
     StringVector res(n);
@@ -1431,7 +1468,7 @@ StringVector cpp_md_markup(SEXP Rstr){
     }
 
     for(int i=0 ; i<n ; ++i){
-        res[i] = apply_md_markup(CHAR(STRING_ELT(Rstr, i)));
+        res[i] = apply_escape_markup(CHAR(STRING_ELT(Rstr, i)));
     }
 
     return res;

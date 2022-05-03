@@ -106,7 +106,7 @@ etable(est, fitstat = ~..fit_ols)
  ```
  - now there is support for models with no coefficient (only fixed-effects).
  
- - the application of markdown markup is now more robust and can also be escaped with a backslash.
+ - the application of markdown markup is now more robust and can also be escaped with a backslash. The escaping has been ported to c++.
  
 ## coeftable
 

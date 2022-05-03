@@ -2153,11 +2153,32 @@ et2 = etable(est_onlyFE, est, se.below = TRUE)
 test(nrow(et2), 16)
 
 
+# Latex escaping
+cpp_escape_markup = fixest:::cpp_escape_markup
 
+# MD markup
+test(cpp_escape_markup("**bonjour** *les* ***gens * \\***heureux***"),
+     "\\textbf{bonjour} \\textit{les} \\textbf{\\textit{gens * ***heureux}}")
 
+# Escaping + markup in equations
+test(cpp_escape_markup("$x_5*3^2$ est **different** de x_5*3^2"),
+     "$x_5*3^2$ est \\textbf{different} de x\\_5*3\\^2")
 
+# single $ escaping + # %
+test(cpp_escape_markup("Rule #1: this $ should be escaped! this % too!"),
+     "Rule \\#1: this \\$ should be escaped! this \\% too")
 
+# dirty $ => user mistake
+test(cpp_escape_markup("$there$ are *too many $ here*!"),
+     "$there$ are \\textit{too many \\$ here}!")
 
+# random, stacking
+test(cpp_escape_markup("#%_&^*hi$*$ *there**"),
+     "\\#\\%\\_\\&\\^\\textit{hi$*$ }there**")
+
+# values already escaped
+test(cpp_escape_markup("\\$this_is **not** an\\^equation\\$. But $this&one, \\$, * is *$ *is*."),
+     "\\$this\\_is \\textbf{not} an\\^equation\\$. But $this&one, \\$, * is *$ \\textit{is}.")
 
 
 

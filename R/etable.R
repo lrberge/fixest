@@ -5869,92 +5869,16 @@ pmatch_varname = function(x, coef_names, arg_name){
     qui
 }
 
-# x = strsplit("*bonjour $x^2$*", "$", fixed = TRUE)[[1]]
-# x = strsplit("*bonjour $x^2*3$*", "$", fixed = TRUE)[[1]]
-# x = "et **bonsoir**!"
-markup_apply = function(x){
-    # x: if len > 1, means it contains equations that have been split
-    # the function is slow, but we don't apply it to many things anyway, so that's OK
-    # UPDATE: now I use lookbehind/after: the function is REALLY super slow
-    # maybe port it to c++ at come point?
-    # from 150us => 2ms BIG DIFF!!!!
-    # UPDATE: OK, now in c++ => 5us. And I added escaping.
-
-    if(!any(grepl("*", x, fixed = TRUE))){
-        return(x)
-    }
-
-    is_eq = is_eq_star = FALSE
-    n_x = length(x)
-    if(n_x > 1){
-        is_eq = TRUE
-        id_eq = (1:n_x)[(1:n_x) %% 2 == 0]
-        is_eq_star = any(grepl("*", x[id_eq], fixed = TRUE))
-        if(is_eq_star){
-            x[id_eq] = gsub("*", "_@_", x[id_eq], fixed = TRUE)
-        }
-
-        x = paste0(x, collapse = "|$|")
-    }
-
-    res = cpp_md_markup(x)
-
-    if(is_eq){
-        if(is_eq_star){
-            res = gsub("_@_", "*", res, fixed = TRUE)
-        }
-        res = strsplit(res, "|$|", fixed = TRUE)[[1]]
-    }
-
-    res
-}
-
-escape_all = function(x){
-    # we escape all
-    res = gsub("((?<=[^\\\\])|(?<=^))(\\$|_|%|&|\\^|#)", "\\\\\\2", x, perl = TRUE)
-    res
-}
-
 # escape_latex("Voici **une** *equation*: $5! = 5*4*3*2*1$. Est-ce que ***ca marche***?$^*$")
 escape_latex = function(x_all, makecell = TRUE){
-    # This is super tricky to escape properly!
-    # We do NOT escape within equations
+    # escapes & _ % ^ #
+    # values within $ $ are not escaped
+    # if only one $ => will be escaped
+    # applies markdown markup
 
     x_name = deparse(substitute(x_all))
 
-    res = c()
-
-    for(index in seq_along(x_all)){
-        x = x_all[index]
-
-        # 1) finding out equations, ie non escaped dollar signs
-        dollars = gregexpr("((?<=[^\\\\])|(?<=^))\\$", x, perl = TRUE)[[1]]
-
-        is_eq = FALSE
-        if(length(dollars) > 1){
-            is_eq = TRUE
-            if(length(dollars) %% 2 != 0){
-                stop_up(up = 2, "There are ", length(dollars), " dollar signs in the following character string:\n", x, "\nIt will raise a Latex error (which '$' means equation? which means dollar-sign?): if you want to use a regular dollar sign, please escape it like that: \\\\$.")
-            }
-        }
-
-        # 2) Escaping but conditionally on not being in an equation
-        if(is_eq){
-            # Finding out the equations
-            all_items = strsplit(paste0(x, " "), "((?<=[^\\\\])|(?<=^))\\$", perl = TRUE)[[1]]
-            for(i in seq_along(all_items)){
-                if(i %% 2 == 1){
-                    all_items[i] = escape_all(all_items[i])
-                }
-            }
-
-            all_items = markup_apply(all_items)
-
-            res[index] = gsub(" $", "", paste(all_items, collapse = "$"))
-        } else {
-            res[index] = markup_apply(escape_all(x))
-        }
-    }
+    res = cpp_escape_markup(x_all)
 
     if(makecell){
         who = grepl("\n", res, fixed = TRUE)
@@ -6117,7 +6041,7 @@ format_se_type_latex = function(x, dict = c(), inline = FALSE){
     if(!grepl("\\(", x)){
         # means not clustered
         # we escape all
-        return(escape_all(x))
+        return(escape_latex(x))
     }
 
     # Now the FEs
