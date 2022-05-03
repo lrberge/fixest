@@ -19,6 +19,8 @@
  
  - fix several bugs in predict when using `i()`, in particular when used in combination with a factor or `poly()` (reported by @rfbressan [#301](https://github.com/lrberge/fixest/issues/301)).
  
+ - fix bug in `etable` relating to ampersands not being correctly escaped.
+ 
 ## New functions
 
  - new function `degrees_freedom_iid` which is a more user-friendly version of `degrees_freedom`.

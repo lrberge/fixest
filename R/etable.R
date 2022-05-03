@@ -6426,7 +6426,7 @@ tex.nice = function(x, n_models){
     # I) dealing with amps
     #
 
-    x_split_amp = strsplit(x, "&", fixed = TRUE)
+    x_split_amp = strsplit(x, "(?<!\\\\)&", perl = TRUE)
 
     qui_amp = lengths(x_split_amp) == n & !sapply(x_split_amp, function(x) any(grepl("midrule", x)))
 
