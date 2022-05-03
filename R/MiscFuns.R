@@ -6843,7 +6843,7 @@ as.dict = function(x){
 #' Sets/gets the default dictionary used in the function \code{\link[fixest]{etable}}, \code{\link[fixest]{did_means}} and \code{\link[fixest]{coefplot}}. The dictionaries are used to relabel variables (usually towards a fancier, more explicit formatting) when exporting them into a Latex table or displaying in graphs. By setting the dictionary with \code{setFixest_dict}, you can avoid providing the argument \code{dict}.
 #'
 #'
-#' @param dict A named character vector or a character scalar. E.g. to change my variable named "a" and "b" to (resp.) "$log(a)$" and "$bonus^3$", then use \code{dict = c(a="$log(a)$", b3="$bonus^3$")}. Alternatively you can feed a character scalar containing the dictionary in the form "variable 1: definition \n variable 2: definition". In that case the function \code{\link[fixest]{as.dict}} will be applied to get a proper dictionary. This dictionary is used in Latex tables or in graphs by the function \code{\link[fixest]{coefplot}}. If you want to separate Latex rendering from rendering in graphs, use an ampersand first to make the variable specific to \code{coefplot}.
+#' @param dict A named character vector or a character scalar. E.g. to change my variable named "a" and "b" to (resp.) "$log(a)$" and "$bonus^3$", then use \code{dict = c(a="$log(a)$", b3="$bonus^3$")}. Alternatively you can feed a character scalar containing the dictionary in the form \code{"variable 1: definition \n variable 2: definition"}. In that case the function \code{\link[fixest]{as.dict}} will be applied to get a proper dictionary. This dictionary is used in Latex tables or in graphs by the function \code{\link[fixest]{coefplot}}. If you want to separate Latex rendering from rendering in graphs, use an ampersand first to make the variable specific to \code{coefplot}.
 #' @param ... You can add arguments of the form: \code{variable_name = "Definition"}. This is an alternative to using a named vector in the argument \code{dict}.
 #' @param reset Logical, default is \code{FALSE}. If \code{TRUE}, then the dictionary is reset. Note that the default dictionary always relabels the variable "(Intercept)" in to "Constant". To overwrite it, you need to add "(Intercept)" explicitly in your dictionary.
 #'
@@ -6887,7 +6887,7 @@ setFixest_dict = function(dict = NULL, ..., reset = FALSE){
 
     check_arg(dict, "NULL named character vector no na | character scalar")
 
-    if(is.null(names(dict))){
+    if(is.null(names(dict)) && !is.null(dict)){
         dict = error_sender(as.dict(dict), "In setFixest_dict, problem when coercing the dictionay with as.dict().")
     }
 

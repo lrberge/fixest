@@ -10,7 +10,7 @@ setFixest_dict(dict = NULL, ..., reset = FALSE)
 getFixest_dict()
 }
 \arguments{
-\item{dict}{A named character vector or a character scalar. E.g. to change my variable named "a" and "b" to (resp.) "$log(a)$" and "$bonus^3$", then use \code{dict = c(a="$log(a)$", b3="$bonus^3$")}. Alternatively you can feed a character scalar containing the dictionary in the form "variable 1: definition \n variable 2: definition". In that case the function \code{\link[fixest]{as.dict}} will be applied to get a proper dictionary. This dictionary is used in Latex tables or in graphs by the function \code{\link[fixest]{coefplot}}. If you want to separate Latex rendering from rendering in graphs, use an ampersand first to make the variable specific to \code{coefplot}.}
+\item{dict}{A named character vector or a character scalar. E.g. to change my variable named "a" and "b" to (resp.) "$log(a)$" and "$bonus^3$", then use \code{dict = c(a="$log(a)$", b3="$bonus^3$")}. Alternatively you can feed a character scalar containing the dictionary in the form \code{"variable 1: definition \n variable 2: definition"}. In that case the function \code{\link[fixest]{as.dict}} will be applied to get a proper dictionary. This dictionary is used in Latex tables or in graphs by the function \code{\link[fixest]{coefplot}}. If you want to separate Latex rendering from rendering in graphs, use an ampersand first to make the variable specific to \code{coefplot}.}
 
 \item{...}{You can add arguments of the form: \code{variable_name = "Definition"}. This is an alternative to using a named vector in the argument \code{dict}.}
 

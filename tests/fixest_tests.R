@@ -2166,7 +2166,7 @@ test(cpp_escape_markup("$x_5*3^2$ est **different** de x_5*3^2"),
 
 # single $ escaping + # %
 test(cpp_escape_markup("Rule #1: this $ should be escaped! this % too!"),
-     "Rule \\#1: this \\$ should be escaped! this \\% too")
+     "Rule \\#1: this \\$ should be escaped! this \\% too!")
 
 # dirty $ => user mistake
 test(cpp_escape_markup("$there$ are *too many $ here*!"),
