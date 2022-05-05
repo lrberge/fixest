@@ -2443,7 +2443,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
     if(is.null(valideta)) valideta = function(...) TRUE
 
     validmu = family$validmu
-    if(is.null(validmu)) validmu = function(...) TRUE
+    if(is.null(validmu)) validmu = function(mu) TRUE
 
     family_equiv = family$family_equiv
 

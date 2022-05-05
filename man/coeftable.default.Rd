@@ -52,10 +52,17 @@ Default method to extracts the coefficients table and its sub-components from an
 
 \examples{
 
+# NOTA: This function is really made to handle fixest objects
+# The default methods works for simple structures, but you'd be
+# likely better off with broom::tidy for other models
+
 est = lm(mpg ~ cyl, mtcars)
 coeftable(est)
 
 se(est)
+
+
+
 
 
 }

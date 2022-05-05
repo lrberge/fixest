@@ -2,6 +2,9 @@
 % Please edit documentation in R/Methods.R
 \name{coeftable.fixest}
 \alias{coeftable.fixest}
+\alias{se.fixest}
+\alias{tstat.fixest}
+\alias{pvalue.fixest}
 \title{Obtain various statistics from an estimation}
 \usage{
 \method{coeftable}{fixest}(
@@ -15,6 +18,39 @@
   list = FALSE,
   ...
 )
+
+\method{se}{fixest}(
+  object,
+  vcov = NULL,
+  ssc = NULL,
+  cluster = NULL,
+  keep = NULL,
+  drop = NULL,
+  order = NULL,
+  ...
+)
+
+\method{tstat}{fixest}(
+  object,
+  vcov = NULL,
+  ssc = NULL,
+  cluster = NULL,
+  keep = NULL,
+  drop = NULL,
+  order = NULL,
+  ...
+)
+
+\method{pvalue}{fixest}(
+  object,
+  vcov = NULL,
+  ssc = NULL,
+  cluster = NULL,
+  keep = NULL,
+  drop = NULL,
+  order = NULL,
+  ...
+)
 }
 \arguments{
 \item{object}{A \code{fixest} object. For example an estimation obtained from \code{\link[fixest]{feols}}.}
@@ -23,7 +59,7 @@
 
 \item{ssc}{An object of class \code{ssc.type} obtained with the function \code{\link[fixest]{ssc}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link[fixest]{ssc}} for this argument. The arguments and defaults of the function \code{\link[fixest]{ssc}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "min"}, \code{t.df = "min"}, \code{fixef.force_exact=FALSE)}. See the help of the function \code{\link[fixest]{ssc}} for details.}
 
-\item{cluster}{[Fixest specific.] Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1, "var2")]}, \code{cluster = c("var1, "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] cluster).}
+\item{cluster}{Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1, "var2")]}, \code{cluster = c("var1, "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] cluster).}
 
 \item{keep}{Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{keep = "x[[:digit:]]$"}. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is kept). See details.}
 
@@ -46,6 +82,15 @@ Set of functions to directly extract some commonly used statistics, like the p-v
 \details{
 This set of tiny functions is primarily constructed for \code{fixest} estimations.
 }
+\section{Functions}{
+\itemize{
+\item \code{se.fixest}: Extracts the standard-error of an estimation
+
+\item \code{tstat.fixest}: Extracts the t-statistics of an estimation
+
+\item \code{pvalue.fixest}: Extracts the p-value of an estimation
+}}
+
 \examples{
 
 # Some data and estimation

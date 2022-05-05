@@ -7,7 +7,9 @@
 wald(x, keep = NULL, drop = NULL, print = TRUE, vcov, se, cluster, ...)
 }
 \arguments{
-\item{x}{A \code{fixest} object. Obtained using the methods \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
+\item{x}{A \code{fixest} object. Obtained using the methods
+\code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or
+\code{\link[fixest]{feglm}}.}
 
 \item{keep}{Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{keep = "x[[:digit:]]$"}. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is kept). See details.}
 

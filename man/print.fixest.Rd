@@ -13,21 +13,37 @@ setFixest_print(type = "table", fitstat = NULL)
 getFixest_print()
 }
 \arguments{
-\item{x}{A \code{fixest} object. Obtained using the methods \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
+\item{x}{A \code{fixest} object. Obtained using the methods
+\code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or
+\code{\link[fixest]{feglm}}.}
 
-\item{n}{Integer, number of coefficients to display. By default, only the first 8 coefficients are displayed if \code{x} does not come from \code{\link[fixest]{summary.fixest}}.}
+\item{n}{Integer, number of coefficients to display. By default, only the
+first 8 coefficients are displayed if \code{x} does not come from
+\code{\link[fixest]{summary.fixest}}.}
 
-\item{type}{Either \code{"table"} (default) to display the coefficients table or \code{"coef"} to display only the coefficients.}
+\item{type}{Either \code{"table"} (default) to display the coefficients table
+or \code{"coef"} to display only the coefficients.}
 
-\item{fitstat}{A formula or a character vector representing which fit statistic to display. The types must be valid types of the function \code{\link[fixest]{fitstat}}. The default fit statistics depend on the type of estimation (OLS, GLM, IV, with/without fixed-effect). Providing the argument \code{fitstat} overrides the default fit statistics, you can however use the point "." to summon them back. Ex 1: \code{fitstat = ~ . + ll} adds the log-likelihood to the default values. Ex 2: \code{fitstat = ~ ll + pr2} only displays the log-likelihood and the pseudo-R2.}
+\item{fitstat}{A formula or a character vector representing which fit
+statistic to display. The types must be valid types of the function
+\code{\link[fixest]{fitstat}}. The default fit statistics depend on the
+type of estimation (OLS, GLM, IV, with/without fixed-effect). Providing the
+argument \code{fitstat} overrides the default fit statistics, you can
+however use the point "." to summon them back. Ex 1: \code{fitstat = ~ . +
+ll} adds the log-likelihood to the default values. Ex 2: \code{fitstat = ~
+ll + pr2} only displays the log-likelihood and the pseudo-R2.}
 
 \item{...}{Other arguments to be passed to \code{\link[fixest]{vcov.fixest}}.}
 }
 \description{
-This function is very similar to usual \code{summary} functions as it provides the table of coefficients along with other information on the fit of the estimation. The type of output can be customized by the user (using function \code{setFixest_print}).
+This function is very similar to usual \code{summary} functions as it
+provides the table of coefficients along with other information on the fit of
+the estimation. The type of output can be customized by the user (using
+function \code{setFixest_print}).
 }
 \details{
-It is possible to set the default values for the arguments \code{type} and \code{fitstat} by using the function \code{setFixest_print}.
+It is possible to set the default values for the arguments
+\code{type} and \code{fitstat} by using the function \code{setFixest_print}.
 }
 \examples{
 
@@ -74,7 +90,12 @@ setFixest_print(fitstat = NULL)
 
 }
 \seealso{
-See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the fixed-effects coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
+See also the main estimation functions \code{\link[fixest]{femlm}},
+\code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use
+\code{\link[fixest]{summary.fixest}} to see the results with the appropriate
+standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the
+fixed-effects coefficients, and the function \code{\link[fixest]{etable}} to
+visualize the results of multiple estimations.
 }
 \author{
 Laurent Berge

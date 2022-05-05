@@ -5,9 +5,6 @@
 \alias{se}
 \alias{pvalue}
 \alias{tstat}
-\alias{se.fixest}
-\alias{tstat.fixest}
-\alias{pvalue.fixest}
 \title{Extracts the coefficients table from an estimation}
 \usage{
 coeftable(object, ...)
@@ -17,39 +14,6 @@ se(object, ...)
 pvalue(object, ...)
 
 tstat(object, ...)
-
-\method{se}{fixest}(
-  object,
-  vcov = NULL,
-  ssc = NULL,
-  cluster = NULL,
-  keep = NULL,
-  drop = NULL,
-  order = NULL,
-  ...
-)
-
-\method{tstat}{fixest}(
-  object,
-  vcov = NULL,
-  ssc = NULL,
-  cluster = NULL,
-  keep = NULL,
-  drop = NULL,
-  order = NULL,
-  ...
-)
-
-\method{pvalue}{fixest}(
-  object,
-  vcov = NULL,
-  ssc = NULL,
-  cluster = NULL,
-  keep = NULL,
-  drop = NULL,
-  order = NULL,
-  ...
-)
 }
 \arguments{
 \item{object}{An estimation (fitted model object), e.g. a \code{fixest} object.}
@@ -62,15 +26,6 @@ Returns a matrix (\code{coeftable}) or vectors.
 \description{
 Methods to extracts the coefficients table and its sub-components from an estimation.
 }
-\section{Methods (by class)}{
-\itemize{
-\item \code{fixest}: Extracts the standard-error of an estimation
-
-\item \code{fixest}: Extracts the t-statistics of an estimation
-
-\item \code{fixest}: Extracts the p-value of an estimation
-}}
-
 \examples{
 
 est = lm(mpg ~ cyl, mtcars)
