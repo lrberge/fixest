@@ -269,7 +269,7 @@ run_test = function(chunk, from){
 
         # We assign the variables to the global env to facilitate debugging
         for(var in names(env)){
-            assign(var, get(var, env), .GlobalEnv)
+            assign(var, get(var, env), parent.frame())
         }
 
     } else {
