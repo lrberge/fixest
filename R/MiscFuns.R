@@ -6626,7 +6626,7 @@ is_calling_fun = function(pattern, full_search = FALSE, full_name = FALSE){
     if(n_sc > 2){
 
         if(full_search){
-            fun_all = sapply(sc_all, function(x) as.character(x[[1]])[1])
+            fun_all = sapply(tail(sc_all, 13), function(x) deparse(x)[1])
             if(full_name){
                 res = pattern %in% fun_all
             } else {
@@ -6643,7 +6643,7 @@ is_calling_fun = function(pattern, full_search = FALSE, full_name = FALSE){
                 sc = sc_all[[n_sc - 2]]
             }
 
-            fun_name = as.character(sc[[1]])[1]
+            fun_name = deparse(sc)[1]
             if(full_name){
                 res = pattern %in% fun_name
             } else {
