@@ -310,6 +310,8 @@ By default, the DSB operator expands vectors into sums. You can add a comma, lik
 
 In all \code{fixest} estimations, this special parsing is enabled, so you don't need to use \code{xpd}.
 
+One-sided formulas can be expanded with the DSB operator: let \code{x = ~sepal + petal}, then \code{xpd(y ~ .[x])} leads to \code{color ~ sepal + petal}.
+
 You can even use multiple square brackets within a single variable, but then the use of nesting is required. For example, the following \code{xpd(y ~ .[".[letters[1:2]]_.[1:2]"])} will create \code{y ~ a_1 + b_2}. Remember that the nested character string is parsed with \code{\link[fixest]{dsb}}, which explains this behavior.
 }
 

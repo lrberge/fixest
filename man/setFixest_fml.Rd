@@ -148,10 +148,18 @@ xpd(y ~ x, add = ~bon + jour)
 # Dot square bracket operator
 #
 
+# The basic use id to add variables in the formula
+x = c("x1", "x2")
+xpd(y ~ .[x])
+
+# Alternatively, one-sided formulas can be used and their content will be inserted verbatim
+x = ~x1 + x2
+xpd(y ~ .[x])
+
 # You can create multiple variables at once
 xpd(y ~ x.[1:5] + z.[2:3])
 
-# You can summon variables from the environment
+# You can summon variables from the environment to complete variables names
 var = "a"
 xpd(y ~ x.[var])
 

@@ -1542,6 +1542,8 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 #'
 #' In all \code{fixest} estimations, this special parsing is enabled, so you don't need to use \code{xpd}.
 #'
+#' One-sided formulas can be expanded with the DSB operator: let \code{x = ~sepal + petal}, then \code{xpd(y ~ .[x])} leads to \code{color ~ sepal + petal}.
+#'
 #' You can even use multiple square brackets within a single variable, but then the use of nesting is required. For example, the following \code{xpd(y ~ .[".[letters[1:2]]_.[1:2]"])} will create \code{y ~ a_1 + b_2}. Remember that the nested character string is parsed with \code{\link[fixest]{dsb}}, which explains this behavior.
 #'
 #' @section Regular expressions:
@@ -1686,10 +1688,18 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 #' # Dot square bracket operator
 #' #
 #'
+#' # The basic use id to add variables in the formula
+#' x = c("x1", "x2")
+#' xpd(y ~ .[x])
+#'
+#' # Alternatively, one-sided formulas can be used and their content will be inserted verbatim
+#' x = ~x1 + x2
+#' xpd(y ~ .[x])
+#'
 #' # You can create multiple variables at once
 #' xpd(y ~ x.[1:5] + z.[2:3])
 #'
-#' # You can summon variables from the environment
+#' # You can summon variables from the environment to complete variables names
 #' var = "a"
 #' xpd(y ~ x.[var])
 #'
@@ -3261,6 +3271,10 @@ dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE
                                  "Dot square bracket operator: Evaluation of '.[",
                                  x_split[i], "]' led to an error:",
                                  up = up + 1)
+
+            if(length(value) == 2 && value[1] == "~"){
+                value = value[2]
+            }
         }
 
 

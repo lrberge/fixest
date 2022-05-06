@@ -79,6 +79,13 @@ lm(xpd(y ~ x..), base)
 #>      1.8560       0.6508       0.7091      -0.5565 
 ```
 
+ - the dot-square-bracket operator in `xpd` also expands one-sided formulas:
+```R
+x_all = ~sepal + petal
+xpd(color ~ .[x_all])
+#> color ~ sepal + petal
+```
+
 ## etable
 
  - in the argument `fitstat`, the formula is now automatically expanded with `xpd`. This means that you can set fit statistics macro which can be summoned from `etable`. Useful to set default fit statistics for: IVs, GLMs, etc.
