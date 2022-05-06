@@ -1945,7 +1945,7 @@ test(predict(a, se.fit = TRUE)$se.fit, predict(b, se.fit = TRUE)$se.fit)
 test(predict(a, se.fit = TRUE, interval = "con")$fit[, 2],
      predict(b, se.fit = TRUE, interval = "con")$ci_low)
 
-test(predict(a, se.fit = TRUE, interval = "pre")$fit[, 2],
+test(suppressWarnings(predict(a, se.fit = TRUE, interval = "pre")$fit[, 2]),
      predict(b, se.fit = TRUE, interval = "pre")$ci_low)
 
 # With weights
@@ -1958,7 +1958,7 @@ test(predict(aw, se.fit = TRUE)$se.fit, predict(bw, se.fit = TRUE)$se.fit)
 test(predict(aw, se.fit = TRUE, interval = "con")$fit[, 2],
      predict(bw, se.fit = TRUE, interval = "con")$ci_low)
 
-test(predict(aw, se.fit = TRUE, interval = "pre")$fit[, 2],
+test(suppressWarnings(predict(aw, se.fit = TRUE, interval = "pre")$fit[, 2]),
      predict(bw, se.fit = TRUE, interval = "pre")$ci_low)
 
 

@@ -6627,11 +6627,12 @@ is_calling_fun = function(pattern, full_search = FALSE, full_name = FALSE){
 
         if(full_search){
             fun_all = sapply(tail(sc_all, 13), function(x) deparse(x)[1])
+
             if(full_name){
-                res = pattern %in% fun_all
-            } else {
-                res = any(grepl(pattern, fun_all))
+                pattern = .dsb("^.[pattern]\\(")
             }
+
+            res = any(grepl(pattern, fun_all))
         } else {
             if(grepl(".fixest", sc_all[[n_sc - 1]][[1]], fixed = TRUE)){
                 if(n_sc == 3){
@@ -6645,10 +6646,10 @@ is_calling_fun = function(pattern, full_search = FALSE, full_name = FALSE){
 
             fun_name = deparse(sc)[1]
             if(full_name){
-                res = pattern %in% fun_name
-            } else {
-                res = grepl(pattern, fun_name)
+                pattern = .dsb("^.[pattern]\\(")
             }
+
+            res = grepl(pattern, fun_name)
         }
 
         return(res)
