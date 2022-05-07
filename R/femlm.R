@@ -1,5 +1,3 @@
-# load("data/trade.RData") ; load("data/base_did.RData")
-# roxygen2::roxygenise(roclets = "rd")
 
 femlm_only_clusters <- function(env){
 	# Estimation with only the cluster coefficients

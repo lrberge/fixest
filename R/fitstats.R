@@ -13,12 +13,12 @@
 
 #' Print method for fit statistics of fixest estimations
 #'
-#' Displays a brief summary of selected fit statistics from the function \code{\link[fixest]{fitstat}}.
+#' Displays a brief summary of selected fit statistics from the function [`fitstat`].
 #'
 #' @inherit fitstat examples
 #'
-#' @param x An object resulting from the \code{\link[fixest]{fitstat}} function.
-#' @param na.rm Logical, default is \code{FALSE}. If \code{TRUE}, the statistics that are missing are not displayed.
+#' @param x An object resulting from the [`fitstat`] function.
+#' @param na.rm Logical, default is `FALSE`. If `TRUE`, the statistics that are missing are not displayed.
 #' @param ... Not currently used.
 #'
 #'
@@ -209,17 +209,17 @@ print.fixest_fitstat = function(x, na.rm = FALSE, ...){
 
 #' Register custom fit statistics
 #'
-#' Enables the registration of custom fi statistics that can be easily summoned with the function \code{\link[fixest]{fitstat}}.
+#' Enables the registration of custom fi statistics that can be easily summoned with the function [`fitstat`].
 #'
 #' @inherit fitstat seealso
 #'
 #' @param type A character scalar giving the type-name.
-#' @param fun A function to be applied to a \code{fixest} estimation. It must return either a scalar, or a list of unitary elements. If the number of elements returned is greater than 1, then each element must be named! If the fit statistic is not valid for a given estimation, a plain \code{NA} value should be returned.
-#' @param alias A (named) character vector. An alias to be used in lieu of the type name in the display methods (ie when used in \code{\link[fixest]{print.fixest_fitstat}} or \code{\link[fixest]{etable}}). If the function returns several values, i.e. sub-types, you can give an alias to these sub-types. The syntax is \code{c("type" = "alias", "subtype_i" = "alias_i")}, with "type" (resp. "subtype") the value of the argument \code{type} resp. (\code{subtypes}). You can also give an alias encompassing the type and sub-type with the syntax \code{c("type.subtype_i" = "alias")}.
-#' @param subtypes A character vector giving the name of each element returned by the function \code{fun}. This is only used when the function returns more than one value. Note that you can use the shortcut "test" when the sub-types are "stat", "p" and "df"; and "test2" when these are "stat", "p", "df1" and "df2".
+#' @param fun A function to be applied to a `fixest` estimation. It must return either a scalar, or a list of unitary elements. If the number of elements returned is greater than 1, then each element must be named! If the fit statistic is not valid for a given estimation, a plain `NA` value should be returned.
+#' @param alias A (named) character vector. An alias to be used in lieu of the type name in the display methods (ie when used in [`print.fixest_fitstat`] or [`etable`]). If the function returns several values, i.e. sub-types, you can give an alias to these sub-types. The syntax is `c("type" = "alias", "subtype_i" = "alias_i")`, with "type" (resp. "subtype") the value of the argument `type` resp. (`subtypes`). You can also give an alias encompassing the type and sub-type with the syntax `c("type.subtype_i" = "alias")`.
+#' @param subtypes A character vector giving the name of each element returned by the function `fun`. This is only used when the function returns more than one value. Note that you can use the shortcut "test" when the sub-types are "stat", "p" and "df"; and "test2" when these are "stat", "p", "df1" and "df2".
 #'
 #' @details
-#' If there are several components to the computed statistics (i.e. the function returns several elements), then using the argument \code{subtypes}, giving the names of each of these components, is mandatory. This is to ensure that the statistic can be used as any other built-in statistic (and there are too many edge cases impeding automatic deduction).
+#' If there are several components to the computed statistics (i.e. the function returns several elements), then using the argument `subtypes`, giving the names of each of these components, is mandatory. This is to ensure that the statistic can be used as any other built-in statistic (and there are too many edge cases impeding automatic deduction).
 #'
 #' @author Laurent Berge
 #'
@@ -407,46 +407,46 @@ fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
 
 #' Computes fit statistics of fixest objects
 #'
-#' Computes various fit statistics for \code{fixest} estimations.
+#' Computes various fit statistics for `fixest` estimations.
 #'
-#' @param x A \code{fixest} estimation.
-#' @param type Character vector or one sided formula. The type of fit statistic to be computed. The classic ones are: n, rmse, r2, pr2, f, wald, ivf, ivwald. You have the full list in the details section or use \code{show_types = TRUE}. Further, you can register your own types with \code{\link[fixest]{fitstat_register}}.
-#' @param simplify Logical, default is \code{FALSE}. By default a list is returned whose names are the selected types. If \code{simplify = TRUE} and only one type is selected, then the element is directly returned (ie will not be nested in a list).
-#' @param verbose Logical, default is \code{TRUE}. If \code{TRUE}, an object of class \code{fixest_fitstat} is returned (so its associated print method will be triggered). If \code{FALSE} a simple list is returned instead.
-#' @param show_types Logical, default is \code{FALSE}. If \code{TRUE}, only prompts all available types.
-#' @param frame An environment in which to evaluate variables, default is \code{parent.frame()}. Only used if the argument \code{type} is a formula and some values in the formula have to be extended with the dot square bracket operator. Mostly for internal use.
-#' @param ... Other elements to be passed to other methods and may be used to compute the statistics (for example you can pass on arguments to compute the VCOV when using \code{type = "g"} or \code{type = "wald"}.).
+#' @param x A `fixest` estimation.
+#' @param type Character vector or one sided formula. The type of fit statistic to be computed. The classic ones are: n, rmse, r2, pr2, f, wald, ivf, ivwald. You have the full list in the details section or use `show_types = TRUE`. Further, you can register your own types with [`fitstat_register`].
+#' @param simplify Logical, default is `FALSE`. By default a list is returned whose names are the selected types. If `simplify = TRUE` and only one type is selected, then the element is directly returned (ie will not be nested in a list).
+#' @param verbose Logical, default is `TRUE`. If `TRUE`, an object of class `fixest_fitstat` is returned (so its associated print method will be triggered). If `FALSE` a simple list is returned instead.
+#' @param show_types Logical, default is `FALSE`. If `TRUE`, only prompts all available types.
+#' @param frame An environment in which to evaluate variables, default is `parent.frame()`. Only used if the argument `type` is a formula and some values in the formula have to be extended with the dot square bracket operator. Mostly for internal use.
+#' @param ... Other elements to be passed to other methods and may be used to compute the statistics (for example you can pass on arguments to compute the VCOV when using `type = "g"` or `type = "wald"`.).
 #'
 #' @section Registering your own types:
 #'
-#' You can register custom fit statistics with the function \code{fitstat_register}.
+#' You can register custom fit statistics with the function `fitstat_register`.
 #'
 #' @section Available types:
 #'
 #' The types are case sensitive, please use lower case only. The types available are:
 #'
 #' \itemize{
-#' \item{\code{n}, \code{ll}, \code{aic}, \code{bic}, \code{rmse}: }{The number of observations, the log-likelihood, the AIC, the BIC and the root mean squared error, respectively.}
-#' \item{\code{my}: }{Mean of the dependent variable.}
-#' \item{\code{g}: }{The degrees of freedom used to compute the t-test (it influences the p-values of the coefficients). When the VCOV is clustered, this value is equal to the minimum cluster size, otherwise, it is equal to the sample size minus the number of variables.}
-#' \item{\code{r2}, \code{ar2}, \code{wr2}, \code{awr2}, \code{pr2}, \code{apr2}, \code{wpr2}, \code{awpr2}: }{All r2 that can be obtained with the function \code{\link[fixest]{r2}}. The \code{a} stands for 'adjusted', the \code{w} for 'within' and the \code{p} for 'pseudo'. Note that the order of the letters \code{a}, \code{w} and \code{p} does not matter. The pseudo R2s are McFadden's R2s (ratios of log-likelihoods).}
-#' \item{\code{theta}: }{The over-dispersion parameter in Negative Binomial models. Low values mean high overdispersion.}
-#' \item{\code{f}, \code{wf}: }{The F-tests of nullity of the coefficients. The \code{w} stands for 'within'. These types return the following values: \code{stat}, \code{p}, \code{df1} and \code{df2}. If you want to display only one of these, use their name after a dot: e.g. \code{f.stat} will give the statistic of the F-test, or \code{wf.p} will give the p-values of the F-test on the projected model (i.e. projected onto the fixed-effects).}
-#' \item{\code{wald}: }{Wald test of joint nullity of the coefficients. This test always excludes the intercept and the fixed-effects. These type returns the following values: \code{stat}, \code{p}, \code{df1}, \code{df2} and \code{vcov}. The element \code{vcov} reports the way the VCOV matrix was computed since it directly influences this statistic.}
-#' \item{\code{ivf}, \code{ivf1}, \code{ivf2}, \code{ivfall}: }{These statistics are specific to IV estimations. They report either the IV F-test (namely the Cragg-Donald F statistic in the presence of only one endogenous regressor) of the first stage (\code{ivf} or \code{ivf1}), of the second stage (\code{ivf2}) or of both (\code{ivfall}). The F-test of the first stage is commonly named weak instrument test. The value of \code{ivfall} is only useful in \code{\link[fixest]{etable}} when both the 1st and 2nd stages are displayed (it leads to the 1st stage F-test(s) to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- otherwise, \code{ivf1} would also be displayed on the 2nd stage estimation). These types return the following values: \code{stat}, \code{p}, \code{df1} and \code{df2}.}
-#' \item{\code{ivwald}, \code{ivwald1}, \code{ivwald2}, \code{ivwaldall}: }{These statistics are specific to IV estimations. They report either the IV Wald-test of the first stage (\code{ivwald} or \code{ivwald1}), of the second stage (\code{ivwald2}) or of both (\code{ivwaldall}). The Wald-test of the first stage is commonly named weak instrument test. Note that if the estimation was done with a robust VCOV and there is only one endogenous regressor, this is equivalent to the Kleibergen-Paap statistic. The value of \code{ivwaldall} is only useful in \code{\link[fixest]{etable}} when both the 1st and 2nd stages are displayed (it leads to the 1st stage Wald-test(s) to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- otherwise, \code{ivwald1} would also be displayed on the 2nd stage estimation). These types return the following values: \code{stat}, \code{p}, \code{df1}, \code{df2}, and \code{vcov}.}
-#' \item{\code{cd}: }{The Cragg-Donald test for weak instruments.}
-#' \item{\code{kpr}: }{The Kleibergen-Paap test for weak instruments.}
-#' \item{\code{wh}: }{This statistic is specific to IV estimations. Wu-Hausman endogeneity test. H0 is the absence of endogeneity of the instrumented variables. It returns the following values: \code{stat}, \code{p}, \code{df1}, \code{df2}.}
-#' \item{\code{sargan}: }{Sargan test of overidentifying restrictions. H0: the instruments are not correlated with the second stage residuals. It returns the following values: \code{stat}, \code{p}, \code{df}.}
-#' \item{\code{lr}, \code{wlr}: }{Likelihood ratio and within likelihood ratio tests. It returns the following elements: \code{stat}, \code{p}, \code{df}. Concerning the within-LR test, note that, contrary to estimations with \code{femlm} or \code{feNmlm}, estimations with \code{feglm}/\code{fepois} need to estimate the model with fixed-effects only which may prove time-consuming (depending on your model). Bottom line, if you really need the within-LR and estimate a Poisson model, use \code{femlm} instead of \code{fepois} (the former uses direct ML maximization for which the only FEs model is a by product).}
+#' \item{`n`, `ll`, `aic`, `bic`, `rmse`: }{The number of observations, the log-likelihood, the AIC, the BIC and the root mean squared error, respectively.}
+#' \item{`my`: }{Mean of the dependent variable.}
+#' \item{`g`: }{The degrees of freedom used to compute the t-test (it influences the p-values of the coefficients). When the VCOV is clustered, this value is equal to the minimum cluster size, otherwise, it is equal to the sample size minus the number of variables.}
+#' \item{`r2`, `ar2`, `wr2`, `awr2`, `pr2`, `apr2`, `wpr2`, `awpr2`: }{All r2 that can be obtained with the function [`r2`]. The `a` stands for 'adjusted', the `w` for 'within' and the `p` for 'pseudo'. Note that the order of the letters `a`, `w` and `p` does not matter. The pseudo R2s are McFadden's R2s (ratios of log-likelihoods).}
+#' \item{`theta`: }{The over-dispersion parameter in Negative Binomial models. Low values mean high overdispersion.}
+#' \item{`f`, `wf`: }{The F-tests of nullity of the coefficients. The `w` stands for 'within'. These types return the following values: `stat`, `p`, `df1` and `df2`. If you want to display only one of these, use their name after a dot: e.g. `f.stat` will give the statistic of the F-test, or `wf.p` will give the p-values of the F-test on the projected model (i.e. projected onto the fixed-effects).}
+#' \item{`wald`: }{Wald test of joint nullity of the coefficients. This test always excludes the intercept and the fixed-effects. These type returns the following values: `stat`, `p`, `df1`, `df2` and `vcov`. The element `vcov` reports the way the VCOV matrix was computed since it directly influences this statistic.}
+#' \item{`ivf`, `ivf1`, `ivf2`, `ivfall`: }{These statistics are specific to IV estimations. They report either the IV F-test (namely the Cragg-Donald F statistic in the presence of only one endogenous regressor) of the first stage (`ivf` or `ivf1`), of the second stage (`ivf2`) or of both (`ivfall`). The F-test of the first stage is commonly named weak instrument test. The value of `ivfall` is only useful in `\link[fixest]{etable`} when both the 1st and 2nd stages are displayed (it leads to the 1st stage F-test(s) to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- otherwise, `ivf1` would also be displayed on the 2nd stage estimation). These types return the following values: `stat`, `p`, `df1` and `df2`.}
+#' \item{`ivwald`, `ivwald1`, `ivwald2`, `ivwaldall`: }{These statistics are specific to IV estimations. They report either the IV Wald-test of the first stage (`ivwald` or `ivwald1`), of the second stage (`ivwald2`) or of both (`ivwaldall`). The Wald-test of the first stage is commonly named weak instrument test. Note that if the estimation was done with a robust VCOV and there is only one endogenous regressor, this is equivalent to the Kleibergen-Paap statistic. The value of `ivwaldall` is only useful in [`etable`] when both the 1st and 2nd stages are displayed (it leads to the 1st stage Wald-test(s) to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- otherwise, `ivwald1` would also be displayed on the 2nd stage estimation). These types return the following values: `stat`, `p`, `df1`, `df2`, and `vcov`.}
+#' \item{`cd`: }{The Cragg-Donald test for weak instruments.}
+#' \item{`kpr`: }{The Kleibergen-Paap test for weak instruments.}
+#' \item{`wh`: }{This statistic is specific to IV estimations. Wu-Hausman endogeneity test. H0 is the absence of endogeneity of the instrumented variables. It returns the following values: `stat`, `p`, `df1`, `df2`.}
+#' \item{`sargan`: }{Sargan test of overidentifying restrictions. H0: the instruments are not correlated with the second stage residuals. It returns the following values: `stat`, `p`, `df`.}
+#' \item{`lr`, `wlr`: }{Likelihood ratio and within likelihood ratio tests. It returns the following elements: `stat`, `p`, `df`. Concerning the within-LR test, note that, contrary to estimations with `femlm` or `feNmlm`, estimations with `feglm`/`fepois` need to estimate the model with fixed-effects only which may prove time-consuming (depending on your model). Bottom line, if you really need the within-LR and estimate a Poisson model, use `femlm` instead of `fepois` (the former uses direct ML maximization for which the only FEs model is a by product).}
 #' }
 #'
 #'
 #'
 #'
 #' @return
-#' By default an object of class \code{fixest_fitstat} is returned. Using \code{verbose = FALSE} returns a simple a list. Finally, if only one type is selected, \code{simplify = TRUE} leads to the selected type to be returned.
+#' By default an object of class `fixest_fitstat` is returned. Using `verbose = FALSE` returns a simple a list. Finally, if only one type is selected, `simplify = TRUE` leads to the selected type to be returned.
 #'
 #' @examples
 #'
@@ -992,16 +992,16 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
 #' @inheritParams summary.fixest
 #' @inheritParams etable
 #'
-#' @param print Logical, default is \code{TRUE}. If \code{TRUE}, then a verbose description of the test is prompted on the R console. Otherwise only a named vector containing the test statistics is returned.
-#' @param ... Any other element to be passed to \code{\link[fixest]{summary.fixest}}.
+#' @param print Logical, default is `TRUE`. If `TRUE`, then a verbose description of the test is prompted on the R console. Otherwise only a named vector containing the test statistics is returned.
+#' @param ... Any other element to be passed to [`summary.fixest`].
 #'
 #' @details
-#' The type of VCOV matrix plays a crucial role in this test. Use the arguments \code{se} and \code{cluster} to change the type of VCOV for the test.
+#' The type of VCOV matrix plays a crucial role in this test. Use the arguments `se` and `cluster` to change the type of VCOV for the test.
 #'
 #' @return
-#' A named vector containing the following elements is returned: \code{stat}, \code{p}, \code{df1}, and \code{df2}. They correspond to the test statistic, the p-value, the first and second degrees of freedoms.
+#' A named vector containing the following elements is returned: `stat`, `p`, `df1`, and `df2`. They correspond to the test statistic, the p-value, the first and second degrees of freedoms.
 #'
-#' If no valid coefficient is found, the value \code{NA} is returned.
+#' If no valid coefficient is found, the value `NA` is returned.
 #'
 #' @examples
 #'
@@ -1125,13 +1125,13 @@ fitstat_validate = function(x, vector = FALSE){
 }
 
 
-#' R2s of \code{fixest} models
+#' R2s of `fixest` models
 #'
-#' Reports different R2s for \code{fixest} estimations (e.g. \code{\link[fixest]{feglm}} or \code{\link[fixest]{feols}}).
+#' Reports different R2s for `fixest` estimations (e.g. [`feglm`] or [`feols`]).
 #'
-#' @param x A \code{fixest} object, e.g. obtained with function \code{\link[fixest]{feglm}} or \code{\link[fixest]{feols}}.
-#' @param type A character vector representing the R2 to compute. The R2 codes are of the form: "wapr2" with letters "w" (within), "a" (adjusted) and "p" (pseudo) possibly missing. E.g. to get the regular R2: use \code{type = "r2"}, the within adjusted R2: use \code{type = "war2"}, the pseudo R2: use \code{type = "pr2"}, etc. Use \code{"cor2"} for the squared correlation. By default, all R2s are computed.
-#' @param full_names Logical scalar, default is \code{FALSE}. If \code{TRUE} then names of the vector in output will have full names instead of keywords (e.g. \code{Squared Correlation} instead of \code{cor2}, etc).
+#' @param x A `fixest` object, e.g. obtained with function [`feglm`] or [`feols`].
+#' @param type A character vector representing the R2 to compute. The R2 codes are of the form: "wapr2" with letters "w" (within), "a" (adjusted) and "p" (pseudo) possibly missing. E.g. to get the regular R2: use `type = "r2"`, the within adjusted R2: use `type = "war2"`, the pseudo R2: use `type = "pr2"`, etc. Use `"cor2"` for the squared correlation. By default, all R2s are computed.
+#' @param full_names Logical scalar, default is `FALSE`. If `TRUE` then names of the vector in output will have full names instead of keywords (e.g. `Squared Correlation` instead of `cor2`, etc).
 #'
 #' @details
 #'
@@ -1141,7 +1141,7 @@ fitstat_validate = function(x, vector = FALSE){
 #'
 #' The pseudo-R2 is also returned in the OLS case, it corresponds to the pseudo-R2 of the equivalent GLM model with a Gaussian family.
 #'
-#' For the adjusted within-R2s, the adjustment factor is \code{(n - nb_fe) / (n - nb_fe - K)} with \code{n} the number of observations, \code{nb_fe} the number of fixed-effects and \code{K} the number of variables.
+#' For the adjusted within-R2s, the adjustment factor is `(n - nb_fe) / (n - nb_fe - K)` with `n` the number of observations, `nb_fe` the number of fixed-effects and `K` the number of variables.
 #'
 #' @return
 #' Returns a named vector.
@@ -1307,18 +1307,18 @@ r2 = function(x, type = "all", full_names = FALSE){
 }
 
 
-#' Gets the degrees of freedom of a \code{fixest} estimation
+#' Gets the degrees of freedom of a `fixest` estimation
 #'
-#' Simple utility to extract the degrees of freedom from a \code{fixest} estimation.
+#' Simple utility to extract the degrees of freedom from a `fixest` estimation.
 #'
 #' @inheritParams vcov.fixest
 #'
-#' @param x A \code{fixest} estimation.
-#' @param type Character scalar, equal to "k", "resid", "t". If "k", then the number of regressors is returned. If "resid", then it is the "residuals degree of freedom", i.e. the number of observations minus the number of regressors. If "t", it is the degrees of freedom used in the t-test. Note that these values are affected by how the VCOV of \code{x} is computed, in particular when the VCOV is clustered.
-#' @param vars A vector of variable names, of the regressors. This is optional. If provided, then \code{type} is set to 1 by default and the number of regressors contained in \code{vars} is returned. This is only useful in the presence of collinearity and we want a subset of the regressors only. (Mostly for internal use.)
+#' @param x A `fixest` estimation.
+#' @param type Character scalar, equal to "k", "resid", "t". If "k", then the number of regressors is returned. If "resid", then it is the "residuals degree of freedom", i.e. the number of observations minus the number of regressors. If "t", it is the degrees of freedom used in the t-test. Note that these values are affected by how the VCOV of `x` is computed, in particular when the VCOV is clustered.
+#' @param vars A vector of variable names, of the regressors. This is optional. If provided, then `type` is set to 1 by default and the number of regressors contained in `vars` is returned. This is only useful in the presence of collinearity and we want a subset of the regressors only. (Mostly for internal use.)
 #' @param stage Either 1 or 2. Only concerns IV regressions, which stage to look at.
 #'
-#' The type of VCOV can have an influence on the degrees of freedom. In particular, when the VCOV is clustered, the DoF returned will be in accordance with the way the small sample correction was performed when computing the VCOV. That type of value is in general not what we have in mind when we think of "degrees of freedom". To obtain the ones that are more intuitive, please use \code{degrees_freedom_iid} instead.
+#' The type of VCOV can have an influence on the degrees of freedom. In particular, when the VCOV is clustered, the DoF returned will be in accordance with the way the small sample correction was performed when computing the VCOV. That type of value is in general not what we have in mind when we think of "degrees of freedom". To obtain the ones that are more intuitive, please use `degrees_freedom_iid` instead.
 #'
 #'
 #' @examples
@@ -1394,7 +1394,7 @@ degrees_freedom = function(x, type, vars = NULL, vcov = NULL, se = NULL, cluster
 }
 
 
-#' @describeIn degrees_freedom Gets the degrees of freedom of a \code{fixest} estimation
+#' @describeIn degrees_freedom Gets the degrees of freedom of a `fixest` estimation
 degrees_freedom_iid = function(x, type){
     degrees_freedom(x, type, vcov = "iid")
 }
