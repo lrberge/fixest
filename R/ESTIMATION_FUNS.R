@@ -29,7 +29,7 @@
 #' @section Combining the fixed-effects:
 #' You can combine two variables to make it a new fixed-effect using `^`. The syntax is as follows: `fe_1^fe_2`. Here you created a new variable which is the combination of the two variables fe_1 and fe_2. This is identical to doing `paste0(fe_1, "_", fe_2)` but more convenient.
 #'
-#' Note that pasting is a costly operation, especially for large data sets. Thus, the internal algorithm uses a numerical trick which is fast, but the drawback is that the identity of each observation is lost (i.e. they are now equal to a meaningless number instead of being equal to `paste0(fe_1, "_", fe_2)`). These \dQuote{identities} are useful only if you're interested in the value of the fixed-effects (that you can extract with `\link[fixest]{fixef.fixest`}). If you're only interested in coefficients of the variables, it doesn't matter. Anyway, you can use `combine.quick = FALSE` to tell the internal algorithm to use `paste` instead of the numerical trick. By default, the numerical trick is performed only for large data sets.
+#' Note that pasting is a costly operation, especially for large data sets. Thus, the internal algorithm uses a numerical trick which is fast, but the drawback is that the identity of each observation is lost (i.e. they are now equal to a meaningless number instead of being equal to `paste0(fe_1, "_", fe_2)`). These \dQuote{identities} are useful only if you're interested in the value of the fixed-effects (that you can extract with [`fixef.fixest`]). If you're only interested in coefficients of the variables, it doesn't matter. Anyway, you can use `combine.quick = FALSE` to tell the internal algorithm to use `paste` instead of the numerical trick. By default, the numerical trick is performed only for large data sets.
 #'
 #' @section Varying slopes:
 #' You can add variables with varying slopes in the fixed-effect part of the formula. The syntax is as follows: fixef_var[var1, var2]. Here the variables var1 and var2 will be with varying slopes (one slope per value in fixef_var) and the fixed-effect fixef_var will also be added.
@@ -3377,9 +3377,9 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit, split
 #' \item{theta}{In the case of a negative binomial estimation: the overdispersion parameter.}
 #'
 #'  @seealso
-#' See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the fixed-effects coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
+#' See also [`summary.fixest`] to see the results with the appropriate standard-errors, [`fixef.fixest`] to extract the fixed-effects coefficients, and the function [`etable`] to visualize the results of multiple estimations.
 #'
-#' And other estimation methods: \code{\link[fixest]{feols}}, \code{\link[fixest]{femlm}}, \code{\link[fixest]{feglm}}, \code{\link[fixest:feglm]{fepois}}, \code{\link[fixest:femlm]{fenegbin}}.
+#' And other estimation methods: [`feols`], [`femlm`], [`feglm`], [`fepois`][fixest::feglm], [`fenegbin`][fixest::femlm].
 #'
 #' @author
 #' Laurent Berge
