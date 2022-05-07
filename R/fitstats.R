@@ -1696,6 +1696,148 @@ proj_on_U = function(x, Z){
 
 
 
+####
+#### SETUP ####
+####
+
+fixest_models = list(
+    all = "all",
+    feols = list(
+        all = "feols.all",
+        iv = list(
+            endo_any = "feols.iv.endo_any",
+            endo_single = "feols.iv.endo_single",
+            inst_any = "feols.iv.inst_any",
+            inst_single = "feols.iv.inst_any"
+            )
+        ),
+    feglm = list(
+        all = "feglm.all",
+        poisson = "feglm.poisson",
+        quasipoisson = "feglm.quasipoisson",
+        binomial = list(
+            logit = "feglm.binomial.logit",
+            probit = "feglm.binomial.probit"
+        ),
+        quasibinomial = list(
+            logit = "feglm.quasibinomial.logit",
+            probit = "feglm.quasibinomial.probit"
+            )
+        ),
+    feNmlm = list(
+        guaussian = "feNmlm.gaussian",
+        poisson = "feNmlm.poisson",
+        logit = "feNmlm.logit",
+        negbin = "feNmlm.negbin"
+    ),
+    femlm = list(
+        guaussian = "feNmlm.gaussian",
+        poisson = "feNmlm.poisson",
+        logit = "feNmlm.logit",
+        negbin = "feNmlm.negbin"
+    ),
+    fepois = "fepois",
+    fenegbin = "fenegbin",
+    logit = "logit",
+    probit = "probit",
+    ml_glm = "ml_glm",
+    fixef_any = "fixef_any",
+    fixef_none = "fixef_none",
+    weights_any = "weights_any",
+    weights_none = "weights_none",
+    y_binary = "y_binary",
+    vars_any = "vars_any"
+    )
+
+
+fitstat_setup = function(){
+
+    stats_all = list()
+
+    doc = list()
+
+    doc_short = list(
+        general = list(header = "General statistics"),
+        signif = list(header = "Significance tests"),
+        iv = list(header = "Instrumental variables"),
+        user = list(header = "User-defined statistics")
+        )
+
+    #
+    # General ####
+    #
+
+    stats_all$sq.cor = stats_all$cor2 = list(fun = function(x) r2(x, "sq.cor"),
+                                             when = fixest_models$all,
+                                             alias = "Squared Cor.",
+                                             alias_tex = "Squared Correlation")
+
+    doc_short$general[["cor, sq.cor"]] = "Squared correlation"
+    doc[["cor, sq.cor"]] = "Squared correlation"
+
+    #
+    # |- r2s ####
+    #
+
+    stats_all$r2 = list(fun = function(x) r2(x, "r2"),
+                        when = fixest_models$feols,
+                        alias = "R2",
+                        alias_tex = "R$^2$")
+
+    stats_all$ar2 = list(fun = function(x) r2(x, "ar2"),
+                        when = fixest_models$feols && fixest_models$vars_any,
+                        alias = "Adj. R2",
+                        alias_tex = "Adj. R$^2$")
+
+    stats_all$wr2 = list(fun = function(x) r2(x, "wr2"),
+                        when = fixest_models$feols && fixest_models$fixef_any,
+                        alias = "Within R2",
+                        alias_tex = "Within R$^2$")
+
+    stats_all$awr2 = stats_all$war2 = list(
+        fun = function(x) r2(x, "awr2"),
+        when = fixest_models$feols && fixest_models$fixef_any && fixest_models$vars_any,
+        alias = "Within adj. R2",
+        alias_tex = "Within adj. R$^2$")
+
+    # pseudo
+
+    stats_all$pr2 = list(fun = function(x) r2(x, "pr2"),
+                        when = fixest_models$ml_glm,
+                        alias = "Pseudo R2",
+                        alias_tex = "Pseudo R$^2$")
+
+    stats_all$apr2 = stats_all$par2 = list(
+        fun = function(x) r2(x, "apr2"),
+        when = fixest_models$ml_glm && fixest_models$vars_any,
+        alias = "Adj. pseudo R2",
+        alias_tex = "Adj. pseudo R$^2$")
+
+    stats_all$wpr2 = stats_all$pwr2 = list(
+        fun = function(x) r2(x, "wpr2"),
+        when = fixest_models$ml_glm && fixest_models$fixef_any,
+        alias = "Within pseudo R2",
+        alias_tex = "Within pseudo R$^2$")
+
+    stats_all$awpr2 = stats_all$wapr2 = stats_all$apwr2 = stats_all$wpar2 =
+        stats_all$pawr2 = stats_all$pwar2 = list(
+        fun = function(x) r2(x, "awpr2"),
+        when = fixest_models$ml_glm && fixest_models$fixef_any && fixest_models$vars_any,
+        alias = "Within adj. pseudo R2",
+        alias_tex = "Within adj. pseudo R$^2$")
+
+
+    # DOC
+    #> All r2s that can be obtained with the function \code{\link[fixest]{r2}}. The \code{a} stands for 'adjusted', the \code{w} for 'within' and the \code{p} for 'pseudo'. Note that the order of the letters \code{a}, \code{w} and \code{p} does not matter. The pseudo R2s are McFadden's R2s (ratios of log-likelihoods).
+
+
+
+
+
+
+
+
+}
 
 
 
