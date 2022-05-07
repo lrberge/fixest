@@ -269,15 +269,15 @@ rep_df = function(x, times = 1, each = 1, ...){
 #### USER LEVEL ####
 ####
 
-#' Extracts the models tree from a \code{fixest_multi} object
+#' Extracts the models tree from a `fixest_multi` object
 #'
-#' Extracts the meta information on all the models contained in a \code{fixest_multi} estimation.
+#' Extracts the meta information on all the models contained in a `fixest_multi` estimation.
 #'
 #' @inheritParams print.fixest_multi
-#' @param simplify Logical, default is \code{FALSE}. The default behavior is to display all the meta information, even if they are identical across models. By using \code{simplify = TRUE}, only the information with some variation is kept.
+#' @param simplify Logical, default is `FALSE`. The default behavior is to display all the meta information, even if they are identical across models. By using `simplify = TRUE`, only the information with some variation is kept.
 #'
 #' @return
-#' It returns a \code{data.frame} whose first column (named \code{id}) is the index of the models and the other columns contain the information specific to each model (e.g. which sample, which RHS,  which dependent variable, etc).
+#' It returns a `data.frame` whose first column (named `id`) is the index of the models and the other columns contain the information specific to each model (e.g. which sample, which RHS,  which dependent variable, etc).
 #'
 #' @examples
 #'
@@ -332,12 +332,12 @@ models = function(x, simplify = FALSE){
 #'
 #' @inherit print.fixest_multi seealso
 #'
-#' @param object A \code{fixest_multi} object, obtained from a \code{fixest} estimation leading to multiple results.
-#' @param type A character either equal to \code{"short"}, \code{"long"}, \code{"compact"}, \code{"se_compact"} or \code{"se_long"}. If \code{short}, only the table of coefficients is displayed for each estimation. If \code{long}, then the full results are displayed for each estimation. If \code{compact}, a \code{data.frame} is returned with one line per model and the formatted coefficients + standard-errors in the columns. If \code{se_compact}, a \code{data.frame} is returned with one line per model, one numeric column for each coefficient and one numeric column for each standard-error. If \code{"se_long"}, same as \code{"se_compact"} but the data is in a long format instead of wide.
+#' @param object A `fixest_multi` object, obtained from a `fixest` estimation leading to multiple results.
+#' @param type A character either equal to `"short"`, `"long"`, `"compact"`, `"se_compact"` or `"se_long"`. If `short`, only the table of coefficients is displayed for each estimation. If `long`, then the full results are displayed for each estimation. If `compact`, a `data.frame` is returned with one line per model and the formatted coefficients + standard-errors in the columns. If `se_compact`, a `data.frame` is returned with one line per model, one numeric column for each coefficient and one numeric column for each standard-error. If `"se_long"`, same as `"se_compact"` but the data is in a long format instead of wide.
 #' @param ... Not currently used.
 #'
 #' @return
-#' It returns either an object of class \code{fixest_multi} (if \code{type} equals \code{short} or \code{long}), either a \code{data.frame} (if type equals \code{compact} or \code{se_compact}).
+#' It returns either an object of class `fixest_multi` (if `type` equals `short` or `long`), either a `data.frame` (if type equals `compact` or `se_compact`).
 #'
 #' @examples
 #'
@@ -489,11 +489,11 @@ summary.fixest_multi = function(object, type = "short", vcov = NULL, se = NULL, 
 #'
 #' @method print fixest_multi
 #'
-#' @param x A \code{fixest_multi} object, obtained from a \code{fixest} estimation leading to multiple results.
-#' @param ... Other arguments to be passed to \code{\link[fixest]{summary.fixest_multi}}.
+#' @param x A `fixest_multi` object, obtained from a `fixest` estimation leading to multiple results.
+#' @param ... Other arguments to be passed to [`summary.fixest_multi`].
 #'
 #' @seealso
-#' The main fixest estimation functions: \code{\link[fixest]{feols}}, \code{\link[fixest:feglm]{fepois}}, \code{\link[fixest:femlm]{fenegbin}}, \code{\link[fixest]{feglm}}, \code{\link[fixest]{feNmlm}}. Tools for mutliple fixest estimations: \code{\link[fixest]{summary.fixest_multi}}, \code{\link[fixest]{print.fixest_multi}}, \code{\link[fixest]{as.list.fixest_multi}}, \code{\link[fixest]{sub-sub-.fixest_multi}}, \code{\link[fixest]{sub-.fixest_multi}}.
+#' The main fixest estimation functions: [`feols`], [`fepois`][fixest::feglm], [`fenegbin`][fixest::femlm], [`feglm`], [`feNmlm`]. Tools for mutliple fixest estimations: [`summary.fixest_multi`], [`print.fixest_multi`], [`as.list.fixest_multi`], [`sub-sub-.fixest_multi`], [`sub-.fixest_multi`].
 #'
 #' @examples
 #'
@@ -590,9 +590,9 @@ print.fixest_multi = function(x, ...){
 
 }
 
-#' Extracts one element from a \code{fixest_multi} object
+#' Extracts one element from a `fixest_multi` object
 #'
-#' Extracts single elements from multiple \code{fixest} estimations.
+#' Extracts single elements from multiple `fixest` estimations.
 #'
 #' @inherit print.fixest_multi seealso
 #' @inheritParams print.fixest_multi
@@ -600,7 +600,7 @@ print.fixest_multi = function(x, ...){
 #' @param i An integer scalar. The identifier of the estimation to extract.
 #'
 #' @return
-#' A \code{fixest} object is returned.
+#' A `fixest` object is returned.
 #'
 #' @examples
 #'
@@ -636,23 +636,23 @@ print.fixest_multi = function(x, ...){
 #' @inherit print.fixest_multi seealso
 #' @inheritParams print.fixest_multi
 #'
-#' @param sample An integer vector, a logical scalar, or a character vector. It represents the \code{sample} identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation was a split sample. You can use \code{.N} to refer to the last element. If logical, all elements are selected in both cases, but \code{FALSE} leads \code{sample} to become the rightmost key (just try it out).
-#' @param lhs An integer vector, a logical scalar, or a character vector. It represents the left-hand-sides identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation contained multiple left-hand-sides. You can use \code{.N} to refer to the last element. If logical, all elements are selected in both cases, but \code{FALSE} leads \code{lhs} to become the rightmost key (just try it out).
-#' @param rhs An integer vector or a logical scalar. It represents the right-hand-sides identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation contained multiple right-hand-sides. You can use \code{.N} to refer to the last element. If logical, all elements are selected in both cases, but \code{FALSE} leads \code{rhs} to become the rightmost key (just try it out).
-#' @param fixef An integer vector or a logical scalar. It represents the fixed-effects identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation contained fixed-effects in a stepwise fashion. You can use \code{.N} to refer to the last element. If logical, all elements are selected in both cases, but \code{FALSE} leads \code{fixef} to become the rightmost key (just try it out).
-#' @param iv An integer vector or a logical scalar. It represent the stages of the IV. Note that the length can be greater than 2 when there are multiple endogenous regressors (the first stage corresponding to multiple estimations). Note that the order of the stages depends on the \code{stage} argument from \code{\link[fixest]{summary.fixest}}. If logical, all elements are selected in both cases, but \code{FALSE} leads \code{iv} to become the rightmost key (just try it out).
+#' @param sample An integer vector, a logical scalar, or a character vector. It represents the `sample` identifiers for which the results should be extracted. Only valid when the `fixest` estimation was a split sample. You can use `.N` to refer to the last element. If logical, all elements are selected in both cases, but `FALSE` leads `sample` to become the rightmost key (just try it out).
+#' @param lhs An integer vector, a logical scalar, or a character vector. It represents the left-hand-sides identifiers for which the results should be extracted. Only valid when the `fixest` estimation contained multiple left-hand-sides. You can use `.N` to refer to the last element. If logical, all elements are selected in both cases, but `FALSE` leads `lhs` to become the rightmost key (just try it out).
+#' @param rhs An integer vector or a logical scalar. It represents the right-hand-sides identifiers for which the results should be extracted. Only valid when the `fixest` estimation contained multiple right-hand-sides. You can use `.N` to refer to the last element. If logical, all elements are selected in both cases, but `FALSE` leads `rhs` to become the rightmost key (just try it out).
+#' @param fixef An integer vector or a logical scalar. It represents the fixed-effects identifiers for which the results should be extracted. Only valid when the `fixest` estimation contained fixed-effects in a stepwise fashion. You can use `.N` to refer to the last element. If logical, all elements are selected in both cases, but `FALSE` leads `fixef` to become the rightmost key (just try it out).
+#' @param iv An integer vector or a logical scalar. It represent the stages of the IV. Note that the length can be greater than 2 when there are multiple endogenous regressors (the first stage corresponding to multiple estimations). Note that the order of the stages depends on the `stage` argument from `\link[fixest]{summary.fixest`}. If logical, all elements are selected in both cases, but `FALSE` leads `iv` to become the rightmost key (just try it out).
 #' @param i An integer vector. Represents the estimations to extract.
 #' @param I An integer vector. Represents the root element to extract.
-#' @param reorder Logical, default is \code{TRUE}. Indicates whether reordering of the results should be performed depending on the user input.
-#' @param drop Logical, default is \code{FALSE}. If the result contains only one estimation, then if \code{drop = TRUE} it will be transformed into a \code{fixest} object (instead of \code{fixest_multi}).
+#' @param reorder Logical, default is `TRUE`. Indicates whether reordering of the results should be performed depending on the user input.
+#' @param drop Logical, default is `FALSE`. If the result contains only one estimation, then if `drop = TRUE` it will be transformed into a `fixest` object (instead of `fixest_multi`).
 #'
 #' @details
-#' The order with we we use the keys matter. Every time a key \code{sample}, \code{lhs}, \code{rhs}, \code{fixef} or \code{iv} is used, a reordering is performed to consider the leftmost-side key to be the new root.
+#' The order with we we use the keys matter. Every time a key `sample`, `lhs`, `rhs`, `fixef` or `iv` is used, a reordering is performed to consider the leftmost-side key to be the new root.
 #'
-#' Use logical keys to easily reorder. For example, say the object \code{res} contains a multiple estimation with multiple left-hand-sides, right-hand-sides and fixed-effects. By default the results are ordered as follows: \code{lhs}, \code{fixef}, \code{rhs}. If you use \code{res[lhs = FALSE]}, then the new order is: \code{fixef}, \code{rhs}, \code{lhs}. With \code{res[rhs = TRUE, lhs = FALSE]} it becomes: \code{rhs}, \code{fixef}, \code{lhs}. In both cases you keep all estimations.
+#' Use logical keys to easily reorder. For example, say the object `res` contains a multiple estimation with multiple left-hand-sides, right-hand-sides and fixed-effects. By default the results are ordered as follows: `lhs`, `fixef`, `rhs`. If you use `res[lhs = FALSE]`, then the new order is: `fixef`, `rhs`, `lhs`. With `res[rhs = TRUE, lhs = FALSE]` it becomes: `rhs`, `fixef`, `lhs`. In both cases you keep all estimations.
 #'
 #' @return
-#' It returns a \code{fixest_multi} object. If there is only one estimation left in the object, then the result is simplified into a \code{fixest} object.
+#' It returns a `fixest_multi` object. If there is only one estimation left in the object, then the result is simplified into a `fixest` object.
 #'
 #' @examples
 #'
@@ -865,7 +865,7 @@ print.fixest_multi = function(x, ...){
 
 #' Transforms a fixest_multi object into a list
 #'
-#' Extracts the results from a \code{fixest_multi} object and place them into a list.
+#' Extracts the results from a `fixest_multi` object and place them into a list.
 #'
 #' @inheritParams print.fixest_multi
 #' @inherit print.fixest_multi seealso
@@ -903,9 +903,9 @@ as.list.fixest_multi = function(x, ...){
 #' @inheritParams etable
 #' @inheritParams coef.fixest
 #'
-#' @param object A \code{fixest_multi} object. Obtained from a multiple estimation.
-#' @param long Logical, default is \code{FALSE}. Whether the results should be displayed in a long format.
-#' @param na.rm Logical, default is \code{TRUE}. Only applies when \code{long = TRUE}: whether to remove the coefficients with \code{NA} values.
+#' @param object A `fixest_multi` object. Obtained from a multiple estimation.
+#' @param long Logical, default is `FALSE`. Whether the results should be displayed in a long format.
+#' @param na.rm Logical, default is `TRUE`. Only applies when `long = TRUE`: whether to remove the coefficients with `NA` values.
 #' @param ... Not currently used.
 #'
 #'
@@ -996,23 +996,23 @@ coef.fixest_multi = function(object, keep, drop, order, collin = FALSE,
 #' @rdname coef.fixest_multi
 coefficients.fixest_multi <- coef.fixest_multi
 
-#' Extracts the coefficients tables from \code{fixest_multi} estimations
+#' Extracts the coefficients tables from `fixest_multi` estimations
 #'
-#' Series of methods to extract the coefficients table or its sub-components from a \code{fixest_multi} objects (i.e. the outcome of multiple estimations).
+#' Series of methods to extract the coefficients table or its sub-components from a `fixest_multi` objects (i.e. the outcome of multiple estimations).
 #'
 #' @inheritParams etable
 #'
-#' @param object A \code{fixest_multi} object, coming from a \code{fixest} multiple estimation.
-#' @param wide A logical scalar, default is \code{FALSE}. If \code{TRUE}, then a list is returned: the elements of the list are coef/se/tstat/pvalue. Each element of the list is a wide table with a column per coefficient.
-#' @param long Logical scalar, default is \code{FALSE}. If \code{TRUE}, then all the information is stacked, with two columns containing the information: \code{"param"} and \code{"value"}. The column \code{param} contains the values \code{coef}/\code{se}/\code{tstat}/\code{pvalue}.
-#' @param ... Other arguments to be passed to \code{\link[fixest]{summary.fixest}}.
+#' @param object A `fixest_multi` object, coming from a `fixest` multiple estimation.
+#' @param wide A logical scalar, default is `FALSE`. If `TRUE`, then a list is returned: the elements of the list are coef/se/tstat/pvalue. Each element of the list is a wide table with a column per coefficient.
+#' @param long Logical scalar, default is `FALSE`. If `TRUE`, then all the information is stacked, with two columns containing the information: `"param"` and `"value"`. The column `param` contains the values `coef`/`se`/`tstat`/`pvalue`.
+#' @param ... Other arguments to be passed to [`summary.fixest`].
 #'
 #' @return
-#' It returns a \code{data.frame} containing the coefficients tables (or just the se/pvalue/tstat) along with the information on which model was estimated.
+#' It returns a `data.frame` containing the coefficients tables (or just the se/pvalue/tstat) along with the information on which model was estimated.
 #'
-#' If \code{wide = TRUE}, then a list is returned. The elements of the list are coef/se/tstat/pvalue. Each element of the list is a wide table with a column per coefficient.
+#' If `wide = TRUE`, then a list is returned. The elements of the list are coef/se/tstat/pvalue. Each element of the list is a wide table with a column per coefficient.
 #'
-#' If \code{long = TRUE}, then all the information is stacked. This removes the 4 columns containing the coefficient estimates to the p-values, and replace them with two new columns: \code{"param"} and \code{"value"}. The column \code{param} contains the values \code{coef}/\code{se}/\code{tstat}/\code{pvalue}, and the column \code{values} the associated numerical information.
+#' If `long = TRUE`, then all the information is stacked. This removes the 4 columns containing the coefficient estimates to the p-values, and replace them with two new columns: `"param"` and `"value"`. The column `param` contains the values `coef`/`se`/`tstat`/`pvalue`, and the column `values` the associated numerical information.
 #'
 #' @examples
 #'
@@ -1122,7 +1122,7 @@ coeftable.fixest_multi = function(object, vcov = NULL, keep = NULL, drop = NULL,
 }
 
 
-#' @describeIn coeftable.fixest_multi Extracts the standard-errors from \code{fixest_multi} estimations
+#' @describeIn coeftable.fixest_multi Extracts the standard-errors from `fixest_multi` estimations
 se.fixest_multi = function(object, vcov = NULL, keep = NULL, drop = NULL, order = NULL,
                            long = FALSE, ...){
     # Default is wide format => same as with coef
@@ -1148,7 +1148,7 @@ se.fixest_multi = function(object, vcov = NULL, keep = NULL, drop = NULL, order 
     res
 }
 
-#' @describeIn coeftable.fixest_multi Extracts the t-stats from \code{fixest_multi} estimations
+#' @describeIn coeftable.fixest_multi Extracts the t-stats from `fixest_multi` estimations
 tstat.fixest_multi = function(object, vcov = NULL, keep = NULL, drop = NULL, order = NULL,
                            long = FALSE, ...){
     # Default is wide format => same as with coef
@@ -1174,7 +1174,7 @@ tstat.fixest_multi = function(object, vcov = NULL, keep = NULL, drop = NULL, ord
     res
 }
 
-#' @describeIn coeftable.fixest_multi Extracts the p-values from \code{fixest_multi} estimations
+#' @describeIn coeftable.fixest_multi Extracts the p-values from `fixest_multi` estimations
 pvalue.fixest_multi = function(object, vcov = NULL, keep = NULL, drop = NULL, order = NULL,
                               long = FALSE, ...){
     # Default is wide format => same as with coef
@@ -1201,17 +1201,17 @@ pvalue.fixest_multi = function(object, vcov = NULL, keep = NULL, drop = NULL, or
 }
 
 
-#' Extracts the residuals from a \code{fixest_multi} object
+#' Extracts the residuals from a `fixest_multi` object
 #'
-#' Utility to extract the residuals from multiple \code{fixest} estimations. If possible, all the residuals are coerced into a matrix.
+#' Utility to extract the residuals from multiple `fixest` estimations. If possible, all the residuals are coerced into a matrix.
 #'
 #' @inheritParams resid.fixest
 #'
-#' @param object A \code{fixes_multi} object.
-#' @param na.rm Logical, default is \code{FALSE}. Should the NAs be kept? If \code{TRUE}, they are removed.
+#' @param object A `fixes_multi` object.
+#' @param na.rm Logical, default is `FALSE`. Should the NAs be kept? If `TRUE`, they are removed.
 #'
 #' @return
-#' If all the models return residuals of the same length, a matrix is returned. Otherwise, a \code{list} is returned.
+#' If all the models return residuals of the same length, a matrix is returned. Otherwise, a `list` is returned.
 #'
 #' @examples
 #'
