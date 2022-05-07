@@ -10,48 +10,48 @@
 #' Tool to easily group the values of a given variable.
 #'
 #' @param x A vector whose values have to be grouped. Can be of any type but must be atomic.
-#' @param bin A list of values to be grouped, a vector, a formula, or the special values \code{"bin::digit"} or \code{"cut::values"}. To create a new value from old values, use \code{bin = list("new_value"=old_values)} with \code{old_values} a vector of existing values. You can use \code{.()} for \code{list()}.
-#' It accepts regular expressions, but they must start with an \code{"@"}, like in \code{bin="@Aug|Dec"}. It accepts one-sided formulas which must contain the variable \code{x}, e.g. \code{bin=list("<2" = ~x < 2)}.
-#' The names of the list are the new names. If the new name is missing, the first value matched becomes the new name. In the name, adding \code{"@d"}, with \code{d} a digit, will relocate the value in position \code{d}: useful to change the position of factors. Use \code{"@"} as first item to make subsequent items be located first in the factor.
-#' Feeding in a vector is like using a list without name and only a single element. If the vector is numeric, you can use the special value \code{"bin::digit"} to group every \code{digit} element.
-#' For example if \code{x} represents years, using \code{bin="bin::2"} creates bins of two years.
-#' With any data, using \code{"!bin::digit"} groups every digit consecutive values starting from the first value.
-#' Using \code{"!!bin::digit"} is the same but starting from the last value.
-#' With numeric vectors you can: a) use \code{"cut::n"} to cut the vector into \code{n} equal parts, b) use \code{"cut::a]b["} to create the following bins: \code{[min, a]}, \code{]a, b[}, \code{[b, max]}.
-#' The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to p100) followed by an open or closed square bracket. You can add custom bin names by adding them in the character vector after \code{'cut::values'}. See details and examples. Dot square bracket expansion (see \code{\link[fixest]{dsb}}) is enabled.
+#' @param bin A list of values to be grouped, a vector, a formula, or the special values `"bin::digit"` or `"cut::values"`. To create a new value from old values, use `bin = list("new_value"=old_values)` with `old_values` a vector of existing values. You can use `.()` for `list()`.
+#' It accepts regular expressions, but they must start with an `"@"`, like in `bin="@Aug|Dec"`. It accepts one-sided formulas which must contain the variable `x`, e.g. `bin=list("<2" = ~x < 2)`.
+#' The names of the list are the new names. If the new name is missing, the first value matched becomes the new name. In the name, adding `"@d"`, with `d` a digit, will relocate the value in position `d`: useful to change the position of factors. Use `"@"` as first item to make subsequent items be located first in the factor.
+#' Feeding in a vector is like using a list without name and only a single element. If the vector is numeric, you can use the special value `"bin::digit"` to group every `digit` element.
+#' For example if `x` represents years, using `bin="bin::2"` creates bins of two years.
+#' With any data, using `"!bin::digit"` groups every digit consecutive values starting from the first value.
+#' Using `"!!bin::digit"` is the same but starting from the last value.
+#' With numeric vectors you can: a) use `"cut::n"` to cut the vector into `n` equal parts, b) use `"cut::a]b["` to create the following bins: `[min, a]`, `]a, b[`, `[b, max]`.
+#' The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to p100) followed by an open or closed square bracket. You can add custom bin names by adding them in the character vector after `'cut::values'`. See details and examples. Dot square bracket expansion (see [`dsb`]) is enabled.
 #'
 #' @section "Cutting" a numeric vector:
 #'
 #' Numeric vectors can be cut easily into: a) equal parts, b) user-specified bins.
 #'
-#' Use \code{"cut::n"} to cut the vector into \code{n} (roughly) equal parts. Percentiles are used to partition the data, hence some data distributions can lead to create less than \code{n} parts (for example if P0 is the same as P50).
+#' Use `"cut::n"` to cut the vector into `n` (roughly) equal parts. Percentiles are used to partition the data, hence some data distributions can lead to create less than `n` parts (for example if P0 is the same as P50).
 #'
-#' The user can specify custom bins with the following syntax: \code{"cut::a]b]c]"etc}. Here the numbers \code{a}, \code{b}, \code{c}, etc, are a sequence of increasing numbers, each followed by an open or closed square bracket. The numbers can be specified as either plain numbers (e.g. \code{"cut::5]12[32["}), quartiles (e.g. \code{"cut::q1]q3["}), or percentiles (e.g. \code{"cut::p10]p15]p90]"}). Values of different types can be mixed: \code{"cut::5]q2[p80["} is valid provided the median (\code{q2}) is indeed greater than \code{5}, otherwise an error is thrown.
+#' The user can specify custom bins with the following syntax: `"cut::a]b]c]"etc`. Here the numbers `a`, `b`, `c`, etc, are a sequence of increasing numbers, each followed by an open or closed square bracket. The numbers can be specified as either plain numbers (e.g. `"cut::5]12[32["`), quartiles (e.g. `"cut::q1]q3["`), or percentiles (e.g. `"cut::p10]p15]p90]"`). Values of different types can be mixed: `"cut::5]q2[p80["` is valid provided the median (`q2`) is indeed greater than `5`, otherwise an error is thrown.
 #'
-#' The square bracket right of each number tells whether the numbers should be included or excluded from the current bin. For example, say \code{x} ranges from 0 to 100, then \code{"cut::5]"} will create two  bins: one from 0 to 5 and a second from 6 to 100. With \code{"cut::5["} the bins would have been 0-4 and 5-100.
+#' The square bracket right of each number tells whether the numbers should be included or excluded from the current bin. For example, say `x` ranges from 0 to 100, then `"cut::5]"` will create two  bins: one from 0 to 5 and a second from 6 to 100. With `"cut::5["` the bins would have been 0-4 and 5-100.
 #'
 #' A factor is returned. The labels report the min and max values in each bin.
 #'
-#' To have user-specified bin labels, just add them in the character vector following \code{'cut::values'}. You don't need to provide all of them, and \code{NA} values fall back to the default label. For example, \code{bin = c("cut::4", "Q1", NA, "Q3")} will modify only the first and third label that will be displayed as \code{"Q1"} and \code{"Q3"}.
+#' To have user-specified bin labels, just add them in the character vector following `'cut::values'`. You don't need to provide all of them, and `NA` values fall back to the default label. For example, `bin = c("cut::4", "Q1", NA, "Q3")` will modify only the first and third label that will be displayed as `"Q1"` and `"Q3"`.
 #'
-#' @section \code{bin} vs \code{ref}:
+#' @section `bin` vs `ref`:
 #'
-#' The functions \code{\link[fixest]{bin}} and \code{\link[fixest]{ref}} are able to do the same thing, then why use one instead of the other? Here are the differences:
+#' The functions [`bin`] and [`ref`] are able to do the same thing, then why use one instead of the other? Here are the differences:
 #'
 #' \itemize{
-#' \item{}{\code{ref} always returns a factor. This is in contrast with \code{bin} which returns, when possible, a vector of the same type as the vector in input.}
-#' \item{}{\code{ref} always places the values modified in the first place of the factor levels. On the other hand, \code{bin} tries to not modify the ordering of the levels. It is possible to make \code{bin} mimic the behavior of \code{ref} by adding an \code{"@"} as the first element of the list in the argument \code{bin}.}
-#'  \item{}{when a vector (and not a list) is given in input, \code{ref} will place each element of the vector in the first place of the factor levels. The behavior of \code{bin} is totally different, \code{bin} will transform all the values in the vector into a single value in \code{x} (i.e. it's binning).}
+#' \item{}{`ref` always returns a factor. This is in contrast with `bin` which returns, when possible, a vector of the same type as the vector in input.}
+#' \item{}{`ref` always places the values modified in the first place of the factor levels. On the other hand, `bin` tries to not modify the ordering of the levels. It is possible to make `bin` mimic the behavior of `ref` by adding an `"@"` as the first element of the list in the argument `bin`.}
+#'  \item{}{when a vector (and not a list) is given in input, `ref` will place each element of the vector in the first place of the factor levels. The behavior of `bin` is totally different, `bin` will transform all the values in the vector into a single value in `x` (i.e. it's binning).}
 #' }
 #'
 #' @return
-#' It returns a vector of the same length as \code{x}.
+#' It returns a vector of the same length as `x`.
 #'
 #' @author
 #' Laurent Berge
 #'
 #' @seealso
-#' To re-factor variables: \code{\link[fixest]{ref}}.
+#' To re-factor variables: [`ref`].
 #'
 #' @examples
 #'
@@ -169,27 +169,27 @@ bin = function(x, bin){
 #'
 #' Takes a variables of any types, transforms it into a factors, and modifies the values of the factors. Useful in estimations when you want to set some value of a vector as a reference.
 #'
-#' @inheritSection bin \code{bin} vs \code{ref}
+#' @inheritSection bin `bin` vs `ref`
 #'
 #' @param x A vector of any type (must be atomic though).
-#' @param ref A vector or a list, or special binning values (explained later). If a vector, it must correspond to (partially matched) values of the vector \code{x}. The vector \code{x} which will be transformed into a factor and these values will be placed first in the levels. That's the main usage of this function. You can also bin on-the-fly the values of \code{x}, using the same syntax as the function \code{\link[fixest]{bin}}. Here's a description of what bin does: To create a new value from old values, use \code{bin = list("new_value"=old_values)} with \code{old_values} a vector of existing values. You can use \code{.()} for \code{list()}.
-#' It accepts regular expressions, but they must start with an \code{"@"}, like in \code{bin="@Aug|Dec"}. It accepts one-sided formulas which must contain the variable \code{x}, e.g. \code{bin=list("<2" = ~x < 2)}.
-#' The names of the list are the new names. If the new name is missing, the first value matched becomes the new name. In the name, adding \code{"@d"}, with \code{d} a digit, will relocate the value in position \code{d}: useful to change the position of factors.
-#' If the vector \code{x} is numeric, you can use the special value \code{"bin::digit"} to group every \code{digit} element.
-#' For example if \code{x} represents years, using \code{bin="bin::2"} creates bins of two years.
-#' With any data, using \code{"!bin::digit"} groups every digit consecutive values starting from the first value.
-#' Using \code{"!!bin::digit"} is the same but starting from the last value.
-#' With numeric vectors you can: a) use \code{"cut::n"} to cut the vector into \code{n} equal parts, b) use \code{"cut::a]b["} to create the following bins: \code{[min, a]}, \code{]a, b[}, \code{[b, max]}.
-#' The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to p100) followed by an open or closed square bracket. You can add custom bin names by adding them in the character vector after \code{'cut::values'}. See details and examples. Dot square bracket expansion (see \code{\link[fixest]{dsb}}) is enabled.
+#' @param ref A vector or a list, or special binning values (explained later). If a vector, it must correspond to (partially matched) values of the vector `x`. The vector `x` which will be transformed into a factor and these values will be placed first in the levels. That's the main usage of this function. You can also bin on-the-fly the values of `x`, using the same syntax as the function [`bin`]. Here's a description of what bin does: To create a new value from old values, use `bin = list("new_value"=old_values)` with `old_values` a vector of existing values. You can use `.()` for `list()`.
+#' It accepts regular expressions, but they must start with an `"@"`, like in `bin="@Aug|Dec"`. It accepts one-sided formulas which must contain the variable `x`, e.g. `bin=list("<2" = ~x < 2)`.
+#' The names of the list are the new names. If the new name is missing, the first value matched becomes the new name. In the name, adding `"@d"`, with `d` a digit, will relocate the value in position `d`: useful to change the position of factors.
+#' If the vector `x` is numeric, you can use the special value `"bin::digit"` to group every `digit` element.
+#' For example if `x` represents years, using `bin="bin::2"` creates bins of two years.
+#' With any data, using `"!bin::digit"` groups every digit consecutive values starting from the first value.
+#' Using `"!!bin::digit"` is the same but starting from the last value.
+#' With numeric vectors you can: a) use `"cut::n"` to cut the vector into `n` equal parts, b) use `"cut::a]b["` to create the following bins: `[min, a]`, `]a, b[`, `[b, max]`.
+#' The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to p100) followed by an open or closed square bracket. You can add custom bin names by adding them in the character vector after `'cut::values'`. See details and examples. Dot square bracket expansion (see `\link[fixest]{dsb`}) is enabled.
 #'
 #' @return
-#' It returns a factor of the same length as \code{x}, where levels have been modified according to the argument \code{ref}.
+#' It returns a factor of the same length as `x`, where levels have been modified according to the argument `ref`.
 #'
 #' @author
 #' Laurent Berge
 #'
 #' @seealso
-#' To bin the values of a vectors: \code{\link[fixest]{bin}}.
+#' To bin the values of a vectors: [`bin`].
 #'
 #' @examples
 #'
@@ -301,49 +301,52 @@ ref = function(x, ref){
 #'
 #' This utility tool displays the number of unique elements in one or multiple data.frames as well as their number of NA values.
 #'
-#' @param x A formula, with data set names on the LHS and variables on the RHS, like \code{data1 + data2 ~ var1 + var2}. The following special variables are admitted: \code{"."} to get default values, \code{".N"} for the number of observations, \code{".U"} for the number of unique rows, \code{".NA"} for the number of rows with at least one NA. Variables can be combined with \code{"^"}, e.g. \code{df~id^period}; use \code{id\%^\%period} to also include the terms on both sides. Note that using \code{:} and \code{*} is equivalent to \code{^} and \code{\%^\%}. Sub select with \code{id[cond]}, when doing so \code{id} is automatically included. Conditions can be chained, as in \code{id[cond1, cond2]}. Use \code{NA(x, y)} in conditions instead of \code{is.na(x) | is.na(y)}. Use the \code{!!} operator to have both a condition and its opposite. To compare the keys in two data sets, use \code{data1:data2}. If not a formula, \code{x} can be: a vector (displays the # of unique values); a \code{data.frame} (default values are displayed), or a "sum" of data sets like in \code{x = data1 + data2}, in that case it is equivalent to \code{data1 + data2 ~ .}.
+#' @param x A formula, with data set names on the LHS and variables on the RHS, like `data1 + data2 ~ var1 + var2`. The following special variables are admitted: `"."` to get default values, `".N"` for the number of observations, `".U"` for the number of unique rows, `".NA"` for the number of rows with at least one NA. Variables can be combined with `"^"`, e.g. `df~id^period`; use `id\%^\%period` to also include the terms on both sides. Note that using `:` and `*` is equivalent to `^` and `\%^\%`. Sub select with `id[cond]`, when doing so `id` is automatically included. Conditions can be chained, as in `id[cond1, cond2]`. Use `NA(x, y)` in conditions instead of `is.na(x) | is.na(y)`. Use the `!!` operator to have both a condition and its opposite. To compare the keys in two data sets, use `data1:data2`. If not a formula, `x` can be: a vector (displays the # of unique values); a `data.frame` (default values are displayed), or a "sum" of data sets like in `x = data1 + data2`, in that case it is equivalent to `data1 + data2 ~ .`.
 #' @param ... Not currently used.
 #'
 #' @section Special values and functions:
 #'
-#' In the formula, you can use the following special values: \code{"."}, \code{".N"}, \code{".U"}, and \code{".NA"}.
+#' In the formula, you can use the following special values: `"."`, `".N"`, `".U"`, and `".NA"`.
 #'
 #' \itemize{
 #'
-#' \item{\code{"."}}{Accesses the default values. If there is only one data set and the data set is \emph{not} a \code{data.table}, then the default is to display the number of observations and the number of unique rows. If the data is a \code{data.table}, the number of unique items in the key(s) is displayed instead of the number of unique rows (if the table has keys of course). If there are two or more data sets, then the default is to display the unique items for: a) the variables common across all data sets, if there's less than 4, and b) if no variable is shown in a), the number of variables common across at least two data sets, provided there are less than 5. If the data sets are data tables, the keys are also displayed on top of the common variables. In any case, the number of observations is always displayed.}
+#' \item{`"."`}{Accesses the default values. If there is only one data set and the data set is \emph{not} a `data.table`, then the default is to display the number of observations and the number of unique rows. If the data is a `data.table`, the number of unique items in the key(s) is displayed instead of the number of unique rows (if the table has keys of course). If there are two or more data sets, then the default is to display the unique items for: a) the variables common across all data sets, if there's less than 4, and b) if no variable is shown in a), the number of variables common across at least two data sets, provided there are less than 5. If the data sets are data tables, the keys are also displayed on top of the common variables. In any case, the number of observations is always displayed.}
 #'
-#' \item{\code{".N"}}{Displays the number of observations.}
+#' \item{`".N"`}{Displays the number of observations.}
 #'
-#' \item{\code{".U"}}{Displays the number of unique rows.}
+#' \item{`".U"`}{Displays the number of unique rows.}
 #'
-#' \item{\code{".NA"}}{Displays the number of rows with at least one NA.}
+#' \item{`".NA"`}{Displays the number of rows with at least one NA.}
 #'
 #' }
 #'
-#' @section The \code{NA} function:
+#' @section The `NA` function:
 #'
-#' The special function \code{NA} is an equivalent to \code{is.na} but can handle several variables. For instance, \code{NA(x, y)} is equivalent to \code{is.na(x) | is.na(y)}. You can add as many variables as you want as arguments. If no argument is provided, as in \code{NA()}, it is identical to having all the variables of the data set as argument.
+#' The special function `NA` is an equivalent to `is.na` but can handle several variables. For instance, `NA(x, y)` is equivalent to `is.na(x) | is.na(y)`. You can add as many variables as you want as arguments. If no argument is provided, as in `NA()`, it is identical to having all the variables of the data set as argument.
 #'
 #' @section Combining variables:
 #'
-#' Use the "hat", \code{"^"}, operator to combine several variables. For example \code{id^period} will display the number of unique values of id x period combinations.
+#' Use the "hat", `"^"`, operator to combine several variables. For example `id^period` will display the number of unique values of id x period combinations.
 #'
-#' Use the "super hat", \code{"\%^\%"}, operator to also include the terms on both sides. For example, instead of writing \code{id + period + id^period}, you can simply write \code{id\%^\%period}.
+#' Use the "super hat", `"\%^\%"`, operator to also include the terms on both sides. For example, instead of writing `id + period + id^period`, you can simply write `id\%^\%period`.
 #'
-#' Alternatively, you can use \code{:} for \code{^} and \code{*} for \code{\%^\%}.
+#' Alternatively, you can use `:` for `^` and `*` for `\%^\%`.
 #'
 #' @section Sub-selections:
 #'
-#' To show the number of unique values for sub samples, simply use \code{[]}. For example, \code{id[x > 10]} will display the number of unique \code{id} for which \code{x > 10}.
+#' To show the number of unique values for sub samples, simply use `[]`. For example, `id[x > 10]` will display the number of unique `id` for which `x > 10`.
 #'
-#' Simple square brackets lead to the inclusion of both the variable and its subset. For example \code{id[x > 10]} is equivalent to \code{id + id[x > 10]}. To include only the sub selection, use double square brackets, as in \code{id[[x > 10]]}.
+#' Simple square brackets lead to the inclusion of both the variable and its subset. For example `id[x > 10]` is equivalent to `id + id[x > 10]`. To include only the sub selection, use double square brackets, as in `id[[x > 10]]`.
 #'
-#' You can add multiple sub selections at once, only separate them with a comma. For example \code{id[x > 10, NA(y)]} is equivalent to \code{id[x > 10] + id[NA(y)]}.
+#' You can add multiple sub selections at once, only separate them with a comma. For example `id[x > 10, NA(y)]` is equivalent to `id[x > 10] + id[NA(y)]`.
 #'
-#' Use the double negative operator, i.e. \code{!!}, to include both a condition and its opposite at once. For example \code{id[!!x > 10]} is equivalent to \code{id[x > 10, !x > 10]}. Double negative operators can be chained, like in \code{id[!!cond1 & !!cond2]}, then the cardinal product of all double negatived conditions is returned.
+#' Use the double negative operator, i.e. `!!`, to include both a condition and its opposite at once. For example `id[!!x > 10]` is equivalent to `id[x > 10, !x > 10]`. Double negative operators can be chained, like in `id[!!cond1 & !!cond2]`, then the cardinal product of all double negatived conditions is returned.
 #'
 #' @return
 #' It returns a vector containing the number of unique values per element. If several data sets were provided, a list is returned, as long as the number of data sets, each element being a vector of unique values.
+#'
+#' @author
+#' Laurent Berge
 #'
 #' @examples
 #'
@@ -1146,6 +1149,9 @@ print.list_n_unik = function(x, ...){
 #' @return
 #' Returns a character scalar.
 #'
+#' @author
+#' Laurent Berge
+#'
 #' @examples
 #'
 #' osize(iris)
@@ -1186,7 +1192,10 @@ print.osize = function(x, ...){
 #' @param previous Logical scalar. Whether the results of the previous draw should be returned.
 #'
 #' @return
-#' A data base (resp vector) with \code{n} rows (resp elements).
+#' A data base (resp vector) with `n` rows (resp elements).
+#'
+#' @author
+#' Laurent Berge
 #'
 #' @examples
 #'
@@ -1275,17 +1284,20 @@ len_unique = function(x, nthreads = getFixest_nthreads()){
 #' Tool to transform any type of vector, or even combination of vectors, into an integer vector ranging from 1 to the number of unique values. This actually creates an unique identifier vector.
 #'
 #' @param ... Vectors of any type, to be transformed in integer.
-#' @param sorted Logical, default is \code{FALSE}. Whether the integer vector should make reference to sorted values?
-#' @param add_items Logical, default is \code{FALSE}. Whether to add the unique values of the original vector(s). If requested, an attribute \code{items} is created containing the values (alternatively, they can appear in a list if \code{items.list=TRUE}).
-#' @param items.list Logical, default is \code{FALSE}. Only used if \code{add_items=TRUE}. If \code{TRUE}, then a list of length 2 is returned with \code{x} the integer vector and \code{items} the vector of items.
-#' @param multi.df Logical, default is \code{FALSE}. If \code{TRUE} then a data.frame listing the unique elements is returned in the form of a data.frame. Ignored if \code{add_items = FALSE}.
-#' @param multi.join Character scalar used to join the items of multiple vectors. The default is \code{"_"}. Ignored if \code{add_items = FALSE}.
-#' @param internal Logical, default is \code{FALSE}. For programming only. If this function is used within another function, setting \code{internal = TRUE} is needed to make the evaluation of \code{...} valid. End users of \code{to_integer} should not care.
+#' @param sorted Logical, default is `FALSE`. Whether the integer vector should make reference to sorted values?
+#' @param add_items Logical, default is `FALSE`. Whether to add the unique values of the original vector(s). If requested, an attribute `items` is created containing the values (alternatively, they can appear in a list if `items.list=TRUE`).
+#' @param items.list Logical, default is `FALSE`. Only used if `add_items=TRUE`. If `TRUE`, then a list of length 2 is returned with `x` the integer vector and `items` the vector of items.
+#' @param multi.df Logical, default is `FALSE`. If `TRUE` then a data.frame listing the unique elements is returned in the form of a data.frame. Ignored if `add_items = FALSE`.
+#' @param multi.join Character scalar used to join the items of multiple vectors. The default is `"_"`. Ignored if `add_items = FALSE}.
+#' @param internal Logical, default is `FALSE`. For programming only. If this function is used within another function, setting `internal = TRUE` is needed to make the evaluation of `...` valid. End users of `to_integer` should not care.
 #'
 #'
 #' @return
 #' Reruns a vector of the same length as the input vectors.
-#' If \code{add_items=TRUE} and \code{items.list=TRUE}, a list of two elements is returned: \code{x} being the integer vector and \code{items} being the unique values to which the values in \code{x} make reference.
+#' If `add_items=TRUE` and `items.list=TRUE`, a list of two elements is returned: `x` being the integer vector and `items` being the unique values to which the values in `x` make reference.
+#'
+#' @author
+#' Laurent Berge
 #'
 #' @examples
 #'
