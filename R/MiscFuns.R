@@ -6,13 +6,13 @@
 
 
 
-#' Collinearity diagnostics for \code{fixest} objects
+#' Collinearity diagnostics for `fixest` objects
 #'
-#' In some occasions, the optimization algorithm of \code{\link[fixest]{femlm}} may fail to converge, or the variance-covariance matrix may not be available. The most common reason of why this happens is collinearity among variables. This function helps to find out which set of variables is problematic.
+#' In some occasions, the optimization algorithm of [`femlm`] may fail to converge, or the variance-covariance matrix may not be available. The most common reason of why this happens is collinearity among variables. This function helps to find out which set of variables is problematic.
 #'
 #'
-#' @param x A \code{fixest} object obtained from, e.g. functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
-#' @param verbose An integer. If higher than or equal to 1, then a note is prompted at each step of the algorithm. By default \code{verbose = 0} for small problems and to 1 for large problems.
+#' @param x A `fixest` object obtained from, e.g. functions [`femlm`], [`feols`] or [`feglm`].
+#' @param verbose An integer. If higher than or equal to 1, then a note is prompted at each step of the algorithm. By default `verbose = 0` for small problems and to 1 for large problems.
 #'
 #' @details
 #' This function tests: 1) collinearity with the fixed-effect variables, 2) perfect multi-collinearity between the variables, 4) perfect multi-collinearity between several variables and the fixed-effects, and 4) identification issues when there are non-linear in parameters parts.
@@ -532,25 +532,25 @@ collinearity = function(x, verbose){
 #' This function shows the means and standard-deviations of several variables conditional on whether they are from the treated or the control group. The groups can further be split according to a pre/post variable. Results can be seamlessly be exported to Latex.
 #'
 #'
-#' @param fml Either a formula of the type \code{var1 + ... + varN ~ treat} or \code{var1 + ... + varN ~ treat | post}. Either a data.frame/matrix containing all the variables for which the means are to be computed (they must be numeric of course). Both the treatment and the post variables must contain only exactly two values. You can use a point to select all the variables of the data set: \code{. ~ treat}.
-#' @param base A data base containing all the variables in the formula \code{fml}.
-#' @param treat_var Only if argument \code{fml} is *not* a formula. The vector identifying the treated and the control observations (the vector can be of any type but must contain only two possible values). Must be of the same length as the data.
-#' @param post_var Only if argument \code{fml} is *not* a formula. The vector identifying the periods (pre/post) of the observations (the vector can be of any type but must contain only two possible values). The first value (in the sorted sense) of the vector is taken as the pre period. Must be of the same length as the data.
+#' @param fml Either a formula of the type `var1 + ... + varN ~ treat` or `var1 + ... + varN ~ treat | post`. Either a data.frame/matrix containing all the variables for which the means are to be computed (they must be numeric of course). Both the treatment and the post variables must contain only exactly two values. You can use a point to select all the variables of the data set: `. ~ treat`.
+#' @param base A data base containing all the variables in the formula `fml`.
+#' @param treat_var Only if argument `fml` is *not* a formula. The vector identifying the treated and the control observations (the vector can be of any type but must contain only two possible values). Must be of the same length as the data.
+#' @param post_var Only if argument `fml` is *not* a formula. The vector identifying the periods (pre/post) of the observations (the vector can be of any type but must contain only two possible values). The first value (in the sorted sense) of the vector is taken as the pre period. Must be of the same length as the data.
 #' @param treat_first Which value of the 'treatment' vector should appear on the left? By default the max value appears first (e.g. if the treatment variable is a 0/1 vector, 1 appears first).
-#' @param tex Should the result be displayed in Latex? Default is \code{FALSE}. Automatically set to \code{TRUE} if the table is to be saved in a file using the argument \code{file}.
-#' @param treat_dict A character vector of length two. What are the names of the treated and the control? This should be a dictionary: e.g. \code{c("1"="Treated", "0" = "Control")}.
-#' @param dict A named character vector. A dictionary between the variables names and an alias. For instance \code{dict=c("x"="Inflation Rate")} would replace the variable name \code{x} by \dQuote{Inflation Rate}.
+#' @param tex Should the result be displayed in Latex? Default is `FALSE`. Automatically set to `TRUE` if the table is to be saved in a file using the argument `file`.
+#' @param treat_dict A character vector of length two. What are the names of the treated and the control? This should be a dictionary: e.g. `c("1"="Treated", "0" = "Control")`.
+#' @param dict A named character vector. A dictionary between the variables names and an alias. For instance `dict=c("x"="Inflation Rate")` would replace the variable name `x` by \dQuote{Inflation Rate}.
 #' @param file A file path. If given, the table is written in Latex into this file.
-#' @param replace Default is \code{TRUE}, which means that when the table is exported, the existing file is not erased.
+#' @param replace Default is `TRUE`, which means that when the table is exported, the existing file is not erased.
 #' @param title Character string giving the Latex title of the table. (Only if exported.)
 #' @param label Character string giving the Latex label of the table. (Only if exported.)
-#' @param raw Logical, default is \code{FALSE}. If \code{TRUE}, it returns the information without formatting.
+#' @param raw Logical, default is `FALSE`. If `TRUE`, it returns the information without formatting.
 #' @param indiv Either the variable name of individual identifiers, a one sided formula, or a vector. If the data is that of a panel, this can be used to track the number of individuals per group.
-#' @param prepostnames Only if there is a 'post' variable. The names of the pre and post periods to be displayed in Latex. Default is \code{c("Before", "After")}.
-#' @param diff.inv Logical, default to \code{FALSE}. Whether to inverse the difference.
+#' @param prepostnames Only if there is a 'post' variable. The names of the pre and post periods to be displayed in Latex. Default is `c("Before", "After")`.
+#' @param diff.inv Logical, default to `FALSE`. Whether to inverse the difference.
 #'
 #' @details
-#' By default, when the user tries to apply this function to nun-numeric variables, an error is raised. The exception is when the all variables are selected with the dot (like in \code{. ~ treat}. In this case, non-numeric variables are automatically omitted (with a message).
+#' By default, when the user tries to apply this function to nun-numeric variables, an error is raised. The exception is when the all variables are selected with the dot (like in `. ~ treat`. In this case, non-numeric variables are automatically omitted (with a message).
 #'
 #' NAs are removed automatically: if the data contains NAs an information message will be prompted. First all observations containing NAs relating to the treatment or post variables are removed. Then if there are still NAs for the variables, they are excluded separately for each variable, and a new message detailing the NA breakup is prompted.
 #'
@@ -1061,33 +1061,33 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
 
 #' Create, or interact variables with, factors
 #'
-#' Treat a variable as a factor, or interacts a variable with a factor. Values to be dropped/kept from the factor can be easily set. Note that to interact fixed-effects, this function should not be used: instead use directly the syntax \code{fe1^fe2}.
+#' Treat a variable as a factor, or interacts a variable with a factor. Values to be dropped/kept from the factor can be easily set. Note that to interact fixed-effects, this function should not be used: instead use directly the syntax `fe1^fe2`.
 #'
 #'
 #' @inheritParams bin
 #'
-#' @param factor_var  A vector (of any type) that will be treated as a factor. You can set references (i.e. exclude values for which to create dummies) with the \code{ref} argument.
-#' @param var A variable of the same length as \code{factor_var}. This variable will be interacted with the factor in \code{factor_var}. It can be numeric or factor-like. To force a numeric variable to be treated as a factor, you can add the \code{i.} prefix to a variable name. For instance take a numeric variable \code{x_num}: \code{i(x_fact, x_num)} will treat \code{x_num} as numeric while \code{i(x_fact, i.x_num)} will treat \code{x_num} as a factor (it's a shortcut to \code{as.factor(x_num)}).
-#' @param ref A vector of values to be taken as references from \code{factor_var}. Can also be a logical: if \code{TRUE}, then the first value of \code{factor_var} will be removed. If \code{ref} is a character vector, partial matching is applied to values; use "@" as the first character to enable regular expression matching. See examples.
-#' @param keep A vector of values to be kept from \code{factor_var} (all others are dropped). By default they should be values from \code{factor_var} and if \code{keep} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.
-#' @param ref2 A vector of values to be dropped from \code{var}. By default they should be values from \code{var} and if \code{ref2} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.
-#' @param keep2 A vector of values to be kept from \code{var} (all others are dropped). By default they should be values from \code{var} and if \code{keep2} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.
-#' @param bin2 A list or vector defining the binning of the second variable. See help for the argument \code{bin} for details (or look at the help of the function \code{\link[fixest]{bin}}). You can use \code{.()} for \code{list()}.
+#' @param factor_var  A vector (of any type) that will be treated as a factor. You can set references (i.e. exclude values for which to create dummies) with the `ref` argument.
+#' @param var A variable of the same length as `factor_var`. This variable will be interacted with the factor in `factor_var`. It can be numeric or factor-like. To force a numeric variable to be treated as a factor, you can add the `i.` prefix to a variable name. For instance take a numeric variable `x_num`: `i(x_fact, x_num)` will treat `x_num` as numeric while `i(x_fact, i.x_num)` will treat `x_num` as a factor (it's a shortcut to `as.factor(x_num)`).
+#' @param ref A vector of values to be taken as references from `factor_var`. Can also be a logical: if `TRUE`, then the first value of `factor_var` will be removed. If `ref` is a character vector, partial matching is applied to values; use "@" as the first character to enable regular expression matching. See examples.
+#' @param keep A vector of values to be kept from `factor_var` (all others are dropped). By default they should be values from `factor_var` and if `keep` is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.
+#' @param ref2 A vector of values to be dropped from `var`. By default they should be values from `var` and if `ref2` is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.
+#' @param keep2 A vector of values to be kept from `var` (all others are dropped). By default they should be values from `var` and if `keep2` is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.
+#' @param bin2 A list or vector defining the binning of the second variable. See help for the argument `bin` for details (or look at the help of the function [`bin`]). You can use `.()` for `list()`.
 #' @param ... Not currently used.
 #'
 #' @details
-#' To interact fixed-effects, this function should not be used: instead use directly the syntax \code{fe1^fe2} in the fixed-effects part of the formula. Please see the details and examples in the help page of \code{\link[fixest]{feols}}.
+#' To interact fixed-effects, this function should not be used: instead use directly the syntax `fe1^fe2` in the fixed-effects part of the formula. Please see the details and examples in the help page of [`feols`].
 #'
 #' @return
-#' It returns a matrix with number of rows the length of \code{factor_var}. If there is no interacted variable or it is interacted with a numeric variable, the number of columns is equal to the number of cases contained in \code{factor_var} minus the reference(s). If the interacted variable is a factor, the number of columns is the number of combined cases between \code{factor_var} and \code{var}.
+#' It returns a matrix with number of rows the length of `factor_var`. If there is no interacted variable or it is interacted with a numeric variable, the number of columns is equal to the number of cases contained in `factor_var` minus the reference(s). If the interacted variable is a factor, the number of columns is the number of combined cases between `factor_var` and `var`.
 #'
 #' @author
 #' Laurent Berge
 #'
 #' @seealso
-#' \code{\link[fixest:coefplot]{iplot}} to plot interactions or factors created with \code{i()}, \code{\link[fixest]{feols}} for OLS estimation with multiple fixed-effects.
+#' [`iplot`][fixest:coefplot] to plot interactions or factors created with `i()`, [`feols`] for OLS estimation with multiple fixed-effects.
 #'
-#' See the function \code{\link[fixest]{bin}} for binning variables.
+#' See the function [`bin`] for binning variables.
 #'
 #' @examples
 #'
@@ -1514,45 +1514,45 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 #'
 #' @inheritParams setFixest_fml
 #'
-#' @param fml A formula containing macros variables. Each macro variable must start with two dots. The macro variables can be set globally using \code{setFixest_fml}, or can be defined in \code{...}. Special macros of the form \code{..("regex")} can be used to fetch, through a regular expression, variables directly in a character vector (or in column names) given in the argument \code{data} (note that the algorithm tries to "guess" the argument data when nested in function calls [see example]). You can negate the regex by starting with a \code{"!"}. Square brackets have a special meaning: Values in them are evaluated and parsed accordingly. Example: \code{y~x.[1:2] + z.[i]} will lead to \code{y~x1+x2+z3} if \code{i==3}. You can trigger the auto-completion of variables by using the \code{'..'} suffix, like in \code{y ~ x..} which would include \code{x1} and \code{x2}, etc. See examples.
+#' @param fml A formula containing macros variables. Each macro variable must start with two dots. The macro variables can be set globally using `setFixest_fml`, or can be defined in `...`. Special macros of the form `..("regex")` can be used to fetch, through a regular expression, variables directly in a character vector (or in column names) given in the argument `data` (note that the algorithm tries to "guess" the argument data when nested in function calls [see example]). You can negate the regex by starting with a `"!"`. Square brackets have a special meaning: Values in them are evaluated and parsed accordingly. Example: `y~x.[1:2] + z.[i]` will lead to `y~x1+x2+z3` if `i==3`. You can trigger the auto-completion of variables by using the `'..'` suffix, like in `y ~ x..` which would include `x1` and `x2`, etc. See examples.
 #' @param add Either a character scalar or a one-sided formula. The elements will be added to the right-hand-side of the formula, before any macro expansion is applied.
-#' @param lhs If present then a formula will be constructed with \code{lhs} as the full left-hand-side. The value of \code{lhs} can be a one-sided formula, a call, or a character vector. Note that the macro variables wont be applied. You can use it in combination with the argument \code{rhs}. Note that if \code{fml} is not missing, its LHS will be replaced by \code{lhs}.
-#' @param rhs If present, then a formula will be constructed with \code{rhs} as the full right-hand-side. The value of \code{rhs} can be a one-sided formula, a call, or a character vector. Note that the macro variables wont be applied. You can use it in combination with the argument \code{lhs}. Note that if \code{fml} is not missing, its RHS will be replaced by \code{rhs}.
-#' @param data Either a character vector or a data.frame. This argument will only be used if a macro of the type \code{..("regex")} is used in the formula of the argument \code{fml}. If so, any variable name from \code{data} that matches the regular expression will be added to the formula.
-#' @param frame The environment containing the values to be expanded with the dot square bracket operator. Default is \code{parent.frame()}.
+#' @param lhs If present then a formula will be constructed with `lhs` as the full left-hand-side. The value of `lhs` can be a one-sided formula, a call, or a character vector. Note that the macro variables wont be applied. You can use it in combination with the argument `rhs`. Note that if `fml` is not missing, its LHS will be replaced by `lhs`.
+#' @param rhs If present, then a formula will be constructed with `rhs` as the full right-hand-side. The value of `rhs` can be a one-sided formula, a call, or a character vector. Note that the macro variables wont be applied. You can use it in combination with the argument `lhs`. Note that if `fml` is not missing, its RHS will be replaced by `rhs`.
+#' @param data Either a character vector or a data.frame. This argument will only be used if a macro of the type `..("regex")` is used in the formula of the argument `fml`. If so, any variable name from `data` that matches the regular expression will be added to the formula.
+#' @param frame The environment containing the values to be expanded with the dot square bracket operator. Default is `parent.frame()`.
 #'
 #' @details
-#' In \code{xpd}, the default macro variables are taken from \code{getFixest_fml}. Any value in the \code{...} argument of \code{xpd} will replace these default values.
+#' In `xpd`, the default macro variables are taken from `getFixest_fml`. Any value in the `...` argument of `xpd` will replace these default values.
 #'
-#' The definitions of the macro variables will replace in verbatim the macro variables. Therefore, you can include multi-part formulas if you wish but then beware of the order of the macros variable in the formula. For example, using the \code{airquality} data, say you want to set as controls the variable \code{Temp} and \code{Day} fixed-effects, you can do \code{setFixest_fml(..ctrl = ~Temp | Day)}, but then \code{feols(Ozone ~ Wind + ..ctrl, airquality)} will be quite different from \code{feols(Ozone ~ ..ctrl + Wind, airquality)}, so beware!
+#' The definitions of the macro variables will replace in verbatim the macro variables. Therefore, you can include multi-part formulas if you wish but then beware of the order of the macros variable in the formula. For example, using the `airquality` data, say you want to set as controls the variable `Temp` and `Day` fixed-effects, you can do `setFixest_fml(..ctrl = ~Temp | Day)`, but then `feols(Ozone ~ Wind + ..ctrl, airquality)` will be quite different from `feols(Ozone ~ ..ctrl + Wind, airquality)`, so beware!
 #'
 #' @section Dot square bracket operator in formulas:
 #'
 #' In a formula, the dot square bracket (DSB) operator can: i) create manifold variables at once, or ii) capture values from the current environment and put them verbatim in the formula.
 #'
-#' Say you want to include the variables \code{x1} to \code{x3} in your formula. You can use \code{xpd(y ~ x.[1:3])} and you'll get \code{y ~ x1 + x2 + x3}.
+#' Say you want to include the variables `x1` to `x3` in your formula. You can use `xpd(y ~ x.[1:3])` and you'll get `y ~ x1 + x2 + x3`.
 #'
-#' To summon values from the environment, simply put the variable in square brackets. For example: \code{for(i in 1:3) xpd(y.[i] ~ x)} will create the formulas \code{y1 ~ x} to \code{y3 ~ x} depending on the value of \code{i}.
+#' To summon values from the environment, simply put the variable in square brackets. For example: `for(i in 1:3) xpd(y.[i] ~ x)` will create the formulas `y1 ~ x` to `y3 ~ x` depending on the value of `i`.
 #'
-#' You can include a full variable from the environment in the same way: \code{for(y in c("a", "b")) xpd(.[y] ~ x)} will create the two formulas \code{a ~ x} and \code{b ~ x}.
+#' You can include a full variable from the environment in the same way: `for(y in c("a", "b")) xpd(.[y] ~ x)` will create the two formulas `a ~ x` and `b ~ x`.
 #'
-#' The DSB can even be used within variable names, but then the variable must be nested in character form. For example \code{y ~ .["x.[1:2]_sq"]} will create \code{y ~ x1_sq + x2_sq}. Using the character form is important to avoid a formula parsing error. Double quotes must be used. Note that the character string that is nested will be parsed with the function \code{\link[fixest]{dsb}}, and thus it will return a vector.
+#' The DSB can even be used within variable names, but then the variable must be nested in character form. For example `y ~ .["x.[1:2]_sq"]` will create `y ~ x1_sq + x2_sq`. Using the character form is important to avoid a formula parsing error. Double quotes must be used. Note that the character string that is nested will be parsed with the function [`dsb`], and thus it will return a vector.
 #'
-#' By default, the DSB operator expands vectors into sums. You can add a comma, like in \code{.[, x]}, to expand with commas--the content can then be used within functions. For instance: \code{c(x.[, 1:2])} will create \code{c(x1, x2)} (and \emph{not} \code{c(x1 + x2)}).
+#' By default, the DSB operator expands vectors into sums. You can add a comma, like in `.[, x]`, to expand with commas--the content can then be used within functions. For instance: `c(x.[, 1:2])` will create `c(x1, x2)` (and \emph{not} `c(x1 + x2)`).
 #'
-#' In all \code{fixest} estimations, this special parsing is enabled, so you don't need to use \code{xpd}.
+#' In all `fixest` estimations, this special parsing is enabled, so you don't need to use `xpd`.
 #'
-#' One-sided formulas can be expanded with the DSB operator: let \code{x = ~sepal + petal}, then \code{xpd(y ~ .[x])} leads to \code{color ~ sepal + petal}.
+#' One-sided formulas can be expanded with the DSB operator: let `x = ~sepal + petal`, then `xpd(y ~ .[x])` leads to `color ~ sepal + petal`.
 #'
-#' You can even use multiple square brackets within a single variable, but then the use of nesting is required. For example, the following \code{xpd(y ~ .[".[letters[1:2]]_.[1:2]"])} will create \code{y ~ a_1 + b_2}. Remember that the nested character string is parsed with \code{\link[fixest]{dsb}}, which explains this behavior.
+#' You can even use multiple square brackets within a single variable, but then the use of nesting is required. For example, the following `xpd(y ~ .[".[letters[1:2]]_.[1:2]"])` will create `y ~ a_1 + b_2`. Remember that the nested character string is parsed with [`dsb`], which explains this behavior.
 #'
 #' @section Regular expressions:
 #'
-#' You can catch several variable names at once by using regular expressions. To use regular expressions, you need to enclose it in the dot-dot or the regex function: \code{..("regex")} or \code{regex("regex")}. For example, \code{regex("Sepal")} will catch both the variables \code{Sepal.Length} and \code{Sepal.Width} from the \code{iris} data set. In a \code{fixest} estimation, the variables names from which the regex will be applied come from the data set. If you use \code{xpd}, you need to provide either a data set or a vector of names in the argument \code{data}.
+#' You can catch several variable names at once by using regular expressions. To use regular expressions, you need to enclose it in the dot-dot or the regex function: `..("regex")` or `regex("regex")`. For example, `regex("Sepal")` will catch both the variables `Sepal.Length` and `Sepal.Width` from the `iris` data set. In a `fixest` estimation, the variables names from which the regex will be applied come from the data set. If you use `xpd`, you need to provide either a data set or a vector of names in the argument `data`.
 #'
-#' By default the variables are aggregated with a sum. For example in a data set with the variables x1 to x10, \code{regex("x(1|2)"} will yield \code{x1 + x2 + x10}. You can instead ask for "comma" aggregation by using a comma first, just before the regular expression: \code{y ~ sw(regex(,"x(1|2)"))} would lead to \code{y ~ sw(x1, x2, x10)}.
+#' By default the variables are aggregated with a sum. For example in a data set with the variables x1 to x10, `regex("x(1|2)"` will yield `x1 + x2 + x10`. You can instead ask for "comma" aggregation by using a comma first, just before the regular expression: `y ~ sw(regex(,"x(1|2)"))` would lead to `y ~ sw(x1, x2, x10)`.
 #'
-#' Note that the dot square bracket operator (DSB, see before) is applied before the regular expression is evaluated. This means that \code{regex("x.[3:4]_sq")} will lead, after evaluation of the DSB, to \code{regex("x3_sq|x4_sq")}. It is a handy way to insert range of numbers in a regular expression.
+#' Note that the dot square bracket operator (DSB, see before) is applied before the regular expression is evaluated. This means that `regex("x.[3:4]_sq")` will lead, after evaluation of the DSB, to `regex("x3_sq|x4_sq")`. It is a handy way to insert range of numbers in a regular expression.
 #'
 #'
 #' @return
@@ -1563,7 +1563,7 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 #'
 #'
 #' @seealso
-#' \code{\link[fixest]{setFixest_fml}} to set formula macros, and \code{\link[fixest]{dsb}} to modify character strings with the DSB operator.
+#' [`setFixest_fml`] to set formula macros, and [`dsb`] to modify character strings with the DSB operator.
 #'
 #' @examples
 #'
@@ -2030,32 +2030,32 @@ xpd = function(fml, ..., add = NULL, lhs, rhs, data = NULL, frame = parent.frame
 
 #' Centers a set of variables around a set of factors
 #'
-#' User-level access to internal demeaning algorithm of \code{fixest}.
+#' User-level access to internal demeaning algorithm of `fixest`.
 #'
 #' @inheritSection feols Varying slopes
 #'
-#' @param X A matrix, vector, data.frame or a list OR a formula OR a \code{\link[fixest]{feols}} estimation. If equal to a formula, then the argument \code{data} is required, and it must be of the type: \code{x1 + x2 ~ f1 + fe2} with on the LHS the variables to be centered, and on the RHS the factors used for centering. Note that you can use variables with varying slopes with the syntax \code{fe[v1, v2]} (see details in \code{\link[fixest]{feols}}). If a \code{feols} estimation, all variables (LHS+RHS) are demeaned and then returned (only if it was estimated with fixed-effects). Otherwise, it must represent the data to be centered. Of course the number of observations of that data must be the same as the factors used for centering (argument \code{f}).
-#' @param f A matrix, vector, data.frame or list. The factors used to center the variables in argument \code{X}. Matrices will be coerced using \code{as.data.frame}.
-#' @param slope.vars A vector, matrix or list representing the variables with varying slopes. Matrices will be coerced using \code{as.data.frame}. Note that if this argument is used it MUST be in conjunction with the argument \code{slope.flag} that maps the factors to which the varying slopes are attached. See examples.
-#' @param slope.flag An integer vector of the same length as the number of variables in \code{f} (the factors used for centering). It indicates for each factor the number of variables with varying slopes to which it is associated. Positive values mean that the raw factor should also be included in the centering, negative values that it should be excluded. Sorry it's complicated... but see the examples it may get clearer.
-#' @param data A data.frame containing all variables in the argument \code{X}. Only used if \code{X} is a formula, in which case \code{data} is mandatory.
-#' @param weights Vector, can be missing or NULL. If present, it must contain the same number of observations as in \code{X}.
-#' @param nthreads Number of threads to be used. By default it is equal to \code{getFixest_nthreads()}.
-#' @param notes Logical, whether to display a message when NA values are removed. By default it is equal to \code{getFixest_notes()}.
+#' @param X A matrix, vector, data.frame or a list OR a formula OR a [`feols`] estimation. If equal to a formula, then the argument `data` is required, and it must be of the type: `x1 + x2 ~ f1 + fe2` with on the LHS the variables to be centered, and on the RHS the factors used for centering. Note that you can use variables with varying slopes with the syntax `fe[v1, v2]` (see details in [`feols`]). If a `feols` estimation, all variables (LHS+RHS) are demeaned and then returned (only if it was estimated with fixed-effects). Otherwise, it must represent the data to be centered. Of course the number of observations of that data must be the same as the factors used for centering (argument `f`).
+#' @param f A matrix, vector, data.frame or list. The factors used to center the variables in argument `X`. Matrices will be coerced using `as.data.frame`.
+#' @param slope.vars A vector, matrix or list representing the variables with varying slopes. Matrices will be coerced using `as.data.frame`. Note that if this argument is used it MUST be in conjunction with the argument `slope.flag` that maps the factors to which the varying slopes are attached. See examples.
+#' @param slope.flag An integer vector of the same length as the number of variables in `f` (the factors used for centering). It indicates for each factor the number of variables with varying slopes to which it is associated. Positive values mean that the raw factor should also be included in the centering, negative values that it should be excluded. Sorry it's complicated... but see the examples it may get clearer.
+#' @param data A data.frame containing all variables in the argument `X`. Only used if `X` is a formula, in which case `data` is mandatory.
+#' @param weights Vector, can be missing or NULL. If present, it must contain the same number of observations as in `X`.
+#' @param nthreads Number of threads to be used. By default it is equal to `getFixest_nthreads()`.
+#' @param notes Logical, whether to display a message when NA values are removed. By default it is equal to `getFixest_notes()`.
 #' @param iter Number of iterations, default is 2000.
-#' @param tol Stopping criterion of the algorithm. Default is \code{1e-6}. The algorithm stops when the maximum absolute increase in the coefficients values is lower than \code{tol}.
-#' @param na.rm Logical, default is \code{TRUE}. If \code{TRUE} and the input data contains any NA value, then any observation with NA will be discarded leading to an output with less observations than the input. If \code{FALSE}, if NAs are present the output will also be filled with NAs for each NA observation in input.
-#' @param as.matrix Logical, if \code{TRUE} a matrix is returned, if \code{FALSE} it will be a data.frame. The default depends on the input, if atomic then a matrix will be returned.
-#' @param im_confident Logical, default is \code{FALSE}. FOR EXPERT USERS ONLY! This argument allows to skip some of the preprocessing of the arguments given in input. If \code{TRUE}, then \code{X} MUST be a numeric vector/matrix/list (not a formula!), \code{f} MUST be a list, \code{slope.vars} MUST be a list, \code{slope.vars} MUST be consistent with \code{slope.flag}, and \code{weights}, if given, MUST be numeric (not integer!). Further there MUST be not any NA value, and the number of observations of each element MUST be consistent. Non compliance to these rules may simply lead your R session to break.
-#' @param fixef.reorder Logical, default is \code{TRUE}. Whether to reorder the fixed-effects by frequencies before feeding them into the algorithm. If \code{FALSE}, the original fixed-effects order provided by the user is maintained. In general, reordering leads to faster and more precise performance.
+#' @param tol Stopping criterion of the algorithm. Default is `1e-6`. The algorithm stops when the maximum absolute increase in the coefficients values is lower than `tol`.
+#' @param na.rm Logical, default is `TRUE`. If `TRUE` and the input data contains any NA value, then any observation with NA will be discarded leading to an output with less observations than the input. If `FALSE`, if NAs are present the output will also be filled with NAs for each NA observation in input.
+#' @param as.matrix Logical, if `TRUE` a matrix is returned, if `FALSE` it will be a data.frame. The default depends on the input, if atomic then a matrix will be returned.
+#' @param im_confident Logical, default is `FALSE`. FOR EXPERT USERS ONLY! This argument allows to skip some of the preprocessing of the arguments given in input. If `TRUE`, then `X` MUST be a numeric vector/matrix/list (not a formula!), `f` MUST be a list, `slope.vars` MUST be a list, `slope.vars` MUST be consistent with `slope.flag`, and `weights`, if given, MUST be numeric (not integer!). Further there MUST be not any NA value, and the number of observations of each element MUST be consistent. Non compliance to these rules may simply lead your R session to break.
+#' @param fixef.reorder Logical, default is `TRUE`. Whether to reorder the fixed-effects by frequencies before feeding them into the algorithm. If `FALSE`, the original fixed-effects order provided by the user is maintained. In general, reordering leads to faster and more precise performance.
 #' @param ... Not currently used.
 #'
 #' @return
 #' It returns a data.frame of the same number of columns as the number of variables to be centered.
 #'
-#' If \code{na.rm = TRUE}, then the number of rows is equal to the number of rows in input minus the number of NA values (contained in \code{X}, \code{f}, \code{slope.vars} or \code{weights}). The default is to have an output of the same number of observations as the input (filled with NAs where appropriate).
+#' If `na.rm = TRUE`, then the number of rows is equal to the number of rows in input minus the number of NA values (contained in `X`, `f`, `slope.vars` or `weights`). The default is to have an output of the same number of observations as the input (filled with NAs where appropriate).
 #'
-#' A matrix can be returned if \code{as.matrix = TRUE}.
+#' A matrix can be returned if `as.matrix = TRUE`.
 #'
 #' @examples
 #'
@@ -2605,9 +2605,9 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
 
 #' Extracts the observations used for the estimation
 #'
-#' This function extracts the observations used in \code{fixest} estimation.
+#' This function extracts the observations used in `fixest` estimation.
 #'
-#' @param x A \code{fixest} object.
+#' @param x A `fixest` object.
 #'
 #' @return
 #' It returns a simple vector of integers.
@@ -2649,19 +2649,19 @@ obs = function(x){
 
 
 
-#' Check the fixed-effects convergence of a \code{feols} estimation
+#' Check the fixed-effects convergence of a `feols` estimation
 #'
-#' Checks the convergence of a \code{feols} estimation by computing the first-order conditions of all fixed-effects (all should be close to 0)
+#' Checks the convergence of a `feols` estimation by computing the first-order conditions of all fixed-effects (all should be close to 0)
 #'
-#' @param x A \code{\link[fixest]{feols}} estimation that should contain fixed-effects.
-#' @param object An object returned by \code{check_conv_feols}.
+#' @param x A [`feols`] estimation that should contain fixed-effects.
+#' @param object An object returned by `check_conv_feols`.
 #' @param type Either "short" (default) or "detail". If "short", only the maximum absolute FOC are displayed, otherwise the 2 smallest and the 2 largest FOC are reported for each fixed-effect and each variable.
 #' @param ... Not currently used.
 #'
 #' Note that this function first re-demeans the variables, thus possibly incurring some extra computation time.
 #'
 #' @return
-#' It returns a list of \code{N} elements, \code{N} being the number of variables in the estimation (dependent variable + explanatory variables +, if IV, endogenous variables and instruments). For each variable, all the first-order conditions for each fixed-effect are returned.
+#' It returns a list of `N` elements, `N` being the number of variables in the estimation (dependent variable + explanatory variables +, if IV, endogenous variables and instruments). For each variable, all the first-order conditions for each fixed-effect are returned.
 #'
 #' @examples
 #'
@@ -2808,21 +2808,21 @@ summary.fixest_check_conv = function(object, type = "short", ...){
 
 
 
-#' Replicates \code{fixest} objects
+#' Replicates `fixest` objects
 #'
-#' Simple function that replicates \code{fixest} objects while (optionally) computing different standard-errors. Useful mostly in combination with \code{\link[fixest]{etable}} or \code{\link[fixest]{coefplot}}.
+#' Simple function that replicates `fixest` objects while (optionally) computing different standard-errors. Useful mostly in combination with [`etable`] or [`coefplot`].
 #'
-#' @param x Either a \code{fixest} object, either a list of \code{fixest} objects created with \code{.l()}.
-#' @param times Integer vector giving the number of repetitions of the vector of elements. By default \code{times = 1}. It must be either of length 1, either of the same length as the argument \code{x}.
+#' @param x Either a `fixest` object, either a list of `fixest` objects created with `.l()`.
+#' @param times Integer vector giving the number of repetitions of the vector of elements. By default `times = 1`. It must be either of length 1, either of the same length as the argument `x`.
 #' @param each Integer scalar indicating the repetition of each element. Default is 1.
-#' @param vcov A list containing the types of standard-error to be computed, default is missing. If not missing, it must be of the same length as \code{times}, \code{each}, or the final vector. Note that if the arguments \code{times} and \code{each} are missing, then \code{times} becomes equal to the length of \code{vcov}. To see how to summon a VCOV, see the dedicated section in the \href{https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1}{vignette}.
-#' @param ... In \code{.l()}: \code{fixest} objects. In \code{rep()}: not currently used.
+#' @param vcov A list containing the types of standard-error to be computed, default is missing. If not missing, it must be of the same length as `times`, `each`, or the final vector. Note that if the arguments `times` and `each` are missing, then `times` becomes equal to the length of `vcov`. To see how to summon a VCOV, see the dedicated section in the \href{https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1}{vignette}.
+#' @param ... In `.l()`: `fixest` objects. In `rep()`: not currently used.
 #'
 #' @details
-#' To apply \code{rep.fixest} on a list of \code{fixest} objects, it is absolutely necessary to use \code{.l()} and not \code{list()}.
+#' To apply `rep.fixest` on a list of `fixest` objects, it is absolutely necessary to use `.l()` and not `list()`.
 #'
 #' @return
-#' Returns a list of the appropriate length. Each element of the list is a \code{fixest} object.
+#' Returns a list of the appropriate length. Each element of the list is a `fixest` object.
 #'
 #' @examples
 #'
@@ -6676,11 +6676,11 @@ is_calling_fun = function(pattern, full_search = FALSE, full_name = FALSE){
 #### Setters/Getters ####
 ####
 
-#' Sets/gets whether to display notes in \code{fixest} estimation functions
+#' Sets/gets whether to display notes in `fixest` estimation functions
 #'
-#' Sets/gets the default values of whether notes (informing for NA and observations removed) should be displayed in \code{fixest} estimation functions.
+#' Sets/gets the default values of whether notes (informing for NA and observations removed) should be displayed in `fixest` estimation functions.
 #'
-#' @param x A logical. If \code{FALSE}, then notes are permanently removed.
+#' @param x A logical. If `FALSE`, then notes are permanently removed.
 #'
 #' @author
 #' Laurent Berge
@@ -6712,14 +6712,14 @@ getFixest_notes = function(){
     x
 }
 
-#' Sets/gets the number of threads to use in \code{fixest} functions
+#' Sets/gets the number of threads to use in `fixest` functions
 #'
-#' Sets/gets the default number of threads to used in \code{fixest} estimation functions. The default is the maximum number of threads minus two.
+#' Sets/gets the default number of threads to used in `fixest` estimation functions. The default is the maximum number of threads minus two.
 #'
 #'
 #'
 #' @param nthreads The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. If missing, the default is to use 50\% of all threads.
-#' @param save Either a logical or equal to \code{"reset"}. Default is \code{FALSE}. If \code{TRUE} then the value is set permanently at the project level, this means that if you restart R, you will still obtain the previously saved defaults. This is done by writing in the \code{".Renviron"} file, located in the project's working directory, hence we must have write permission there for this to work, and only works with Rstudio. If equal to "reset", the default at the project level is erased. Since there is writing in a file involved, permission is asked to the user.
+#' @param save Either a logical or equal to `"reset"`. Default is `FALSE`. If `TRUE` then the value is set permanently at the project level, this means that if you restart R, you will still obtain the previously saved defaults. This is done by writing in the `".Renviron"` file, located in the project's working directory, hence we must have write permission there for this to work, and only works with Rstudio. If equal to "reset", the default at the project level is erased. Since there is writing in a file involved, permission is asked to the user.
 #'
 #' @author
 #' Laurent Berge
@@ -6802,10 +6802,10 @@ getFixest_nthreads = function(){
 #'
 #' Transforms a single character string containing a dictionary in a textual format into a proper dictionary, that is a named character vector
 #'
-#' @param x A character scalar of the form \code{"variable 1: definition \n variable 2: definition"} etc. Each line of this character must contain at most one definition with, on the left the variable name, and on the right its definition. The separation between the variable and its definition must be a colon followed with a single space (i.e. ": "). You can stack definitions within a single line by making use of a semi colon: \code{"var1: def; var2: def"}. White spaces on the left and right are ignored. You can add commented lines with a \code{"#"}. Non-empty, non-commented lines that don't have the proper format witll raise an error.
+#' @param x A character scalar of the form `"variable 1: definition \n variable 2: definition"` etc. Each line of this character must contain at most one definition with, on the left the variable name, and on the right its definition. The separation between the variable and its definition must be a colon followed with a single space (i.e. ": "). You can stack definitions within a single line by making use of a semi colon: `"var1: def; var2: def"`. White spaces on the left and right are ignored. You can add commented lines with a `"#"`. Non-empty, non-commented lines that don't have the proper format witll raise an error.
 #'
 #' @details
-#' This function is mostly used in combination with \code{\link[fixest]{setFixest_dict}} to set the dictionary to be used in the function \code{\link[fixest]{etable}}.
+#' This function is mostly used in combination with [`setFixest_dict`] to set the dictionary to be used in the function [`etable`].
 #'
 #' @return
 #' It returns a named character vector.
@@ -6814,7 +6814,7 @@ getFixest_nthreads = function(){
 #' Laurent Berge
 #'
 #' @seealso
-#' \code{\link[fixest]{etable}}, \code{\link[fixest]{setFixest_dict}}
+#' [`etable`], [`setFixest_dict`]
 #'
 #' @examples
 #'
@@ -6855,17 +6855,17 @@ as.dict = function(x){
 
 #' Sets/gets the dictionary relabeling the variables
 #'
-#' Sets/gets the default dictionary used in the function \code{\link[fixest]{etable}}, \code{\link[fixest]{did_means}} and \code{\link[fixest]{coefplot}}. The dictionaries are used to relabel variables (usually towards a fancier, more explicit formatting) when exporting them into a Latex table or displaying in graphs. By setting the dictionary with \code{setFixest_dict}, you can avoid providing the argument \code{dict}.
+#' Sets/gets the default dictionary used in the function [`etable`], [`did_means`] and [`coefplot`]. The dictionaries are used to relabel variables (usually towards a fancier, more explicit formatting) when exporting them into a Latex table or displaying in graphs. By setting the dictionary with `setFixest_dict`, you can avoid providing the argument `dict`.
 #'
 #'
-#' @param dict A named character vector or a character scalar. E.g. to change my variable named "a" and "b" to (resp.) "$log(a)$" and "$bonus^3$", then use \code{dict = c(a="$log(a)$", b3="$bonus^3$")}. Alternatively you can feed a character scalar containing the dictionary in the form \code{"variable 1: definition \n variable 2: definition"}. In that case the function \code{\link[fixest]{as.dict}} will be applied to get a proper dictionary. This dictionary is used in Latex tables or in graphs by the function \code{\link[fixest]{coefplot}}. If you want to separate Latex rendering from rendering in graphs, use an ampersand first to make the variable specific to \code{coefplot}.
-#' @param ... You can add arguments of the form: \code{variable_name = "Definition"}. This is an alternative to using a named vector in the argument \code{dict}.
-#' @param reset Logical, default is \code{FALSE}. If \code{TRUE}, then the dictionary is reset. Note that the default dictionary always relabels the variable "(Intercept)" in to "Constant". To overwrite it, you need to add "(Intercept)" explicitly in your dictionary.
+#' @param dict A named character vector or a character scalar. E.g. to change my variable named "a" and "b" to (resp.) "$log(a)$" and "$bonus^3$", then use `dict = c(a="$log(a)$", b3="$bonus^3$")`. Alternatively you can feed a character scalar containing the dictionary in the form `"variable 1: definition \n variable 2: definition"`. In that case the function [`as.dict`] will be applied to get a proper dictionary. This dictionary is used in Latex tables or in graphs by the function [`coefplot`]. If you want to separate Latex rendering from rendering in graphs, use an ampersand first to make the variable specific to `coefplot`.
+#' @param ... You can add arguments of the form: `variable_name = "Definition"`. This is an alternative to using a named vector in the argument `dict`.
+#' @param reset Logical, default is `FALSE`. If `TRUE`, then the dictionary is reset. Note that the default dictionary always relabels the variable "(Intercept)" in to "Constant". To overwrite it, you need to add "(Intercept)" explicitly in your dictionary.
 #'
 #' @details
-#' By default the dictionary only grows. This means that successive calls with not erase the previous definitions unless the argument \code{reset} has been set to \code{TRUE}.
+#' By default the dictionary only grows. This means that successive calls with not erase the previous definitions unless the argument `reset` has been set to `TRUE`.
 #'
-#' The default dictionary is equivalent to having \code{setFixest_dict("(Intercept)" = "Constant")}. To change this default, you need to provide a new definition to \code{"(Intercept)"} explicitly.
+#' The default dictionary is equivalent to having `setFixest_dict("(Intercept)" = "Constant")`. To change this default, you need to provide a new definition to `"(Intercept)"` explicitly.
 #'
 #' @author
 #' Laurent Berge
@@ -6988,23 +6988,23 @@ getFixest_print = function(){
 
 #' Sets/gets formula macros
 #'
-#' You can set formula macros globally with \code{setFixest_fml}. These macros can then be used in \code{fixest} estimations or when using the function \code{\link[fixest:setFixest_fml]{xpd}}.
+#' You can set formula macros globally with `setFixest_fml`. These macros can then be used in `fixest` estimations or when using the function [`xpd`][fixest:setFixest_fml].
 #'
 #' @inherit xpd examples
 #'
-#' @param ... Definition of the macro variables. Each argument name corresponds to the name of the macro variable. It is required that each macro variable name starts with two dots (e.g. \code{..ctrl}). The value of each argument must be a one-sided formula or a character vector, it is the definition of the macro variable. Example of a valid call: \code{setFixest_fml(..ctrl = ~ var1 + var2)}. In the function \code{xpd}, the default macro variables are taken from \code{getFixest_fml}, any variable in \code{...} will replace these values. You can enclose values in \code{.[]}, if so they will be evaluated from the current environment. For example \code{..ctrl = ~ x.[1:2] + .[z]} will lead to \code{~x1 + x2 + var} if \code{z} is equal to \code{"var"}.
-#' @param reset A logical scalar, defaults to \code{FALSE}. If \code{TRUE}, all macro variables are first reset (i.e. deleted).
+#' @param ... Definition of the macro variables. Each argument name corresponds to the name of the macro variable. It is required that each macro variable name starts with two dots (e.g. `..ctrl`). The value of each argument must be a one-sided formula or a character vector, it is the definition of the macro variable. Example of a valid call: `setFixest_fml(..ctrl = ~ var1 + var2)`. In the function `xpd`, the default macro variables are taken from `getFixest_fml`, any variable in `...` will replace these values. You can enclose values in `.[]`, if so they will be evaluated from the current environment. For example `..ctrl = ~ x.[1:2] + .[z]` will lead to `~x1 + x2 + var` if `z` is equal to `"var"`.
+#' @param reset A logical scalar, defaults to `FALSE`. If `TRUE`, all macro variables are first reset (i.e. deleted).
 #'
 #' @details
-#' In \code{xpd}, the default macro variables are taken from \code{getFixest_fml}. Any value in the \code{...} argument of \code{xpd} will replace these default values.
+#' In `xpd`, the default macro variables are taken from `getFixest_fml`. Any value in the `...` argument of `xpd` will replace these default values.
 #'
-#' The definitions of the macro variables will replace in verbatim the macro variables. Therefore, you can include multipart formulas if you wish but then beware of the order the the macros variable in the formula. For example, using the airquality data, say you want to set as controls the variable \code{Temp} and \code{Day} fixed-effects, you can do \code{setFixest_fml(..ctrl = ~Temp | Day)}, but then \code{feols(Ozone ~ Wind + ..ctrl, airquality)} will be quite different from \code{feols(Ozone ~ ..ctrl + Wind, airquality)}, so beware!
+#' The definitions of the macro variables will replace in verbatim the macro variables. Therefore, you can include multipart formulas if you wish but then beware of the order the the macros variable in the formula. For example, using the airquality data, say you want to set as controls the variable `Temp` and `Day` fixed-effects, you can do `setFixest_fml(..ctrl = ~Temp | Day)`, but then `feols(Ozone ~ Wind + ..ctrl, airquality)` will be quite different from `feols(Ozone ~ ..ctrl + Wind, airquality)`, so beware!
 #'
 #' @return
-#' The function \code{getFixest_fml()} returns a list of character strings, the names corresponding to the macro variable names, the character strings corresponding to their definition.
+#' The function `getFixest_fml()` returns a list of character strings, the names corresponding to the macro variable names, the character strings corresponding to their definition.
 #'
 #' @seealso
-#' \code{\link[fixest]{xpd}} to make use of formula macros.
+#' [`xpd`] to make use of formula macros.
 #'
 #'
 #'
@@ -7043,10 +7043,10 @@ getFixest_fml = function(){
 #' @inheritParams feNmlm
 #' @inheritParams feglm
 #'
-#' @param reset Logical, default to \code{FALSE}. Whether to reset all values.
+#' @param reset Logical, default to `FALSE`. Whether to reset all values.
 #'
 #' @return
-#' The function \code{getFixest_estimation} returns the currently set global defaults.
+#' The function `getFixest_estimation` returns the currently set global defaults.
 #'
 #' @examples
 #'
@@ -7141,7 +7141,7 @@ getFixest_estimation = function(){
 #' data(trade)
 #'
 #' @format
-#' \code{trade} is a data frame with 38,325 observations and 6 variables named \code{Destination}, \code{Origin}, \code{Product}, \code{Year}, \code{dist_km} and \code{Euros}.
+#' `trade` is a data frame with 38,325 observations and 6 variables named `Destination`, `Origin`, `Product`, `Year`, `dist_km` and `Euros`.
 #'
 #' \itemize{
 #' \item{Origin: 2-digits codes of the countries of origin of the trade flow.}
