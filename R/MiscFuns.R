@@ -2815,7 +2815,7 @@ summary.fixest_check_conv = function(object, type = "short", ...){
 #' @param x Either a `fixest` object, either a list of `fixest` objects created with `.l()`.
 #' @param times Integer vector giving the number of repetitions of the vector of elements. By default `times = 1`. It must be either of length 1, either of the same length as the argument `x`.
 #' @param each Integer scalar indicating the repetition of each element. Default is 1.
-#' @param vcov A list containing the types of standard-error to be computed, default is missing. If not missing, it must be of the same length as `times`, `each`, or the final vector. Note that if the arguments `times` and `each` are missing, then `times` becomes equal to the length of `vcov`. To see how to summon a VCOV, see the dedicated section in the \href{https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1}{vignette}.
+#' @param vcov A list containing the types of standard-error to be computed, default is missing. If not missing, it must be of the same length as `times`, `each`, or the final vector. Note that if the arguments `times` and `each` are missing, then `times` becomes equal to the length of `vcov`. To see how to summon a VCOV, see the dedicated section in the [vignette](https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1).
 #' @param ... In `.l()`: `fixest` objects. In `rep()`: not currently used.
 #'
 #' @details

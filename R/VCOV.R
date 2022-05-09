@@ -24,7 +24,7 @@
 #' The computation of the VCOV matrix is first done in [`summary.fixest`].
 #'
 #' @details
-#' For an explanation on how the standard-errors are computed and what is the exact meaning of the arguments, please have a look at the dedicated vignette: \href{https://lrberge.github.io/fixest/articles/standard_errors.html}{On standard-errors}.
+#' For an explanation on how the standard-errors are computed and what is the exact meaning of the arguments, please have a look at the dedicated vignette: [On standard-errors](https://lrberge.github.io/fixest/articles/standard_errors.html).
 #'
 #' @seealso
 #' You can also compute VCOVs with the following functions: [`vcov_cluster`], [`vcov_hac`], [`vcov_conley`].
@@ -1036,7 +1036,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 #'
 #' @details
 #'
-#' The following vignette: \href{https://lrberge.github.io/fixest/articles/standard_errors.html}{On standard-errors}, describes in details how the standard-errors are computed in `fixest` and how you can replicate standard-errors from other software.
+#' The following vignette: [On standard-errors](https://lrberge.github.io/fixest/articles/standard_errors.html), describes in details how the standard-errors are computed in `fixest` and how you can replicate standard-errors from other software.
 #'
 #' @return
 #' It returns a `ssc.type` object.

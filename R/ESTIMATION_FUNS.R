@@ -64,7 +64,7 @@
 #'
 #' Standard-errors can be computed in different ways, you can use the arguments `se` and `ssc` in [`summary.fixest`] to define how to compute them. By default, in the presence of fixed-effects, standard-errors are automatically clustered.
 #'
-#' The following vignette: \href{https://lrberge.github.io/fixest/articles/standard_errors.html}{On standard-errors} describes in details how the standard-errors are computed in `fixest` and how you can replicate standard-errors from other software.
+#' The following vignette: [On standard-errors](https://lrberge.github.io/fixest/articles/standard_errors.html) describes in details how the standard-errors are computed in `fixest` and how you can replicate standard-errors from other software.
 #'
 #' You can use the functions [`setFixest_vcov`] and [`setFixest_ssc`][fixest::ssc] to permanently set the way the standard-errors are computed.
 #'
@@ -84,7 +84,7 @@
 #'
 #' @section Multiple estimations:
 #'
-#' Multiple estimations can be performed at once, they just have to be specified in the formula. Multiple estimations yield a `fixest_multi` object which is \sQuote{kind of} a list of all the results but includes specific methods to access the results in a handy way. Please have a look at the dedicated vignette: \href{https://lrberge.github.io/fixest/articles/multiple_estimations.html}{Multiple estimations}.
+#' Multiple estimations can be performed at once, they just have to be specified in the formula. Multiple estimations yield a `fixest_multi` object which is \sQuote{kind of} a list of all the results but includes specific methods to access the results in a handy way. Please have a look at the dedicated vignette: [Multiple estimations](https://lrberge.github.io/fixest/articles/multiple_estimations.html).
 #'
 #' To include multiple dependent variables, wrap them in `c()` (`list()` also works). For instance `fml = c(y1, y2) ~ x1` would estimate the model `fml = y1 ~ x1` and then the model `fml = y2 ~ x1`.
 #'
@@ -167,7 +167,7 @@
 #'
 #' @references
 #'
-#' Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (\url{https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13}).
+#' Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 ([https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13]).
 #'
 #' For models with multiple fixed-effects:
 #'
@@ -2140,7 +2140,7 @@ feols.fit = function(y, X, fixef_df, vcov, offset, split, fsplit, split.keep, sp
 #'
 #' @references
 #'
-#' Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (\url{https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13}).
+#' Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 ([https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13]).
 #'
 #' For models with multiple fixed-effects:
 #'
@@ -3091,7 +3091,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
 #'
 #' @references
 #'
-#' Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (\url{https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13}).
+#' Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 ([https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13]).
 #'
 #' For models with multiple fixed-effects:
 #'
@@ -3386,7 +3386,7 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit, split
 #'
 #' @references
 #'
-#' Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (\url{https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13}).
+#' Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 ([https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13]).
 #'
 #' For models with multiple fixed-effects:
 #'
