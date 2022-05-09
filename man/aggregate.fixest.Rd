@@ -15,7 +15,7 @@
 
 \item{use_weights}{Logical, default is \code{TRUE}. If the estimation was weighted, whether the aggregation should take into account the weights. Basically if the weights reflected frequency it should be \code{TRUE}.}
 
-\item{...}{Arguments to be passed to \code{\link[fixest]{summary.fixest}}.}
+\item{...}{Arguments to be passed to \code{\link{summary.fixest}}.}
 }
 \value{
 It returns a matrix representing a table of coefficients.
@@ -24,7 +24,7 @@ It returns a matrix representing a table of coefficients.
 Simple tool that aggregates the value of CATT coefficients in staggered difference-in-difference setups (see details).
 }
 \details{
-This is a function helping to replicate the estimator from Sun and Abraham (2020). You first need to perform an estimation with cohort and relative periods dummies (typically using the function \code{\link[fixest]{i}}), this leads to estimators of the cohort average treatment effect on the treated (CATT). Then you can use this function to retrieve the average treatment effect on each relative period, or for any other way you wish to aggregate the CATT.
+This is a function helping to replicate the estimator from Sun and Abraham (2020). You first need to perform an estimation with cohort and relative periods dummies (typically using the function \code{\link{i}}), this leads to estimators of the cohort average treatment effect on the treated (CATT). Then you can use this function to retrieve the average treatment effect on each relative period, or for any other way you wish to aggregate the CATT.
 
 Note that contrary to the SA article, here the cohort share in the sample is considered to be a perfect measure for the cohort share in the population.
 }

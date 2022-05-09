@@ -7,14 +7,14 @@
 \method{print}{fixest_fitstat}(x, na.rm = FALSE, ...)
 }
 \arguments{
-\item{x}{An object resulting from the \code{\link[fixest]{fitstat}} function.}
+\item{x}{An object resulting from the \code{\link{fitstat}} function.}
 
 \item{na.rm}{Logical, default is \code{FALSE}. If \code{TRUE}, the statistics that are missing are not displayed.}
 
 \item{...}{Not currently used.}
 }
 \description{
-Displays a brief summary of selected fit statistics from the function \code{\link[fixest]{fitstat}}.
+Displays a brief summary of selected fit statistics from the function \code{\link{fitstat}}.
 }
 \examples{
 

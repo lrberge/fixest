@@ -7,21 +7,21 @@
 \method{update}{fixest}(object, fml.update, nframes = 1, evaluate = TRUE, ...)
 }
 \arguments{
-\item{object}{A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
+\item{object}{A \code{fixest} object. Obtained using the functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}.}
 
-\item{fml.update}{Changes to be made to the original argument \code{fml}. See more information on \code{\link[stats]{update.formula}}. You can add/withdraw both variables and fixed-effects. E.g. \code{. ~ . + x2 | . + z2} would add the variable \code{x2} and the cluster \code{z2} to the former estimation.}
+\item{fml.update}{Changes to be made to the original argument \code{fml}. See more information on \code{\link[stats:update.formula]{update.formula}}. You can add/withdraw both variables and fixed-effects. E.g. \code{. ~ . + x2 | . + z2} would add the variable \code{x2} and the cluster \code{z2} to the former estimation.}
 
 \item{nframes}{(Advanced users.) Defaults to 1. Number of frames up the stack where to perform the evaluation of the updated call. By default, this is the parent frame.}
 
 \item{evaluate}{Logical, default is \code{TRUE}. If \code{FALSE}, only the updated call is returned.}
 
-\item{...}{Other arguments to be passed to the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
+\item{...}{Other arguments to be passed to the functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}.}
 }
 \value{
-It returns a \code{fixest} object (see details in \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}).
+It returns a \code{fixest} object (see details in \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}).
 }
 \description{
-Updates and re-estimates a \code{fixest} model (estimated with \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}). This function updates the formulas and use previous starting values to estimate a new \code{fixest} model. The data is obtained from the original \code{call}.
+Updates and re-estimates a \code{fixest} model (estimated with \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}). This function updates the formulas and use previous starting values to estimate a new \code{fixest} model. The data is obtained from the original \code{call}.
 }
 \examples{
 
@@ -45,7 +45,7 @@ etable(est_pois, est_2, est_3, est_4)
 
 }
 \seealso{
-See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. \code{\link[fixest]{predict.fixest}}, \code{\link[fixest]{summary.fixest}}, \code{\link[fixest]{vcov.fixest}}, \code{\link[fixest]{fixef.fixest}}.
+See also the main estimation functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}. \code{\link{predict.fixest}}, \code{\link{summary.fixest}}, \code{\link{vcov.fixest}}, \code{\link{fixef.fixest}}.
 }
 \author{
 Laurent Berge

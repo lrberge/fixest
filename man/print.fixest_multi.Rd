@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{A \code{fixest_multi} object, obtained from a \code{fixest} estimation leading to multiple results.}
 
-\item{...}{Other arguments to be passed to \code{\link[fixest]{summary.fixest_multi}}.}
+\item{...}{Other arguments to be passed to \code{\link{summary.fixest_multi}}.}
 }
 \description{
 Displays summary information on fixest_multi objects in the R console.
@@ -27,5 +27,5 @@ res
 
 }
 \seealso{
-The main fixest estimation functions: \code{\link[fixest]{feols}}, \code{\link[fixest:feglm]{fepois}}, \code{\link[fixest:femlm]{fenegbin}}, \code{\link[fixest]{feglm}}, \code{\link[fixest]{feNmlm}}. Tools for mutliple fixest estimations: \code{\link[fixest]{summary.fixest_multi}}, \code{\link[fixest]{print.fixest_multi}}, \code{\link[fixest]{as.list.fixest_multi}}, \code{\link[fixest]{sub-sub-.fixest_multi}}, \code{\link[fixest]{sub-.fixest_multi}}.
+The main fixest estimation functions: \code{\link{feols}}, \code{\link[=feglm]{fepois}}, \code{\link[=femlm]{fenegbin}}, \code{\link{feglm}}, \code{\link{feNmlm}}. Tools for mutliple fixest estimations: \code{\link{summary.fixest_multi}}, \code{\link{print.fixest_multi}}, \code{\link{as.list.fixest_multi}}, \code{\link{sub-sub-.fixest_multi}}, \code{\link{sub-.fixest_multi}}.
 }

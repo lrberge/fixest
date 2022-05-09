@@ -23,7 +23,7 @@ demean(
 )
 }
 \arguments{
-\item{X}{A matrix, vector, data.frame or a list OR a formula OR a \code{\link[fixest]{feols}} estimation. If equal to a formula, then the argument \code{data} is required, and it must be of the type: \code{x1 + x2 ~ f1 + fe2} with on the LHS the variables to be centered, and on the RHS the factors used for centering. Note that you can use variables with varying slopes with the syntax \code{fe[v1, v2]} (see details in \code{\link[fixest]{feols}}). If a \code{feols} estimation, all variables (LHS+RHS) are demeaned and then returned (only if it was estimated with fixed-effects). Otherwise, it must represent the data to be centered. Of course the number of observations of that data must be the same as the factors used for centering (argument \code{f}).}
+\item{X}{A matrix, vector, data.frame or a list OR a formula OR a \code{\link{feols}} estimation. If equal to a formula, then the argument \code{data} is required, and it must be of the type: \code{x1 + x2 ~ f1 + fe2} with on the LHS the variables to be centered, and on the RHS the factors used for centering. Note that you can use variables with varying slopes with the syntax \code{fe[v1, v2]} (see details in \code{\link{feols}}). If a \code{feols} estimation, all variables (LHS+RHS) are demeaned and then returned (only if it was estimated with fixed-effects). Otherwise, it must represent the data to be centered. Of course the number of observations of that data must be the same as the factors used for centering (argument \code{f}).}
 
 \item{f}{A matrix, vector, data.frame or list. The factors used to center the variables in argument \code{X}. Matrices will be coerced using \code{as.data.frame}.}
 
@@ -65,14 +65,14 @@ User-level access to internal demeaning algorithm of \code{fixest}.
 }
 \section{Varying slopes}{
 
-You can add variables with varying slopes in the fixed-effect part of the formula. The syntax is as follows: fixef_var[var1, var2]. Here the variables var1 and var2 will be with varying slopes (one slope per value in fixef_var) and the fixed-effect fixef_var will also be added.
+You can add variables with varying slopes in the fixed-effect part of the formula. The syntax is as follows: fixef_var\link{var1, var2}. Here the variables var1 and var2 will be with varying slopes (one slope per value in fixef_var) and the fixed-effect fixef_var will also be added.
 
-To add only the variables with varying slopes and not the fixed-effect, use double square brackets: fixef_var[[var1, var2]].
+To add only the variables with varying slopes and not the fixed-effect, use double square brackets: fixef_var[\link{var1, var2}].
 
 In other words:
 \itemize{
-  \item fixef_var[var1, var2] is equivalent to fixef_var + fixef_var[[var1]] + fixef_var[[var2]]
-  \item fixef_var[[var1, var2]] is equivalent to fixef_var[[var1]] + fixef_var[[var2]]
+\item fixef_var\link{var1, var2} is equivalent to fixef_var + fixef_var[\link{var1}] + fixef_var[\link{var2}]
+\item fixef_var[\link{var1, var2}] is equivalent to fixef_var[\link{var1}] + fixef_var[\link{var2}]
 }
 
 In general, for convergence reasons, it is recommended to always add the fixed-effect and avoid using only the variable with varying slope (i.e. use single square brackets).

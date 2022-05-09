@@ -1724,7 +1724,7 @@ nobs.fixest = function(object, ...){
 #' \deqn{AIC = -2\times LogLikelihood + k\times nbParams}
 #' with k the penalty parameter.
 #'
-#' You can have more information on this criterion on [`AIC`].
+#' You can have more information on this criterion on [`AIC`][stats::AIC].
 #'
 #' @return
 #' It return a numeric vector, with length the same as the number of objects taken as arguments.
@@ -1781,7 +1781,7 @@ AIC.fixest = function(object, ..., k = 2){
 #' \deqn{BIC = -2\times LogLikelihood + \log(nobs)\times nbParams}
 #' with k the penalty parameter.
 #'
-#' You can have more information on this criterion on [`AIC`].
+#' You can have more information on this criterion on [`AIC`][stats::AIC].
 #'
 #' @return
 #' It return a numeric vector, with length the same as the number of objects taken as arguments.

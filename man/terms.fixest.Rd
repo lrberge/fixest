@@ -7,7 +7,7 @@
 \method{terms}{fixest}(x, ...)
 }
 \arguments{
-\item{x}{A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
+\item{x}{A \code{fixest} object. Obtained using the functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}.}
 
 \item{...}{Not currently used.}
 }

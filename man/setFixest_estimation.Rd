@@ -28,7 +28,7 @@ getFixest_estimation()
 \arguments{
 \item{data}{A data.frame containing the necessary variables to run the model. The variables of the non-linear right hand side of the formula are identified with this \code{data.frame} names. Can also be a matrix.}
 
-\item{panel.id}{The panel identifiers. Can either be: i) a one sided formula (e.g. \code{panel.id = ~id+time}), ii) a character vector of length 2 (e.g. \code{panel.id=c('id', 'time')}, or iii) a character scalar of two variables separated by a comma (e.g. \code{panel.id='id,time'}). Note that you can combine variables with \code{^} only inside formulas (see the dedicated section in \code{\link[fixest]{feols}}).}
+\item{panel.id}{The panel identifiers. Can either be: i) a one sided formula (e.g. \code{panel.id = ~id+time}), ii) a character vector of length 2 (e.g. \code{panel.id=c('id', 'time')}, or iii) a character scalar of two variables separated by a comma (e.g. \code{panel.id='id,time'}). Note that you can combine variables with \code{^} only inside formulas (see the dedicated section in \code{\link{feols}}).}
 
 \item{fixef.rm}{Can be equal to "perfect" (default), "singleton", "both" or "none". Controls which observations are to be removed. If "perfect", then observations having a fixed-effect with perfect fit (e.g. only 0 outcomes in Poisson estimations) will be removed. If "singleton", all observations for which a fixed-effect appears only once will be removed. The meaning of "both" and "none" is direct.}
 
@@ -48,7 +48,7 @@ getFixest_estimation()
 
 \item{demeaned}{Logical, default is \code{FALSE}. Only used in the presence of fixed-effects: should the centered variables be returned? If \code{TRUE}, it creates the items \code{y_demeaned} and \code{X_demeaned}.}
 
-\item{mem.clean}{Logical, default is \code{FALSE}. Only to be used if the data set is large compared to the available RAM. If \code{TRUE} then intermediary objects are removed as much as possible and \code{\link[base]{gc}} is run before each substantial C++ section in the internal code to avoid memory issues.}
+\item{mem.clean}{Logical, default is \code{FALSE}. Only to be used if the data set is large compared to the available RAM. If \code{TRUE} then intermediary objects are removed as much as possible and \code{\link{gc}} is run before each substantial C++ section in the internal code to avoid memory issues.}
 
 \item{glm.iter}{Number of iterations of the glm algorithm. Default is 25.}
 

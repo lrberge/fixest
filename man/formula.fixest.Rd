@@ -7,7 +7,7 @@
 \method{formula}{fixest}(x, type = c("full", "linear", "iv", "NL"), ...)
 }
 \arguments{
-\item{x}{An object of class \code{fixest}. Typically the result of a \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}} estimation.}
+\item{x}{An object of class \code{fixest}. Typically the result of a \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}} estimation.}
 
 \item{type}{A character scalar. Default is \code{type = "full"} which gives back a formula containing the linear part of the model along with the fixed-effects (if any) and the IV part (if any). If \code{type = "linear"} then only the linear formula is returned. If \code{type = "NL"} then only the non linear in parameters part is returned.}
 
@@ -17,7 +17,7 @@
 It returns a formula.
 }
 \description{
-This function extracts the formula from a \code{fixest} estimation (obtained with \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}). If the estimation was done with fixed-effects, they are added in the formula after a pipe (\dQuote{|}). If the estimation was done with a non linear in parameters part, then this will be added in the formula in between \code{I()}.
+This function extracts the formula from a \code{fixest} estimation (obtained with \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}). If the estimation was done with fixed-effects, they are added in the formula after a pipe (\dQuote{|}). If the estimation was done with a non linear in parameters part, then this will be added in the formula in between \code{I()}.
 }
 \examples{
 
@@ -34,7 +34,7 @@ formula(res, "linear")
 
 }
 \seealso{
-See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. \code{\link[fixest]{model.matrix.fixest}}, \code{\link[fixest]{update.fixest}}, \code{\link[fixest]{summary.fixest}}, \code{\link[fixest]{vcov.fixest}}.
+See also the main estimation functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}. \code{\link{model.matrix.fixest}}, \code{\link{update.fixest}}, \code{\link{summary.fixest}}, \code{\link{vcov.fixest}}.
 }
 \author{
 Laurent Berge

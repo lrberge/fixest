@@ -20,9 +20,9 @@
 )
 }
 \arguments{
-\item{object}{A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
+\item{object}{A \code{fixest} object. Obtained using the functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}.}
 
-\item{type}{A character scalar, either \code{"response"} (default), \code{"deviance"}, \code{"pearson"}, or \code{"working"}. Note that the \code{"working"} corresponds to the residuals from the weighted least square and only applies to \code{\link[fixest]{feglm}} models.}
+\item{type}{A character scalar, either \code{"response"} (default), \code{"deviance"}, \code{"pearson"}, or \code{"working"}. Note that the \code{"working"} corresponds to the residuals from the weighted least square and only applies to \code{\link{feglm}} models.}
 
 \item{na.rm}{Logical, default is \code{TRUE}. Whether to remove the observations with NAs from the original data set. If \code{FALSE}, then the vector returned is always of the same length as the original data set.}
 
@@ -32,7 +32,7 @@
 It returns a numeric vector of the length the number of observations used for the estimation (if \code{na.rm = TRUE}) or of the length of the original data set (if \code{na.rm = FALSE}).
 }
 \description{
-This function extracts residuals from a fitted model estimated with \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
+This function extracts residuals from a fitted model estimated with \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}.
 }
 \examples{
 
@@ -45,7 +45,7 @@ plot(resid(res_poisson))
 
 }
 \seealso{
-See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. \code{\link[fixest]{fitted.fixest}}, \code{\link[fixest]{predict.fixest}}, \code{\link[fixest]{summary.fixest}}, \code{\link[fixest]{vcov.fixest}}, \code{\link[fixest]{fixef.fixest}}.
+See also the main estimation functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}. \code{\link{fitted.fixest}}, \code{\link{predict.fixest}}, \code{\link{summary.fixest}}, \code{\link{vcov.fixest}}, \code{\link{fixef.fixest}}.
 }
 \author{
 Laurent Berge

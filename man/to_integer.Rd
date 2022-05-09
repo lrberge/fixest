@@ -70,3 +70,6 @@ to_integer(x1, x2, add_items = TRUE)
 to_integer(x1, x2, add_items = TRUE, multi.join = "; ")
 
 }
+\author{
+Laurent Berge
+}

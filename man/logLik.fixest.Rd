@@ -7,7 +7,7 @@
 \method{logLik}{fixest}(object, ...)
 }
 \arguments{
-\item{object}{A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
+\item{object}{A \code{fixest} object. Obtained using the functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}.}
 
 \item{...}{Not currently used.}
 }
@@ -18,7 +18,7 @@ It returns a numeric scalar.
 This function extracts the log-likelihood from a \code{fixest} estimation.
 }
 \details{
-This function extracts the log-likelihood based on the model fit. You can have more information on the likelihoods in the details of the function \code{\link[fixest]{femlm}}.
+This function extracts the log-likelihood based on the model fit. You can have more information on the likelihoods in the details of the function \code{\link{femlm}}.
 }
 \examples{
 
@@ -32,7 +32,7 @@ logLik(res)
 
 }
 \seealso{
-See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Other statistics functions: \code{\link[fixest]{AIC.fixest}}, \code{\link[fixest]{BIC.fixest}}.
+See also the main estimation functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}. Other statistics functions: \code{\link{AIC.fixest}}, \code{\link{BIC.fixest}}.
 }
 \author{
 Laurent Berge

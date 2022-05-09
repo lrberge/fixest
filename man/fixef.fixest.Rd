@@ -15,13 +15,13 @@
 )
 }
 \arguments{
-\item{object}{A \code{fixest} estimation (e.g. obtained using \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}).}
+\item{object}{A \code{fixest} estimation (e.g. obtained using \code{\link{feols}} or \code{\link{feglm}}).}
 
 \item{notes}{Logical. Whether to display a note when the fixed-effects coefficients are not regular.}
 
 \item{sorted}{Logical, default is \code{TRUE}. Whether to order the fixed-effects by their names. If \code{FALSE}, then the order used in the demeaning algorithm is used.}
 
-\item{nthreads}{The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. The default is to use 50\% of all threads. You can set permanently the number of threads used within this package using the function \code{\link[fixest]{setFixest_nthreads}}.}
+\item{nthreads}{The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. The default is to use 50\\% of all threads. You can set permanently the number of threads used within this package using the function \code{\link{setFixest_nthreads}}.}
 
 \item{fixef.tol}{Precision used to obtain the fixed-effects. Defaults to \code{1e-5}. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations. Argument \code{fixef.tol} cannot be lower than \code{10000*.Machine$double.eps}. Note that this parameter is dynamically controlled by the algorithm.}
 
@@ -61,7 +61,7 @@ plot(fe_trade)
 
 }
 \seealso{
-\code{\link[fixest]{plot.fixest.fixef}}. See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the fixed-effect coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
+\code{\link{plot.fixest.fixef}}. See also the main estimation functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}. Use \code{\link{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link{fixef.fixest}} to extract the fixed-effect coefficients, and the function \code{\link{etable}} to visualize the results of multiple estimations.
 }
 \author{
 Laurent Berge

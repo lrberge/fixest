@@ -29,3 +29,6 @@ osize(trade)
 
 
 }
+\author{
+Laurent Berge
+}

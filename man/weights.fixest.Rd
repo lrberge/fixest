@@ -24,5 +24,5 @@ weights(est)
 
 }
 \seealso{
-\code{\link[fixest]{feols}}, \code{\link[fixest:feglm]{fepois}}, \code{\link[fixest]{feglm}}, \code{\link[fixest:femlm]{fenegbin}}, \code{\link[fixest]{feNmlm}}.
+\code{\link{feols}}, \code{\link[=fixest:feglm]{fepois}}, \code{\link{feglm}}, \code{\link[=fixest:femlm]{fenegbin}}, \code{\link{feNmlm}}.
 }

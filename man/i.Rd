@@ -22,14 +22,14 @@ Feeding in a vector is like using a list without name and only a single element.
 For example if \code{x} represents years, using \code{bin="bin::2"} creates bins of two years.
 With any data, using \code{"!bin::digit"} groups every digit consecutive values starting from the first value.
 Using \code{"!!bin::digit"} is the same but starting from the last value.
-With numeric vectors you can: a) use \code{"cut::n"} to cut the vector into \code{n} equal parts, b) use \code{"cut::a]b["} to create the following bins: \code{[min, a]}, \code{]a, b[}, \code{[b, max]}.
-The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to p100) followed by an open or closed square bracket. You can add custom bin names by adding them in the character vector after \code{'cut::values'}. See details and examples. Dot square bracket expansion (see \code{\link[fixest]{dsb}}) is enabled.}
+With numeric vectors you can: a) use \code{"cut::n"} to cut the vector into \code{n} equal parts, b) use \code{"cut::a]b["} to create the following bins: \verb{[min, a]}, \verb{]a, b[}, \verb{[b, max]}.
+The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to p100) followed by an open or closed square bracket. You can add custom bin names by adding them in the character vector after \code{'cut::values'}. See details and examples. Dot square bracket expansion (see \code{\link{dsb}}) is enabled.}
 
 \item{ref2}{A vector of values to be dropped from \code{var}. By default they should be values from \code{var} and if \code{ref2} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.}
 
 \item{keep2}{A vector of values to be kept from \code{var} (all others are dropped). By default they should be values from \code{var} and if \code{keep2} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.}
 
-\item{bin2}{A list or vector defining the binning of the second variable. See help for the argument \code{bin} for details (or look at the help of the function \code{\link[fixest]{bin}}). You can use \code{.()} for \code{list()}.}
+\item{bin2}{A list or vector defining the binning of the second variable. See help for the argument \code{bin} for details (or look at the help of the function \code{\link{bin}}). You can use \code{.()} for \code{list()}.}
 
 \item{...}{Not currently used.}
 }
@@ -40,7 +40,7 @@ It returns a matrix with number of rows the length of \code{factor_var}. If ther
 Treat a variable as a factor, or interacts a variable with a factor. Values to be dropped/kept from the factor can be easily set. Note that to interact fixed-effects, this function should not be used: instead use directly the syntax \code{fe1^fe2}.
 }
 \details{
-To interact fixed-effects, this function should not be used: instead use directly the syntax \code{fe1^fe2} in the fixed-effects part of the formula. Please see the details and examples in the help page of \code{\link[fixest]{feols}}.
+To interact fixed-effects, this function should not be used: instead use directly the syntax \code{fe1^fe2} in the fixed-effects part of the formula. Please see the details and examples in the help page of \code{\link{feols}}.
 }
 \examples{
 
@@ -123,9 +123,9 @@ feols(Ozone ~ i(Month, bin = list(summer = 7:9)), airquality)
 
 }
 \seealso{
-\code{\link[fixest:coefplot]{iplot}} to plot interactions or factors created with \code{i()}, \code{\link[fixest]{feols}} for OLS estimation with multiple fixed-effects.
+\code{\link[=fixest:coefplot]{iplot}} to plot interactions or factors created with \code{i()}, \code{\link{feols}} for OLS estimation with multiple fixed-effects.
 
-See the function \code{\link[fixest]{bin}} for binning variables.
+See the function \code{\link{bin}} for binning variables.
 }
 \author{
 Laurent Berge

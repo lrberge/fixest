@@ -18,7 +18,7 @@ getFixest_fml()
 The function \code{getFixest_fml()} returns a list of character strings, the names corresponding to the macro variable names, the character strings corresponding to their definition.
 }
 \description{
-You can set formula macros globally with \code{setFixest_fml}. These macros can then be used in \code{fixest} estimations or when using the function \code{\link[fixest:setFixest_fml]{xpd}}.
+You can set formula macros globally with \code{setFixest_fml}. These macros can then be used in \code{fixest} estimations or when using the function \code{\link[=fixest:setFixest_fml]{xpd}}.
 }
 \details{
 In \code{xpd}, the default macro variables are taken from \code{getFixest_fml}. Any value in the \code{...} argument of \code{xpd} will replace these default values.
@@ -227,5 +227,5 @@ lm(xpd(Armed.Forces ~ Population + GN..), longley)
 
 }
 \seealso{
-\code{\link[fixest]{xpd}} to make use of formula macros.
+\code{\link{xpd}} to make use of formula macros.
 }

@@ -17,7 +17,7 @@
 )
 }
 \arguments{
-\item{object}{A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
+\item{object}{A \code{fixest} object. Obtained using the functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}.}
 
 \item{data}{If missing (default) then the original data is obtained by evaluating the \code{call}. Otherwise, it should be a \code{data.frame}.}
 
@@ -39,7 +39,7 @@
 It returns either a vector, a matrix or a data.frame. It returns a vector for the dependent variable ("lhs"), a data.frame for the fixed-effects ("fixef") and a matrix for any other type.
 }
 \description{
-This function creates the left-hand-side or the right-hand-side(s) of a \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}} estimation.
+This function creates the left-hand-side or the right-hand-side(s) of a \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}} estimation.
 }
 \examples{
 
@@ -61,7 +61,7 @@ head(model.matrix(est, data = base[, "x1", drop = FALSE], subset = TRUE))
 
 }
 \seealso{
-See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. \code{\link[fixest]{formula.fixest}}, \code{\link[fixest]{update.fixest}}, \code{\link[fixest]{summary.fixest}}, \code{\link[fixest]{vcov.fixest}}.
+See also the main estimation functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}. \code{\link{formula.fixest}}, \code{\link{update.fixest}}, \code{\link{summary.fixest}}, \code{\link{vcov.fixest}}.
 }
 \author{
 Laurent Berge

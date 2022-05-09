@@ -28,9 +28,9 @@ did_means(
 
 \item{base}{A data base containing all the variables in the formula \code{fml}.}
 
-\item{treat_var}{Only if argument \code{fml} is *not* a formula. The vector identifying the treated and the control observations (the vector can be of any type but must contain only two possible values). Must be of the same length as the data.}
+\item{treat_var}{Only if argument \code{fml} is \emph{not} a formula. The vector identifying the treated and the control observations (the vector can be of any type but must contain only two possible values). Must be of the same length as the data.}
 
-\item{post_var}{Only if argument \code{fml} is *not* a formula. The vector identifying the periods (pre/post) of the observations (the vector can be of any type but must contain only two possible values). The first value (in the sorted sense) of the vector is taken as the pre period. Must be of the same length as the data.}
+\item{post_var}{Only if argument \code{fml} is \emph{not} a formula. The vector identifying the periods (pre/post) of the observations (the vector can be of any type but must contain only two possible values). The first value (in the sorted sense) of the vector is taken as the pre period. Must be of the same length as the data.}
 
 \item{tex}{Should the result be displayed in Latex? Default is \code{FALSE}. Automatically set to \code{TRUE} if the table is to be saved in a file using the argument \code{file}.}
 

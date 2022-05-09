@@ -33,7 +33,7 @@ getFixest_vcov()
 The function \code{getFixest_vcov()} returns a list with three elements containing the default for estimations i) without, ii) with one, or iii) with two or more fixed-effects.
 }
 \description{
-This functions defines or extracts the default type of standard-errors to computed in \code{fixest} \code{\link[fixest:summary.fixest]{summary}}, and \code{\link[fixest:vcov.fixest]{vcov}}.
+This functions defines or extracts the default type of standard-errors to computed in \code{fixest} \code{\link[=summary.fixest]{summary}}, and \code{\link[=vcov.fixest]{vcov}}.
 }
 \examples{
 
