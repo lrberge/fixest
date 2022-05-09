@@ -997,15 +997,17 @@ std::string cpp_add_commas(double x, int r = 1, bool whole = true){
     // for whole numbers => no trailing digits
     // does not accept vectors, although super easy to expand to vectors
 
-    std::string x_str = std::to_string(static_cast<int>(abs(x)));
+    double xr = round(x * pow(10, r)) / pow(10, r);
+
+    std::string x_str = std::to_string(static_cast<int>(abs(xr)));
     std::string res;
 
-    if(x < 0){
+    if(xr < 0){
         res.push_back('-');
-        x = -x;
+        xr = -xr;
     }
 
-    if(x < 1000){
+    if(xr < 1000){
         res.insert(res.size(), x_str);
 
     } else {
@@ -1021,18 +1023,20 @@ std::string cpp_add_commas(double x, int r = 1, bool whole = true){
         }
     }
 
-    double rest = x - floor(x);
-    if((rest != 0 || !whole) && r > 0){
+    double rest = xr - floor(xr);
+    bool is_whole = whole && (x - floor(x)) == 0;
+    if(!is_whole && r > 0){
         // not a whole number
 
         res.push_back('.');
 
         if(r == 1){
-            res.push_back(std::to_string(static_cast<int>(round(rest * 10)))[0]);
+            res.push_back(std::to_string(static_cast<int>(floor(rest * 10)))[0]);
 
         } else {
-            double rounded_rest = round(rest * pow(10, r)) / pow(10, r);
-            std::string rest_str = std::to_string(rounded_rest);
+            // double rounded_rest = floor(rest * pow(10, r)) / pow(10, r);
+            // std::string rest_str = std::to_string(rounded_rest);
+            std::string rest_str = std::to_string(rest);
             int nr = rest_str.size();
 
             for(int i=2 ; i < nr && i-1 <= r ; ++i){
