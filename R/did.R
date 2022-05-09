@@ -15,36 +15,36 @@
 #' @param cohort A vector representing the cohort. It should represent the period at which the treatment has been received (and thus be fixed for each unit).
 #' @param period A vector representing the period. It can be either a relative time period (with negative values representing the before the treatment and positive values after the treatment), or a regular time period. In the latter case, the relative time period will be created from the cohort information (which represents the time at which the treatment has been received).
 #' @param ref.c A vector of references for the cohort. By default the never treated cohorts are taken as reference and the always treated are excluded from the estimation. You can add more references with this argument, which means that dummies will not be created for them (but they will remain in the estimation).
-#' @param ref.p A vector of references for the (relative!) period. By default the first relative period (RP) before the treatment, i.e. -1, is taken as reference. You can instead use your own references (i.e. RPs for which dummies will not be created -- but these observations remain in the sample). Please note that you will need at least two references. You can use the special variables \code{.F} and \code{.L} to access the first and the last relative periods.
-#' @param att Logical, default is \code{FALSE}. If \code{TRUE}: then the total average treatment effect for the treated is computed (instead of the ATT for each relative period).
-#' @param no_agg Logical, default is \code{FALSE}. If \code{TRUE}: then there is no aggregation, leading to the estimation of all \code{cohort x time to treatment} coefficients.
-#' @param bin A list of values to be grouped, a vector, or the special value \code{"bin::digit"}. The binning will be applied to both the cohort and the period (to bin them separately, see \code{bin.c} and \code{bin.p}). To create a new value from old values, use \code{bin = list("new_value"=old_values)} with \code{old_values} a vector of existing values. It accepts regular expressions, but they must start with an \code{"@"}, like in \code{bin="@Aug|Dec"}. The names of the list are the new names. If the new name is missing, the first value matched becomes the new name. Feeding in a vector is like using a list without name and only a single element. If the vector is numeric, you can use the special value \code{"bin::digit"} to group every \code{digit} element. For example if \code{x} represent years, using \code{bin="bin::2"} create bins of two years. Using \code{"!bin::digit"} groups every digit consecutive values starting from the first value. Using \code{"!!bin::digit"} is the same bu starting from the last value. In both cases, \code{x} is not required to be numeric.
-#' @param bin.rel A list or a vector defining which values to bin. Only applies to the relative periods and \emph{not} the cohorts. Please refer to the help of the argument \code{bin} to understand the different ways to do the binning (or look at the help of \code{\link[fixest]{bin}}).
-#' @param bin.c A list or a vector defining which values to bin. Only applies to the cohort. Please refer to the help of the argument \code{bin} to understand the different ways to do the binning (or look at the help of \code{\link[fixest]{bin}}).
-#' @param bin.p A list or a vector defining which values to bin. Only applies to the period. Please refer to the help of the argument \code{bin} to understand the different ways to do the binning (or look at the help of \code{\link[fixest]{bin}}).
+#' @param ref.p A vector of references for the (relative!) period. By default the first relative period (RP) before the treatment, i.e. -1, is taken as reference. You can instead use your own references (i.e. RPs for which dummies will not be created -- but these observations remain in the sample). Please note that you will need at least two references. You can use the special variables `.F` and `.L` to access the first and the last relative periods.
+#' @param att Logical, default is `FALSE`. If `TRUE`: then the total average treatment effect for the treated is computed (instead of the ATT for each relative period).
+#' @param no_agg Logical, default is `FALSE`. If `TRUE`: then there is no aggregation, leading to the estimation of all `cohort x time to treatment` coefficients.
+#' @param bin A list of values to be grouped, a vector, or the special value `"bin::digit"`. The binning will be applied to both the cohort and the period (to bin them separately, see `bin.c` and `bin.p`). To create a new value from old values, use `bin = list("new_value"=old_values)` with `old_values` a vector of existing values. It accepts regular expressions, but they must start with an `"@"`, like in `bin="@Aug|Dec"`. The names of the list are the new names. If the new name is missing, the first value matched becomes the new name. Feeding in a vector is like using a list without name and only a single element. If the vector is numeric, you can use the special value `"bin::digit"` to group every `digit` element. For example if `x` represent years, using `bin="bin::2"` create bins of two years. Using `"!bin::digit"` groups every digit consecutive values starting from the first value. Using `"!!bin::digit"` is the same bu starting from the last value. In both cases, `x` is not required to be numeric.
+#' @param bin.rel A list or a vector defining which values to bin. Only applies to the relative periods and *not* the cohorts. Please refer to the help of the argument `bin` to understand the different ways to do the binning (or look at the help of [`bin`]).
+#' @param bin.c A list or a vector defining which values to bin. Only applies to the cohort. Please refer to the help of the argument `bin` to understand the different ways to do the binning (or look at the help of [`bin`]).
+#' @param bin.p A list or a vector defining which values to bin. Only applies to the period. Please refer to the help of the argument `bin` to understand the different ways to do the binning (or look at the help of [`bin`]).
 #'
 #' @details
-#' This function creates a matrix of \code{cohort x relative_period} interactions, and if used within a \code{fixest} estimation, the coefficients will automatically be aggregated to obtain the ATT for each relative period. In practice, the coefficients are aggregated with the \code{\link[fixest]{aggregate.fixest}} function whose argument \code{agg} is automatically set to the appropriate value.
+#' This function creates a matrix of `cohort x relative_period` interactions, and if used within a `fixest` estimation, the coefficients will automatically be aggregated to obtain the ATT for each relative period. In practice, the coefficients are aggregated with the [`aggregate.fixest`] function whose argument `agg` is automatically set to the appropriate value.
 #'
 #' The SA method requires relative periods (negative/positive for before/after the treatment). Either the user can compute the RP (relative periods) by his/her own, either the RPs are computed on the fly from the periods and the cohorts (which then should represent the treatment period).
 #'
 #' The never treated, which are the cohorts displaying only negative RPs are used as references (i.e. no dummy will be constructed for them). On the other hand, the always treated are removed from the estimation, by means of adding NAs for each of their observations.
 #'
-#' If the RPs have to be constructed on the fly, any cohort that is not present in the period is considered as never treated. This means that if the period ranges from 1995 to 2005, \code{cohort = 1994} will be considered as never treated, although it should be considered as always treated: so be careful.
+#' If the RPs have to be constructed on the fly, any cohort that is not present in the period is considered as never treated. This means that if the period ranges from 1995 to 2005, `cohort = 1994` will be considered as never treated, although it should be considered as always treated: so be careful.
 #'
 #' If you construct your own relative periods, the controls cohorts should have only negative RPs.
 #'
 #' @section Binning:
 #'
-#' You can bin periods with the arguments \code{bin}, \code{bin.c}, \code{bin.p} and/or \code{bin.rel}.
+#' You can bin periods with the arguments `bin`, `bin.c`, `bin.p` and/or `bin.rel`.
 #'
-#' The argument \code{bin} applies both to the original periods and cohorts (the cohorts will also be binned!). This argument only works when the \code{period} represent "calendar" periods (not relative ones!).
+#' The argument `bin` applies both to the original periods and cohorts (the cohorts will also be binned!). This argument only works when the `period` represent "calendar" periods (not relative ones!).
 #'
-#' Alternatively you can bin the periods with \code{bin.p} (either "calendar" or relative); or the cohorts with \code{bin.c}.
+#' Alternatively you can bin the periods with `bin.p` (either "calendar" or relative); or the cohorts with `bin.c`.
 #'
-#' The argument \code{bin.rel} applies only to the relative periods (hence not to the cohorts) once they have been created.
+#' The argument `bin.rel` applies only to the relative periods (hence not to the cohorts) once they have been created.
 #'
-#' To understand how binning works, please have a look at the help and examples of the function \code{\link[fixest]{bin}}.
+#' To understand how binning works, please have a look at the help and examples of the function [`bin`].
 #'
 #' Binning can be done in many different ways: just remember that it is not because it is possible that it does makes sense!
 #'
@@ -52,7 +52,7 @@
 #' Laurent Berge
 #'
 #' @return
-#' If not used within a \code{fixest} estimation, this function will return a matrix of interacted coefficients.
+#' If not used within a `fixest` estimation, this function will return a matrix of interacted coefficients.
 #'
 #' @examples
 #'
@@ -345,14 +345,14 @@ sunab_att = function(cohort, period, ref.c = NULL, ref.p = -1){
 #'
 #' Simple tool that aggregates the value of CATT coefficients in staggered difference-in-difference setups (see details).
 #'
-#' @param x A \code{fixest} object.
-#' @param agg A character scalar describing the variable names to be aggregated, it is pattern-based. All variables that match the pattern will be aggregated. It must be of the form \code{"(root)"}, the parentheses must be there and the resulting variable name will be \code{"root"}. You can add another root with parentheses: \code{"(root1)regex(root2)"}, in which case the resulting name is \code{"root1::root2"}. To name the resulting variable differently you can pass a named vector: \code{c("name" = "pattern")} or \code{c("name" = "pattern(root2)")}. It's a bit intricate sorry, please see the examples.
-#' @param full Logical scalar, defaults to \code{FALSE}. If \code{TRUE}, then all coefficients are returned, not only the aggregated coefficients.
-#' @param use_weights Logical, default is \code{TRUE}. If the estimation was weighted, whether the aggregation should take into account the weights. Basically if the weights reflected frequency it should be \code{TRUE}.
-#' @param ... Arguments to be passed to \code{\link[fixest]{summary.fixest}}.
+#' @param x A `fixest` object.
+#' @param agg A character scalar describing the variable names to be aggregated, it is pattern-based. All variables that match the pattern will be aggregated. It must be of the form `"(root)"`, the parentheses must be there and the resulting variable name will be `"root"`. You can add another root with parentheses: `"(root1)regex(root2)"`, in which case the resulting name is `"root1::root2"`. To name the resulting variable differently you can pass a named vector: `c("name" = "pattern")` or `c("name" = "pattern(root2)")`. It's a bit intricate sorry, please see the examples.
+#' @param full Logical scalar, defaults to `FALSE`. If `TRUE`, then all coefficients are returned, not only the aggregated coefficients.
+#' @param use_weights Logical, default is `TRUE`. If the estimation was weighted, whether the aggregation should take into account the weights. Basically if the weights reflected frequency it should be `TRUE`.
+#' @param ... Arguments to be passed to [`summary.fixest`].
 #'
 #' @details
-#' This is a function helping to replicate the estimator from Sun and Abraham (2020). You first need to perform an estimation with cohort and relative periods dummies (typically using the function \code{\link[fixest]{i}}), this leads to estimators of the cohort average treatment effect on the treated (CATT). Then you can use this function to retrieve the average treatment effect on each relative period, or for any other way you wish to aggregate the CATT.
+#' This is a function helping to replicate the estimator from Sun and Abraham (2020). You first need to perform an estimation with cohort and relative periods dummies (typically using the function [`i`]), this leads to estimators of the cohort average treatment effect on the treated (CATT). Then you can use this function to retrieve the average treatment effect on each relative period, or for any other way you wish to aggregate the CATT.
 #'
 #' Note that contrary to the SA article, here the cohort share in the sample is considered to be a perfect measure for the cohort share in the population.
 #'
@@ -590,13 +590,13 @@ aggregate.fixest = function(x, agg, full = FALSE, use_weights = TRUE, ...){
 
 #' Sample data for difference in difference
 #'
-#' This data has been generated to illustrate the use of difference in difference functions in package \pkg{fixest}. This is a balanced panel of 104 individuals and 10 periods. About half the individuals are treated, the treatment having a positive effect on the dependent variable \code{y} after the 5th period. The effect of the treatment on \code{y} is gradual.
+#' This data has been generated to illustrate the use of difference in difference functions in package \pkg{fixest}. This is a balanced panel of 104 individuals and 10 periods. About half the individuals are treated, the treatment having a positive effect on the dependent variable `y` after the 5th period. The effect of the treatment on `y` is gradual.
 #'
 #' @usage
 #' data(base_did)
 #'
 #' @format
-#' \code{base_did} is a data frame with 1,040 observations and 6 variables named \code{y}, \code{x1}, \code{id}, \code{period}, \code{post} and \code{treat}.
+#' `base_did` is a data frame with 1,040 observations and 6 variables named `y`, `x1`, `id`, `period`, `post` and `treat`.
 #'
 #' \itemize{
 #' \item{y: The dependent variable affected by the treatment.}
@@ -628,7 +628,7 @@ aggregate.fixest = function(x, agg, full = FALSE, use_weights = TRUE, ...){
 #' data(base_stagg)
 #'
 #' @format
-#' \code{base_stagg} is a data frame with 950 observations and 7 variables:
+#' `base_stagg` is a data frame with 950 observations and 7 variables:
 #'
 #' \itemize{
 #' \item{id: panel identifier.}

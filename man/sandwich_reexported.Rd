@@ -10,7 +10,7 @@ The package \pkg{fixest} does not use \code{estfun} or \code{bread} from \pkg{sa
 }
 \details{
 \itemize{
-\item Here is the help from package \pkg{sandwich}: \code{\link[sandwich:estfun]{estfun}} and \code{\link[sandwich:bread]{bread}}. The help from package \pkg{fixest} is here: \code{\link[fixest]{estfun.fixest}} and \code{\link[fixest]{bread.fixest}}.
+\item Here is the help from package \pkg{sandwich}: \code{\link[sandwich:estfun]{estfun}} and \code{\link[sandwich:bread]{bread}}. The help from package \pkg{fixest} is here: \code{\link{estfun.fixest}} and \code{\link{bread.fixest}}.
 }
 }
 \keyword{internal}

@@ -10,7 +10,7 @@ check_conv_feols(x)
 \method{summary}{fixest_check_conv}(object, type = "short", ...)
 }
 \arguments{
-\item{x}{A \code{\link[fixest]{feols}} estimation that should contain fixed-effects.}
+\item{x}{A \code{\link{feols}} estimation that should contain fixed-effects.}
 
 \item{object}{An object returned by \code{check_conv_feols}.}
 

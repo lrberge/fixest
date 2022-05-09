@@ -33,5 +33,5 @@ coeftable(est)
 
 }
 \seealso{
-Please look at the \code{\link[fixest]{coeftable.fixest}} page for more detailed information.
+Please look at the \code{\link{coeftable.fixest}} page for more detailed information.
 }

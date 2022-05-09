@@ -20,9 +20,9 @@ conley(cutoff = NULL, pixel = NULL, distance = NULL)
 \arguments{
 \item{x}{A \code{fixest} object.}
 
-\item{lat}{A character scalar or a one sided formula giving the name of the variable representing the latitude. The latitude must lie in [-90, 90], [0, 180] or [-180, 0].}
+\item{lat}{A character scalar or a one sided formula giving the name of the variable representing the latitude. The latitude must lie in \link{-90, 90}, \link{0, 180} or \link{-180, 0}.}
 
-\item{lon}{A character scalar or a one sided formula giving the name of the variable representing the longitude. The longitude must be in [-180, 180], [0, 360] or [-360, 0].}
+\item{lon}{A character scalar or a one sided formula giving the name of the variable representing the longitude. The longitude must be in \link{-180, 180}, \link{0, 360} or \link{-360, 0}.}
 
 \item{cutoff}{The distance cutoff, in km. You can express the cutoff in miles by writing the number in character form and adding "mi" as a suffix: cutoff = "100mi" would be 100 miles. If missing, a rule of thumb is used to deduce the cutoff.}
 
@@ -30,12 +30,12 @@ conley(cutoff = NULL, pixel = NULL, distance = NULL)
 
 \item{distance}{How to compute the distance between points. It can be equal to "triangular" (default) or "spherical". The latter case corresponds to the great circle distance and is more precise than triangular but is a bit more intensive computationally.}
 
-\item{ssc}{An object returned by the function \code{\link[fixest]{ssc}}. It specifies how to perform the small sample correction.}
+\item{ssc}{An object returned by the function \code{\link{ssc}}. It specifies how to perform the small sample correction.}
 }
 \value{
 If the first argument is a \code{fixest} object, then a VCOV is returned (i.e. a symmetric matrix).
 
-If the first argument is not a \code{fixest} object, then a) implicitly the arguments are shifted to the left (i.e. \code{vcov_conley("lat", "long")} is equivalent to \code{vcov_conley(lat = "lat", lon = "long")}) and b) a VCOV-\emph{request} is returned and NOT a VCOV. That VCOV-request can then be used in the argument \code{vcov} of various \code{fixest} functions (e.g. \code{\link[fixest]{vcov.fixest}} or even in the estimation calls).
+If the first argument is not a \code{fixest} object, then a) implicitly the arguments are shifted to the left (i.e. \code{vcov_conley("lat", "long")} is equivalent to \code{vcov_conley(lat = "lat", lon = "long")}) and b) a VCOV-\emph{request} is returned and NOT a VCOV. That VCOV-request can then be used in the argument \code{vcov} of various \code{fixest} functions (e.g. \code{\link{vcov.fixest}} or even in the estimation calls).
 }
 \description{
 Compute VCOVs robust to spatial correlation, a la Conley (1999).
@@ -47,7 +47,7 @@ The kernel is uniform.
 
 If the cutoff is not provided, an estimation of it is given. This cutoff ensures that a minimum of units lie within it and is robust to sub-sampling. This automatic cutoff is only here for convenience, the most appropriate cutoff shall depend on the application and shall be provided by the user.
 
-The function \code{conley} does not compute VCOVs directly but is meant to be used in the argument \code{vcov} of \code{fixest} functions (e.g. in \code{\link[fixest]{vcov.fixest}} or even in the estimation calls).
+The function \code{conley} does not compute VCOVs directly but is meant to be used in the argument \code{vcov} of \code{fixest} functions (e.g. in \code{\link{vcov.fixest}} or even in the estimation calls).
 }
 \examples{
 

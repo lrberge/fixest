@@ -11,12 +11,12 @@ fitstat_register(type, fun, alias = NULL, subtypes = NULL)
 
 \item{fun}{A function to be applied to a \code{fixest} estimation. It must return either a scalar, or a list of unitary elements. If the number of elements returned is greater than 1, then each element must be named! If the fit statistic is not valid for a given estimation, a plain \code{NA} value should be returned.}
 
-\item{alias}{A (named) character vector. An alias to be used in lieu of the type name in the display methods (ie when used in \code{\link[fixest]{print.fixest_fitstat}} or \code{\link[fixest]{etable}}). If the function returns several values, i.e. sub-types, you can give an alias to these sub-types. The syntax is \code{c("type" = "alias", "subtype_i" = "alias_i")}, with "type" (resp. "subtype") the value of the argument \code{type} resp. (\code{subtypes}). You can also give an alias encompassing the type and sub-type with the syntax \code{c("type.subtype_i" = "alias")}.}
+\item{alias}{A (named) character vector. An alias to be used in lieu of the type name in the display methods (ie when used in \code{\link{print.fixest_fitstat}} or \code{\link{etable}}). If the function returns several values, i.e. sub-types, you can give an alias to these sub-types. The syntax is \code{c("type" = "alias", "subtype_i" = "alias_i")}, with "type" (resp. "subtype") the value of the argument \code{type} resp. (\code{subtypes}). You can also give an alias encompassing the type and sub-type with the syntax \code{c("type.subtype_i" = "alias")}.}
 
 \item{subtypes}{A character vector giving the name of each element returned by the function \code{fun}. This is only used when the function returns more than one value. Note that you can use the shortcut "test" when the sub-types are "stat", "p" and "df"; and "test2" when these are "stat", "p", "df1" and "df2".}
 }
 \description{
-Enables the registration of custom fi statistics that can be easily summoned with the function \code{\link[fixest]{fitstat}}.
+Enables the registration of custom fi statistics that can be easily summoned with the function \code{\link{fitstat}}.
 }
 \details{
 If there are several components to the computed statistics (i.e. the function returns several elements), then using the argument \code{subtypes}, giving the names of each of these components, is mandatory. This is to ensure that the statistic can be used as any other built-in statistic (and there are too many edge cases impeding automatic deduction).

@@ -27,7 +27,7 @@
 Returns a list of the appropriate length. Each element of the list is a \code{fixest} object.
 }
 \description{
-Simple function that replicates \code{fixest} objects while (optionally) computing different standard-errors. Useful mostly in combination with \code{\link[fixest]{etable}} or \code{\link[fixest]{coefplot}}.
+Simple function that replicates \code{fixest} objects while (optionally) computing different standard-errors. Useful mostly in combination with \code{\link{etable}} or \code{\link{coefplot}}.
 }
 \details{
 To apply \code{rep.fixest} on a list of \code{fixest} objects, it is absolutely necessary to use \code{.l()} and not \code{list()}.

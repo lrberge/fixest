@@ -15,17 +15,17 @@ l(x, lag = 1, fill = NA)
 \arguments{
 \item{x}{The variable.}
 
-\item{lead}{A vector of integers giving the number of leads. Negative values lead to lags. This argument can be a vector when using it in fixest estimations. When creating variables in a \code{\link[data.table]{data.table}}, it **must** be of length one.}
+\item{lead}{A vector of integers giving the number of leads. Negative values lead to lags. This argument can be a vector when using it in fixest estimations. When creating variables in a \code{\link[data.table:data.table]{data.table::data.table}}, it \strong{must} be of length one.}
 
 \item{fill}{A scalar, default is \code{NA}. How to fill the missing values due to the lag/lead? Note that in a \code{fixest} estimation, 'fill' must be numeric (not required when creating new variables).}
 
-\item{lag}{A vector of integers giving the number of lags. Negative values lead to leads. This argument can be a vector when using it in fixest estimations. When creating variables in a \code{\link[data.table]{data.table}}, it **must** be of length one.}
+\item{lag}{A vector of integers giving the number of lags. Negative values lead to leads. This argument can be a vector when using it in fixest estimations. When creating variables in a \code{\link[data.table:data.table]{data.table::data.table}}, it \strong{must} be of length one.}
 }
 \value{
-These functions can only be used i) in a formula of a \code{fixest} estimation, or ii) when creating variables within a \code{fixest_panel} object (obtained with function \code{\link[fixest]{panel}}) which is alaos a \code{\link[data.table]{data.table}}.
+These functions can only be used i) in a formula of a \code{fixest} estimation, or ii) when creating variables within a \code{fixest_panel} object (obtained with function \code{\link{panel}}) which is alaos a \code{\link[data.table:data.table]{data.table::data.table}}.
 }
 \description{
-Produce lags or leads in the formulas of \code{fixest} estimations or when creating variables in a \code{\link[data.table]{data.table}}. The data must be set as a panel beforehand (either with the function \code{\link[fixest]{panel}} or with the argument \code{panel.id} in the estimation).
+Produce lags or leads in the formulas of \code{fixest} estimations or when creating variables in a \code{\link[data.table:data.table]{data.table::data.table}}. The data must be set as a panel beforehand (either with the function \code{\link{panel}} or with the argument \code{panel.id} in the estimation).
 }
 \section{Functions}{
 \itemize{
@@ -65,5 +65,5 @@ if(require("data.table")){
 
 }
 \seealso{
-The function \code{\link[fixest]{panel}} changes \code{data.frames} into a panel from which the functions \code{l} and \code{f} can be called. Otherwise you can set the panel 'live' during the estimation using the argument \code{panel.id} (see for example in the function \code{\link[fixest]{feols}}).
+The function \code{\link{panel}} changes \code{data.frames} into a panel from which the functions \code{l} and \code{f} can be called. Otherwise you can set the panel 'live' during the estimation using the argument \code{panel.id} (see for example in the function \code{\link{feols}}).
 }

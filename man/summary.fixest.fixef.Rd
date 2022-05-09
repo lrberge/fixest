@@ -7,7 +7,7 @@
 \method{summary}{fixest.fixef}(object, n = 5, ...)
 }
 \arguments{
-\item{object}{An object returned by the function \code{\link[fixest]{fixef.fixest}}.}
+\item{object}{An object returned by the function \code{\link{fixef.fixest}}.}
 
 \item{n}{Positive integer, defaults to 5. The \code{n} first fixed-effects for each fixed-effect dimension are reported.}
 
@@ -36,7 +36,7 @@ summary(fe_trade)
 
 }
 \seealso{
-\code{\link[fixest]{femlm}}, \code{\link[fixest]{fixef.fixest}}, \code{\link[fixest]{plot.fixest.fixef}}.
+\code{\link{femlm}}, \code{\link{fixef.fixest}}, \code{\link{plot.fixest.fixef}}.
 }
 \author{
 Laurent Berge

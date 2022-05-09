@@ -7,7 +7,7 @@
 \method{AIC}{fixest}(object, ..., k = 2)
 }
 \arguments{
-\item{object}{A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
+\item{object}{A \code{fixest} object. Obtained using the functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}.}
 
 \item{...}{Optionally, more fitted objects.}
 
@@ -24,7 +24,7 @@ The AIC is computed as:
 \deqn{AIC = -2\times LogLikelihood + k\times nbParams}
 with k the penalty parameter.
 
-You can have more information on this criterion on \code{\link[stats]{AIC}}.
+You can have more information on this criterion on \code{\link[stats:AIC]{AIC}}.
 }
 \examples{
 
@@ -39,7 +39,7 @@ BIC(res1, res2)
 
 }
 \seealso{
-See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Other statictics methods: \code{\link[fixest]{BIC.fixest}}, \code{\link[fixest]{logLik.fixest}}, \code{\link[fixest]{nobs.fixest}}.
+See also the main estimation functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}. Other statictics methods: \code{\link{BIC.fixest}}, \code{\link{logLik.fixest}}, \code{\link{nobs.fixest}}.
 }
 \author{
 Laurent Berge

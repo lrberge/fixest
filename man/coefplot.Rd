@@ -127,11 +127,11 @@ iplot(
 )
 }
 \arguments{
-\item{object}{Can be either: i) an estimation object (obtained for example from \code{\link[fixest]{feols}}, ii) a list of estimation objects (several results will be plotted at once), iii) a matrix of coefficients table, iv) a numeric vector of the point estimates -- the latter requiring the extra arguments \code{sd} or \code{ci_low} and \code{ci_high}.}
+\item{object}{Can be either: i) an estimation object (obtained for example from \code{\link{feols}}, ii) a list of estimation objects (several results will be plotted at once), iii) a matrix of coefficients table, iv) a numeric vector of the point estimates -- the latter requiring the extra arguments \code{sd} or \code{ci_low} and \code{ci_high}.}
 
 \item{...}{Other arguments to be passed to \code{summary}, if \code{object} is an estimation, and/or to the function \code{plot} or \code{lines} (if \code{add = TRUE}).}
 
-\item{style}{A character scalar giving the style of the plot to be used. You can set styles with the function \code{\link[fixest]{setFixest_coefplot}}, setting all the default values of the function. If missing, then it switches to either "default" or "iplot", depending on the calling function.}
+\item{style}{A character scalar giving the style of the plot to be used. You can set styles with the function \code{\link{setFixest_coefplot}}, setting all the default values of the function. If missing, then it switches to either "default" or "iplot", depending on the calling function.}
 
 \item{sd}{The standard errors of the estimates. It may be missing.}
 
@@ -145,13 +145,13 @@ iplot(
 
 \item{horiz}{A logical scalar, default is \code{FALSE}. Whether to display the confidence intervals horizontally instead of vertically.}
 
-\item{dict}{A named character vector or a logical scalar. It changes the original variable names to the ones contained in the \code{dict}ionary. E.g. to change the variables named \code{a} and \code{b3} to (resp.) \dQuote{$log(a)$} and to \dQuote{$bonus^3$}, use \code{dict=c(a="$log(a)$",b3="$bonus^3$")}. By default, it is equal to \code{getFixest_dict()}, a default dictionary which can be set with \code{\link[fixest]{setFixest_dict}}. You can use \code{dict = FALSE} to disable it. By default \code{dict} modifies the entries in the global dictionary, to disable this behavior, use "reset" as the first element (ex: \code{dict=c("reset", mpg="Miles per gallon")}).}
+\item{dict}{A named character vector or a logical scalar. It changes the original variable names to the ones contained in the \code{dict}ionary. E.g. to change the variables named \code{a} and \code{b3} to (resp.) \dQuote{$log(a)$} and to \dQuote{$bonus^3$}, use \code{dict=c(a="$log(a)$",b3="$bonus^3$")}. By default, it is equal to \code{getFixest_dict()}, a default dictionary which can be set with \code{\link{setFixest_dict}}. You can use \code{dict = FALSE} to disable it. By default \code{dict} modifies the entries in the global dictionary, to disable this behavior, use "reset" as the first element (ex: \code{dict=c("reset", mpg="Miles per gallon")}).}
 
-\item{keep}{Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{keep = "x[[:digit:]]$"}. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is kept). See details.}
+\item{keep}{Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}} help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{keep = "x[[:digit:]]$"}. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is kept). See details.}
 
-\item{drop}{Character vector. This element is used if some variables are not to be displayed. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). Each variable satisfying any of the regular expressions will be discarded. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{drop = "x[[:digit:]]{2}"}. If the first character is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is dropped). See details.}
+\item{drop}{Character vector. This element is used if some variables are not to be displayed. This should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}} help for more info). Each variable satisfying any of the regular expressions will be discarded. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \verb{drop = "x[[:digit:]]\{2}"}. If the first character is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is dropped). See details.}
 
-\item{order}{Character vector. This element is used if the user wants the variables to be ordered in a certain way. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). The variables satisfying the first regular expression will be placed first, then the order follows the sequence of regular expressions. This argument is applied post aliasing (see argument \code{dict}). Example: you have the following variables: \code{month1} to \code{month6}, then \code{x1} to \code{x5}, then \code{year1} to \code{year6}. If you want to display first the x's, then the years, then the months you could use: \code{order = c("x", "year")}. If the first character is an exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that does not contain \dQuote{Intercept} goes first).  See details.}
+\item{order}{Character vector. This element is used if the user wants the variables to be ordered in a certain way. This should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}} help for more info). The variables satisfying the first regular expression will be placed first, then the order follows the sequence of regular expressions. This argument is applied post aliasing (see argument \code{dict}). Example: you have the following variables: \code{month1} to \code{month6}, then \code{x1} to \code{x5}, then \code{year1} to \code{year6}. If you want to display first the x's, then the years, then the months you could use: \code{order = c("x", "year")}. If the first character is an exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that does not contain \dQuote{Intercept} goes first).  See details.}
 
 \item{ci.width}{The width of the extremities of the confidence intervals. Default is \code{0.1}.}
 
@@ -183,29 +183,29 @@ iplot(
 
 \item{grid}{Logical, default is \code{TRUE}. Whether a grid should be displayed. You can set the display of the grid with the argument \code{grid.par}.}
 
-\item{grid.par}{List. Parameters of the grid. The default values are: \code{lty = 3} and \code{col = "gray"}. You can add any graphical parameter that will be passed to \code{\link[graphics]{abline}}. You also have two additional arguments: use \code{horiz = FALSE} to disable the horizontal lines, and use \code{vert = FALSE} to disable the vertical lines. Eg: \code{grid.par = list(vert = FALSE, col = "red", lwd = 2)}.}
+\item{grid.par}{List. Parameters of the grid. The default values are: \code{lty = 3} and \code{col = "gray"}. You can add any graphical parameter that will be passed to \code{\link[graphics:abline]{graphics::abline}}. You also have two additional arguments: use \code{horiz = FALSE} to disable the horizontal lines, and use \code{vert = FALSE} to disable the vertical lines. Eg: \code{grid.par = list(vert = FALSE, col = "red", lwd = 2)}.}
 
 \item{zero}{Logical, default is \code{TRUE}. Whether the 0-line should be emphasized. You can set the parameters of that line with the argument \code{zero.par}.}
 
-\item{zero.par}{List. Parameters of the zero-line. The default values are \code{col = "black"} and \code{lwd = 1}. You can add any graphical parameter that will be passed to \code{\link[graphics]{abline}}. Example: \code{zero.par = list(col = "darkblue", lwd = 3)}.}
+\item{zero.par}{List. Parameters of the zero-line. The default values are \code{col = "black"} and \code{lwd = 1}. You can add any graphical parameter that will be passed to \code{\link[graphics:abline]{graphics::abline}}. Example: \code{zero.par = list(col = "darkblue", lwd = 3)}.}
 
 \item{pt.join}{Logical, default is \code{FALSE}. If \code{TRUE}, then the coefficient estimates are joined with a line.}
 
-\item{pt.join.par}{List. Parameters of the line joining the coefficients. The default values are: \code{col = pt.col} and \code{lwd = lwd}. You can add any graphical parameter that will be passed to \code{\link[graphics]{lines}}. Eg: \code{pt.join.par = list(lty = 2)}.}
+\item{pt.join.par}{List. Parameters of the line joining the coefficients. The default values are: \code{col = pt.col} and \code{lwd = lwd}. You can add any graphical parameter that will be passed to \code{\link{lines}}. Eg: \code{pt.join.par = list(lty = 2)}.}
 
 \item{ci.join}{Logical default to \code{FALSE}. Whether to join the extremities of the confidence intervals. If \code{TRUE}, then you can set the graphical parameters with the argument \code{ci.join.par}.}
 
-\item{ci.join.par}{A list of parameters to be passed to \code{\link[graphics]{lines}}. Only used if \code{ci.join=TRUE}. By default it is equal to \code{list(lwd = lwd, col = col, lty = 2)}.}
+\item{ci.join.par}{A list of parameters to be passed to \code{\link[graphics:lines]{graphics::lines}}. Only used if \code{ci.join=TRUE}. By default it is equal to \code{list(lwd = lwd, col = col, lty = 2)}.}
 
-\item{ci.fill}{Logical default to \code{FALSE}. Whether to fille the confidence intervals with a color. If \code{TRUE}, then you can set the graphical parameters with the argument \code{ci.fill.par}.}
+\item{ci.fill}{Logical default to \code{FALSE}. Whether to fill the confidence intervals with a color. If \code{TRUE}, then you can set the graphical parameters with the argument \code{ci.fill.par}.}
 
-\item{ci.fill.par}{A list of parameters to be passed to \code{\link[graphics]{polygon}}. Only used if \code{ci.fill=TRUE}. By default it is equal to \code{list(col = "lightgray", alpha = 0.5)}. Note that \code{alpha} is a special parameter that adds transparency to the color (ranges from 0 to 1).}
+\item{ci.fill.par}{A list of parameters to be passed to \code{\link[graphics:polygon]{graphics::polygon}}. Only used if \code{ci.fill=TRUE}. By default it is equal to \code{list(col = "lightgray", alpha = 0.5)}. Note that \code{alpha} is a special parameter that adds transparency to the color (ranges from 0 to 1).}
 
 \item{ref}{Used to add points equal to 0 (typically to visualize reference points). Either: i) "auto" (default), ii) a character vector of length 1, iii) a list of length 1, iv) a named integer vector of length 1, or v) a numeric vector. By default, in \code{iplot}, if the argument \code{ref} has been used in the estimation, these references are automatically added. If ii), ie a character scalar, then that coefficient equal to zero is added as the first coefficient. If a list or a named integer vector of length 1, then the integer gives the position of the reference among the coefficients and the name gives the coefficient name. A non-named numeric value of \code{ref} only works if the x-axis is also numeric (which can happen in \code{iplot}).}
 
 \item{ref.line}{Logical or numeric, default is "auto", whose behavior depends on the situation. It is \code{TRUE} only if: i) interactions are plotted, ii) the x values are numeric and iii) a reference is found. If \code{TRUE}, then a vertical line is drawn at the level of the reference value. Otherwise, if numeric a vertical line will be drawn at that specific value.}
 
-\item{ref.line.par}{List. Parameters of the vertical line on the reference. The default values are: \code{col = "black"} and \code{lty = 2}. You can add any graphical parameter that will be passed to \code{\link[graphics]{abline}}. Eg: \code{ref.line.par = list(lty = 1, lwd = 3)}.}
+\item{ref.line.par}{List. Parameters of the vertical line on the reference. The default values are: \code{col = "black"} and \code{lty = 2}. You can add any graphical parameter that will be passed to \code{\link[graphics:abline]{graphics::abline}}. Eg: \code{ref.line.par = list(lty = 1, lwd = 3)}.}
 
 \item{lab.cex}{The size of the labels of the coefficients. Default is missing. It is automatically set by an internal algorithm which can go as low as \code{lab.min.cex} (another argument).}
 
@@ -227,13 +227,13 @@ iplot(
 
 \item{bg}{Background color for the plot. By default it is white.}
 
-\item{group}{A list, default is missing. Each element of the list reports the coefficients to be grouped while the name of the element is the group name. Each element of the list can be either: i) a character vector of length 1, ii) of length 2, or ii) a numeric vector. If equal to: i) then it is interpreted as a pattern: all element fitting the regular expression will be grouped (note that you can use the special character "^^" to clean the beginning of the names, see example), if ii) it corrsponds to the first and last elements to be grouped, if iii) it corresponds to the coefficients numbers to be grouped. If equal to a character vector, you can use a percentage to tell the algorithm to look at the coefficients before aliasing (e.g. \code{"\%varname"}). Example of valid uses: \code{group=list(group_name=\"pattern\")}, \code{group=list(group_name=c(\"var_start\", \"var_end\"))}, \code{group=list(group_name=1:2))}. See details.}
+\item{group}{A list, default is missing. Each element of the list reports the coefficients to be grouped while the name of the element is the group name. Each element of the list can be either: i) a character vector of length 1, ii) of length 2, or ii) a numeric vector. If equal to: i) then it is interpreted as a pattern: all element fitting the regular expression will be grouped (note that you can use the special character "^^" to clean the beginning of the names, see example), if ii) it corrsponds to the first and last elements to be grouped, if iii) it corresponds to the coefficients numbers to be grouped. If equal to a character vector, you can use a percentage to tell the algorithm to look at the coefficients before aliasing (e.g. \code{"\%varname"}). Example of valid uses: \verb{group=list(group_name=\\"pattern\\")}, \verb{group=list(group_name=c(\\"var_start\\", \\"var_end\\"))}, \verb{group=list(group_name=1:2))}. See details.}
 
 \item{group.par}{A list of parameters controlling the display of the group. The parameters controlling the line are: \code{lwd}, \code{tcl} (length of the tick), \code{line.adj} (adjustment of the position, default is 0), \code{tick} (whether to add the ticks), \code{lwd.ticks}, \code{col.ticks}. Then the parameters controlling the text: \code{text.adj} (adjustment of the position, default is 0), \code{text.cex}, \code{text.font}, \code{text.col}.}
 
-\item{main}{The title of the plot. Default is \code{"Effect on __depvar__"}. You can use the special variable \code{__depvar__} to set the title (useful when you set the plot default with \code{\link[fixest]{setFixest_coefplot}}).}
+\item{main}{The title of the plot. Default is \code{"Effect on __depvar__"}. You can use the special variable \verb{__depvar__} to set the title (useful when you set the plot default with \code{\link{setFixest_coefplot}}).}
 
-\item{value.lab}{The label to appear on the side of the coefficient values. If \code{horiz = FALSE}, the label appears in the y-axis. If \code{horiz = TRUE}, then it appears on the x-axis. The default is equal to \code{"Estimate and __ci__ Conf. Int."}, with \code{__ci__} a special variable giving the value of the confidence interval.}
+\item{value.lab}{The label to appear on the side of the coefficient values. If \code{horiz = FALSE}, the label appears in the y-axis. If \code{horiz = TRUE}, then it appears on the x-axis. The default is equal to \code{"Estimate and __ci__ Conf. Int."}, with \verb{__ci__} a special variable giving the value of the confidence interval.}
 
 \item{ylab}{The label of the y-axis, default is \code{NULL}. Note that if \code{horiz = FALSE}, it overrides the value of the argument \code{value.lab}.}
 
@@ -241,10 +241,10 @@ iplot(
 
 \item{sub}{A subtitle, default is \code{NULL}.}
 
-\item{i.select}{Integer scalar, default is 1. In \code{iplot}, used to select which variable created with \code{i()} to select. Only used when there are several variables created with \code{\link[fixest]{i}}. This is an index, just try increasing numbers to hopefully obtain what you want. Note that it works much better when the variables are "pure" \code{i()} variables and not interacted with other variables. For example: \code{i(species, x1)} is good while \code{i(species):x1} isn't. The latter will also work but the index may feel weird in case there are many \code{i()} variables.}
+\item{i.select}{Integer scalar, default is 1. In \code{iplot}, used to select which variable created with \code{i()} to select. Only used when there are several variables created with \code{\link{i}}. This is an index, just try increasing numbers to hopefully obtain what you want. Note that it works much better when the variables are "pure" \code{i()} variables and not interacted with other variables. For example: \code{i(species, x1)} is good while \code{i(species):x1} isn't. The latter will also work but the index may feel weird in case there are many \code{i()} variables.}
 }
 \description{
-This function plots the results of estimations (coefficients and confidence intervals). The function \code{iplot} restricts the output to variables created with \code{\link[fixest]{i}}, either interactions with factors or raw factors.
+This function plots the results of estimations (coefficients and confidence intervals). The function \code{iplot} restricts the output to variables created with \code{\link{i}}, either interactions with factors or raw factors.
 }
 \section{Functions}{
 \itemize{
@@ -253,13 +253,13 @@ This function plots the results of estimations (coefficients and confidence inte
 
 \section{Setting custom default values}{
 
-The function \code{coefplot} dispose of many arguments to parametrize the plots. Most of these arguments can be set once an for all using the function \code{\link[fixest]{setFixest_coefplot}}. See Example 3 below for a demonstration.
+The function \code{coefplot} dispose of many arguments to parametrize the plots. Most of these arguments can be set once an for all using the function \code{\link{setFixest_coefplot}}. See Example 3 below for a demonstration.
 }
 
 \section{iplot}{
 
 
-The function \code{iplot} restricts \code{coefplot} to interactions or factors created with the function \code{\link[fixest]{i}}. Only \emph{one} of the i-variables will be plotted at a time. If you have several i-variables, you can navigate through them with the \code{i.select} argument.
+The function \code{iplot} restricts \code{coefplot} to interactions or factors created with the function \code{\link{i}}. Only \emph{one} of the i-variables will be plotted at a time. If you have several i-variables, you can navigate through them with the \code{i.select} argument.
 
 The argument \code{i.select} is an index that will go through all the i-variables. It will work well if the variables are pure, meaning not interacted with other variables. If the i-variables are interacted, the index may have an odd behavior but will (in most cases) work all the same, just try some numbers up until you (hopefully) obtain the graph you want.
 
@@ -276,7 +276,7 @@ Although you can combine several regular expressions in a single character strin
 
 You can use the special character "!" (exclamation mark) to reverse the effect of the regular expression (this feature is specific to this function). For example \code{drop = "!Wind"} would drop any variable that does not contain "Wind".
 
-You can use the special character "\%" (percentage) to make reference to the original variable name instead of the aliased name. For example, you have a variable named \code{"Month6"}, and use a dictionary \code{dict = c(Month6="June")}. Thus the variable will be displayed as \code{"June"}. If you want to delete that variable, you can use either \code{drop="June"}, or \code{drop="\%Month6"} (which makes reference to its original name).
+You can use the special character "\\%" (percentage) to make reference to the original variable name instead of the aliased name. For example, you have a variable named \code{"Month6"}, and use a dictionary \code{dict = c(Month6="June")}. Thus the variable will be displayed as \code{"June"}. If you want to delete that variable, you can use either \code{drop="June"}, or \code{drop="\\\%Month6"} (which makes reference to its original name).
 
 The argument \code{order} takes in a vector of regular expressions, the order will follow the elements of this vector. The vector gives a list of priorities, on the left the elements with highest priority. For example, order = c("Wind", "!Inter", "!Temp") would give highest priorities to the variables containing "Wind" (which would then appear first), second highest priority is the variables not containing "Inter", last, with lowest priority, the variables not containing "Temp". If you had the following variables: (Intercept), Temp:Wind, Wind, Temp you would end up with the following order: Wind, Temp:Wind, Temp, (Intercept).
 }
@@ -430,7 +430,7 @@ coefplot(est, group = list(Sepal = "^^Sepal.", Species = "^^Species"))
 
 }
 \seealso{
-See \code{\link[fixest]{setFixest_coefplot}} to set the default values of \code{coefplot}, and the estimation functions: e.g. \code{\link[fixest]{feols}}, \code{\link[fixest:feglm]{fepois}}, \code{\link[fixest]{feglm}}, \code{\link[fixest:femlm]{fenegbin}}.
+See \code{\link{setFixest_coefplot}} to set the default values of \code{coefplot}, and the estimation functions: e.g. \code{\link{feols}}, \code{\link[=feglm]{fepois}}, \code{\link{feglm}}, \code{\link[=femlm]{fenegbin}}.
 }
 \author{
 Laurent Berge

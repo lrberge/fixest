@@ -7,7 +7,7 @@
 \method{nobs}{fixest}(object, ...)
 }
 \arguments{
-\item{object}{A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
+\item{object}{A \code{fixest} object. Obtained using the functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}.}
 
 \item{...}{Not currently used.}
 }
@@ -15,7 +15,7 @@
 It returns an interger.
 }
 \description{
-This function simply extracts the number of observations form a \code{fixest} object, obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
+This function simply extracts the number of observations form a \code{fixest} object, obtained using the functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}.
 }
 \examples{
 
@@ -29,7 +29,7 @@ logLik(res)
 
 }
 \seealso{
-See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the fixed-effects coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
+See also the main estimation functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}. Use \code{\link{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link{fixef.fixest}} to extract the fixed-effects coefficients, and the function \code{\link{etable}} to visualize the results of multiple estimations.
 }
 \author{
 Laurent Berge

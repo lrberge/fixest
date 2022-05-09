@@ -18,7 +18,7 @@ Note that the fixed-effect coefficients might NOT be interpretable. This functio
 If the data are not regular in the fixed-effect coefficients, this means that several \sQuote{reference points} are set to obtain the fixed-effects, thereby impeding their interpretation. In this case a warning is raised.}
 }
 \description{
-This function plots the 5 fixed-effects with the highest and lowest values, for each of the fixed-effect dimension. It takes as an argument the fixed-effects obtained from the function \code{\link{fixef.fixest}} after an estimation using \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
+This function plots the 5 fixed-effects with the highest and lowest values, for each of the fixed-effect dimension. It takes as an argument the fixed-effects obtained from the function \code{\link{fixef.fixest}} after an estimation using \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}.
 }
 \examples{
 
@@ -37,7 +37,7 @@ plot(fe_trade)
 
 }
 \seealso{
-\code{\link[fixest]{fixef.fixest}} to extract clouster coefficients. See also the main estimation function \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
+\code{\link{fixef.fixest}} to extract clouster coefficients. See also the main estimation function \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}. Use \code{\link{summary.fixest}} to see the results with the appropriate standard-errors, the function \code{\link{etable}} to visualize the results of multiple estimations.
 }
 \author{
 Laurent Berge

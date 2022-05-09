@@ -38,7 +38,7 @@ style.df(
 
 \item{slopes.line}{Character scalar. Default is \code{"-"}. A character that will be used to create a line of separation for the variables with varying slopes header. Used only if \code{slopes.line} is not the empty string.}
 
-\item{slopes.format}{Character scalar. Default is \code{"__var__ (__slope__)"}. The format of the name of the varying slopes. The values \code{__var__} and \code{__slope__} are special characters that will be replaced by the value of the variable name and slope name, respectively.}
+\item{slopes.format}{Character scalar. Default is \code{"__var__ (__slope__)"}. The format of the name of the varying slopes. The values \verb{__var__} and \verb{__slope__} are special characters that will be replaced by the value of the variable name and slope name, respectively.}
 
 \item{stats.title}{Character scalar. Default is \code{"_"}. The header preceding the statistics section. If equal to the empty string, then this line is removed. If equal to single character (like in the default), then this character will be expanded to take the full column width.}
 
@@ -50,9 +50,9 @@ style.df(
 
 \item{signif.code}{Named numeric vector, used to provide the significance codes with respect to the p-value of the coefficients. Default is \code{c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)}. To suppress the significance codes, use \code{signif.code=NA} or \code{signif.code=NULL}. Can also be equal to \code{"letters"}, then the default becomes \code{c("a"=0.01, "b"=0.05, "c"=0.10)}.}
 
-\item{interaction.combine}{Character scalar, defaults to \code{" x "}. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if \code{dict = c(x1="Wind", x2="Rain")} and you have the following interaction \code{x1:x2}, then it will be renamed (by default) \code{Wind x Rain} -- using \code{interaction.combine = "*"} would lead to \code{Wind*Rain}.}
+\item{interaction.combine}{Character scalar, defaults to \code{" x "}. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if \code{dict = c(x1="Wind", x2="Rain")} and you have the following interaction \code{x1:x2}, then it will be renamed (by default) \verb{Wind x Rain} -- using \code{interaction.combine = "*"} would lead to \code{Wind*Rain}.}
 
-\item{i.equal}{Character scalar, defaults to \code{" = "}. Only affects factor variables created with the function \code{\link[fixest]{i}}, tells how the variable should be linked to its value. For example if you have the Species factor from the iris data set, by default the display of the variable is \code{Species = Setosa}, etc. If \code{i.equal = ": "} the display becomes \code{Species: Setosa}.}
+\item{i.equal}{Character scalar, defaults to \code{" = "}. Only affects factor variables created with the function \code{\link{i}}, tells how the variable should be linked to its value. For example if you have the Species factor from the iris data set, by default the display of the variable is \code{Species = Setosa}, etc. If \code{i.equal = ": "} the display becomes \code{Species: Setosa}.}
 
 \item{default}{Logical, default is \code{FALSE}. If \code{TRUE}, all the values not provided by the user are set to their default.}
 }
@@ -60,11 +60,10 @@ style.df(
 It returns an object of class \code{fixest_style_df}.
 }
 \description{
-This function describes the style of data.frames created with the function \code{\link[fixest]{etable}}.
+This function describes the style of data.frames created with the function \code{\link{etable}}.
 }
 \details{
 @inheritParams etable
-
 
 The title elements (\code{depvar.title}, \code{fixef.title}, \code{slopes.title} and \code{stats.title}) will be the row names of the returned data.frame. Therefore keep in mind that any two of them should not be identical (since identical row names are forbidden in data.frames).
 }

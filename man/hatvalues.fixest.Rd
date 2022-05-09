@@ -15,10 +15,10 @@
 Returns a vector of the same length as the number of observations used in the estimation.
 }
 \description{
-Computes the hat values for \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}} estimations. Only works when there are no fixed-effects.
+Computes the hat values for \code{\link{feols}} or \code{\link{feglm}} estimations. Only works when there are no fixed-effects.
 }
 \details{
-Hat values are not available for \code{\link[fixest:femlm]{fenegbin}}, \code{\link[fixest]{femlm}} and \code{\link[fixest]{feNmlm}} estimations.
+Hat values are not available for \code{\link[=fixest:femlm]{fenegbin}}, \code{\link{femlm}} and \code{\link{feNmlm}} estimations.
 
 When there are fixed-effects, the hat values of the reduced form are different from the hat values of the full model. And we cannot get costlessly the hat values of the full model from the reduced form. It would require to reestimate the model with the fixed-effects as regular variables.
 }

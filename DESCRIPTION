@@ -29,4 +29,5 @@ SystemRequirements: C++11
 VignetteBuilder: knitr
 LazyData: true
 RoxygenNote: 7.1.2
+Roxygen: list(markdown = TRUE)
 Encoding: UTF-8

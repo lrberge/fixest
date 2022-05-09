@@ -7,7 +7,7 @@
 as.dict(x)
 }
 \arguments{
-\item{x}{A character scalar of the form \code{"variable 1: definition \n variable 2: definition"} etc. Each line of this character must contain at most one definition with, on the left the variable name, and on the right its definition. The separation between the variable and its definition must be a colon followed with a single space (i.e. ": "). You can stack definitions within a single line by making use of a semi colon: \code{"var1: def; var2: def"}. White spaces on the left and right are ignored. You can add commented lines with a \code{"#"}. Non-empty, non-commented lines that don't have the proper format witll raise an error.}
+\item{x}{A character scalar of the form \code{"variable 1: definition \\n variable 2: definition"} etc. Each line of this character must contain at most one definition with, on the left the variable name, and on the right its definition. The separation between the variable and its definition must be a colon followed with a single space (i.e. ": "). You can stack definitions within a single line by making use of a semi colon: \code{"var1: def; var2: def"}. White spaces on the left and right are ignored. You can add commented lines with a \code{"#"}. Non-empty, non-commented lines that don't have the proper format witll raise an error.}
 }
 \value{
 It returns a named character vector.
@@ -16,7 +16,7 @@ It returns a named character vector.
 Transforms a single character string containing a dictionary in a textual format into a proper dictionary, that is a named character vector
 }
 \details{
-This function is mostly used in combination with \code{\link[fixest]{setFixest_dict}} to set the dictionary to be used in the function \code{\link[fixest]{etable}}.
+This function is mostly used in combination with \code{\link{setFixest_dict}} to set the dictionary to be used in the function \code{\link{etable}}.
 }
 \examples{
 
@@ -33,7 +33,7 @@ as.dict(x)
 
 }
 \seealso{
-\code{\link[fixest]{etable}}, \code{\link[fixest]{setFixest_dict}}
+\code{\link{etable}}, \code{\link{setFixest_dict}}
 }
 \author{
 Laurent Berge

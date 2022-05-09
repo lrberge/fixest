@@ -22,7 +22,7 @@
 \arguments{
 \item{object}{A \code{fixes_multi} object.}
 
-\item{type}{A character scalar, either \code{"response"} (default), \code{"deviance"}, \code{"pearson"}, or \code{"working"}. Note that the \code{"working"} corresponds to the residuals from the weighted least square and only applies to \code{\link[fixest]{feglm}} models.}
+\item{type}{A character scalar, either \code{"response"} (default), \code{"deviance"}, \code{"pearson"}, or \code{"working"}. Note that the \code{"working"} corresponds to the residuals from the weighted least square and only applies to \code{\link{feglm}} models.}
 
 \item{na.rm}{Logical, default is \code{FALSE}. Should the NAs be kept? If \code{TRUE}, they are removed.}
 

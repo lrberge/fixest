@@ -26,7 +26,6 @@ dsb(
 
 \item{collapse}{Character scalar or \code{NULL} (default). If provided, the resulting character vector will be collapsed into a character scalar using this value as a separator.
 
-
 There are over 30 basic string operations, it supports pluralization, it's fast (e.g. faster than \code{glue} in the benchmarks), string operations can be nested (it may be the most powerful feature), operators have sensible defaults.
 
 See detailed help on the console with \code{dsb("--help")}. The real help is in fact in the "Examples" section.}

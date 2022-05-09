@@ -56,13 +56,13 @@ setFixest_coefplot(
 getFixest_coefplot()
 }
 \arguments{
-\item{style}{A character scalar giving the style of the plot to be used. You can set styles with the function \code{\link[fixest]{setFixest_coefplot}}, setting all the default values of the function. If missing, then it switches to either "default" or "iplot", depending on the calling function.}
+\item{style}{A character scalar giving the style of the plot to be used. You can set styles with the function \code{\link{setFixest_coefplot}}, setting all the default values of the function. If missing, then it switches to either "default" or "iplot", depending on the calling function.}
 
 \item{horiz}{A logical scalar, default is \code{FALSE}. Whether to display the confidence intervals horizontally instead of vertically.}
 
-\item{dict}{A named character vector or a logical scalar. It changes the original variable names to the ones contained in the \code{dict}ionary. E.g. to change the variables named \code{a} and \code{b3} to (resp.) \dQuote{$log(a)$} and to \dQuote{$bonus^3$}, use \code{dict=c(a="$log(a)$",b3="$bonus^3$")}. By default, it is equal to \code{getFixest_dict()}, a default dictionary which can be set with \code{\link[fixest]{setFixest_dict}}. You can use \code{dict = FALSE} to disable it. By default \code{dict} modifies the entries in the global dictionary, to disable this behavior, use "reset" as the first element (ex: \code{dict=c("reset", mpg="Miles per gallon")}).}
+\item{dict}{A named character vector or a logical scalar. It changes the original variable names to the ones contained in the \code{dict}ionary. E.g. to change the variables named \code{a} and \code{b3} to (resp.) \dQuote{$log(a)$} and to \dQuote{$bonus^3$}, use \code{dict=c(a="$log(a)$",b3="$bonus^3$")}. By default, it is equal to \code{getFixest_dict()}, a default dictionary which can be set with \code{\link{setFixest_dict}}. You can use \code{dict = FALSE} to disable it. By default \code{dict} modifies the entries in the global dictionary, to disable this behavior, use "reset" as the first element (ex: \code{dict=c("reset", mpg="Miles per gallon")}).}
 
-\item{keep}{Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{keep = "x[[:digit:]]$"}. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is kept). See details.}
+\item{keep}{Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}} help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{keep = "x[[:digit:]]$"}. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is kept). See details.}
 
 \item{ci.width}{The width of the extremities of the confidence intervals. Default is \code{0.1}.}
 
@@ -92,27 +92,27 @@ getFixest_coefplot()
 
 \item{grid}{Logical, default is \code{TRUE}. Whether a grid should be displayed. You can set the display of the grid with the argument \code{grid.par}.}
 
-\item{grid.par}{List. Parameters of the grid. The default values are: \code{lty = 3} and \code{col = "gray"}. You can add any graphical parameter that will be passed to \code{\link[graphics]{abline}}. You also have two additional arguments: use \code{horiz = FALSE} to disable the horizontal lines, and use \code{vert = FALSE} to disable the vertical lines. Eg: \code{grid.par = list(vert = FALSE, col = "red", lwd = 2)}.}
+\item{grid.par}{List. Parameters of the grid. The default values are: \code{lty = 3} and \code{col = "gray"}. You can add any graphical parameter that will be passed to \code{\link[graphics:abline]{graphics::abline}}. You also have two additional arguments: use \code{horiz = FALSE} to disable the horizontal lines, and use \code{vert = FALSE} to disable the vertical lines. Eg: \code{grid.par = list(vert = FALSE, col = "red", lwd = 2)}.}
 
 \item{zero}{Logical, default is \code{TRUE}. Whether the 0-line should be emphasized. You can set the parameters of that line with the argument \code{zero.par}.}
 
-\item{zero.par}{List. Parameters of the zero-line. The default values are \code{col = "black"} and \code{lwd = 1}. You can add any graphical parameter that will be passed to \code{\link[graphics]{abline}}. Example: \code{zero.par = list(col = "darkblue", lwd = 3)}.}
+\item{zero.par}{List. Parameters of the zero-line. The default values are \code{col = "black"} and \code{lwd = 1}. You can add any graphical parameter that will be passed to \code{\link[graphics:abline]{graphics::abline}}. Example: \code{zero.par = list(col = "darkblue", lwd = 3)}.}
 
 \item{pt.join}{Logical, default is \code{FALSE}. If \code{TRUE}, then the coefficient estimates are joined with a line.}
 
-\item{pt.join.par}{List. Parameters of the line joining the coefficients. The default values are: \code{col = pt.col} and \code{lwd = lwd}. You can add any graphical parameter that will be passed to \code{\link[graphics]{lines}}. Eg: \code{pt.join.par = list(lty = 2)}.}
+\item{pt.join.par}{List. Parameters of the line joining the coefficients. The default values are: \code{col = pt.col} and \code{lwd = lwd}. You can add any graphical parameter that will be passed to \code{\link{lines}}. Eg: \code{pt.join.par = list(lty = 2)}.}
 
 \item{ci.join}{Logical default to \code{FALSE}. Whether to join the extremities of the confidence intervals. If \code{TRUE}, then you can set the graphical parameters with the argument \code{ci.join.par}.}
 
-\item{ci.join.par}{A list of parameters to be passed to \code{\link[graphics]{lines}}. Only used if \code{ci.join=TRUE}. By default it is equal to \code{list(lwd = lwd, col = col, lty = 2)}.}
+\item{ci.join.par}{A list of parameters to be passed to \code{\link[graphics:lines]{graphics::lines}}. Only used if \code{ci.join=TRUE}. By default it is equal to \code{list(lwd = lwd, col = col, lty = 2)}.}
 
-\item{ci.fill}{Logical default to \code{FALSE}. Whether to fille the confidence intervals with a color. If \code{TRUE}, then you can set the graphical parameters with the argument \code{ci.fill.par}.}
+\item{ci.fill}{Logical default to \code{FALSE}. Whether to fill the confidence intervals with a color. If \code{TRUE}, then you can set the graphical parameters with the argument \code{ci.fill.par}.}
 
-\item{ci.fill.par}{A list of parameters to be passed to \code{\link[graphics]{polygon}}. Only used if \code{ci.fill=TRUE}. By default it is equal to \code{list(col = "lightgray", alpha = 0.5)}. Note that \code{alpha} is a special parameter that adds transparency to the color (ranges from 0 to 1).}
+\item{ci.fill.par}{A list of parameters to be passed to \code{\link[graphics:polygon]{graphics::polygon}}. Only used if \code{ci.fill=TRUE}. By default it is equal to \code{list(col = "lightgray", alpha = 0.5)}. Note that \code{alpha} is a special parameter that adds transparency to the color (ranges from 0 to 1).}
 
 \item{ref.line}{Logical or numeric, default is "auto", whose behavior depends on the situation. It is \code{TRUE} only if: i) interactions are plotted, ii) the x values are numeric and iii) a reference is found. If \code{TRUE}, then a vertical line is drawn at the level of the reference value. Otherwise, if numeric a vertical line will be drawn at that specific value.}
 
-\item{ref.line.par}{List. Parameters of the vertical line on the reference. The default values are: \code{col = "black"} and \code{lty = 2}. You can add any graphical parameter that will be passed to \code{\link[graphics]{abline}}. Eg: \code{ref.line.par = list(lty = 1, lwd = 3)}.}
+\item{ref.line.par}{List. Parameters of the vertical line on the reference. The default values are: \code{col = "black"} and \code{lty = 2}. You can add any graphical parameter that will be passed to \code{\link[graphics:abline]{graphics::abline}}. Eg: \code{ref.line.par = list(lty = 1, lwd = 3)}.}
 
 \item{lab.cex}{The size of the labels of the coefficients. Default is missing. It is automatically set by an internal algorithm which can go as low as \code{lab.min.cex} (another argument).}
 
@@ -130,13 +130,13 @@ getFixest_coefplot()
 
 \item{bg}{Background color for the plot. By default it is white.}
 
-\item{group}{A list, default is missing. Each element of the list reports the coefficients to be grouped while the name of the element is the group name. Each element of the list can be either: i) a character vector of length 1, ii) of length 2, or ii) a numeric vector. If equal to: i) then it is interpreted as a pattern: all element fitting the regular expression will be grouped (note that you can use the special character "^^" to clean the beginning of the names, see example), if ii) it corrsponds to the first and last elements to be grouped, if iii) it corresponds to the coefficients numbers to be grouped. If equal to a character vector, you can use a percentage to tell the algorithm to look at the coefficients before aliasing (e.g. \code{"\%varname"}). Example of valid uses: \code{group=list(group_name=\"pattern\")}, \code{group=list(group_name=c(\"var_start\", \"var_end\"))}, \code{group=list(group_name=1:2))}. See details.}
+\item{group}{A list, default is missing. Each element of the list reports the coefficients to be grouped while the name of the element is the group name. Each element of the list can be either: i) a character vector of length 1, ii) of length 2, or ii) a numeric vector. If equal to: i) then it is interpreted as a pattern: all element fitting the regular expression will be grouped (note that you can use the special character "^^" to clean the beginning of the names, see example), if ii) it corrsponds to the first and last elements to be grouped, if iii) it corresponds to the coefficients numbers to be grouped. If equal to a character vector, you can use a percentage to tell the algorithm to look at the coefficients before aliasing (e.g. \code{"\%varname"}). Example of valid uses: \verb{group=list(group_name=\\"pattern\\")}, \verb{group=list(group_name=c(\\"var_start\\", \\"var_end\\"))}, \verb{group=list(group_name=1:2))}. See details.}
 
 \item{group.par}{A list of parameters controlling the display of the group. The parameters controlling the line are: \code{lwd}, \code{tcl} (length of the tick), \code{line.adj} (adjustment of the position, default is 0), \code{tick} (whether to add the ticks), \code{lwd.ticks}, \code{col.ticks}. Then the parameters controlling the text: \code{text.adj} (adjustment of the position, default is 0), \code{text.cex}, \code{text.font}, \code{text.col}.}
 
-\item{main}{The title of the plot. Default is \code{"Effect on __depvar__"}. You can use the special variable \code{__depvar__} to set the title (useful when you set the plot default with \code{\link[fixest]{setFixest_coefplot}}).}
+\item{main}{The title of the plot. Default is \code{"Effect on __depvar__"}. You can use the special variable \verb{__depvar__} to set the title (useful when you set the plot default with \code{\link{setFixest_coefplot}}).}
 
-\item{value.lab}{The label to appear on the side of the coefficient values. If \code{horiz = FALSE}, the label appears in the y-axis. If \code{horiz = TRUE}, then it appears on the x-axis. The default is equal to \code{"Estimate and __ci__ Conf. Int."}, with \code{__ci__} a special variable giving the value of the confidence interval.}
+\item{value.lab}{The label to appear on the side of the coefficient values. If \code{horiz = FALSE}, the label appears in the y-axis. If \code{horiz = TRUE}, then it appears on the x-axis. The default is equal to \code{"Estimate and __ci__ Conf. Int."}, with \verb{__ci__} a special variable giving the value of the confidence interval.}
 
 \item{ylab}{The label of the y-axis, default is \code{NULL}. Note that if \code{horiz = FALSE}, it overrides the value of the argument \code{value.lab}.}
 
@@ -144,13 +144,13 @@ getFixest_coefplot()
 
 \item{sub}{A subtitle, default is \code{NULL}.}
 
-\item{reset}{Logical, default is \code{TRUE}. If \code{TRUE}, then the arguments that *are not* set during the call are reset to their "factory"-default values. If \code{FALSE}, on the other hand, arguments that have already been modified are not changed.}
+\item{reset}{Logical, default is \code{TRUE}. If \code{TRUE}, then the arguments that \emph{are not} set during the call are reset to their "factory"-default values. If \code{FALSE}, on the other hand, arguments that have already been modified are not changed.}
 }
 \value{
 Doesn't return anything.
 }
 \description{
-You can set the default values of most arguments of \code{\link[fixest]{coefplot}} with this function.
+You can set the default values of most arguments of \code{\link{coefplot}} with this function.
 }
 \examples{
 
@@ -182,5 +182,5 @@ coefplot(est)
 
 }
 \seealso{
-\code{\link[fixest]{coefplot}}
+\code{\link{coefplot}}
 }

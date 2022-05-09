@@ -26,3 +26,6 @@ sample_df(iris)
 sample_df(iris, previous = TRUE)
 
 }
+\author{
+Laurent Berge
+}
