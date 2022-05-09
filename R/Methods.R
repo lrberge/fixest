@@ -31,9 +31,7 @@
 #'   [`fitstat`]. The default fit statistics depend on the
 #'   type of estimation (OLS, GLM, IV, with/without fixed-effect). Providing the
 #'   argument `fitstat` overrides the default fit statistics, you can
-#'   however use the point "." to summon them back. Ex 1: `fitstat = ~ . +
-#'   ll} adds the log-likelihood to the default values. Ex 2: `fitstat = ~
-#'   ll + pr2} only displays the log-likelihood and the pseudo-R2.
+#'   however use the point "." to summon them back. Ex 1: `fitstat = ~ . + ll` adds the log-likelihood to the default values. Ex 2: `fitstat = ~ ll + pr2` only displays the log-likelihood and the pseudo-R2.
 #' @param ... Other arguments to be passed to [`vcov.fixest`].
 #'
 #' @details It is possible to set the default values for the arguments

@@ -1288,7 +1288,7 @@ len_unique = function(x, nthreads = getFixest_nthreads()){
 #' @param add_items Logical, default is `FALSE`. Whether to add the unique values of the original vector(s). If requested, an attribute `items` is created containing the values (alternatively, they can appear in a list if `items.list=TRUE`).
 #' @param items.list Logical, default is `FALSE`. Only used if `add_items=TRUE`. If `TRUE`, then a list of length 2 is returned with `x` the integer vector and `items` the vector of items.
 #' @param multi.df Logical, default is `FALSE`. If `TRUE` then a data.frame listing the unique elements is returned in the form of a data.frame. Ignored if `add_items = FALSE`.
-#' @param multi.join Character scalar used to join the items of multiple vectors. The default is `"_"`. Ignored if `add_items = FALSE}.
+#' @param multi.join Character scalar used to join the items of multiple vectors. The default is `"_"`. Ignored if `add_items = FALSE`.
 #' @param internal Logical, default is `FALSE`. For programming only. If this function is used within another function, setting `internal = TRUE` is needed to make the evaluation of `...` valid. End users of `to_integer` should not care.
 #'
 #'
