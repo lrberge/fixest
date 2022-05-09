@@ -1972,7 +1972,7 @@ coefficients.fixest <- coef.fixest
 
 #' Extracts fitted values from a `fixest` fit
 #'
-#' This function extracts the fitted values from a model estimated with [`femlm`], [`feols`] or [`feglm`]. The fitted values that are returned are the \emph{expected predictor}.
+#' This function extracts the fitted values from a model estimated with [`femlm`], [`feols`] or [`feglm`]. The fitted values that are returned are the *expected predictor*.
 #'
 #' @inheritParams nobs.fixest
 #'
@@ -1981,7 +1981,7 @@ coefficients.fixest <- coef.fixest
 #' @param ... Not currently used.
 #'
 #' @details
-#' This function returns the \emph{expected predictor} of a `fixest` fit. The likelihood functions are detailed in [`femlm`] help page.
+#' This function returns the *expected predictor* of a `fixest` fit. The likelihood functions are detailed in [`femlm`] help page.
 #'
 #' @return
 #' It returns a numeric vector of length the number of observations used to estimate the model.

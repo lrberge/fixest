@@ -105,9 +105,9 @@
 #'
 #' To use multiple dependent variables in `fixest` estimations, you need to include them in a vector: like in `c(y1, y2, y3)`.
 #'
-#' First, if names are stored in a vector, they can readily be inserted in a formula to perform multiple estimations using the dot square bracket operator. For instance if `my_lhs = c("y1", "y2")`, calling `fixest` with, say `feols(.[my_lhs] ~ x1, etc)` is equivalent to using `feols(c(y1, y2) ~ x1, etc)`. Beware that this is a special feature unique to the \emph{left-hand-side} of `fixest` estimations (the default behavior of the DSB operator is to aggregate with sums, see [`xpd`]).
+#' First, if names are stored in a vector, they can readily be inserted in a formula to perform multiple estimations using the dot square bracket operator. For instance if `my_lhs = c("y1", "y2")`, calling `fixest` with, say `feols(.[my_lhs] ~ x1, etc)` is equivalent to using `feols(c(y1, y2) ~ x1, etc)`. Beware that this is a special feature unique to the *left-hand-side* of `fixest` estimations (the default behavior of the DSB operator is to aggregate with sums, see [`xpd`]).
 #'
-#' Second, you can use a regular expression to grep the left-hand-sides on the fly. When the `..("regex")` feature is used naked on the LHS, the variables grepped are inserted into `c()`. For example `..("Pe") ~ Sepal.Length, iris` is equivalent to `c(Petal.Length, Petal.Width) ~ Sepal.Length, iris`. Beware that this is a special feature unique to the \emph{left-hand-side} of `fixest` estimations (the default behavior of `..("regex")` is to aggregate with sums, see [`xpd`]).
+#' Second, you can use a regular expression to grep the left-hand-sides on the fly. When the `..("regex")` feature is used naked on the LHS, the variables grepped are inserted into `c()`. For example `..("Pe") ~ Sepal.Length, iris` is equivalent to `c(Petal.Length, Petal.Width) ~ Sepal.Length, iris`. Beware that this is a special feature unique to the *left-hand-side* of `fixest` estimations (the default behavior of `..("regex")` is to aggregate with sums, see [`xpd`]).
 #'
 #' @section Argument sliding:
 #'

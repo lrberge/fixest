@@ -310,7 +310,7 @@ ref = function(x, ref){
 #'
 #' \itemize{
 #'
-#' \item{`"."`}{Accesses the default values. If there is only one data set and the data set is \emph{not} a `data.table`, then the default is to display the number of observations and the number of unique rows. If the data is a `data.table`, the number of unique items in the key(s) is displayed instead of the number of unique rows (if the table has keys of course). If there are two or more data sets, then the default is to display the unique items for: a) the variables common across all data sets, if there's less than 4, and b) if no variable is shown in a), the number of variables common across at least two data sets, provided there are less than 5. If the data sets are data tables, the keys are also displayed on top of the common variables. In any case, the number of observations is always displayed.}
+#' \item{`"."`}{Accesses the default values. If there is only one data set and the data set is *not* a `data.table`, then the default is to display the number of observations and the number of unique rows. If the data is a `data.table`, the number of unique items in the key(s) is displayed instead of the number of unique rows (if the table has keys of course). If there are two or more data sets, then the default is to display the unique items for: a) the variables common across all data sets, if there's less than 4, and b) if no variable is shown in a), the number of variables common across at least two data sets, provided there are less than 5. If the data sets are data tables, the keys are also displayed on top of the common variables. In any case, the number of observations is always displayed.}
 #'
 #' \item{`".N"`}{Displays the number of observations.}
 #'

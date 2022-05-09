@@ -1175,13 +1175,13 @@ dof = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, cluster.df = 
 #' @return
 #' If the first argument is a `fixest` object, then a VCOV is returned (i.e. a symmetric matrix).
 #'
-#' If the first argument is not a `fixest` object, then a) implicitly the arguments are shifted to the left (i.e. `vcov_cluster(~var1 + var2)` is equivalent to `vcov_cluster(cluster = ~var1 + var2)`) and b) a VCOV-\emph{request} is returned and NOT a VCOV. That VCOV-request can then be used in the argument `vcov` of various `fixest` functions (e.g. [`vcov.fixest`] or even in the estimation calls).
+#' If the first argument is not a `fixest` object, then a) implicitly the arguments are shifted to the left (i.e. `vcov_cluster(~var1 + var2)` is equivalent to `vcov_cluster(cluster = ~var1 + var2)`) and b) a VCOV-*request* is returned and NOT a VCOV. That VCOV-request can then be used in the argument `vcov` of various `fixest` functions (e.g. [`vcov.fixest`] or even in the estimation calls).
 #'
 #' @author
 #' Laurent Berge
 #'
 #' @references
-#' Cameron AC, Gelbach JB, Miller DL (2011). "Robust Inference with Multiway Clustering." \emph{Journal of Business & Economic Statistics}, 29(2), 238-249. doi:10.1198/jbes.2010.07136.
+#' Cameron AC, Gelbach JB, Miller DL (2011). "Robust Inference with Multiway Clustering." *Journal of Business & Economic Statistics*, 29(2), 238-249. doi:10.1198/jbes.2010.07136.
 #'
 #' @examples
 #'
@@ -1340,16 +1340,16 @@ vcov_cluster = function(x, cluster = NULL, ssc = NULL){
 #'
 #'
 #' @references
-#' Newey WK, West KD (1987). "A Simple, Positive Semi-Definite, Heteroskedasticity and Autocorrelation Consistent Covariance Matrix." \emph{Econometrica}, 55(3), 703-708. doi:10.2307/1913610.
+#' Newey WK, West KD (1987). "A Simple, Positive Semi-Definite, Heteroskedasticity and Autocorrelation Consistent Covariance Matrix." *Econometrica*, 55(3), 703-708. doi:10.2307/1913610.
 #'
-#' Driscoll JC, Kraay AC (1998). "Consistent Covariance Matrix Estimation with Spatially Dependent Panel Data." \emph{The Review of Economics and Statistics}, 80(4), 549-560. doi:10.1162/003465398557825.
+#' Driscoll JC, Kraay AC (1998). "Consistent Covariance Matrix Estimation with Spatially Dependent Panel Data." *The Review of Economics and Statistics*, 80(4), 549-560. doi:10.1162/003465398557825.
 #'
-#' Millo G (2017). "Robust Standard Error Estimators for Panel Models: A Unifying Approach" \emph{Journal of Statistical Software}, 82(3). doi:10.18637/jss.v082.i03.
+#' Millo G (2017). "Robust Standard Error Estimators for Panel Models: A Unifying Approach" *Journal of Statistical Software*, 82(3). doi:10.18637/jss.v082.i03.
 #'
 #' @return
 #' If the first argument is a `fixest` object, then a VCOV is returned (i.e. a symmetric matrix).
 #'
-#' If the first argument is not a `fixest` object, then a) implicitly the arguments are shifted to the left (i.e. `vcov_DK(~year)` is equivalent to `vcov_DK(time = ~year)`) and b) a VCOV-\emph{request} is returned and NOT a VCOV. That VCOV-request can then be used in the argument `vcov` of various `fixest` functions (e.g. [`vcov.fixest`] or even in the estimation calls).
+#' If the first argument is not a `fixest` object, then a) implicitly the arguments are shifted to the left (i.e. `vcov_DK(~year)` is equivalent to `vcov_DK(time = ~year)`) and b) a VCOV-*request* is returned and NOT a VCOV. That VCOV-request can then be used in the argument `vcov` of various `fixest` functions (e.g. [`vcov.fixest`] or even in the estimation calls).
 #'
 #' @examples
 #'
@@ -1502,10 +1502,10 @@ vcov_NW = function(x, unit = NULL, time = NULL, lag = NULL, ssc = NULL){
 #' @return
 #' If the first argument is a `fixest` object, then a VCOV is returned (i.e. a symmetric matrix).
 #'
-#' If the first argument is not a `fixest` object, then a) implicitly the arguments are shifted to the left (i.e. `vcov_conley("lat", "long")` is equivalent to `vcov_conley(lat = "lat", lon = "long")`) and b) a VCOV-\emph{request} is returned and NOT a VCOV. That VCOV-request can then be used in the argument `vcov` of various `fixest` functions (e.g. [`vcov.fixest`] or even in the estimation calls).
+#' If the first argument is not a `fixest` object, then a) implicitly the arguments are shifted to the left (i.e. `vcov_conley("lat", "long")` is equivalent to `vcov_conley(lat = "lat", lon = "long")`) and b) a VCOV-*request* is returned and NOT a VCOV. That VCOV-request can then be used in the argument `vcov` of various `fixest` functions (e.g. [`vcov.fixest`] or even in the estimation calls).
 #'
 #' @references
-#' Conley TG (1999). "GMM Estimation with Cross Sectional Dependence", \emph{Journal of Econometrics}, 92, 1-45.
+#' Conley TG (1999). "GMM Estimation with Cross Sectional Dependence", *Journal of Econometrics*, 92, 1-45.
 #'
 #' @examples
 #'
@@ -2470,8 +2470,8 @@ getFixest_ssc = function(){
 #' This functions defines or extracts the default type of standard-errors to computed in `fixest` [`summary`][fixest::summary.fixest], and [`vcov`][fixest::vcov.fixest].
 #'
 #' @param no_FE Character scalar equal to either: `"iid"` (default), or `"hetero"`. The type of standard-errors to use by default for estimations without fixed-effects.
-#' @param one_FE Character scalar equal to either: `"iid"`, `"hetero"`, or `"cluster"` (default). The type of standard-errors to use by default for estimations with \emph{one} fixed-effect.
-#' @param two_FE Character scalar equal to either: `"iid"`, `"hetero"`, `"cluster"` (default), or `"twoway"`. The type of standard-errors to use by default for estimations with \emph{two or more} fixed-effects.
+#' @param one_FE Character scalar equal to either: `"iid"`, `"hetero"`, or `"cluster"` (default). The type of standard-errors to use by default for estimations with *one* fixed-effect.
+#' @param two_FE Character scalar equal to either: `"iid"`, `"hetero"`, `"cluster"` (default), or `"twoway"`. The type of standard-errors to use by default for estimations with *two or more* fixed-effects.
 #' @param panel Character scalar equal to either: `"iid"`, `"hetero"`, `"cluster"` (default), or `"driscoll_kraaay"`. The type of standard-errors to use by default for estimations with the argument `panel.id` set up. Note that panel has precedence over the presence of fixed-effects.
 #' @param all Character scalar equal to either: `"iid"`, or `"hetero"`. By default is is NULL. If provided, it sets all the SEs to that value.
 #' @param reset Logical, default is `FALSE`. Whether to reset to the default values.

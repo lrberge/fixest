@@ -77,7 +77,7 @@
 #'
 #' @section iplot:
 #'
-#' The function `iplot` restricts `coefplot` to interactions or factors created with the function [`i`]. Only \emph{one} of the i-variables will be plotted at a time. If you have several i-variables, you can navigate through them with the `i.select` argument.
+#' The function `iplot` restricts `coefplot` to interactions or factors created with the function [`i`]. Only *one* of the i-variables will be plotted at a time. If you have several i-variables, you can navigate through them with the `i.select` argument.
 #'
 #' The argument `i.select` is an index that will go through all the i-variables. It will work well if the variables are pure, meaning not interacted with other variables. If the i-variables are interacted, the index may have an odd behavior but will (in most cases) work all the same, just try some numbers up until you (hopefully) obtain the graph you want.
 #'

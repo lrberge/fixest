@@ -1538,7 +1538,7 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 #'
 #' The DSB can even be used within variable names, but then the variable must be nested in character form. For example `y ~ .["x.[1:2]_sq"]` will create `y ~ x1_sq + x2_sq`. Using the character form is important to avoid a formula parsing error. Double quotes must be used. Note that the character string that is nested will be parsed with the function [`dsb`], and thus it will return a vector.
 #'
-#' By default, the DSB operator expands vectors into sums. You can add a comma, like in `.[, x]`, to expand with commas--the content can then be used within functions. For instance: `c(x.[, 1:2])` will create `c(x1, x2)` (and \emph{not} `c(x1 + x2)`).
+#' By default, the DSB operator expands vectors into sums. You can add a comma, like in `.[, x]`, to expand with commas--the content can then be used within functions. For instance: `c(x.[, 1:2])` will create `c(x1, x2)` (and *not* `c(x1 + x2)`).
 #'
 #' In all `fixest` estimations, this special parsing is enabled, so you don't need to use `xpd`.
 #'
