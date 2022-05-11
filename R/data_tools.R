@@ -180,7 +180,7 @@ bin = function(x, bin){
 #' With any data, using `"!bin::digit"` groups every digit consecutive values starting from the first value.
 #' Using `"!!bin::digit"` is the same but starting from the last value.
 #' With numeric vectors you can: a) use `"cut::n"` to cut the vector into `n` equal parts, b) use `"cut::a]b["` to create the following bins: `[min, a]`, `]a, b[`, `[b, max]`.
-#' The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to p100) followed by an open or closed square bracket. You can add custom bin names by adding them in the character vector after `'cut::values'`. See details and examples. Dot square bracket expansion (see `\link[fixest]{dsb`}) is enabled.
+#' The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to p100) followed by an open or closed square bracket. You can add custom bin names by adding them in the character vector after `'cut::values'`. See details and examples. Dot square bracket expansion (see [`dsb`]) is enabled.
 #'
 #' @return
 #' It returns a factor of the same length as `x`, where levels have been modified according to the argument `ref`.
@@ -301,7 +301,7 @@ ref = function(x, ref){
 #'
 #' This utility tool displays the number of unique elements in one or multiple data.frames as well as their number of NA values.
 #'
-#' @param x A formula, with data set names on the LHS and variables on the RHS, like `data1 + data2 ~ var1 + var2`. The following special variables are admitted: `"."` to get default values, `".N"` for the number of observations, `".U"` for the number of unique rows, `".NA"` for the number of rows with at least one NA. Variables can be combined with `"^"`, e.g. `df~id^period`; use `id\%^\%period` to also include the terms on both sides. Note that using `:` and `*` is equivalent to `^` and `\%^\%`. Sub select with `id[cond]`, when doing so `id` is automatically included. Conditions can be chained, as in `id[cond1, cond2]`. Use `NA(x, y)` in conditions instead of `is.na(x) | is.na(y)`. Use the `!!` operator to have both a condition and its opposite. To compare the keys in two data sets, use `data1:data2`. If not a formula, `x` can be: a vector (displays the # of unique values); a `data.frame` (default values are displayed), or a "sum" of data sets like in `x = data1 + data2`, in that case it is equivalent to `data1 + data2 ~ .`.
+#' @param x A formula, with data set names on the LHS and variables on the RHS, like `data1 + data2 ~ var1 + var2`. The following special variables are admitted: `"."` to get default values, `".N"` for the number of observations, `".U"` for the number of unique rows, `".NA"` for the number of rows with at least one NA. Variables can be combined with `"^"`, e.g. `df~id^period`; use `id%^%period` to also include the terms on both sides. Note that using `:` and `*` is equivalent to `^` and `%^%`. Sub select with `id[cond]`, when doing so `id` is automatically included. Conditions can be chained, as in `id[cond1, cond2]`. Use `NA(x, y)` in conditions instead of `is.na(x) | is.na(y)`. Use the `!!` operator to have both a condition and its opposite. To compare the keys in two data sets, use `data1:data2`. If not a formula, `x` can be: a vector (displays the # of unique values); a `data.frame` (default values are displayed), or a "sum" of data sets like in `x = data1 + data2`, in that case it is equivalent to `data1 + data2 ~ .`.
 #' @param ... Not currently used.
 #'
 #' @section Special values and functions:
@@ -328,9 +328,9 @@ ref = function(x, ref){
 #'
 #' Use the "hat", `"^"`, operator to combine several variables. For example `id^period` will display the number of unique values of id x period combinations.
 #'
-#' Use the "super hat", `"\%^\%"`, operator to also include the terms on both sides. For example, instead of writing `id + period + id^period`, you can simply write `id\%^\%period`.
+#' Use the "super hat", `"%^%"`, operator to also include the terms on both sides. For example, instead of writing `id + period + id^period`, you can simply write `id%^%period`.
 #'
-#' Alternatively, you can use `:` for `^` and `*` for `\%^\%`.
+#' Alternatively, you can use `:` for `^` and `*` for `%^%`.
 #'
 #' @section Sub-selections:
 #'

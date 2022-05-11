@@ -4,7 +4,7 @@
 \alias{[[.fixest_multi}
 \title{Extracts one element from a \code{fixest_multi} object}
 \usage{
-\method{[[}{fixest_multi}(x, i)
+\method{sub-sub-}{fixest_multi}(x, i)
 }
 \arguments{
 \item{x}{A \code{fixest_multi} object, obtained from a \code{fixest} estimation leading to multiple results.}
