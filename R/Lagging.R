@@ -679,7 +679,7 @@ lag_fml = lag.formula
 #' @details
 #' This function allows you to use leads and lags in a `fixest` estimation without having to provide the argument `panel.id`. It also offers more options on how to set the panel (with the additional arguments 'time.step' and 'duplicate.method').
 #'
-#' When the initial data set was also a `data.table`, not all operations are supported and some may dissolve the `fixest_panel`. This is the case when creating subselections of the initial data with additional attributes (e.g. pdt[x>0, .(x, y, z)] would dissolve the `fixest_panel`, meaning only a data.table would be the result of the call).
+#' When the initial data set was also a `data.table`, not all operations are supported and some may dissolve the `fixest_panel`. This is the case when creating subselections of the initial data with additional attributes (e.g. `pdt[x>0, .(x, y, z)]` would dissolve the `fixest_panel`, meaning only a data.table would be the result of the call).
 #'
 #' If the initial data set was also a `data.table`, then you can create new variables from lags and leads using the functions [`l`]() and [`f`][fixest::l](). See the example.
 #'

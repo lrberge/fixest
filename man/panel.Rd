@@ -24,7 +24,7 @@ Constructs a \code{fixest} panel data base out of a data.frame which allows to u
 \details{
 This function allows you to use leads and lags in a \code{fixest} estimation without having to provide the argument \code{panel.id}. It also offers more options on how to set the panel (with the additional arguments 'time.step' and 'duplicate.method').
 
-When the initial data set was also a \code{data.table}, not all operations are supported and some may dissolve the \code{fixest_panel}. This is the case when creating subselections of the initial data with additional attributes (e.g. pdt\link{x>0, .(x, y, z)} would dissolve the \code{fixest_panel}, meaning only a data.table would be the result of the call).
+When the initial data set was also a \code{data.table}, not all operations are supported and some may dissolve the \code{fixest_panel}. This is the case when creating subselections of the initial data with additional attributes (e.g. \code{pdt[x>0, .(x, y, z)]} would dissolve the \code{fixest_panel}, meaning only a data.table would be the result of the call).
 
 If the initial data set was also a \code{data.table}, then you can create new variables from lags and leads using the functions \url{l} and \code{\link[=l]{f}}(). See the example.
 }

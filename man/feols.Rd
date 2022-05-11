@@ -75,7 +75,7 @@ feols.fit(
 
 \item{data}{A data.frame containing the necessary variables to run the model. The variables of the non-linear right hand side of the formula are identified with this \code{data.frame} names. Can also be a matrix.}
 
-\item{vcov}{Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: \code{vcov_type ~ variables}. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from \code{\link{vcov_cluster}}, \code{\link[=fixest:vcov_hac]{vcov_NW}}, \code{\link[=fixest:vcov_hac]{NW}}, \code{\link[=fixest:vcov_hac]{vcov_DK}}, \code{\link[=fixest:vcov_hac]{DK}}, \code{\link{vcov_conley}} and \code{\link[=fixest:vcov_conley]{conley}}. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the \code{vcov} documentation in the \href{https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1}{vignette}.}
+\item{vcov}{Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: \code{vcov_type ~ variables}. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from \code{\link{vcov_cluster}}, \code{\link[=vcov_hac]{vcov_NW}}, \code{\link[=vcov_hac]{NW}}, \code{\link[=vcov_hac]{vcov_DK}}, \code{\link[=vcov_hac]{DK}}, \code{\link{vcov_conley}} and \code{\link[=vcov_conley]{conley}}. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the \code{vcov} documentation in the \href{https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1}{vignette}.}
 
 \item{weights}{A formula or a numeric vector. Each observation can be weighted, the weights must be greater than 0. If equal to a formula, it should be one-sided: for example \code{~ var_weight}.}
 
@@ -192,14 +192,14 @@ Note that pasting is a costly operation, especially for large data sets. Thus, t
 
 \section{Varying slopes}{
 
-You can add variables with varying slopes in the fixed-effect part of the formula. The syntax is as follows: fixef_var\link{var1, var2}. Here the variables var1 and var2 will be with varying slopes (one slope per value in fixef_var) and the fixed-effect fixef_var will also be added.
+You can add variables with varying slopes in the fixed-effect part of the formula. The syntax is as follows: \code{fixef_var[var1, var2]}. Here the variables var1 and var2 will be with varying slopes (one slope per value in fixef_var) and the fixed-effect fixef_var will also be added.
 
-To add only the variables with varying slopes and not the fixed-effect, use double square brackets: fixef_var[\link{var1, var2}].
+To add only the variables with varying slopes and not the fixed-effect, use double square brackets: \code{fixef_var[[var1, var2]]}.
 
 In other words:
 \itemize{
-\item fixef_var\link{var1, var2} is equivalent to fixef_var + fixef_var[\link{var1}] + fixef_var[\link{var2}]
-\item fixef_var[\link{var1, var2}] is equivalent to fixef_var[\link{var1}] + fixef_var[\link{var2}]
+\item \code{fixef_var[var1, var2]} is equivalent to \code{fixef_var + fixef_var[[var1]] + fixef_var[[var2]]}
+\item \code{fixef_var[[var1, var2]]} is equivalent to \code{fixef_var[[var1]] + fixef_var[[var2]]}
 }
 
 In general, for convergence reasons, it is recommended to always add the fixed-effect and avoid using only the variable with varying slope (i.e. use single square brackets).
@@ -519,7 +519,7 @@ feols(y ~ csw(..(,"x")), base)
 
 }
 \references{
-Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (\link{https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13}).
+Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (\href{https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13}{}).
 
 For models with multiple fixed-effects:
 

@@ -493,7 +493,7 @@ summary.fixest_multi = function(object, type = "short", vcov = NULL, se = NULL, 
 #' @param ... Other arguments to be passed to [`summary.fixest_multi`].
 #'
 #' @seealso
-#' The main fixest estimation functions: [`feols`], [`fepois`][fixest::feglm], [`fenegbin`][fixest::femlm], [`feglm`], [`feNmlm`]. Tools for mutliple fixest estimations: [`summary.fixest_multi`], [`print.fixest_multi`], [`as.list.fixest_multi`], [`sub-sub-.fixest_multi`], [`sub-.fixest_multi`].
+#' The main fixest estimation functions: [`feols`], [`fepois`][fixest::feglm], [`fenegbin`][fixest::femlm], [`feglm`], [`feNmlm`]. Tools for mutliple fixest estimations: [`summary.fixest_multi`], [`print.fixest_multi`], [`as.list.fixest_multi`], \code{\link[fixest]{sub-sub-.fixest_multi}}, \code{\link[fixest]{sub-.fixest_multi}}.
 #'
 #' @examples
 #'
@@ -593,8 +593,6 @@ print.fixest_multi = function(x, ...){
 #' Extracts one element from a `fixest_multi` object
 #'
 #' Extracts single elements from multiple `fixest` estimations.
-#'
-#' @method sub-sub- fixest_multi
 #'
 #' @inherit print.fixest_multi seealso
 #' @inheritParams print.fixest_multi

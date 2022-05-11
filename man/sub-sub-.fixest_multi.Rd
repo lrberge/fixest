@@ -4,7 +4,7 @@
 \alias{[[.fixest_multi}
 \title{Extracts one element from a \code{fixest_multi} object}
 \usage{
-\method{sub-sub-}{fixest_multi}(x, i)
+\method{[[}{fixest_multi}(x, i)
 }
 \arguments{
 \item{x}{A \code{fixest_multi} object, obtained from a \code{fixest} estimation leading to multiple results.}
@@ -33,5 +33,5 @@ res[[2]]
 
 }
 \seealso{
-The main fixest estimation functions: \code{\link{feols}}, \code{\link[=feglm]{fepois}}, \code{\link[=femlm]{fenegbin}}, \code{\link{feglm}}, \code{\link{feNmlm}}. Tools for mutliple fixest estimations: \code{\link{summary.fixest_multi}}, \code{\link{print.fixest_multi}}, \code{\link{as.list.fixest_multi}}, \code{\link{sub-sub-.fixest_multi}}, \code{\link{sub-.fixest_multi}}.
+The main fixest estimation functions: \code{\link{feols}}, \code{\link[=feglm]{fepois}}, \code{\link[=femlm]{fenegbin}}, \code{\link{feglm}}, \code{\link{feNmlm}}. Tools for mutliple fixest estimations: \code{\link{summary.fixest_multi}}, \code{\link{print.fixest_multi}}, \code{\link{as.list.fixest_multi}}, \code{\link[fixest]{sub-sub-.fixest_multi}}, \code{\link[fixest]{sub-.fixest_multi}}.
 }

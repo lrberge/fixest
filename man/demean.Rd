@@ -65,14 +65,14 @@ User-level access to internal demeaning algorithm of \code{fixest}.
 }
 \section{Varying slopes}{
 
-You can add variables with varying slopes in the fixed-effect part of the formula. The syntax is as follows: fixef_var\link{var1, var2}. Here the variables var1 and var2 will be with varying slopes (one slope per value in fixef_var) and the fixed-effect fixef_var will also be added.
+You can add variables with varying slopes in the fixed-effect part of the formula. The syntax is as follows: \code{fixef_var[var1, var2]}. Here the variables var1 and var2 will be with varying slopes (one slope per value in fixef_var) and the fixed-effect fixef_var will also be added.
 
-To add only the variables with varying slopes and not the fixed-effect, use double square brackets: fixef_var[\link{var1, var2}].
+To add only the variables with varying slopes and not the fixed-effect, use double square brackets: \code{fixef_var[[var1, var2]]}.
 
 In other words:
 \itemize{
-\item fixef_var\link{var1, var2} is equivalent to fixef_var + fixef_var[\link{var1}] + fixef_var[\link{var2}]
-\item fixef_var[\link{var1, var2}] is equivalent to fixef_var[\link{var1}] + fixef_var[\link{var2}]
+\item \code{fixef_var[var1, var2]} is equivalent to \code{fixef_var + fixef_var[[var1]] + fixef_var[[var2]]}
+\item \code{fixef_var[[var1, var2]]} is equivalent to \code{fixef_var[[var1]] + fixef_var[[var2]]}
 }
 
 In general, for convergence reasons, it is recommended to always add the fixed-effect and avoid using only the variable with varying slope (i.e. use single square brackets).
