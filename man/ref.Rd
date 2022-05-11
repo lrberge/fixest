@@ -17,7 +17,7 @@ For example if \code{x} represents years, using \code{bin="bin::2"} creates bins
 With any data, using \code{"!bin::digit"} groups every digit consecutive values starting from the first value.
 Using \code{"!!bin::digit"} is the same but starting from the last value.
 With numeric vectors you can: a) use \code{"cut::n"} to cut the vector into \code{n} equal parts, b) use \code{"cut::a]b["} to create the following bins: \verb{[min, a]}, \verb{]a, b[}, \verb{[b, max]}.
-The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to p100) followed by an open or closed square bracket. You can add custom bin names by adding them in the character vector after \code{'cut::values'}. See details and examples. Dot square bracket expansion (see \verb{\link[fixest]\{dsb}}) is enabled.}
+The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to p100) followed by an open or closed square bracket. You can add custom bin names by adding them in the character vector after \code{'cut::values'}. See details and examples. Dot square bracket expansion (see \code{\link{dsb}}) is enabled.}
 }
 \value{
 It returns a factor of the same length as \code{x}, where levels have been modified according to the argument \code{ref}.

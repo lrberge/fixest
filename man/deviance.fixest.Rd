@@ -27,5 +27,5 @@ deviance(est_pois)
 
 }
 \seealso{
-\code{\link{feols}}, \code{\link[=fixest:feglm]{fepois}}, \code{\link{feglm}}, \code{\link[=fixest:femlm]{fenegbin}}, \code{\link{feNmlm}}.
+\code{\link{feols}}, \code{\link[=feglm]{fepois}}, \code{\link{feglm}}, \code{\link[=femlm]{fenegbin}}, \code{\link{feNmlm}}.
 }

@@ -20,9 +20,9 @@ conley(cutoff = NULL, pixel = NULL, distance = NULL)
 \arguments{
 \item{x}{A \code{fixest} object.}
 
-\item{lat}{A character scalar or a one sided formula giving the name of the variable representing the latitude. The latitude must lie in \link{-90, 90}, \link{0, 180} or \link{-180, 0}.}
+\item{lat}{A character scalar or a one sided formula giving the name of the variable representing the latitude. The latitude must lie in [-90, 90], [0, 180] or [-180, 0].}
 
-\item{lon}{A character scalar or a one sided formula giving the name of the variable representing the longitude. The longitude must be in \link{-180, 180}, \link{0, 360} or \link{-360, 0}.}
+\item{lon}{A character scalar or a one sided formula giving the name of the variable representing the longitude. The longitude must be in [-180, 180], [0, 360] or [-360, 0].}
 
 \item{cutoff}{The distance cutoff, in km. You can express the cutoff in miles by writing the number in character form and adding "mi" as a suffix: cutoff = "100mi" would be 100 miles. If missing, a rule of thumb is used to deduce the cutoff.}
 

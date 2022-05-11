@@ -71,7 +71,7 @@ style.tex(
 
 \item{fixef_sizes.suffix}{A suffix to add to the fixed-effects names. Defaults to \code{""} (i.e. no suffix).}
 
-\item{stats.title}{A character scalar. The title line appearing before the statistics (defaults to \verb{"\\\\midrule \\\\emph\{Fit statistics}"} if \code{main = "base"} and to \code{" "} if \code{main = "aer"}). Note that the behavior of \code{stats.title = " "} (a space) is different from \code{stats.title = ""} (the empty string): in the first case you will get an empty row, while in the second case you get no empty row. To get a line without an empty row, use \code{"\\\\midrule"} (and not \code{"\\\\midrule "}!--the space!).}
+\item{stats.title}{A character scalar. The title line appearing before the statistics (defaults to \verb{"\\\\midrule \\\\emph\{Fit statistics"\}} if \code{main = "base"} and to \code{" "} if \code{main = "aer"}). Note that the behavior of \code{stats.title = " "} (a space) is different from \code{stats.title = ""} (the empty string): in the first case you will get an empty row, while in the second case you get no empty row. To get a line without an empty row, use \code{"\\\\midrule"} (and not \code{"\\\\midrule "}!--the space!).}
 
 \item{notes.intro}{A character scalar. Some tex code appearing just before the notes, defaults to \code{"\\\\par \\\\raggedright \\n"}.}
 
@@ -97,7 +97,7 @@ style.tex(
 
 \item{tpt}{(Tex only.) Logical scalar, default is FALSE. Whether to use the \code{threeparttable} environment. If so, the \code{notes} will be integrated into the \code{tablenotes} environment.}
 
-\item{arraystretch}{(Tex only.) A numeric scalar, default is \code{NULL}. If provided, the command \verb{\\\renewcommand*\{\\\\arraystretch}{x}} is inserted, replacing \code{x} by the value of \code{arraystretch}. The changes are specific to the current table and do not affect the rest of the document.}
+\item{arraystretch}{(Tex only.) A numeric scalar, default is \code{NULL}. If provided, the command \verb{\\\renewcommand*\{\\\\arraystretch\{x\}\}} is inserted, replacing \code{x} by the value of \code{arraystretch}. The changes are specific to the current table and do not affect the rest of the document.}
 
 \item{adjustbox}{(Tex only.) A logical, numeric or character scalar, default is \code{NULL}. If not \code{NULL}, the table is inserted within the \code{adjustbox} environment. By default the options are \verb{width = 1\\\\textwidth, center} (if \code{TRUE}). A numeric value changes the value before \verb{\\\\textwidth}. You can also add a character of the form \code{"x tw"} or \code{"x th"} with \code{x} a number and where tw (th) stands for text-width (text-height). Finally any other character value is passed verbatim as an \code{adjustbox} option.}
 

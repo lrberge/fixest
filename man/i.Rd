@@ -123,7 +123,7 @@ feols(Ozone ~ i(Month, bin = list(summer = 7:9)), airquality)
 
 }
 \seealso{
-\code{\link[=fixest:coefplot]{iplot}} to plot interactions or factors created with \code{i()}, \code{\link{feols}} for OLS estimation with multiple fixed-effects.
+\code{\link[=coefplot]{iplot}} to plot interactions or factors created with \code{i()}, \code{\link{feols}} for OLS estimation with multiple fixed-effects.
 
 See the function \code{\link{bin}} for binning variables.
 }

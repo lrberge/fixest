@@ -127,7 +127,7 @@ fepois(
 
 \item{family}{Family to be used for the estimation. Defaults to \code{gaussian()}. See \code{\link{family}} for details of family functions.}
 
-\item{vcov}{Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: \code{vcov_type ~ variables}. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from \code{\link{vcov_cluster}}, \code{\link[=fixest:vcov_hac]{vcov_NW}}, \code{\link[=fixest:vcov_hac]{NW}}, \code{\link[=fixest:vcov_hac]{vcov_DK}}, \code{\link[=fixest:vcov_hac]{DK}}, \code{\link{vcov_conley}} and \code{\link[=fixest:vcov_conley]{conley}}. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the \code{vcov} documentation in the \href{https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1}{vignette}.}
+\item{vcov}{Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: \code{vcov_type ~ variables}. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from \code{\link{vcov_cluster}}, \code{\link[=vcov_hac]{vcov_NW}}, \code{\link[=vcov_hac]{NW}}, \code{\link[=vcov_hac]{vcov_DK}}, \code{\link[=vcov_hac]{DK}}, \code{\link{vcov_conley}} and \code{\link[=vcov_conley]{conley}}. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the \code{vcov} documentation in the \href{https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1}{vignette}.}
 
 \item{offset}{A formula or a numeric vector. An offset can be added to the estimation. If equal to a formula, it should be of the form (for example) \code{~0.5*x**2}. This offset is linearly added to the elements of the main formula 'fml'.}
 
@@ -135,15 +135,15 @@ fepois(
 
 \item{subset}{A vector (logical or numeric) or a one-sided formula. If provided, then the estimation will be performed only on the observations defined by this argument.}
 
-\item{split}{A one sided formula representing a variable (eg \code{split = ~var}) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. If you also want to include the estimation for the full sample, use the argument \code{fsplit} instead. You can use the special operators \verb{\\\%keep\\\%} and \verb{\\\%drop\\\%} to select only a subset of values for which to split the sample. E.g. \verb{split = ~var \\\%keep\\\% c("v1", "v2")} will split the sample only according to the values \code{v1} and \code{v2} of the variable \code{var}; it is equivalent to supplying the argument \code{split.keep = c("v1", "v2")}. By default there is partial matching on each value, you can trigger a regular expression evaluation by adding a \code{'@'} first, as in: \verb{~var \\\%drop\\\% "@^v[12]"} which will drop values starting with \code{"v1"} or \code{"v2"} (of course you need to know regexes!).}
+\item{split}{A one sided formula representing a variable (eg \code{split = ~var}) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. If you also want to include the estimation for the full sample, use the argument \code{fsplit} instead. You can use the special operators \verb{\%keep\%} and \verb{\%drop\%} to select only a subset of values for which to split the sample. E.g. \code{split = ~var \%keep\% c("v1", "v2")} will split the sample only according to the values \code{v1} and \code{v2} of the variable \code{var}; it is equivalent to supplying the argument \code{split.keep = c("v1", "v2")}. By default there is partial matching on each value, you can trigger a regular expression evaluation by adding a \code{'@'} first, as in: \code{~var \%drop\% "@^v[12]"} which will drop values starting with \code{"v1"} or \code{"v2"} (of course you need to know regexes!).}
 
-\item{fsplit}{A one sided formula representing a variable (eg \code{split = ~var}) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. This argument is the same as split but also includes the full sample as the first estimation. You can use the special operators \verb{\\\%keep\\\%} and \verb{\\\%drop\\\%} to select only a subset of values for which to split the sample. E.g. \verb{split = ~var \\\%keep\\\% c("v1", "v2")} will split the sample only according to the values \code{v1} and \code{v2} of the variable \code{var}; it is equivalent to supplying the argument \code{split.keep = c("v1", "v2")}. By default there is partial matching on each value, you can trigger a regular expression evaluation by adding an \code{'@'} first, as in: \verb{~var \\\%drop\\\% "@^v[12]"} which will drop values starting with \code{"v1"} or \code{"v2"} (of course you need to know regexes!).}
+\item{fsplit}{A one sided formula representing a variable (eg \code{split = ~var}) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. This argument is the same as split but also includes the full sample as the first estimation. You can use the special operators \verb{\%keep\%} and \verb{\%drop\%} to select only a subset of values for which to split the sample. E.g. \code{split = ~var \%keep\% c("v1", "v2")} will split the sample only according to the values \code{v1} and \code{v2} of the variable \code{var}; it is equivalent to supplying the argument \code{split.keep = c("v1", "v2")}. By default there is partial matching on each value, you can trigger a regular expression evaluation by adding an \code{'@'} first, as in: \code{~var \%drop\% "@^v[12]"} which will drop values starting with \code{"v1"} or \code{"v2"} (of course you need to know regexes!).}
 
 \item{split.keep}{A character vector. Only used when \code{split}, or \code{fsplit}, is supplied. If provided, then the sample will be split only on the values of \code{split.keep}. The values in \code{split.keep} will be partially matched to the values of \code{split}. To enable regular expressions, you need to add an \code{'@'} first. For example \code{split.keep = c("v1", "@other|var")} will keep only the value in \code{split} partially matched by \code{"v1"} or the values containing \code{"other"} or \code{"var"}.}
 
 \item{split.drop}{A character vector. Only used when \code{split}, or \code{fsplit}, is supplied. If provided, then the sample will be split only on the values that are not in \code{split.drop}. The values in \code{split.drop} will be partially matched to the values of \code{split}. To enable regular expressions, you need to add an \code{'@'} first. For example \code{split.drop = c("v1", "@other|var")} will drop only the value in \code{split} partially matched by \code{"v1"} or the values containing \code{"other"} or \code{"var"}.}
 
-\item{cluster}{Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1", "var2")]}, \code{cluster = c("var1", "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as fixed-effects in the estimation, you can leave it blank with \code{vcov = "twoway"} (assuming \code{var1} \link[=resp. `var2`]{resp. \code{var2}} was the 1st \link{res. 2nd} fixed-effect). You can interact two variables using \code{^} with the following syntax: \code{cluster = ~var1^var2} or \code{cluster = "var1^var2"}.}
+\item{cluster}{Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1", "var2")]}, \code{cluster = c("var1", "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as fixed-effects in the estimation, you can leave it blank with \code{vcov = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [resp. 2nd] fixed-effect). You can interact two variables using \code{^} with the following syntax: \code{cluster = ~var1^var2} or \code{cluster = "var1^var2"}.}
 
 \item{se}{Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "iid"}. Note that this argument is deprecated, you should use \code{vcov} instead.}
 
@@ -171,7 +171,7 @@ fepois(
 
 \item{glm.tol}{Tolerance level for the glm algorithm. Default is \code{1e-8}.}
 
-\item{nthreads}{The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. The default is to use 50\\% of all threads. You can set permanently the number of threads used within this package using the function \code{\link{setFixest_nthreads}}.}
+\item{nthreads}{The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. The default is to use 50\% of all threads. You can set permanently the number of threads used within this package using the function \code{\link{setFixest_nthreads}}.}
 
 \item{lean}{Logical, default is \code{FALSE}. If \code{TRUE} then all large objects are removed from the returned result: this will save memory but will block the possibility to use many methods. It is recommended to use the arguments \code{se} or \code{cluster} to obtain the appropriate standard-errors at estimation time, since obtaining different SEs won't be possible afterwards.}
 
@@ -254,14 +254,14 @@ Note that pasting is a costly operation, especially for large data sets. Thus, t
 
 \section{Varying slopes}{
 
-You can add variables with varying slopes in the fixed-effect part of the formula. The syntax is as follows: fixef_var\link{var1, var2}. Here the variables var1 and var2 will be with varying slopes (one slope per value in fixef_var) and the fixed-effect fixef_var will also be added.
+You can add variables with varying slopes in the fixed-effect part of the formula. The syntax is as follows: \code{fixef_var[var1, var2]}. Here the variables var1 and var2 will be with varying slopes (one slope per value in fixef_var) and the fixed-effect fixef_var will also be added.
 
-To add only the variables with varying slopes and not the fixed-effect, use double square brackets: fixef_var[\link{var1, var2}].
+To add only the variables with varying slopes and not the fixed-effect, use double square brackets: \code{fixef_var[[var1, var2]]}.
 
 In other words:
 \itemize{
-\item fixef_var\link{var1, var2} is equivalent to fixef_var + fixef_var[\link{var1}] + fixef_var[\link{var2}]
-\item fixef_var[\link{var1, var2}] is equivalent to fixef_var[\link{var1}] + fixef_var[\link{var2}]
+\item \code{fixef_var[var1, var2]} is equivalent to \code{fixef_var + fixef_var[[var1]] + fixef_var[[var2]]}
+\item \code{fixef_var[[var1, var2]]} is equivalent to \code{fixef_var[[var1]] + fixef_var[[var2]]}
 }
 
 In general, for convergence reasons, it is recommended to always add the fixed-effect and avoid using only the variable with varying slope (i.e. use single square brackets).
@@ -411,7 +411,7 @@ est_split[sample = 1:2, lhs = 1, rhs = 1]
 
 }
 \references{
-Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (\link{https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13}).
+Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (\href{https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13}{}).
 
 For models with multiple fixed-effects:
 

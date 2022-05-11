@@ -8,12 +8,12 @@
 
 #' Permanently removes the fixest package startup message
 #'
-#' Package startup messages can be very annoying, although sometimes they can be necessary. Use this function to prevent \code{fixest}'s package startup message from popping when loading. This will be specific to your current project.
+#' Package startup messages can be very annoying, although sometimes they can be necessary. Use this function to prevent `fixest`'s package startup message from popping when loading. This will be specific to your current project.
 #'
-#' @param x Logical, no default. If \code{FALSE}, the package startup message is removed.
+#' @param x Logical, no default. If `FALSE`, the package startup message is removed.
 #'
 #' @details
-#' Note that this function is introduced to cope with the first \code{fixest} startup message (in version 0.9.0).
+#' Note that this function is introduced to cope with the first `fixest` startup message (in version 0.9.0).
 #'
 #' This function works only with R >= 4.0.0. There are no startup messages for R < 4.0.0.
 #'
