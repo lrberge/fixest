@@ -1749,6 +1749,24 @@ fixest_models = list(
     vars_any = "vars_any"
     )
 
+is_fixest_model = function(x, feols = FALSE, feglm = FALSE, femlm = FALSE,
+                           feNmlm = FALSE, fepois = FALSE, fenegbin = FALSE,
+                           logit = FALSE, probit = FALSE,
+                           ols = FALSE, glm = FALSE, ml = FALSE, ml_glm = FALSE,
+                           iv = FALSE, iv.endo_single = FALSE, iv.inst_single = FALSE,
+                           fam.poisson = FALSE, fam.binomial = FALSE, fam.logit = FALSE,
+                           fam.probit = FALSE, fam.gaussian = FALSE, fam.negbin = FALSE,
+                           link.identity = FALSE, link.exp = FALSE, fixef_any = FALSE,
+                           fixef_none = FALSE, weights_any = FALSE, weights_none = FALSE,
+                           y_binary = FALSE, vars_any = FALSE){
+
+    check_arg(x, "class(fixest)")
+
+    if(missing(x)){
+
+    }
+
+}
 
 fitstat_setup = function(){
 
@@ -1826,9 +1844,9 @@ fitstat_setup = function(){
         alias = "Within adj. pseudo R2",
         alias_tex = "Within adj. pseudo R$^2$")
 
+    doc[["r2, ar2, wr2, awr2"]] = "Different R2s available for [`feols`] which are obtained with the function [`r2`]. The `a` stands for 'adjusted', the `w` for 'within'. The within R2 is available only for fixed-effects models. Note that the order of the letters `a`, `w` and `p` does not matter. The pseudo R2s are McFadden's R2s (ratios of log-likelihoods)."
 
-    # DOC
-    #> All r2s that can be obtained with the function \code{\link[fixest]{r2}}. The \code{a} stands for 'adjusted', the \code{w} for 'within' and the \code{p} for 'pseudo'. Note that the order of the letters \code{a}, \code{w} and \code{p} does not matter. The pseudo R2s are McFadden's R2s (ratios of log-likelihoods).
+    doc[["pr2, apr2, wpr2, awpr2"]] = "Different pseudo-R2s available for non-linear models ([`feglm`], [`fepois`][fixest::feglm], [`fenegbin`][fixest::feglm], [`femlm`] and [`feNmlm`]) which are obtained with the function [`r2`]. The `a` stands for 'adjusted', the `w` for 'within'. The within R2 is available only for fixed-effects models. Note that the order of the letters `a`, `w` and `p` does not matter. The pseudo R2s are McFadden's R2s (ratios of log-likelihoods)."
 
 
 
