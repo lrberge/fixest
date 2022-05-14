@@ -9,6 +9,16 @@ The `fixest` package offers a family of functions to perform estimations with mu
 
 At the time of writing of this page (February 2020), `fixest` is the fastest existing method to perform fixed-effects estimations, often by orders of magnitude. See below for a benchmarking with the fastest alternative software. 
 
+## Getting started
+
+Install the latest release from CRAN with `install.packages("fixest")` or install the latest development version with (thanks to Sebastian Krantz for setting this up):
+
+```R
+install.packages("fixest", 
+                 repos = c(ropensci = 'https://fastverse.r-universe.dev', 
+                 CRAN = 'https://cloud.r-project.org'))
+```
+
 ## Benchmarking
 
 Here is a comparison of the performance of `fixest` functions to other state of the art methods to perform estimations with multiple fixed-effects. The results are reported in the five figures below. Package `fixest` (black lines) is consistently faster in all situations.
