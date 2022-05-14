@@ -2,6 +2,7 @@
 # fixest: Fast and user-friendly fixed-effects estimation
 
 <a href="https://cran.r-project.org/web/checks/check_results_fixest.html"><img src="https://cranchecks.info/badges/worst/fixest" alt="CRAN status"></a>
+<a href="https://fastverse.r-universe.dev"><img src="https://fastverse.r-universe.dev/badges/fixest" alt="Version_ROpensci"></a>
 <a href="https://CRAN.R-project.org/package=fixest"><img src="http://www.r-pkg.org/badges/version/fixest" alt="Version"> </a>
 <a href="https://ipub.com/dev-corner/apps/r-package-downloads/"> <img src="https://cranlogs.r-pkg.org/badges/fixest" alt = "Downloads"> </a>
 
@@ -9,14 +10,14 @@ The `fixest` package offers a family of functions to perform estimations with mu
 
 At the time of writing of this page (February 2020), `fixest` is the fastest existing method to perform fixed-effects estimations, often by orders of magnitude. See below for a benchmarking with the fastest alternative software. 
 
-## Getting started
-
-Install the latest release from CRAN with `install.packages("fixest")` or install the latest development version with (thanks to Sebastian Krantz for setting this up):
-
 ```R
+# To install from CRAN:
+install.packages("fixest")
+
+# To install the latest stable development release:
 install.packages("fixest", 
-                 repos = c(ropensci = 'https://fastverse.r-universe.dev', 
-                 CRAN = 'https://cloud.r-project.org'))
+                 repos = c(ropensci = 'https://fastverse.r-universe.dev',
+                           CRAN = 'https://cloud.r-project.org'))
 ```
 
 ## Benchmarking
