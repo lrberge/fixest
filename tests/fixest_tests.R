@@ -780,6 +780,21 @@ est_pois = fepois(y_0 ~ csw(x.[,1:4]), base, split = ~species)
 base$x1_bis = base$x1
 est_pois = fepois(y_0 ~ x.[1:3] + x1_bis | sw0(species), base)
 
+# Different ways .[]
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+
+dep_all = list(dsb("/y, x1, x2"), ~y + x1 + x2)
+for(dep in dep_all){
+    m = feols(.[dep] ~ x3, base)
+    test(length(m), 3)
+
+    m = feols(x3 ~ .[dep], base)
+    test(length(m$coefficients), 4)
+
+    m = feols(x3 ~ csw(.[,dep]), base)
+    test(length(m), 3)
+}
+
 
 
 

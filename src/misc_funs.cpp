@@ -1030,18 +1030,11 @@ std::string cpp_add_commas(double x, int r = 1, bool whole = true){
 
         res.push_back('.');
 
-        if(r == 1){
-            res.push_back(std::to_string(static_cast<int>(floor(rest * 10)))[0]);
+        std::string rest_str = std::to_string(rest);
+        int nr = rest_str.size();
 
-        } else {
-            // double rounded_rest = floor(rest * pow(10, r)) / pow(10, r);
-            // std::string rest_str = std::to_string(rounded_rest);
-            std::string rest_str = std::to_string(rest);
-            int nr = rest_str.size();
-
-            for(int i=2 ; i < nr && i-1 <= r ; ++i){
-                res.push_back(rest_str[i]);
-            }
+        for(int i=2 ; i < nr && i-1 <= r ; ++i){
+            res.push_back(rest_str[i]);
         }
     }
 
