@@ -1471,6 +1471,21 @@ StringVector cpp_escape_markup(SEXP Rstr){
     return res;
 }
 
+// [[Rcpp::export]]
+bool cpp_is_binary(SEXP x){
+
+    int n = Rf_length(x);
+    simple_vec_double my_var(x);
+
+    for(int i=0 ; i<n ; ++i){
+        if(my_var[i] != 0 && my_var[i] != 1){
+            return false;
+        }
+    }
+
+    return true;
+}
+
 
 
 

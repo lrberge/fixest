@@ -217,6 +217,10 @@ cpp_escape_markup <- function(Rstr) {
     .Call(`_fixest_cpp_escape_markup`, Rstr)
 }
 
+cpp_is_binary <- function(x) {
+    .Call(`_fixest_cpp_is_binary`, x)
+}
+
 cpp_get_nb_threads <- function() {
     .Call(`_fixest_cpp_get_nb_threads`)
 }

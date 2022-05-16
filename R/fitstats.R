@@ -1749,21 +1749,307 @@ fixest_models = list(
     vars_any = "vars_any"
     )
 
-is_fixest_model = function(x, feols = FALSE, feglm = FALSE, femlm = FALSE,
+is_fixest_model = function(x, all_models = FALSE, feols = FALSE, feglm = FALSE, femlm = FALSE,
                            feNmlm = FALSE, fepois = FALSE, fenegbin = FALSE,
                            logit = FALSE, probit = FALSE,
                            ols = FALSE, glm = FALSE, ml = FALSE, ml_glm = FALSE,
                            iv = FALSE, iv.endo_single = FALSE, iv.inst_single = FALSE,
-                           fam.poisson = FALSE, fam.binomial = FALSE, fam.logit = FALSE,
-                           fam.probit = FALSE, fam.gaussian = FALSE, fam.negbin = FALSE,
+                           fam.poisson = FALSE, fam.binomial = FALSE, fam.negbin = FALSE,
+                           fam.gaussian = FALSE, link.logit = FALSE,link.probit = FALSE,
                            link.identity = FALSE, link.exp = FALSE, fixef_any = FALSE,
                            fixef_none = FALSE, weights_any = FALSE, weights_none = FALSE,
                            y_binary = FALSE, vars_any = FALSE){
 
     check_arg(x, "class(fixest)")
+    check_arg("logical scalar", feols, feglm, femlm, feNmlm, fepois, fenegbin, logit, probit)
+    check_arg("logical scalar", ols, glm, ml, ml_glm, iv, iv.endo_single, iv.inst_single)
+    check_arg("logical scalar", fam.poisson, fam.binomial, link.logit, link.probit, fam.gaussian, fam.negbin)
+    check_arg("logical scalar", link.identity, link.exp, fixef_any, fixef_none, weights_any, weights_none)
+    check_arg("logical scalar", all_models, y_binary, vars_any)
 
     if(missing(x)){
+        res = function(model) {
+            is_fixest_model(model, all_models = all_models, feols = feols, feglm = feglm, femlm = femlm,
+                            feNmlm = feNmlm, fepois = fepois, fenegbin = fenegbin,
+                            logit = logit, probit = probit,
+                            ols = ols, glm = glm, ml = ml, ml_glm = ml_glm,
+                            iv = iv, iv.endo_single = iv.endo_single,
+                            iv.inst_single = iv.inst_single,
+                            fam.poisson = fam.poisson, fam.binomial = fam.binomial,
+                            fam.gaussian = fam.gaussian, link.negbin = link.negbin,
+                            link.probit = link.probit, link.logit = link.logit,
+                            link.identity = link.identity, link.exp = link.exp,
+                            fixef_any = fixef_any,
+                            fixef_none = fixef_none, weights_any = weights_any,
+                            weights_none = weights_none,
+                            y_binary = y_binary, vars_any = vars_any)
+        }
 
+        return(res)
+    }
+
+    #
+    # Checking the model
+    #
+
+    mc = match.call()
+    mc = mc[!names(mc) %in% c("", "x")]
+
+    if(length(mc) == 0){
+        stop("You must at least provide one main model (arg. 'all_models' to 'iv') for which the current object is valid. If all models are OK, use 'all_models = TRUE'.")
+    }
+
+    for(v in names(mc)){
+        if(!is.logical(mc[[v]])){
+            mc[[v]] = eval(mc[[v]], parent.frame())
+        }
+    }
+
+    # types => logical
+    types = unlist(mc)
+    types = names(types)[types]
+
+    # dsb("','s, ' = .+$'R, w, '\"|\"'a, ', 'c ? a")
+    all_models = c("all_models", "feols", "feglm", "femlm", "feNmlm", "fepois", "fenegbin",
+                   "logit", "probit", "ols", "glm", "ml", "ml_glm", "iv")
+
+    if(!any(all_models %in% types)){
+        stop("You must at least provide one main model (arg. 'all_models' to 'iv') for which the current object is valid. If all models are OK, use 'all_models = TRUE'.")
+    }
+
+    if(x$method_type == "feols"){
+        if(!any(c("feols", "ols", "iv") %in% types)){
+            return(FALSE)
+        }
+
+        if(!"feols" %in% types){
+            if(isTRUE(x$iv)){
+                if(!"iv" %in% types){
+                    return(FALSE)
+                }
+            } else if(!"ols" %in% types){
+                return(FALSE)
+            }
+        }
+    }
+
+    if(x$method_type == "feglm"){
+        if(any(c("feglm", "glm", "ml_glm") %in% types)){
+            # OK
+
+        } else if(x$family$family %in% c("binomial", "quasibinomial")){
+            if(x$family$link == "logit"){
+                if(!"logit" %in% types){
+                    return(FALSE)
+                }
+            } else if(x$family$link == "probit"){
+                if(!"probit" %in% types){
+                    return(FALSE)
+                }
+            } else {
+                return(FALSE)
+            }
+        } else if(x$family$family == c("poisson", "quasipoisson")){
+            if(!"fepois" %in% types){
+                return(FALSE)
+            }
+        } else {
+            return(FALSE)
+        }
+    }
+
+    if(x$method_type == "feNmlm"){
+        # We consider femlm == feNmlm since we don't introduce the non-linear peculiarities
+        if(any(c("femlm", "feNmlm", "ml", "ml_glm") %in% types)){
+            # OK
+
+        } else if("fenegbin" %in% types && x$family == "negbin"){
+            # OK
+
+        } else {
+            return(FALSE)
+        }
+    }
+
+    #
+    # families
+    #
+
+    all_families = grep("^fam\\.", types, value = TRUE)
+
+    if(length(all_families) > 0 && x$method_type %in% c("feglm", "feNmlm")){
+
+        ok_fam = FALSE
+
+        if("fam.gaussian" %in% types){
+            if(x$method_type == "feglm"){
+                if(x$family$family == "gaussian"){
+                    ok_fam = TRUE
+                }
+            } else if(x$method_type == "feNmlm"){
+                if(x$family == "gaussian"){
+                    ok_fam = TRUE
+                }
+            }
+        }
+
+        if("fam.poisson" %in% types){
+            if(x$method_type == "feglm"){
+                if(x$family$family == "poisson"){
+                    ok_fam = TRUE
+                }
+            } else if(x$method_type == "feNmlm"){
+                if(x$family == "poisson"){
+                    ok_fam = TRUE
+                }
+            }
+        }
+
+        if("fam.negbin" %in% types){
+            if(x$method_type == "feglm"){
+                # not OK
+            } else if(x$method_type == "feNmlm"){
+                if(x$family == "negbin"){
+                    ok_fam = TRUE
+                }
+            }
+        }
+
+        if("fam.binomial" %in% types){
+            if(x$method_type == "feglm"){
+                if(x$family$family == "binomial"){
+                    ok_fam = TRUE
+                }
+            } else if(x$method_type == "feNmlm"){
+                if(x$family == "logit"){
+                    ok_fam = TRUE
+                }
+            }
+        }
+
+        if(!ok_fam){
+            return(FALSE)
+        }
+    }
+
+    #
+    # link
+    #
+
+    all_links = grep("^link\\.", types, value = TRUE)
+
+    if(length(all_links) > 0 && x$method_type %in% c("feglm", "feNmlm")){
+
+        ok_link = FALSE
+
+        if("link.logit" %in% types){
+            if(x$method_type == "feNmlm" && x$family == "logit"){
+                ok_link = TRUE
+            } else if(x$method_type == "feglm" && x$family$link == "logit"){
+                ok_link = TRUE
+            }
+        }
+
+        if("link.probit" %in% types){
+            if(x$method_type == "feglm" && x$family$link == "probit"){
+                ok_link = TRUE
+            }
+        }
+
+        if("link.identity" %in% types){
+            if(x$method_type == "feglm" && x$family$link == "identity"){
+                ok_link = TRUE
+            }
+        }
+
+        if("link.exp" %in% types){
+            if(x$method_type == "feglm" && x$family$link == "exp"){
+                ok_link = TRUE
+            }
+        }
+
+        if(!ok_link){
+            return(FALSE)
+        }
+    }
+
+    #
+    # iv
+    #
+
+    all_iv = grep("^iv\\.", types, value = TRUE)
+
+    if(length(all_iv) > 0 && isTRUE(x$iv)){
+
+        if("iv.endo_single" %in% types){
+            if(length(x$iv_endo_names_fit) > 1){
+                return(FALSE)
+            }
+        }
+
+        if("iv.inst_single" %in% types){
+            if(length(x$iv_inst_names_xpd) > 1){
+                return(FALSE)
+            }
+        }
+
+    }
+
+    #
+    # fixef
+    #
+
+    # Those are exclusive
+
+    if("fixef_any" %in% types){
+        if(is.null(x$fixef_vars)){
+            return(FALSE)
+        }
+    }
+
+    if("fixef_none" %in% types){
+        if(!is.null(x$fixef_vars)){
+            return(FALSE)
+        }
+    }
+
+    #
+    # weights
+    #
+
+    if("weights_any" %in% types){
+        if(is.null(x$weights)){
+            return(FALSE)
+        }
+    }
+
+    if("weights_none" %in% types){
+        if(!is.null(x$weights)){
+            return(FALSE)
+        }
+    }
+
+    #
+    # other
+    #
+
+    if("y_binary" %in% types){
+        if(x$method_type == "feglm" && x$family$family %in% c("binomial", "quasibinomial")){
+            # OK
+        } else if(x$method_type == "feNmlm" && x$family == "logit"){
+            # OK
+        } else {
+            y = model.matrix(x, type = "lhs")
+            if(!cpp_is_binary(y)){
+                return(FALSE)
+            }
+        }
+    }
+
+    if("vars_any" %in% types){
+        if(length(x$coefficients) == 0){
+            return(FALSE)
+        }
     }
 
 }

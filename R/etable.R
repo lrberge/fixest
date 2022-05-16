@@ -690,7 +690,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
     }
 
     for(i in seq_along(dots)){
-        if(!is_fixest_model(dots[[i]]) && !(is.list(dots[[i]]) && is_fixest_model(dots[[i]][[1]]))){
+        if(!is_fixest_object(dots[[i]]) && !(is.list(dots[[i]]) && is_fixest_object(dots[[i]][[1]]))){
             msg = ""
             if(!is.null(names(dots))){
                 msg = paste0(" (named '", names(dots)[i], "')")
@@ -6311,7 +6311,7 @@ insert = function(x, y, i){
 
 
 
-is_fixest_model = function(x){
+is_fixest_object = function(x){
     any(c("fixest", "fixest_list", "fixest_multi") %in% class(x))
 }
 
