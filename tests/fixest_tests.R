@@ -2125,6 +2125,69 @@ est_fe = feols(y ~ x1 | fe, base)
 
 fitstat(est_fe, ~ wf)
 
+####
+#### ... is_fixest_model ####
+####
+
+chunk("is_fixest_model")
+
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+base$y_01 = 1 * (base$y > mean(base$y))
+base$x4 = rnorm(150)
+base$x5 = rnorm(150)
+
+m_feols_fixef_weights = feols(y ~ x1 + x2 | species, base, weights = ~x3)
+m_iv = feols(y ~ x1 | x2 ~ x3, base)
+m_iv_multEndoInst_fixef = feols(y ~ x1 | species | x2 + x3 ~ x4 + x5, base)
+m_no_vars = feols(y_01 ~ 0 | species, base)
+
+m_pois = fepois(y ~ x1 + x2, base)
+m_logit = feglm(y_01 ~ x1 | x2, base, family = "logit")
+
+# OLS + fixef + weights
+test(is_fixest_model(m_feols_fixef_weights, feols = TRUE, weights_any = TRUE), TRUE)
+test(is_fixest_model(m_feols_fixef_weights, feols = TRUE, weights_none = TRUE), FALSE)
+test(is_fixest_model(m_feols_fixef_weights, ols = TRUE, fixef_any = TRUE), TRUE)
+test(is_fixest_model(m_feols_fixef_weights, ols = TRUE, fixef_none = TRUE), FALSE)
+test(is_fixest_model(m_feols_fixef_weights, ols = TRUE, y_binary = TRUE), FALSE)
+test(is_fixest_model(m_feols_fixef_weights, ml_glm = TRUE), FALSE)
+
+# IV + fixef
+test(is_fixest_model(m_iv_fixef, ols = TRUE), FALSE)
+test(is_fixest_model(m_iv_fixef, iv = TRUE), TRUE)
+test(is_fixest_model(m_iv_fixef, iv = TRUE, fixef_none = TRUE), TRUE)
+test(is_fixest_model(m_iv_fixef, iv = TRUE, fixef_any = TRUE), FALSE)
+test(is_fixest_model(m_iv_fixef, iv = TRUE, iv.endo_single = TRUE), TRUE)
+test(is_fixest_model(m_iv_fixef, iv = TRUE, iv.inst_single = TRUE), TRUE)
+
+# IV + multi endo/inst + fixef
+test(is_fixest_model(m_iv_multEndoInst_fixef, iv = TRUE, fixef_none = TRUE), FALSE)
+test(is_fixest_model(m_iv_multEndoInst_fixef, iv = TRUE, fixef_any = TRUE), TRUE)
+test(is_fixest_model(m_iv_multEndoInst_fixef, iv = TRUE, iv.endo_single = TRUE), FALSE)
+test(is_fixest_model(m_iv_multEndoInst_fixef, iv = TRUE, iv.inst_single = TRUE), FALSE)
+
+# Poisson
+test(is_fixest_model(m_pois, fepois = TRUE), TRUE)
+test(is_fixest_model(m_pois, feglm = TRUE, fam.poisson = TRUE), TRUE)
+test(is_fixest_model(m_pois, ml_glm = TRUE, fam.poisson = TRUE), TRUE)
+
+# Logit
+test(is_fixest_model(m_logit, logit = TRUE), TRUE)
+test(is_fixest_model(m_logit, all_models = TRUE, y_binary = TRUE), TRUE)
+test(is_fixest_model(m_logit, all_models = TRUE, fam.binomial = TRUE), TRUE)
+test(is_fixest_model(m_logit, all_models = TRUE, link.logit = TRUE), TRUE)
+
+# no vars + binary
+test(is_fixest_model(m_no_vars, all_models = TRUE, vars_any = TRUE), FALSE)
+test(is_fixest_model(m_no_vars, all_models = TRUE, y_binary = TRUE), TRUE)
+
+# function
+my_fun = is_fixest_model(all_models = TRUE, vars_any = TRUE)
+test(my_fun(m_no_vars), TRUE)
+
+my_fun = is_fixest_model(all_models = TRUE, y_binary = TRUE)
+test(my_fun(m_no_vars), TRUE)
+
 
 ####
 #### confint ####
