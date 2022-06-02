@@ -432,7 +432,7 @@ fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
 #' \item{`r2`, `ar2`, `wr2`, `awr2`, `pr2`, `apr2`, `wpr2`, `awpr2`: }{All r2 that can be obtained with the function [`r2`]. The `a` stands for 'adjusted', the `w` for 'within' and the `p` for 'pseudo'. Note that the order of the letters `a`, `w` and `p` does not matter. The pseudo R2s are McFadden's R2s (ratios of log-likelihoods).}
 #' \item{`theta`: }{The over-dispersion parameter in Negative Binomial models. Low values mean high overdispersion.}
 #' \item{`f`, `wf`: }{The F-tests of nullity of the coefficients. The `w` stands for 'within'. These types return the following values: `stat`, `p`, `df1` and `df2`. If you want to display only one of these, use their name after a dot: e.g. `f.stat` will give the statistic of the F-test, or `wf.p` will give the p-values of the F-test on the projected model (i.e. projected onto the fixed-effects).}
-#' \item{`wald`: }{Wald test of joint nullity of the coefficients. This test always excludes the intercept and the fixed-effects. These type returns the following values: `stat`, `p`, `df1`, `df2` and `vcov`. The element `vcov` reports the way the VCOV matrix was computed since it directly influences this statistic.}
+#' \item{`wald`: }{Wald test of joint nullity of the coefficients. This test always excludes the intercept and the fixed-effects. This type returns the following values: `stat`, `p`, `df1`, `df2` and `vcov`. The element `vcov` reports the way the VCOV matrix was computed since it directly influences this statistic.}
 #' \item{`ivf`, `ivf1`, `ivf2`, `ivfall`: }{These statistics are specific to IV estimations. They report either the IV F-test (namely the Cragg-Donald F statistic in the presence of only one endogenous regressor) of the first stage (`ivf` or `ivf1`), of the second stage (`ivf2`) or of both (`ivfall`). The F-test of the first stage is commonly named weak instrument test. The value of `ivfall` is only useful in [`etable`] when both the 1st and 2nd stages are displayed (it leads to the 1st stage F-test(s) to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- otherwise, `ivf1` would also be displayed on the 2nd stage estimation). These types return the following values: `stat`, `p`, `df1` and `df2`.}
 #' \item{`ivwald`, `ivwald1`, `ivwald2`, `ivwaldall`: }{These statistics are specific to IV estimations. They report either the IV Wald-test of the first stage (`ivwald` or `ivwald1`), of the second stage (`ivwald2`) or of both (`ivwaldall`). The Wald-test of the first stage is commonly named weak instrument test. Note that if the estimation was done with a robust VCOV and there is only one endogenous regressor, this is equivalent to the Kleibergen-Paap statistic. The value of `ivwaldall` is only useful in [`etable`] when both the 1st and 2nd stages are displayed (it leads to the 1st stage Wald-test(s) to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- otherwise, `ivwald1` would also be displayed on the 2nd stage estimation). These types return the following values: `stat`, `p`, `df1`, `df2`, and `vcov`.}
 #' \item{`cd`: }{The Cragg-Donald test for weak instruments.}
@@ -1403,6 +1403,40 @@ degrees_freedom_iid = function(x, type){
 #### Stats -- internal ####
 ####
 
+fit_rmse = function(x){
+
+    if(!is.null(x$ssr)){
+        res = sqrt(x$ssr / x$nobs)
+    } else if(!is.null(x$weights)){
+        res = sqrt(cpp_ssq(resid(x), x$weights) / sum(x$weights))
+    } else {
+        res = sqrt(cpp_ssq(resid(x)) / x$nobs)
+    }
+
+     res
+}
+
+fit_g = function(x){
+    my_vcov = x$cov.scaled
+
+    G = attr(my_vcov, "G")
+    if(is.null(G)) G = x$nobs - x$nparams
+
+    G
+}
+
+fit_theta = function(x){
+    isNegbin = x$method == "fenegbin" || (x$method_type == "feNmlm" && x$family == "negbin")
+    if(isNegbin){
+        theta = x$coefficients[".theta"]
+        names(theta) = "Overdispersion"
+    } else {
+        theta = NA
+    }
+
+    theta
+}
+
 .wald = function(x, var){
     # x: fixest estimation
 
@@ -1776,7 +1810,7 @@ is_fixest_model = function(x, all_models = FALSE, feols = FALSE, feglm = FALSE, 
                             iv = iv, iv.endo_single = iv.endo_single,
                             iv.inst_single = iv.inst_single,
                             fam.poisson = fam.poisson, fam.binomial = fam.binomial,
-                            fam.gaussian = fam.gaussian, link.negbin = link.negbin,
+                            fam.gaussian = fam.gaussian,
                             link.probit = link.probit, link.logit = link.logit,
                             link.identity = link.identity, link.exp = link.exp,
                             fixef_any = fixef_any,
@@ -1799,14 +1833,12 @@ is_fixest_model = function(x, all_models = FALSE, feols = FALSE, feglm = FALSE, 
         stop("You must at least provide one main model (arg. 'all_models' to 'iv') for which the current object is valid. If all models are OK, use 'all_models = TRUE'.")
     }
 
+    types = logical(0)
     for(v in names(mc)){
-        if(!is.logical(mc[[v]])){
-            mc[[v]] = eval(mc[[v]], parent.frame())
-        }
+        types[[v]] = eval(mc[[v]], parent.frame())
     }
 
     # types => logical
-    types = unlist(mc)
     types = names(types)[types]
 
     # dsb("','s, ' = .+$'R, w, '\"|\"'a, ', 'c ? a")
@@ -1817,57 +1849,60 @@ is_fixest_model = function(x, all_models = FALSE, feols = FALSE, feglm = FALSE, 
         stop("You must at least provide one main model (arg. 'all_models' to 'iv') for which the current object is valid. If all models are OK, use 'all_models = TRUE'.")
     }
 
-    if(x$method_type == "feols"){
-        if(!any(c("feols", "ols", "iv") %in% types)){
-            return(FALSE)
-        }
+    if(!"all_models" %in% types){
 
-        if(!"feols" %in% types){
-            if(isTRUE(x$iv)){
-                if(!"iv" %in% types){
-                    return(FALSE)
-                }
-            } else if(!"ols" %in% types){
+        if(x$method_type == "feols"){
+            if(!any(c("feols", "ols", "iv") %in% types)){
                 return(FALSE)
             }
-        }
-    }
 
-    if(x$method_type == "feglm"){
-        if(any(c("feglm", "glm", "ml_glm") %in% types)){
-            # OK
-
-        } else if(x$family$family %in% c("binomial", "quasibinomial")){
-            if(x$family$link == "logit"){
-                if(!"logit" %in% types){
+            if(!"feols" %in% types){
+                if(isTRUE(x$iv)){
+                    if(!"iv" %in% types){
+                        return(FALSE)
+                    }
+                } else if(!"ols" %in% types){
                     return(FALSE)
                 }
-            } else if(x$family$link == "probit"){
-                if(!"probit" %in% types){
+            }
+        }
+
+        if(x$method_type == "feglm"){
+            if(any(c("feglm", "glm", "ml_glm") %in% types)){
+                # OK
+
+            } else if(x$family$family %in% c("binomial", "quasibinomial")){
+                if(x$family$link == "logit"){
+                    if(!"logit" %in% types){
+                        return(FALSE)
+                    }
+                } else if(x$family$link == "probit"){
+                    if(!"probit" %in% types){
+                        return(FALSE)
+                    }
+                } else {
+                    return(FALSE)
+                }
+            } else if(x$family$family %in% c("poisson", "quasipoisson")){
+                if(!"fepois" %in% types){
                     return(FALSE)
                 }
             } else {
                 return(FALSE)
             }
-        } else if(x$family$family == c("poisson", "quasipoisson")){
-            if(!"fepois" %in% types){
+        }
+
+        if(x$method_type == "feNmlm"){
+            # We consider femlm == feNmlm since we don't introduce the non-linear peculiarities
+            if(any(c("femlm", "feNmlm", "ml", "ml_glm") %in% types)){
+                # OK
+
+            } else if("fenegbin" %in% types && x$family == "negbin"){
+                # OK
+
+            } else {
                 return(FALSE)
             }
-        } else {
-            return(FALSE)
-        }
-    }
-
-    if(x$method_type == "feNmlm"){
-        # We consider femlm == feNmlm since we don't introduce the non-linear peculiarities
-        if(any(c("femlm", "feNmlm", "ml", "ml_glm") %in% types)){
-            # OK
-
-        } else if("fenegbin" %in% types && x$family == "negbin"){
-            # OK
-
-        } else {
-            return(FALSE)
         }
     }
 
@@ -2052,6 +2087,7 @@ is_fixest_model = function(x, all_models = FALSE, feols = FALSE, feglm = FALSE, 
         }
     }
 
+    return(TRUE)
 }
 
 fitstat_setup = function(){
@@ -2071,68 +2107,121 @@ fitstat_setup = function(){
     # General ####
     #
 
+    stats_all$n = list(fun = nobs,
+                       when = is_fixest_model(all_models = TRUE),
+                       alias = "Obs.")
+
+    stats_all$ll = list(fun = logLik,
+                       when = is_fixest_model(ml_glm = TRUE),
+                       alias = "Log-Likelihood")
+
+    stats_all$aic = list(fun = AIC,
+                        when = is_fixest_model(ml_glm = TRUE),
+                        alias = "Log-Likelihood")
+
+    stats_all$bic = list(fun = BIC,
+                        when = is_fixest_model(ml_glm = TRUE),
+                        alias = "Log-Likelihood")
+
+
+    doc_short$general[["n, ll, aic, bic"]] = "# of obs., log-lik., AIC and BIC"
+    doc[["`n`, `ll`, `aic`, `bic`"]] = "The number of observations, the log-likelihood, the AIC and the BIC, respectively."
+
+    # ---- |
+
+    stats_all$rmse = list(fun = fit_rmse,
+                          when = is_fixest_model(all_models = TRUE),
+                          alias = "RMSE")
+
+    stats_all$my = list(fun = function(x) mean(model.matrix(x, type = "lhs")),
+                        when = is_fixest_model(all_models = TRUE),
+                        alias = "mean(y)",
+                        alias_tex = "$\\bar{y}$")
+
+    stats_all$g = list(fun = fit_g,
+                       when = is_fixest_model(all_models = TRUE),
+                       alias = "G",
+                       alias_tex = "Size of the 'effective' sample")
+
+
+    doc_short$general[["rmse, my, g"]] = "RMSE, mean(y), 'effective' sample size"
+    doc[["`rmse`"]] = "Root mean squared error."
+    doc[["`my`"]] = "Mean of the dependent variable."
+    doc[["`g`"]] = "The degrees of freedom used to compute the t-test (it influences the p-values of the coefficients). When the VCOV is clustered, this value is equal to the minimum cluster size, otherwise, it is equal to the sample size minus the number of variables."
+
+    # ---- |
+
+    stats_all$theta = list(fun = fit_theta,
+                           when = is_fixest_model(fenegbin = TRUE),
+                           alias = "Over-disp.",
+                           alias_tex = "Over-dispersion")
+
+    doc_short$general[["theta"]] = "Over-dispersion (Neg. Binom.)"
+    doc[["`theta`"]] = "The over-dispersion parameter in negative binomial models. Values close to 0 mean high overdispersion. Large values mean no over-dispersion."
+
+
     stats_all$sq.cor = stats_all$cor2 = list(fun = function(x) r2(x, "sq.cor"),
-                                             when = fixest_models$all,
+                                             when = is_fixest_model(all_models = TRUE),
                                              alias = "Squared Cor.",
                                              alias_tex = "Squared Correlation")
 
     doc_short$general[["cor, sq.cor"]] = "Squared correlation"
-    doc[["cor, sq.cor"]] = "Squared correlation"
+    doc[["cor, sq.cor"]] = "Squared correlation between the dependent variable and the predicted variable."
 
     #
-    # |- r2s ####
+    # ... r2s ####
     #
 
     stats_all$r2 = list(fun = function(x) r2(x, "r2"),
-                        when = fixest_models$feols,
+                        when = is_fixest_model(feols = TRUE),
                         alias = "R2",
                         alias_tex = "R$^2$")
 
     stats_all$ar2 = list(fun = function(x) r2(x, "ar2"),
-                        when = fixest_models$feols && fixest_models$vars_any,
+                        when = is_fixest_model(feols = TRUE, vars_any = TRUE),
                         alias = "Adj. R2",
                         alias_tex = "Adj. R$^2$")
 
     stats_all$wr2 = list(fun = function(x) r2(x, "wr2"),
-                        when = fixest_models$feols && fixest_models$fixef_any,
+                        when = is_fixest_model(feols = TRUE, fixef_any = TRUE),
                         alias = "Within R2",
                         alias_tex = "Within R$^2$")
 
     stats_all$awr2 = stats_all$war2 = list(
         fun = function(x) r2(x, "awr2"),
-        when = fixest_models$feols && fixest_models$fixef_any && fixest_models$vars_any,
+        when = is_fixest_model(feols = TRUE, fixef_any = TRUE, vars_any = TRUE),
         alias = "Within adj. R2",
         alias_tex = "Within adj. R$^2$")
 
     # pseudo
 
     stats_all$pr2 = list(fun = function(x) r2(x, "pr2"),
-                        when = fixest_models$ml_glm,
+                        when = is_fixest_model(ml_glm = TRUE),
                         alias = "Pseudo R2",
                         alias_tex = "Pseudo R$^2$")
 
     stats_all$apr2 = stats_all$par2 = list(
         fun = function(x) r2(x, "apr2"),
-        when = fixest_models$ml_glm && fixest_models$vars_any,
+        when = is_fixest_model(ml_glm = TRUE, vars_any = TRUE),
         alias = "Adj. pseudo R2",
         alias_tex = "Adj. pseudo R$^2$")
 
     stats_all$wpr2 = stats_all$pwr2 = list(
         fun = function(x) r2(x, "wpr2"),
-        when = fixest_models$ml_glm && fixest_models$fixef_any,
+        when = is_fixest_model(ml_glm = TRUE, fixef_any = TRUE),
         alias = "Within pseudo R2",
         alias_tex = "Within pseudo R$^2$")
 
     stats_all$awpr2 = stats_all$wapr2 = stats_all$apwr2 = stats_all$wpar2 =
         stats_all$pawr2 = stats_all$pwar2 = list(
         fun = function(x) r2(x, "awpr2"),
-        when = fixest_models$ml_glm && fixest_models$fixef_any && fixest_models$vars_any,
+        when = is_fixest_model(ml_glm = TRUE, fixef_any = TRUE, vars_any = TRUE),
         alias = "Within adj. pseudo R2",
         alias_tex = "Within adj. pseudo R$^2$")
 
-    doc[["r2, ar2, wr2, awr2"]] = "Different R2s available for [`feols`] which are obtained with the function [`r2`]. The `a` stands for 'adjusted', the `w` for 'within'. The within R2 is available only for fixed-effects models. Note that the order of the letters `a`, `w` and `p` does not matter. The pseudo R2s are McFadden's R2s (ratios of log-likelihoods)."
+    doc[["`r2`, `ar2`, `wr2`, `awr2`"]] = "Different R2s available for [`feols`] which are obtained with the function [`r2`]. The `a` stands for 'adjusted', the `w` for 'within'. The within R2 is available only for fixed-effects models. Note that the order of the letters `a`, `w` and `p` does not matter. The pseudo R2s are McFadden's R2s (ratios of log-likelihoods)."
 
-    doc[["pr2, apr2, wpr2, awpr2"]] = "Different pseudo-R2s available for non-linear models ([`feglm`], [`fepois`][fixest::feglm], [`fenegbin`][fixest::feglm], [`femlm`] and [`feNmlm`]) which are obtained with the function [`r2`]. The `a` stands for 'adjusted', the `w` for 'within'. The within R2 is available only for fixed-effects models. Note that the order of the letters `a`, `w` and `p` does not matter. The pseudo R2s are McFadden's R2s (ratios of log-likelihoods)."
+    doc[["`pr2`, `apr2`, `wpr2`, `awpr2`"]] = "Different pseudo-R2s available for non-linear models ([`feglm`], [`fepois`][fixest::feglm], [`fenegbin`][fixest::feglm], [`femlm`] and [`feNmlm`]) which are obtained with the function [`r2`]. The `a` stands for 'adjusted', the `w` for 'within'. The within R2 is available only for fixed-effects models. Note that the order of the letters `a`, `w` and `p` does not matter. The pseudo R2s are McFadden's R2s (ratios of log-likelihoods)."
 
 
 
