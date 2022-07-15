@@ -298,8 +298,8 @@ sunab = function(cohort, period, ref.c = NULL, ref.p = -1, bin, bin.rel, bin.c, 
         }
 
         if(is_GLOBAL){
-            agg_att = c("ATT" = paste0("\\Q", period_name, "\\E::[[:digit:]]+"))
-            agg_period = paste0("(\\Q", period_name, "\\E)::(-?[[:digit:]]+)")
+            agg_att = c("ATT" = paste0("\\Q", period_name, "\\E::[[:digit:]]+:cohort"))
+            agg_period = paste0("(\\Q", period_name, "\\E)::(-?[[:digit:]]+):cohort")
 
             if(att){
                 agg = agg_att
@@ -346,7 +346,7 @@ sunab_att = function(cohort, period, ref.c = NULL, ref.p = -1){
 #' Simple tool that aggregates the value of CATT coefficients in staggered difference-in-difference setups (see details).
 #'
 #' @param x A `fixest` object.
-#' @param agg A character scalar describing the variable names to be aggregated, it is pattern-based. All variables that match the pattern will be aggregated. It must be of the form `"(root)"`, the parentheses must be there and the resulting variable name will be `"root"`. You can add another root with parentheses: `"(root1)regex(root2)"`, in which case the resulting name is `"root1::root2"`. To name the resulting variable differently you can pass a named vector: `c("name" = "pattern")` or `c("name" = "pattern(root2)")`. It's a bit intricate sorry, please see the examples.
+#' @param agg A character scalar describing the variable names to be aggregated, it is pattern-based. For [`sunab`] estimations, the following keywords work: "att", "period", "cohort" and `FALSE` (to have full disaggregation). All variables that match the pattern will be aggregated. It must be of the form `"(root)"`, the parentheses must be there and the resulting variable name will be `"root"`. You can add another root with parentheses: `"(root1)regex(root2)"`, in which case the resulting name is `"root1::root2"`. To name the resulting variable differently you can pass a named vector: `c("name" = "pattern")` or `c("name" = "pattern(root2)")`. It's a bit intricate sorry, please see the examples.
 #' @param full Logical scalar, defaults to `FALSE`. If `TRUE`, then all coefficients are returned, not only the aggregated coefficients.
 #' @param use_weights Logical, default is `TRUE`. If the estimation was weighted, whether the aggregation should take into account the weights. Basically if the weights reflected frequency it should be `TRUE`.
 #' @param ... Arguments to be passed to [`summary.fixest`].
@@ -459,6 +459,8 @@ aggregate.fixest = function(x, agg, full = FALSE, use_weights = TRUE, ...){
 
     coef = x$coefficients
     cname = names(coef)
+
+    browser()
 
     qui = grepl(agg, cname, perl = TRUE)
     if(!any(qui)){
