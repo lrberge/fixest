@@ -21,6 +21,8 @@
  
  - fix bug in `etable` relating to ampersands not being correctly escaped.
  
+ - fix bug in `sunab` when the time variable is exactly named `t` (reported by Florian Hollenbach [#330](https://github.com/lrberge/fixest/issues/330)).
+ 
 ## New functions
 
  - new function `degrees_freedom_iid` which is a more user-friendly version of `degrees_freedom`.

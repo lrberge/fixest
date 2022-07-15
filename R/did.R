@@ -460,8 +460,6 @@ aggregate.fixest = function(x, agg, full = FALSE, use_weights = TRUE, ...){
     coef = x$coefficients
     cname = names(coef)
 
-    browser()
-
     qui = grepl(agg, cname, perl = TRUE)
     if(!any(qui)){
         if(from_summary){
