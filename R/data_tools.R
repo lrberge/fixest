@@ -1214,7 +1214,7 @@ sample_df = function(x, n = 10, previous = FALSE){
     }
 
     all_draws = getOption("fixest_sample_df")
-    x_dp = deparse(substitute(x))
+    x_dp = deparse_long(substitute(x))
 
     make_draw = TRUE
     if(previous){

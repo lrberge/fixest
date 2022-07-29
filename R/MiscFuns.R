@@ -730,7 +730,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
             all_vars = all.vars(fml_x)
             pblm = setdiff(all_vars, names(base))
             if(length(pblm) > 0){
-                stop("The variable", enumerate_items(pblm, "s.is"), " not in the data set (", deparse(substitute(base)), ").")
+                stop("The variable", enumerate_items(pblm, "s.is"), " not in the data set (", deparse_short(substitute(base)), ").")
             }
 
             # Evaluation control
@@ -5783,6 +5783,16 @@ extract_fe_slope = function(t){
     fe_all = gsub("\\[.+", "", t)
 
     list(fixef_vars=fixef_vars, slope_vars=slope_vars, slope_fe=slope_fe, slope_terms=slope_terms, fe_all=fe_all)
+}
+
+
+deparse_short = function(x){
+    x_dp = deparse(x)
+    if(length(x_dp) > 1){
+        x_dp = paste0(x_dp, "...")
+    }
+
+    x_dp
 }
 
 deparse_long = function(x){

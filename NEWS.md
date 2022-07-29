@@ -25,6 +25,8 @@
  
  - fix bug in `feols.fit` when `vcov` was supplied and the estimation did not contain fixed-effects (reported by @grlju [#341](https://github.com/lrberge/fixest/issues/341)).
  
+ - fix bug in `sample_df` when the name of the variable was too long.
+ 
 ## New functions
 
  - new function `degrees_freedom_iid` which is a more user-friendly version of `degrees_freedom`.
