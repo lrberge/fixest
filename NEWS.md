@@ -190,6 +190,8 @@ setFixest_dict(x)
 ```
 - `setFixest_dict`: i) now the dictionary only grows, ii) you can define variables directly in the arguments of `setFixest_dict`, iii) `as.dict` is applied to the dictionary if relevant, iv) there's a new argument `reset`.
 
+- new function `fdim` to print the dimension of a data set in an user-readable way.
+
 
 # fixest 0.10.4
 

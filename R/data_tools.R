@@ -1279,6 +1279,37 @@ len_unique = function(x, nthreads = getFixest_nthreads()){
 }
 
 
+#' Formatted dimension
+#'
+#' Prints the dimension of a data set, in an user-readable way
+#'
+#' @param x An R object, usually a data.frame (but can also be a vector).
+#'
+#' @return
+#' It does not return anything, the output is directly printed on the console.
+#'
+#' @author Laurent Berge
+#'
+#' @examples
+#'
+#' fdim(iris)
+#'
+#' fdim(iris$Species)
+#'
+#'
+#'
+fdim = function(x){
+    if(!missing(x)){
+        if(!is.null(dim(x))) {
+            info = fsignif(dim(x))
+            cat(info[1], " row", plural(info[1]), " and ", info[2], " column", plural(info[2]), "\n", sep = "")
+        } else if (!is.null(length(x))) {
+            cat(fsignif(length(x)), " obs\n")
+        }
+    }
+}
+
+
 #' Fast transform of any type of vector(s) into an integer vector
 #'
 #' Tool to transform any type of vector, or even combination of vectors, into an integer vector ranging from 1 to the number of unique values. This actually creates an unique identifier vector.

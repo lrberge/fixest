@@ -57,7 +57,7 @@ S3method(tstat, fixest_multi)
 export(vcov_cluster, vcov_DK, vcov_NW, vcov_conley)
 
 # Data manipulation
-export(n_unik, osize, sample_df)
+export(n_unik, osize, sample_df, fdim)
 
 # dsb
 export(dsb, .dsb, .dsb0)
