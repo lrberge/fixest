@@ -881,6 +881,38 @@ test(v3, v3b)
 test(max(abs(v1 - v3)) == 0, FALSE)
 test(max(abs(v2 - v3)) == 0, FALSE)
 
+# feols.fit
+
+ymat = base$y
+xmat = base[, 2:3]
+fe = base$species
+
+for(use_fe in c(TRUE, FALSE)){
+    all_vcov = dsb("/iid, hetero")
+    if(use_fe){
+        setFixest_fml(..fe = ~ 1 | species)
+        all_vcov = c(all_vcov, "cluster")
+    } else {
+        setFixest_fml(..fe = ~ 1)
+    }
+
+    for(v in all_vcov){
+
+        if(use_fe){
+            est_fit = feols.fit(ymat, xmat, fe, vcov = v)
+        } else {
+            est_fit = feols.fit(ymat, cbind(1, xmat), vcov = v)
+        }
+
+        est = feols(y ~ x1 + x2 + ..fe, base, vcov = v)
+
+        test(vcov(est), vcov(est_fit))
+    }
+}
+
+
+
+
 ####
 #### ... Argument sliding ####
 ####

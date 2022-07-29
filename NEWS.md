@@ -23,6 +23,8 @@
  
  - fix bug in `sunab` when the time variable is exactly named `t` (reported by Florian Hollenbach [#330](https://github.com/lrberge/fixest/issues/330)).
  
+ - fix bug in `feols.fit` when `vcov` was supplied and the estimation did not contain fixed-effects (reported by @grlju [#341](https://github.com/lrberge/fixest/issues/341)).
+ 
 ## New functions
 
  - new function `degrees_freedom_iid` which is a more user-friendly version of `degrees_freedom`.
@@ -31,7 +33,7 @@
 
  - new internal algorithm leading to an object very much like a plain list, much easier to interact with.
  
- - new function `models` to extract the matrix of informing on which model has been estimated.
+ - new function `models` to extract the matrix of reporting which model has been estimated.
  
  - in multiple estimations: all warnings are turned to notes and all notes are delayed and stacked.
  
