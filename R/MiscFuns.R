@@ -63,7 +63,7 @@ collinearity = function(x, verbose){
     # stop("Sorry, it does not work. A new version will hopefully come soon.")
 
 	if(!inherits(x, "fixest")){
-		stop("Argument 'x' must be a fixest object.")
+		stop("Argument `x` must be a fixest object.")
 	}
 
 	# I) (linear) collinearity with fixed-effects
@@ -97,7 +97,7 @@ collinearity = function(x, verbose){
 	coef = x$coefficients
 
 	# Getting the data
-	data = fetch_data(x, "To apply function 'collinearity', ")
+	data = fetch_data(x, "To apply function `collinearity`, ")
 
 	if(is.matrix(data)){
 	    data = as.data.frame(data)
@@ -270,7 +270,7 @@ collinearity = function(x, verbose){
 				ccat("\n")
 				varnames = colnames(linear_mat_noIntercept)
 				collin_var = varnames[max_residuals < 1e-6]
-				message = paste0("Variable", enumerate_items(collin_var, "s.is.quote"), " collinear with fixed-effects '", names(cluster)[q], "'.")
+				message = paste0("Variable", enumerate_items(collin_var, "s.is.quote"), " collinear with fixed-effects `", names(cluster)[q], "`.")
 
 				print(message)
 				return(invisible(message))
@@ -303,7 +303,7 @@ collinearity = function(x, verbose){
 	            varnames = colnames(linear_mat_noIntercept)
 	            collin_var = varnames[max_residuals < 1e-6]
 
-	            message = paste0("Variable", enumerate_items(collin_var, "s.is.quote"), " collinear with variable with varying slope '", slope_vars[q], "' (on '", slope_fe[q], "').")
+	            message = paste0("Variable", enumerate_items(collin_var, "s.is.quote"), " collinear with variable with varying slope `", slope_vars[q], "` (on `", slope_fe[q], "`).")
 
 	            print(message)
 	            return(invisible(message))
@@ -352,7 +352,7 @@ collinearity = function(x, verbose){
 				coef_lm = res$coefficients
 				vars = colnames(mat_base)[-i]
 				collin_var = vars[!is.na(coef_lm) & abs(coef_lm) > 1e-6]
-				message = paste0("Variable '", dict_name[v], "' is collinear with variable", enumerate_items(dict_name[collin_var], "s.quote"), ".")
+				message = paste0("Variable `", dict_name[v], "` is collinear with variable", enumerate_items(dict_name[collin_var], "s.quote"), ".")
 
 				print(message)
 				return(invisible(message))
@@ -390,7 +390,7 @@ collinearity = function(x, verbose){
 					ccat("\n")
 					coef_lm = coef(res)
 					collin_var = names(coef_lm)[!is.na(coef_lm) & abs(coef_lm) > 1e-6]
-					message = paste0("Variable '", dict_name[v], "' is collinear with variable", enumerate_items(dict_name[collin_var], "s.quote"), ", together with the fixed-effects ", dum_names[id_cluster], ".")
+					message = paste0("Variable `", dict_name[v], "` is collinear with variable", enumerate_items(dict_name[collin_var], "s.quote"), ", together with the fixed-effects ", dum_names[id_cluster], ".")
 
 					print(message)
 					return(invisible(message))
@@ -607,35 +607,35 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
             indiv_varname = attr(terms(indiv), "term.labels")
 
             if(missing(base)){
-                stop("To use 'indiv' as a formula, you must provide the argument 'base'.")
+                stop("To use `indiv` as a formula, you must provide the argument `base`.")
             }
 
             if(length(indiv_varname) > 1){
-                stop("The argument 'indiv' must refer to only one variable.")
+                stop("The argument `indiv` must refer to only one variable.")
             }
 
             if(!all(all.vars(indiv) %in% names(base))){
                 pblm = setdiff(all.vars(indiv), names(base))
-                stop("In argument 'indiv': the variable", enumerate_items(pblm, "s.is")," not in the data set.")
+                stop("In argument `indiv`: the variable", enumerate_items(pblm, "s.is")," not in the data set.")
             }
 
             indiv_var = try(eval(str2lang(indiv_varname), base), silent = TRUE)
             if("try-error" %in% class(indiv_var)){
-                stop("Evaluation of 'indiv' raises and error:\n", indiv_var)
+                stop("Evaluation of `indiv` raises and error:\n", indiv_var)
             }
         } else if(length(indiv) == 1 && is.character(indiv)){
             indiv_varname = indiv
 
             if(missing(base) || !indiv %in% names(base)){
-                stop("To use 'indiv' as a 'character string' you must provide the argument 'base'.")
+                stop("To use `indiv` as a `character string` you must provide the argument `base`.")
             } else {
                 indiv_var = base[[indiv]]
             }
         } else {
             if(!missing(base) && length(indiv) != NROW(base)){
-                stop("The length of 'indiv' must be the same as the data.")
+                stop("The length of `indiv` must be the same as the data.")
             } else if(missing(base) && length(indiv) != NROW(fml)){
-                stop("The length of 'indiv' must be the same as the data.")
+                stop("The length of `indiv` must be the same as the data.")
             }
             indiv_var = indiv
         }
@@ -650,12 +650,12 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
     usePost = FALSE
     if("formula" %in% class(fml_in)){
         if(missing(base) || !is.data.frame(base)){
-            stop("If you provide a formula, a data.frame must be given in argument 'base'.")
+            stop("If you provide a formula, a data.frame must be given in argument `base`.")
         }
 
         # Creation of x and the condition
         if(!length(fml_in) == 3){
-            stop("The formula must be of the type 'var1 + ... + varN ~ treat' or 'var1 + ... + varN ~ treat | post'.")
+            stop("The formula must be of the type `var1 + ... + varN ~ treat` or `var1 + ... + varN ~ treat | post`.")
         }
 
         fml_parts = fml_split(fml_in)
@@ -677,18 +677,18 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
 
         treat_var = try(eval(fml[[3]], base), silent = TRUE)
         if("try-error" %in% class(treat_var)){
-            stop("Evaluation of the 'treatment' variable raises and error: \n", treat_var)
+            stop("Evaluation of the `treatment` variable raises and error: \n", treat_var)
         }
 
         if(!is.null(pipe)){
             if(!(all(all.vars(pipe) %in% names(base)))){
                 pblm = setdiff(all.vars(pipe), names(base))
-                stop("In the evaluation of the 'post' variable: ", enumerate_items(pblm, "is"), " not in the data set.")
+                stop("In the evaluation of the `post` variable: ", enumerate_items(pblm, "is"), " not in the data set.")
             }
 
             post_var = try(eval(pipe[[2]], base), silent = TRUE)
             if("try-error" %in% class(post_var)){
-                stop("Evaluation of the 'post' variable raises and error: \n", treat_var)
+                stop("Evaluation of the `post` variable raises and error: \n", treat_var)
             }
 
             usePost = TRUE
@@ -741,7 +741,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
                 var = var2eval[i]
                 x_small = try(eval(parse(text=var), base_small), silent = TRUE)
                 if("try-error" %in% class(x_small)){
-                    stop("Evaluation of the variable '", var, "' raises and error:\n", x_small)
+                    stop("Evaluation of the variable `", var, "` raises and error:\n", x_small)
                 }
 
                 if(!is.numeric(x_small) && !is.logical(x_small)){
@@ -760,17 +760,17 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
         x_name = colnames(mat_vars)
     } else {
         if(missing(treat_var)){
-            stop("If argument 'fml' is not a formula, you must provide the argument 'treat_var'.")
+            stop("If argument `fml` is not a formula, you must provide the argument `treat_var`.")
         } else {
             mat_vars = fml_in
 
             if(NROW(mat_vars) != length(treat_var)){
-                stop("The arguments 'x' and 'treat_var' must be of the same length.")
+                stop("The arguments `x` and `treat_var` must be of the same length.")
             }
 
             if(!missing(post_var) && !is.null(post_var)){
                 if(NROW(mat_vars) != length(post_var)){
-                    stop("If provided, the argument 'post_var' must be of the same length of 'x'.")
+                    stop("If provided, the argument `post_var` must be of the same length of `x`.")
                 }
                 usePost = TRUE
             }
@@ -784,9 +784,9 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
                 }
                 mat_vars = as.matrix(mat_vars)
             } else if(!is.matrix(mat_vars)){
-                stop("If not a formula, argument 'fml' must be a data.frame or a matrix. Currently it is of class ", class(mat_vars)[1], ".")
+                stop("If not a formula, argument `fml` must be a data.frame or a matrix. Currently it is of class ", class(mat_vars)[1], ".")
             } else if(!is.numeric(mat_vars) && !is.logical(mat_vars)){
-                stop("If not a formula, argument 'fml' must be a data.frame or a matrix with numeric variables. Currenlty its is not numeric.")
+                stop("If not a formula, argument `fml` must be a data.frame or a matrix with numeric variables. Currenlty its is not numeric.")
             }
 
             if(is.logical(mat_vars)) mat_vars = as.numeric(mat_vars)
@@ -811,9 +811,9 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
             msg = "treatment variable."
             if(usePost && anyNA(post_var)){
                 if(anyNA(treat_var)){
-                    msg = "'treatment' and 'post' variables."
+                    msg = "`treatment` and `post` variables."
                 } else {
-                    msg = "'post' variable."
+                    msg = "`post` variable."
                 }
             }
             stop("All observation contain NA values for the ", msg)
@@ -842,7 +842,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
     if(usePost && length(unique(post_var)) != 2){
         n = length(unique(post_var))
         msg = ifelse(n == 1, "only one value.", paste0(n, " values."))
-        stop("This function supports only 2 conditional values for the 'post' variable. Currently, it contains ", msg)
+        stop("This function supports only 2 conditional values for the `post` variable. Currently, it contains ", msg)
     }
 
     if(usePost){
@@ -853,12 +853,12 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
     if(!missing(treat_dict) && !is.null(treat_dict)){
 
         if(!isVector(treat_dict) || is.null(names(treat_dict))){
-            stop("The argument 'treat_dict' must be a named character vector.")
+            stop("The argument `treat_dict` must be a named character vector.")
         }
 
         pblm = setdiff(treat_cases, names(treat_dict))
         if(length(pblm) > 0){
-            stop("The value", enumerate_items(pblm, "s.is"), " not in 'treat_dict'.")
+            stop("The value", enumerate_items(pblm, "s.is"), " not in `treat_dict`.")
         }
     } else {
         treat_dict = paste0("cond: ", treat_cases)
@@ -871,7 +871,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
 
     if(!missing(treat_first) && !is.null(treat_first)){
         if(!treat_first %in% treat_cases){
-            stop("Argument 'treat_first' must be an element of the treated variable.")
+            stop("Argument `treat_first` must be an element of the treated variable.")
         } else if(treat_first != treat_cases[1]){
             treat_cases = rev(treat_cases)
         }
@@ -1256,9 +1256,9 @@ i = function(factor_var, var, ref, keep, bin, ref2, keep2, bin2, ...){
 
             if(grepl("^[[:alpha:]\\.][[:alnum:]\\._]*:[[:alpha:]\\.][[:alnum:]\\._]*$", var_name)){
                 info = strsplit(var_name, ":")[[1]]
-                stop("In i(): When 'var' is equal to a product, please use I(", info[1], "*", info[2], ") instead of ", var_name, ".")
+                stop("In i(): When `var` is equal to a product, please use I(", info[1], "*", info[2], ") instead of ", var_name, ".")
             } else {
-                stop("The arguments 'var' and 'f' must be of the same length (currently ", length(var), " vs ", length(f), ").")
+                stop("The arguments `var` and `f` must be of the same length (currently ", length(var), " vs ", length(f), ").")
             }
         }
     }
@@ -1912,7 +1912,7 @@ xpd = function(fml, ..., add = NULL, lhs, rhs, data = NULL, frame = parent.frame
                 if(is.matrix(data)){
                     data = colnames(data)
                     if(is.null(data)){
-                        stop("The argument 'data' must contain variables names. It is currently a matrix without column names.")
+                        stop("The argument `data` must contain variables names. It is currently a matrix without column names.")
                     }
                 } else if(is.data.frame(data)){
                     data = names(data)
@@ -1961,8 +1961,8 @@ xpd = function(fml, ..., add = NULL, lhs, rhs, data = NULL, frame = parent.frame
             fml_txt = paste(res, collapse = "")
             fml = error_sender(as.formula(fml_txt, frame),
                                "Expansion of variables in ..(\"regex\"): coercion of the following text to a formula led to an error.\n",
-                               fit_screen(paste0("     TEXT: ", fml_txt)),
-                               "\n  PROBLEM: see below", up = 1)
+                               fit_screen(paste0("...TEXT: `", fml_txt, "`")),
+                               "\nPROBLEM: see below", up = 1)
         }
     }
 
@@ -1978,8 +1978,8 @@ xpd = function(fml, ..., add = NULL, lhs, rhs, data = NULL, frame = parent.frame
 
             fml = error_sender(as.formula(fml_txt, frame),
                                "Dot square bracket operator: coercion of the following text to a formula led to an error.\n",
-                               fit_screen(paste0("     TEXT: ", fml_txt)),
-                               "\n  PROBLEM: see below", up = 1)
+                               fit_screen(paste0("...TEXT: `", fml_txt, "`")),
+                               "\nPROBLEM: see below", up = 1)
         }
 
     }
@@ -1995,7 +1995,7 @@ xpd = function(fml, ..., add = NULL, lhs, rhs, data = NULL, frame = parent.frame
                 if(is.matrix(data)){
                     data = colnames(data)
                     if(is.null(data)){
-                        stop("The argument 'data' must contain variables names. It is currently a matrix without column names.")
+                        stop("The argument `data` must contain variables names. It is currently a matrix without column names.")
                     }
                 } else if(is.data.frame(data)){
                     data = names(data)
@@ -2018,9 +2018,9 @@ xpd = function(fml, ..., add = NULL, lhs, rhs, data = NULL, frame = parent.frame
             }
 
             fml = error_sender(as.formula(fml_txt, frame),
-                               "Expansion of variables ending with '..' did not work. Coercion of the following text to a formula led to an error.\n",
-                               fit_screen(paste0("     TEXT: ", fml_txt)),
-                               "\n  PROBLEM: see below", up = 1)
+                               "Expansion of variables ending with `..` did not work. Coercion of the following text to a formula led to an error.\n",
+                               fit_screen(paste0("...TEXT: `", fml_txt, "`")),
+                               "\nPROBLEM: see below", up = 1)
         }
     }
 
@@ -3245,8 +3245,8 @@ dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE
                 x_txt = paste0("dsb_check_set_agg(", x_txt, ")")
                 my_list = list(dsb_check_set_agg = dsb_check_set_agg)
                 my_call = error_sender(eval(str2lang(x_txt), my_list, frame),
-                                       "Dot square bracket operator: Evaluation of '.[",
-                                       x_split[i], "]' led to an error:",
+                                       "Dot square bracket operator: Evaluation of `.[",
+                                       x_split[i], "]` led to an error:",
                                        up = up + 1)
 
                 operator[i] = op
@@ -3256,8 +3256,8 @@ dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE
 
         if(do_lang){
             my_call = error_sender(str2lang(x_split[i]),
-                                   "Dot square bracket operator: Evaluation of '.[",
-                                   x_split[i], "]' led to an error:",
+                                   "Dot square bracket operator: Evaluation of `.[",
+                                   x_split[i], "]` led to an error:",
                                    up = up + 1)
         }
 
@@ -3268,8 +3268,8 @@ dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE
         } else {
             # Informative error message
             value = error_sender(as.character(eval(my_call, frame)),
-                                 "Dot square bracket operator: Evaluation of '.[",
-                                 x_split[i], "]' led to an error:",
+                                 "Dot square bracket operator: Evaluation of `.[",
+                                 x_split[i], "]` led to an error:",
                                  up = up + 1)
 
             if(length(value) == 2 && value[1] == "~"){
@@ -3590,7 +3590,7 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
     # We need to check a^b otherwise error is thrown in terms()
     rhs_txt = deparse_long(fml[[2]])
     if(grepl("\\^[[:alpha:]]", rhs_txt)){
-        stop("The special operator '^' can only be used in the fixed-effects part of the formula. Please use ':' instead.")
+        stop("The special operator `^` can only be used in the fixed-effects part of the formula. Please use `:` instead.")
     }
 
     #
@@ -3718,7 +3718,7 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_i
 
         if(!original_data && any(!all_vars %in% names(newdata))){
             pblm = setdiff(all_vars, names(newdata))
-            stop("In 'model.matrix', the variable", enumerate_items(pblm, "is.s.quote"), " in the formula but not in the argument 'data'. Use 'subset = TRUE' to enable the creation of partial data.")
+            stop("In `model.matrix`, the variable", enumerate_items(pblm, "is.s.quote"), " in the formula but not in the argument `data`. Use `subset = TRUE` to enable the creation of partial data.")
         }
 
     } else {
@@ -3729,7 +3729,7 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_i
 
             vars_keep = keep_apply(vars_keep, subset)
             if(length(vars_keep) == 0){
-                stop("The variables in 'subset' do not match any variable in the 'data'.")
+                stop("The variables in `subset` do not match any variable in the `data`.")
             }
 
             if(isFALSE(keep_apply("(Intercept)", subset, logical = TRUE))){
@@ -3757,7 +3757,7 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_i
             }
 
             if(all(terms_drop)){
-                stop("Due to the use of the argument 'subset', not a single variable is left.")
+                stop("Due to the use of the argument `subset`, not a single variable is left.")
             }
 
             fml = .xpd(rhs = terms_all[!terms_drop])
@@ -3786,7 +3786,7 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_i
         if(length(fml) == 3) fml = fml[c(1, 3)]
 
         # We apply model.frame to the original data
-        data = fetch_data(object, "To apply 'model.matrix.fixest', ")
+        data = fetch_data(object, "To apply `model.matrix.fixest`, ")
 
         panel__meta__info = set_panel_meta_info(object, data)
 
@@ -4044,7 +4044,7 @@ fml_combine = function(fml_char, fastCombine, vars = FALSE){
                 # we add some error control -- imperfect, but... it's enough
                 lab_collapsed = gsub("\\([^\\)]+\\)", "", lab)
                 if(length(lab_split) != length(strsplit(lab_collapsed, "%^%", fixed = TRUE)[[1]])){
-                    msg = "Wrong formatting of the fixed-effects interactions. The '^' operator should not be within parentheses."
+                    msg = "Wrong formatting of the fixed-effects interactions. The `^` operator should not be within parentheses."
                     stop(msg)
                 }
             }
@@ -4262,7 +4262,7 @@ check_set_nthreads = function(nthreads){
     # Simple function that checks that the nber of threads is valid
     set_up(1)
 
-    check_value(nthreads, "integer scalar GE{0} | numeric scalar GT{0} LT{1}", .message = paste0("The argument 'nthreads' must be an integer lower or equal to the number of threads available (", max(cpp_get_nb_threads(), 1), "). It can be equal to 0 which means all threads. Alternatively, if equal to a number strictly between 0 and 1, it represents the fraction of all threads to be used."))
+    check_value(nthreads, "integer scalar GE{0} | numeric scalar GT{0} LT{1}", .message = paste0("The argument `nthreads` must be an integer lower or equal to the number of threads available (", max(cpp_get_nb_threads(), 1), "). It can be equal to 0 which means all threads. Alternatively, if equal to a number strictly between 0 and 1, it represents the fraction of all threads to be used."))
 
     max_threads = cpp_get_nb_threads()
 
@@ -4556,7 +4556,7 @@ items_to_drop = function(items, x, varname, keep = FALSE, argname,
     ref = argname == "ref" && !valid_ref
 
     if(keep_first && (keep || ref)){
-        stop("Internal error: keep_first should not be used with 'keep' or 'ref'.")
+        stop("Internal error: keep_first should not be used with `keep` or `ref`.")
     }
 
     if(is.factor(items)){
@@ -4571,27 +4571,27 @@ items_to_drop = function(items, x, varname, keep = FALSE, argname,
     if(inherits(x, "formula")){
 
         if(!identical(all.vars(x), "x")){
-            stop_up("In argument '", argname, "', the formula must contain a single variable name: 'x'. So far '", deparse_long(x), "' is not valid.")
+            stop_up("In argument `", argname, "`, the formula must contain a single variable name: `x`. So far `", deparse_long(x), "` is not valid.")
         }
 
         if(length(x) > 2){
-            stop_up("In argument '", argname, "', if a formula, it must be one-sided. Problem: '", deparse_long(x), "' is two-sided.")
+            stop_up("In argument `", argname, "`, if a formula, it must be one-sided. Problem: `", deparse_long(x), "` is two-sided.")
         }
 
         is_here = error_sender(eval(x[[2]], list(x = items)),
-                               "In argument '", argname, "', the evaluation of the formula led to an error:")
+                               "In argument `", argname, "`, the evaluation of the formula led to an error:")
         if(length(is_here) != length(items)){
-            stop_up("In argument '", argname, "', the evaluation of the formula must return a logical vector of the same length as 'x'. Problem: '", deparse_long(x), "' returns a vector of length ", length(is_here), " (expected: ", length(items), ").")
+            stop_up("In argument `", argname, "`, the evaluation of the formula must return a logical vector of the same length as `x`. Problem: `", deparse_long(x), "` returns a vector of length ", length(is_here), " (expected: ", length(items), ").")
         }
 
         if(!is.logical(is_here)){
-            stop_up("In argument '", argname, "', the evaluation of the formula must return a logical vector. Problem: '", deparse_long(x), "' is not logical (instead it is of class ", enumerate_items(class(is_here)), ").")
+            stop_up("In argument `", argname, "`, the evaluation of the formula must return a logical vector. Problem: `", deparse_long(x), "` is not logical (instead it is of class ", enumerate_items(class(is_here)), ").")
         }
 
         is_here = !is.na(is_here) & is_here
 
         if(!no_error && !any(is_here)){
-            stop_up("In argument '", argname, "', the evaluation of the formula must match at least one value. Problem: '", deparse_long(x), "' does not match any.")
+            stop_up("In argument `", argname, "`, the evaluation of the formula must match at least one value. Problem: `", deparse_long(x), "` does not match any.")
         }
 
         if(keep){
@@ -4611,7 +4611,7 @@ items_to_drop = function(items, x, varname, keep = FALSE, argname,
                 new_x = grep(pattern, items, value = TRUE)
                 if(length(new_x) == 0 && !no_error){
                     # strong checking!
-                    stop_up("In argument '", argname, "', the regular expression '", pattern, "' does not match any value of '", varname, "'.")
+                    stop_up("In argument `", argname, "`, the regular expression `", pattern, "` does not match any value of `", varname, "`.")
                 }
                 all_x = c(all_x, new_x)
             } else {
@@ -4621,7 +4621,7 @@ items_to_drop = function(items, x, varname, keep = FALSE, argname,
                     my_x = items[qui_ok]
                     my_x = my_x[!is.na(my_x)]
                 } else {
-                    check_value_plus(my_x, "match", .choices = unique(items), .message = paste0("The argument '", argname, "' should contain values of the variable '", varname, "'."))
+                    check_value_plus(my_x, "match", .choices = unique(items), .message = paste0("The argument `", argname, "` should contain values of the variable `", varname, "`."))
                 }
 
                 all_x = c(all_x, my_x)
@@ -4667,7 +4667,7 @@ items_to_drop = function(items, x, varname, keep = FALSE, argname,
                 if(keep_first){
 
                     if(!x[1] %in% items && !no_error){
-                        stop_up("In argument '", argname, "', the value ", x[1], " does not match any value of '", varname, "'.")
+                        stop_up("In argument `", argname, "`, the value ", x[1], " does not match any value of `", varname, "`.")
                     }
 
                     id_drop = unique(c(which(items %in% x[1]), id_drop))
@@ -4676,7 +4676,7 @@ items_to_drop = function(items, x, varname, keep = FALSE, argname,
             }
 
             if(length(id_drop) == 0 && !no_error){
-                stop_up("In argument '", argname, "', the value", plural_len(x, "s.don't"), " match any value of '", varname, "'.")
+                stop_up("In argument `", argname, "`, the value", plural_len(x, "s.don't"), " match any value of `", varname, "`.")
             }
         }
 
@@ -4711,7 +4711,7 @@ bin_factor = function(bin, x, varname, no_error = FALSE){
                 bin_names[i] = error_sender(dsb(bin_names[i], frame = parent.frame(2), nest = FALSE,
                                                 vectorize = TRUE, collapse = ""),
                                             dsb("Error when binning: the name (.[bin_names[i]]) expanded",
-                                                " with '.[]' led to an error:"))
+                                                " with `.[]` led to an error:"))
 
             }
         }
@@ -4724,7 +4724,7 @@ bin_factor = function(bin, x, varname, no_error = FALSE){
             for(j in qui_bis){
                 value[[j]] = error_sender(.dsb(value[[j]], frame = parent.frame(2), nest = FALSE),
                                            dsb("Error when binning: the name (.[value[[j]]]) expanded",
-                                               " with '.[]' led to an error:"))
+                                               " with `.[]` led to an error:"))
             }
             bin[[i]] = unlist(value)
         }
@@ -4738,7 +4738,7 @@ bin_factor = function(bin, x, varname, no_error = FALSE){
     if(!is.list(bin) && (is.character(bin) && any(grepl("^cut::", bin)))){
 
         if(!grepl("^cut::", bin[1])){
-            stop_up("To use the special binning 'cut::values', it must be in the first position of the vector, possibly followed by custom names. Currently 'cut::values' is in position ", which(grepl("^cut::", bin))[1], ".")
+            stop_up("To use the special binning `cut::values`, it must be in the first position of the vector, possibly followed by custom names. Currently `cut::values` is in position ", which(grepl("^cut::", bin))[1], ".")
         }
 
         n_names = length(bin) - 1
@@ -4751,12 +4751,12 @@ bin_factor = function(bin, x, varname, no_error = FALSE){
             }
 
             if(n_names > n_cuts){
-                stop_up("In the special binning 'cut::values', the number of custom names is greater than the number of bins (", n_names, " vs ", n_cuts, ").")
+                stop_up("In the special binning `cut::values`, the number of custom names is greater than the number of bins (", n_names, " vs ", n_cuts, ").")
             }
         }
 
         if(!is.numeric(x)){
-            stop_up("To use the special binning 'cut::values', the variable '", varname, "' must be numeric. Currently this is not the case (it is of class ", enumerate_items(class(x)), " instead).")
+            stop_up("To use the special binning `cut::values`, the variable `", varname, "` must be numeric. Currently this is not the case (it is of class ", enumerate_items(class(x)), " instead).")
         }
 
         return(cut_vector(x, bin))
@@ -4775,13 +4775,13 @@ bin_factor = function(bin, x, varname, no_error = FALSE){
         if(is.character(bin) && any(grepl("^!?!?bin::", bin))){
 
             if(length(bin) > 1){
-                stop_up("To use the special binning 'bin::digit', the argument '", argname, "' must be of length 1. Currently it is of length ", length(bin), ".")
+                stop_up("To use the special binning `bin::digit`, the argument `", argname, "` must be of length 1. Currently it is of length ", length(bin), ".")
             }
 
             d = gsub("^!?!?bin::", "", bin)
             if(any(grepl("[^[:digit:]]", d))){
                 bin_type = gsub("^(!?!?bin).*", "\\1", bin)
-                stop_up("In the argument bin, the special binning must be of the form '", bin_type, "::digit'. Currently this is not the case for '", bin_type, "::", d, "'.")
+                stop_up("In the argument bin, the special binning must be of the form `", bin_type, "::digit`. Currently this is not the case for `", bin_type, "::", d, "`.")
             }
             d = as.numeric(d)
 
@@ -4790,7 +4790,7 @@ bin_factor = function(bin, x, varname, no_error = FALSE){
 
             if(!consecutive){
                 if(!is.numeric(x_items)){
-                    stop_up("To use the special binning 'bin::digit', the variable '", varname, "' must be numeric. Currently this is not the case (it is of class ", enumerate_items(class(x_items)), " instead).")
+                    stop_up("To use the special binning `bin::digit`, the variable `", varname, "` must be numeric. Currently this is not the case (it is of class ", enumerate_items(class(x_items)), " instead).")
                 }
 
                 new_x = (x_items %/% d) * d
@@ -4838,7 +4838,7 @@ bin_factor = function(bin, x, varname, no_error = FALSE){
         t_id = table(unlist(id_bin))
         n_max = max(t_id)
         pblm = x_items[as.numeric(names(t_id)[t_id == n_max])]
-        stop_up("In 'bin', some values are binned in different bins, it's of course not allowed. The value '", pblm, "' is in ", n_max, " bins.")
+        stop_up("In `bin`, some values are binned in different bins, it's of course not allowed. The value `", pblm, "` is in ", n_max, " bins.")
     }
 
     # recreating the factor
@@ -4995,7 +4995,7 @@ cut_vector = function(x, bin){
 
     # checking bin
     if(!is.character(bin) || !grepl("^cut::", bin)){
-        stop("Internal bug: Argument 'bin' should be equal to 'cut::stg' over here -- this is not the case.")
+        stop("Internal bug: Argument `bin` should be equal to `cut::stg` over here -- this is not the case.")
     }
 
     # cleaning x
@@ -5032,7 +5032,7 @@ cut_vector = function(x, bin){
         n_cuts = length(values)
 
         if(n_cuts != length(bounds)){
-            stop_up("In 'bin', the format should be 'cut::a]b]' with 'a', 'b', etc, numbers or quartiles/percentiles. Problem: each number must be followed by an open (or closed) square bracket, this is currentlly not the case.")
+            stop_up("In `bin`, the format should be `cut::a]b]` with `a`, `b`, etc, numbers or quartiles/percentiles. Problem: each number must be followed by an open (or closed) square bracket, this is currentlly not the case.")
         }
 
         cut_points = numeric(n_cuts)
@@ -5046,7 +5046,7 @@ cut_vector = function(x, bin){
             } else if(grepl("^p|P|q|Q", v)){
                 p = gsub("^.", "", v)
                 if(!is_numeric_in_char(p)){
-                    stop_up("In 'bin', the format should be 'cut::a]b]' with 'a', 'b', etc, numbers or quartiles (resp. percentiles) of the form qX (resp. pX) with X a number. \n  The value '", v, "', in '", bin, "', is incorrect.")
+                    stop_up("In `bin`, the format should be `cut::a]b]` with `a`, `b`, etc, numbers or quartiles (resp. percentiles) of the form qX (resp. pX) with X a number. \n  The value `", v, "`, in `", bin, "`, is incorrect.")
                 }
 
                 p = as.numeric(p)
@@ -5055,26 +5055,26 @@ cut_vector = function(x, bin){
                 if(grepl("^q|Q", v)){
                     # we transform the quartile into a percentile
                     if(!p %in% c(0:4)){
-                        stop_up("In 'bin', the format should be 'cut::a]b]' with 'a', 'b', etc, numbers or quartiles (resp. percentiles) of the form qX (resp. pX) with X a number. \n  The value '", v, "', in '", bin, "', is incorrect. \n  The quartile must be an integer between 0 and 4.")
+                        stop_up("In `bin`, the format should be `cut::a]b]` with `a`, `b`, etc, numbers or quartiles (resp. percentiles) of the form qX (resp. pX) with X a number. \n  The value `", v, "`, in `", bin, "`, is incorrect. \n  The quartile must be an integer between 0 and 4.")
                     }
 
                     p = c(0, 25, 50, 75, 100)[p + 1]
                 }
 
                 if(!p %in% 0:100){
-                    stop_up("In 'bin', the format should be 'cut::a]b]' with 'a', 'b', etc, numbers or quartiles (resp. percentiles) of the form qX (resp. pX) with X a number. \n  The value '", v, "', in '", bin, "', is incorrect. \n  The percentile must be an integer between 0 and 100.")
+                    stop_up("In `bin`, the format should be `cut::a]b]` with `a`, `b`, etc, numbers or quartiles (resp. percentiles) of the form qX (resp. pX) with X a number. \n  The value `", v, "`, in `", bin, "`, is incorrect. \n  The percentile must be an integer between 0 and 100.")
                 }
 
                 cut_points[i] = quantile(x, p/100)
 
             } else {
-                stop_up("In 'bin', the format should be 'cut::a]b]' with 'a', 'b', etc, numbers or quartiles (resp. percentiles) of the form qX (resp. pX) with X a number. \n  The value '", v, "', in '", bin, "', is incorrect. This is not a percentile nor a number.")
+                stop_up("In `bin`, the format should be `cut::a]b]` with `a`, `b`, etc, numbers or quartiles (resp. percentiles) of the form qX (resp. pX) with X a number. \n  The value `", v, "`, in `", bin, "`, is incorrect. This is not a percentile nor a number.")
             }
         }
 
         if(n_cuts > 1 && any(cut_points[1:(n_cuts-1)] > cut_points[1 + 1:(n_cuts-1)])){
             i_pblm = which(cut_points[1:(n_cuts-1)] > cut_points[1 + 1:(n_cuts-1)])[1]
-            stop_up("In 'bin', the format should be 'cut::a]b]' with 'a', 'b', etc, numbers or quartiles (resp. percentiles) of the form qX (resp. pX) with X a number. \n  The values 'a', 'b', etc should be increasing, but the ", n_th(i_pblm), " value (", cut_points[i_pblm], ") is larger than the ", n_th(i_pblm + 1), " (", cut_points[i_pblm + 1], ").")
+            stop_up("In `bin`, the format should be `cut::a]b]` with `a`, `b`, etc, numbers or quartiles (resp. percentiles) of the form qX (resp. pX) with X a number. \n  The values `a`, `b`, etc should be increasing, but the ", n_th(i_pblm), " value (", cut_points[i_pblm], ") is larger than the ", n_th(i_pblm + 1), " (", cut_points[i_pblm + 1], ").")
         }
 
     }
@@ -5101,7 +5101,7 @@ cut_vector = function(x, bin){
     if(any(isnt_empty == 0)){
         i_empty = which(isnt_empty == 0)
         if(getFixest_notes()){
-            message("When binning: in '", bin, "', the ", enumerate_items(n_th(i_empty)), " bin", plural_len(i_empty, "s.is"), " empty.")
+            message("When binning: in `", bin, "`, the ", enumerate_items(n_th(i_empty)), " bin", plural_len(i_empty, "s.is"), " empty.")
         }
 
         x_int = cumsum(isnt_empty)[x_int]
@@ -5185,10 +5185,10 @@ fixest_pvalue = function(x, zvalue, vcov){
     if(use_t_distr(x)){
 
         if(missing(vcov)) {
-            stop("Internal error (=bug): the argument 'vcov' should not be missing in fixest_pvalue().")
+            stop("Internal error (=bug): the argument `vcov` should not be missing in fixest_pvalue().")
 
         } else if(is.null(attr(vcov, "dof.K"))){
-            stop("Internal error (=bug): the attribute 'dof.K' from 'vcov' should not be NULL.")
+            stop("Internal error (=bug): the attribute `dof.K` from `vcov` should not be NULL.")
         }
 
         # df.t is always an attribute of the vcov
@@ -5214,10 +5214,10 @@ fixest_CI_factor = function(x, level, vcov){
     if(use_t_distr(x)){
 
         if(missing(vcov)) {
-            stop("Internal error (=bug): the argument 'vcov' should not be missing in fixest_CI_factor().")
+            stop("Internal error (=bug): the argument `vcov` should not be missing in fixest_CI_factor().")
 
         } else if(is.null(attr(vcov, "dof.K"))){
-            stop("Internal error (=bug): the attribute 'dof.K' from 'vcov' should not be NULL.")
+            stop("Internal error (=bug): the attribute `dof.K` from `vcov` should not be NULL.")
         }
 
         # df.t is always an attribute of the vcov
@@ -5398,7 +5398,7 @@ par_fit = function(my_par, id){
 
 dict_apply = function(x, dict = NULL){
 
-    check_arg(dict, "NULL named character vector no na", .message = "The argument 'dict' must be a dictionnary, ie a named vector (eg dict=c(\"old_name\"=\"new_name\")")
+    check_arg(dict, "NULL named character vector no na", .message = "The argument `dict` must be a dictionnary, ie a named vector (eg dict=c(\"old_name\"=\"new_name\")")
 
     if(missing(dict) || length(dict) == 0){
         return(x)
@@ -5415,7 +5415,7 @@ dict_apply = function(x, dict = NULL){
         names(dict) = gsub(" ", "", names(dict), fixed = TRUE)
         if(anyDuplicated(names(dict))){
             dup = duplicated(names(dict))
-            stop("The dictionary 'dict' contains several items with the same names, it concerns ",
+            stop("The dictionary `dict` contains several items with the same names, it concerns ",
                  enumerate_items(names(dict)[dup]), " (note that spaces are ignored).")
         }
     }
@@ -5435,7 +5435,7 @@ keep_apply = function(x, keep = NULL, logical = FALSE){
         }
     }
 
-    check_arg(keep, "character vector no na", .message = "The arg. 'keep' must be a vector of regular expressions (see help(regex)).")
+    check_arg(keep, "character vector no na", .message = "The arg. `keep` must be a vector of regular expressions (see help(regex)).")
 
     res = x
 
@@ -5448,7 +5448,7 @@ keep_apply = function(x, keep = NULL, logical = FALSE){
             var2keep = gsub("^%", "", var2keep)
             vect2check = names(res)
             if(is.null(vect2check)){
-                # warning("In keep, the special character '%' cannot be used here.")
+                # warning("In keep, the special character `%` cannot be used here.")
                 vect2check = res
             }
         }
@@ -5471,7 +5471,7 @@ drop_apply = function(x, drop = NULL){
         return(x)
     }
 
-    check_arg(drop, "character vector no na", .message = "The arg. 'drop' must be a vector of regular expressions (see help(regex)). ")
+    check_arg(drop, "character vector no na", .message = "The arg. `drop` must be a vector of regular expressions (see help(regex)). ")
 
     res = x
 
@@ -5483,7 +5483,7 @@ drop_apply = function(x, drop = NULL){
             var2drop = gsub("^%", "", var2drop)
             vect2check = names(res)
             if(is.null(vect2check)){
-                # warning("In drop, the special character '%' cannot be used here.")
+                # warning("In drop, the special character `%` cannot be used here.")
                 vect2check = res
             }
         }
@@ -5504,7 +5504,7 @@ order_apply = function(x, order = NULL){
         return(x)
     }
 
-    check_arg(order, "character vector no na", .message = "The arg. 'order' must be a vector of regular expressions (see help(regex)). ")
+    check_arg(order, "character vector no na", .message = "The arg. `order` must be a vector of regular expressions (see help(regex)). ")
 
     res = x
 
@@ -5516,7 +5516,7 @@ order_apply = function(x, order = NULL){
             var2order = gsub("^%", "", var2order)
             vect2check = names(res)
             if(is.null(vect2check)){
-                # warning("In order, the special character '%' cannot be used here.")
+                # warning("In order, the special character `%` cannot be used here.")
                 vect2check = res
             }
         }
@@ -5725,7 +5725,7 @@ fml2varnames = function(fml, combine_fun = FALSE){
     } else {
         t = terms(fml)
         all_var_names = attr(t, "term.labels")
-        # => maybe I should be more cautious below???? Sometimes ':' really means stuff like 1:5
+        # => maybe I should be more cautious below???? Sometimes `:` really means stuff like 1:5
         all_var_names = gsub(":", "*", all_var_names) # for very special cases
     }
 
@@ -5970,7 +5970,7 @@ error_sender = function(expr, ..., clean, up = 0, arg_name){
             if(missing(arg_name)){
                 arg_name = deparse(substitute(expr))
             }
-            msg = paste0("Argument '", arg_name, "' could not be evaluated: ")
+            msg = paste0("Argument `", arg_name, "` could not be evaluated: ")
             stop_up(msg, res[[2]])
 
         } else {
@@ -6111,7 +6111,7 @@ fixest_fml_rewriter = function(fml){
             rhs_text = gsub("(?<!I\\()(\\b(\\.[[:alpha:]]|[[:alpha:]])[[:alnum:]\\._]*\\^[[:digit:]]+)", "I(\\1)", rhs_text, perl = TRUE)
 
             if(grepl("\\^[[:alpha:]]", rhs_text)){
-                stop_up("The operator '^' between variables can be used only in the fixed-effects part of the formula. Otherwise, please use ':' instead.")
+                stop_up("The operator `^` between variables can be used only in the fixed-effects part of the formula. Otherwise, please use `:` instead.")
             }
 
             fml_rhs = as.formula(rhs_text)
@@ -6220,14 +6220,14 @@ fixest_fml_rewriter = function(fml){
             rhs_txt = fml_split(fml, i = 1, text = TRUE)
 
             if(grepl("\\^[[:alpha:]]", rhs_txt)){
-                stop_up("The operator '^' between variables can be used only in the fixed-effects part of the formula. Otherwise, please use ':' instead.")
+                stop_up("The operator `^` between variables can be used only in the fixed-effects part of the formula. Otherwise, please use `:` instead.")
             }
 
             if(is_fml_inside(fml_parts[[n_parts]])){
                 iv_txt = fml_split(fml, i = n_parts, text = TRUE)
 
                 if(grepl("\\^[[:alpha:]]", iv_txt)){
-                    stop_up("The operator '^' between variables can be used only in the fixed-effects part of the formula. Otherwise, please use ':' instead.")
+                    stop_up("The operator `^` between variables can be used only in the fixed-effects part of the formula. Otherwise, please use `:` instead.")
                 }
             }
 
@@ -6272,14 +6272,14 @@ check_set_digits = function(digits, up = 1){
         # Control
         if(!d_type %in% c("r", "s")){
             arg = deparse(substitute(digits))
-            stop_up("The argument '", arg, "' must start with 'r' (for round) or 's' (for significant). Currently it starts with '", d_type,"' which is not valid.\nExample of valid use: digits = 'r3'.")
+            stop_up("The argument `", arg, "` must start with `r` (for round) or `s` (for significant). Currently it starts with `", d_type,"` which is not valid.\nExample of valid use: digits = `r3`.")
         }
 
         round = d_type == "r"
 
         if(!grepl("^[0-9]$", d_value)){
             arg = deparse(substitute(digits))
-            stop_up("The argument '", arg, "' must be equal to the character 'r' or 's' followed by a single digit. Currently '", digits,"' is not valid.\nExample of valid use: digits = '", d_type, "3'.")
+            stop_up("The argument `", arg, "` must be equal to the character `r` or `s` followed by a single digit. Currently `", digits,"` is not valid.\nExample of valid use: digits = `", d_type, "3`.")
         }
 
         digits = as.numeric(d_value)
@@ -6497,7 +6497,7 @@ extract_fun = function(fml_char, fun, err_msg = NULL, bool = FALSE, drop = TRUE)
 
             if(only_one && length(fml_split) > 2){
                 if(is.null(err_msg)){
-                    stop_up("Only one function '", fun, "' can be used at a time.")
+                    stop_up("Only one function `", fun, "` can be used at a time.")
                 } else {
                     stop_up(err_msg)
                 }
