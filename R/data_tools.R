@@ -271,8 +271,8 @@ ref = function(x, ref){
         if(is.character(ref[1]) && grepl("^(cut|bin)", ref[1])){
             IS_SPECIAL = TRUE
             if(!is.numeric(x)){
-                stop(.dsb("To use the special binning '.[ref[1]]' the variable ",
-                          "'.[varname]' must be numeric. Currently this is not the case ",
+                stop(.dsb("To use the special binning `.[ref[1]]` the variable ",
+                          "`.[varname]` must be numeric. Currently this is not the case ",
                           "(it is of class .[3KO, C?class(x)] instead)."))
             }
         } else {
@@ -415,7 +415,7 @@ n_unik = function(x){
     # attr("na.info") => nber of NA values, vector
 
     if(missing(x)){
-        stop("Argument 'x' must be provided. Problem: it is missing.")
+        stop("Argument `x` must be provided. Problem: it is missing.")
     }
 
     # Non standard-evaluation
@@ -488,9 +488,9 @@ n_unik = function(x){
         x_all = vector("list", n_x)
         for(i in 1:n_x){
             x_all[[i]] = error_sender(eval(str2lang(x_all_names[i]), parent.frame()),
-                                      "The left-hand-side of the formula must contain valid data.frames. Problem in the evaluation of '", x_all_names[i], "':")
+                                      "The left-hand-side of the formula must contain valid data.frames. Problem in the evaluation of `", x_all_names[i], "`:")
             check_value(x_all[[i]], "data.frame",
-                        .message = paste0("The value '", x_all_names[i], "' (in the LHS of the formula) must be a data.frame."))
+                        .message = paste0("The value `", x_all_names[i], "` (in the LHS of the formula) must be a data.frame."))
         }
 
         fml = x[c(1, 3)]
@@ -1209,8 +1209,8 @@ sample_df = function(x, n = 10, previous = FALSE){
     check_arg(previous, "logical scalar")
 
     if(MISSNULL(x)){
-        if(missing(x)) stop("The argument 'x' cannot be missing, please provide it.")
-        if(is.null(x)) stop("The argument 'x' must be a vector, matrix or data.frame. Currently it is NULL.")
+        if(missing(x)) stop("The argument `x` cannot be missing, please provide it.")
+        if(is.null(x)) stop("The argument `x` must be a vector, matrix or data.frame. Currently it is NULL.")
     }
 
     all_draws = getOption("fixest_sample_df")
@@ -1346,7 +1346,7 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
     n_all = lengths(dots)
     n = n_all[1]
 
-    if(length(unique(n_all)) != 1) stop("All elements in '...' should be of the same length (current lenghts are ", enumerate_items(n_all), ").")
+    if(length(unique(n_all)) != 1) stop("All elements in `...` should be of the same length (current lenghts are ", enumerate_items(n_all), ").")
 
     is_na = is.na(dots[[1]])
     for(q in seq(from = 2, length.out = Q - 1)){
