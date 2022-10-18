@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
       </span>
     </div>
 
@@ -74,15 +74,13 @@
     <p>Simple function that replicates <code>fixest</code> objects while (optionally) computing different standard-errors. Useful mostly in combination with <code><a href="etable.html">etable</a></code> or <code><a href="coefplot.html">coefplot</a></code>.</p>
     </div>
 
-    <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for fixest</span>
+    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for fixest</span>
 <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">x</span>, times <span class="op">=</span> <span class="fl">1</span>, each <span class="op">=</span> <span class="fl">1</span>, <span class="va">vcov</span>, <span class="va">...</span><span class="op">)</span>
 
 <span class="co"># S3 method for fixest_list</span>
 <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">x</span>, times <span class="op">=</span> <span class="fl">1</span>, each <span class="op">=</span> <span class="fl">1</span>, <span class="va">vcov</span>, <span class="va">...</span><span class="op">)</span>
 
-<span class="fu">.l</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></code></pre></div>
-    </div>
+<span class="fu">.l</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></code></pre></div></div>
 
     <div id="arguments">
     <h2>Arguments</h2>
@@ -120,7 +118,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span>                         model 1.1          model 1.2         model 1.3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:             Ozone              Ozone             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)       -64.34* (21.30)   -64.34** (20.15)   -64.34* (19.66)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant          -64.34* (21.30)   -64.34** (20.15)   -64.34* (19.66)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R           0.0598 (0.0335) 0.0598*** (0.0162)   0.0598 (0.0314)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind              -3.334* (1.181) -3.334*** (0.8343)   -3.334* (1.135)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp            1.652*** (0.1583)  1.652*** (0.1927) 1.652*** (0.1386)</span>
@@ -146,7 +144,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span>                         model 1.1         model 2.1          model 1.2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:             Ozone             Ozone              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)       -64.34* (21.30)                     -64.34** (20.15)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant          -64.34* (21.30)                     -64.34** (20.15)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R           0.0598 (0.0335)   0.0522 (0.0408) 0.0598*** (0.0162)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind              -3.334* (1.181)   -3.109. (1.306) -3.334*** (0.8343)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp            1.652*** (0.1583) 1.875*** (0.1816)  1.652*** (0.1927)</span>
@@ -161,7 +159,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span>                          model 2.2         model 1.3        model 2.3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone             Ozone            Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)                          -64.34* (19.66)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant                             -64.34* (19.66)                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R           0.0522* (0.0202)   0.0598 (0.0314)  0.0522 (0.0391)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind            -3.109*** (0.7986)   -3.334* (1.135)  -3.109. (1.215)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp             1.875*** (0.3671) 1.652*** (0.1386) 1.875** (0.2209)</span>
@@ -180,7 +178,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span>                         model 1.1          model 1.2         model 1.3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:             Ozone              Ozone             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)       -64.34* (21.30)   -64.34** (20.15)   -64.34* (19.66)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant          -64.34* (21.30)   -64.34** (20.15)   -64.34* (19.66)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R           0.0598 (0.0335) 0.0598*** (0.0162)   0.0598 (0.0314)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind              -3.334* (1.181) -3.334*** (0.8343)   -3.334* (1.135)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp            1.652*** (0.1583)  1.652*** (0.1927) 1.652*** (0.1386)</span>
@@ -195,7 +193,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span>                         model 2.1          model 2.2        model 2.3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:             Ozone              Ozone            Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)                                                          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant                                                             </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R           0.0522 (0.0408)   0.0522* (0.0202)  0.0522 (0.0391)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind              -3.109. (1.306) -3.109*** (0.7986)  -3.109. (1.215)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp            1.875*** (0.1816)  1.875*** (0.3671) 1.875** (0.2209)</span>
@@ -224,7 +222,8 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.0.</p>
 </div>
 
       </footer></div>

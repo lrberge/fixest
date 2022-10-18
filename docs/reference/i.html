@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
       </span>
     </div>
 
@@ -74,9 +74,7 @@
     <p>Treat a variable as a factor, or interacts a variable with a factor. Values to be dropped/kept from the factor can be easily set. Note that to interact fixed-effects, this function should not be used: instead use directly the syntax <code>fe1^fe2</code>.</p>
     </div>
 
-    <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">i</span><span class="op">(</span><span class="va">factor_var</span>, <span class="va">var</span>, <span class="va">ref</span>, <span class="va">keep</span>, <span class="va">bin</span>, <span class="va">ref2</span>, <span class="va">keep2</span>, <span class="va">bin2</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
-    </div>
+    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">i</span><span class="op">(</span><span class="va">factor_var</span>, <span class="va">var</span>, <span class="va">ref</span>, <span class="va">keep</span>, <span class="va">bin</span>, <span class="va">ref2</span>, <span class="va">keep2</span>, <span class="va">bin2</span>, <span class="va">...</span><span class="op">)</span></code></pre></div></div>
 
     <div id="arguments">
     <h2>Arguments</h2>
@@ -291,7 +289,7 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                 res_2F        res_2F_bis</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:                  Ozone             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)              8.207 (14.16)    18.51* (7.343)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant                 8.207 (14.16)    18.51* (7.343)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R              0.0963** (0.0314) 0.1007** (0.0324)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month = 5 x week = 2    -11.36 (17.18)                  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month = 5 x week = 3    -9.660 (16.05)                  </span>
@@ -339,7 +337,7 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month::8     21.3119    7.51740 2.83501 0.00543040 ** </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 31.2   Adj. R2: 0.083194</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 31.1   Adj. R2: 0.083194</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="fu">i</span><span class="op">(</span><span class="va">Month</span>, bin <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>summer <span class="op">=</span> <span class="fl">7</span><span class="op">:</span><span class="fl">9</span><span class="op">)</span><span class="op">)</span>, <span class="va">airquality</span><span class="op">)</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 37 observations removed because of NA values (LHS: 37).</span>
@@ -352,7 +350,7 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month::summer 25.86610    7.04559 3.671249 0.00037013 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 30.9   Adj. R2: 0.102158</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 30.8   Adj. R2: 0.102158</span>
 <span class="r-in"></span>
 <span class="r-in"></span>
 <span class="r-in"></span>
@@ -370,7 +368,8 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.0.</p>
 </div>
 
       </footer></div>

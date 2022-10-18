@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
       </span>
     </div>
 
@@ -66,7 +66,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Extract the formula of a <code>fixest</code> fit</h1>
-    <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/MiscFuns.R" class="external-link"><code>R/MiscFuns.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/Methods.R" class="external-link"><code>R/Methods.R</code></a></small>
     <div class="hidden name"><code>formula.fixest.Rd</code></div>
     </div>
 
@@ -74,10 +74,8 @@
     <p>This function extracts the formula from a <code>fixest</code> estimation (obtained with <code><a href="femlm.html">femlm</a></code>, <code><a href="feols.html">feols</a></code> or <code><a href="feglm.html">feglm</a></code>). If the estimation was done with fixed-effects, they are added in the formula after a pipe (“|”). If the estimation was done with a non linear in parameters part, then this will be added in the formula in between <code><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I()</a></code>.</p>
     </div>
 
-    <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for fixest</span>
-<span class="fu"><a href="https://rdrr.io/r/stats/formula.html" class="external-link">formula</a></span><span class="op">(</span><span class="va">x</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"full"</span>, <span class="st">"linear"</span>, <span class="st">"iv"</span>, <span class="st">"NL"</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
-    </div>
+    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for fixest</span>
+<span class="fu"><a href="https://rdrr.io/r/stats/formula.html" class="external-link">formula</a></span><span class="op">(</span><span class="va">x</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"full"</span>, <span class="st">"linear"</span>, <span class="st">"iv"</span>, <span class="st">"NL"</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></code></pre></div></div>
 
     <div id="arguments">
     <h2>Arguments</h2>
@@ -111,12 +109,11 @@
 <span class="r-in"><span class="co"># formula with the fixed-effect variable</span></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/stats/formula.html" class="external-link">formula</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Sepal.Length ~ Sepal.Width + Petal.Length + Petal.Width | Species</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000000002cb92318&gt;</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># linear part without the fixed-effects</span></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/stats/formula.html" class="external-link">formula</a></span><span class="op">(</span><span class="va">res</span>, <span class="st">"linear"</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Sepal.Length ~ Sepal.Width + Petal.Length + Petal.Width</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000000004edda210&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x0000000044fd16a0&gt;</span>
 <span class="r-in"></span>
 <span class="r-in"></span>
 </code></pre></div>
@@ -133,7 +130,8 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.0.</p>
 </div>
 
       </footer></div>

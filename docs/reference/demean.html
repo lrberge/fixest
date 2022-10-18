@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
       </span>
     </div>
 
@@ -74,8 +74,7 @@
     <p>User-level access to internal demeaning algorithm of <code>fixest</code>.</p>
     </div>
 
-    <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">demean</span><span class="op">(</span>
+    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">demean</span><span class="op">(</span>
   <span class="va">X</span>,
   <span class="va">f</span>,
   <span class="va">slope.vars</span>,
@@ -91,8 +90,7 @@
   as.matrix <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/is.recursive.html" class="external-link">is.atomic</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>,
   im_confident <span class="op">=</span> <span class="cn">FALSE</span>,
   <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
-    </div>
+<span class="op">)</span></code></pre></div></div>
 
     <div id="arguments">
     <h2>Arguments</h2>
@@ -137,10 +135,10 @@ A matrix can be returned if <code>as.matrix = TRUE</code>.</p>
     <h2>Varying slopes</h2>
     
 
-<p>You can add variables with varying slopes in the fixed-effect part of the formula. The syntax is as follows: fixef_var[var1, var2]. Here the variables var1 and var2 will be with varying slopes (one slope per value in fixef_var) and the fixed-effect fixef_var will also be added.</p>
-<p>To add only the variables with varying slopes and not the fixed-effect, use double square brackets: fixef_var[[var1, var2]].</p>
-<p>In other words:</p><ul><li><p>fixef_var[var1, var2] is equivalent to fixef_var + fixef_var[[var1]] + fixef_var[[var2]]</p></li>
-<li><p>fixef_var[[var1, var2]] is equivalent to fixef_var[[var1]] + fixef_var[[var2]]</p></li>
+<p>You can add variables with varying slopes in the fixed-effect part of the formula. The syntax is as follows: <code>fixef_var[var1, var2]</code>. Here the variables var1 and var2 will be with varying slopes (one slope per value in fixef_var) and the fixed-effect fixef_var will also be added.</p>
+<p>To add only the variables with varying slopes and not the fixed-effect, use double square brackets: <code>fixef_var[[var1, var2]]</code>.</p>
+<p>In other words:</p><ul><li><p><code>fixef_var[var1, var2]</code> is equivalent to <code>fixef_var + fixef_var[[var1]] + fixef_var[[var2]]</code></p></li>
+<li><p><code>fixef_var[[var1, var2]]</code> is equivalent to <code>fixef_var[[var1]] + fixef_var[[var2]]</code></p></li>
 </ul><p>In general, for convergence reasons, it is recommended to always add the fixed-effect and avoid using only the variable with varying slope (i.e. use single square brackets).</p>
     </div>
 
@@ -169,7 +167,7 @@ A matrix can be returned if <code>as.matrix = TRUE</code>.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                est             est_fe</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:        ln_euros_dm           ln_euros</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)     -6.89e-14 (0.0116)                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        -6.89e-14 (0.0116)                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ln_dist_dm      -2.072*** (0.0271)                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ln_dist                            -2.072*** (0.0271)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-Effects:  ------------------ ------------------</span>
@@ -276,7 +274,8 @@ A matrix can be returned if <code>as.matrix = TRUE</code>.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.0.</p>
 </div>
 
       </footer></div>

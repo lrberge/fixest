@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
       </span>
     </div>
 
@@ -74,8 +74,7 @@
     <p>Compute VCOVs robust to spatial correlation, a la Conley (1999).</p>
     </div>
 
-    <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">vcov_conley</span><span class="op">(</span>
+    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">vcov_conley</span><span class="op">(</span>
   <span class="va">x</span>,
   lat <span class="op">=</span> <span class="cn">NULL</span>,
   lon <span class="op">=</span> <span class="cn">NULL</span>,
@@ -85,8 +84,7 @@
   ssc <span class="op">=</span> <span class="cn">NULL</span>
 <span class="op">)</span>
 
-<span class="fu">conley</span><span class="op">(</span>cutoff <span class="op">=</span> <span class="cn">NULL</span>, pixel <span class="op">=</span> <span class="cn">NULL</span>, distance <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div>
-    </div>
+<span class="fu">conley</span><span class="op">(</span>cutoff <span class="op">=</span> <span class="cn">NULL</span>, pixel <span class="op">=</span> <span class="cn">NULL</span>, distance <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div></div>
 
     <div id="arguments">
     <h2>Arguments</h2>
@@ -137,7 +135,7 @@ If the first argument is not a <code>fixest</code> object, then a) implicitly th
 <span class="r-out co"><span class="r-pr">#&gt;</span> mag         -123.421    19.2323 -6.41737 2.1389e-10 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 209.6   Adj. R2: 0.052245</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 209.5   Adj. R2: 0.052245</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># Post estimation</span></span>
 <span class="r-in"><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">depth</span> <span class="op">~</span> <span class="va">mag</span>, <span class="va">quakes</span><span class="op">)</span></span>
@@ -162,7 +160,8 @@ If the first argument is not a <code>fixest</code> object, then a) implicitly th
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.0.</p>
 </div>
 
       </footer></div>

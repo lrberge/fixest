@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
       </span>
     </div>
 
@@ -74,8 +74,7 @@
     <p>Aggregates the results of multiple estimations and displays them in the form of either a Latex table or a <code>data.frame</code>. Note that you will need the <code>booktabs</code> package for the Latex table to render properly.</p>
     </div>
 
-    <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">etable</span><span class="op">(</span>
+    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">etable</span><span class="op">(</span>
   <span class="va">...</span>,
   vcov <span class="op">=</span> <span class="cn">NULL</span>,
   stage <span class="op">=</span> <span class="fl">2</span>,
@@ -316,25 +315,24 @@
   markdown <span class="op">=</span> <span class="cn">NULL</span>,
   page.width <span class="op">=</span> <span class="st">"fit"</span>,
   div.class <span class="op">=</span> <span class="st">"etable"</span>
-<span class="op">)</span></code></pre></div>
-    </div>
+<span class="op">)</span></code></pre></div></div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>...</dt>
 <dd><p>Used to capture different <code>fixest</code> estimation objects (obtained with <code><a href="femlm.html">femlm</a></code>, <code><a href="feols.html">feols</a></code> or <code><a href="feglm.html">feglm</a></code>). Note that any other type of element is discarded. Note that you can give a list of <code>fixest</code> objects.</p></dd>
 <dt>vcov</dt>
-<dd><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href="vcov_cluster.html">vcov_cluster</a></code>, <code><a href="vcov_hac.html">vcov_NW</a></code>, <code><a href="vcov_hac.html">NW</a></code>, <code><a href="vcov_hac.html">vcov_DK</a></code>, <code><a href="vcov_hac.html">DK</a></code>, <code><a href="vcov_conley.html">vcov_conley</a></code> and <code><a href="vcov_conley.html">conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the `vcov` documentation in the <a href="https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1" class="external-link">vignette</a>.</p></dd>
+<dd><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href="vcov_cluster.html">vcov_cluster</a></code>, <code><a href="vcov_hac.html">vcov_NW</a></code>, <code><a href="vcov_hac.html">NW</a></code>, <code><a href="vcov_hac.html">vcov_DK</a></code>, <code><a href="vcov_hac.html">DK</a></code>, <code><a href="vcov_conley.html">vcov_conley</a></code> and <code><a href="vcov_conley.html">conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the <code>vcov</code> documentation in the <a href="https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1" class="external-link">vignette</a>.</p></dd>
 <dt>stage</dt>
 <dd><p>Can be equal to <code>2</code> (default), <code>1</code>, <code>1:2</code> or <code>2:1</code>. Only used if the object is an IV estimation: defines the stage to which <code>summary</code> should be applied. If <code>stage = 1</code> and there are multiple endogenous regressors or if <code>stage</code> is of length 2, then an object of class <code>fixest_multi</code> is returned.</p></dd>
 <dt>agg</dt>
-<dd><p>A character scalar describing the variable names to be aggregated, it is pattern-based. All variables that match the pattern will be aggregated. It must be of the form <code>"(root)"</code>, the parentheses must be there and the resulting variable name will be <code>"root"</code>. You can add another root with parentheses: <code>"(root1)regex(root2)"</code>, in which case the resulting name is <code>"root1::root2"</code>. To name the resulting variable differently you can pass a named vector: <code>c("name" = "pattern")</code> or <code>c("name" = "pattern(root2)")</code>. It's a bit intricate sorry, please see the examples.</p></dd>
+<dd><p>A character scalar describing the variable names to be aggregated, it is pattern-based. For <code><a href="sunab.html">sunab</a></code> estimations, the following keywords work: "att", "period", "cohort" and <code>FALSE</code> (to have full disaggregation). All variables that match the pattern will be aggregated. It must be of the form <code>"(root)"</code>, the parentheses must be there and the resulting variable name will be <code>"root"</code>. You can add another root with parentheses: <code>"(root1)regex(root2)"</code>, in which case the resulting name is <code>"root1::root2"</code>. To name the resulting variable differently you can pass a named vector: <code>c("name" = "pattern")</code> or <code>c("name" = "pattern(root2)")</code>. It's a bit intricate sorry, please see the examples.</p></dd>
 <dt>se</dt>
 <dd><p>Character scalar. Which kind of standard error should be computed: “standard”, “hetero”, “cluster”, “twoway”, “threeway” or “fourway”? By default if there are clusters in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "iid"</code>. Note that this argument is deprecated, you should use <code>vcov</code> instead.</p></dd>
 <dt>ssc</dt>
 <dd><p>An object of class <code>ssc.type</code> obtained with the function <code><a href="ssc.html">ssc</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href="ssc.html">ssc</a></code> for this argument. The arguments and defaults of the function <code><a href="ssc.html">ssc</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "min"</code>, <code>t.df = "min"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href="ssc.html">ssc</a></code> for details.</p></dd>
 <dt>cluster</dt>
-<dd><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as fixed-effects in the estimation, you can leave it blank with <code>vcov = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] fixed-effect). You can interact two variables using <code>^</code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></dd>
+<dd><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as fixed-effects in the estimation, you can leave it blank with <code>vcov = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [resp. 2nd] fixed-effect). You can interact two variables using <code>^</code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></dd>
 <dt>.vcov</dt>
 <dd><p>A function to be used to compute the standard-errors of each fixest object. You can pass extra arguments to this function using the argument <code>.vcov_args</code>. See the example.</p></dd>
 <dt>.vcov_args</dt>
@@ -358,11 +356,11 @@
 <dt>se.below</dt>
 <dd><p>Logical or <code>NULL</code> (default). Should the standard-errors be displayed below the coefficients? If <code>NULL</code>, then this is <code>TRUE</code> for Latex and <code>FALSE</code> otherwise.</p></dd>
 <dt>keep</dt>
-<dd><p>Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see <code><a href="https://rdrr.io/r/base/regex.html" class="external-link">regex</a></code> help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument <code>dict</code>). Example: you have the variable <code>x1</code> to <code>x55</code> and want to display only <code>x1</code> to <code>x9</code>, then you could use <code>keep = "x[[:digit:]]$"</code>. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain “Intercept” is kept). See details.</p></dd>
+<dd><p>Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see <code><a href="https://rdrr.io/r/base/regex.html" class="external-link">base::regex</a></code> help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument <code>dict</code>). Example: you have the variable <code>x1</code> to <code>x55</code> and want to display only <code>x1</code> to <code>x9</code>, then you could use <code>keep = "x[[:digit:]]$"</code>. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain “Intercept” is kept). See details.</p></dd>
 <dt>drop</dt>
-<dd><p>Character vector. This element is used if some variables are not to be displayed. This should be a vector of regular expressions (see <code><a href="https://rdrr.io/r/base/regex.html" class="external-link">regex</a></code> help for more info). Each variable satisfying any of the regular expressions will be discarded. This argument is applied post aliasing (see argument <code>dict</code>). Example: you have the variable <code>x1</code> to <code>x55</code> and want to display only <code>x1</code> to <code>x9</code>, then you could use <code>drop = "x[[:digit:]]{2}"</code>. If the first character is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable that does not contain “Intercept” is dropped). See details.</p></dd>
+<dd><p>Character vector. This element is used if some variables are not to be displayed. This should be a vector of regular expressions (see <code><a href="https://rdrr.io/r/base/regex.html" class="external-link">base::regex</a></code> help for more info). Each variable satisfying any of the regular expressions will be discarded. This argument is applied post aliasing (see argument <code>dict</code>). Example: you have the variable <code>x1</code> to <code>x55</code> and want to display only <code>x1</code> to <code>x9</code>, then you could use <code>drop = "x[[:digit:]]{2}</code>". If the first character is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable that does not contain “Intercept” is dropped). See details.</p></dd>
 <dt>order</dt>
-<dd><p>Character vector. This element is used if the user wants the variables to be ordered in a certain way. This should be a vector of regular expressions (see <code><a href="https://rdrr.io/r/base/regex.html" class="external-link">regex</a></code> help for more info). The variables satisfying the first regular expression will be placed first, then the order follows the sequence of regular expressions. This argument is applied post aliasing (see argument <code>dict</code>). Example: you have the following variables: <code>month1</code> to <code>month6</code>, then <code>x1</code> to <code>x5</code>, then <code>year1</code> to <code>year6</code>. If you want to display first the x's, then the years, then the months you could use: <code>order = c("x", "year")</code>. If the first character is an exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that does not contain “Intercept” goes first).  See details.</p></dd>
+<dd><p>Character vector. This element is used if the user wants the variables to be ordered in a certain way. This should be a vector of regular expressions (see <code><a href="https://rdrr.io/r/base/regex.html" class="external-link">base::regex</a></code> help for more info). The variables satisfying the first regular expression will be placed first, then the order follows the sequence of regular expressions. This argument is applied post aliasing (see argument <code>dict</code>). Example: you have the following variables: <code>month1</code> to <code>month6</code>, then <code>x1</code> to <code>x5</code>, then <code>year1</code> to <code>year6</code>. If you want to display first the x's, then the years, then the months you could use: <code>order = c("x", "year")</code>. If the first character is an exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that does not contain “Intercept” goes first).  See details.</p></dd>
 <dt>dict</dt>
 <dd><p>A named character vector or a logical scalar. It changes the original variable names to the ones contained in the <code>dict</code>ionary. E.g. to change the variables named <code>a</code> and <code>b3</code> to (resp.) “$log(a)$” and to “$bonus^3$”, use <code>dict=c(a="$log(a)$",b3="$bonus^3$")</code>. By default, it is equal to <code><a href="setFixest_dict.html">getFixest_dict()</a></code>, a default dictionary which can be set with <code><a href="setFixest_dict.html">setFixest_dict</a></code>. You can use <code>dict = FALSE</code> to disable it. By default <code>dict</code> modifies the entries in the global dictionary, to disable this behavior, use "reset" as the first element (ex: <code>dict=c("reset", mpg="Miles per gallon")</code>).</p></dd>
 <dt>file</dt>
@@ -388,9 +386,9 @@
 <dt>family</dt>
 <dd><p>Logical, default is missing. Whether to display the families of the models. By default this line is displayed when at least two models are from different families.</p></dd>
 <dt>powerBelow</dt>
-<dd><p>(Tex only.) Integer, default is -5. A coefficient whose value is below <code>10**(powerBelow+1)</code> is written with a power in Latex. For example <code>0.0000456</code> would be written <code>4.56$\times 10^{-5}$</code> by default. Setting <code>powerBelow = -6</code> would lead to <code>0.00004</code> in Latex.</p></dd>
+<dd><p>(Tex only.) Integer, default is -5. A coefficient whose value is below <code>10**(powerBelow+1)</code> is written with a power in Latex. For example <code>0.0000456</code> would be written <code>4.56$\\times 10^{-5}$</code> by default. Setting <code>powerBelow = -6</code> would lead to <code>0.00004</code> in Latex.</p></dd>
 <dt>interaction.combine</dt>
-<dd><p>Character scalar, defaults to <code>" $\times$ "</code> for Tex and to <code>" = "</code> otherwise. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if <code>dict = c(x1="Wind", x2="Rain")</code> and you have the following interaction <code>x1:x2</code>, then it will be renamed (by default) <code>Wind $\times$ Rain</code> -- using <code>interaction.combine = "*"</code> would lead to <code>Wind*Rain</code>.</p></dd>
+<dd><p>Character scalar, defaults to <code>" $\\times$ "</code> for Tex and to <code>" = "</code> otherwise. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if <code>dict = c(x1="Wind", x2="Rain")</code> and you have the following interaction <code>x1:x2</code>, then it will be renamed (by default) <code>Wind $\\times$ Rain</code> -- using <code>interaction.combine = "*"</code> would lead to <code>Wind*Rain</code>.</p></dd>
 <dt>interaction.order</dt>
 <dd><p>Character vector of regular expressions. Only affects variables that are interacted like x1 and x2 in <code>feols(y ~ x1*x2, data)</code>. You can change the order in which the interacted variables are displayed: e.g. <code>interaction.order = "x2"</code> would lead to "x1 x x2" instead of "x1 x x2". Please look at the argument 'order' and the dedicated section in the help page for more information.</p></dd>
 <dt>i.equal</dt>
@@ -400,7 +398,7 @@
 <dt>style.tex</dt>
 <dd><p>An object created by the function <code><a href="style.tex.html">style.tex</a></code>. It represents the style of the Latex table, see the documentation of <code><a href="style.tex.html">style.tex</a></code>.</p></dd>
 <dt>style.df</dt>
-<dd><p>An object created by the function <code><a href="style.df.html">style.df</a>. </code>It represents the style of the data frame returned (if <code>tex = FALSE</code>), see the documentation of <code><a href="style.df.html">style.df</a></code>.</p></dd>
+<dd><p>An object created by the function <code><a href="style.df.html">style.df</a></code> It represents the style of the data frame returned (if <code>tex = FALSE</code>), see the documentation of <code><a href="style.df.html">style.df</a></code>.</p></dd>
 <dt>notes</dt>
 <dd><p>(Tex only.) Character vector. If provided, a <code>"notes"</code> section will be added at the end right after the end of the table, containing the text of this argument. If it is a vector, it will be collapsed with new lines. If <code>tpt = TRUE</code>, the behavior is different: each element of the vector is an item. If the first element of the vector starts with <code>"@"</code>, then it will be included verbatim, and in case of <code>tpt = TRUE</code>, right before the first item. If that element is provided, it will replace the value defined in <code>style.tex(notes.intro)</code> or <code>style.tex(notes.tpt.intro)</code>.</p></dd>
 <dt>group</dt>
@@ -408,11 +406,11 @@
 <dt>extralines</dt>
 <dd><p>A vector, a list or a one sided formula. The list elements should be either a vector representing the value of each cell, a list of the form <code>list("item1" = #item1, "item2" = #item2, etc)</code>, or a function. This argument can be many things, please have a look at the dedicated help section; a simplified description follows. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: <code>extralines=list("Sub-sample"=c("&lt;20 yo", "all", "&gt;50 yo"))</code> will create an new line with <code>"Sub-sample"</code> in the leftmost cell, the vector filling the content of the cells for the three models. You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) <code>"^"</code>: coef., <code>"-"</code>: fixed-effect, <code>"_"</code>: stats, section; 2) <code>"^"</code>: 1st, <code>"_"</code>: last, row. For example: <code>extralines=list("__Controls"=stuff)</code> will place the line at the bottom of the stats section, and using <code>extralines=list("^^Controls"=stuff)</code> will make the row appear at the top of the 'coefficients' section. For details, see the dedicated section. You can use <code>.()</code> instead of <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p></dd>
 <dt>fixef.group</dt>
-<dd><p>Logical scalar or list (default is <code>NULL</code>). If equal to <code>TRUE</code>, then all fixed-effects always appearing jointly in models will be grouped in one row. If a list, its elements must be character vectors of regular expressions and the list names will be the row names. For ex. <code>fixef.group=list("Dates fixed-effects"="Month|Day")</code> will remove the <code>"Month"</code> and <code>"Day"</code> fixed effects from the display and replace them with a single row named "Dates fixed-effects". You can monitor the placement of the new row with the special characters telling where to place the row within a section: <code>"^"</code> (first), or <code>"_"</code> (last); and in which section it should appear: <code>"^"</code> (coef.), <code>"-"</code> (fixed-effects), or <code>"_"</code> (stat.). These two special characters must appear first in the row names. Please see the dedicated section</p></dd>
+<dd><p>Logical scalar or list (default is <code>NULL</code>). If equal to <code>TRUE</code>, then all fixed-effects always appearing jointly in models will be grouped in one row. If a list, its elements must be character vectors of regular expressions and the list names will be the row names. For ex. <code>fixef.group=list("Dates fixed-effects"="Month|Day")</code> will remove the <code>"Month"</code> and <code>"Day"</code> fixed effects from the display and replace them with a single row named "Dates fixed-effects". You can monitor the placement of the new row with two special characters telling where to place the row within a section: first in which section it should appear: <code>"^"</code> (coef.), <code>"-"</code> (fixed-effects), or <code>"_"</code> (stat.) section; then whether the row should be <code>"^"</code> (first), or <code>"_"</code> (last). These two special characters must appear first in the row names. Please see the dedicated section</p></dd>
 <dt>placement</dt>
 <dd><p>(Tex only.) Character string giving the position of the float in Latex. Default is "htbp". It must consist of only the characters 'h', 't', 'b', 'p', 'H' and '!'. Reminder: h: here; t: top; b: bottom; p: float page; H: definitely here; !: prevents Latex to look for other positions. Note that it can be equal to the empty string (and you'll get the default placement).</p></dd>
 <dt>drop.section</dt>
-<dd><p>Character vector which can be of length 0 (i.e. equal to <code>NULL</code>). Can contain the values "fixef", "slopes" or "stats". It would drop, respectively, the fixed-effects section, the variables with varying slopes section or the fit statistics section.</p></dd>
+<dd><p>Character vector which can be of length 0 (i.e. equal to <code>NULL</code>). Can contain the values "coef", "fixef", "slopes" or "stats". It would drop, respectively, the coefficients section, fixed-effects section, the variables with varying slopes section or the fit statistics section.</p></dd>
 <dt>poly_dict</dt>
 <dd><p>Character vector, default is <code>c("", " square", " cube")</code>. When raw polynomials (<code>x^2</code>, etc) are used, the variables are automatically renamed and <code>poly_dict</code> rules the display of the power. For powers greater than the number of elements of the vector, the value displayed is <code>$^{pow}$</code> in Latex and <code>^ pow</code> in the R console.</p></dd>
 <dt>postprocess.tex</dt>
@@ -422,23 +420,23 @@
 <dt>tpt</dt>
 <dd><p>(Tex only.) Logical scalar, default is FALSE. Whether to use the <code>threeparttable</code> environment. If so, the <code>notes</code> will be integrated into the <code>tablenotes</code> environment.</p></dd>
 <dt>arraystretch</dt>
-<dd><p>(Tex only.) A numeric scalar, default is <code>NULL</code>. If provided, the command <code>\renewcommand*{\arraystretch}{x}</code> is inserted, replacing <code>x</code> by the value of <code>arraystretch</code>. The changes are specific to the current table and do not affect the rest of the document.</p></dd>
+<dd><p>(Tex only.) A numeric scalar, default is <code>NULL</code>. If provided, the command <code>\\renewcommand*{\\arraystretch{x}}</code> is inserted, replacing <code>x</code> by the value of <code>arraystretch</code>. The changes are specific to the current table and do not affect the rest of the document.</p></dd>
 <dt>adjustbox</dt>
-<dd><p>(Tex only.) A logical, numeric or character scalar, default is <code>NULL</code>. If not <code>NULL</code>, the table is inserted within the <code>adjustbox</code> environment. By default the options are <code>width = 1\textwidth, center</code> (if <code>TRUE</code>). A numeric value changes the value before <code>\textwidth</code>. You can also add a character of the form <code>"x tw"</code> or <code>"x th"</code> with <code>x</code> a number and where tw (th) stands for text-width (text-height). Finally any other character value is passed verbatim as an <code>adjustbox</code> option.</p></dd>
+<dd><p>(Tex only.) A logical, numeric or character scalar, default is <code>NULL</code>. If not <code>NULL</code>, the table is inserted within the <code>adjustbox</code> environment. By default the options are <code>width = 1\\textwidth, center</code> (if <code>TRUE</code>). A numeric value changes the value before <code>\\textwidth</code>. You can also add a character of the form <code>"x tw"</code> or <code>"x th"</code> with <code>x</code> a number and where tw (th) stands for text-width (text-height). Finally any other character value is passed verbatim as an <code>adjustbox</code> option.</p></dd>
 <dt>fontsize</dt>
 <dd><p>(Tex only.) A character scalar, default is <code>NULL</code>. Can be equal to <code>tiny</code>, <code>scriptsize</code>, <code>footnotesize</code>, <code>small</code>, <code>normalsize</code>, <code>large</code>, or <code>Large</code>. The change affect the table only (and not the rest of the document).</p></dd>
 <dt>fit_format</dt>
-<dd><p>Character scalar, default is <code>"__var__"</code>. Only used in the presence of IVs. By default the endogenous regressors are named <code>fit_varname</code> in the second stage. The format of the endogenous regressor to appear in the table is governed by <code>fit_format</code>. For instance, by default, the prefix <code>"fit_"</code> is removed, leading to only <code>varname</code> to appear. If <code>fit_format = "$\\hat{__var__}$"</code>, then <code>"$\hat{varname}$"</code> will appear in the table.</p></dd>
+<dd><p>Character scalar, default is <code>"__var__"</code>. Only used in the presence of IVs. By default the endogenous regressors are named <code>fit_varname</code> in the second stage. The format of the endogenous regressor to appear in the table is governed by <code>fit_format</code>. For instance, by default, the prefix <code>"fit_"</code> is removed, leading to only <code>varname</code> to appear. If <code>fit_format = "$\\\\hat{__var__$"}</code>, then <code>"$\\hat{varname$"}</code> will appear in the table.</p></dd>
 <dt>coef.just</dt>
 <dd><p>(DF only.) Either <code>"."</code>, <code>"("</code>, <code>"l"</code>, <code>"c"</code> or <code>"r"</code>, default is <code>NULL</code>. How the coefficients should be justified. If <code>NULL</code> then they are right aligned if <code>se.below = FALSE</code> and aligned to the dot if <code>se.below = TRUE</code>. The keywords stand respectively for dot-, parenthesis-, left-, center- and right-aligned.</p></dd>
 <dt>tabular</dt>
-<dd><p>(Tex only.) Character scalar equal to "normal" (default), "*" or "X". Represents the type of tabular environment to use: either <code>tabular</code>, <code>tabular*</code> or <code>tabularx</code>.</p></dd>
+<dd><p>(Tex only.) Character scalar equal to "normal" (default), <code>"*"</code> or <code>"X"</code>. Represents the type of tabular environment to use: either <code>tabular</code>, <code>tabular*</code> or <code>tabularx</code>.</p></dd>
 <dt>highlight</dt>
 <dd><p>List containing coefficients to highlight. Highlighting is of the form <code>.("options1" = "coefs1", "options2" = "coefs2", etc)</code>.
 The coefficients to be highlighted can be written in three forms: 1) row, eg <code>"x1"</code> will highlight the full row of the variable <code>x1</code>; 2) cells, use <code>'@'</code> after the coefficient name to give the column, it accepts ranges, eg <code>"x1@2, 4-6, 8"</code> will highlight only the columns 2, 4, 5, 6, and 8 of the variable <code>x1</code>; 3) range, by giving the top-left and bottom-right values separated with a semi-colon, eg <code>"x1@2 ; x3@5"</code> will highlight from the column 2 of <code>x1</code> to the 5th column of <code>x3</code>. Coefficient names are partially matched, use a <code>'%'</code> first to refer to the original name (before dictionary) and use <code>'@'</code> first to use a regular expression. You can add a vector of row/cell/range.
 The options are a comma-separated list of items. By default the highlighting is done with a frame (a thick box) around the coefficient, use <code>'rowcol'</code> to highlight with a row color instead. Here are the other options: <code>'se'</code> to highlight the standard-errors too; <code>'square'</code> to have a square box (instead of rounded); <code>'thick1'</code> to <code>'thick6'</code> to monitor the width of the box; <code>'sep0'</code> to <code>'sep9'</code> to monitor the inner spacing. Finally the remaining option is the color: simply add an R color (it must be a valid R color!). You can use <code>"color!alpha"</code> with "alpha" a number between 0 to 100 to change the alpha channel of the color.</p></dd>
 <dt>coef.style</dt>
-<dd><p>Named list containing styles to be applied to the coefficients. It must be of the form <code>.("style1" = "coefs1", "style2" = "coefs2", etc)</code>. The style must contain the string <code>":coef:"</code> (or <code>":coef_se:"</code> to style both the coefficient and its standard-error). The string <code>:coef:</code> will be replaced verbatim by the coefficient value. For example use <code>"\textbf{:coef:}"</code> to put the coefficient in bold. Note that markdown markup is enabled so <code>"**:coef:**"</code> would also put it in bold. The coefficients to be styled can be written in three forms: 1) row, eg <code>"x1"</code> will style the full row of the variable <code>x1</code>; 2) cells, use <code>'@'</code> after the coefficient name to give the column, it accepts ranges, eg <code>"x1@2, 4-6, 8"</code> will style only the columns 2, 4, 5, 6, and 8 of the variable <code>x1</code>; 3) range, by giving the top-left and bottom-right values separated with a semi-colon, eg <code>"x1@2 ; x3@5"</code> will style from the column 2 of <code>x1</code> to the 5th column of <code>x3</code>. Coefficient names are partially matched, use a <code>'%'</code> first to refer to the original name (before dictionary) and use <code>'@'</code> first to use a regular expression. You can add a vector of row/cell/range.</p></dd>
+<dd><p>Named list containing styles to be applied to the coefficients. It must be of the form <code>.("style1" = "coefs1", "style2" = "coefs2", etc)</code>. The style must contain the string <code>":coef:"</code> (or <code>":coef_se:"</code> to style both the coefficient and its standard-error). The string <code>:coef:</code> will be replaced verbatim by the coefficient value. For example use <code>"\\textbf{:coef:}"</code> to put the coefficient in bold. Note that markdown markup is enabled so <code>"**:coef:**"</code> would also put it in bold. The coefficients to be styled can be written in three forms: 1) row, eg <code>"x1"</code> will style the full row of the variable <code>x1</code>; 2) cells, use <code>'@'</code> after the coefficient name to give the column, it accepts ranges, eg <code>"x1@2, 4-6, 8"</code> will style only the columns 2, 4, 5, 6, and 8 of the variable <code>x1</code>; 3) range, by giving the top-left and bottom-right values separated with a semi-colon, eg <code>"x1@2 ; x3@5"</code> will style from the column 2 of <code>x1</code> to the 5th column of <code>x3</code>. Coefficient names are partially matched, use a <code>'%'</code> first to refer to the original name (before dictionary) and use <code>'@'</code> first to use a regular expression. You can add a vector of row/cell/range.</p></dd>
 <dt>meta</dt>
 <dd><p>(Tex only.) A one-sided formula that shall contain the following elements: date or time, sys, author, comment and call. Default is <code>NULL</code>. This argument is a shortcut to controlling the meta information that can be displayed in comments before the table. Typically if the element is in the formula, it means that the argument will be equal to <code>TRUE</code>. Example: <code>meta = ~time+call</code> is equivalent to <code>meta.time = TRUE</code> and <code>meta.call = TRUE</code>. The "author" and "comment" elements are a bit special. Using <code>meta = ~author("Mark")</code> is equivalent to <code>meta.author = "Mark"</code> while <code>meta=~author</code> is equiv. to <code>meta.author = TRUE</code>. The "comment" must be used with a character string inside: <code>meta = ~comment("this is a comment")</code>. The order in the formula controls the order of appearance of the meta elements. It also has precedence over the <code>meta.XX</code> arguments.</p></dd>
 <dt>meta.time</dt>
@@ -481,9 +479,9 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
     <h2>Details</h2>
     <p>The function <code>esttex</code> is equivalent to the function <code>etable</code> with argument <code>tex = TRUE</code>.</p>
 <p>The function <code>esttable</code> is equivalent to the function <code>etable</code> with argument <code>tex = FALSE</code>.</p>
-<p>To display the table, you will need the Latex package <code>booktabs</code> which contains the <code>\toprule</code>, <code>\midrule</code> and <code>\bottomrule</code> commands.</p>
+<p>To display the table, you will need the Latex package <code>booktabs</code> which contains the <code>\\toprule</code>, <code>\\midrule</code> and <code>\\bottomrule</code> commands.</p>
 <p>You can permanently change the way your table looks in Latex by using <code>setFixest_etable</code>. The following vignette gives an example as well as illustrates how to use the <code>style</code> and postprocessing functions: <a href="https://lrberge.github.io/fixest/articles/exporting_tables.html" class="external-link">Exporting estimation tables</a>.</p>
-<p>When the argument <code>postprocessing.tex</code> is not missing, two additional tags will be included in the character vector returned by <code>etable</code>: <code>"%start:tab\n"</code> and <code>"%end:tab\n"</code>. These can be used to identify the start and end of the tabular and are useful to insert code within the <code>table</code> environment.</p>
+<p>When the argument <code>postprocessing.tex</code> is not missing, two additional tags will be included in the character vector returned by <code>etable</code>: <code>"%start:tab\\n"</code> and <code>"%end:tab\\n"</code>. These can be used to identify the start and end of the tabular and are useful to insert code within the <code>table</code> environment.</p>
     </div>
     <div id="functions">
     <h2>Functions</h2>
@@ -542,15 +540,16 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 
 
 <p>By default on all instances (with the notable exception of the elements of <code><a href="style.tex.html">style.tex</a></code>) special Latex characters are escaped. This means that <code>title="Exports in million $."</code> will be exported as "Exports in million \$.": the dollar sign will be escaped. This is true for the following characters: &amp;, $, %, _, ^ and #.</p>
-<p>Note, importantly, that equations are NOT escaped. This means that <code>title="Functional form $a_i \times x^b$, variation in %."</code> will be displayed as: <code>"Functional form $a_i \times x^b$, variation in \%."</code>: only the last percentage will be escaped.</p>
-<p>If for some reason you don't want the escaping to take place, the arguments <code>headers</code> and <code>extralines</code> are the only ones allowing that. To disable escaping, add the special token ":tex:" in the row names. Example: in <code>headers=list(":tex:Row title"="weird &amp; &amp; %\n tex stuff\\")</code>, the elements will be displayed verbatim. Of course, since it can easily ruin your table, it is only recommended to super users.</p>
+<p>Note, importantly, that equations are NOT escaped. This means that <code>title="Functional form $a_i \\times x^b$, variation in %."</code> will be displayed as: <code>"Functional form $a_i \\times x^b$, variation in \\%."</code>: only the last percentage will be escaped.</p>
+<p>If for some reason you don't want the escaping to take place, the arguments <code>headers</code> and <code>extralines</code> are the only ones allowing that. To disable escaping, add the special token ":tex:" in the row names. Example: in <code>headers=list(":tex:Row title"="weird &amp; &amp; %\\n tex stuff\\\\")</code>, the elements will be displayed verbatim. Of course, since it can easily ruin your table, it is only recommended to super users.</p>
     </div>
     <div id="markdown-markup">
     <h2>Markdown markup</h2>
     
 
 
-<p>Within anything that is Latex-escaped (see previous section), you can use a markdown-style markup to put the text in italic and/or bold. Use <code>*text*</code>, <code>**text**</code> or <code>***text***</code> to put some text in, respectively, italic (with <code>\textit</code>), bold (with <code>\textbf</code>) and italic-bold.</p>
+<p>Within anything that is Latex-escaped (see previous section), you can use a markdown-style markup to put the text in italic and/or bold. Use <code>*text*</code>, <code>**text**</code> or <code>***text***</code> to put some text in, respectively, italic (with <code>\\textit</code>), bold (with <code>\\textbf</code>) and italic-bold.</p>
+<p>The markup can be escaped by using an backslash first. For example <code>"***This: \\***, are three stars***"</code> will leave the three stars in the middle untouched.</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
@@ -575,7 +574,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>                               est1               est2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)      -100.2*** (26.35)                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant         -100.2*** (26.35)                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month = 6          -54.99* (26.34)                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month = 7           35.89. (18.37)                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month = 8           44.52* (18.05)                   </span>
@@ -620,6 +619,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>                               est1               est2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant         -100.2*** (26.35)                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind x Month = 5    -1.086 (1.127)  -1.086** (0.1408)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind x Month = 6     2.046 (1.784)  2.046*** (0.0398)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind x Month = 7 -5.616*** (1.316) -5.616*** (0.1554)</span>
@@ -640,7 +640,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>                              est1              est2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:             Ozone             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)     -100.2*** (26.35)                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        -100.2*** (26.35)                  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month = 6         -54.99* (26.34)                  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month = 7          35.89. (18.37)                  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month = 8          44.52* (18.05)                  </span>
@@ -660,7 +660,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>                              est1              est2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:             Ozone             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)     -100.2*** (26.35)                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        -100.2*** (26.35)                  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month = 6         -54.99* (26.34)                  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month = 7          35.89. (18.37)                  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month = 8          44.52* (18.05)                  </span>
@@ -686,12 +686,12 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind x Month = 7 -5.616*** (1.316) -5.616*** (0.1554)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind x Month = 8 -6.515*** (1.220) -6.515*** (0.2203)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind x Month = 9    -1.349 (1.147)   -1.349* (0.3175)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant         -100.2*** (26.35)                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month = 6          -54.99* (26.34)                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month = 7           35.89. (18.37)                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month = 8           44.52* (18.05)                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month = 9           -11.78 (18.22)                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp             2.042*** (0.3078)  2.042*** (0.2242)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)      -100.2*** (26.35)                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-Effects:   ----------------- ------------------</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month                           No                Yes</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ________________ _________________ __________________</span>
@@ -715,7 +715,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind x Month = 7 -5.616*** (1.316) -5.616*** (0.1554)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind x Month = 8 -6.515*** (1.220) -6.515*** (0.2203)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind x Month = 9    -1.349 (1.147)   -1.349* (0.3175)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)      -100.2*** (26.35)                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant         -100.2*** (26.35)                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp             2.042*** (0.3078)  2.042*** (0.2242)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-Effects:   ----------------- ------------------</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month                           No                Yes</span>
@@ -739,7 +739,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                 est1               est2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:                Ozone              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)        -100.2*** (26.35)                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant           -100.2*** (26.35)                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month = Jun          -54.99* (26.34)                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month = 7             35.89. (18.37)                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month = 8             44.52* (18.05)                   </span>
@@ -800,7 +800,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>                              est1              est2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:             Ozone             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)      -100.2 A (26.35)                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant         -100.2 A (26.35)                  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month = 6        -54.99 B (26.34)                  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month = 7         35.89 C (18.37)                  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month = 8         44.52 B (18.05)                  </span>
@@ -838,7 +838,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>    \tabularnewline \midrule \midrule</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Dependent Variable: &amp; \multicolumn{2}{c}{Ozone}\\</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Model:             &amp; (1)            &amp; (2)\\  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    (Intercept)        &amp; -100.2$^{***}$ &amp;   \\   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Constant           &amp; -100.2$^{***}$ &amp;   \\   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                       &amp; (26.35)        &amp;   \\   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Jun                &amp; -54.99$^{**}$  &amp;   \\   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                       &amp; (26.34)        &amp;   \\   </span>
@@ -882,7 +882,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Model:             &amp; (1)            &amp; (2)\\  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    \midrule</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    \emph{Variables}\\</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    (Intercept)        &amp; -100.2$^{***}$ &amp;   \\   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Constant           &amp; -100.2$^{***}$ &amp;   \\   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                       &amp; (26.35)        &amp;   \\   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Jun                &amp; -54.99$^{**}$  &amp;   \\   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                       &amp; (26.34)        &amp;   \\   </span>
@@ -926,7 +926,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>     &amp; \multicolumn{2}{c}{Ozone}\\</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                        &amp; (1)            &amp; (2)\\  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    \midrule </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    (Intercept)         &amp; -100.2$^{***}$ &amp;   \\   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Constant            &amp; -100.2$^{***}$ &amp;   \\   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                        &amp; (26.35)        &amp;   \\   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Jun                 &amp; -54.99$^{**}$  &amp;   \\   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                        &amp; (26.34)        &amp;   \\   </span>
@@ -978,7 +978,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>                             est_c0            est_c1           est_c2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone             Ozone            Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)        18.60** (6.748)  29.83*** (4.101) 25.79*** (6.506)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant           18.60** (6.748)  29.83*** (4.101) 25.79*** (6.506)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R         0.1272*** (0.0328) 0.0659** (0.0201)  0.1347 (0.0881)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R square                                       -0.0002 (0.0003)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Controls                        No               Yes              Yes</span>
@@ -1011,7 +1011,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>                            est_all         est_sub1          est_sub2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone            Ozone             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)       -64.34** (23.05)   -48.52 (30.42)    -80.06 (57.59)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant          -64.34** (23.05)   -48.52 (30.42)    -80.06 (57.59)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R           0.0598* (0.0232)  0.0249 (0.0319)  0.0993* (0.0414)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp             1.652*** (0.2535) 1.184** (0.4123)  2.037** (0.6508)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind            -3.334*** (0.6544)  -1.107 (0.9236) -5.830*** (1.124)</span>
@@ -1025,7 +1025,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>                          est_sub3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)      -112.9** (34.81)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant         -112.9** (34.81)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R           0.0225 (0.0322)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp            2.005*** (0.3716)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind              -1.353 (0.9065)</span>
@@ -1056,7 +1056,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>                             est_c0            est_c1           est_c2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone             Ozone            Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)        18.60** (6.748)  29.83*** (4.101) 25.79*** (6.506)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant           18.60** (6.748)  29.83*** (4.101) 25.79*** (6.506)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R         0.1272*** (0.0328) 0.0659** (0.0201)  0.1347 (0.0881)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R square                                       -0.0002 (0.0003)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ __________________ _________________ ________________</span>
@@ -1073,7 +1073,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone            Ozone             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                      </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Sub-sample                     All         May-June         Jul.-Aug.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)       -64.34** (23.05)   -48.52 (30.42)    -80.06 (57.59)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant          -64.34** (23.05)   -48.52 (30.42)    -80.06 (57.59)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R           0.0598* (0.0232)  0.0249 (0.0319)  0.0993* (0.0414)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp             1.652*** (0.2535) 1.184** (0.4123)  2.037** (0.6508)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind            -3.334*** (0.6544)  -1.107 (0.9236) -5.830*** (1.124)</span>
@@ -1087,7 +1087,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Sub-sample                  Sept.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)      -112.9** (34.81)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant         -112.9** (34.81)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R           0.0225 (0.0322)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp            2.005*** (0.3716)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind              -1.353 (0.9065)</span>
@@ -1113,13 +1113,13 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># header =&gt; vector: adds a line w/t title</span></span>
 <span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est_header</span>, headers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"B"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                          model 1          model 2           model 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     est_header.1     est_header.2      est_header.3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                A                A                 B</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Ozone          Solar.R              Wind</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)     42.14*** (2.086) 185.2*** (7.218) 9.958*** (0.2548)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1     272.4*** (25.94) 317.2*** (91.89) -19.89*** (3.152)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2     102.8*** (27.46)   -33.07 (92.49)   -0.6379 (3.152)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        42.14*** (2.086) 185.1*** (7.218) 9.958*** (0.2548)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1     272.3*** (25.94) 317.1*** (91.89) -19.89*** (3.152)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2     102.7*** (27.46)   -33.07 (92.49)   -0.6379 (3.152)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ ________________ _________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID              IID               IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                 116              146               153</span>
@@ -1131,13 +1131,13 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-in"><span class="co"># header =&gt; list: identical way to do the previous header</span></span>
 <span class="r-in"><span class="co"># The form is: list(item1 = #item1, item2 = #item2,  etc)</span></span>
 <span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est_header</span>, headers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"A"</span> <span class="op">=</span> <span class="fl">2</span>, <span class="st">"B"</span> <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                          model 1          model 2           model 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     est_header.1     est_header.2      est_header.3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                A                A                 B</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Ozone          Solar.R              Wind</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)     42.14*** (2.086) 185.2*** (7.218) 9.958*** (0.2548)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1     272.4*** (25.94) 317.2*** (91.89) -19.89*** (3.152)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2     102.8*** (27.46)   -33.07 (92.49)   -0.6379 (3.152)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        42.14*** (2.086) 185.1*** (7.218) 9.958*** (0.2548)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1     272.3*** (25.94) 317.1*** (91.89) -19.89*** (3.152)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2     102.7*** (27.46)   -33.07 (92.49)   -0.6379 (3.152)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ ________________ _________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID              IID               IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                 116              146               153</span>
@@ -1149,13 +1149,13 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-in"><span class="co"># Adding a title +</span></span>
 <span class="r-in"><span class="co"># when an element is to be repeated only once, you can avoid the "= 1":</span></span>
 <span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est_header</span>, headers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"A"</span> <span class="op">=</span> <span class="fl">2</span>, <span class="st">"B"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                          model 1          model 2           model 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     est_header.1     est_header.2      est_header.3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Group                          A                A                 B</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Ozone          Solar.R              Wind</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)     42.14*** (2.086) 185.2*** (7.218) 9.958*** (0.2548)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1     272.4*** (25.94) 317.2*** (91.89) -19.89*** (3.152)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2     102.8*** (27.46)   -33.07 (92.49)   -0.6379 (3.152)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        42.14*** (2.086) 185.1*** (7.218) 9.958*** (0.2548)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1     272.3*** (25.94) 317.1*** (91.89) -19.89*** (3.152)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2     102.7*** (27.46)   -33.07 (92.49)   -0.6379 (3.152)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ ________________ _________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID              IID               IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                 116              146               153</span>
@@ -1173,14 +1173,14 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-in"><span class="co"># Placing the new header line at the bottom</span></span>
 <span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est_header</span>, headers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"_Group"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"B"</span><span class="op">)</span>,</span>
 <span class="r-in">                                  <span class="st">"^Currency"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"US $"</span> <span class="op">=</span> <span class="fl">2</span>, <span class="st">"CA $"</span> <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                          model 1          model 2           model 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     est_header.1     est_header.2      est_header.3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Currency                    US $             US $              CA $</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Ozone          Solar.R              Wind</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Group                          A                A                 B</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)     42.14*** (2.086) 185.2*** (7.218) 9.958*** (0.2548)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1     272.4*** (25.94) 317.2*** (91.89) -19.89*** (3.152)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2     102.8*** (27.46)   -33.07 (92.49)   -0.6379 (3.152)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        42.14*** (2.086) 185.1*** (7.218) 9.958*** (0.2548)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1     272.3*** (25.94) 317.1*** (91.89) -19.89*** (3.152)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2     102.7*** (27.46)   -33.07 (92.49)   -0.6379 (3.152)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ ________________ _________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID              IID               IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                 116              146               153</span>
@@ -1203,11 +1203,11 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Model:               &amp; (1)           &amp; (2)           &amp; (3)\\  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    \midrule</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    \emph{Variables}\\</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    (Intercept)          &amp; 42.14$^{***}$ &amp; 185.2$^{***}$ &amp; 9.958$^{***}$\\   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Constant             &amp; 42.14$^{***}$ &amp; 185.1$^{***}$ &amp; 9.958$^{***}$\\   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                         &amp; (2.086)       &amp; (7.218)       &amp; (0.2548)\\   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    poly(Temp)1          &amp; 272.4$^{***}$ &amp; 317.2$^{***}$ &amp; -19.89$^{***}$\\   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    poly(Temp)1          &amp; 272.3$^{***}$ &amp; 317.1$^{***}$ &amp; -19.89$^{***}$\\   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                         &amp; (25.94)       &amp; (91.89)       &amp; (3.152)\\   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    poly(Temp)2          &amp; 102.8$^{***}$ &amp; -33.07        &amp; -0.6379\\   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    poly(Temp)2          &amp; 102.7$^{***}$ &amp; -33.07        &amp; -0.6379\\   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                         &amp; (27.46)       &amp; (92.49)       &amp; (3.152)\\   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    \midrule</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    \emph{Fit statistics}\\</span>
@@ -1227,13 +1227,13 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-in"><span class="co"># In the two arguments extralines and headers, .() can be used for list()</span></span>
 <span class="r-in"><span class="co"># For example:</span></span>
 <span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est_header</span>, headers <span class="op">=</span> <span class="fu">.</span><span class="op">(</span><span class="st">"^Currency"</span> <span class="op">=</span> <span class="fu">.</span><span class="op">(</span><span class="st">"US $"</span> <span class="op">=</span> <span class="fl">2</span>, <span class="st">"CA $"</span> <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                          model 1          model 2           model 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     est_header.1     est_header.2      est_header.3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Currency                    US $             US $              CA $</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Ozone          Solar.R              Wind</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)     42.14*** (2.086) 185.2*** (7.218) 9.958*** (0.2548)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1     272.4*** (25.94) 317.2*** (91.89) -19.89*** (3.152)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2     102.8*** (27.46)   -33.07 (92.49)   -0.6379 (3.152)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        42.14*** (2.086) 185.1*** (7.218) 9.958*** (0.2548)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1     272.3*** (25.94) 317.1*** (91.89) -19.89*** (3.152)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2     102.7*** (27.46)   -33.07 (92.49)   -0.6379 (3.152)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ ________________ _________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID              IID               IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                 116              146               153</span>
@@ -1263,7 +1263,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>                            est_0fe          est_2fe</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone            Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)       -64.34** (23.05)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant          -64.34** (23.05)                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R           0.0598* (0.0232)  0.0509 (0.0428)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp             1.652*** (0.2535) 2.052** (0.2390)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind            -3.334*** (0.6544)  -3.289* (1.051)</span>
@@ -1284,7 +1284,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>                            est_0fe           est_1fe          est_2fe</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone             Ozone            Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)       -64.34** (23.05)                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant          -64.34** (23.05)                                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R           0.0598* (0.0232)   0.0522 (0.0408)  0.0509 (0.0428)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp             1.652*** (0.2535) 1.875*** (0.1816) 2.052** (0.2390)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind            -3.334*** (0.6544)   -3.109. (1.306)  -3.289* (1.051)</span>
@@ -1305,7 +1305,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>                            est_0fe          est_2fe</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone            Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)       -64.34** (23.05)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant          -64.34** (23.05)                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R           0.0598* (0.0232)  0.0509 (0.0428)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp             1.652*** (0.2535) 2.052** (0.2390)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind            -3.334*** (0.6544)  -3.289* (1.051)</span>
@@ -1331,7 +1331,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>                            est_0fe           est_1fe          est_2fe</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone             Ozone            Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)       -64.34** (23.05)                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant          -64.34** (23.05)                                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R           0.0598* (0.0232)   0.0522 (0.0408)  0.0509 (0.0428)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp             1.652*** (0.2535) 1.875*** (0.1816) 2.052** (0.2390)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind            -3.334*** (0.6544)   -3.109. (1.306)  -3.289* (1.051)</span>
@@ -1357,7 +1357,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone            Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dates                           No              Yes</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)       -64.34** (23.05)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant          -64.34** (23.05)                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R           0.0598* (0.0232)  0.0509 (0.0428)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp             1.652*** (0.2535) 2.052** (0.2390)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind            -3.334*** (0.6544)  -3.289* (1.051)</span>
@@ -1374,7 +1374,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>                            est_0fe          est_2fe</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone            Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)       -64.34** (23.05)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant          -64.34** (23.05)                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R           0.0598* (0.0232)  0.0509 (0.0428)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp             1.652*** (0.2535) 2.052** (0.2390)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind            -3.334*** (0.6544)  -3.289* (1.051)</span>
@@ -1397,15 +1397,15 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-in"><span class="co"># by feeding functions in the 'vcov' argument.</span></span>
 <span class="r-in"><span class="co"># Let's use some covariances from the sandwich package</span></span>
 <span class="r-in"></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est_c0</span>, <span class="va">est_c1</span>, <span class="va">est_c2</span>, vcov <span class="op">=</span> <span class="fu">sandwich</span><span class="fu">::</span><span class="va"><a href="https://sandwich.R-Forge.R-project.org//reference/vcovHC.html" class="external-link">vcovHC</a></span><span class="op">)</span></span>
+<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est_c0</span>, <span class="va">est_c1</span>, <span class="va">est_c2</span>, vcov <span class="op">=</span> <span class="fu">sandwich</span><span class="fu">::</span><span class="va"><a href="https://sandwich.R-Forge.R-project.org/reference/vcovHC.html" class="external-link">vcovHC</a></span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                             est_c0             est_c1            est_c2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone              Ozone             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)       18.60*** (3.949)   29.83*** (3.064)  25.79*** (4.436)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant          18.60*** (3.949)   29.83*** (3.064)  25.79*** (4.436)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R         0.1272*** (0.0266) 0.0659*** (0.0150)  0.1347* (0.0651)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1                         -155.5*** (39.20) -153.6*** (39.12)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1                         -155.5*** (39.20) -153.5*** (39.12)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2                           98.77** (36.32)   98.88** (36.42)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1                          166.7*** (25.38)  159.3*** (25.99)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1                          166.6*** (25.38)  159.3*** (25.99)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2                            67.20* (27.38)    68.77* (27.36)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R square                                         -0.0002 (0.0002)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ __________________ __________________ _________________</span>
@@ -1417,15 +1417,15 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># To add extra arguments to vcovHC, you need to write your wrapper:</span></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est_c0</span>, <span class="va">est_c1</span>, <span class="va">est_c2</span>, vcov <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu">sandwich</span><span class="fu">::</span><span class="fu"><a href="https://sandwich.R-Forge.R-project.org//reference/vcovHC.html" class="external-link">vcovHC</a></span><span class="op">(</span><span class="va">x</span>, type <span class="op">=</span> <span class="st">"HC0"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est_c0</span>, <span class="va">est_c1</span>, <span class="va">est_c2</span>, vcov <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu">sandwich</span><span class="fu">::</span><span class="fu"><a href="https://sandwich.R-Forge.R-project.org/reference/vcovHC.html" class="external-link">vcovHC</a></span><span class="op">(</span><span class="va">x</span>, type <span class="op">=</span> <span class="st">"HC0"</span><span class="op">)</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                             est_c0             est_c1            est_c2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone              Ozone             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)       18.60*** (3.850)   29.83*** (2.890)  25.79*** (4.091)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant          18.60*** (3.850)   29.83*** (2.890)  25.79*** (4.091)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R         0.1272*** (0.0260) 0.0659*** (0.0140)  0.1347* (0.0603)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1                         -155.5*** (35.29) -153.6*** (35.11)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1                         -155.5*** (35.29) -153.5*** (35.11)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2                           98.77** (32.31)   98.88** (32.35)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1                          166.7*** (23.41)  159.3*** (23.76)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1                          166.6*** (23.41)  159.3*** (23.76)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2                           67.20** (24.84)   68.77** (24.68)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R square                                         -0.0002 (0.0002)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ __________________ __________________ _________________</span>
@@ -1447,7 +1447,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>                               est1               est2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)      -100.2*** (26.35)                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant         -100.2*** (26.35)                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month = 6          -54.99* (26.34)                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month = 7           35.89. (18.37)                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month = 8           44.52* (18.05)                   </span>
@@ -1473,7 +1473,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>                               est1               est2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)      -100.2*** (26.35)                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant         -100.2*** (26.35)                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month = 6          -54.99* (26.34)                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month = 7           35.89. (18.37)                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month = 8           44.52* (18.05)                   </span>
@@ -1515,7 +1515,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>                            model 1           model 2            model 3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone             Ozone              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)       -64.34** (23.05)   -64.34* (21.30)   -64.34** (20.15)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant          -64.34** (23.05)   -64.34* (21.30)   -64.34** (20.15)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R           0.0598* (0.0232)   0.0598 (0.0335) 0.0598*** (0.0162)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind            -3.334*** (0.6544)   -3.334* (1.181) -3.334*** (0.8343)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp             1.652*** (0.2535) 1.652*** (0.1583)  1.652*** (0.1927)</span>
@@ -1528,7 +1528,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>                           model 4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)       -64.34* (19.66)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant          -64.34* (19.66)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R           0.0598 (0.0314)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind              -3.334* (1.135)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp            1.652*** (0.1386)</span>
@@ -1549,7 +1549,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                est           est_bis</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)       -64.34** (21.23)                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant          -64.34** (21.23)                  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R          0.0598** (0.0191)   0.0522 (0.0408)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind            -3.334*** (0.8749)   -3.109. (1.306)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp             1.652*** (0.2025) 1.875*** (0.1816)</span>
@@ -1566,10 +1566,10 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-in"><span class="co"># When you have only one model, this model is replicated</span></span>
 <span class="r-in"><span class="co"># along the elements of the vcov list.</span></span>
 <span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est</span>, vcov <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"hetero"</span>, <span class="op">~</span> <span class="va">Month</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                est               est</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                est             est.1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)       -64.34** (21.23)   -64.34* (21.30)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant          -64.34** (21.23)   -64.34* (21.30)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R          0.0598** (0.0191)   0.0598 (0.0335)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind            -3.334*** (0.8749)   -3.334* (1.181)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp             1.652*** (0.2025) 1.652*** (0.1583)</span>
@@ -1592,10 +1592,10 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># each</span></span>
 <span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est</span>, <span class="va">est_bis</span>, vcov <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"each"</span>, <span class="st">"iid"</span>, <span class="op">~</span> <span class="va">Month</span>, <span class="op">~</span> <span class="va">Day</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                est               est                est</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                est             est.1              est.2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone             Ozone              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)       -64.34** (23.05)   -64.34* (21.30)   -64.34** (20.15)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant          -64.34** (23.05)   -64.34* (21.30)   -64.34** (20.15)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R           0.0598* (0.0232)   0.0598 (0.0335) 0.0598*** (0.0162)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind            -3.334*** (0.6544)   -3.334* (1.181) -3.334*** (0.8343)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp             1.652*** (0.2535) 1.652*** (0.1583)  1.652*** (0.1927)</span>
@@ -1607,10 +1607,10 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span> R2                         0.60589           0.60589            0.60589</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                       --                --                 --</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                            est_bis           est_bis            est_bis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                            est_bis         est_bis.1          est_bis.2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone             Ozone              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)                                                            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant                                                               </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R           0.0522* (0.0237)   0.0522 (0.0408)   0.0522* (0.0202)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind            -3.109*** (0.6601)   -3.109. (1.306) -3.109*** (0.7986)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp             1.875*** (0.3407) 1.875*** (0.1816)  1.875*** (0.3671)</span>
@@ -1626,10 +1626,10 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># times</span></span>
 <span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est</span>, <span class="va">est_bis</span>, vcov <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"times"</span>, <span class="st">"iid"</span>, <span class="op">~</span> <span class="va">Month</span>, <span class="op">~</span> <span class="va">Day</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                est            est_bis               est</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                est            est_bis             est.1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone              Ozone             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)       -64.34** (23.05)                      -64.34* (21.30)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant          -64.34** (23.05)                      -64.34* (21.30)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R           0.0598* (0.0232)   0.0522* (0.0237)   0.0598 (0.0335)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind            -3.334*** (0.6544) -3.109*** (0.6601)   -3.334* (1.181)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp             1.652*** (0.2535)  1.875*** (0.3407) 1.652*** (0.1583)</span>
@@ -1641,10 +1641,10 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span> R2                         0.60589            0.63686           0.60589</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                       --            0.53154                --</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                           est_bis                est            est_bis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                         est_bis.1              est.2          est_bis.2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:             Ozone              Ozone              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)                         -64.34** (20.15)                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant                            -64.34** (20.15)                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R           0.0522 (0.0408) 0.0598*** (0.0162)   0.0522* (0.0202)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind              -3.109. (1.306) -3.334*** (0.8343) -3.109*** (0.7986)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp            1.875*** (0.1816)  1.652*** (0.1927)  1.875*** (0.3671)</span>
@@ -1680,7 +1680,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Model:         &amp; (1)            &amp; (2)            &amp; (3)\\  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    \midrule</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    \emph{Variables}\\</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    (Intercept)    &amp; 18.60$^{***}$  &amp; 77.25$^{***}$  &amp; -64.34$^{***}$\\   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Constant       &amp; 18.60$^{***}$  &amp; 77.25$^{***}$  &amp; -64.34$^{***}$\\   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                   &amp; (6.748)        &amp; (9.068)        &amp; (23.05)\\   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Solar.R        &amp; 0.1272$^{***}$ &amp; 0.1004$^{***}$ &amp; 0.0598$^{**}$\\   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                   &amp; (0.0328)       &amp; (0.0263)       &amp; (0.0232)\\   </span>
@@ -1719,7 +1719,8 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.0.</p>
 </div>
 
       </footer></div>

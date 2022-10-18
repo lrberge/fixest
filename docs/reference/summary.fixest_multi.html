@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
       </span>
     </div>
 
@@ -74,8 +74,7 @@
     <p>Summary information for fixest_multi objects. In particular, this is used to specify the type of standard-errors to be computed.</p>
     </div>
 
-    <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for fixest_multi</span>
+    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for fixest_multi</span>
 <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span>
   <span class="va">object</span>,
   type <span class="op">=</span> <span class="st">"short"</span>,
@@ -88,8 +87,7 @@
   lean <span class="op">=</span> <span class="cn">FALSE</span>,
   n <span class="op">=</span> <span class="fl">1000</span>,
   <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
-    </div>
+<span class="op">)</span></code></pre></div></div>
 
     <div id="arguments">
     <h2>Arguments</h2>
@@ -98,11 +96,11 @@
 <dt>type</dt>
 <dd><p>A character either equal to <code>"short"</code>, <code>"long"</code>, <code>"compact"</code>, <code>"se_compact"</code> or <code>"se_long"</code>. If <code>short</code>, only the table of coefficients is displayed for each estimation. If <code>long</code>, then the full results are displayed for each estimation. If <code>compact</code>, a <code>data.frame</code> is returned with one line per model and the formatted coefficients + standard-errors in the columns. If <code>se_compact</code>, a <code>data.frame</code> is returned with one line per model, one numeric column for each coefficient and one numeric column for each standard-error. If <code>"se_long"</code>, same as <code>"se_compact"</code> but the data is in a long format instead of wide.</p></dd>
 <dt>vcov</dt>
-<dd><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href="vcov_cluster.html">vcov_cluster</a></code>, <code><a href="vcov_hac.html">vcov_NW</a></code>, <code><a href="vcov_hac.html">NW</a></code>, <code><a href="vcov_hac.html">vcov_DK</a></code>, <code><a href="vcov_hac.html">DK</a></code>, <code><a href="vcov_conley.html">vcov_conley</a></code> and <code><a href="vcov_conley.html">conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the `vcov` documentation in the <a href="https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1" class="external-link">vignette</a>.</p></dd>
+<dd><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href="vcov_cluster.html">vcov_cluster</a></code>, <code><a href="vcov_hac.html">vcov_NW</a></code>, <code><a href="vcov_hac.html">NW</a></code>, <code><a href="vcov_hac.html">vcov_DK</a></code>, <code><a href="vcov_hac.html">DK</a></code>, <code><a href="vcov_conley.html">vcov_conley</a></code> and <code><a href="vcov_conley.html">conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the <code>vcov</code> documentation in the <a href="https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1" class="external-link">vignette</a>.</p></dd>
 <dt>se</dt>
 <dd><p>Character scalar. Which kind of standard error should be computed: “standard”, “hetero”, “cluster”, “twoway”, “threeway” or “fourway”? By default if there are clusters in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "iid"</code>. Note that this argument is deprecated, you should use <code>vcov</code> instead.</p></dd>
 <dt>cluster</dt>
-<dd><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as fixed-effects in the estimation, you can leave it blank with <code>vcov = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] fixed-effect). You can interact two variables using <code>^</code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></dd>
+<dd><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as fixed-effects in the estimation, you can leave it blank with <code>vcov = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [resp. 2nd] fixed-effect). You can interact two variables using <code>^</code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></dd>
 <dt>ssc</dt>
 <dd><p>An object of class <code>ssc.type</code> obtained with the function <code><a href="ssc.html">ssc</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href="ssc.html">ssc</a></code> for this argument. The arguments and defaults of the function <code><a href="ssc.html">ssc</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "min"</code>, <code>t.df = "min"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href="ssc.html">ssc</a></code> for details.</p></dd>
 <dt>.vcov</dt>
@@ -122,7 +120,7 @@
     </div>
     <div id="see-also">
     <h2>See also</h2>
-    <div class="dont-index"><p>The main fixest estimation functions: <code><a href="feols.html">feols</a></code>, <code><a href="feglm.html">fepois</a></code>, <code><a href="femlm.html">fenegbin</a></code>, <code><a href="feglm.html">feglm</a></code>, <code><a href="feNmlm.html">feNmlm</a></code>. Tools for mutliple fixest estimations: <code>summary.fixest_multi</code>, <code><a href="print.fixest_multi.html">print.fixest_multi</a></code>, <code><a href="as.list.fixest_multi.html">as.list.fixest_multi</a></code>, <code>sub-sub-.fixest_multi</code>, <code>sub-.fixest_multi</code>, <code>cash-.fixest_multi</code>.</p></div>
+    <div class="dont-index"><p>The main fixest estimation functions: <code><a href="feols.html">feols</a></code>, <code><a href="feglm.html">fepois</a></code>, <code><a href="femlm.html">fenegbin</a></code>, <code><a href="feglm.html">feglm</a></code>, <code><a href="feNmlm.html">feNmlm</a></code>. Tools for mutliple fixest estimations: <code>summary.fixest_multi</code>, <code><a href="print.fixest_multi.html">print.fixest_multi</a></code>, <code><a href="as.list.fixest_multi.html">as.list.fixest_multi</a></code>, <code>sub-sub-.fixest_multi</code>, <code>sub-.fixest_multi</code>.</p></div>
     </div>
 
     <div id="ref-examples">
@@ -206,6 +204,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Expl. vars.: x1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: y</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 50 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sample (species): setosa</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: IID </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std. Error t value   Pr(&gt;|t|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept) 2.639001   0.310014 8.51251 3.7424e-11 ***</span>
@@ -217,6 +216,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Expl. vars.: x1 + x2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: y</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 50 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sample (species): setosa</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: IID </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std. Error t value   Pr(&gt;|t|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept) 2.303738   0.385294 5.97917 2.8943e-07 ***</span>
@@ -229,6 +229,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Expl. vars.: x1 + x2 + x3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: y</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 50 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sample (species): setosa</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: IID </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept) 2.351890   0.392868 5.986471 3.0342e-07 ***</span>
@@ -244,6 +245,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Expl. vars.: x1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: y</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 50 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sample (species): versicolor</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: IID </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std. Error t value   Pr(&gt;|t|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept) 3.539735   0.562874 6.28869 9.0690e-08 ***</span>
@@ -255,6 +257,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Expl. vars.: x1 + x2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: y</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 50 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sample (species): versicolor</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: IID </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std. Error t value   Pr(&gt;|t|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept) 2.116431   0.494256 4.28206 9.0640e-05 ***</span>
@@ -267,6 +270,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Expl. vars.: x1 + x2 + x3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: y</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 50 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sample (species): versicolor</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: IID </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)  1.895540   0.507055  3.73833 5.1122e-04 ***</span>
@@ -282,6 +286,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Expl. vars.: x1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: y</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 50 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sample (species): virginica</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: IID </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std. Error t value   Pr(&gt;|t|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept) 3.906836   0.757061 5.16053 4.6563e-06 ***</span>
@@ -293,6 +298,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Expl. vars.: x1 + x2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: y</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 50 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sample (species): virginica</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: IID </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept) 0.624782   0.524867  1.19036 2.3988e-01    </span>
@@ -305,6 +311,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Expl. vars.: x1 + x2 + x3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: y</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 50 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sample (species): virginica</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: IID </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error   t value   Pr(&gt;|t|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)  0.699883   0.533601  1.311623 1.9616e-01    </span>
@@ -316,26 +323,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 0.305014   Adj. R2: 0.749908</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"compact"</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   lhs     sample          rhs     (Intercept)                x1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   y setosa     x1           2.64*** (0.31)   0.69*** (0.0899)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   y setosa     x1 + x2       2.3*** (0.385) 0.667*** (0.0904)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   y setosa     x1 + x2 + x3 2.35*** (0.393) 0.655*** (0.0924)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4   y versicolor x1           3.54*** (0.563) 0.865*** (0.202) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   y versicolor x1 + x2      2.12*** (0.494)    0.248 (0.187) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   y versicolor x1 + x2 + x3  1.9*** (0.507)   0.387. (0.205) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7   y virginica  x1           3.91*** (0.757) 0.902*** (0.253) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8   y virginica  x1 + x2        0.625 (0.525)    0.26. (0.153) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9   y virginica  x1 + x2 + x3     0.7 (0.534)    0.33. (0.174) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                  x2             x3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1                                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2    0.283 (0.197)                </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3    0.238 (0.208)   0.252 (0.347)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4                                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 0.736*** (0.125)                </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 0.908*** (0.165)  -0.679 (0.435)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7                                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8 0.935*** (0.0896)               </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9 0.946*** (0.0907)  -0.17 (0.198)</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in sprintf("%s%.*s", res[i], s + 2 - nchar(res[i]), "0000000000000000"):</span> argument for '*' conversion specification must be a number</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"se_compact"</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   lhs     sample          rhs (Intercept) (Intercept)__se        x1     x1__se</span>
@@ -414,7 +402,8 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.0.</p>
 </div>
 
       </footer></div>

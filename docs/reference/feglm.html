@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
       </span>
     </div>
 
@@ -74,8 +74,7 @@
     <p>Estimates GLM models with any number of fixed-effects.</p>
     </div>
 
-    <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">feglm</span><span class="op">(</span>
+    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">feglm</span><span class="op">(</span>
   <span class="va">fml</span>,
   <span class="va">data</span>,
   family <span class="op">=</span> <span class="st">"gaussian"</span>,
@@ -85,6 +84,8 @@
   <span class="va">subset</span>,
   <span class="va">split</span>,
   <span class="va">fsplit</span>,
+  <span class="va">split.keep</span>,
+  <span class="va">split.drop</span>,
   <span class="va">cluster</span>,
   <span class="va">se</span>,
   <span class="va">ssc</span>,
@@ -121,6 +122,8 @@
   <span class="va">offset</span>,
   <span class="va">split</span>,
   <span class="va">fsplit</span>,
+  <span class="va">split.keep</span>,
+  <span class="va">split.drop</span>,
   <span class="va">cluster</span>,
   <span class="va">se</span>,
   <span class="va">ssc</span>,
@@ -156,6 +159,8 @@
   <span class="va">subset</span>,
   <span class="va">split</span>,
   <span class="va">fsplit</span>,
+  <span class="va">split.keep</span>,
+  <span class="va">split.drop</span>,
   <span class="va">cluster</span>,
   <span class="va">se</span>,
   <span class="va">ssc</span>,
@@ -181,8 +186,7 @@
   only.coef <span class="op">=</span> <span class="cn">FALSE</span>,
   <span class="va">env</span>,
   <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
-    </div>
+<span class="op">)</span></code></pre></div></div>
 
     <div id="arguments">
     <h2>Arguments</h2>
@@ -193,7 +197,7 @@
 <dt>family</dt>
 <dd><p>Family to be used for the estimation. Defaults to <code><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian()</a></code>. See <code><a href="https://rdrr.io/r/stats/family.html" class="external-link">family</a></code> for details of family functions.</p></dd>
 <dt>vcov</dt>
-<dd><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href="vcov_cluster.html">vcov_cluster</a></code>, <code><a href="vcov_hac.html">vcov_NW</a></code>, <code><a href="vcov_hac.html">NW</a></code>, <code><a href="vcov_hac.html">vcov_DK</a></code>, <code><a href="vcov_hac.html">DK</a></code>, <code><a href="vcov_conley.html">vcov_conley</a></code> and <code><a href="vcov_conley.html">conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the `vcov` documentation in the <a href="https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1" class="external-link">vignette</a>.</p></dd>
+<dd><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href="vcov_cluster.html">vcov_cluster</a></code>, <code><a href="vcov_hac.html">vcov_NW</a></code>, <code><a href="vcov_hac.html">NW</a></code>, <code><a href="vcov_hac.html">vcov_DK</a></code>, <code><a href="vcov_hac.html">DK</a></code>, <code><a href="vcov_conley.html">vcov_conley</a></code> and <code><a href="vcov_conley.html">conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the <code>vcov</code> documentation in the <a href="https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1" class="external-link">vignette</a>.</p></dd>
 <dt>offset</dt>
 <dd><p>A formula or a numeric vector. An offset can be added to the estimation. If equal to a formula, it should be of the form (for example) <code>~0.5*x**2</code>. This offset is linearly added to the elements of the main formula 'fml'.</p></dd>
 <dt>weights</dt>
@@ -201,11 +205,15 @@
 <dt>subset</dt>
 <dd><p>A vector (logical or numeric) or a one-sided formula. If provided, then the estimation will be performed only on the observations defined by this argument.</p></dd>
 <dt>split</dt>
-<dd><p>A one sided formula representing a variable (eg <code>split = ~var</code>) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. If you also want to include the estimation for the full sample, use the argument <code>fsplit</code> instead.</p></dd>
+<dd><p>A one sided formula representing a variable (eg <code>split = ~var</code>) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. If you also want to include the estimation for the full sample, use the argument <code>fsplit</code> instead. You can use the special operators <code>%keep%</code> and <code>%drop%</code> to select only a subset of values for which to split the sample. E.g. <code>split = ~var %keep% c("v1", "v2")</code> will split the sample only according to the values <code>v1</code> and <code>v2</code> of the variable <code>var</code>; it is equivalent to supplying the argument <code>split.keep = c("v1", "v2")</code>. By default there is partial matching on each value, you can trigger a regular expression evaluation by adding a <code>'@'</code> first, as in: <code>~var %drop% "@^v[12]"</code> which will drop values starting with <code>"v1"</code> or <code>"v2"</code> (of course you need to know regexes!).</p></dd>
 <dt>fsplit</dt>
-<dd><p>A one sided formula representing a variable (eg <code>split = ~var</code>) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. This argument is the same as split but also includes the full sample as the first estimation.</p></dd>
+<dd><p>A one sided formula representing a variable (eg <code>split = ~var</code>) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. This argument is the same as split but also includes the full sample as the first estimation. You can use the special operators <code>%keep%</code> and <code>%drop%</code> to select only a subset of values for which to split the sample. E.g. <code>split = ~var %keep% c("v1", "v2")</code> will split the sample only according to the values <code>v1</code> and <code>v2</code> of the variable <code>var</code>; it is equivalent to supplying the argument <code>split.keep = c("v1", "v2")</code>. By default there is partial matching on each value, you can trigger a regular expression evaluation by adding an <code>'@'</code> first, as in: <code>~var %drop% "@^v[12]"</code> which will drop values starting with <code>"v1"</code> or <code>"v2"</code> (of course you need to know regexes!).</p></dd>
+<dt>split.keep</dt>
+<dd><p>A character vector. Only used when <code>split</code>, or <code>fsplit</code>, is supplied. If provided, then the sample will be split only on the values of <code>split.keep</code>. The values in <code>split.keep</code> will be partially matched to the values of <code>split</code>. To enable regular expressions, you need to add an <code>'@'</code> first. For example <code>split.keep = c("v1", "@other|var")</code> will keep only the value in <code>split</code> partially matched by <code>"v1"</code> or the values containing <code>"other"</code> or <code>"var"</code>.</p></dd>
+<dt>split.drop</dt>
+<dd><p>A character vector. Only used when <code>split</code>, or <code>fsplit</code>, is supplied. If provided, then the sample will be split only on the values that are not in <code>split.drop</code>. The values in <code>split.drop</code> will be partially matched to the values of <code>split</code>. To enable regular expressions, you need to add an <code>'@'</code> first. For example <code>split.drop = c("v1", "@other|var")</code> will drop only the value in <code>split</code> partially matched by <code>"v1"</code> or the values containing <code>"other"</code> or <code>"var"</code>.</p></dd>
 <dt>cluster</dt>
-<dd><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as fixed-effects in the estimation, you can leave it blank with <code>vcov = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] fixed-effect). You can interact two variables using <code>^</code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></dd>
+<dd><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as fixed-effects in the estimation, you can leave it blank with <code>vcov = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [resp. 2nd] fixed-effect). You can interact two variables using <code>^</code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></dd>
 <dt>se</dt>
 <dd><p>Character scalar. Which kind of standard error should be computed: “standard”, “hetero”, “cluster”, “twoway”, “threeway” or “fourway”? By default if there are clusters in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "iid"</code>. Note that this argument is deprecated, you should use <code>vcov</code> instead.</p></dd>
 <dt>ssc</dt>
@@ -354,10 +362,10 @@
     <h2>Varying slopes</h2>
     
 
-<p>You can add variables with varying slopes in the fixed-effect part of the formula. The syntax is as follows: fixef_var[var1, var2]. Here the variables var1 and var2 will be with varying slopes (one slope per value in fixef_var) and the fixed-effect fixef_var will also be added.</p>
-<p>To add only the variables with varying slopes and not the fixed-effect, use double square brackets: fixef_var[[var1, var2]].</p>
-<p>In other words:</p><ul><li><p>fixef_var[var1, var2] is equivalent to fixef_var + fixef_var[[var1]] + fixef_var[[var2]]</p></li>
-<li><p>fixef_var[[var1, var2]] is equivalent to fixef_var[[var1]] + fixef_var[[var2]]</p></li>
+<p>You can add variables with varying slopes in the fixed-effect part of the formula. The syntax is as follows: <code>fixef_var[var1, var2]</code>. Here the variables var1 and var2 will be with varying slopes (one slope per value in fixef_var) and the fixed-effect fixef_var will also be added.</p>
+<p>To add only the variables with varying slopes and not the fixed-effect, use double square brackets: <code>fixef_var[[var1, var2]]</code>.</p>
+<p>In other words:</p><ul><li><p><code>fixef_var[var1, var2]</code> is equivalent to <code>fixef_var + fixef_var[[var1]] + fixef_var[[var2]]</code></p></li>
+<li><p><code>fixef_var[[var1, var2]]</code> is equivalent to <code>fixef_var[[var1]] + fixef_var[[var2]]</code></p></li>
 </ul><p>In general, for convergence reasons, it is recommended to always add the fixed-effect and avoid using only the variable with varying slope (i.e. use single square brackets).</p>
     </div>
     <div id="lagging-variables">
@@ -365,7 +373,7 @@
     
 
 
-<p>To use leads/lags of variables in the estimation, you can: i) either provide the argument <code>panel.id</code>, ii) either set your data set as a panel with the function <code><a href="panel.html">panel</a></code>. Doing either of the two will give you acceess to the lagging functions <code><a href="l.html">l</a></code>,  <code><a href="l.html">f</a></code> and <code><a href="l.html">d</a></code>.</p>
+<p>To use leads/lags of variables in the estimation, you can: i) either provide the argument <code>panel.id</code>, ii) either set your data set as a panel with the function <code><a href="panel.html">panel</a></code>, <code><a href="l.html">f</a></code> and <code><a href="l.html">d</a></code>.</p>
 <p>You can provide several leads/lags/differences at once: e.g. if your formula is equal to <code>f(y) ~ l(x, -1:1)</code>, it means that the dependent variable is equal to the lead of <code>y</code>, and you will have as explanatory variables the lead of <code>x1</code>, <code>x1</code> and the lag of <code>x1</code>. See the examples in function <code><a href="l.html">l</a></code> for more details.</p>
     </div>
     <div id="interactions">
@@ -374,8 +382,8 @@
 
 
 <p>You can interact a numeric variable with a "factor-like" variable by using <code>i(factor_var, continuous_var, ref)</code>, where <code>continuous_var</code> will be interacted with each value of <code>factor_var</code> and the argument <code>ref</code> is a value of <code>factor_var</code> taken as a reference (optional).</p>
-<p>Using this specific way to create interactions leads to a different display of the interacted values in <code><a href="etable.html">etable</a></code> and offers a special representation of the interacted coefficients in the function <code><a href="coefplot.html">coefplot</a></code>. See examples.</p>
-<p>It is important to note that *if you do not care about the standard-errors of the interactions*, then you can add interactions in the fixed-effects part of the formula, it will be incomparably faster (using the syntax <code>factor_var[continuous_var]</code>, as explained in the section “Varying slopes”).</p>
+<p>Using this specific way to create interactions leads to a different display of the interacted values in <code><a href="etable.html">etable</a></code>. See examples.</p>
+<p>It is important to note that <em>if you do not care about the standard-errors of the interactions</em>, then you can add interactions in the fixed-effects part of the formula, it will be incomparably faster (using the syntax <code>factor_var[continuous_var]</code>, as explained in the section “Varying slopes”).</p>
 <p>The function <code><a href="i.html">i</a></code> has in fact more arguments, please see details in its associated help page.</p>
     </div>
     <div id="on-standard-errors">
@@ -438,11 +446,12 @@ Finally <code>mvsw</code> will add, in a stepwise fashion all possible combinati
 <p>The DSB can even be used within variable names, but then the variable must be nested in character form. For example <code>y ~ .["x.[1:2]_sq"]</code> will create <code>y ~ x1_sq + x2_sq</code>. Using the character form is important to avoid a formula parsing error. Double quotes must be used. Note that the character string that is nested will be parsed with the function <code><a href="dsb.html">dsb</a></code>, and thus it will return a vector.</p>
 <p>By default, the DSB operator expands vectors into sums. You can add a comma, like in <code>.[, x]</code>, to expand with commas--the content can then be used within functions. For instance: <code>c(x.[, 1:2])</code> will create <code>c(x1, x2)</code> (and <em>not</em> <code>c(x1 + x2)</code>).</p>
 <p>In all <code>fixest</code> estimations, this special parsing is enabled, so you don't need to use <code>xpd</code>.</p>
+<p>One-sided formulas can be expanded with the DSB operator: let <code>x = ~sepal + petal</code>, then <code>xpd(y ~ .[x])</code> leads to <code>color ~ sepal + petal</code>.</p>
 <p>You can even use multiple square brackets within a single variable, but then the use of nesting is required. For example, the following <code>xpd(y ~ .[".[letters[1:2]]_.[1:2]"])</code> will create <code>y ~ a_1 + b_2</code>. Remember that the nested character string is parsed with <code><a href="dsb.html">dsb</a></code>, which explains this behavior.</p>
     </div>
     <div id="references">
     <h2>References</h2>
-    <p>Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (<a href="https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13" class="external-link">https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13</a>).</p>
+    <p>Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (<a href="https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13" class="external-link"></a>).</p>
 <p>For models with multiple fixed-effects:</p>
 <p>Gaure, Simen, 2013, "OLS with multiple high dimensional category variables", Computational Statistics &amp; Data Analysis 66 pp. 8--18</p>
     </div>
@@ -498,10 +507,10 @@ And other estimation methods: <code><a href="feols.html">feols</a></code>, <code
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># We can display the results for the first lhs:</span></span>
 <span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_mult</span><span class="op">[</span>lhs <span class="op">=</span> <span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                             model 1            model 2            model 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 est_mult[lhs = 1].1 est_mult[lhs = ..2 est_mult[lhs = ..3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:               Ozone              Ozone              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)       0.5334** (0.1943)   0.8890* (0.4430)   0.8028. (0.4441)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant          0.5334** (0.1943)   0.8890* (0.4430)   0.8028. (0.4441)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind            -0.0761*** (0.0052) -0.1151** (0.0439) -0.1152** (0.0440)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp             0.0483*** (0.0020) 0.0441*** (0.0051) 0.0444*** (0.0051)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind x Temp                            0.0005 (0.0005)    0.0005 (0.0005)</span>
@@ -517,10 +526,10 @@ And other estimation methods: <code><a href="feols.html">feols</a></code>, <code
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># And now the second (access can be made by name)</span></span>
 <span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_mult</span><span class="op">[</span>lhs <span class="op">=</span> <span class="st">"Solar.R"</span><span class="op">]</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                            model 1            model 2             model 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 est_mult[lhs = ..1 est_mult[lhs = ..2 est_mult[lhs = "..3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Solar.R            Solar.R             Solar.R</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)      3.777*** (0.0714)  4.343*** (0.1689)   4.529*** (0.1708)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant         3.777*** (0.0714)  4.343*** (0.1689)   4.529*** (0.1708)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind            0.0119*** (0.0020) -0.0415** (0.0146)  -0.0433** (0.0147)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp            0.0169*** (0.0008) 0.0098*** (0.0021)  0.0088*** (0.0021)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind x Temp                        0.0007*** (0.0002)  0.0007*** (0.0002)</span>
@@ -530,17 +539,17 @@ And other estimation methods: <code><a href="feols.html">feols</a></code>, <code
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                   146                146                 146</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Squared Cor.               0.08076            0.08166             0.08983</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Pseudo R2                  0.06045            0.06207             0.07100</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> BIC                        8,192.6            8,183.5             8,110.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> BIC                        8,192.6            8,183.5             8,110.6</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># Now we focus on the two last right hand sides</span></span>
 <span class="r-in"><span class="co"># (note that .N can be used to specify the last item)</span></span>
 <span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_mult</span><span class="op">[</span>rhs <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="va">.N</span><span class="op">]</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                            model 1            model 2            model 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 est_mult[rhs = ..1 est_mult[rhs = ..2 est_mult[rhs = ..3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone            Solar.R              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)       0.8890* (0.4430)  4.343*** (0.1689)   0.8028. (0.4441)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant          0.8890* (0.4430)  4.343*** (0.1689)   0.8028. (0.4441)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind            -0.1151** (0.0439) -0.0415** (0.0146) -0.1152** (0.0440)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp            0.0441*** (0.0051) 0.0098*** (0.0021) 0.0444*** (0.0051)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind x Temp        0.0005 (0.0005) 0.0007*** (0.0002)    0.0005 (0.0005)</span>
@@ -552,10 +561,10 @@ And other estimation methods: <code><a href="feols.html">feols</a></code>, <code
 <span class="r-out co"><span class="r-pr">#&gt;</span> Pseudo R2                  0.53402            0.06207            0.53759</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> BIC                        1,568.7            8,183.5            1,561.5</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                             model 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 est_mult[rhs = 2..4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:             Solar.R</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)       4.529*** (0.1708)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant          4.529*** (0.1708)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind             -0.0433** (0.0147)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Temp             0.0088*** (0.0021)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind x Temp      0.0007*** (0.0002)</span>
@@ -565,7 +574,7 @@ And other estimation methods: <code><a href="feols.html">feols</a></code>, <code
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                    146</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Squared Cor.                0.08983</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Pseudo R2                   0.07100</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> BIC                         8,110.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> BIC                         8,110.6</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-in"></span>
@@ -739,48 +748,7 @@ And other estimation methods: <code><a href="feols.html">feols</a></code>, <code
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># Different way of displaying the results with "compact"</span></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est_split</span>, <span class="st">"compact"</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    sample     lhs           rhs      (Intercept)   poly(Wind, 2)1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1       5 Ozone   poly(Wind, 2)  3.3*** (0.0424) -6.41*** (0.617)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2       5 Ozone   poly(Temp, 2) 4.06*** (0.109)                  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3       5 Solar.R poly(Wind, 2) 5.21*** (0.0182)   -0.57* (0.272)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4       5 Solar.R poly(Temp, 2)  5.1*** (0.0523)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5       6 Ozone   poly(Wind, 2) 3.07*** (0.125)     6.1** (1.92) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6       6 Ozone   poly(Temp, 2) 3.42*** (0.0808)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7       6 Solar.R poly(Wind, 2) 5.22*** (0.0142)  2.22*** (0.178)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8       6 Solar.R poly(Temp, 2)  5.2*** (0.0197)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9       7 Ozone   poly(Wind, 2) 3.78*** (0.0432) -6.72*** (0.703)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10      7 Ozone   poly(Temp, 2)  2.6*** (0.19)                   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11      7 Solar.R poly(Wind, 2) 5.36*** (0.0142) -0.683** (0.217)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12      7 Solar.R poly(Temp, 2) 5.11*** (0.0562)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13      8 Ozone   poly(Wind, 2) 3.76*** (0.0415) -6.96*** (0.698)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14      8 Ozone   poly(Temp, 2) 3.14*** (0.0976)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15      8 Solar.R poly(Wind, 2) 5.13*** (0.0162)  -0.459. (0.272)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16      8 Solar.R poly(Temp, 2) 4.93*** (0.0414)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17      9 Ozone   poly(Wind, 2) 3.36*** (0.037)  -4.04*** (0.493)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18      9 Ozone   poly(Temp, 2) 3.37*** (0.0383)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19      9 Solar.R poly(Wind, 2) 5.12*** (0.0146) -0.564** (0.194)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20      9 Solar.R poly(Temp, 2) 5.11*** (0.0153)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       poly(Wind, 2)2   poly(Temp, 2)1    poly(Temp, 2)2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1    3.08*** (0.57)                                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2                     11.3*** (1.45)      2.51* (1.17) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   -1.83*** (0.251)                                   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4                    -2.63*** (0.636)   -5.6*** (0.432)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5     -2.28* (1.03)                                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6                       3.26* (1.29)    5.67*** (1.56) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7  -0.625*** (0.14)                                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8                     3.29*** (0.365)     0.156 (0.323)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9     -0.959 (0.682)                                   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10                    24.9*** (3.06)   -8.58*** (1.77) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11    0.0139 (0.277)                                   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12                    4.83*** (0.928)    -1.11. (0.616)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13    -0.344 (0.486)                                   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14                    17.3*** (1.75)   -5.78*** (0.897)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15   0.684** (0.247)                                   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16                    4.22*** (0.817)   -0.794. (0.462)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17   2.99*** (0.47)                                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18                     6.1*** (0.691)   2.25*** (0.627)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19     0.144 (0.225)                                   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20                    1.29*** (0.251) -0.929*** (0.26) </span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in sprintf("%s%.*s", res[i], s + 2 - nchar(res[i]), "0000000000000000"):</span> argument for '*' conversion specification must be a number</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># You can still select which sample/LHS/RHS to display</span></span>
 <span class="r-in"><span class="va">est_split</span><span class="op">[</span>sample <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, lhs <span class="op">=</span> <span class="fl">1</span>, rhs <span class="op">=</span> <span class="fl">1</span><span class="op">]</span></span>
@@ -814,7 +782,8 @@ And other estimation methods: <code><a href="feols.html">feols</a></code>, <code
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.0.</p>
 </div>
 
       </footer></div>

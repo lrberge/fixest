@@ -35,7 +35,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
       </span>
     </div>
 
@@ -95,41 +95,80 @@
 <div class="page-header"><h1 id="fixest-fast-and-user-friendly-fixed-effects-estimation">fixest: Fast and user-friendly fixed-effects estimation<a class="anchor" aria-label="anchor" href="#fixest-fast-and-user-friendly-fixed-effects-estimation"></a>
 </h1></div>
 
-<p>The <code>fixest</code> package offers a family of functions to perform estimations with multiple fixed-effects in both an OLS and a GLM context. Please refer to the <a href="https://CRAN.R-project.org/package=fixest/vignettes/fixest_walkthrough.html" class="external-link">introduction</a> for a walk-through.</p>
-<p>At the time of writing of this page (February 2020), <code>fixest</code> is the fastest existing method to perform fixed-effects estimations, often by orders of magnitude. See below for a benchmarking with the fastest alternative software.</p>
+<p>The <code>fixest</code> package offers a family of functions to
+perform estimations with multiple fixed-effects in both an OLS and a GLM
+context. Please refer to the <a href="https://CRAN.R-project.org/package=fixest/vignettes/fixest_walkthrough.html" class="external-link">introduction</a>
+for a walk-through.</p>
+<p>At the time of writing of this page (February 2020),
+<code>fixest</code> is the fastest existing method to perform
+fixed-effects estimations, often by orders of magnitude. See below for a
+benchmarking with the fastest alternative software.</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># To install from CRAN:</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"fixest"</span><span class="op">)</span>
+
+<span class="co"># To install the latest stable development release:</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"fixest"</span>, 
+                 repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>ropensci <span class="op">=</span> <span class="st">'https://fastverse.r-universe.dev'</span>,
+                           CRAN <span class="op">=</span> <span class="st">'https://cloud.r-project.org'</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <div class="section level2">
 <h2 id="benchmarking">Benchmarking<a class="anchor" aria-label="anchor" href="#benchmarking"></a>
 </h2>
-<p>Here is a comparison of the performance of <code>fixest</code> functions to other state of the art methods to perform estimations with multiple fixed-effects. The results are reported in the five figures below. Package <code>fixest</code> (black lines) is consistently faster in all situations.</p>
-<p><img src="https://github.com/lrberge/fixest/blob/master/vignettes/images/benchmark_gaussian.png?raw=true"></p>
-<p><img src="https://github.com/lrberge/fixest/blob/master/vignettes/images/benchmark_difficult.png?raw=true"></p>
-<p><img src="https://github.com/lrberge/fixest/blob/master/vignettes/images/benchmark_poisson.png?raw=true"></p>
-<p><img src="https://github.com/lrberge/fixest/blob/master/vignettes/images/benchmark_negbin.png?raw=true"></p>
-<p><img src="https://github.com/lrberge/fixest/blob/master/vignettes/images/benchmark_logit.png?raw=true"></p>
+<p>Here is a comparison of the performance of <code>fixest</code>
+functions to other state of the art methods to perform estimations with
+multiple fixed-effects. The results are reported in the five figures
+below. Package <code>fixest</code> (black lines) is consistently faster
+in all situations.</p>
+<p><img src="https://github.com/lrberge/fixest/blob/master/articles/images/benchmark_gaussian.png?raw=true"></p>
+<p><img src="https://github.com/lrberge/fixest/blob/master/articles/images/benchmark_difficult.png?raw=true"></p>
+<p><img src="https://github.com/lrberge/fixest/blob/master/articles/images/benchmark_poisson.png?raw=true"></p>
+<p><img src="https://github.com/lrberge/fixest/blob/master/articles/images/benchmark_negbin.png?raw=true"></p>
+<p><img src="https://github.com/lrberge/fixest/blob/master/articles/images/benchmark_logit.png?raw=true"></p>
 <div class="section level3">
 <h3 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
 </h3>
-<p>The benchmarking was performed as follows: In the OLS context, we estimate the following equation:</p>
+<p>The benchmarking was performed as follows: In the OLS context, we
+estimate the following equation:</p>
 <!-- $$y_{ijk} = \alpha_i + \beta_j + \gamma_k + \delta x_{ijk} + \epsilon_{ijk}$$ -->
-<p><img src="https://github.com/lrberge/fixest/blob/master/vignettes/images/equation.PNG?raw=true"></p>
-<p>The same functional form (one variable, three fixed-effects) is estimated for the Poisson, the Negative Binomial and the Logit cases (with ad hoc modifications to fit each model). See Berge (2018) for more details on the setup.</p>
-<p>For the “difficult” benchmark (OLS only), the data is generated in a way that makes the convergence of the fixed-effects slow. The phenomenon of slow convergence is frequent for real micro-level data sets involving employee and firm fixed-effects for instance.</p>
-<p>Each estimation is replicated 10 times and the average computing time is reported in the figures.</p>
+<p><img src="https://github.com/lrberge/fixest/blob/master/articles/images/equation.PNG?raw=true"></p>
+<p>The same functional form (one variable, three fixed-effects) is
+estimated for the Poisson, the Negative Binomial and the Logit cases
+(with ad hoc modifications to fit each model). See Berge (2018) for more
+details on the setup.</p>
+<p>For the “difficult” benchmark (OLS only), the data is generated in a
+way that makes the convergence of the fixed-effects slow. The phenomenon
+of slow convergence is frequent for real micro-level data sets involving
+employee and firm fixed-effects for instance.</p>
+<p>Each estimation is replicated 10 times and the average computing time
+is reported in the figures.</p>
 <p>The alternative methods used for comparison are:</p>
 <ul>
-<li>OLS: felm (R: package <a href="https://github.com/sgaure/lfe" class="external-link">lfe</a>), <a href="https://github.com/sergiocorreia/reghdfe" class="external-link">reghdfe</a> (Stata) and <a href="https://github.com/FixedEffects/FixedEffectModels.jl" class="external-link">FixedEffectModels</a> (Julia)</li>
-<li>Poisson: glmmboot (R: package <a href="https://cran.r-project.org/package=glmmML" class="external-link">glmmML</a>), feglm (R: package <a href="https://github.com/amrei-stammann/alpaca" class="external-link">alpaca</a>) and <a href="https://github.com/sergiocorreia/ppmlhdfe" class="external-link">ppmlhdfe</a> (Stata)</li>
+<li>OLS: felm (R: package <a href="https://github.com/sgaure/lfe" class="external-link">lfe</a>), <a href="https://github.com/sergiocorreia/reghdfe" class="external-link">reghdfe</a> (Stata) and
+<a href="https://github.com/FixedEffects/FixedEffectModels.jl" class="external-link">FixedEffectModels</a>
+(Julia)</li>
+<li>Poisson: glmmboot (R: package <a href="https://cran.r-project.org/package=glmmML" class="external-link">glmmML</a>), feglm (R:
+package <a href="https://github.com/amrei-stammann/alpaca" class="external-link">alpaca</a>)
+and <a href="https://github.com/sergiocorreia/ppmlhdfe" class="external-link">ppmlhdfe</a>
+(Stata)</li>
 <li>Negative Binomial: glm.nb (R: package MASS) and nbreg (Stata)</li>
-<li>Logit: glmmboot (R: package <a href="https://cran.r-project.org/package=glmmML" class="external-link">glmmML</a>), feglm (R: package <a href="https://github.com/amrei-stammann/alpaca" class="external-link">alpaca</a>) and logit (Stata)</li>
+<li>Logit: glmmboot (R: package <a href="https://cran.r-project.org/package=glmmML" class="external-link">glmmML</a>), feglm (R:
+package <a href="https://github.com/amrei-stammann/alpaca" class="external-link">alpaca</a>)
+and logit (Stata)</li>
 </ul>
-<p>All the aforementioned packages were updated at the benchmarking date: February 2020.</p>
-<p>The code and data for the benchmarking can be found <a href="https://drive.google.com/drive/folders/1-1M_vLGduByk5P3qHl7AMBBl85RzHpv7?usp=sharing" class="external-link">in this folder</a>.</p>
+<p>All the aforementioned packages were updated at the benchmarking
+date: February 2020.</p>
+<p>The code and data for the benchmarking can be found <a href="https://drive.google.com/drive/folders/1-1M_vLGduByk5P3qHl7AMBBl85RzHpv7?usp=sharing" class="external-link">in
+this folder</a>.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="acknowledgements">Acknowledgements<a class="anchor" aria-label="anchor" href="#acknowledgements"></a>
 </h2>
-<p>Of course the development of <code>fixest</code> has been inspired and pushed forward by (almost all) these (great) packages used in the benchmarking and I am deeply indebted to their authors. Although <code>fixest</code> contains many features, some are still uncovered and you should definitely have a look at these packages.</p>
+<p>Of course the development of <code>fixest</code> has been inspired
+and pushed forward by (almost all) these (great) packages used in the
+benchmarking and I am deeply indebted to their authors. Although
+<code>fixest</code> contains many features, some are still uncovered and
+you should definitely have a look at these packages.</p>
 </div>
 </div>
   </div>
@@ -171,8 +210,10 @@
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
 <li><a href="https://cran.r-project.org/web/checks/check_results_fixest.html" class="external-link"><img src="https://cranchecks.info/badges/worst/fixest" alt="CRAN status"></a></li>
+<li><a href="https://fastverse.r-universe.dev" class="external-link"><img src="https://fastverse.r-universe.dev/badges/fixest" alt="Version_ROpensci"></a></li>
 <li><a href="https://CRAN.R-project.org/package=fixest" class="external-link"><img src="http://www.r-pkg.org/badges/version/fixest" alt="Version"></a></li>
-<li><a href="https://ipub.com/dev-corner/apps/r-package-downloads/" class="external-link"> <img src="https://cranlogs.r-pkg.org/badges/fixest" alt="Downloads"></a></li>
+<li><a href="https://ipub.com/dev-corner/apps/r-package-downloads/" class="external-link">
+<img src="https://cranlogs.r-pkg.org/badges/fixest" alt="Downloads"></a></li>
 </ul>
 </div>
 
@@ -187,7 +228,8 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.0.</p>
 </div>
 
       </footer>

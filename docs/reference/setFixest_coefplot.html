@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
       </span>
     </div>
 
@@ -74,8 +74,7 @@
     <p>You can set the default values of most arguments of <code><a href="coefplot.html">coefplot</a></code> with this function.</p>
     </div>
 
-    <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">setFixest_coefplot</span><span class="op">(</span>
+    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">setFixest_coefplot</span><span class="op">(</span>
   <span class="va">style</span>,
   horiz <span class="op">=</span> <span class="cn">FALSE</span>,
   dict <span class="op">=</span> <span class="fu"><a href="setFixest_dict.html">getFixest_dict</a></span><span class="op">(</span><span class="op">)</span>,
@@ -123,8 +122,7 @@
   reset <span class="op">=</span> <span class="cn">FALSE</span>
 <span class="op">)</span>
 
-<span class="fu">getFixest_coefplot</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-    </div>
+<span class="fu">getFixest_coefplot</span><span class="op">(</span><span class="op">)</span></code></pre></div></div>
 
     <div id="arguments">
     <h2>Arguments</h2>
@@ -135,7 +133,7 @@
 <dt>dict</dt>
 <dd><p>A named character vector or a logical scalar. It changes the original variable names to the ones contained in the <code>dict</code>ionary. E.g. to change the variables named <code>a</code> and <code>b3</code> to (resp.) “$log(a)$” and to “$bonus^3$”, use <code>dict=c(a="$log(a)$",b3="$bonus^3$")</code>. By default, it is equal to <code><a href="setFixest_dict.html">getFixest_dict()</a></code>, a default dictionary which can be set with <code><a href="setFixest_dict.html">setFixest_dict</a></code>. You can use <code>dict = FALSE</code> to disable it. By default <code>dict</code> modifies the entries in the global dictionary, to disable this behavior, use "reset" as the first element (ex: <code>dict=c("reset", mpg="Miles per gallon")</code>).</p></dd>
 <dt>keep</dt>
-<dd><p>Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see <code><a href="https://rdrr.io/r/base/regex.html" class="external-link">regex</a></code> help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument <code>dict</code>). Example: you have the variable <code>x1</code> to <code>x55</code> and want to display only <code>x1</code> to <code>x9</code>, then you could use <code>keep = "x[[:digit:]]$"</code>. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain “Intercept” is kept). See details.</p></dd>
+<dd><p>Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see <code><a href="https://rdrr.io/r/base/regex.html" class="external-link">base::regex</a></code> help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument <code>dict</code>). Example: you have the variable <code>x1</code> to <code>x55</code> and want to display only <code>x1</code> to <code>x9</code>, then you could use <code>keep = "x[[:digit:]]$"</code>. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain “Intercept” is kept). See details.</p></dd>
 <dt>ci.width</dt>
 <dd><p>The width of the extremities of the confidence intervals. Default is <code>0.1</code>.</p></dd>
 <dt>ci_level</dt>
@@ -165,11 +163,11 @@
 <dt>grid</dt>
 <dd><p>Logical, default is <code>TRUE</code>. Whether a grid should be displayed. You can set the display of the grid with the argument <code>grid.par</code>.</p></dd>
 <dt>grid.par</dt>
-<dd><p>List. Parameters of the grid. The default values are: <code>lty = 3</code> and <code>col = "gray"</code>. You can add any graphical parameter that will be passed to <code><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></code>. You also have two additional arguments: use <code>horiz = FALSE</code> to disable the horizontal lines, and use <code>vert = FALSE</code> to disable the vertical lines. Eg: <code>grid.par = list(vert = FALSE, col = "red", lwd = 2)</code>.</p></dd>
+<dd><p>List. Parameters of the grid. The default values are: <code>lty = 3</code> and <code>col = "gray"</code>. You can add any graphical parameter that will be passed to <code><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">graphics::abline</a></code>. You also have two additional arguments: use <code>horiz = FALSE</code> to disable the horizontal lines, and use <code>vert = FALSE</code> to disable the vertical lines. Eg: <code>grid.par = list(vert = FALSE, col = "red", lwd = 2)</code>.</p></dd>
 <dt>zero</dt>
 <dd><p>Logical, default is <code>TRUE</code>. Whether the 0-line should be emphasized. You can set the parameters of that line with the argument <code>zero.par</code>.</p></dd>
 <dt>zero.par</dt>
-<dd><p>List. Parameters of the zero-line. The default values are <code>col = "black"</code> and <code>lwd = 1</code>. You can add any graphical parameter that will be passed to <code><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></code>. Example: <code>zero.par = list(col = "darkblue", lwd = 3)</code>.</p></dd>
+<dd><p>List. Parameters of the zero-line. The default values are <code>col = "black"</code> and <code>lwd = 1</code>. You can add any graphical parameter that will be passed to <code><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">graphics::abline</a></code>. Example: <code>zero.par = list(col = "darkblue", lwd = 3)</code>.</p></dd>
 <dt>pt.join</dt>
 <dd><p>Logical, default is <code>FALSE</code>. If <code>TRUE</code>, then the coefficient estimates are joined with a line.</p></dd>
 <dt>pt.join.par</dt>
@@ -177,15 +175,15 @@
 <dt>ci.join</dt>
 <dd><p>Logical default to <code>FALSE</code>. Whether to join the extremities of the confidence intervals. If <code>TRUE</code>, then you can set the graphical parameters with the argument <code>ci.join.par</code>.</p></dd>
 <dt>ci.join.par</dt>
-<dd><p>A list of parameters to be passed to <code><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></code>. Only used if <code>ci.join=TRUE</code>. By default it is equal to <code>list(lwd = lwd, col = col, lty = 2)</code>.</p></dd>
+<dd><p>A list of parameters to be passed to <code><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">graphics::lines</a></code>. Only used if <code>ci.join=TRUE</code>. By default it is equal to <code>list(lwd = lwd, col = col, lty = 2)</code>.</p></dd>
 <dt>ci.fill</dt>
-<dd><p>Logical default to <code>FALSE</code>. Whether to fille the confidence intervals with a color. If <code>TRUE</code>, then you can set the graphical parameters with the argument <code>ci.fill.par</code>.</p></dd>
+<dd><p>Logical default to <code>FALSE</code>. Whether to fill the confidence intervals with a color. If <code>TRUE</code>, then you can set the graphical parameters with the argument <code>ci.fill.par</code>.</p></dd>
 <dt>ci.fill.par</dt>
-<dd><p>A list of parameters to be passed to <code><a href="https://rdrr.io/r/graphics/polygon.html" class="external-link">polygon</a></code>. Only used if <code>ci.fill=TRUE</code>. By default it is equal to <code>list(col = "lightgray", alpha = 0.5)</code>. Note that <code>alpha</code> is a special parameter that adds transparency to the color (ranges from 0 to 1).</p></dd>
+<dd><p>A list of parameters to be passed to <code><a href="https://rdrr.io/r/graphics/polygon.html" class="external-link">graphics::polygon</a></code>. Only used if <code>ci.fill=TRUE</code>. By default it is equal to <code>list(col = "lightgray", alpha = 0.5)</code>. Note that <code>alpha</code> is a special parameter that adds transparency to the color (ranges from 0 to 1).</p></dd>
 <dt>ref.line</dt>
 <dd><p>Logical or numeric, default is "auto", whose behavior depends on the situation. It is <code>TRUE</code> only if: i) interactions are plotted, ii) the x values are numeric and iii) a reference is found. If <code>TRUE</code>, then a vertical line is drawn at the level of the reference value. Otherwise, if numeric a vertical line will be drawn at that specific value.</p></dd>
 <dt>ref.line.par</dt>
-<dd><p>List. Parameters of the vertical line on the reference. The default values are: <code>col = "black"</code> and <code>lty = 2</code>. You can add any graphical parameter that will be passed to <code><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></code>. Eg: <code>ref.line.par = list(lty = 1, lwd = 3)</code>.</p></dd>
+<dd><p>List. Parameters of the vertical line on the reference. The default values are: <code>col = "black"</code> and <code>lty = 2</code>. You can add any graphical parameter that will be passed to <code><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">graphics::abline</a></code>. Eg: <code>ref.line.par = list(lty = 1, lwd = 3)</code>.</p></dd>
 <dt>lab.cex</dt>
 <dd><p>The size of the labels of the coefficients. Default is missing. It is automatically set by an internal algorithm which can go as low as <code>lab.min.cex</code> (another argument).</p></dd>
 <dt>lab.min.cex</dt>
@@ -217,7 +215,7 @@
 <dt>sub</dt>
 <dd><p>A subtitle, default is <code>NULL</code>.</p></dd>
 <dt>reset</dt>
-<dd><p>Logical, default is <code>TRUE</code>. If <code>TRUE</code>, then the arguments that *are not* set during the call are reset to their "factory"-default values. If <code>FALSE</code>, on the other hand, arguments that have already been modified are not changed.</p></dd>
+<dd><p>Logical, default is <code>TRUE</code>. If <code>TRUE</code>, then the arguments that <em>are not</em> set during the call are reset to their "factory"-default values. If <code>FALSE</code>, on the other hand, arguments that have already been modified are not changed.</p></dd>
 </dl></div>
     <div id="value">
     <h2>Value</h2>
@@ -274,7 +272,8 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.0.</p>
 </div>
 
       </footer></div>

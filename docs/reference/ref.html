@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
       </span>
     </div>
 
@@ -66,7 +66,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Refactors a variable</h1>
-    <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/MiscFuns.R" class="external-link"><code>R/MiscFuns.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/data_tools.R" class="external-link"><code>R/data_tools.R</code></a></small>
     <div class="hidden name"><code>ref.Rd</code></div>
     </div>
 
@@ -74,9 +74,7 @@
     <p>Takes a variables of any types, transforms it into a factors, and modifies the values of the factors. Useful in estimations when you want to set some value of a vector as a reference.</p>
     </div>
 
-    <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">ref</span><span class="op">(</span><span class="va">x</span>, <span class="va">ref</span><span class="op">)</span></code></pre></div>
-    </div>
+    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">ref</span><span class="op">(</span><span class="va">x</span>, <span class="va">ref</span><span class="op">)</span></code></pre></div></div>
 
     <div id="arguments">
     <h2>Arguments</h2>
@@ -173,7 +171,7 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                               a                   b</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:                     Petal.Width         Petal.Width</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)                    -0.0908 (0.0564)    0.3445* (0.1489)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant                       -0.0908 (0.0564)    0.3445* (0.1489)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Petal.Length                 0.2304*** (0.0344)  0.2304*** (0.0344)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Speciesversicolor            0.4354*** (0.1028)                    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Speciesvirginica             0.8377*** (0.1453)                    </span>
@@ -237,7 +235,8 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.0.</p>
 </div>
 
       </footer></div>

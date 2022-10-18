@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
       </span>
     </div>
 
@@ -74,8 +74,7 @@
     <p>Set of functions to compute the VCOVs robust to different forms correlation in panel or time series settings.</p>
     </div>
 
-    <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">vcov_DK</span><span class="op">(</span><span class="va">x</span>, time <span class="op">=</span> <span class="cn">NULL</span>, lag <span class="op">=</span> <span class="cn">NULL</span>, ssc <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
+    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">vcov_DK</span><span class="op">(</span><span class="va">x</span>, time <span class="op">=</span> <span class="cn">NULL</span>, lag <span class="op">=</span> <span class="cn">NULL</span>, ssc <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
 
 <span class="fu">vcov_NW</span><span class="op">(</span><span class="va">x</span>, unit <span class="op">=</span> <span class="cn">NULL</span>, time <span class="op">=</span> <span class="cn">NULL</span>, lag <span class="op">=</span> <span class="cn">NULL</span>, ssc <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
 
@@ -85,8 +84,7 @@
 
 <span class="fu">DK</span><span class="op">(</span>lag <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
 
-<span class="fu">driscoll_kraay</span><span class="op">(</span>lag <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div>
-    </div>
+<span class="fu">driscoll_kraay</span><span class="op">(</span>lag <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div></div>
 
     <div id="arguments">
     <h2>Arguments</h2>
@@ -95,7 +93,7 @@
 <dt>time</dt>
 <dd><p>A character scalar or a one sided formula giving the name of the variable representing the time.</p></dd>
 <dt>lag</dt>
-<dd><p>An integer scalar, default is <code>NULL</code>. If <code>NULL</code>, then the default lag is equal to <code>n_t^0.25</code> with <code>n_t</code> the number of time periods (as of Newey and West 1987) for panel Newey-West and Driscoll-Kraay. The default for the time series Newey-West is computed via <code><a href="https://sandwich.R-Forge.R-project.org//reference/NeweyWest.html" class="external-link">bwNeweyWest</a></code> which implements the Newey and West 1994 method.</p></dd>
+<dd><p>An integer scalar, default is <code>NULL</code>. If <code>NULL</code>, then the default lag is equal to <code>n_t^0.25</code> with <code>n_t</code> the number of time periods (as of Newey and West 1987) for panel Newey-West and Driscoll-Kraay. The default for the time series Newey-West is computed via <code><a href="https://sandwich.R-Forge.R-project.org/reference/NeweyWest.html" class="external-link">bwNeweyWest</a></code> which implements the Newey and West 1994 method.</p></dd>
 <dt>ssc</dt>
 <dd><p>An object returned by the function <code><a href="ssc.html">ssc</a></code>. It specifies how to perform the small sample correction.</p></dd>
 <dt>unit</dt>
@@ -119,7 +117,7 @@ If the first argument is not a <code>fixest</code> object, then a) implicitly th
 
 <p>The default lag selection depends on whether the VCOV applies to a panel or a time series.</p>
 <p>For panels, i.e. panel Newey-West or Driscoll-Kraay VCOV, the default lag is <code>n_t^0.25</code> with <code>n_t</code> the number of time periods. This is based on Newey and West 1987.</p>
-<p>For time series Newey-West, the default lag is found thanks to the <code><a href="https://sandwich.R-Forge.R-project.org//reference/NeweyWest.html" class="external-link">bwNeweyWest</a></code> function from the <code>sandwich</code> package. It is based on Newey and West 1994.</p>
+<p>For time series Newey-West, the default lag is found thanks to the <code><a href="https://sandwich.R-Forge.R-project.org/reference/NeweyWest.html" class="external-link">bwNeweyWest</a></code> function from the <code>sandwich</code> package. It is based on Newey and West 1994.</p>
     </div>
     <div id="references">
     <h2>References</h2>
@@ -201,7 +199,8 @@ If the first argument is not a <code>fixest</code> object, then a) implicitly th
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.0.</p>
 </div>
 
       </footer></div>

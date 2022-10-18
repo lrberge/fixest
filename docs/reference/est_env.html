@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
       </span>
     </div>
 
@@ -74,14 +74,22 @@
     <p>This is a function advanced users which allows to estimate any <code>fixest</code> estimation from a <code>fixest</code> environment obtained with <code>only.env = TRUE</code> in a <code>fixest</code> estimation.</p>
     </div>
 
-    <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">est_env</span><span class="op">(</span><span class="va">env</span><span class="op">)</span></code></pre></div>
-    </div>
+    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">est_env</span><span class="op">(</span><span class="va">env</span>, <span class="va">y</span>, <span class="va">X</span>, <span class="va">weights</span>, <span class="va">endo</span>, <span class="va">inst</span><span class="op">)</span></code></pre></div></div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>env</dt>
 <dd><p>An environment obtained from a <code>fixest</code> estimation with <code>only.env = TRUE</code>. This is intended for advanced users so there is no error handling: any other kind of input will fail with a poor error message.</p></dd>
+<dt>y</dt>
+<dd><p>A vector representing the dependent variable. Should be of the same length as the number of observations in the initial estimation.</p></dd>
+<dt>X</dt>
+<dd><p>A matrix representing the independent variables. Should be of the same dimension as in the initial estimation.</p></dd>
+<dt>weights</dt>
+<dd><p>A vector of weights (i.e. with only positive values). Should be of the same length as the number of observations in the initial estimation. If identical to the scalar 1, this will mean that no weights will be used in the estimation.</p></dd>
+<dt>endo</dt>
+<dd><p>A matrix representing the endogenous regressors in IV estimations. It should be of the same dimension as the original endogenous regressors.</p></dd>
+<dt>inst</dt>
+<dd><p>A matrix representing the instruments in IV estimations. It should be of the same dimension as the original instruments.</p></dd>
 </dl></div>
     <div id="value">
     <h2>Value</h2>
@@ -124,8 +132,14 @@
 <span class="r-in"></span>
 <span class="r-in">  <span class="va">res_all</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></span><span class="op">(</span><span class="st">"list"</span>, <span class="va">n_sim</span><span class="op">)</span></span>
 <span class="r-in">  <span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">n_sim</span><span class="op">)</span><span class="op">{</span></span>
-<span class="r-in">    <span class="fu"><a href="https://rdrr.io/r/base/assign.html" class="external-link">assign</a></span><span class="op">(</span><span class="st">"weights.value"</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Exponential.html" class="external-link">rexp</a></span><span class="op">(</span><span class="va">n_obs</span>, rate <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, <span class="va">core_env</span><span class="op">)</span></span>
-<span class="r-in">    <span class="va">res_all</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="fu">est_env</span><span class="op">(</span>env <span class="op">=</span> <span class="va">core_env</span><span class="op">)</span></span>
+<span class="r-in">    <span class="co"># # begin: NOT RUN</span></span>
+<span class="r-in">    <span class="co"># # We could directly assign in the environment:</span></span>
+<span class="r-in">    <span class="co"># assign("weights.value", rexp(n_obs, rate = 1), core_env)</span></span>
+<span class="r-in">    <span class="co"># res_all[[i]] = est_env(env = core_env)</span></span>
+<span class="r-in">    <span class="co">#   end: NOT RUN</span></span>
+<span class="r-in"></span>
+<span class="r-in">    <span class="co"># Instead we can use the argument weights, which does the same</span></span>
+<span class="r-in">    <span class="va">res_all</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="fu">est_env</span><span class="op">(</span>env <span class="op">=</span> <span class="va">core_env</span>, weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Exponential.html" class="external-link">rexp</a></span><span class="op">(</span><span class="va">n_obs</span>, rate <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span class="r-in">  <span class="op">}</span></span>
 <span class="r-in"></span>
 <span class="r-in">  <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">res_all</span><span class="op">)</span></span>
@@ -170,7 +184,8 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.0.</p>
 </div>
 
       </footer></div>

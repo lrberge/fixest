@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
       </span>
     </div>
 
@@ -74,17 +74,15 @@
     <p>Simple tool that aggregates the value of CATT coefficients in staggered difference-in-difference setups (see details).</p>
     </div>
 
-    <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for fixest</span>
-<span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html" class="external-link">aggregate</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">agg</span>, full <span class="op">=</span> <span class="cn">FALSE</span>, use_weights <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
-    </div>
+    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for fixest</span>
+<span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html" class="external-link">aggregate</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">agg</span>, full <span class="op">=</span> <span class="cn">FALSE</span>, use_weights <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></code></pre></div></div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>A <code>fixest</code> object.</p></dd>
 <dt>agg</dt>
-<dd><p>A character scalar describing the variable names to be aggregated, it is pattern-based. All variables that match the pattern will be aggregated. It must be of the form <code>"(root)"</code>, the parentheses must be there and the resulting variable name will be <code>"root"</code>. You can add another root with parentheses: <code>"(root1)regex(root2)"</code>, in which case the resulting name is <code>"root1::root2"</code>. To name the resulting variable differently you can pass a named vector: <code>c("name" = "pattern")</code> or <code>c("name" = "pattern(root2)")</code>. It's a bit intricate sorry, please see the examples.</p></dd>
+<dd><p>A character scalar describing the variable names to be aggregated, it is pattern-based. For <code><a href="sunab.html">sunab</a></code> estimations, the following keywords work: "att", "period", "cohort" and <code>FALSE</code> (to have full disaggregation). All variables that match the pattern will be aggregated. It must be of the form <code>"(root)"</code>, the parentheses must be there and the resulting variable name will be <code>"root"</code>. You can add another root with parentheses: <code>"(root1)regex(root2)"</code>, in which case the resulting name is <code>"root1::root2"</code>. To name the resulting variable differently you can pass a named vector: <code>c("name" = "pattern")</code> or <code>c("name" = "pattern(root2)")</code>. It's a bit intricate sorry, please see the examples.</p></dd>
 <dt>full</dt>
 <dd><p>Logical scalar, defaults to <code>FALSE</code>. If <code>TRUE</code>, then all coefficients are returned, not only the aggregated coefficients.</p></dd>
 <dt>use_weights</dt>
@@ -187,7 +185,8 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.0.</p>
 </div>
 
       </footer></div>

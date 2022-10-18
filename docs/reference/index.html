@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
       </span>
     </div>
 
@@ -121,9 +121,9 @@
         </td>
         <td><p>Summary of a <code>fixest</code> object. Computes different types of standard errors.</p></td>
       </tr><tr><td>
-          <p><code><a href="coeftable.html">coeftable()</a></code> <code><a href="coeftable.html">pvalue()</a></code> <code><a href="coeftable.html">tstat()</a></code> <code><a href="coeftable.html">se()</a></code> </p>
+          <p><code><a href="coeftable.html">coeftable()</a></code> <code><a href="coeftable.html">se()</a></code> <code><a href="coeftable.html">pvalue()</a></code> <code><a href="coeftable.html">tstat()</a></code> </p>
         </td>
-        <td><p>Obtain various statistics from an estimation</p></td>
+        <td><p>Extracts the coefficients table from an estimation</p></td>
       </tr><tr><td>
           <p><code><a href="coef.fixest.html">coef(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="coef.fixest.html">coefficients(<i>&lt;fixest&gt;</i>)</a></code> </p>
         </td>
@@ -193,13 +193,13 @@
         </td>
         <td><p>Transforms a fixest_multi object into a list</p></td>
       </tr><tr><td>
-          <p><code><a href="cash-.fixest_multi.html">`$`(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Extracts the root of a fixest_multi object</p></td>
-      </tr><tr><td>
           <p><code><a href="coef.fixest_multi.html">coef(<i>&lt;fixest_multi&gt;</i>)</a></code> <code><a href="coef.fixest_multi.html">coefficients(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
         </td>
         <td><p>Extracts the coefficients of fixest_multi objects</p></td>
+      </tr><tr><td>
+          <p><code><a href="coeftable.fixest_multi.html">coeftable(<i>&lt;fixest_multi&gt;</i>)</a></code> <code><a href="coeftable.fixest_multi.html">se(<i>&lt;fixest_multi&gt;</i>)</a></code> <code><a href="coeftable.fixest_multi.html">tstat(<i>&lt;fixest_multi&gt;</i>)</a></code> <code><a href="coeftable.fixest_multi.html">pvalue(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Extracts the coefficients tables from <code>fixest_multi</code> estimations</p></td>
       </tr><tr><td>
           <p><code><a href="print.fixest_multi.html">print(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
         </td>
@@ -211,7 +211,7 @@
       </tr><tr><td>
           <p><code><a href="sub-.fixest_multi.html">`[`(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
         </td>
-        <td><p>Subset a fixest_multi object</p></td>
+        <td><p>Subsets a fixest_multi object</p></td>
       </tr><tr><td>
           <p><code><a href="sub-sub-.fixest_multi.html">`[[`(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
         </td>
@@ -309,7 +309,7 @@
         </td>
         <td><p>Dissolves a <code>fixest</code> panel</p></td>
       </tr><tr><td>
-          <p><code><a href="lag.formula.html">lag(<i>&lt;formula&gt;</i>)</a></code> </p>
+          <p><code><a href="lag.formula.html">lag(<i>&lt;formula&gt;</i>)</a></code> <code><a href="lag.formula.html">lag_fml()</a></code> </p>
         </td>
         <td><p>Lags a variable using a formula</p></td>
       </tr><tr><td>
@@ -349,7 +349,7 @@
         </td>
         <td><p>Register custom fit statistics</p></td>
       </tr><tr><td>
-          <p><code><a href="degrees_freedom.html">degrees_freedom()</a></code> </p>
+          <p><code><a href="degrees_freedom.html">degrees_freedom()</a></code> <code><a href="degrees_freedom.html">degrees_freedom_iid()</a></code> </p>
         </td>
         <td><p>Gets the degrees of freedom of a <code>fixest</code> estimation</p></td>
       </tr><tr><td>
@@ -517,7 +517,8 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.0.</p>
 </div>
 
       </footer></div>

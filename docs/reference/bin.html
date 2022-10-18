@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
       </span>
     </div>
 
@@ -66,7 +66,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Bins the values of a variable (typically a factor)</h1>
-    <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/MiscFuns.R" class="external-link"><code>R/MiscFuns.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/data_tools.R" class="external-link"><code>R/data_tools.R</code></a></small>
     <div class="hidden name"><code>bin.Rd</code></div>
     </div>
 
@@ -74,9 +74,7 @@
     <p>Tool to easily group the values of a given variable.</p>
     </div>
 
-    <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">bin</span><span class="op">(</span><span class="va">x</span>, <span class="va">bin</span><span class="op">)</span></code></pre></div>
-    </div>
+    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">bin</span><span class="op">(</span><span class="va">x</span>, <span class="va">bin</span><span class="op">)</span></code></pre></div></div>
 
     <div id="arguments">
     <h2>Arguments</h2>
@@ -108,6 +106,10 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 <p>The square bracket right of each number tells whether the numbers should be included or excluded from the current bin. For example, say <code>x</code> ranges from 0 to 100, then <code>"cut::5]"</code> will create two  bins: one from 0 to 5 and a second from 6 to 100. With <code>"cut::5["</code> the bins would have been 0-4 and 5-100.</p>
 <p>A factor is returned. The labels report the min and max values in each bin.</p>
 <p>To have user-specified bin labels, just add them in the character vector following <code>'cut::values'</code>. You don't need to provide all of them, and <code>NA</code> values fall back to the default label. For example, <code>bin = c("cut::4", "Q1", NA, "Q3")</code> will modify only the first and third label that will be displayed as <code>"Q1"</code> and <code>"Q3"</code>.</p>
+<p>["<code>), quartiles (e.g. </code>"cut::q1]: R:%22%60),%20quartiles%20(e.g.%20%60%22cut::q1
+["<code>), or percentiles (e.g. </code>"cut::p10]: R:%22%60),%20or%20percentiles%20(e.g.%20%60%22cut::p10
+["<code> is valid provided the median (</code>q2<code>) is indeed greater than </code>5`, otherwise an error is thrown.</p>
+<p>The square bracket right of each number tells whether the numbers should be included or excluded from the current bin. For example, say <code>x</code> ranges from 0 to 100, then `"cut::5]: R:%22%60%20is%20valid%20provided%20the%20median%20(%60q2%60)%20is%20indeed%20greater%20than%20%605%60,%20otherwise%20an%20error%20is%20thrown.%0A%0AThe%20square%20bracket%20right%20of%20each%20number%20tells%20whether%20the%20numbers%20should%20be%20included%20or%20excluded%20from%20the%20current%20bin.%20For%20example,%20say%20%60x%60%20ranges%20from%200%20to%20100,%20then%20%60%22cut::5</p>
     </div>
     <div id="bin-vs-ref">
     <h2><code>bin</code> vs <code>ref</code></h2>
@@ -246,7 +248,7 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 <span class="r-in"><span class="co"># Three custom bins</span></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu">bin</span><span class="op">(</span><span class="va">plen</span>, <span class="st">"cut::2]5]"</span><span class="op">)</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1.0; 1.9] [3.0; 5.0] [5.1; 6.9] </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1.0; 1.9] [3.0; 5.0] [5.0; 6.9] </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         50         58         42 </span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># .. same, excluding 5 in the 2nd bin</span></span>
@@ -258,19 +260,19 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 <span class="r-in"><span class="co"># Using quartiles</span></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu">bin</span><span class="op">(</span><span class="va">plen</span>, <span class="st">"cut::q1]q2]q3]"</span><span class="op">)</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1.0; 1.6] [1.7; 4.3] [4.4; 5.1] [5.2; 6.9] </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1.0; 1.6] [1.7; 4.2] [4.4; 5.0] [5.2; 6.9] </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         44         31         41         34 </span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># Using percentiles</span></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu">bin</span><span class="op">(</span><span class="va">plen</span>, <span class="st">"cut::p20]p50]p70]p90]"</span><span class="op">)</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1.0; 1.5] [1.6; 4.3] [4.4; 5.0] [5.1; 5.8] [5.9; 6.9] </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1.0; 1.5] [1.6; 4.2] [4.4; 5.0] [5.0; 5.7] [5.9; 6.9] </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         37         38         33         29         13 </span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># Mixing all</span></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu">bin</span><span class="op">(</span><span class="va">plen</span>, <span class="st">"cut::2[q2]p90]"</span><span class="op">)</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1.0; 1.9] [3.0; 4.3] [4.4; 5.8] [5.9; 6.9] </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1.0; 1.9] [3.0; 4.2] [4.4; 5.7] [5.9; 6.9] </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         50         25         62         13 </span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># NOTA:</span></span>
@@ -280,7 +282,7 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 <span class="r-in"><span class="co"># NA values lead to the default label</span></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu">bin</span><span class="op">(</span><span class="va">plen</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cut::2[q2]p90]"</span>, <span class="st">"&lt;2"</span>, <span class="st">"]2; Q2]"</span>, <span class="cn">NA</span>, <span class="st">"&gt;90%"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;2    ]2; Q2] [4.4; 5.8]       &gt;90% </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;2    ]2; Q2] [4.4; 5.7]       &gt;90% </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         50         25         62         13 </span>
 <span class="r-in"></span>
 <span class="r-in"></span>
@@ -313,7 +315,8 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.0.</p>
 </div>
 
       </footer></div>

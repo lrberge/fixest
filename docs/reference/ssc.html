@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
       </span>
     </div>
 
@@ -74,8 +74,7 @@
     <p>Provides how the small sample correction should be calculated in <code><a href="vcov.fixest.html">vcov.fixest</a></code>/<code><a href="summary.fixest.html">summary.fixest</a></code>.</p>
     </div>
 
-    <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">ssc</span><span class="op">(</span>
+    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">ssc</span><span class="op">(</span>
   adj <span class="op">=</span> <span class="cn">TRUE</span>,
   fixef.K <span class="op">=</span> <span class="st">"nested"</span>,
   cluster.adj <span class="op">=</span> <span class="cn">TRUE</span>,
@@ -95,21 +94,20 @@
 
 <span class="fu">setFixest_ssc</span><span class="op">(</span>ssc.type <span class="op">=</span> <span class="fu">ssc</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
 
-<span class="fu">getFixest_ssc</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-    </div>
+<span class="fu">getFixest_ssc</span><span class="op">(</span><span class="op">)</span></code></pre></div></div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>adj</dt>
 <dd><p>Logical scalar, defaults to <code>TRUE</code>. Whether to apply a small sample adjustment of the form <code>(n - 1) / (n - K)</code>, with <code>K</code> the number of estimated parameters. If <code>FALSE</code>, then no adjustment is made.</p></dd>
 <dt>fixef.K</dt>
-<dd><p>Character scalar equal to <code>"nested"</code> (default), <code>"none"</code> or <code>"full"</code>. In the small sample adjustment, how to account for the fixed-effects parameters. If <code>"none"</code>, the fixed-effects parameters are discarded, meaning the number of parameters (<code>K</code>) is only equal to the number of variables. If <code>"full"</code>, then the number of parameters is equal to the number of variables plus the number of fixed-effects. Finally, if <code>"nested"</code>, then the number of parameters is equal to the number of variables plus the number of fixed-effects that *are not* nested in the clusters used to cluster the standard-errors.</p></dd>
+<dd><p>Character scalar equal to <code>"nested"</code> (default), <code>"none"</code> or <code>"full"</code>. In the small sample adjustment, how to account for the fixed-effects parameters. If <code>"none"</code>, the fixed-effects parameters are discarded, meaning the number of parameters (<code>K</code>) is only equal to the number of variables. If <code>"full"</code>, then the number of parameters is equal to the number of variables plus the number of fixed-effects. Finally, if <code>"nested"</code>, then the number of parameters is equal to the number of variables plus the number of fixed-effects that <em>are not</em> nested in the clusters used to cluster the standard-errors.</p></dd>
 <dt>cluster.adj</dt>
 <dd><p>Logical scalar, default is <code>TRUE</code>. How to make the small sample correction when clustering the standard-errors? If <code>TRUE</code> a <code>G/(G-1)</code> correction is performed with <code>G</code> the number of cluster values.</p></dd>
 <dt>cluster.df</dt>
 <dd><p>Either "conventional" or "min" (default). Only relevant when the variance-covariance matrix is two-way clustered (or higher). It governs how the small sample adjustment for the clusters is to be performed. [Sorry for the jargon that follows.] By default a unique adjustment is made, of the form G_min/(G_min-1) with G_min the smallest G_i. If <code>cluster.df="conventional"</code> then the i-th "sandwich" matrix is adjusted with G_i/(G_i-1) with G_i the number of unique clusters.</p></dd>
 <dt>t.df</dt>
-<dd><p>Either "conventional", "min" (default) or an integer scalar. Only relevant when the variance-covariance matrix is clustered. It governs how the p-values should be computed. By default, the degrees of freedom of the Student t distribution is equal to the minimum size of the clusters with which the VCOV has been clustered. If <code>t.df="conventional"</code>, then the degrees of freedom of the Student t distribution is equal to the number of observations minus the number of estimated variables. You can also pass a number to manually specify the DoF of the t-distribution.</p></dd>
+<dd><p>Either "conventional", "min" (default) or an integer scalar. Only relevant when the variance-covariance matrix is clustered. It governs how the p-values should be computed. By default, the degrees of freedom of the Student t distribution is equal to the minimum size of the clusters with which the VCOV has been clustered minus one. If <code>t.df="conventional"</code>, then the degrees of freedom of the Student t distribution is equal to the number of observations minus the number of estimated variables. You can also pass a number to manually specify the DoF of the t-distribution.</p></dd>
 <dt>fixef.force_exact</dt>
 <dd><p>Logical, default is <code>FALSE</code>. If there are 2 or more fixed-effects, these fixed-effects they can be irregular, meaning they can provide the same information. If so, the "real" number of parameters should be lower than the total number of fixed-effects. If <code>fixef.force_exact = TRUE</code>, then <code><a href="fixef.fixest.html">fixef.fixest</a></code> is first run to determine the exact number of parameters among the fixed-effects. Mostly, panels of the type individual-firm require <code>fixef.force_exact = TRUE</code> (but it adds computational costs).</p></dd>
 <dt>ssc.type</dt>
@@ -320,7 +318,8 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.0.</p>
 </div>
 
       </footer></div>

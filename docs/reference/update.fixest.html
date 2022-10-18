@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
       </span>
     </div>
 
@@ -66,7 +66,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Updates a <code>fixest</code> estimation</h1>
-    <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/MiscFuns.R" class="external-link"><code>R/MiscFuns.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/Methods.R" class="external-link"><code>R/Methods.R</code></a></small>
     <div class="hidden name"><code>update.fixest.Rd</code></div>
     </div>
 
@@ -74,10 +74,8 @@
     <p>Updates and re-estimates a <code>fixest</code> model (estimated with <code><a href="femlm.html">femlm</a></code>, <code><a href="feols.html">feols</a></code> or <code><a href="feglm.html">feglm</a></code>). This function updates the formulas and use previous starting values to estimate a new <code>fixest</code> model. The data is obtained from the original <code>call</code>.</p>
     </div>
 
-    <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for fixest</span>
-<span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/update.dev.pkg.html" class="external-link">update</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">fml.update</span>, nframes <span class="op">=</span> <span class="fl">1</span>, evaluate <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
-    </div>
+    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for fixest</span>
+<span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/update.dev.pkg.html" class="external-link">update</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">fml.update</span>, nframes <span class="op">=</span> <span class="fl">1</span>, evaluate <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></code></pre></div></div>
 
     <div id="arguments">
     <h2>Arguments</h2>
@@ -125,37 +123,37 @@
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># Quick look at the 4 estimations</span></span>
 <span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_pois</span>, <span class="va">est_2</span>, <span class="va">est_3</span>, <span class="va">est_4</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                             est_pois              est_2              est_3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:                Euros              Euros              Euros</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km)      -1.517*** (0.1131) -1.518*** (0.1132) -1.528*** (0.1157)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> log(Year)                              72.37*** (6.900)   72.62*** (6.983)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-Effects:    ------------------ ------------------ ------------------</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Country of Origin                Yes                Yes                Yes</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Destination                      Yes                Yes                Yes</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Product                           No                 No                Yes</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> _________________ __________________ __________________ __________________</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> S.E.: Clustered           by: Origin         by: Origin         by: Origin</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Observations                  38,325             38,325             38,325</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Squared Cor.                 0.37832            0.38444            0.61155</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Pseudo R2                    0.58950            0.59290            0.76381</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> BIC                         2.44e+12           2.42e+12           1.41e+12</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                           est_pois              est_2              est_3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Euros              Euros              Euros</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km)    -1.517*** (0.1131) -1.518*** (0.1132) -1.528*** (0.1157)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> log(Year)                            72.37*** (6.900)   72.62*** (6.983)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-Effects:  ------------------ ------------------ ------------------</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Origin                         Yes                Yes                Yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Destination                    Yes                Yes                Yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Product                         No                 No                Yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> _______________ __________________ __________________ __________________</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> S.E.: Clustered         by: Origin         by: Origin         by: Origin</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Observations                38,325             38,325             38,325</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Squared Cor.               0.37832            0.38444            0.61155</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pseudo R2                  0.58950            0.59290            0.76381</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> BIC                       2.44e+12           2.42e+12           1.41e+12</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                              est_4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Euros</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km)                      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> log(Year)         70.82*** (5.989)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-Effects:    ----------------</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Country of Origin               No</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Destination                    Yes</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Product                        Yes</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> _________________ ________________</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> S.E.: Clustered    by: Destination</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Observations                38,325</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Squared Cor.               0.17893</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Pseudo R2                  0.35377</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> BIC                       3.85e+12</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                            est_4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Euros</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km)                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> log(Year)       70.82*** (5.989)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-Effects:  ----------------</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Origin                        No</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Destination                  Yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Product                      Yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> S.E.: Clustered  by: Destination</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Observations              38,325</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Squared Cor.             0.17893</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pseudo R2                0.35377</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> BIC                     3.85e+12</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-in"></span>
@@ -173,7 +171,8 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.0.</p>
 </div>
 
       </footer></div>

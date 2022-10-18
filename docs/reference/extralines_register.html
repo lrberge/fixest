@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
       </span>
     </div>
 
@@ -74,9 +74,7 @@
     <p>This function is used to create <code>extralines</code> (which is an argument of <code><a href="etable.html">etable</a></code>) macros that can be easily summoned in <code><a href="etable.html">etable</a></code>.</p>
     </div>
 
-    <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">extralines_register</span><span class="op">(</span><span class="va">type</span>, <span class="va">fun</span>, <span class="va">alias</span><span class="op">)</span></code></pre></div>
-    </div>
+    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">extralines_register</span><span class="op">(</span><span class="va">type</span>, <span class="va">fun</span>, <span class="va">alias</span><span class="op">)</span></code></pre></div></div>
 
     <div id="arguments">
     <h2>Arguments</h2>
@@ -104,7 +102,7 @@
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Petal.Length</span> <span class="op">~</span> <span class="va">Sepal.Length</span> <span class="op">|</span> <span class="va">Species</span>, <span class="va">iris</span><span class="op">)</span></span>
 <span class="r-in"></span>
-<span class="r-in"><span class="co"># Now we can easily create a row with the mean of y.</span></span>
+<span class="r-in"><span class="co"># Now we can easily create a row with the SD of y.</span></span>
 <span class="r-in"><span class="co"># We just "summon" it in a one-sided formula</span></span>
 <span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est</span>, extralines <span class="op">=</span> <span class="op">~</span> <span class="va">sdy</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                              est</span>
@@ -156,7 +154,8 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.0.</p>
 </div>
 
       </footer></div>

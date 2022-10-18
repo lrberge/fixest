@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
       </span>
     </div>
 
@@ -74,17 +74,24 @@
     <p>Sets/gets the default dictionary used in the function <code><a href="etable.html">etable</a></code>, <code><a href="did_means.html">did_means</a></code> and <code><a href="coefplot.html">coefplot</a></code>. The dictionaries are used to relabel variables (usually towards a fancier, more explicit formatting) when exporting them into a Latex table or displaying in graphs. By setting the dictionary with <code>setFixest_dict</code>, you can avoid providing the argument <code>dict</code>.</p>
     </div>
 
-    <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">setFixest_dict</span><span class="op">(</span><span class="va">dict</span><span class="op">)</span>
+    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">setFixest_dict</span><span class="op">(</span>dict <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span>, reset <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
 
-<span class="fu">getFixest_dict</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-    </div>
+<span class="fu">getFixest_dict</span><span class="op">(</span><span class="op">)</span></code></pre></div></div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>dict</dt>
-<dd><p>A named character vector. E.g. to change my variable named "a" and "b" to (resp.) "$log(a)$" and "$bonus^3$", then use <code>dict = c(a="$log(a)$", b3="$bonus^3$")</code>. This dictionary is used in Latex tables or in graphs by the function <code><a href="coefplot.html">coefplot</a></code>. If you want to separate Latex rendering from rendering in graphs, use an ampersand first to make the variable specific to <code>coefplot</code>.</p></dd>
+<dd><p>A named character vector or a character scalar. E.g. to change my variable named "a" and "b" to (resp.) "$log(a)$" and "$bonus^3$", then use <code>dict = c(a="$log(a)$", b3="$bonus^3$")</code>. Alternatively you can feed a character scalar containing the dictionary in the form <code>"variable 1: definition \n variable 2: definition"</code>. In that case the function <code><a href="as.dict.html">as.dict</a></code> will be applied to get a proper dictionary. This dictionary is used in Latex tables or in graphs by the function <code><a href="coefplot.html">coefplot</a></code>. If you want to separate Latex rendering from rendering in graphs, use an ampersand first to make the variable specific to <code>coefplot</code>.</p></dd>
+<dt>...</dt>
+<dd><p>You can add arguments of the form: <code>variable_name = "Definition"</code>. This is an alternative to using a named vector in the argument <code>dict</code>.</p></dd>
+<dt>reset</dt>
+<dd><p>Logical, default is <code>FALSE</code>. If <code>TRUE</code>, then the dictionary is reset. Note that the default dictionary always relabels the variable "(Intercept)" in to "Constant". To overwrite it, you need to add "(Intercept)" explicitly in your dictionary.</p></dd>
 </dl></div>
+    <div id="details">
+    <h2>Details</h2>
+    <p>By default the dictionary only grows. This means that successive calls with not erase the previous definitions unless the argument <code>reset</code> has been set to <code>TRUE</code>.</p>
+<p>The default dictionary is equivalent to having <code>setFixest_dict("(Intercept)" = "Constant")</code>. To change this default, you need to provide a new definition to <code>"(Intercept)"</code> explicitly.</p>
+    </div>
     <div id="author">
     <h2>Author</h2>
     <p>Laurent Berge</p>
@@ -96,63 +103,102 @@
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">trade</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">Euros</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">dist_km</span><span class="op">)</span><span class="op">|</span><span class="va">Origin</span><span class="op">+</span><span class="va">Destination</span><span class="op">+</span><span class="va">Product</span>, <span class="va">trade</span><span class="op">)</span></span>
 <span class="r-in"><span class="co"># we export the result &amp; rename some variables</span></span>
-<span class="r-in"><span class="fu"><a href="etable.html">esttex</a></span><span class="op">(</span><span class="va">est</span>, dict <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"log(Euros)"</span><span class="op">=</span><span class="st">"Euros (ln)"</span>, Origin<span class="op">=</span><span class="st">"Country of Origin"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> \begin{table}[htbp]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    \caption{no title}</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    \centering</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    \begin{tabular}{lc}</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       \tabularnewline \midrule \midrule</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       Dependent Variable: &amp; Euros (ln)\\  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       Model:              &amp; (1)\\  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       \midrule</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       \emph{Variables}\\</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       log(dist\_km)       &amp; -2.169$^{***}$\\   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                           &amp; (0.1542)\\   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       \midrule</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       \emph{Fixed-effects}\\</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       Country of Origin   &amp; Yes\\  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       Destination         &amp; Yes\\  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       Product             &amp; Yes\\  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       \midrule</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       \emph{Fit statistics}\\</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       Observations        &amp; 38,325\\  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       R$^2$               &amp; 0.70402\\  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       Within R$^2$        &amp; 0.21827\\  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       \midrule \midrule</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       \multicolumn{2}{l}{\emph{Clustered (Country of Origin) standard-errors in parentheses}}\\</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       \multicolumn{2}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    \end{tabular}</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> \end{table}</span>
+<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est</span>, dict <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"log(Euros)"</span><span class="op">=</span><span class="st">"Euros (ln)"</span>, Origin<span class="op">=</span><span class="st">"Country of Origin"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                  est</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:           Euros (ln)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km)      -2.169*** (0.1542)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-Effects:    ------------------</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Country of Origin                Yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Destination                      Yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Product                          Yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> _________________ __________________</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> S.E.: Clustered   by: Country of O..</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Observations                  38,325</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> R2                           0.70402</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                    0.21827</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># If you export many tables, it can be more convenient to use setFixest_dict:</span></span>
 <span class="r-in"><span class="fu">setFixest_dict</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"log(Euros)"</span><span class="op">=</span><span class="st">"Euros (ln)"</span>, Origin<span class="op">=</span><span class="st">"Country of Origin"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="etable.html">esttex</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span> <span class="co"># variables are properly relabeled</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> \begin{table}[htbp]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    \caption{no title}</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    \centering</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    \begin{tabular}{lc}</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       \tabularnewline \midrule \midrule</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       Dependent Variable: &amp; Euros (ln)\\  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       Model:              &amp; (1)\\  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       \midrule</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       \emph{Variables}\\</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       log(dist\_km)       &amp; -2.169$^{***}$\\   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                           &amp; (0.1542)\\   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       \midrule</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       \emph{Fixed-effects}\\</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       Country of Origin   &amp; Yes\\  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       Destination         &amp; Yes\\  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       Product             &amp; Yes\\  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       \midrule</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       \emph{Fit statistics}\\</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       Observations        &amp; 38,325\\  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       R$^2$               &amp; 0.70402\\  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       Within R$^2$        &amp; 0.21827\\  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       \midrule \midrule</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       \multicolumn{2}{l}{\emph{Clustered (Country of Origin) standard-errors in parentheses}}\\</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       \multicolumn{2}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    \end{tabular}</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> \end{table}</span>
+<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span> <span class="co"># variables are properly relabeled</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                  est</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:           Euros (ln)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km)      -2.169*** (0.1542)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-Effects:    ------------------</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Country of Origin                Yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Destination                      Yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Product                          Yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> _________________ __________________</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> S.E.: Clustered   by: Country of O..</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Observations                  38,325</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> R2                           0.70402</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                    0.21827</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class="r-in"></span>
+<span class="r-in"><span class="co"># The dictionary only 'grows'</span></span>
+<span class="r-in"><span class="co"># Here you get the previous two variables + the new one that are relabeled</span></span>
+<span class="r-in"><span class="co"># Btw you set the dictionary directly using the argument names:</span></span>
+<span class="r-in"><span class="fu">setFixest_dict</span><span class="op">(</span>Destination <span class="op">=</span> <span class="st">"Country of Destination"</span><span class="op">)</span></span>
+<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                       est</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:                Euros (ln)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km)           -2.169*** (0.1542)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-Effects:         ------------------</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Country of Origin                     Yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Country of Destination                Yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Product                               Yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ______________________ __________________</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> S.E.: Clustered        by: Country of O..</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Observations                       38,325</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> R2                                0.70402</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                         0.21827</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class="r-in"></span>
+<span class="r-in"><span class="co"># Another way to set a dictionary: with a character string:</span></span>
+<span class="r-in"><span class="co"># See the help page of as.dict</span></span>
+<span class="r-in"><span class="va">dict</span> <span class="op">=</span> <span class="st">"log(dist_km): Distance (ln); Product: Type of Good"</span></span>
+<span class="r-in"><span class="fu">setFixest_dict</span><span class="op">(</span><span class="va">dict</span><span class="op">)</span></span>
+<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                       est</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:                Euros (ln)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Distance (ln)          -2.169*** (0.1542)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-Effects:         ------------------</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Country of Origin                     Yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Country of Destination                Yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Type of Good                          Yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ______________________ __________________</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> S.E.: Clustered        by: Country of O..</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Observations                       38,325</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> R2                                0.70402</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                         0.21827</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class="r-in"></span>
+<span class="r-in"><span class="co"># And now we reset:</span></span>
+<span class="r-in"><span class="fu">setFixest_dict</span><span class="op">(</span>reset <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                est</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:         log(Euros)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km)    -2.169*** (0.1542)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-Effects:  ------------------</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Origin                         Yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Destination                    Yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Product                        Yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> _______________ __________________</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> S.E.: Clustered         by: Origin</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Observations                38,325</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> R2                         0.70402</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                  0.21827</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-in"></span>
 </code></pre></div>
     </div>
@@ -168,7 +214,8 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.0.</p>
 </div>
 
       </footer></div>

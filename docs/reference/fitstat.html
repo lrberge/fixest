@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
       </span>
     </div>
 
@@ -74,9 +74,15 @@
     <p>Computes various fit statistics for <code>fixest</code> estimations.</p>
     </div>
 
-    <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">fitstat</span><span class="op">(</span><span class="va">x</span>, <span class="va">type</span>, simplify <span class="op">=</span> <span class="cn">FALSE</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span>, show_types <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
-    </div>
+    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">fitstat</span><span class="op">(</span>
+  <span class="va">x</span>,
+  <span class="va">type</span>,
+  simplify <span class="op">=</span> <span class="cn">FALSE</span>,
+  verbose <span class="op">=</span> <span class="cn">TRUE</span>,
+  show_types <span class="op">=</span> <span class="cn">FALSE</span>,
+  frame <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,
+  <span class="va">...</span>
+<span class="op">)</span></code></pre></div></div>
 
     <div id="arguments">
     <h2>Arguments</h2>
@@ -90,6 +96,8 @@
 <dd><p>Logical, default is <code>TRUE</code>. If <code>TRUE</code>, an object of class <code>fixest_fitstat</code> is returned (so its associated print method will be triggered). If <code>FALSE</code> a simple list is returned instead.</p></dd>
 <dt>show_types</dt>
 <dd><p>Logical, default is <code>FALSE</code>. If <code>TRUE</code>, only prompts all available types.</p></dd>
+<dt>frame</dt>
+<dd><p>An environment in which to evaluate variables, default is <code><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame()</a></code>. Only used if the argument <code>type</code> is a formula and some values in the formula have to be extended with the dot square bracket operator. Mostly for internal use.</p></dd>
 <dt>...</dt>
 <dd><p>Other elements to be passed to other methods and may be used to compute the statistics (for example you can pass on arguments to compute the VCOV when using <code>type = "g"</code> or <code>type = "wald"</code>.).</p></dd>
 </dl></div>
@@ -140,7 +148,7 @@
 <span class="r-in"><span class="fu">fitstat</span><span class="op">(</span><span class="va">gravity</span>, <span class="op">~</span> <span class="va">rmse</span> <span class="op">+</span> <span class="va">r2</span> <span class="op">+</span> <span class="va">wald</span> <span class="op">+</span> <span class="va">wf</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 RMSE: 2.26215</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                   R2: 0.50428</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Wald (joint nullity): stat =   272.9, p &lt; 2.2e-16, on 1 and 38,309 DoF, VCOV: Clustered (Destination).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Wald (joint nullity): stat =   272.8, p &lt; 2.2e-16, on 1 and 38,309 DoF, VCOV: Clustered (Destination).</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   F-test (projected): stat = 5,832.8, p &lt; 2.2e-16, on 1 and 38,295 DoF.</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># You can use them in etable</span></span>
@@ -229,7 +237,8 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.0.</p>
 </div>
 
       </footer></div>

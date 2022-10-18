@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
       </span>
     </div>
 
@@ -74,8 +74,7 @@
     <p>This function estimates maximum likelihood models (e.g., Poisson or Logit) with non-linear in parameters right-hand-sides and is efficient to handle any number of fixed effects. If you do not use non-linear in parameters right-hand-side, use <code><a href="femlm.html">femlm</a></code> or <code><a href="feglm.html">feglm</a></code> instead (their design is simpler).</p>
     </div>
 
-    <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">feNmlm</span><span class="op">(</span>
+    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">feNmlm</span><span class="op">(</span>
   <span class="va">fml</span>,
   <span class="va">data</span>,
   family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"negbin"</span>, <span class="st">"logit"</span>, <span class="st">"gaussian"</span><span class="op">)</span>,
@@ -91,6 +90,8 @@
   <span class="va">subset</span>,
   <span class="va">split</span>,
   <span class="va">fsplit</span>,
+  <span class="va">split.keep</span>,
+  <span class="va">split.drop</span>,
   <span class="va">cluster</span>,
   <span class="va">se</span>,
   <span class="va">ssc</span>,
@@ -116,8 +117,7 @@
   only.coef <span class="op">=</span> <span class="cn">FALSE</span>,
   <span class="va">env</span>,
   <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
-    </div>
+<span class="op">)</span></code></pre></div></div>
 
     <div id="arguments">
     <h2>Arguments</h2>
@@ -130,7 +130,7 @@
 <dt>NL.fml</dt>
 <dd><p>A formula. If provided, this formula represents the non-linear part of the right hand side (RHS). Note that contrary to the <code>fml</code> argument, the coefficients must explicitly appear in this formula. For instance, it can be <code>~a*log(b*x + c*x^3)</code>, where <code>a</code>, <code>b</code>, and <code>c</code> are the coefficients to be estimated. Note that only the RHS of the formula is to be provided, and NOT the left hand side.</p></dd>
 <dt>vcov</dt>
-<dd><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href="vcov_cluster.html">vcov_cluster</a></code>, <code><a href="vcov_hac.html">vcov_NW</a></code>, <code><a href="vcov_hac.html">NW</a></code>, <code><a href="vcov_hac.html">vcov_DK</a></code>, <code><a href="vcov_hac.html">DK</a></code>, <code><a href="vcov_conley.html">vcov_conley</a></code> and <code><a href="vcov_conley.html">conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the `vcov` documentation in the <a href="https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1" class="external-link">vignette</a>.</p></dd>
+<dd><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href="vcov_cluster.html">vcov_cluster</a></code>, <code><a href="vcov_hac.html">vcov_NW</a></code>, <code><a href="vcov_hac.html">NW</a></code>, <code><a href="vcov_hac.html">vcov_DK</a></code>, <code><a href="vcov_hac.html">DK</a></code>, <code><a href="vcov_conley.html">vcov_conley</a></code> and <code><a href="vcov_conley.html">conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the <code>vcov</code> documentation in the <a href="https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1" class="external-link">vignette</a>.</p></dd>
 <dt>fixef</dt>
 <dd><p>Character vector. The names of variables to be used as fixed-effects. These variables should contain the identifier of each observation (e.g., think of it as a panel identifier). Note that the recommended way to include fixed-effects is to insert them directly in the formula.</p></dd>
 <dt>fixef.rm</dt>
@@ -148,11 +148,15 @@
 <dt>subset</dt>
 <dd><p>A vector (logical or numeric) or a one-sided formula. If provided, then the estimation will be performed only on the observations defined by this argument.</p></dd>
 <dt>split</dt>
-<dd><p>A one sided formula representing a variable (eg <code>split = ~var</code>) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. If you also want to include the estimation for the full sample, use the argument <code>fsplit</code> instead.</p></dd>
+<dd><p>A one sided formula representing a variable (eg <code>split = ~var</code>) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. If you also want to include the estimation for the full sample, use the argument <code>fsplit</code> instead. You can use the special operators <code>%keep%</code> and <code>%drop%</code> to select only a subset of values for which to split the sample. E.g. <code>split = ~var %keep% c("v1", "v2")</code> will split the sample only according to the values <code>v1</code> and <code>v2</code> of the variable <code>var</code>; it is equivalent to supplying the argument <code>split.keep = c("v1", "v2")</code>. By default there is partial matching on each value, you can trigger a regular expression evaluation by adding a <code>'@'</code> first, as in: <code>~var %drop% "@^v[12]"</code> which will drop values starting with <code>"v1"</code> or <code>"v2"</code> (of course you need to know regexes!).</p></dd>
 <dt>fsplit</dt>
-<dd><p>A one sided formula representing a variable (eg <code>split = ~var</code>) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. This argument is the same as split but also includes the full sample as the first estimation.</p></dd>
+<dd><p>A one sided formula representing a variable (eg <code>split = ~var</code>) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. This argument is the same as split but also includes the full sample as the first estimation. You can use the special operators <code>%keep%</code> and <code>%drop%</code> to select only a subset of values for which to split the sample. E.g. <code>split = ~var %keep% c("v1", "v2")</code> will split the sample only according to the values <code>v1</code> and <code>v2</code> of the variable <code>var</code>; it is equivalent to supplying the argument <code>split.keep = c("v1", "v2")</code>. By default there is partial matching on each value, you can trigger a regular expression evaluation by adding an <code>'@'</code> first, as in: <code>~var %drop% "@^v[12]"</code> which will drop values starting with <code>"v1"</code> or <code>"v2"</code> (of course you need to know regexes!).</p></dd>
+<dt>split.keep</dt>
+<dd><p>A character vector. Only used when <code>split</code>, or <code>fsplit</code>, is supplied. If provided, then the sample will be split only on the values of <code>split.keep</code>. The values in <code>split.keep</code> will be partially matched to the values of <code>split</code>. To enable regular expressions, you need to add an <code>'@'</code> first. For example <code>split.keep = c("v1", "@other|var")</code> will keep only the value in <code>split</code> partially matched by <code>"v1"</code> or the values containing <code>"other"</code> or <code>"var"</code>.</p></dd>
+<dt>split.drop</dt>
+<dd><p>A character vector. Only used when <code>split</code>, or <code>fsplit</code>, is supplied. If provided, then the sample will be split only on the values that are not in <code>split.drop</code>. The values in <code>split.drop</code> will be partially matched to the values of <code>split</code>. To enable regular expressions, you need to add an <code>'@'</code> first. For example <code>split.drop = c("v1", "@other|var")</code> will drop only the value in <code>split</code> partially matched by <code>"v1"</code> or the values containing <code>"other"</code> or <code>"var"</code>.</p></dd>
 <dt>cluster</dt>
-<dd><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as fixed-effects in the estimation, you can leave it blank with <code>vcov = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] fixed-effect). You can interact two variables using <code>^</code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></dd>
+<dd><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as fixed-effects in the estimation, you can leave it blank with <code>vcov = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [resp. 2nd] fixed-effect). You can interact two variables using <code>^</code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></dd>
 <dt>se</dt>
 <dd><p>Character scalar. Which kind of standard error should be computed: “standard”, “hetero”, “cluster”, “twoway”, “threeway” or “fourway”? By default if there are clusters in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "iid"</code>. Note that this argument is deprecated, you should use <code>vcov</code> instead.</p></dd>
 <dt>ssc</dt>
@@ -162,11 +166,11 @@
 <dt>start</dt>
 <dd><p>Starting values for the coefficients in the linear part (for the non-linear part, use NL.start). Can be: i) a numeric of length 1 (e.g. <code>start = 0</code>, the default), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients).</p></dd>
 <dt>jacobian.method</dt>
-<dd><p>(For NL models only) Character scalar. Provides the method used to numerically compute the Jacobian of the non-linear part. Can be either <code>"simple"</code> or <code>"Richardson"</code>. Default is <code>"simple"</code>. See the help of <code><a href="https://rdrr.io/pkg/numDeriv/man/jacobian.html" class="external-link">jacobian</a></code> for more information.</p></dd>
+<dd><p>(For NL models only) Character scalar. Provides the method used to numerically compute the Jacobian of the non-linear part. Can be either <code>"simple"</code> or <code>"Richardson"</code>. Default is <code>"simple"</code>. See the help of <code>jacobian</code> for more information.</p></dd>
 <dt>useHessian</dt>
 <dd><p>Logical. Should the Hessian be computed in the optimization stage? Default is <code>TRUE</code>.</p></dd>
 <dt>hessian.args</dt>
-<dd><p>List of arguments to be passed to function <code><a href="https://rdrr.io/pkg/numDeriv/man/genD.html" class="external-link">genD</a></code>. Defaults is missing. Only used with the presence of <code>NL.fml</code>.</p></dd>
+<dd><p>List of arguments to be passed to function <code>genD</code>. Defaults is missing. Only used with the presence of <code>NL.fml</code>.</p></dd>
 <dt>opt.control</dt>
 <dd><p>List of elements to be passed to the optimization method <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code>. See the help page of <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code> for more information.</p></dd>
 <dt>nthreads</dt>
@@ -295,7 +299,7 @@ with first a linear term and then a non linear part expressed by the function g.
     
 
 
-<p>To use leads/lags of variables in the estimation, you can: i) either provide the argument <code>panel.id</code>, ii) either set your data set as a panel with the function <code><a href="panel.html">panel</a></code>. Doing either of the two will give you acceess to the lagging functions <code><a href="l.html">l</a></code>,  <code><a href="l.html">f</a></code> and <code><a href="l.html">d</a></code>.</p>
+<p>To use leads/lags of variables in the estimation, you can: i) either provide the argument <code>panel.id</code>, ii) either set your data set as a panel with the function <code><a href="panel.html">panel</a></code>, <code><a href="l.html">f</a></code> and <code><a href="l.html">d</a></code>.</p>
 <p>You can provide several leads/lags/differences at once: e.g. if your formula is equal to <code>f(y) ~ l(x, -1:1)</code>, it means that the dependent variable is equal to the lead of <code>y</code>, and you will have as explanatory variables the lead of <code>x1</code>, <code>x1</code> and the lag of <code>x1</code>. See the examples in function <code><a href="l.html">l</a></code> for more details.</p>
     </div>
     <div id="interactions">
@@ -304,8 +308,8 @@ with first a linear term and then a non linear part expressed by the function g.
 
 
 <p>You can interact a numeric variable with a "factor-like" variable by using <code>i(factor_var, continuous_var, ref)</code>, where <code>continuous_var</code> will be interacted with each value of <code>factor_var</code> and the argument <code>ref</code> is a value of <code>factor_var</code> taken as a reference (optional).</p>
-<p>Using this specific way to create interactions leads to a different display of the interacted values in <code><a href="etable.html">etable</a></code> and offers a special representation of the interacted coefficients in the function <code><a href="coefplot.html">coefplot</a></code>. See examples.</p>
-<p>It is important to note that *if you do not care about the standard-errors of the interactions*, then you can add interactions in the fixed-effects part of the formula, it will be incomparably faster (using the syntax <code>factor_var[continuous_var]</code>, as explained in the section “Varying slopes”).</p>
+<p>Using this specific way to create interactions leads to a different display of the interacted values in <code><a href="etable.html">etable</a></code>. See examples.</p>
+<p>It is important to note that <em>if you do not care about the standard-errors of the interactions</em>, then you can add interactions in the fixed-effects part of the formula, it will be incomparably faster (using the syntax <code>factor_var[continuous_var]</code>, as explained in the section “Varying slopes”).</p>
 <p>The function <code><a href="i.html">i</a></code> has in fact more arguments, please see details in its associated help page.</p>
     </div>
     <div id="on-standard-errors">
@@ -368,11 +372,12 @@ Finally <code>mvsw</code> will add, in a stepwise fashion all possible combinati
 <p>The DSB can even be used within variable names, but then the variable must be nested in character form. For example <code>y ~ .["x.[1:2]_sq"]</code> will create <code>y ~ x1_sq + x2_sq</code>. Using the character form is important to avoid a formula parsing error. Double quotes must be used. Note that the character string that is nested will be parsed with the function <code><a href="dsb.html">dsb</a></code>, and thus it will return a vector.</p>
 <p>By default, the DSB operator expands vectors into sums. You can add a comma, like in <code>.[, x]</code>, to expand with commas--the content can then be used within functions. For instance: <code>c(x.[, 1:2])</code> will create <code>c(x1, x2)</code> (and <em>not</em> <code>c(x1 + x2)</code>).</p>
 <p>In all <code>fixest</code> estimations, this special parsing is enabled, so you don't need to use <code>xpd</code>.</p>
+<p>One-sided formulas can be expanded with the DSB operator: let <code>x = ~sepal + petal</code>, then <code>xpd(y ~ .[x])</code> leads to <code>color ~ sepal + petal</code>.</p>
 <p>You can even use multiple square brackets within a single variable, but then the use of nesting is required. For example, the following <code>xpd(y ~ .[".[letters[1:2]]_.[1:2]"])</code> will create <code>y ~ a_1 + b_2</code>. Remember that the nested character string is parsed with <code><a href="dsb.html">dsb</a></code>, which explains this behavior.</p>
     </div>
     <div id="references">
     <h2>References</h2>
-    <p>Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (<a href="https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13" class="external-link">https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13</a>).</p>
+    <p>Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (<a href="https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13" class="external-link"></a>).</p>
 <p>For models with multiple fixed-effects:</p>
 <p>Gaure, Simen, 2013, "OLS with multiple high dimensional category variables", Computational Statistics &amp; Data Analysis 66 pp. 8--18</p>
 <p>On the unconditionnal Negative Binomial model:</p>
@@ -406,7 +411,7 @@ Finally <code>mvsw</code> will add, in a stepwise fashion all possible combinati
 <span class="r-out co"><span class="r-pr">#&gt;</span>                             est1_L            est1_NL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:                 z1                 z1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)       0.0632* (0.0298)   0.0632* (0.0298)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant          0.0632* (0.0298)   0.0632* (0.0298)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(x)          0.9945*** (0.0051)                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(y)          0.9901*** (0.0058)                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> a                                  0.9945*** (0.0051)</span>
@@ -436,7 +441,7 @@ Finally <code>mvsw</code> will add, in a stepwise fashion all possible combinati
 <span class="r-out co"><span class="r-pr">#&gt;</span>                             est2_L           est2_NL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:                 z2                z2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)      2.824*** (0.0386)                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant         2.824*** (0.0386)                  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(x)          0.2695*** (0.0094)                  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(y)          0.1774*** (0.0087)                  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> a                                  1.057*** (0.0265)</span>
@@ -471,7 +476,8 @@ Finally <code>mvsw</code> will add, in a stepwise fashion all possible combinati
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.0.</p>
 </div>
 
       </footer></div>

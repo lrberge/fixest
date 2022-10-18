@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
       </span>
     </div>
 
@@ -66,7 +66,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Predict method for <code>fixest</code> fits</h1>
-    <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/MiscFuns.R" class="external-link"><code>R/MiscFuns.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/Methods.R" class="external-link"><code>R/Methods.R</code></a></small>
     <div class="hidden name"><code>predict.fixest.Rd</code></div>
     </div>
 
@@ -74,8 +74,7 @@
     <p>This function obtains prediction from a fitted model estimated with <code><a href="femlm.html">femlm</a></code>, <code><a href="feols.html">feols</a></code> or <code><a href="feglm.html">feglm</a></code>.</p>
     </div>
 
-    <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for fixest</span>
+    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for fixest</span>
 <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span>
   <span class="va">object</span>,
   <span class="va">newdata</span>,
@@ -89,8 +88,7 @@
   vcov <span class="op">=</span> <span class="cn">NULL</span>,
   ssc <span class="op">=</span> <span class="cn">NULL</span>,
   <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
-    </div>
+<span class="op">)</span></code></pre></div></div>
 
     <div id="arguments">
     <h2>Arguments</h2>
@@ -113,7 +111,7 @@
 <dt>sample</dt>
 <dd><p>Either "estimation" (default) or "original". This argument is only used when arg. 'newdata' is missing, and is ignored otherwise. If equal to "estimation", the vector returned matches the sample used for the estimation. If equal to "original", it matches the original data set (the observations not used for the estimation being filled with NAs).</p></dd>
 <dt>vcov</dt>
-<dd><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href="vcov_cluster.html">vcov_cluster</a></code>, <code><a href="vcov_hac.html">vcov_NW</a></code>, <code><a href="vcov_hac.html">NW</a></code>, <code><a href="vcov_hac.html">vcov_DK</a></code>, <code><a href="vcov_hac.html">DK</a></code>, <code><a href="vcov_conley.html">vcov_conley</a></code> and <code><a href="vcov_conley.html">conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the `vcov` documentation in the <a href="https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1" class="external-link">vignette</a>.</p></dd>
+<dd><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href="vcov_cluster.html">vcov_cluster</a></code>, <code><a href="vcov_hac.html">vcov_NW</a></code>, <code><a href="vcov_hac.html">NW</a></code>, <code><a href="vcov_hac.html">vcov_DK</a></code>, <code><a href="vcov_hac.html">DK</a></code>, <code><a href="vcov_conley.html">vcov_conley</a></code> and <code><a href="vcov_conley.html">conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the <code>vcov</code> documentation in the <a href="https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1" class="external-link">vignette</a>.</p></dd>
 <dt>ssc</dt>
 <dd><p>An object of class <code>ssc.type</code> obtained with the function <code><a href="ssc.html">ssc</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href="ssc.html">ssc</a></code> for this argument. The arguments and defaults of the function <code><a href="ssc.html">ssc</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "min"</code>, <code>t.df = "min"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href="ssc.html">ssc</a></code> for details.</p></dd>
 <dt>...</dt>
@@ -258,7 +256,8 @@ If <code>se.fit = TRUE</code> or <code>interval != "none"</code>, the object ret
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.0.</p>
 </div>
 
       </footer></div>

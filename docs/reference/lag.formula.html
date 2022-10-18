@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
       </span>
     </div>
 
@@ -74,8 +74,7 @@
     <p>Lags a variable using panel id + time identifiers in a formula.</p>
     </div>
 
-    <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for formula</span>
+    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for formula</span>
 <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/shift.html" class="external-link">lag</a></span><span class="op">(</span>
   <span class="va">x</span>,
   k <span class="op">=</span> <span class="fl">1</span>,
@@ -84,8 +83,17 @@
   fill <span class="op">=</span> <span class="cn">NA</span>,
   duplicate.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"first"</span><span class="op">)</span>,
   <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
-    </div>
+<span class="op">)</span>
+
+<span class="fu">lag_fml</span><span class="op">(</span>
+  <span class="va">x</span>,
+  k <span class="op">=</span> <span class="fl">1</span>,
+  <span class="va">data</span>,
+  time.step <span class="op">=</span> <span class="cn">NULL</span>,
+  fill <span class="op">=</span> <span class="cn">NA</span>,
+  duplicate.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"first"</span><span class="op">)</span>,
+  <span class="va">...</span>
+<span class="op">)</span></code></pre></div></div>
 
     <div id="arguments">
     <h2>Arguments</h2>
@@ -96,7 +104,7 @@
 <dt>data</dt>
 <dd><p>Optional, the data.frame in which to evaluate the formula. If not provided, variables will be fetched in the current environment.</p></dd>
 <dt>time.step</dt>
-<dd><p>The method to compute the lags, default is <code>NULL</code> (which means automatically set). Can be equal to: <code>"unitary"</code>, <code>"consecutive"</code>, <code>"within.consecutive"</code>, or to a number. If <code>"unitary"</code>, then the largest common divisor between consecutive time periods is used (typically if the time variable represents years, it will be 1). This method can apply only to integer (or convertible to integer) variables. If <code>"consecutive"</code>, then the time variable can be of any type: two successive time periods represent a lag of 1. If <code>"witihn.consecutive"</code> then **within a given id**, two successive time periods represent a lag of 1. Finally, if the time variable is numeric, you can provide your own numeric time step.</p></dd>
+<dd><p>The method to compute the lags, default is <code>NULL</code> (which means automatically set). Can be equal to: <code>"unitary"</code>, <code>"consecutive"</code>, <code>"within.consecutive"</code>, or to a number. If <code>"unitary"</code>, then the largest common divisor between consecutive time periods is used (typically if the time variable represents years, it will be 1). This method can apply only to integer (or convertible to integer) variables. If <code>"consecutive"</code>, then the time variable can be of any type: two successive time periods represent a lag of 1. If <code>"witihn.consecutive"</code> then <strong>within a given id</strong>, two successive time periods represent a lag of 1. Finally, if the time variable is numeric, you can provide your own numeric time step.</p></dd>
 <dt>fill</dt>
 <dd><p>Scalar. How to fill the observations without defined lead/lag values. Default is <code>NA</code>.</p></dd>
 <dt>duplicate.method</dt>
@@ -108,6 +116,11 @@
     <h2>Value</h2>
     <p>It returns a vector of the same type and length as the variable to be lagged in the formula.</p>
     </div>
+    <div id="functions">
+    <h2>Functions</h2>
+    
+<ul><li><p><code>lag_fml</code>: Lags a variable using a formula syntax</p></li>
+</ul></div>
     <div id="see-also">
     <h2>See also</h2>
     <div class="dont-index"><p>Alternatively, the function <code><a href="panel.html">panel</a></code> changes a <code>data.frame</code> into a panel from which the functions <code>l</code> and <code>f</code> (creating leads and lags) can be called. Otherwise you can set the panel 'live' during the estimation using the argument <code>panel.id</code> (see for example in the function <code><a href="feols.html">feols</a></code>).</p></div>
@@ -153,8 +166,8 @@
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># Error because of duplicate values for (id, time)</span></span>
 <span class="r-in"><span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/shift.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">x</span><span class="op">~</span><span class="va">id</span><span class="op">+</span><span class="va">time</span>, <span class="fl">1</span>, <span class="va">base_dup</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Error : in lag.formula(x ~ id + time, 1, base_dup):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  The panel identifiers contain duplicate values: this is not allowed</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Error : in lag.formula(x ~ id + time, 1, base_dup): </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> The panel identifiers contain duplicate values: this is not allowed</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> since lag/leads are not defined for them. For example (id, time) = (1,</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1) appears three times. Please provide data without duplicates -- or you</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> can also use duplicate.method = 'first' (see Details).</span>
@@ -175,8 +188,8 @@
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># Error: wrong time step</span></span>
 <span class="r-in"><span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/shift.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">x</span><span class="op">~</span><span class="va">id</span><span class="op">+</span><span class="va">time</span>, <span class="fl">2</span>, <span class="va">base</span>, time.step <span class="op">=</span> <span class="fl">7</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Error : in lag.formula(x ~ id + time, 2, base, time.step = 7):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  If 'time.step' is a number, then it must be an exact divisor of all the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Error : in lag.formula(x ~ id + time, 2, base, time.step = 7): </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> If 'time.step' is a number, then it must be an exact divisor of all the</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> difference between two consecutive time periods. This is currently not</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> the case: 7 is not a divisor of 1 (the difference btw the time periods 2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> and 1).</span>
@@ -229,7 +242,8 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.0.</p>
 </div>
 
       </footer></div>

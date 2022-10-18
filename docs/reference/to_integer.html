@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
       </span>
     </div>
 
@@ -66,7 +66,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Fast transform of any type of vector(s) into an integer vector</h1>
-    <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/MiscFuns.R" class="external-link"><code>R/MiscFuns.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/data_tools.R" class="external-link"><code>R/data_tools.R</code></a></small>
     <div class="hidden name"><code>to_integer.Rd</code></div>
     </div>
 
@@ -74,8 +74,7 @@
     <p>Tool to transform any type of vector, or even combination of vectors, into an integer vector ranging from 1 to the number of unique values. This actually creates an unique identifier vector.</p>
     </div>
 
-    <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">to_integer</span><span class="op">(</span>
+    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">to_integer</span><span class="op">(</span>
   <span class="va">...</span>,
   sorted <span class="op">=</span> <span class="cn">FALSE</span>,
   add_items <span class="op">=</span> <span class="cn">FALSE</span>,
@@ -83,8 +82,7 @@
   multi.df <span class="op">=</span> <span class="cn">FALSE</span>,
   multi.join <span class="op">=</span> <span class="st">"_"</span>,
   internal <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
-    </div>
+<span class="op">)</span></code></pre></div></div>
 
     <div id="arguments">
     <h2>Arguments</h2>
@@ -107,6 +105,10 @@
     <h2>Value</h2>
     <p>Reruns a vector of the same length as the input vectors.
 If <code>add_items=TRUE</code> and <code>items.list=TRUE</code>, a list of two elements is returned: <code>x</code> being the integer vector and <code>items</code> being the unique values to which the values in <code>x</code> make reference.</p>
+    </div>
+    <div id="author">
+    <h2>Author</h2>
+    <p>Laurent Berge</p>
     </div>
 
     <div id="ref-examples">
@@ -213,7 +215,8 @@ If <code>add_items=TRUE</code> and <code>items.list=TRUE</code>, a list of two e
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.0.</p>
 </div>
 
       </footer></div>
