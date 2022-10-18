@@ -424,7 +424,7 @@ summary.fixest_multi = function(object, type = "short", vcov = NULL, se = NULL, 
                 stars = cut(ct[, 4], breaks = c(-1, signifCode, 100), labels = c(names(signifCode), ""))
                 stars[is.na(stars)] = ""
 
-                value = paste0(signif_plus(ct[, 1], 3), stars, " (", signif_plus(ct[, 2], 3), ")")
+                value = paste0(format_number(ct[, 1], 3), stars, " (", format_number(ct[, 2], 3), ")")
                 names(value) = vname
 
             } else if(type %in% c("se_compact", "se_long")){

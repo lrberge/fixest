@@ -29,7 +29,7 @@
  
  - fix rare bug regarding an error message when a missing variable did exist as a function in the environment. 
  
- - fix bug preventing the use of binning with formulas reported by @tlcaputi [#341](https://github.com/lrberge/fixest/issues/359)).
+ - fix bug preventing the use of binning with formulas reported by @tlcaputi [#359](https://github.com/lrberge/fixest/issues/359)).
  
  - fix various errors in the documentation.
  
