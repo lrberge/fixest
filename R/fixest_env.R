@@ -565,7 +565,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
             ok = TRUE
             for(i in 1:n_pblm){
                 var = var_pblm[i]
-                if(exists(var, envir = call_env)){
+                if(exists(var, envir = call_env, mode = "numeric")){
                     if(length(var) < 5){
                         var_pblm_dp = deparse_long(eval(str2lang(var), call_env))
                         type[i] = "scalar"

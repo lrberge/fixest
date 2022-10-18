@@ -27,6 +27,8 @@
  
  - fix bug in `sample_df` when the name of the variable was too long.
  
+ - fix rare bug regarding an error message when a missing variable did exist as a function in the environment. 
+ 
 ## New functions
 
  - new function `degrees_freedom_iid` which is a more user-friendly version of `degrees_freedom`.
