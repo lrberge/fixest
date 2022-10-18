@@ -980,10 +980,11 @@ coef.fixest_multi = function(object, keep, drop, order, collin = FALSE,
         res_long = c(t(res), recursive = TRUE)
         tmp = data.frame(coefficient =  res_long)
         mod_long = rep_df(mod, each = ncol(res))
-        res = cbind(mod_long, coefficient = res_long)
+        res = cbind(mod_long, coefficient = rep(all_names, NROW(res)),
+                    estimate = res_long)
 
-        if(na.rm && anyNA(res$coefficient)){
-            res = res[!is.na(res$coefficient), , drop = FALSE]
+        if(na.rm && anyNA(res$estimate)){
+            res = res[!is.na(res$estimate), , drop = FALSE]
         }
 
     } else {

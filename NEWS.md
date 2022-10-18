@@ -1,5 +1,5 @@
 
-# fixest 0.10.5
+# fixest 0.11.0
 
 ## Bug fixes
 
@@ -33,21 +33,58 @@
  
  - fix various errors in the documentation.
  
-## New functions
-
- - new function `degrees_freedom_iid` which is a more user-friendly version of `degrees_freedom`.
- 
 ## Multiple estimations
 
  - new internal algorithm leading to an object very much like a plain list, much easier to interact with.
  
  - new function `models` to extract the matrix of reporting which model has been estimated.
- 
+```R
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+mult_est = feols(y ~ csw(x.[,1:3]), base)
+models(mult_est)
+#>   id          rhs
+#> 1  1           x1
+#> 2  2      x1 + x2
+#> 3  3 x1 + x2 + x3
+```
  - in multiple estimations: all warnings are turned to notes and all notes are delayed and stacked.
  
  - `coef.fixest_multi`: Now reports the model of each estimation in the first columns. Also gains the arguments `collin`, `long` (to display the results in a long format) and `na.rm`.
+```R
+coef(mult_est)
+#>   id          rhs (Intercept)         x1       x2         x3
+#> 1  1           x1    6.526223 -0.2233611       NA         NA
+#> 2  2      x1 + x2    2.249140  0.5955247 0.471920         NA
+#> 3  3 x1 + x2 + x3    1.855997  0.6508372 0.709132 -0.5564827
+
+# Now in long format
+#>    id          rhs coefficient   estimate
+#> 1   1           x1 (Intercept)  6.5262226
+#> 2   1           x1          x1 -0.2233611
+#> 5   2      x1 + x2 (Intercept)  2.2491402
+#> 6   2      x1 + x2          x1  0.5955247
+#> 7   2      x1 + x2          x2  0.4719200
+#> 9   3 x1 + x2 + x3 (Intercept)  1.8559975
+#> 10  3 x1 + x2 + x3          x1  0.6508372
+#> 11  3 x1 + x2 + x3          x2  0.7091320
+#> 12  3 x1 + x2 + x3          x3 -0.5564827
+```
  
  - new methods: `coeftable.fixest_multi`, `se.fixest_multi`, `tstat.fixest_multi`, `pvalue.fixest_multi` to easily extract the results from multiple estimations.
+ 
+```R
+coeftable(mult_est)
+#>   id          rhs coefficient   Estimate Std. Error   t value     Pr(>|t|)
+#> 1  1           x1 (Intercept)  6.5262226 0.47889634 13.627631 6.469702e-28
+#> 2  1           x1          x1 -0.2233611 0.15508093 -1.440287 1.518983e-01
+#> 3  2      x1 + x2 (Intercept)  2.2491402 0.24796963  9.070224 7.038510e-16
+#> 4  2      x1 + x2          x1  0.5955247 0.06932816  8.589940 1.163254e-14
+#> 5  2      x1 + x2          x2  0.4719200 0.01711768 27.569160 5.847914e-60
+#> 6  3 x1 + x2 + x3 (Intercept)  1.8559975 0.25077711  7.400984 9.853855e-12
+#> 7  3 x1 + x2 + x3          x1  0.6508372 0.06664739  9.765380 1.199846e-17
+#> 8  3 x1 + x2 + x3          x2  0.7091320 0.05671929 12.502483 7.656980e-25
+#> 9  3 x1 + x2 + x3          x3 -0.5564827 0.12754795 -4.362929 2.412876e-05
+```
  
 ## xpd
 
@@ -163,21 +200,9 @@ etable(est)
 #> Adj. R2                      0.85571            0.54743            0.57927
 ```
  
-## Other
+## Dictionary
 
- - remove warnings when a binomial family is used with weights in `feglm`.
- 
- - add the arguments `y`, `X`, `weights`, `endo`, `inst` to the function `est_env` to make it more user-friendly.
- 
- - fix documentation typos (thanks to Caleb Kwon).
- 
- - `etable` now returns a `data.frame` whose first column is the variables names (before this was contained in the row names).
- 
- - fix environment problems when `lean = TRUE`, leading to large objects when saved on disk.
- 
- - `print.fixest` now displays the information on the sample/subset/offset/weights.
- 
- - add a new way to create dictionaries with `as.dict`:
+ - new way to create dictionaries with `as.dict`:
 ```R
 x = "
 # Main vars
@@ -195,8 +220,26 @@ as.dict(x)
 setFixest_dict(x)
 ```
 - `setFixest_dict`: i) now the dictionary only grows, ii) you can define variables directly in the arguments of `setFixest_dict`, iii) `as.dict` is applied to the dictionary if relevant, iv) there's a new argument `reset`.
+  
+## New functions
 
-- new function `fdim` to print the dimension of a data set in an user-readable way.
+ - new function `degrees_freedom_iid` which is a more user-friendly version of `degrees_freedom`.
+ 
+ - new function `fdim` to print the dimension of a data set in an user-readable way.
+
+## Other
+
+ - remove warnings when a binomial family is used with weights in `feglm`.
+ 
+ - add the arguments `y`, `X`, `weights`, `endo`, `inst` to the function `est_env` to make it more user-friendly.
+ 
+ - fix documentation typos (thanks to Caleb Kwon).
+ 
+ - `etable` now returns a `data.frame` whose first column is the variables names (before this was contained in the row names).
+ 
+ - fix environment problems when `lean = TRUE`, leading to large objects when saved on disk.
+ 
+ - `print.fixest` now displays the information on the sample/subset/offset/weights.
 
 
 # fixest 0.10.4
