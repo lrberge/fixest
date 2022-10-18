@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.11.0</span>
       </span>
     </div>
 
@@ -72,19 +72,9 @@
 <h2 id="ongoing-issues">Ongoing issues<a class="anchor" aria-label="anchor" href="#ongoing-issues"></a></h2>
 <div class="section level4">
 <h4 id="compatibility-with-the-sandwich-package">Compatibility with the sandwich package<a class="anchor" aria-label="anchor" href="#compatibility-with-the-sandwich-package"></a></h4>
-<p>So far <code>fixest</code> objects are compatible with variances
-computed with the package <code>sandwich</code> with the following
-exceptions:</p>
-<ul><li><p><code>vcovHC</code> with <code>type = "HC4"</code>: The
-compatibility is only partial, i.e. it works for models without
-fixed-effects but breaks with fixed-effects estimations. This is because
-the hatvalues, needed for this kind of VCOV correction, are not defined
-when fixed-effects are used (actually I could make it compatible but the
-model would need to be reestimated with dummy variables, and this hardly
-squares with the idea of efficient fixed-effects estimation).</p></li>
-<li><p><code>vcovBS</code>, i.e. bootstraped standard-errors: Absolutely
-not compatible so far, but it will become compatible later
-(hopefully).</p></li>
+<p>So far <code>fixest</code> objects are compatible with variances computed with the package <code>sandwich</code> with the following exceptions:</p>
+<ul><li><p><code>vcovHC</code> with <code>type = "HC4"</code>: The compatibility is only partial, i.e. it works for models without fixed-effects but breaks with fixed-effects estimations. This is because the hatvalues, needed for this kind of VCOV correction, are not defined when fixed-effects are used (actually I could make it compatible but the model would need to be reestimated with dummy variables, and this hardly squares with the idea of efficient fixed-effects estimation).</p></li>
+<li><p><code>vcovBS</code>, i.e. bootstraped standard-errors: Absolutely not compatible so far, but it will become compatible later (hopefully).</p></li>
 </ul></div>
 </div>
 
@@ -103,8 +93,7 @@ not compatible so far, but it will become compatible later
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

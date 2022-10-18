@@ -58,6 +58,7 @@ coef(mult_est)
 #> 3  3 x1 + x2 + x3    1.855997  0.6508372 0.709132 -0.5564827
 
 # Now in long format
+coef(mult_est, long = TRUE)
 #>    id          rhs coefficient   estimate
 #> 1   1           x1 (Intercept)  6.5262226
 #> 2   1           x1          x1 -0.2233611
@@ -181,7 +182,7 @@ ct$wt$se
 ## All estimations
 
  - arguments `split` and `fsplit` gain the `%keep%` and `%drop%` operators which allow to split the sample only on a subset of elements. All estimations also gain the arguments `split.keep` and `split.drop` which do the same thing as the previous operators.
-```
+```R
 base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
 est = feols(y ~ x.[1:3], base, fsplit = ~species %keep% c("set", "vers"))
 etable(est)
