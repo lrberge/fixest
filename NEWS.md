@@ -31,6 +31,8 @@
  
  - fix bug preventing the use of binning with formulas reported by @tlcaputi [#341](https://github.com/lrberge/fixest/issues/359)).
  
+ - fix various errors in the documentation.
+ 
 ## New functions
 
  - new function `degrees_freedom_iid` which is a more user-friendly version of `degrees_freedom`.
