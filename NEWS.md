@@ -29,6 +29,8 @@
  
  - fix rare bug regarding an error message when a missing variable did exist as a function in the environment. 
  
+ - fix bug preventing the use of binning with formulas reported by @tlcaputi [#341](https://github.com/lrberge/fixest/issues/359)).
+ 
 ## New functions
 
  - new function `degrees_freedom_iid` which is a more user-friendly version of `degrees_freedom`.

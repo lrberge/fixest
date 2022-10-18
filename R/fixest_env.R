@@ -596,53 +596,127 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
                 var_pblm = var_pblm[type != "scalar"]
                 type = type[type != "scalar"]
 
-                # Error => we take the time to provide an informative error message
-                LHS = all.vars(fml_parts[[1]][[2]])
-                RHS = all.vars(fml_parts[[1]][[3]])
+                # Very rare case when we use binning with ~x
+                # still problem if x is used elsewhere and missing... but well, what can I do?
+                is_special_case = FALSE
+                if("x" %in% var_pblm &&
+                   any(c("i", "bin", "ref") %in%
+                       all.vars(fml, functions = TRUE))){
 
-                msg_builder = function(var_pblm, type, qui){
-                    msg = ""
-                    if(any(type[qui] == "var")){
-                        msg = " Note that fixest does not accept variables from the global enviroment, they must be in the data set"
-                        extra = "."
-                        if(!all(type[qui] == "var")){
-                            extra = paste0(" (it concerns ", enumerate_items(var_pblm[qui][type[qui] == "var"]), ").")
+                    # That's a real pain in the neck to do it properly
+                    fml_dp = deparse_long(fml)
+
+                    # these functions return TRUE/FALSE
+                    # depending on whether ~x is used for binning
+                    my_funs = list()
+                    check_fml = function(x) !is.null(x) &&
+                        grepl("~", deparse_long(x), fixed = TRUE)
+                    my_funs$i = function(factor_var, var, ref, keep, bin = NULL,
+                                         ref2, keep2, bin2 = NULL, ...){
+
+                        # returns TRUE / FALSE
+                        mc = match.call()
+                        if(check_fml(mc$bin)){
+                            return(TRUE)
                         }
-                        msg = paste0(msg, extra)
+
+                        if(check_fml(mc$bin2)){
+                            return(TRUE)
+                        }
+
+                        FALSE
                     }
 
-                    msg
+                    my_funs$ref = function(x, ref){
+                        mc = match.call()
+                        if(check_fml(mc$ref)){
+                            return(TRUE)
+                        }
+                        FALSE
+                    }
+
+                    my_funs$bin = function(x, bin){
+                        mc = match.call()
+                        if(check_fml(mc$bin)){
+                            return(TRUE)
+                        }
+                        FALSE
+                    }
+
+                    for(f_name in c("i", "bin", "ref")){
+                        pat = paste0("(^|[^[:alnum:]._])", f_name, "\\(")
+                        if(grepl(pat, fml_dp)){
+
+                            # we split to extract the funs
+                            fml_split = strsplit(fml_dp, pat)[[1]]
+                            fml_split = fml_split[-1]
+                            fml_split = paste0(f_name, "(", fml_split)
+                            for(i in seq_along(fml_split)){
+                                f_txt = extract_fun(fml_split[i], f_name)
+                                f_lang = str2lang(f_txt$fun)
+                                is_x = eval(f_lang, envir = my_funs)
+                                if(is_x){
+                                    is_special_case = TRUE
+                                    break
+                                }
+                            }
+                        }
+                    }
                 }
 
-                if(any(!LHS %in% dataNames)){
-                    qui = which(var_pblm %in% LHS)
+                if(is_special_case){
+                    var_pblm = setdiff(var_pblm, "x")
+                }
+
+                if(length(var_pblm) > 0){
+
+                    # Error => we take the time to provide an informative error message
+                    LHS = all.vars(fml_parts[[1]][[2]])
+                    RHS = all.vars(fml_parts[[1]][[3]])
+
+                    msg_builder = function(var_pblm, type, qui){
+                        msg = ""
+                        if(any(type[qui] == "var")){
+                            msg = " Note that fixest does not accept variables from the global enviroment, they must be in the data set"
+                            extra = "."
+                            if(!all(type[qui] == "var")){
+                                extra = paste0(" (it concerns ", enumerate_items(var_pblm[qui][type[qui] == "var"]), ").")
+                            }
+                            msg = paste0(msg, extra)
+                        }
+
+                        msg
+                    }
+
+                    if(any(!LHS %in% dataNames)){
+                        qui = which(var_pblm %in% LHS)
+                        msg = msg_builder(var_pblm, type, qui)
+
+                        stop("The variable", enumerate_items(var_pblm[qui], "s.is.quote"), " in the LHS of the formula but not in the data set.", msg)
+                    }
+
+                    if(any(!RHS %in% dataNames)){
+                        qui = which(var_pblm %in% RHS)
+                        msg = msg_builder(var_pblm, type, qui)
+
+                        stop("The variable", enumerate_items(var_pblm[qui], "s.is.quote"), " in the RHS", ifunit(n_parts, "", " (first part)"), " of the formula but not in the data set.", msg)
+                    }
+
+                    part_2 = all.vars(fml_parts[[2]])
+                    if(any(!part_2 %in% dataNames)){
+                        qui = which(var_pblm %in% part_2)
+                        msg_end = msg_builder(var_pblm, type, qui)
+
+                        msg = ifelse(is_fml_inside(fml_parts[[2]]), "IV", "fixed-effects")
+                        stop("The variable", enumerate_items(var_pblm[qui], "s.is.quote"), " in the ", msg, " part of the formula but not in the data set.", msg_end)
+                    }
+
+                    part_3 = all.vars(fml_parts[[3]])
+                    qui = which(var_pblm %in% part_3)
                     msg = msg_builder(var_pblm, type, qui)
-
-                    stop("The variable", enumerate_items(var_pblm[qui], "s.is.quote"), " in the LHS of the formula but not in the data set.", msg)
+                    stop("The variable", enumerate_items(var_pblm[qui], "s.is.quote"), " in the IV part of the formula but not in the data set.", msg)
                 }
-
-                if(any(!RHS %in% dataNames)){
-                    qui = which(var_pblm %in% RHS)
-                    msg = msg_builder(var_pblm, type, qui)
-
-                    stop("The variable", enumerate_items(var_pblm[qui], "s.is.quote"), " in the RHS", ifunit(n_parts, "", " (first part)"), " of the formula but not in the data set.", msg)
-                }
-
-                part_2 = all.vars(fml_parts[[2]])
-                if(any(!part_2 %in% dataNames)){
-                    qui = which(var_pblm %in% part_2)
-                    msg_end = msg_builder(var_pblm, type, qui)
-
-                    msg = ifelse(is_fml_inside(fml_parts[[2]]), "IV", "fixed-effects")
-                    stop("The variable", enumerate_items(var_pblm[qui], "s.is.quote"), " in the ", msg, " part of the formula but not in the data set.", msg_end)
-                }
-
-                part_3 = all.vars(fml_parts[[3]])
-                qui = which(var_pblm %in% part_3)
-                msg = msg_builder(var_pblm, type, qui)
-                stop("The variable", enumerate_items(var_pblm[qui], "s.is.quote"), " in the IV part of the formula but not in the data set.", msg)
             }
-
         }
 
 
