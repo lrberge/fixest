@@ -31,7 +31,9 @@
  
  - fix bug preventing the use of binning with formulas reported by @tlcaputi [#359](https://github.com/lrberge/fixest/issues/359)).
  
- - fix various errors in the documentation.
+ - fix various errors in the documentation (thanks to Ed Rubin and others!).
+ 
+ - fix bug in warning message in peculiar case of divergence in GLM (reported by @pachadotdev, #315).
  
 ## Multiple estimations
 

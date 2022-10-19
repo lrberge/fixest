@@ -2641,7 +2641,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
                 stop("Weighted-OLS returns NA coefficients at first iteration, step halving cannot be performed. Try other starting values?")
             }
 
-            warning_msg = paste0("Divergence at iteration ", iter, ": ", msg, ". Weighted-OLS returns NA coefficients. Last evaluated coefficients with finite deviance are returned for information purposes.")
+            warning_msg = paste0("Divergence at iteration ", iter, ": Weighted-OLS returns NA coefficients. Last evaluated coefficients with finite deviance are returned for information purposes.")
             div_message = "Weighted-OLS returned NA coefficients."
             wols = wols_old
             break
