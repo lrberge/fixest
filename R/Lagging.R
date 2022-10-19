@@ -681,7 +681,7 @@ lag_fml = lag.formula
 #'
 #' When the initial data set was also a `data.table`, not all operations are supported and some may dissolve the `fixest_panel`. This is the case when creating subselections of the initial data with additional attributes (e.g. `pdt[x>0, .(x, y, z)]` would dissolve the `fixest_panel`, meaning only a data.table would be the result of the call).
 #'
-#' If the initial data set was also a `data.table`, then you can create new variables from lags and leads using the functions [`l`]() and [`f`][fixest::l](). See the example.
+#' If the initial data set was also a `data.table`, then you can create new variables from lags and leads using the functions [`l`] and [`f`][fixest::l]. See the example.
 #'
 #'
 #' @return
@@ -810,7 +810,7 @@ unpanel = function(x){
 
 #' Method to subselect from a `fixest_panel`
 #'
-#' Subselection from a `fixest_panel` which has been created with the function [`panel`]. Also allows to create lag/lead variables with functions [`l`]()/[`f`][fixest::l]() if the `fixest_panel` is also a [`data.table::data.table`].
+#' Subselection from a `fixest_panel` which has been created with the function [`panel`]. Also allows to create lag/lead variables with functions [`l`]/[`f`][fixest::l] if the `fixest_panel` is also a [`data.table::data.table`].
 #'
 #' @param x A `fixest_panel` object, created with the function [`panel`].
 #' @param i Row subselection. Allows [`data.table::data.table`] style selection (provided the data is also a data.table).

@@ -19,7 +19,7 @@
 It returns a \code{fixest_panel} data base, with the attributes allowing to create lags/leads properly bookkeeped.
 }
 \description{
-Subselection from a \code{fixest_panel} which has been created with the function \code{\link{panel}}. Also allows to create lag/lead variables with functions \url{l}/\code{\link[=l]{f}}() if the \code{fixest_panel} is also a \code{\link[data.table:data.table]{data.table::data.table}}.
+Subselection from a \code{fixest_panel} which has been created with the function \code{\link{panel}}. Also allows to create lag/lead variables with functions \code{\link{l}}/\code{\link[=l]{f}} if the \code{fixest_panel} is also a \code{\link[data.table:data.table]{data.table::data.table}}.
 }
 \details{
 If the original data was also a data.table, some calls to \verb{[.fixest_panel} may dissolve the \code{fixest_panel} object and return a regular data.table. This is the case for subselections with additional arguments. If so, a note is displayed on the console.
