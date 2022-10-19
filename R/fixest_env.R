@@ -2050,7 +2050,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
 
     msg_NA_multi = ""
     if(multi_lhs || multi_rhs || multi_fixef){
-        msg_NA_multi = " [This msg only concerns the variables common to all estimations.]"
+        msg_NA_multi = "\n      |-> this msg only concerns the variables common to all estimations"
     }
 
 
@@ -3413,61 +3413,68 @@ assign_fixef_env = function(env, family, origin_type, fixef_id, fixef_sizes, fix
     assign("fixef_table", fixef_table, env)
     assign("familyConv", family, env) # new family -- used in convergence, can be modified
 
-    if(family %in% c("negbin")){
-        # for the deriv_xi_other
-        fixef_id.matrix_cpp = NULL
-        if(Q > 1){
-            fixef_id.matrix_cpp = matrix(unlist(fixef_id), ncol = Q) - 1
-        }
-
-        assign("fixef_id.matrix_cpp", fixef_id.matrix_cpp, env)
-    }
-
-    # New cpp functions
-    # This is where we send the elements needed for convergence in cpp
-    if(origin_type == "feNmlm"){
-        assign("fixef_id_vector", as.integer(unlist(fixef_id) - 1), env)
-    }
-
-    assign("fixef_table_vector", as.integer(unlist(fixef_table)), env)
-    assign("sum_y_vector", unlist(sum_y_all), env)
-
-    if(origin_type == "feNmlm"){
-
-        useExp_fixefCoef = family %in% c("poisson")
-
-        nobs = length(fixef_id[[1]])
-
-        if(useExp_fixefCoef){
-            assign("saved_sumFE", rep(1, nobs), env)
-        } else {
-            assign("saved_sumFE", rep(0, nobs), env)
-        }
-
-        if(family == "gaussian" && Q >= 2){
-            assign("fixef_invTable", 1/unlist(fixef_table), env)
-        } else {
-            assign("fixef_invTable", 1, env)
-        }
-
-        if(family %in% c("negbin", "logit")){
-            fixef_order = list()
-            for(i in 1:Q){
-                fixef_order[[i]] = order(fixef_id[[i]]) - 1
-            }
-            assign("fixef_cumtable_vector", as.integer(unlist(lapply(fixef_table, cumsum))), env)
-            assign("fixef_order_vector", as.integer(unlist(fixef_order)), env)
-        } else {
-            # we need to assign it anyway
-            assign("fixef_cumtable_vector", 1L, env)
-            assign("fixef_order_vector", 1L, env)
-        }
-    }
-
     # Slopes
     assign("slope_flag", slope_flag, env)
     assign("slope_variables", slope_variables, env)
     assign("slope_vars_list", slope_vars_list, env)
+
+    # We **don't enter** the next condition if:
+    # - we're in a split sample estimation and the full sample isn't requested
+    # => in that case the env will be reshaped and the FEs recomputed
+
+    if(!identical(fixef_sizes, 0)){
+        if(family %in% c("negbin")){
+            # for the deriv_xi_other
+            fixef_id.matrix_cpp = NULL
+            if(Q > 1){
+                fixef_id.matrix_cpp = matrix(unlist(fixef_id), ncol = Q) - 1
+            }
+
+            assign("fixef_id.matrix_cpp", fixef_id.matrix_cpp, env)
+        }
+
+        # New cpp functions
+        # This is where we send the elements needed for convergence in cpp
+        if(origin_type == "feNmlm"){
+            assign("fixef_id_vector", as.integer(unlist(fixef_id) - 1), env)
+        }
+
+        assign("fixef_table_vector", as.integer(unlist(fixef_table)), env)
+        assign("sum_y_vector", unlist(sum_y_all), env)
+
+        if(origin_type == "feNmlm"){
+
+            useExp_fixefCoef = family %in% c("poisson")
+
+            nobs = length(fixef_id[[1]])
+
+            if(useExp_fixefCoef){
+                assign("saved_sumFE", rep(1, nobs), env)
+            } else {
+                assign("saved_sumFE", rep(0, nobs), env)
+            }
+
+            if(family == "gaussian" && Q >= 2){
+                assign("fixef_invTable", 1/unlist(fixef_table), env)
+            } else {
+                assign("fixef_invTable", 1, env)
+            }
+
+            if(family %in% c("negbin", "logit")){
+                fixef_order = list()
+                for(i in 1:Q){
+                    fixef_order[[i]] = order(fixef_id[[i]]) - 1
+                }
+                assign("fixef_cumtable_vector", as.integer(unlist(lapply(fixef_table, cumsum))), env)
+                assign("fixef_order_vector", as.integer(unlist(fixef_order)), env)
+            } else {
+                # we need to assign it anyway
+                assign("fixef_cumtable_vector", 1L, env)
+                assign("fixef_order_vector", 1L, env)
+            }
+        }
+    }
+
 }
 
 

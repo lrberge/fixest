@@ -37,6 +37,8 @@
  
  - fix bug preventing the use of the global data set in wrapper functions (`fepois`, `fenegbin`, etc). Reported by @turbanisch, #343.
  
+ - fix bug preventing the use of `split` in non-GLM, non-OLS estimations (reported by @bberger94, #333).
+ 
 ## Multiple estimations
 
  - new internal algorithm leading to an object very much like a plain list, much easier to interact with.
