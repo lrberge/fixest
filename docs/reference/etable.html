@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.0</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,7 +76,8 @@
     <p>Aggregates the results of multiple estimations and displays them in the form of either a Latex table or a <code>data.frame</code>. Note that you will need the <code>booktabs</code> package for the Latex table to render properly.</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">etable</span><span class="op">(</span>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">etable</span><span class="op">(</span>
   <span class="va">...</span>,
   vcov <span class="op">=</span> <span class="cn">NULL</span>,
   stage <span class="op">=</span> <span class="fl">2</span>,
@@ -315,165 +318,317 @@
   markdown <span class="op">=</span> <span class="cn">NULL</span>,
   page.width <span class="op">=</span> <span class="st">"fit"</span>,
   div.class <span class="op">=</span> <span class="st">"etable"</span>
-<span class="op">)</span></code></pre></div></div>
+<span class="op">)</span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>...</dt>
 <dd><p>Used to capture different <code>fixest</code> estimation objects (obtained with <code><a href="femlm.html">femlm</a></code>, <code><a href="feols.html">feols</a></code> or <code><a href="feglm.html">feglm</a></code>). Note that any other type of element is discarded. Note that you can give a list of <code>fixest</code> objects.</p></dd>
+
+
 <dt>vcov</dt>
 <dd><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href="vcov_cluster.html">vcov_cluster</a></code>, <code><a href="vcov_hac.html">vcov_NW</a></code>, <code><a href="vcov_hac.html">NW</a></code>, <code><a href="vcov_hac.html">vcov_DK</a></code>, <code><a href="vcov_hac.html">DK</a></code>, <code><a href="vcov_conley.html">vcov_conley</a></code> and <code><a href="vcov_conley.html">conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the <code>vcov</code> documentation in the <a href="https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1" class="external-link">vignette</a>.</p></dd>
+
+
 <dt>stage</dt>
 <dd><p>Can be equal to <code>2</code> (default), <code>1</code>, <code>1:2</code> or <code>2:1</code>. Only used if the object is an IV estimation: defines the stage to which <code>summary</code> should be applied. If <code>stage = 1</code> and there are multiple endogenous regressors or if <code>stage</code> is of length 2, then an object of class <code>fixest_multi</code> is returned.</p></dd>
+
+
 <dt>agg</dt>
 <dd><p>A character scalar describing the variable names to be aggregated, it is pattern-based. For <code><a href="sunab.html">sunab</a></code> estimations, the following keywords work: "att", "period", "cohort" and <code>FALSE</code> (to have full disaggregation). All variables that match the pattern will be aggregated. It must be of the form <code>"(root)"</code>, the parentheses must be there and the resulting variable name will be <code>"root"</code>. You can add another root with parentheses: <code>"(root1)regex(root2)"</code>, in which case the resulting name is <code>"root1::root2"</code>. To name the resulting variable differently you can pass a named vector: <code>c("name" = "pattern")</code> or <code>c("name" = "pattern(root2)")</code>. It's a bit intricate sorry, please see the examples.</p></dd>
+
+
 <dt>se</dt>
 <dd><p>Character scalar. Which kind of standard error should be computed: “standard”, “hetero”, “cluster”, “twoway”, “threeway” or “fourway”? By default if there are clusters in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "iid"</code>. Note that this argument is deprecated, you should use <code>vcov</code> instead.</p></dd>
+
+
 <dt>ssc</dt>
 <dd><p>An object of class <code>ssc.type</code> obtained with the function <code><a href="ssc.html">ssc</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href="ssc.html">ssc</a></code> for this argument. The arguments and defaults of the function <code><a href="ssc.html">ssc</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "min"</code>, <code>t.df = "min"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href="ssc.html">ssc</a></code> for details.</p></dd>
+
+
 <dt>cluster</dt>
 <dd><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as fixed-effects in the estimation, you can leave it blank with <code>vcov = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [resp. 2nd] fixed-effect). You can interact two variables using <code>^</code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></dd>
+
+
 <dt>.vcov</dt>
 <dd><p>A function to be used to compute the standard-errors of each fixest object. You can pass extra arguments to this function using the argument <code>.vcov_args</code>. See the example.</p></dd>
+
+
 <dt>.vcov_args</dt>
 <dd><p>A list containing arguments to be passed to the function <code>.vcov</code>.</p></dd>
+
+
 <dt>digits</dt>
 <dd><p>Integer or character scalar. Default is 4 and represents the number of significant digits to be displayed for the coefficients and standard-errors. To apply rounding instead of significance use, e.g., <code>digits = "r3"</code> which will round at the first 3 decimals. If character, it must be of the form <code>"rd"</code> or <code>"sd"</code> with <code>d</code> a digit (<code>r</code> is for round and <code>s</code> is for significance). For the number of digits for the fit statistics, use <code>digits.stats</code>. Note that when significance is used it does not exactly display the number of significant digits: see details for its exact meaning.</p></dd>
+
+
 <dt>digits.stats</dt>
 <dd><p>Integer or character scalar. Default is 5 and represents the number of significant digits to be displayed for the fit statistics. To apply rounding instead of significance use, e.g., <code>digits = "r3"</code> which will round at the first 3 decimals. If character, it must be of the form <code>"rd"</code> or <code>"sd"</code> with <code>d</code> a digit (<code>r</code> is for round and <code>s</code> is for significance). Note that when significance is used it does not exactly display the number of significant digits: see details for its exact meaning.</p></dd>
+
+
 <dt>tex</dt>
 <dd><p>Logical: whether the results should be a data.frame or a Latex table. By default, this argument is <code>TRUE</code> if the argument <code>file</code> (used for exportation) is not missing; it is equal to <code>FALSE</code> otherwise.</p></dd>
+
+
 <dt>fitstat</dt>
 <dd><p>A character vector or a one sided formula (both with only lowercase letters). A vector listing which fit statistics to display. The valid types are 'n', 'll', 'aic', 'bic' and r2 types like 'r2', 'pr2', 'war2', etc (see all valid types in <code><a href="r2.html">r2</a></code>). Also accepts valid types from the function <code><a href="fitstat.html">fitstat</a></code>. The default value depends on the models to display. Example of use: <code>fitstat=c('n', 'cor2', 'ar2', 'war2')</code>, or <code>fitstat=~n+cor2+ar2+war2</code> using a formula. You can use the dot to refer to default values:<code> ~ . + ll</code> would add the log-likelihood to the default fit statistics.</p></dd>
+
+
 <dt>title</dt>
 <dd><p>(Tex only.) Character scalar. The title of the Latex table.</p></dd>
+
+
 <dt>coefstat</dt>
 <dd><p>One of <code>"se"</code> (default), <code>"tstat"</code> or <code>"confint"</code>. The statistic to report for each coefficient: the standard-error, the t-statistics or the confidence interval. You can adjust the confidence interval with the argument <code>ci</code>.</p></dd>
+
+
 <dt>ci</dt>
 <dd><p>Level of the confidence interval, defaults to <code>0.95</code>. Only used if <code>coefstat = confint</code>.</p></dd>
+
+
 <dt>se.row</dt>
 <dd><p>Logical scalar, default is <code>NULL</code>. Whether should be displayed the row with the type of standard-error for each model. When <code>tex = FALSE</code>, the default is <code>TRUE</code>. When <code>tex = FALSE</code>, the row is showed only when there is a table-footer and the types of standard-errors differ across models.</p></dd>
+
+
 <dt>se.below</dt>
 <dd><p>Logical or <code>NULL</code> (default). Should the standard-errors be displayed below the coefficients? If <code>NULL</code>, then this is <code>TRUE</code> for Latex and <code>FALSE</code> otherwise.</p></dd>
+
+
 <dt>keep</dt>
 <dd><p>Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see <code><a href="https://rdrr.io/r/base/regex.html" class="external-link">base::regex</a></code> help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument <code>dict</code>). Example: you have the variable <code>x1</code> to <code>x55</code> and want to display only <code>x1</code> to <code>x9</code>, then you could use <code>keep = "x[[:digit:]]$"</code>. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain “Intercept” is kept). See details.</p></dd>
+
+
 <dt>drop</dt>
 <dd><p>Character vector. This element is used if some variables are not to be displayed. This should be a vector of regular expressions (see <code><a href="https://rdrr.io/r/base/regex.html" class="external-link">base::regex</a></code> help for more info). Each variable satisfying any of the regular expressions will be discarded. This argument is applied post aliasing (see argument <code>dict</code>). Example: you have the variable <code>x1</code> to <code>x55</code> and want to display only <code>x1</code> to <code>x9</code>, then you could use <code>drop = "x[[:digit:]]{2}</code>". If the first character is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable that does not contain “Intercept” is dropped). See details.</p></dd>
+
+
 <dt>order</dt>
 <dd><p>Character vector. This element is used if the user wants the variables to be ordered in a certain way. This should be a vector of regular expressions (see <code><a href="https://rdrr.io/r/base/regex.html" class="external-link">base::regex</a></code> help for more info). The variables satisfying the first regular expression will be placed first, then the order follows the sequence of regular expressions. This argument is applied post aliasing (see argument <code>dict</code>). Example: you have the following variables: <code>month1</code> to <code>month6</code>, then <code>x1</code> to <code>x5</code>, then <code>year1</code> to <code>year6</code>. If you want to display first the x's, then the years, then the months you could use: <code>order = c("x", "year")</code>. If the first character is an exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that does not contain “Intercept” goes first).  See details.</p></dd>
+
+
 <dt>dict</dt>
 <dd><p>A named character vector or a logical scalar. It changes the original variable names to the ones contained in the <code>dict</code>ionary. E.g. to change the variables named <code>a</code> and <code>b3</code> to (resp.) “$log(a)$” and to “$bonus^3$”, use <code>dict=c(a="$log(a)$",b3="$bonus^3$")</code>. By default, it is equal to <code><a href="setFixest_dict.html">getFixest_dict()</a></code>, a default dictionary which can be set with <code><a href="setFixest_dict.html">setFixest_dict</a></code>. You can use <code>dict = FALSE</code> to disable it. By default <code>dict</code> modifies the entries in the global dictionary, to disable this behavior, use "reset" as the first element (ex: <code>dict=c("reset", mpg="Miles per gallon")</code>).</p></dd>
+
+
 <dt>file</dt>
 <dd><p>A character scalar. If provided, the Latex (or data frame) table will be saved in a file whose path is <code>file</code>. If you provide this argument, then a Latex table will be exported, to export a regular <code>data.frame</code>, use argument <code>tex = FALSE</code>.</p></dd>
+
+
 <dt>replace</dt>
 <dd><p>Logical, default is <code>FALSE</code>. Only used if option <code>file</code> is used. Should the exported table be written in a new file that replaces any existing file?</p></dd>
+
+
 <dt>convergence</dt>
 <dd><p>Logical, default is missing. Should the convergence state of the algorithm be displayed? By default, convergence information is displayed if at least one model did not converge.</p></dd>
+
+
 <dt>signif.code</dt>
 <dd><p>Named numeric vector, used to provide the significance codes with respect to the p-value of the coefficients. Default is <code>c("***"=0.01, "**"=0.05, "*"=0.10)</code> for a Latex table and <code>c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)</code> for a data.frame (to conform with R's default). To suppress the significance codes, use <code>signif.code=NA</code> or <code>signif.code=NULL</code>. Can also be equal to <code>"letters"</code>, then the default becomes <code>c("a"=0.01, "b"=0.05, "c"=0.10)</code>.</p></dd>
+
+
 <dt>label</dt>
 <dd><p>(Tex only.) Character scalar. The label of the Latex table.</p></dd>
+
+
 <dt>float</dt>
 <dd><p>(Tex only.) Logical. By default, if the argument <code>title</code> or <code>label</code> is provided, it is set to <code>TRUE</code>. Otherwise, it is set to <code>FALSE</code>.</p></dd>
+
+
 <dt>headers</dt>
 <dd><p>Character vector or list. Adds one or more header lines in the table. A header line can be represented by a character vector or a named list of numbers where the names are the cell values and the numbers are the span. Example: <code>headers=list("M"=2, "F"=3)</code> will create a row with 2 times "M" and three time "F" (this is identical to <code>headers=rep(c("M", "F"), c(2, 3))</code>). You can stack header lines within a list, in that case the list names will be displayed in the leftmost cell. Example: <code>headers=list(Gender=list("M"=2, "F"=3), Country="US"</code> will create two header lines. When <code>tex = TRUE</code>, you can add a rule to separate groups by using <code>":_:"</code> somewhere in the row name (ex: <code>headers=list(":_:Gender"=list("M"=2, "F"=3))</code>. You can monitor the placement by inserting a special character in the row name: "^" means at the top, "-" means in the middle (default) and "_" means at the bottom. Example: <code>headers=list("_Country"="US")</code> will add the country row as the very last header row (after the model row). Finally, you can use the special value "auto" to include automatic headers when the data contains split sample estimations. By default it is equal to <code>list("auto")</code>. You can use <code>.()</code> instead of <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p></dd>
+
+
 <dt>fixef_sizes</dt>
 <dd><p>(Tex only.) Logical, default is <code>FALSE</code>. If <code>TRUE</code> and fixed-effects were used in the models, then the number of "units" per fixed-effect dimension is also displayed.</p></dd>
+
+
 <dt>fixef_sizes.simplify</dt>
 <dd><p>Logical, default is <code>TRUE</code>. Only used if <code>fixef_sizes = TRUE</code>. If <code>TRUE</code>, the fixed-effects sizes will be displayed in parentheses instead of in a separate line if there is no ambiguity (i.e. if the size is constant across models).</p></dd>
+
+
 <dt>keepFactors</dt>
 <dd><p>Logical, default is <code>TRUE</code>. If <code>FALSE</code>, then factor variables are displayed as fixed-effects and no coefficient is shown.</p></dd>
+
+
 <dt>family</dt>
 <dd><p>Logical, default is missing. Whether to display the families of the models. By default this line is displayed when at least two models are from different families.</p></dd>
+
+
 <dt>powerBelow</dt>
 <dd><p>(Tex only.) Integer, default is -5. A coefficient whose value is below <code>10**(powerBelow+1)</code> is written with a power in Latex. For example <code>0.0000456</code> would be written <code>4.56$\\times 10^{-5}$</code> by default. Setting <code>powerBelow = -6</code> would lead to <code>0.00004</code> in Latex.</p></dd>
+
+
 <dt>interaction.combine</dt>
 <dd><p>Character scalar, defaults to <code>" $\\times$ "</code> for Tex and to <code>" = "</code> otherwise. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if <code>dict = c(x1="Wind", x2="Rain")</code> and you have the following interaction <code>x1:x2</code>, then it will be renamed (by default) <code>Wind $\\times$ Rain</code> -- using <code>interaction.combine = "*"</code> would lead to <code>Wind*Rain</code>.</p></dd>
+
+
 <dt>interaction.order</dt>
 <dd><p>Character vector of regular expressions. Only affects variables that are interacted like x1 and x2 in <code>feols(y ~ x1*x2, data)</code>. You can change the order in which the interacted variables are displayed: e.g. <code>interaction.order = "x2"</code> would lead to "x1 x x2" instead of "x1 x x2". Please look at the argument 'order' and the dedicated section in the help page for more information.</p></dd>
+
+
 <dt>i.equal</dt>
 <dd><p>Character scalar, defaults to <code>" $=$ "</code> when <code>tex = TRUE</code> and <code>" = "</code> otherwise. Only affects factor variables created with the function <code><a href="i.html">i</a></code>, tells how the variable should be linked to its value. For example if you have the <code>Species</code> factor from the <code>iris</code> data set, by default the display of the variable is <code>Species = Setosa</code>, etc. If <code>i.equal = ": "</code> the display becomes <code>Species: Setosa</code>.</p></dd>
+
+
 <dt>depvar</dt>
 <dd><p>Logical, default is <code>TRUE</code>. Whether a first line containing the dependent variables should be shown.</p></dd>
+
+
 <dt>style.tex</dt>
 <dd><p>An object created by the function <code><a href="style.tex.html">style.tex</a></code>. It represents the style of the Latex table, see the documentation of <code><a href="style.tex.html">style.tex</a></code>.</p></dd>
+
+
 <dt>style.df</dt>
 <dd><p>An object created by the function <code><a href="style.df.html">style.df</a></code> It represents the style of the data frame returned (if <code>tex = FALSE</code>), see the documentation of <code><a href="style.df.html">style.df</a></code>.</p></dd>
+
+
 <dt>notes</dt>
 <dd><p>(Tex only.) Character vector. If provided, a <code>"notes"</code> section will be added at the end right after the end of the table, containing the text of this argument. If it is a vector, it will be collapsed with new lines. If <code>tpt = TRUE</code>, the behavior is different: each element of the vector is an item. If the first element of the vector starts with <code>"@"</code>, then it will be included verbatim, and in case of <code>tpt = TRUE</code>, right before the first item. If that element is provided, it will replace the value defined in <code>style.tex(notes.intro)</code> or <code>style.tex(notes.tpt.intro)</code>.</p></dd>
+
+
 <dt>group</dt>
 <dd><p>A list. The list elements should be vectors of regular expressions. For each elements of this list: A new line in the table is created, all variables that are matched by the regular expressions are discarded (same effect as the argument <code>drop</code>) and <code>TRUE</code> or <code>FALSE</code> will appear in the model cell, depending on whether some of the previous variables were found in the model. Example: <code>group=list("Controls: personal traits"=c("gender", "height", "weight"))</code> will create an new line with <code>"Controls: personal traits"</code> in the leftmost cell, all three variables gender, height and weight are discarded, <code>TRUE</code> appearing in each model containing at least one of the three variables (the style of <code>TRUE</code>/<code>FALSE</code> is governed by the argument <code>yesNo</code>). You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) <code>"^"</code>: coef., <code>"-"</code>: fixed-effect, <code>"_"</code>: stats, section; 2) <code>"^"</code>: 1st, <code>"_"</code>: last, row. For example: <code>group=list("_^Controls"=stuff)</code> will place the line at the top of the 'stats' section, and using <code>group=list("^_Controls"=stuff)</code> will make the row appear at the bottom of the coefficients section. For details, see the dedicated section.</p></dd>
+
+
 <dt>extralines</dt>
 <dd><p>A vector, a list or a one sided formula. The list elements should be either a vector representing the value of each cell, a list of the form <code>list("item1" = #item1, "item2" = #item2, etc)</code>, or a function. This argument can be many things, please have a look at the dedicated help section; a simplified description follows. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: <code>extralines=list("Sub-sample"=c("&lt;20 yo", "all", "&gt;50 yo"))</code> will create an new line with <code>"Sub-sample"</code> in the leftmost cell, the vector filling the content of the cells for the three models. You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) <code>"^"</code>: coef., <code>"-"</code>: fixed-effect, <code>"_"</code>: stats, section; 2) <code>"^"</code>: 1st, <code>"_"</code>: last, row. For example: <code>extralines=list("__Controls"=stuff)</code> will place the line at the bottom of the stats section, and using <code>extralines=list("^^Controls"=stuff)</code> will make the row appear at the top of the 'coefficients' section. For details, see the dedicated section. You can use <code>.()</code> instead of <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p></dd>
+
+
 <dt>fixef.group</dt>
 <dd><p>Logical scalar or list (default is <code>NULL</code>). If equal to <code>TRUE</code>, then all fixed-effects always appearing jointly in models will be grouped in one row. If a list, its elements must be character vectors of regular expressions and the list names will be the row names. For ex. <code>fixef.group=list("Dates fixed-effects"="Month|Day")</code> will remove the <code>"Month"</code> and <code>"Day"</code> fixed effects from the display and replace them with a single row named "Dates fixed-effects". You can monitor the placement of the new row with two special characters telling where to place the row within a section: first in which section it should appear: <code>"^"</code> (coef.), <code>"-"</code> (fixed-effects), or <code>"_"</code> (stat.) section; then whether the row should be <code>"^"</code> (first), or <code>"_"</code> (last). These two special characters must appear first in the row names. Please see the dedicated section</p></dd>
+
+
 <dt>placement</dt>
 <dd><p>(Tex only.) Character string giving the position of the float in Latex. Default is "htbp". It must consist of only the characters 'h', 't', 'b', 'p', 'H' and '!'. Reminder: h: here; t: top; b: bottom; p: float page; H: definitely here; !: prevents Latex to look for other positions. Note that it can be equal to the empty string (and you'll get the default placement).</p></dd>
+
+
 <dt>drop.section</dt>
 <dd><p>Character vector which can be of length 0 (i.e. equal to <code>NULL</code>). Can contain the values "coef", "fixef", "slopes" or "stats". It would drop, respectively, the coefficients section, fixed-effects section, the variables with varying slopes section or the fit statistics section.</p></dd>
+
+
 <dt>poly_dict</dt>
 <dd><p>Character vector, default is <code>c("", " square", " cube")</code>. When raw polynomials (<code>x^2</code>, etc) are used, the variables are automatically renamed and <code>poly_dict</code> rules the display of the power. For powers greater than the number of elements of the vector, the value displayed is <code>$^{pow}$</code> in Latex and <code>^ pow</code> in the R console.</p></dd>
+
+
 <dt>postprocess.tex</dt>
 <dd><p>A function that will postprocess the character vector defining the latex table. Only when <code>tex = TRUE</code>. By default it is equal to <code>NULL</code>, meaning that there is no postprocessing. When <code>tex = FALSE</code>, see the argument <code>postprocess.df</code>. See details.</p></dd>
+
+
 <dt>postprocess.df</dt>
 <dd><p>A function that will postprocess.tex the resulting data.frame. Only when <code>tex = FALSE</code>. By default it is equal to <code>NULL</code>, meaning that there is no postprocessing. When <code>tex = TRUE</code>, see the argument <code>postprocess.tex</code>.</p></dd>
+
+
 <dt>tpt</dt>
 <dd><p>(Tex only.) Logical scalar, default is FALSE. Whether to use the <code>threeparttable</code> environment. If so, the <code>notes</code> will be integrated into the <code>tablenotes</code> environment.</p></dd>
+
+
 <dt>arraystretch</dt>
 <dd><p>(Tex only.) A numeric scalar, default is <code>NULL</code>. If provided, the command <code>\\renewcommand*{\\arraystretch{x}}</code> is inserted, replacing <code>x</code> by the value of <code>arraystretch</code>. The changes are specific to the current table and do not affect the rest of the document.</p></dd>
+
+
 <dt>adjustbox</dt>
 <dd><p>(Tex only.) A logical, numeric or character scalar, default is <code>NULL</code>. If not <code>NULL</code>, the table is inserted within the <code>adjustbox</code> environment. By default the options are <code>width = 1\\textwidth, center</code> (if <code>TRUE</code>). A numeric value changes the value before <code>\\textwidth</code>. You can also add a character of the form <code>"x tw"</code> or <code>"x th"</code> with <code>x</code> a number and where tw (th) stands for text-width (text-height). Finally any other character value is passed verbatim as an <code>adjustbox</code> option.</p></dd>
+
+
 <dt>fontsize</dt>
 <dd><p>(Tex only.) A character scalar, default is <code>NULL</code>. Can be equal to <code>tiny</code>, <code>scriptsize</code>, <code>footnotesize</code>, <code>small</code>, <code>normalsize</code>, <code>large</code>, or <code>Large</code>. The change affect the table only (and not the rest of the document).</p></dd>
+
+
 <dt>fit_format</dt>
 <dd><p>Character scalar, default is <code>"__var__"</code>. Only used in the presence of IVs. By default the endogenous regressors are named <code>fit_varname</code> in the second stage. The format of the endogenous regressor to appear in the table is governed by <code>fit_format</code>. For instance, by default, the prefix <code>"fit_"</code> is removed, leading to only <code>varname</code> to appear. If <code>fit_format = "$\\\\hat{__var__$"}</code>, then <code>"$\\hat{varname$"}</code> will appear in the table.</p></dd>
+
+
 <dt>coef.just</dt>
 <dd><p>(DF only.) Either <code>"."</code>, <code>"("</code>, <code>"l"</code>, <code>"c"</code> or <code>"r"</code>, default is <code>NULL</code>. How the coefficients should be justified. If <code>NULL</code> then they are right aligned if <code>se.below = FALSE</code> and aligned to the dot if <code>se.below = TRUE</code>. The keywords stand respectively for dot-, parenthesis-, left-, center- and right-aligned.</p></dd>
+
+
 <dt>tabular</dt>
 <dd><p>(Tex only.) Character scalar equal to "normal" (default), <code>"*"</code> or <code>"X"</code>. Represents the type of tabular environment to use: either <code>tabular</code>, <code>tabular*</code> or <code>tabularx</code>.</p></dd>
+
+
 <dt>highlight</dt>
 <dd><p>List containing coefficients to highlight. Highlighting is of the form <code>.("options1" = "coefs1", "options2" = "coefs2", etc)</code>.
 The coefficients to be highlighted can be written in three forms: 1) row, eg <code>"x1"</code> will highlight the full row of the variable <code>x1</code>; 2) cells, use <code>'@'</code> after the coefficient name to give the column, it accepts ranges, eg <code>"x1@2, 4-6, 8"</code> will highlight only the columns 2, 4, 5, 6, and 8 of the variable <code>x1</code>; 3) range, by giving the top-left and bottom-right values separated with a semi-colon, eg <code>"x1@2 ; x3@5"</code> will highlight from the column 2 of <code>x1</code> to the 5th column of <code>x3</code>. Coefficient names are partially matched, use a <code>'%'</code> first to refer to the original name (before dictionary) and use <code>'@'</code> first to use a regular expression. You can add a vector of row/cell/range.
 The options are a comma-separated list of items. By default the highlighting is done with a frame (a thick box) around the coefficient, use <code>'rowcol'</code> to highlight with a row color instead. Here are the other options: <code>'se'</code> to highlight the standard-errors too; <code>'square'</code> to have a square box (instead of rounded); <code>'thick1'</code> to <code>'thick6'</code> to monitor the width of the box; <code>'sep0'</code> to <code>'sep9'</code> to monitor the inner spacing. Finally the remaining option is the color: simply add an R color (it must be a valid R color!). You can use <code>"color!alpha"</code> with "alpha" a number between 0 to 100 to change the alpha channel of the color.</p></dd>
+
+
 <dt>coef.style</dt>
 <dd><p>Named list containing styles to be applied to the coefficients. It must be of the form <code>.("style1" = "coefs1", "style2" = "coefs2", etc)</code>. The style must contain the string <code>":coef:"</code> (or <code>":coef_se:"</code> to style both the coefficient and its standard-error). The string <code>:coef:</code> will be replaced verbatim by the coefficient value. For example use <code>"\\textbf{:coef:}"</code> to put the coefficient in bold. Note that markdown markup is enabled so <code>"**:coef:**"</code> would also put it in bold. The coefficients to be styled can be written in three forms: 1) row, eg <code>"x1"</code> will style the full row of the variable <code>x1</code>; 2) cells, use <code>'@'</code> after the coefficient name to give the column, it accepts ranges, eg <code>"x1@2, 4-6, 8"</code> will style only the columns 2, 4, 5, 6, and 8 of the variable <code>x1</code>; 3) range, by giving the top-left and bottom-right values separated with a semi-colon, eg <code>"x1@2 ; x3@5"</code> will style from the column 2 of <code>x1</code> to the 5th column of <code>x3</code>. Coefficient names are partially matched, use a <code>'%'</code> first to refer to the original name (before dictionary) and use <code>'@'</code> first to use a regular expression. You can add a vector of row/cell/range.</p></dd>
+
+
 <dt>meta</dt>
 <dd><p>(Tex only.) A one-sided formula that shall contain the following elements: date or time, sys, author, comment and call. Default is <code>NULL</code>. This argument is a shortcut to controlling the meta information that can be displayed in comments before the table. Typically if the element is in the formula, it means that the argument will be equal to <code>TRUE</code>. Example: <code>meta = ~time+call</code> is equivalent to <code>meta.time = TRUE</code> and <code>meta.call = TRUE</code>. The "author" and "comment" elements are a bit special. Using <code>meta = ~author("Mark")</code> is equivalent to <code>meta.author = "Mark"</code> while <code>meta=~author</code> is equiv. to <code>meta.author = TRUE</code>. The "comment" must be used with a character string inside: <code>meta = ~comment("this is a comment")</code>. The order in the formula controls the order of appearance of the meta elements. It also has precedence over the <code>meta.XX</code> arguments.</p></dd>
+
+
 <dt>meta.time</dt>
 <dd><p>(Tex only.) Either a logical scalar (default is <code>FALSE</code>) or "time" or "date". Whether to include the time (if <code>TRUE</code> or "time") or the date (if "date") of creation of the table in a comment right before the table.</p></dd>
+
+
 <dt>meta.author</dt>
 <dd><p>(Tex only.) A logical scalar (default is <code>FALSE</code>) or a character vector. If <code>TRUE</code> then the identity of the author (deduced from the system user in <code><a href="https://rdrr.io/r/base/Sys.info.html" class="external-link">Sys.info()</a></code>) is inserted in a comment right before the table. If a character vector, then it should contain author names that will be inserted as comments before the table, prefixed with <code>"Created by:"</code>. For free-form comments see the argument <code>meta.comment</code>.</p></dd>
+
+
 <dt>meta.sys</dt>
 <dd><p>(Tex only.) A logical scalar, default is <code>FALSE</code>. Whether to include system information (from <code><a href="https://rdrr.io/r/base/Sys.info.html" class="external-link">Sys.info()</a></code>) in a comment right before the table.</p></dd>
+
+
 <dt>meta.call</dt>
 <dd><p>(Tex only.) Logical scalar, default is <code>FALSE</code>. If <code>TRUE</code> then the call to the function is inserted right before the table in a comment.</p></dd>
+
+
 <dt>meta.comment</dt>
 <dd><p>(Tex only.) A character vector containing free-form comments to be inserted right before the table.</p></dd>
+
+
 <dt>view</dt>
 <dd><p>Logical, default is <code>FALSE</code>. If <code>TRUE</code>, then the table generated in Latex by <code>etable</code> and then is displayed in the viewer pane. Note that for this option to work you need i) pdflatex, ii) imagemagick and iii) ghostscript. All three software must be installed and on the path.</p></dd>
+
+
 <dt>export</dt>
 <dd><p>Character scalar giving the path to a PNG file to be created, default is <code>NULL</code>. If provided, the Latex table will be converted to PNG and copied to the <code>export</code> location. Note that for this option to work you need a working distribution of <code>pdflatex</code>, <code>imagemagick</code> and <code>ghostscript</code>.</p></dd>
+
+
 <dt>markdown</dt>
 <dd><p>Character scalar giving the location of a directory, or a logical scalar. Default is <code>NULL</code>. This argument only works in Rmarkdown documents, when knitting the document. If provided: two behaviors depending on context. A) if the output document is Latex, the table is exported in Latex. B) if the output document is not Latex, the table will be exported to PNG at the desired location and inserted in the document via a markdown link. If equal to <code>TRUE</code>, the default location of the PNGs is a temporary folder for <code>R &gt; 4.0.0</code>, or to <code>"images/etable/"</code> for earlier versions.</p></dd>
+
+
 <dt>page.width</dt>
 <dd><p>Character scalar equal to <code>'fit'</code> (default), <code>'a4'</code> or <code>'us'</code>; or a single Latex measure (like <code>'17cm'</code>) or a double one (like <code>"21, 2cm"</code>). Only used when the Latex table is to be viewed (<code>view = TRUE</code>), exported (<code>export != NULL</code>) or displayed in Rmarkdown (<code>markdown != NULL</code>). It represents the text width of the page in which the Latex table will be inserted. By default, <code>'fit'</code>, the page fits exactly the table (i.e. text width = table width). If <code>'a4'</code> or <code>'us'</code>, two times 2cm is removed from the page width to account for margins. Providing a page width and a margin width, like in <code>"17in, 1in"</code>, enables a correct display of the argument <code>adjustbox</code>. Note that the margin width represent the width of a single side margin (and hence will be doubled).</p></dd>
+
+
 <dt>div.class</dt>
 <dd><p>Character scalar, default is <code>"etable"</code>. Only used in Rmarkdown documents when <code>markdown = TRUE</code>. The table in an image format is embedded in a <code>&lt;div&gt;</code> container, and that container is of class <code>div.class</code>.</p></dd>
+
+
 <dt>view.cache</dt>
 <dd><p>Logical, default is <code>FALSE</code>. Only used when <code>view = TRUE</code>. Whether the PNGs of the tables should be cached.</p></dd>
+
+
 <dt>reset</dt>
 <dd><p>(<code>setFixest_etable</code> only.) Logical, default is <code>FALSE</code>. If <code>TRUE</code>, this will reset all the default values that were already set by the user in previous calls.</p></dd>
+
+
 <dt>save</dt>
 <dd><p>Either a logical or equal to <code>"reset"</code>. Default is <code>FALSE</code>. If <code>TRUE</code> then the value is set permanently at the project level, this means that if you restart R, you will still obtain the previously saved defaults. This is done by writing in the <code>".Renviron"</code> file, located in the project's working directory, hence we must have write permission there for this to work, and only works with Rstudio. If equal to "reset", the default at the project level is erased. Since there is writing in a file involved, permission is asked to the user.</p></dd>
+
+
 <dt>x</dt>
 <dd><p>An object returned by <code>etable</code>.</p></dd>
+
+
 <dt>type</dt>
 <dd><p>Character scalar equal to 'pdflatex' (default), 'magick', 'dir' or 'tex'. Which log file to report; if 'tex', the full source code of the tex file is returned, if 'dir': the directory of the log files is returned.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>If <code>tex = TRUE</code>, the lines composing the Latex table are returned invisibly while the table is directly prompted on the console.
-If <code>tex = FALSE</code>, the data.frame is directly returned. If the argument <code>file</code> is not missing, the <code>data.frame</code> is printed and returned invisibly.</p>
+    
+
+<p>If <code>tex = TRUE</code>, the lines composing the Latex table are returned invisibly while the table is directly prompted on the console.</p>
+
+
+<p>If <code>tex = FALSE</code>, the data.frame is directly returned. If the argument <code>file</code> is not missing, the <code>data.frame</code> is printed and returned invisibly.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -539,7 +694,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
     
 
 
-<p>By default on all instances (with the notable exception of the elements of <code><a href="style.tex.html">style.tex</a></code>) special Latex characters are escaped. This means that <code>title="Exports in million $."</code> will be exported as "Exports in million \$.": the dollar sign will be escaped. This is true for the following characters: &amp;, $, %, _, ^ and #.</p>
+<p>By default on all instances (with the notable exception of the elements of <code><a href="style.tex.html">style.tex</a></code>) special Latex characters are escaped. This means that <code>title="Exports in million $."</code> will be exported as <code>"Exports in million \\$."</code>: the dollar sign will be escaped. This is true for the following characters: &amp;, <code>$</code>, %, _, ^ and #.</p>
 <p>Note, importantly, that equations are NOT escaped. This means that <code>title="Functional form $a_i \\times x^b$, variation in %."</code> will be displayed as: <code>"Functional form $a_i \\times x^b$, variation in \\%."</code>: only the last percentage will be escaped.</p>
 <p>If for some reason you don't want the escaping to take place, the arguments <code>headers</code> and <code>extralines</code> are the only ones allowing that. To disable escaping, add the special token ":tex:" in the row names. Example: in <code>headers=list(":tex:Row title"="weird &amp; &amp; %\\n tex stuff\\\\")</code>, the elements will be displayed verbatim. Of course, since it can easily ruin your table, it is only recommended to super users.</p>
     </div>
@@ -1117,9 +1272,9 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                A                A                 B</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Ozone          Solar.R              Wind</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        42.14*** (2.086) 185.1*** (7.218) 9.958*** (0.2548)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1     272.3*** (25.94) 317.1*** (91.89) -19.89*** (3.152)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2     102.7*** (27.46)   -33.07 (92.49)   -0.6379 (3.152)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        42.14*** (2.086) 185.2*** (7.218) 9.958*** (0.2548)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1     272.4*** (25.94) 317.2*** (91.89) -19.89*** (3.152)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2     102.8*** (27.46)   -33.07 (92.49)   -0.6379 (3.152)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ ________________ _________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID              IID               IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                 116              146               153</span>
@@ -1135,9 +1290,9 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                A                A                 B</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Ozone          Solar.R              Wind</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        42.14*** (2.086) 185.1*** (7.218) 9.958*** (0.2548)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1     272.3*** (25.94) 317.1*** (91.89) -19.89*** (3.152)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2     102.7*** (27.46)   -33.07 (92.49)   -0.6379 (3.152)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        42.14*** (2.086) 185.2*** (7.218) 9.958*** (0.2548)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1     272.4*** (25.94) 317.2*** (91.89) -19.89*** (3.152)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2     102.8*** (27.46)   -33.07 (92.49)   -0.6379 (3.152)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ ________________ _________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID              IID               IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                 116              146               153</span>
@@ -1153,9 +1308,9 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span> Group                          A                A                 B</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Ozone          Solar.R              Wind</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        42.14*** (2.086) 185.1*** (7.218) 9.958*** (0.2548)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1     272.3*** (25.94) 317.1*** (91.89) -19.89*** (3.152)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2     102.7*** (27.46)   -33.07 (92.49)   -0.6379 (3.152)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        42.14*** (2.086) 185.2*** (7.218) 9.958*** (0.2548)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1     272.4*** (25.94) 317.2*** (91.89) -19.89*** (3.152)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2     102.8*** (27.46)   -33.07 (92.49)   -0.6379 (3.152)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ ________________ _________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID              IID               IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                 116              146               153</span>
@@ -1178,9 +1333,9 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Ozone          Solar.R              Wind</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Group                          A                A                 B</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        42.14*** (2.086) 185.1*** (7.218) 9.958*** (0.2548)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1     272.3*** (25.94) 317.1*** (91.89) -19.89*** (3.152)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2     102.7*** (27.46)   -33.07 (92.49)   -0.6379 (3.152)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        42.14*** (2.086) 185.2*** (7.218) 9.958*** (0.2548)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1     272.4*** (25.94) 317.2*** (91.89) -19.89*** (3.152)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2     102.8*** (27.46)   -33.07 (92.49)   -0.6379 (3.152)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ ________________ _________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID              IID               IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                 116              146               153</span>
@@ -1203,11 +1358,11 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Model:               &amp; (1)           &amp; (2)           &amp; (3)\\  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    \midrule</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    \emph{Variables}\\</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Constant             &amp; 42.14$^{***}$ &amp; 185.1$^{***}$ &amp; 9.958$^{***}$\\   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Constant             &amp; 42.14$^{***}$ &amp; 185.2$^{***}$ &amp; 9.958$^{***}$\\   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                         &amp; (2.086)       &amp; (7.218)       &amp; (0.2548)\\   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    poly(Temp)1          &amp; 272.3$^{***}$ &amp; 317.1$^{***}$ &amp; -19.89$^{***}$\\   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    poly(Temp)1          &amp; 272.4$^{***}$ &amp; 317.2$^{***}$ &amp; -19.89$^{***}$\\   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                         &amp; (25.94)       &amp; (91.89)       &amp; (3.152)\\   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    poly(Temp)2          &amp; 102.7$^{***}$ &amp; -33.07        &amp; -0.6379\\   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    poly(Temp)2          &amp; 102.8$^{***}$ &amp; -33.07        &amp; -0.6379\\   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                         &amp; (27.46)       &amp; (92.49)       &amp; (3.152)\\   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    \midrule</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    \emph{Fit statistics}\\</span>
@@ -1231,9 +1386,9 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span> Currency                    US $             US $              CA $</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Ozone          Solar.R              Wind</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        42.14*** (2.086) 185.1*** (7.218) 9.958*** (0.2548)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1     272.3*** (25.94) 317.1*** (91.89) -19.89*** (3.152)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2     102.7*** (27.46)   -33.07 (92.49)   -0.6379 (3.152)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        42.14*** (2.086) 185.2*** (7.218) 9.958*** (0.2548)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1     272.4*** (25.94) 317.2*** (91.89) -19.89*** (3.152)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2     102.8*** (27.46)   -33.07 (92.49)   -0.6379 (3.152)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ ________________ _________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID              IID               IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                 116              146               153</span>
@@ -1403,9 +1558,9 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                        </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Constant          18.60*** (3.949)   29.83*** (3.064)  25.79*** (4.436)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R         0.1272*** (0.0266) 0.0659*** (0.0150)  0.1347* (0.0651)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1                         -155.5*** (39.20) -153.5*** (39.12)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1                         -155.5*** (39.20) -153.6*** (39.12)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2                           98.77** (36.32)   98.88** (36.42)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1                          166.6*** (25.38)  159.3*** (25.99)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1                          166.7*** (25.38)  159.3*** (25.99)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2                            67.20* (27.38)    68.77* (27.36)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R square                                         -0.0002 (0.0002)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ __________________ __________________ _________________</span>
@@ -1423,9 +1578,9 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                        </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Constant          18.60*** (3.850)   29.83*** (2.890)  25.79*** (4.091)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R         0.1272*** (0.0260) 0.0659*** (0.0140)  0.1347* (0.0603)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1                         -155.5*** (35.29) -153.5*** (35.11)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1                         -155.5*** (35.29) -153.6*** (35.11)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2                           98.77** (32.31)   98.88** (32.35)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1                          166.6*** (23.41)  159.3*** (23.76)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1                          166.7*** (23.41)  159.3*** (23.76)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2                           67.20** (24.84)   68.77** (24.68)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Solar.R square                                         -0.0002 (0.0002)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ __________________ __________________ _________________</span>
@@ -1669,7 +1824,8 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 <span class="r-in">         <span class="st">"source 1"</span> <span class="op">=</span> <span class="st">"**Source:** the internet?"</span><span class="op">)</span></span>
 <span class="r-in"></span>
 <span class="r-in"><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="fu"><a href="stepwise.html">csw</a></span><span class="op">(</span><span class="va">Solar.R</span>, <span class="va">Wind</span>, <span class="va">Temp</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">airquality</span><span class="op">)</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7). [This msg only concerns the variables common to all estimations.]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       |-&gt; this msg only concerns the variables common to all estimations</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est</span>, dict <span class="op">=</span> <span class="va">dict</span>, tex <span class="op">=</span> <span class="cn">TRUE</span>, notes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"note 1"</span>, <span class="st">"source 1"</span><span class="op">)</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> \begingroup</span>
@@ -1719,8 +1875,7 @@ If <code>tex = FALSE</code>, the data.frame is directly returned. If the argumen
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

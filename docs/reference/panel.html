@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.0</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,28 +76,39 @@
     <p>Constructs a <code>fixest</code> panel data base out of a data.frame which allows to use leads and lags in <code>fixest</code> estimations and to create new variables from leads and lags if the data.frame was also a <code><a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table</a></code>.</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">panel</span><span class="op">(</span><span class="va">data</span>, <span class="va">panel.id</span>, time.step <span class="op">=</span> <span class="cn">NULL</span>, duplicate.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"first"</span><span class="op">)</span><span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">panel</span><span class="op">(</span><span class="va">data</span>, <span class="va">panel.id</span>, time.step <span class="op">=</span> <span class="cn">NULL</span>, duplicate.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"first"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>data</dt>
 <dd><p>A data.frame.</p></dd>
+
+
 <dt>panel.id</dt>
 <dd><p>The panel identifiers. Can either be: i) a one sided formula (e.g. <code>panel.id = ~id+time</code>), ii) a character vector of length 2 (e.g. <code>panel.id=c('id', 'time')</code>, or iii) a character scalar of two variables separated by a comma (e.g. <code>panel.id='id,time'</code>). Note that you can combine variables with <code>^</code> only inside formulas (see the dedicated section in <code><a href="feols.html">feols</a></code>).</p></dd>
+
+
 <dt>time.step</dt>
 <dd><p>The method to compute the lags, default is <code>NULL</code> (which means automatically set). Can be equal to: <code>"unitary"</code>, <code>"consecutive"</code>, <code>"within.consecutive"</code>, or to a number. If <code>"unitary"</code>, then the largest common divisor between consecutive time periods is used (typically if the time variable represents years, it will be 1). This method can apply only to integer (or convertible to integer) variables. If <code>"consecutive"</code>, then the time variable can be of any type: two successive time periods represent a lag of 1. If <code>"witihn.consecutive"</code> then <strong>within a given id</strong>, two successive time periods represent a lag of 1. Finally, if the time variable is numeric, you can provide your own numeric time step.</p></dd>
+
+
 <dt>duplicate.method</dt>
 <dd><p>If several observations have the same id and time values, then the notion of lag is not defined for them. If <code>duplicate.method = "none"</code> (default) and duplicate values are found, this leads to an error. You can use <code>duplicate.method = "first"</code> so that the first occurrence of identical id/time observations will be used as lag.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>It returns a data base identical to the one given in input, but with an additional attribute: “panel_info”. This attribute contains vectors used to efficiently create lags/leads of the data. When the data is subselected, some bookeeping is performed on the attribute “panel_info”.</p>
+    
+
+<p>It returns a data base identical to the one given in input, but with an additional attribute: “panel_info”. This attribute contains vectors used to efficiently create lags/leads of the data. When the data is subselected, some bookeeping is performed on the attribute “panel_info”.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
     <p>This function allows you to use leads and lags in a <code>fixest</code> estimation without having to provide the argument <code>panel.id</code>. It also offers more options on how to set the panel (with the additional arguments 'time.step' and 'duplicate.method').</p>
 <p>When the initial data set was also a <code>data.table</code>, not all operations are supported and some may dissolve the <code>fixest_panel</code>. This is the case when creating subselections of the initial data with additional attributes (e.g. <code>pdt[x&gt;0, .(x, y, z)]</code> would dissolve the <code>fixest_panel</code>, meaning only a data.table would be the result of the call).</p>
-<p>If the initial data set was also a <code>data.table</code>, then you can create new variables from lags and leads using the functions <a href="l">l</a> and <code><a href="l.html">f</a></code>(). See the example.</p>
+<p>If the initial data set was also a <code>data.table</code>, then you can create new variables from lags and leads using the functions <code><a href="l.html">l</a></code> and <code><a href="l.html">f</a></code>. See the example.</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
@@ -170,6 +183,8 @@
 <span class="r-in">  <span class="va">pdat_dt</span><span class="op">[</span>, <span class="va">x1_l1</span> <span class="op">:=</span> <span class="fu"><a href="l.html">l</a></span><span class="op">(</span><span class="va">x1</span><span class="op">)</span><span class="op">]</span></span>
 <span class="r-in">  <span class="va">pdat_dt</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x1_l1_fill0"</span>, <span class="st">"y_f2"</span><span class="op">)</span> <span class="op">:=</span> <span class="fu">.</span><span class="op">(</span><span class="fu"><a href="l.html">l</a></span><span class="op">(</span><span class="va">x1</span>, fill <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>, <span class="fu"><a href="l.html">f</a></span><span class="op">(</span><span class="va">y</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
 <span class="r-in"><span class="op">}</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: data.table</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> data.table 1.14.0 using 6 threads (see ?getDTthreads).  Latest news: r-datatable.com</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
 <span class="r-in"></span>
 <span class="r-in"></span>
@@ -187,8 +202,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>
