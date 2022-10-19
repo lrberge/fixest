@@ -3170,6 +3170,7 @@ femlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian")
 
 	# This is just an alias
 
+    set_defaults("fixest_estimation")
     call_env_bis = new.env(parent = parent.frame())
 
 	res = try(feNmlm(fml = fml, data = data, family = family, fixef = fixef,
@@ -3206,6 +3207,7 @@ fenegbin = function(fml, data, vcov, theta.init, start = 0, fixef, fixef.rm = "p
     }
 
     # This is just an alias
+    set_defaults("fixest_estimation")
     call_env_bis = new.env(parent = parent.frame())
 
     res = try(feNmlm(fml = fml, data=data, family = "negbin", theta.init = theta.init,
@@ -3242,6 +3244,7 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit, split
     }
 
     # This is just an alias
+    set_defaults("fixest_estimation")
     call_env_bis = new.env(parent = parent.frame())
 
     res = try(feglm(fml = fml, data = data, family = "poisson", offset = offset,

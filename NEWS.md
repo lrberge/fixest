@@ -35,6 +35,8 @@
  
  - fix bug in warning message in peculiar case of divergence in GLM (reported by @pachadotdev, #315).
  
+ - fix bug preventing the use of the global data set in wrapper functions (`fepois`, `fenegbin`, etc). Reported by @turbanisch, #343.
+ 
 ## Multiple estimations
 
  - new internal algorithm leading to an object very much like a plain list, much easier to interact with.
