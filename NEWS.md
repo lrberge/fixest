@@ -92,6 +92,8 @@ coeftable(mult_est)
 #> 8  3 x1 + x2 + x3          x2  0.7091320 0.05671929 12.502483 7.656980e-25
 #> 9  3 x1 + x2 + x3          x3 -0.5564827 0.12754795 -4.362929 2.412876e-05
 ```
+
+- new method `confint.fixest_multi` to extract the confidence intervals of multiple estimations.
  
 ## xpd
 

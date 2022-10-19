@@ -258,7 +258,7 @@ set_index_multi = function(x, index_names){
 
 
 rep_df = function(x, times = 1, each = 1, ...){
-    if(times == 1 && each == 1){
+    if(identical(times, 1) && identical(each, 1)){
         return(x)
     }
 
@@ -1255,6 +1255,68 @@ resid.fixest_multi = function(object, type = c("response", "deviance", "pearson"
 
 #' @rdname resid.fixest_multi
 residuals.fixest_multi <- resid.fixest_multi
+
+
+
+
+#' Confidence intervals for `fixest_multi` objects
+#'
+#' Computes the confidence intervals of parameter estimates for `fixest`'s multiple estimation objects (aka `fixest_multi`).
+#'
+#' @inheritParams confint.fixest
+#'
+#' @param object A `fixest_multi` object obtained from a multiple estimation in `fixest`.
+#'
+#' @return
+#' It returns a data frame whose first columns indicate which model has been estimated. The last three columns indicate the coefficient name, and the lower and upper confidence intervals.
+#'
+#' @examples
+#'
+#' base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+#' est = feols(y ~ csw(x.[,1:3]) | sw0(species), base, vcov = "iid)
+#'
+#' confint(est)
+#'
+#' # focusing only on the coefficient 'x3'
+#' confint(est, "x3")
+#'
+#' # the 'id' provides the index of the estimation
+#' est[c(3, 6)]
+#'
+confint.fixest_multi = function(object, parm, level = 0.95, vcov = NULL, se = NULL,
+                                cluster = NULL, ssc = NULL, ...){
+
+    n = length(object)
+    confint_all = vector("list", n)
+    for(i in 1:n){
+        confint_all[[i]] = confint(object[[i]], parm = parm, level = level,
+                                   vcov = vcov, se = se, cluster = cluster,
+                                   ssc = ssc, coef.col = TRUE, internal = TRUE, ...)
+    }
+
+    n_all = sapply(confint_all, NROW)
+
+    if(max(n_all) == 0){
+        stop("No coefficient could be selected. Revise the argument `parm`?")
+    }
+
+    mod = models(object)
+
+    # Formatting
+    mod_all = rep_df(mod, times = n_all)
+    res = do.call(base::rbind, confint_all)
+    res = cbind(mod_all, res)
+
+    attr(res, "type") = attr(confint_all[n_all > 0][[1]], "type")
+
+    res
+}
+
+
+
+
+
+
 
 
 

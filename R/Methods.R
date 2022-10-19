@@ -2756,6 +2756,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
 #'
 #' @param parm The parameters for which to compute the confidence interval (either an integer vector OR a character vector with the parameter name). If missing, all parameters are used.
 #' @param level The confidence level. Default is 0.95.
+#' @param coef.col Logical, default is `FALSE`. If `TRUE` the column `coefficient` is inserted in the first position containing the coefficient names.
 #'
 #' @return
 #' Returns a data.frame with two columns giving respectively the lower and upper bound of the confidence interval. There is as many rows as parameters.
@@ -2779,7 +2780,8 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
 #' confint(est_pois, se = "cluster")
 #'
 #'
-confint.fixest = function(object, parm, level = 0.95, vcov, se, cluster, ssc = NULL, ...){
+confint.fixest = function(object, parm, level = 0.95, vcov, se, cluster,
+                          ssc = NULL, coef.col = FALSE, ...){
 
     # Checking the arguments
     if(is_user_level_call()){
@@ -2789,6 +2791,15 @@ confint.fixest = function(object, parm, level = 0.95, vcov, se, cluster, ssc = N
 
     # Control
     check_arg(level, "numeric scalar gt{0.5} lt{1}")
+
+    dots = list(...)
+
+    IS_INTERNAL = isTRUE(dots$internal)
+    if(IS_INTERNAL){
+        if(length(object$coefficients) == 0){
+            return(NULL)
+        }
+    }
 
     # The proper SE
     sum_object = summary(object, vcov = vcov, se = se, cluster = cluster, ssc = ssc, ...)
@@ -2812,15 +2823,24 @@ confint.fixest = function(object, parm, level = 0.95, vcov, se, cluster, ssc = N
 
         parm_use = unique(na.omit(all_params[parm]))
         if(length(parm_use) == 0){
+
+            if(IS_INTERNAL){
+                return(NULL)
+            }
+
             stop("There are ", length(all_params), " coefficients, the argument 'parm' does not correspond to any of them.")
         }
     } else if(is.character(parm)){
         parm_pblm = setdiff(parm, all_params)
-        if(length(parm_pblm) > 0){
+        if(length(parm_pblm) > 0 && !IS_INTERNAL){
             stop("some parameters of 'parm' have no estimated coefficient: ", paste0(parm_pblm, collapse=", "), ".")
         }
 
         parm_use = intersect(parm, all_params)
+
+        if(IS_INTERNAL && length(parm_use) == 0){
+            return(NULL)
+        }
     }
 
     # multiplicative factor
@@ -2831,10 +2851,16 @@ confint.fixest = function(object, parm, level = 0.95, vcov, se, cluster, ssc = N
     lower_bound = coef_all[parm_use] + fact[1] * se_all[parm_use]
     upper_bound = coef_all[parm_use] + fact[2] * se_all[parm_use]
 
-    res = data.frame(lower_bound, upper_bound, row.names = parm_use)
-
     val = (1 - level) / 2
-    names(res) = paste0(round(100*c(val, 1-val), 1), " %")
+    bound_names = paste0(round(100*c(val, 1-val), 1), " %")
+
+    if(coef.col){
+        res = data.frame(coefficient = parm_use, lower_bound, upper_bound, row.names = NULL)
+        names(res)[-1] = bound_names
+    } else {
+        res = data.frame(lower_bound, upper_bound, row.names = parm_use)
+        names(res) = bound_names
+    }
 
     attr(res, "type") = attr(se_all, "type")
 
