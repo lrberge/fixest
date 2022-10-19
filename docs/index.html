@@ -35,7 +35,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.11.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.0</span>
       </span>
     </div>
 
@@ -52,12 +52,6 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
       <a href="articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
     </li>
     <li>
@@ -65,6 +59,15 @@
     </li>
     <li>
       <a href="articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    </li>
+<li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul>
 </li>
@@ -98,13 +101,13 @@
 <p>The <code>fixest</code> package offers a family of functions to perform estimations with multiple fixed-effects in both an OLS and a GLM context. Please refer to the <a href="https://CRAN.R-project.org/package=fixest/vignettes/fixest_walkthrough.html" class="external-link">introduction</a> for a walk-through.</p>
 <p>At the time of writing of this page (February 2020), <code>fixest</code> is the fastest existing method to perform fixed-effects estimations, often by orders of magnitude. See below for a benchmarking with the fastest alternative software.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># To install from CRAN:</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"fixest"</span><span class="op">)</span>
-
-<span class="co"># To install the latest stable development release:</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"fixest"</span>, 
-                 repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>ropensci <span class="op">=</span> <span class="st">'https://fastverse.r-universe.dev'</span>,
-                           CRAN <span class="op">=</span> <span class="st">'https://cloud.r-project.org'</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># To install from CRAN:</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"fixest"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># To install the latest stable development release:</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"fixest"</span>, </span>
+<span>                 repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>ropensci <span class="op">=</span> <span class="st">'https://fastverse.r-universe.dev'</span>,</span>
+<span>                           CRAN <span class="op">=</span> <span class="st">'https://cloud.r-project.org'</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="benchmarking">Benchmarking<a class="anchor" aria-label="anchor" href="#benchmarking"></a>
 </h2>
@@ -175,15 +178,7 @@
 </ul>
 </div>
 
-<div class="dev-status">
-<h2 data-toc-skip>Dev status</h2>
-<ul class="list-unstyled">
-<li><a href="https://cran.r-project.org/web/checks/check_results_fixest.html" class="external-link"><img src="https://cranchecks.info/badges/worst/fixest" alt="CRAN status"></a></li>
-<li><a href="https://fastverse.r-universe.dev" class="external-link"><img src="https://fastverse.r-universe.dev/badges/fixest" alt="Version_ROpensci"></a></li>
-<li><a href="https://CRAN.R-project.org/package=fixest" class="external-link"><img src="http://www.r-pkg.org/badges/version/fixest" alt="Version"></a></li>
-<li><a href="https://ipub.com/dev-corner/apps/r-package-downloads/" class="external-link"> <img src="https://cranlogs.r-pkg.org/badges/fixest" alt="Downloads"></a></li>
-</ul>
-</div>
+
 
   </div>
 </div>

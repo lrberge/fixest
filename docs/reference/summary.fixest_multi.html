@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.11.0</span>
       </span>
     </div>
 
@@ -74,49 +74,70 @@
     <p>Summary information for fixest_multi objects. In particular, this is used to specify the type of standard-errors to be computed.</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for fixest_multi</span>
-<span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span>
-  <span class="va">object</span>,
-  type <span class="op">=</span> <span class="st">"short"</span>,
-  vcov <span class="op">=</span> <span class="cn">NULL</span>,
-  se <span class="op">=</span> <span class="cn">NULL</span>,
-  cluster <span class="op">=</span> <span class="cn">NULL</span>,
-  ssc <span class="op">=</span> <span class="cn">NULL</span>,
-  .vcov <span class="op">=</span> <span class="cn">NULL</span>,
-  stage <span class="op">=</span> <span class="fl">2</span>,
-  lean <span class="op">=</span> <span class="cn">FALSE</span>,
-  n <span class="op">=</span> <span class="fl">1000</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for fixest_multi</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  type <span class="op">=</span> <span class="st">"short"</span>,</span>
+<span>  vcov <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  se <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cluster <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ssc <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .vcov <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  stage <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  lean <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  n <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>object</dt>
 <dd><p>A <code>fixest_multi</code> object, obtained from a <code>fixest</code> estimation leading to multiple results.</p></dd>
+
+
 <dt>type</dt>
 <dd><p>A character either equal to <code>"short"</code>, <code>"long"</code>, <code>"compact"</code>, <code>"se_compact"</code> or <code>"se_long"</code>. If <code>short</code>, only the table of coefficients is displayed for each estimation. If <code>long</code>, then the full results are displayed for each estimation. If <code>compact</code>, a <code>data.frame</code> is returned with one line per model and the formatted coefficients + standard-errors in the columns. If <code>se_compact</code>, a <code>data.frame</code> is returned with one line per model, one numeric column for each coefficient and one numeric column for each standard-error. If <code>"se_long"</code>, same as <code>"se_compact"</code> but the data is in a long format instead of wide.</p></dd>
-<dt>vcov</dt>
+
+
+<dt>vcov, .vcov</dt>
 <dd><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href="vcov_cluster.html">vcov_cluster</a></code>, <code><a href="vcov_hac.html">vcov_NW</a></code>, <code><a href="vcov_hac.html">NW</a></code>, <code><a href="vcov_hac.html">vcov_DK</a></code>, <code><a href="vcov_hac.html">DK</a></code>, <code><a href="vcov_conley.html">vcov_conley</a></code> and <code><a href="vcov_conley.html">conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the <code>vcov</code> documentation in the <a href="https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1" class="external-link">vignette</a>.</p></dd>
+
+
 <dt>se</dt>
 <dd><p>Character scalar. Which kind of standard error should be computed: “standard”, “hetero”, “cluster”, “twoway”, “threeway” or “fourway”? By default if there are clusters in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "iid"</code>. Note that this argument is deprecated, you should use <code>vcov</code> instead.</p></dd>
+
+
 <dt>cluster</dt>
 <dd><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as fixed-effects in the estimation, you can leave it blank with <code>vcov = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [resp. 2nd] fixed-effect). You can interact two variables using <code>^</code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></dd>
+
+
 <dt>ssc</dt>
 <dd><p>An object of class <code>ssc.type</code> obtained with the function <code><a href="ssc.html">ssc</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href="ssc.html">ssc</a></code> for this argument. The arguments and defaults of the function <code><a href="ssc.html">ssc</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "min"</code>, <code>t.df = "min"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href="ssc.html">ssc</a></code> for details.</p></dd>
-<dt>.vcov</dt>
-<dd><p>A user provided covariance matrix or a function computing this matrix. If a matrix, it must be a square matrix of the same number of rows as the number of variables estimated. If a function, it must return the previously mentioned matrix.</p></dd>
+
+
 <dt>stage</dt>
 <dd><p>Can be equal to <code>2</code> (default), <code>1</code>, <code>1:2</code> or <code>2:1</code>. Only used if the object is an IV estimation: defines the stage to which <code>summary</code> should be applied. If <code>stage = 1</code> and there are multiple endogenous regressors or if <code>stage</code> is of length 2, then an object of class <code>fixest_multi</code> is returned.</p></dd>
+
+
 <dt>lean</dt>
 <dd><p>Logical, default is <code>FALSE</code>. Used to reduce the (memory) size of the summary object. If <code>TRUE</code>, then all objects of length N (the number of observations) are removed from the result. Note that some <code>fixest</code> methods may consequently not work when applied to the summary.</p></dd>
+
+
 <dt>n</dt>
 <dd><p>Integer, default is 1000. Number of coefficients to display when the print method is used.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Not currently used.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>It returns either an object of class <code>fixest_multi</code> (if <code>type</code> equals <code>short</code> or <code>long</code>), either a <code>data.frame</code> (if type equals <code>compact</code> or <code>se_compact</code>).</p>
+    
+
+<p>It returns either an object of class <code>fixest_multi</code> (if <code>type</code> equals <code>short</code> or <code>long</code>), either a <code>data.frame</code> (if type equals <code>compact</code> or <code>se_compact</code>).</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
@@ -125,16 +146,16 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="va">base</span> <span class="op">=</span> <span class="va">iris</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Multiple estimation</span></span>
-<span class="r-in"><span class="va">res</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu"><a href="stepwise.html">csw</a></span><span class="op">(</span><span class="va">x1</span>, <span class="va">x2</span>, <span class="va">x3</span><span class="op">)</span>, <span class="va">base</span>, split <span class="op">=</span> <span class="op">~</span><span class="va">species</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># By default, the type is "short"</span></span>
-<span class="r-in"><span class="co"># You can still use the arguments from summary.fixest</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span>, se <span class="op">=</span> <span class="st">"hetero"</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">base</span> <span class="op">=</span> <span class="va">iris</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Multiple estimation</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu"><a href="stepwise.html">csw</a></span><span class="op">(</span><span class="va">x1</span>, <span class="va">x2</span>, <span class="va">x3</span><span class="op">)</span>, <span class="va">base</span>, split <span class="op">=</span> <span class="op">~</span><span class="va">species</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># By default, the type is "short"</span></span></span>
+<span class="r-in"><span><span class="co"># You can still use the arguments from summary.fixest</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span>, se <span class="op">=</span> <span class="st">"hetero"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Heteroskedasticity-robust </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ### Sample: setosa</span>
@@ -196,8 +217,8 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> x1           0.330337   0.122494  2.696759 9.7515e-03 ** </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> x2           0.945536   0.080881 11.690520 2.2562e-15 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> x3          -0.169753   0.210310 -0.807154 4.2373e-01    </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"long"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"long"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ### Sample: setosa</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -321,11 +342,30 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 0.305014   Adj. R2: 0.749908</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"compact"</span><span class="op">)</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in sprintf("%s%.*s", res[i], s + 2 - nchar(res[i]), "0000000000000000"):</span> argument for '*' conversion specification must be a number</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"se_compact"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"compact"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   lhs     sample          rhs     (Intercept)               x1               x2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   y setosa     x1           2.64*** (0.310) 0.690*** (0.090)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   y setosa     x1 + x2      2.30*** (0.385) 0.667*** (0.090)    0.283 (0.197)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   y setosa     x1 + x2 + x3 2.35*** (0.393) 0.655*** (0.092)    0.238 (0.208)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   y versicolor x1           3.54*** (0.563) 0.865*** (0.202)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5   y versicolor x1 + x2      2.12*** (0.494)    0.248 (0.187) 0.736*** (0.125)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6   y versicolor x1 + x2 + x3 1.90*** (0.507)   0.387. (0.205) 0.908*** (0.165)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7   y virginica  x1           3.91*** (0.757) 0.902*** (0.253)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8   y virginica  x1 + x2        0.625 (0.525)   0.260. (0.153) 0.935*** (0.090)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9   y virginica  x1 + x2 + x3   0.700 (0.534)   0.330. (0.174) 0.946*** (0.091)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               x3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  0.252 (0.347)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 -0.679 (0.435)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9 -0.170 (0.198)</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"se_compact"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   lhs     sample          rhs (Intercept) (Intercept)__se        x1     x1__se</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1   y setosa     x1             2.6390012       0.3100143 0.6904897 0.08989888</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2   y setosa     x1 + x2        2.3037382       0.3852942 0.6674162 0.09035581</span>
@@ -346,8 +386,8 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> 7        NA         NA         NA        NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 8 0.9348189 0.08960197         NA        NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 9 0.9455356 0.09072204 -0.1697527 0.1980724</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"se_long"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"se_long"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    lhs     sample          rhs type (Intercept)         x1         x2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1    y setosa     x1           coef   2.6390012 0.69048972         NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2    y setosa     x1             se   0.3100143 0.08989888         NA</span>
@@ -386,8 +426,8 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> 16         NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 17 -0.1697527</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 18  0.1980724</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -402,8 +442,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.11.0</span>
       </span>
     </div>
 
@@ -74,80 +74,103 @@
     <p>Set of functions to directly extract some commonly used statistics, like the p-value or the table of coefficients, from estimations. This was first implemented for <code>fixest</code> estimations, but has some support for other models.</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for fixest</span>
-<span class="fu"><a href="coeftable.html">coeftable</a></span><span class="op">(</span>
-  <span class="va">object</span>,
-  vcov <span class="op">=</span> <span class="cn">NULL</span>,
-  ssc <span class="op">=</span> <span class="cn">NULL</span>,
-  cluster <span class="op">=</span> <span class="cn">NULL</span>,
-  keep <span class="op">=</span> <span class="cn">NULL</span>,
-  drop <span class="op">=</span> <span class="cn">NULL</span>,
-  order <span class="op">=</span> <span class="cn">NULL</span>,
-  list <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-
-<span class="co"># S3 method for fixest</span>
-<span class="fu"><a href="coeftable.html">se</a></span><span class="op">(</span>
-  <span class="va">object</span>,
-  vcov <span class="op">=</span> <span class="cn">NULL</span>,
-  ssc <span class="op">=</span> <span class="cn">NULL</span>,
-  cluster <span class="op">=</span> <span class="cn">NULL</span>,
-  keep <span class="op">=</span> <span class="cn">NULL</span>,
-  drop <span class="op">=</span> <span class="cn">NULL</span>,
-  order <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-
-<span class="co"># S3 method for fixest</span>
-<span class="fu"><a href="coeftable.html">tstat</a></span><span class="op">(</span>
-  <span class="va">object</span>,
-  vcov <span class="op">=</span> <span class="cn">NULL</span>,
-  ssc <span class="op">=</span> <span class="cn">NULL</span>,
-  cluster <span class="op">=</span> <span class="cn">NULL</span>,
-  keep <span class="op">=</span> <span class="cn">NULL</span>,
-  drop <span class="op">=</span> <span class="cn">NULL</span>,
-  order <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-
-<span class="co"># S3 method for fixest</span>
-<span class="fu"><a href="coeftable.html">pvalue</a></span><span class="op">(</span>
-  <span class="va">object</span>,
-  vcov <span class="op">=</span> <span class="cn">NULL</span>,
-  ssc <span class="op">=</span> <span class="cn">NULL</span>,
-  cluster <span class="op">=</span> <span class="cn">NULL</span>,
-  keep <span class="op">=</span> <span class="cn">NULL</span>,
-  drop <span class="op">=</span> <span class="cn">NULL</span>,
-  order <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for fixest</span></span>
+<span><span class="fu"><a href="coeftable.html">coeftable</a></span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  vcov <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ssc <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cluster <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  keep <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  drop <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  order <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  list <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for fixest</span></span>
+<span><span class="fu"><a href="coeftable.html">se</a></span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  vcov <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ssc <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cluster <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  keep <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  drop <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  order <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for fixest</span></span>
+<span><span class="fu"><a href="coeftable.html">tstat</a></span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  vcov <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ssc <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cluster <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  keep <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  drop <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  order <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for fixest</span></span>
+<span><span class="fu"><a href="coeftable.html">pvalue</a></span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  vcov <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ssc <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cluster <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  keep <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  drop <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  order <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>object</dt>
 <dd><p>A <code>fixest</code> object. For example an estimation obtained from <code><a href="feols.html">feols</a></code>.</p></dd>
+
+
 <dt>vcov</dt>
-<dd><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href="vcov_cluster.html">vcov_cluster</a></code>, <code><a href="vcov_hac.html">vcov_NW</a></code>, <code><a href="vcov_hac.html">NW</a></code>, <code><a href="vcov_hac.html">vcov_DK</a></code>, <code><a href="vcov_hac.html">DK</a></code>, <code><a href="vcov_conley.html">vcov_conley</a></code> and <code><a href="vcov_conley.html">conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the <code>vcov</code> documentation in the <a href="https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1" class="external-link">vignette</a>.</p></dd>
+<dd><p>A function to be used to compute the standard-errors of each fixest object. You can pass extra arguments to this function using the argument <code>.vcov_args</code>. See the example.</p></dd>
+
+
 <dt>ssc</dt>
 <dd><p>An object of class <code>ssc.type</code> obtained with the function <code><a href="ssc.html">ssc</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href="ssc.html">ssc</a></code> for this argument. The arguments and defaults of the function <code><a href="ssc.html">ssc</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "min"</code>, <code>t.df = "min"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href="ssc.html">ssc</a></code> for details.</p></dd>
+
+
 <dt>cluster</dt>
 <dd><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1, "var2")]</code>, <code>cluster = c("var1, "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as clusters in the estimation, you could further use <code>cluster = 1:2</code> or leave it blank with <code>se = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [resp. 2nd] cluster).</p></dd>
+
+
 <dt>keep</dt>
 <dd><p>Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see <code><a href="https://rdrr.io/r/base/regex.html" class="external-link">base::regex</a></code> help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument <code>dict</code>). Example: you have the variable <code>x1</code> to <code>x55</code> and want to display only <code>x1</code> to <code>x9</code>, then you could use <code>keep = "x[[:digit:]]$"</code>. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain “Intercept” is kept). See details.</p></dd>
+
+
 <dt>drop</dt>
 <dd><p>Character vector. This element is used if some variables are not to be displayed. This should be a vector of regular expressions (see <code><a href="https://rdrr.io/r/base/regex.html" class="external-link">base::regex</a></code> help for more info). Each variable satisfying any of the regular expressions will be discarded. This argument is applied post aliasing (see argument <code>dict</code>). Example: you have the variable <code>x1</code> to <code>x55</code> and want to display only <code>x1</code> to <code>x9</code>, then you could use <code>drop = "x[[:digit:]]{2}</code>". If the first character is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable that does not contain “Intercept” is dropped). See details.</p></dd>
+
+
 <dt>order</dt>
 <dd><p>Character vector. This element is used if the user wants the variables to be ordered in a certain way. This should be a vector of regular expressions (see <code><a href="https://rdrr.io/r/base/regex.html" class="external-link">base::regex</a></code> help for more info). The variables satisfying the first regular expression will be placed first, then the order follows the sequence of regular expressions. This argument is applied post aliasing (see argument <code>dict</code>). Example: you have the following variables: <code>month1</code> to <code>month6</code>, then <code>x1</code> to <code>x5</code>, then <code>year1</code> to <code>year6</code>. If you want to display first the x's, then the years, then the months you could use: <code>order = c("x", "year")</code>. If the first character is an exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that does not contain “Intercept” goes first).  See details.</p></dd>
+
+
 <dt>list</dt>
 <dd><p>Logical, default is <code>FALSE</code>. If <code>TRUE</code>, then a nested list is returned, the first layer is accessed with the coefficients names; the second layer with the following values: <code>coef</code>, <code>se</code>, <code>tstat</code>, <code>pvalue</code>. Note that the variable <code>"(Intercept)"</code> is renamed into <code>"constant"</code>.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Other arguments to be passed to <code><a href="summary.fixest.html">summary.fixest</a></code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Returns a table of coefficients, with in rows the variables and four columns: the estimate, the standard-error, the t-statistic and the p-value.
-If <code>list = TRUE</code> then a nested list is returned, the first layer is accessed with the coefficients names; the second layer with the following values: <code>coef</code>, <code>se</code>, <code>tstat</code>, <code>pvalue</code>. For example, with <code>res = coeftable(est, list = TRUE)</code> you can access the SE of the coefficient <code>x1</code> with <code>res$x1$se</code>; and its coefficient with <code>res$x1$coef</code>, etc.</p>
+    
+
+<p>Returns a table of coefficients, with in rows the variables and four columns: the estimate, the standard-error, the t-statistic and the p-value.</p>
+
+
+<p>If <code>list = TRUE</code> then a nested list is returned, the first layer is accessed with the coefficients names; the second layer with the following values: <code>coef</code>, <code>se</code>, <code>tstat</code>, <code>pvalue</code>. For example, with <code>res = coeftable(est, list = TRUE)</code> you can access the SE of the coefficient <code>x1</code> with <code>res$x1$se</code>; and its coefficient with <code>res$x1$coef</code>, etc.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -163,110 +186,110 @@ If <code>list = TRUE</code> then a nested list is returned, the first layer is a
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="co"># Some data and estimation</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">trade</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feglm.html">fepois</a></span><span class="op">(</span><span class="va">Euros</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">dist_km</span><span class="op">)</span> <span class="op">|</span> <span class="va">Origin</span><span class="op">^</span><span class="va">Product</span> <span class="op">+</span> <span class="va">Year</span>, <span class="va">trade</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Coeftable/se/tstat/pvalue</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Default is clustering along Origin^Product</span></span>
-<span class="r-in"><span class="fu"><a href="coeftable.html">coeftable</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Some data and estimation</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">trade</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feglm.html">fepois</a></span><span class="op">(</span><span class="va">Euros</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">dist_km</span><span class="op">)</span> <span class="op">|</span> <span class="va">Origin</span><span class="op">^</span><span class="va">Product</span> <span class="op">+</span> <span class="va">Year</span>, <span class="va">trade</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Coeftable/se/tstat/pvalue</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Default is clustering along Origin^Product</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="coeftable.html">coeftable</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               Estimate Std. Error   t value      Pr(&gt;|t|)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km) -1.023957 0.04728994 -21.65275 5.725404e-104</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"type")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Clustered (Origin^Product)"</span>
-<span class="r-in"><span class="fu"><a href="coeftable.html">se</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="coeftable.html">se</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   0.04728994 </span>
-<span class="r-in"><span class="fu"><a href="coeftable.html">tstat</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="coeftable.html">tstat</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    -21.65275 </span>
-<span class="r-in"><span class="fu"><a href="coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  log(dist_km) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5.725404e-104 </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Now with two-way clustered standard-errors</span></span>
-<span class="r-in"><span class="co">#  and using coeftable()</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="coeftable.html">coeftable</a></span><span class="op">(</span><span class="va">est</span>, cluster <span class="op">=</span> <span class="op">~</span><span class="va">Origin</span> <span class="op">+</span> <span class="va">Product</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Now with two-way clustered standard-errors</span></span></span>
+<span class="r-in"><span><span class="co">#  and using coeftable()</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="coeftable.html">coeftable</a></span><span class="op">(</span><span class="va">est</span>, cluster <span class="op">=</span> <span class="op">~</span><span class="va">Origin</span> <span class="op">+</span> <span class="va">Product</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               Estimate Std. Error   t value    Pr(&gt;|t|)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km) -1.023957  0.0906375 -11.29728 1.35342e-29</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"type")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Clustered (Origin &amp; Product)"</span>
-<span class="r-in"><span class="fu"><a href="coeftable.html">se</a></span><span class="op">(</span><span class="va">est</span>, cluster <span class="op">=</span> <span class="op">~</span><span class="va">Origin</span> <span class="op">+</span> <span class="va">Product</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="coeftable.html">se</a></span><span class="op">(</span><span class="va">est</span>, cluster <span class="op">=</span> <span class="op">~</span><span class="va">Origin</span> <span class="op">+</span> <span class="va">Product</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    0.0906375 </span>
-<span class="r-in"><span class="fu"><a href="coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">est</span>, cluster <span class="op">=</span> <span class="op">~</span><span class="va">Origin</span> <span class="op">+</span> <span class="va">Product</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">est</span>, cluster <span class="op">=</span> <span class="op">~</span><span class="va">Origin</span> <span class="op">+</span> <span class="va">Product</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  1.35342e-29 </span>
-<span class="r-in"><span class="fu"><a href="coeftable.html">tstat</a></span><span class="op">(</span><span class="va">est</span>, cluster <span class="op">=</span> <span class="op">~</span><span class="va">Origin</span> <span class="op">+</span> <span class="va">Product</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="coeftable.html">tstat</a></span><span class="op">(</span><span class="va">est</span>, cluster <span class="op">=</span> <span class="op">~</span><span class="va">Origin</span> <span class="op">+</span> <span class="va">Product</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    -11.29728 </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Or you can cluster only once:</span></span>
-<span class="r-in"><span class="va">est_sum</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span>, cluster <span class="op">=</span> <span class="op">~</span><span class="va">Origin</span> <span class="op">+</span> <span class="va">Product</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="coeftable.html">coeftable</a></span><span class="op">(</span><span class="va">est_sum</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Or you can cluster only once:</span></span></span>
+<span class="r-in"><span><span class="va">est_sum</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span>, cluster <span class="op">=</span> <span class="op">~</span><span class="va">Origin</span> <span class="op">+</span> <span class="va">Product</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="coeftable.html">coeftable</a></span><span class="op">(</span><span class="va">est_sum</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               Estimate Std. Error   t value    Pr(&gt;|t|)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km) -1.023957  0.0906375 -11.29728 1.35342e-29</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"type")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Clustered (Origin &amp; Product)"</span>
-<span class="r-in"><span class="fu"><a href="coeftable.html">se</a></span><span class="op">(</span><span class="va">est_sum</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="coeftable.html">se</a></span><span class="op">(</span><span class="va">est_sum</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    0.0906375 </span>
-<span class="r-in"><span class="fu"><a href="coeftable.html">tstat</a></span><span class="op">(</span><span class="va">est_sum</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="coeftable.html">tstat</a></span><span class="op">(</span><span class="va">est_sum</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    -11.29728 </span>
-<span class="r-in"><span class="fu"><a href="coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">est_sum</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">est_sum</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  1.35342e-29 </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># You can use the arguments keep, drop, order</span></span>
-<span class="r-in"><span class="co"># to rearrange the results</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">base</span> <span class="op">=</span> <span class="va">iris</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">est_iv</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">|</span> <span class="va">x2</span> <span class="op">~</span> <span class="va">x3</span>, <span class="va">base</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="coeftable.html">tstat</a></span><span class="op">(</span><span class="va">est_iv</span>, keep <span class="op">=</span> <span class="st">"x1"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># You can use the arguments keep, drop, order</span></span></span>
+<span class="r-in"><span><span class="co"># to rearrange the results</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">base</span> <span class="op">=</span> <span class="va">iris</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">est_iv</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">|</span> <span class="va">x2</span> <span class="op">~</span> <span class="va">x3</span>, <span class="va">base</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="coeftable.html">tstat</a></span><span class="op">(</span><span class="va">est_iv</span>, keep <span class="op">=</span> <span class="st">"x1"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       x1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 7.960735 </span>
-<span class="r-in"><span class="fu"><a href="coeftable.html">coeftable</a></span><span class="op">(</span><span class="va">est_iv</span>, keep <span class="op">=</span> <span class="st">"x1|Int"</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="coeftable.html">coeftable</a></span><span class="op">(</span><span class="va">est_iv</span>, keep <span class="op">=</span> <span class="st">"x1|Int"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std. Error  t value     Pr(&gt;|t|)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept) 2.438955 0.25349903 9.621160 2.688392e-17</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> x1          0.559183 0.07024264 7.960735 4.261663e-13</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="coeftable.html">coeftable</a></span><span class="op">(</span><span class="va">est_iv</span>, order <span class="op">=</span> <span class="st">"!Int"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="coeftable.html">coeftable</a></span><span class="op">(</span><span class="va">est_iv</span>, order <span class="op">=</span> <span class="st">"!Int"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error   t value     Pr(&gt;|t|)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> fit_x2      0.4509765 0.01794806 25.126759 4.556383e-55</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> x1          0.5591830 0.07024264  7.960735 4.261663e-13</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept) 2.4389548 0.25349903  9.621160 2.688392e-17</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Using lists</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Returning the coefficients table as a list can be useful for quick</span></span>
-<span class="r-in"><span class="co"># reference in markdown documents.</span></span>
-<span class="r-in"><span class="co"># Note that the "(Intercept)" is renamed into "constant"</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">res</span> <span class="op">=</span> <span class="fu"><a href="coeftable.html">coeftable</a></span><span class="op">(</span><span class="va">est_iv</span>, list <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># coefficient of the constant:</span></span>
-<span class="r-in"><span class="va">res</span><span class="op">$</span><span class="va">constant</span><span class="op">$</span><span class="va">coef</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Using lists</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Returning the coefficients table as a list can be useful for quick</span></span></span>
+<span class="r-in"><span><span class="co"># reference in markdown documents.</span></span></span>
+<span class="r-in"><span><span class="co"># Note that the "(Intercept)" is renamed into "constant"</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">=</span> <span class="fu"><a href="coeftable.html">coeftable</a></span><span class="op">(</span><span class="va">est_iv</span>, list <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># coefficient of the constant:</span></span></span>
+<span class="r-in"><span><span class="va">res</span><span class="op">$</span><span class="va">constant</span><span class="op">$</span><span class="va">coef</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Estimate </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2.438955 </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># pvalue of x1</span></span>
-<span class="r-in"><span class="va">res</span><span class="op">$</span><span class="va">x1</span><span class="op">$</span><span class="va">pvalue</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># pvalue of x1</span></span></span>
+<span class="r-in"><span><span class="va">res</span><span class="op">$</span><span class="va">x1</span><span class="op">$</span><span class="va">pvalue</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Pr(&gt;|t|) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4.261663e-13 </span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -281,8 +304,7 @@ If <code>list = TRUE</code> then a nested list is returned, the first layer is a
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

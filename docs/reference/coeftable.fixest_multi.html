@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.11.0</span>
       </span>
     </div>
 
@@ -74,75 +74,98 @@
     <p>Series of methods to extract the coefficients table or its sub-components from a <code>fixest_multi</code> objects (i.e. the outcome of multiple estimations).</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for fixest_multi</span>
-<span class="fu"><a href="coeftable.html">coeftable</a></span><span class="op">(</span>
-  <span class="va">object</span>,
-  vcov <span class="op">=</span> <span class="cn">NULL</span>,
-  keep <span class="op">=</span> <span class="cn">NULL</span>,
-  drop <span class="op">=</span> <span class="cn">NULL</span>,
-  order <span class="op">=</span> <span class="cn">NULL</span>,
-  long <span class="op">=</span> <span class="cn">FALSE</span>,
-  wide <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-
-<span class="co"># S3 method for fixest_multi</span>
-<span class="fu"><a href="coeftable.html">se</a></span><span class="op">(</span>
-  <span class="va">object</span>,
-  vcov <span class="op">=</span> <span class="cn">NULL</span>,
-  keep <span class="op">=</span> <span class="cn">NULL</span>,
-  drop <span class="op">=</span> <span class="cn">NULL</span>,
-  order <span class="op">=</span> <span class="cn">NULL</span>,
-  long <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-
-<span class="co"># S3 method for fixest_multi</span>
-<span class="fu"><a href="coeftable.html">tstat</a></span><span class="op">(</span>
-  <span class="va">object</span>,
-  vcov <span class="op">=</span> <span class="cn">NULL</span>,
-  keep <span class="op">=</span> <span class="cn">NULL</span>,
-  drop <span class="op">=</span> <span class="cn">NULL</span>,
-  order <span class="op">=</span> <span class="cn">NULL</span>,
-  long <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-
-<span class="co"># S3 method for fixest_multi</span>
-<span class="fu"><a href="coeftable.html">pvalue</a></span><span class="op">(</span>
-  <span class="va">object</span>,
-  vcov <span class="op">=</span> <span class="cn">NULL</span>,
-  keep <span class="op">=</span> <span class="cn">NULL</span>,
-  drop <span class="op">=</span> <span class="cn">NULL</span>,
-  order <span class="op">=</span> <span class="cn">NULL</span>,
-  long <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for fixest_multi</span></span>
+<span><span class="fu"><a href="coeftable.html">coeftable</a></span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  vcov <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  keep <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  drop <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  order <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  long <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  wide <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for fixest_multi</span></span>
+<span><span class="fu"><a href="coeftable.html">se</a></span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  vcov <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  keep <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  drop <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  order <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  long <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for fixest_multi</span></span>
+<span><span class="fu"><a href="coeftable.html">tstat</a></span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  vcov <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  keep <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  drop <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  order <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  long <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for fixest_multi</span></span>
+<span><span class="fu"><a href="coeftable.html">pvalue</a></span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  vcov <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  keep <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  drop <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  order <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  long <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>object</dt>
 <dd><p>A <code>fixest_multi</code> object, coming from a <code>fixest</code> multiple estimation.</p></dd>
+
+
 <dt>vcov</dt>
-<dd><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href="vcov_cluster.html">vcov_cluster</a></code>, <code><a href="vcov_hac.html">vcov_NW</a></code>, <code><a href="vcov_hac.html">NW</a></code>, <code><a href="vcov_hac.html">vcov_DK</a></code>, <code><a href="vcov_hac.html">DK</a></code>, <code><a href="vcov_conley.html">vcov_conley</a></code> and <code><a href="vcov_conley.html">conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the <code>vcov</code> documentation in the <a href="https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1" class="external-link">vignette</a>.</p></dd>
+<dd><p>A function to be used to compute the standard-errors of each fixest object. You can pass extra arguments to this function using the argument <code>.vcov_args</code>. See the example.</p></dd>
+
+
 <dt>keep</dt>
 <dd><p>Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see <code><a href="https://rdrr.io/r/base/regex.html" class="external-link">base::regex</a></code> help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument <code>dict</code>). Example: you have the variable <code>x1</code> to <code>x55</code> and want to display only <code>x1</code> to <code>x9</code>, then you could use <code>keep = "x[[:digit:]]$"</code>. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain “Intercept” is kept). See details.</p></dd>
+
+
 <dt>drop</dt>
 <dd><p>Character vector. This element is used if some variables are not to be displayed. This should be a vector of regular expressions (see <code><a href="https://rdrr.io/r/base/regex.html" class="external-link">base::regex</a></code> help for more info). Each variable satisfying any of the regular expressions will be discarded. This argument is applied post aliasing (see argument <code>dict</code>). Example: you have the variable <code>x1</code> to <code>x55</code> and want to display only <code>x1</code> to <code>x9</code>, then you could use <code>drop = "x[[:digit:]]{2}</code>". If the first character is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable that does not contain “Intercept” is dropped). See details.</p></dd>
+
+
 <dt>order</dt>
 <dd><p>Character vector. This element is used if the user wants the variables to be ordered in a certain way. This should be a vector of regular expressions (see <code><a href="https://rdrr.io/r/base/regex.html" class="external-link">base::regex</a></code> help for more info). The variables satisfying the first regular expression will be placed first, then the order follows the sequence of regular expressions. This argument is applied post aliasing (see argument <code>dict</code>). Example: you have the following variables: <code>month1</code> to <code>month6</code>, then <code>x1</code> to <code>x5</code>, then <code>year1</code> to <code>year6</code>. If you want to display first the x's, then the years, then the months you could use: <code>order = c("x", "year")</code>. If the first character is an exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that does not contain “Intercept” goes first).  See details.</p></dd>
+
+
 <dt>long</dt>
 <dd><p>Logical scalar, default is <code>FALSE</code>. If <code>TRUE</code>, then all the information is stacked, with two columns containing the information: <code>"param"</code> and <code>"value"</code>. The column <code>param</code> contains the values <code>coef</code>/<code>se</code>/<code>tstat</code>/<code>pvalue</code>.</p></dd>
+
+
 <dt>wide</dt>
 <dd><p>A logical scalar, default is <code>FALSE</code>. If <code>TRUE</code>, then a list is returned: the elements of the list are coef/se/tstat/pvalue. Each element of the list is a wide table with a column per coefficient.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Other arguments to be passed to <code><a href="summary.fixest.html">summary.fixest</a></code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>It returns a <code>data.frame</code> containing the coefficients tables (or just the se/pvalue/tstat) along with the information on which model was estimated.
-If <code>wide = TRUE</code>, then a list is returned. The elements of the list are coef/se/tstat/pvalue. Each element of the list is a wide table with a column per coefficient.
-If <code>long = TRUE</code>, then all the information is stacked. This removes the 4 columns containing the coefficient estimates to the p-values, and replace them with two new columns: <code>"param"</code> and <code>"value"</code>. The column <code>param</code> contains the values <code>coef</code>/<code>se</code>/<code>tstat</code>/<code>pvalue</code>, and the column <code>values</code> the associated numerical information.</p>
+    
+
+<p>It returns a <code>data.frame</code> containing the coefficients tables (or just the se/pvalue/tstat) along with the information on which model was estimated.</p>
+
+
+<p>If <code>wide = TRUE</code>, then a list is returned. The elements of the list are coef/se/tstat/pvalue. Each element of the list is a wide table with a column per coefficient.</p>
+
+
+<p>If <code>long = TRUE</code>, then all the information is stacked. This removes the 4 columns containing the coefficient estimates to the p-values, and replace them with two new columns: <code>"param"</code> and <code>"value"</code>. The column <code>param</code> contains the values <code>coef</code>/<code>se</code>/<code>tstat</code>/<code>pvalue</code>, and the column <code>values</code> the associated numerical information.</p>
     </div>
     <div id="functions">
     <h2>Functions</h2>
@@ -154,12 +177,12 @@ If <code>long = TRUE</code>, then all the information is stacked. This removes t
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="va">iris</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">est_multi</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span><span class="op">~</span> <span class="fu"><a href="stepwise.html">csw</a></span><span class="op">(</span><span class="va">x.</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span>, <span class="va">base</span>, split <span class="op">=</span> <span class="op">~</span><span class="va">species</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># we get all the coefficient tables at once</span></span>
-<span class="r-in"><span class="fu"><a href="coeftable.html">coeftable</a></span><span class="op">(</span><span class="va">est_multi</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="va">iris</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">est_multi</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span><span class="op">~</span> <span class="fu"><a href="stepwise.html">csw</a></span><span class="op">(</span><span class="va">x.</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span>, <span class="va">base</span>, split <span class="op">=</span> <span class="op">~</span><span class="va">species</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># we get all the coefficient tables at once</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="coeftable.html">coeftable</a></span><span class="op">(</span><span class="va">est_multi</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    id sample.var     sample          rhs coefficient   Estimate Std. Error</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1   1    species     setosa           x1 (Intercept)  2.6390012 0.31001431</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2   1    species     setosa           x1          x1  0.6904897 0.08989888</span>
@@ -216,9 +239,9 @@ If <code>long = TRUE</code>, then all the information is stacked. This removes t
 <span class="r-out co"><span class="r-pr">#&gt;</span> 25  1.8949086 6.439972e-02</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 26 10.4223360 1.074269e-13</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 27 -0.8570233 3.958750e-01</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Now just the standard-errors</span></span>
-<span class="r-in"><span class="fu"><a href="coeftable.html">se</a></span><span class="op">(</span><span class="va">est_multi</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Now just the standard-errors</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="coeftable.html">se</a></span><span class="op">(</span><span class="va">est_multi</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   id sample.var     sample          rhs (Intercept)         x1         x2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1  1    species     setosa           x1   0.3100143 0.08989888         NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2  2    species     setosa      x1 + x2   0.3852942 0.09035581 0.19722377</span>
@@ -239,9 +262,9 @@ If <code>long = TRUE</code>, then all the information is stacked. This removes t
 <span class="r-out co"><span class="r-pr">#&gt;</span> 7        NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 8        NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 9 0.1980724</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># wide = TRUE =&gt; leads toa  list of wide tables</span></span>
-<span class="r-in"><span class="fu"><a href="coeftable.html">coeftable</a></span><span class="op">(</span><span class="va">est_multi</span>, wide <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># wide = TRUE =&gt; leads toa  list of wide tables</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="coeftable.html">coeftable</a></span><span class="op">(</span><span class="va">est_multi</span>, wide <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $coef</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   id sample.var     sample          rhs (Intercept)        x1        x2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1  1    species     setosa           x1   2.6390012 0.6904897        NA</span>
@@ -330,9 +353,9 @@ If <code>long = TRUE</code>, then all the information is stacked. This removes t
 <span class="r-out co"><span class="r-pr">#&gt;</span> 8       NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 9 0.395875</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># long = TRUE, all the information is stacked</span></span>
-<span class="r-in"><span class="fu"><a href="coeftable.html">coeftable</a></span><span class="op">(</span><span class="va">est_multi</span>, long <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># long = TRUE, all the information is stacked</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="coeftable.html">coeftable</a></span><span class="op">(</span><span class="va">est_multi</span>, long <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     id sample.var     sample          rhs coefficient  param         value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1    1    species     setosa           x1 (Intercept)   coef  2.639001e+00</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2    1    species     setosa           x1 (Intercept)     se  3.100143e-01</span>
@@ -442,9 +465,9 @@ If <code>long = TRUE</code>, then all the information is stacked. This removes t
 <span class="r-out co"><span class="r-pr">#&gt;</span> 106  9    species  virginica x1 + x2 + x3          x3     se  1.980724e-01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 107  9    species  virginica x1 + x2 + x3          x3  tstat -8.570233e-01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 108  9    species  virginica x1 + x2 + x3          x3 pvalue  3.958750e-01</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -459,8 +482,7 @@ If <code>long = TRUE</code>, then all the information is stacked. This removes t
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

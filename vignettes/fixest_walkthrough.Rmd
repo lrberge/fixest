@@ -1,5 +1,5 @@
 ---
-title: 'Fast Fixed-Effects Estimation: Short introduction'
+title: 'Fast Fixed-Effects Estimation: Short Introduction'
 author: "Laurent Berge and Grant McDermott"
 date: "`r Sys.Date()`"
 output:

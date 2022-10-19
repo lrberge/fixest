@@ -2,6 +2,21 @@
 
 title: fixest
 
+articles:
+  - title: Get started
+    navbar: ~
+    contents:
+      - fixest_walkthrough
+      - multiple_estimations
+      - standard_errors
+  - title: Export
+    navbar: Estimation tables
+    contents:
+      - exporting_tables
+      - etable_new_features
+
+development:
+  mode: auto
 
 reference:
     - title: Estimation
@@ -26,7 +41,10 @@ reference:
       desc: Extracts values from single estimations
       contents:
         - summary.fixest
+        - obs
         - coeftable
+        - coeftable.default
+        - coeftable.fixest
         - coef.fixest
         - se
         - tstat
@@ -52,6 +70,7 @@ reference:
       contents:
         - matches("stepwise|c?sw0?")
         - matches("fixest_multi")
+        - models
     - title: Methods from the `stats` package
       desc: Various methods from the stats package
       contents:
@@ -107,18 +126,22 @@ reference:
       desc: The default arguments of many fixest functions can be set at will
       contents:
         - matches("(s|g)etFixest")
+    - title: Data tools
+      desc: Small functions related to data manipulation
+      contents:
+        - fdim
+        - sample_df
+        - n_unik
+        - osize
     - title: Other methods and functions
       desc: Other methods and functions that didn't fit the previous sections
       contents:
         - est_env
+        - as.dict
         - dsb
         - check_conv_feols
-        - sample_df
-        - n_unik
-        - osize
         - did_means
         - fixest_startup_msg
-        - obs
         - bread.fixest
         - collinearity
         - estfun.fixest

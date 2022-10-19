@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.11.0</span>
       </span>
     </div>
 
@@ -121,9 +121,21 @@
         </td>
         <td><p>Summary of a <code>fixest</code> object. Computes different types of standard errors.</p></td>
       </tr><tr><td>
+          <p><code><a href="obs.html">obs()</a></code> </p>
+        </td>
+        <td><p>Extracts the observations used for the estimation</p></td>
+      </tr><tr><td>
           <p><code><a href="coeftable.html">coeftable()</a></code> <code><a href="coeftable.html">se()</a></code> <code><a href="coeftable.html">pvalue()</a></code> <code><a href="coeftable.html">tstat()</a></code> </p>
         </td>
         <td><p>Extracts the coefficients table from an estimation</p></td>
+      </tr><tr><td>
+          <p><code><a href="coeftable.default.html">coeftable(<i>&lt;default&gt;</i>)</a></code> <code><a href="coeftable.default.html">se(<i>&lt;default&gt;</i>)</a></code> <code><a href="coeftable.default.html">tstat(<i>&lt;default&gt;</i>)</a></code> <code><a href="coeftable.default.html">pvalue(<i>&lt;default&gt;</i>)</a></code> <code><a href="coeftable.default.html">se(<i>&lt;matrix&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Extracts the coefficients table from an estimation</p></td>
+      </tr><tr><td>
+          <p><code><a href="coeftable.fixest.html">coeftable(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="coeftable.fixest.html">se(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="coeftable.fixest.html">tstat(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="coeftable.fixest.html">pvalue(<i>&lt;fixest&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Obtain various statistics from an estimation</p></td>
       </tr><tr><td>
           <p><code><a href="coef.fixest.html">coef(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="coef.fixest.html">coefficients(<i>&lt;fixest&gt;</i>)</a></code> </p>
         </td>
@@ -201,6 +213,10 @@
         </td>
         <td><p>Extracts the coefficients tables from <code>fixest_multi</code> estimations</p></td>
       </tr><tr><td>
+          <p><code><a href="confint.fixest_multi.html">confint(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Confidence intervals for <code>fixest_multi</code> objects</p></td>
+      </tr><tr><td>
           <p><code><a href="print.fixest_multi.html">print(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
         </td>
         <td><p>Print method for fixest_multi objects</p></td>
@@ -220,8 +236,12 @@
           <p><code><a href="summary.fixest_multi.html">summary(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
         </td>
         <td><p>Summary for fixest_multi objects</p></td>
+      </tr><tr><td>
+          <p><code><a href="models.html">models()</a></code> </p>
+        </td>
+        <td><p>Extracts the models tree from a <code>fixest_multi</code> object</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
-          <h2 id="methods-from-the-stats-package">Methods from the `stats` package <a href="#methods-from-the-stats-package" class="anchor" aria-hidden="true"></a></h2>
+          <h2 id="methods-from-the-stats-package">Methods from the <code>stats</code> package <a href="#methods-from-the-stats-package" class="anchor" aria-hidden="true"></a></h2>
           <p class="section-desc"></p><p>Various methods from the stats package</p>
         </th>
       </tr></tbody><tbody><tr><td>
@@ -429,21 +449,13 @@
         </td>
         <td><p>Governs the small sample correction in <code>fixest</code> VCOVs</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
-          <h2 id="other-methods-and-functions">Other methods and functions <a href="#other-methods-and-functions" class="anchor" aria-hidden="true"></a></h2>
-          <p class="section-desc"></p><p>Other methods and functions that didn’t fit the previous sections</p>
+          <h2 id="data-tools">Data tools <a href="#data-tools" class="anchor" aria-hidden="true"></a></h2>
+          <p class="section-desc"></p><p>Small functions related to data manipulation</p>
         </th>
       </tr></tbody><tbody><tr><td>
-          <p><code><a href="est_env.html">est_env()</a></code> </p>
+          <p><code><a href="fdim.html">fdim()</a></code> </p>
         </td>
-        <td><p>Estimates a <code>fixest</code> estimation from a <code>fixest</code> environment</p></td>
-      </tr><tr><td>
-          <p><code><a href="dsb.html">dsb()</a></code> </p>
-        </td>
-        <td><p>Simple and powerful string manipulation with the dot square bracket operator</p></td>
-      </tr><tr><td>
-          <p><code><a href="check_conv_feols.html">check_conv_feols()</a></code> <code><a href="check_conv_feols.html">summary(<i>&lt;fixest_check_conv&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Check the fixed-effects convergence of a <code>feols</code> estimation</p></td>
+        <td><p>Formatted dimension</p></td>
       </tr><tr><td>
           <p><code><a href="sample_df.html">sample_df()</a></code> </p>
         </td>
@@ -456,6 +468,26 @@
           <p><code><a href="osize.html">osize()</a></code> <code><a href="osize.html">print(<i>&lt;osize&gt;</i>)</a></code> </p>
         </td>
         <td><p>Formatted object size</p></td>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h2 id="other-methods-and-functions">Other methods and functions <a href="#other-methods-and-functions" class="anchor" aria-hidden="true"></a></h2>
+          <p class="section-desc"></p><p>Other methods and functions that didn’t fit the previous sections</p>
+        </th>
+      </tr></tbody><tbody><tr><td>
+          <p><code><a href="est_env.html">est_env()</a></code> </p>
+        </td>
+        <td><p>Estimates a <code>fixest</code> estimation from a <code>fixest</code> environment</p></td>
+      </tr><tr><td>
+          <p><code><a href="as.dict.html">as.dict()</a></code> </p>
+        </td>
+        <td><p>Transforms a character string into a dictionary</p></td>
+      </tr><tr><td>
+          <p><code><a href="dsb.html">dsb()</a></code> </p>
+        </td>
+        <td><p>Simple and powerful string manipulation with the dot square bracket operator</p></td>
+      </tr><tr><td>
+          <p><code><a href="check_conv_feols.html">check_conv_feols()</a></code> <code><a href="check_conv_feols.html">summary(<i>&lt;fixest_check_conv&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Check the fixed-effects convergence of a <code>feols</code> estimation</p></td>
       </tr><tr><td>
           <p><code><a href="did_means.html">did_means()</a></code> </p>
         </td>
@@ -464,10 +496,6 @@
           <p><code><a href="fixest_startup_msg.html">fixest_startup_msg()</a></code> </p>
         </td>
         <td><p>Permanently removes the fixest package startup message</p></td>
-      </tr><tr><td>
-          <p><code><a href="obs.html">obs()</a></code> </p>
-        </td>
-        <td><p>Extracts the observations used for the estimation</p></td>
       </tr><tr><td>
           <p><code><a href="bread.fixest.html">bread(<i>&lt;fixest&gt;</i>)</a></code> </p>
         </td>
@@ -481,7 +509,7 @@
         </td>
         <td><p>Extracts the scores from a fixest estimation</p></td>
       </tr><tr><td>
-          <p><code><a href="fixest.html">_index_</a></code> </p>
+          <p><code><a href="fixest.html">_index_</a></code> <code><a href="fixest.html">fixest</a></code> <code><a href="fixest.html">fixest-package</a></code> </p>
         </td>
         <td><p>Fast and User-Friendly Fixed-Effects Estimations</p></td>
       </tr><tr><td>
@@ -517,8 +545,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

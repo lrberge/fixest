@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.11.0</span>
       </span>
     </div>
 
@@ -74,278 +74,396 @@
     <p>Estimates GLM models with any number of fixed-effects.</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">feglm</span><span class="op">(</span>
-  <span class="va">fml</span>,
-  <span class="va">data</span>,
-  family <span class="op">=</span> <span class="st">"gaussian"</span>,
-  <span class="va">vcov</span>,
-  <span class="va">offset</span>,
-  <span class="va">weights</span>,
-  <span class="va">subset</span>,
-  <span class="va">split</span>,
-  <span class="va">fsplit</span>,
-  <span class="va">split.keep</span>,
-  <span class="va">split.drop</span>,
-  <span class="va">cluster</span>,
-  <span class="va">se</span>,
-  <span class="va">ssc</span>,
-  <span class="va">panel.id</span>,
-  start <span class="op">=</span> <span class="cn">NULL</span>,
-  etastart <span class="op">=</span> <span class="cn">NULL</span>,
-  mustart <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">fixef</span>,
-  fixef.rm <span class="op">=</span> <span class="st">"perfect"</span>,
-  fixef.tol <span class="op">=</span> <span class="fl">1e-06</span>,
-  fixef.iter <span class="op">=</span> <span class="fl">10000</span>,
-  collin.tol <span class="op">=</span> <span class="fl">1e-10</span>,
-  glm.iter <span class="op">=</span> <span class="fl">25</span>,
-  glm.tol <span class="op">=</span> <span class="fl">1e-08</span>,
-  nthreads <span class="op">=</span> <span class="fu"><a href="setFixest_nthreads.html">getFixest_nthreads</a></span><span class="op">(</span><span class="op">)</span>,
-  lean <span class="op">=</span> <span class="cn">FALSE</span>,
-  warn <span class="op">=</span> <span class="cn">TRUE</span>,
-  notes <span class="op">=</span> <span class="fu"><a href="setFixest_notes.html">getFixest_notes</a></span><span class="op">(</span><span class="op">)</span>,
-  verbose <span class="op">=</span> <span class="fl">0</span>,
-  only.coef <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">combine.quick</span>,
-  mem.clean <span class="op">=</span> <span class="cn">FALSE</span>,
-  only.env <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">env</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-
-<span class="fu">feglm.fit</span><span class="op">(</span>
-  <span class="va">y</span>,
-  <span class="va">X</span>,
-  <span class="va">fixef_df</span>,
-  family <span class="op">=</span> <span class="st">"gaussian"</span>,
-  <span class="va">vcov</span>,
-  <span class="va">offset</span>,
-  <span class="va">split</span>,
-  <span class="va">fsplit</span>,
-  <span class="va">split.keep</span>,
-  <span class="va">split.drop</span>,
-  <span class="va">cluster</span>,
-  <span class="va">se</span>,
-  <span class="va">ssc</span>,
-  <span class="va">weights</span>,
-  <span class="va">subset</span>,
-  start <span class="op">=</span> <span class="cn">NULL</span>,
-  etastart <span class="op">=</span> <span class="cn">NULL</span>,
-  mustart <span class="op">=</span> <span class="cn">NULL</span>,
-  fixef.rm <span class="op">=</span> <span class="st">"perfect"</span>,
-  fixef.tol <span class="op">=</span> <span class="fl">1e-06</span>,
-  fixef.iter <span class="op">=</span> <span class="fl">10000</span>,
-  collin.tol <span class="op">=</span> <span class="fl">1e-10</span>,
-  glm.iter <span class="op">=</span> <span class="fl">25</span>,
-  glm.tol <span class="op">=</span> <span class="fl">1e-08</span>,
-  nthreads <span class="op">=</span> <span class="fu"><a href="setFixest_nthreads.html">getFixest_nthreads</a></span><span class="op">(</span><span class="op">)</span>,
-  lean <span class="op">=</span> <span class="cn">FALSE</span>,
-  warn <span class="op">=</span> <span class="cn">TRUE</span>,
-  notes <span class="op">=</span> <span class="fu"><a href="setFixest_notes.html">getFixest_notes</a></span><span class="op">(</span><span class="op">)</span>,
-  mem.clean <span class="op">=</span> <span class="cn">FALSE</span>,
-  verbose <span class="op">=</span> <span class="fl">0</span>,
-  only.env <span class="op">=</span> <span class="cn">FALSE</span>,
-  only.coef <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">env</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-
-<span class="fu">fepois</span><span class="op">(</span>
-  <span class="va">fml</span>,
-  <span class="va">data</span>,
-  <span class="va">vcov</span>,
-  <span class="va">offset</span>,
-  <span class="va">weights</span>,
-  <span class="va">subset</span>,
-  <span class="va">split</span>,
-  <span class="va">fsplit</span>,
-  <span class="va">split.keep</span>,
-  <span class="va">split.drop</span>,
-  <span class="va">cluster</span>,
-  <span class="va">se</span>,
-  <span class="va">ssc</span>,
-  <span class="va">panel.id</span>,
-  start <span class="op">=</span> <span class="cn">NULL</span>,
-  etastart <span class="op">=</span> <span class="cn">NULL</span>,
-  mustart <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">fixef</span>,
-  fixef.rm <span class="op">=</span> <span class="st">"perfect"</span>,
-  fixef.tol <span class="op">=</span> <span class="fl">1e-06</span>,
-  fixef.iter <span class="op">=</span> <span class="fl">10000</span>,
-  collin.tol <span class="op">=</span> <span class="fl">1e-10</span>,
-  glm.iter <span class="op">=</span> <span class="fl">25</span>,
-  glm.tol <span class="op">=</span> <span class="fl">1e-08</span>,
-  nthreads <span class="op">=</span> <span class="fu"><a href="setFixest_nthreads.html">getFixest_nthreads</a></span><span class="op">(</span><span class="op">)</span>,
-  lean <span class="op">=</span> <span class="cn">FALSE</span>,
-  warn <span class="op">=</span> <span class="cn">TRUE</span>,
-  notes <span class="op">=</span> <span class="fu"><a href="setFixest_notes.html">getFixest_notes</a></span><span class="op">(</span><span class="op">)</span>,
-  verbose <span class="op">=</span> <span class="fl">0</span>,
-  <span class="va">combine.quick</span>,
-  mem.clean <span class="op">=</span> <span class="cn">FALSE</span>,
-  only.env <span class="op">=</span> <span class="cn">FALSE</span>,
-  only.coef <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">env</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">feglm</span><span class="op">(</span></span>
+<span>  <span class="va">fml</span>,</span>
+<span>  <span class="va">data</span>,</span>
+<span>  family <span class="op">=</span> <span class="st">"gaussian"</span>,</span>
+<span>  <span class="va">vcov</span>,</span>
+<span>  <span class="va">offset</span>,</span>
+<span>  <span class="va">weights</span>,</span>
+<span>  <span class="va">subset</span>,</span>
+<span>  <span class="va">split</span>,</span>
+<span>  <span class="va">fsplit</span>,</span>
+<span>  <span class="va">split.keep</span>,</span>
+<span>  <span class="va">split.drop</span>,</span>
+<span>  <span class="va">cluster</span>,</span>
+<span>  <span class="va">se</span>,</span>
+<span>  <span class="va">ssc</span>,</span>
+<span>  <span class="va">panel.id</span>,</span>
+<span>  start <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  etastart <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  mustart <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">fixef</span>,</span>
+<span>  fixef.rm <span class="op">=</span> <span class="st">"perfect"</span>,</span>
+<span>  fixef.tol <span class="op">=</span> <span class="fl">1e-06</span>,</span>
+<span>  fixef.iter <span class="op">=</span> <span class="fl">10000</span>,</span>
+<span>  collin.tol <span class="op">=</span> <span class="fl">1e-10</span>,</span>
+<span>  glm.iter <span class="op">=</span> <span class="fl">25</span>,</span>
+<span>  glm.tol <span class="op">=</span> <span class="fl">1e-08</span>,</span>
+<span>  nthreads <span class="op">=</span> <span class="fu"><a href="setFixest_nthreads.html">getFixest_nthreads</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  lean <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  warn <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  notes <span class="op">=</span> <span class="fu"><a href="setFixest_notes.html">getFixest_notes</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  only.coef <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">combine.quick</span>,</span>
+<span>  mem.clean <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  only.env <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">env</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">feglm.fit</span><span class="op">(</span></span>
+<span>  <span class="va">y</span>,</span>
+<span>  <span class="va">X</span>,</span>
+<span>  <span class="va">fixef_df</span>,</span>
+<span>  family <span class="op">=</span> <span class="st">"gaussian"</span>,</span>
+<span>  <span class="va">vcov</span>,</span>
+<span>  <span class="va">offset</span>,</span>
+<span>  <span class="va">split</span>,</span>
+<span>  <span class="va">fsplit</span>,</span>
+<span>  <span class="va">split.keep</span>,</span>
+<span>  <span class="va">split.drop</span>,</span>
+<span>  <span class="va">cluster</span>,</span>
+<span>  <span class="va">se</span>,</span>
+<span>  <span class="va">ssc</span>,</span>
+<span>  <span class="va">weights</span>,</span>
+<span>  <span class="va">subset</span>,</span>
+<span>  start <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  etastart <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  mustart <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  fixef.rm <span class="op">=</span> <span class="st">"perfect"</span>,</span>
+<span>  fixef.tol <span class="op">=</span> <span class="fl">1e-06</span>,</span>
+<span>  fixef.iter <span class="op">=</span> <span class="fl">10000</span>,</span>
+<span>  collin.tol <span class="op">=</span> <span class="fl">1e-10</span>,</span>
+<span>  glm.iter <span class="op">=</span> <span class="fl">25</span>,</span>
+<span>  glm.tol <span class="op">=</span> <span class="fl">1e-08</span>,</span>
+<span>  nthreads <span class="op">=</span> <span class="fu"><a href="setFixest_nthreads.html">getFixest_nthreads</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  lean <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  warn <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  notes <span class="op">=</span> <span class="fu"><a href="setFixest_notes.html">getFixest_notes</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  mem.clean <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  only.env <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  only.coef <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">env</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">fepois</span><span class="op">(</span></span>
+<span>  <span class="va">fml</span>,</span>
+<span>  <span class="va">data</span>,</span>
+<span>  <span class="va">vcov</span>,</span>
+<span>  <span class="va">offset</span>,</span>
+<span>  <span class="va">weights</span>,</span>
+<span>  <span class="va">subset</span>,</span>
+<span>  <span class="va">split</span>,</span>
+<span>  <span class="va">fsplit</span>,</span>
+<span>  <span class="va">split.keep</span>,</span>
+<span>  <span class="va">split.drop</span>,</span>
+<span>  <span class="va">cluster</span>,</span>
+<span>  <span class="va">se</span>,</span>
+<span>  <span class="va">ssc</span>,</span>
+<span>  <span class="va">panel.id</span>,</span>
+<span>  start <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  etastart <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  mustart <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">fixef</span>,</span>
+<span>  fixef.rm <span class="op">=</span> <span class="st">"perfect"</span>,</span>
+<span>  fixef.tol <span class="op">=</span> <span class="fl">1e-06</span>,</span>
+<span>  fixef.iter <span class="op">=</span> <span class="fl">10000</span>,</span>
+<span>  collin.tol <span class="op">=</span> <span class="fl">1e-10</span>,</span>
+<span>  glm.iter <span class="op">=</span> <span class="fl">25</span>,</span>
+<span>  glm.tol <span class="op">=</span> <span class="fl">1e-08</span>,</span>
+<span>  nthreads <span class="op">=</span> <span class="fu"><a href="setFixest_nthreads.html">getFixest_nthreads</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  lean <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  warn <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  notes <span class="op">=</span> <span class="fu"><a href="setFixest_notes.html">getFixest_notes</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  <span class="va">combine.quick</span>,</span>
+<span>  mem.clean <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  only.env <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  only.coef <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">env</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>fml</dt>
 <dd><p>A formula representing the relation to be estimated. For example: <code>fml = z~x+y</code>. To include fixed-effects, insert them in this formula using a pipe: e.g. <code>fml = z~x+y|fixef_1+fixef_2</code>. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in <code><a href="https://rdrr.io/r/base/c.html" class="external-link">c()</a></code>: ex <code>c(y1, y2)</code>. For multiple indep. vars, use the stepwise functions: ex <code>x1 + csw(x2, x3)</code>. The formula <code>fml = c(y1, y2) ~ x1 + cw0(x2, x3)</code> leads to 6 estimation, see details. Square brackets starting with a dot can be used to call global variables: <code>y.[i] ~ x.[1:2]</code> will lead to <code>y3 ~ x1 + x2</code> if <code>i</code> is equal to 3 in the current environment (see details in <code><a href="xpd.html">xpd</a></code>).</p></dd>
+
+
 <dt>data</dt>
 <dd><p>A data.frame containing the necessary variables to run the model. The variables of the non-linear right hand side of the formula are identified with this <code>data.frame</code> names. Can also be a matrix.</p></dd>
+
+
 <dt>family</dt>
 <dd><p>Family to be used for the estimation. Defaults to <code><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian()</a></code>. See <code><a href="https://rdrr.io/r/stats/family.html" class="external-link">family</a></code> for details of family functions.</p></dd>
+
+
 <dt>vcov</dt>
 <dd><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href="vcov_cluster.html">vcov_cluster</a></code>, <code><a href="vcov_hac.html">vcov_NW</a></code>, <code><a href="vcov_hac.html">NW</a></code>, <code><a href="vcov_hac.html">vcov_DK</a></code>, <code><a href="vcov_hac.html">DK</a></code>, <code><a href="vcov_conley.html">vcov_conley</a></code> and <code><a href="vcov_conley.html">conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the <code>vcov</code> documentation in the <a href="https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1" class="external-link">vignette</a>.</p></dd>
+
+
 <dt>offset</dt>
 <dd><p>A formula or a numeric vector. An offset can be added to the estimation. If equal to a formula, it should be of the form (for example) <code>~0.5*x**2</code>. This offset is linearly added to the elements of the main formula 'fml'.</p></dd>
+
+
 <dt>weights</dt>
 <dd><p>A formula or a numeric vector. Each observation can be weighted, the weights must be greater than 0. If equal to a formula, it should be one-sided: for example <code>~ var_weight</code>.</p></dd>
+
+
 <dt>subset</dt>
 <dd><p>A vector (logical or numeric) or a one-sided formula. If provided, then the estimation will be performed only on the observations defined by this argument.</p></dd>
+
+
 <dt>split</dt>
 <dd><p>A one sided formula representing a variable (eg <code>split = ~var</code>) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. If you also want to include the estimation for the full sample, use the argument <code>fsplit</code> instead. You can use the special operators <code>%keep%</code> and <code>%drop%</code> to select only a subset of values for which to split the sample. E.g. <code>split = ~var %keep% c("v1", "v2")</code> will split the sample only according to the values <code>v1</code> and <code>v2</code> of the variable <code>var</code>; it is equivalent to supplying the argument <code>split.keep = c("v1", "v2")</code>. By default there is partial matching on each value, you can trigger a regular expression evaluation by adding a <code>'@'</code> first, as in: <code>~var %drop% "@^v[12]"</code> which will drop values starting with <code>"v1"</code> or <code>"v2"</code> (of course you need to know regexes!).</p></dd>
+
+
 <dt>fsplit</dt>
 <dd><p>A one sided formula representing a variable (eg <code>split = ~var</code>) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. This argument is the same as split but also includes the full sample as the first estimation. You can use the special operators <code>%keep%</code> and <code>%drop%</code> to select only a subset of values for which to split the sample. E.g. <code>split = ~var %keep% c("v1", "v2")</code> will split the sample only according to the values <code>v1</code> and <code>v2</code> of the variable <code>var</code>; it is equivalent to supplying the argument <code>split.keep = c("v1", "v2")</code>. By default there is partial matching on each value, you can trigger a regular expression evaluation by adding an <code>'@'</code> first, as in: <code>~var %drop% "@^v[12]"</code> which will drop values starting with <code>"v1"</code> or <code>"v2"</code> (of course you need to know regexes!).</p></dd>
+
+
 <dt>split.keep</dt>
 <dd><p>A character vector. Only used when <code>split</code>, or <code>fsplit</code>, is supplied. If provided, then the sample will be split only on the values of <code>split.keep</code>. The values in <code>split.keep</code> will be partially matched to the values of <code>split</code>. To enable regular expressions, you need to add an <code>'@'</code> first. For example <code>split.keep = c("v1", "@other|var")</code> will keep only the value in <code>split</code> partially matched by <code>"v1"</code> or the values containing <code>"other"</code> or <code>"var"</code>.</p></dd>
+
+
 <dt>split.drop</dt>
 <dd><p>A character vector. Only used when <code>split</code>, or <code>fsplit</code>, is supplied. If provided, then the sample will be split only on the values that are not in <code>split.drop</code>. The values in <code>split.drop</code> will be partially matched to the values of <code>split</code>. To enable regular expressions, you need to add an <code>'@'</code> first. For example <code>split.drop = c("v1", "@other|var")</code> will drop only the value in <code>split</code> partially matched by <code>"v1"</code> or the values containing <code>"other"</code> or <code>"var"</code>.</p></dd>
+
+
 <dt>cluster</dt>
 <dd><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as fixed-effects in the estimation, you can leave it blank with <code>vcov = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [resp. 2nd] fixed-effect). You can interact two variables using <code>^</code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></dd>
+
+
 <dt>se</dt>
 <dd><p>Character scalar. Which kind of standard error should be computed: “standard”, “hetero”, “cluster”, “twoway”, “threeway” or “fourway”? By default if there are clusters in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "iid"</code>. Note that this argument is deprecated, you should use <code>vcov</code> instead.</p></dd>
+
+
 <dt>ssc</dt>
 <dd><p>An object of class <code>ssc.type</code> obtained with the function <code><a href="ssc.html">ssc</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href="ssc.html">ssc</a></code> for this argument. The arguments and defaults of the function <code><a href="ssc.html">ssc</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "min"</code>, <code>t.df = "min"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href="ssc.html">ssc</a></code> for details.</p></dd>
+
+
 <dt>panel.id</dt>
 <dd><p>The panel identifiers. Can either be: i) a one sided formula (e.g. <code>panel.id = ~id+time</code>), ii) a character vector of length 2 (e.g. <code>panel.id=c('id', 'time')</code>, or iii) a character scalar of two variables separated by a comma (e.g. <code>panel.id='id,time'</code>). Note that you can combine variables with <code>^</code> only inside formulas (see the dedicated section in <code><a href="feols.html">feols</a></code>).</p></dd>
+
+
 <dt>start</dt>
 <dd><p>Starting values for the coefficients. Can be: i) a numeric of length 1 (e.g. <code>start = 0</code>), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients). Default is missing.</p></dd>
+
+
 <dt>etastart</dt>
 <dd><p>Numeric vector of the same length as the data. Starting values for the linear predictor. Default is missing.</p></dd>
+
+
 <dt>mustart</dt>
 <dd><p>Numeric vector of the same length as the data. Starting values for the vector of means. Default is missing.</p></dd>
+
+
 <dt>fixef</dt>
 <dd><p>Character vector. The names of variables to be used as fixed-effects. These variables should contain the identifier of each observation (e.g., think of it as a panel identifier). Note that the recommended way to include fixed-effects is to insert them directly in the formula.</p></dd>
+
+
 <dt>fixef.rm</dt>
 <dd><p>Can be equal to "perfect" (default), "singleton", "both" or "none". Controls which observations are to be removed. If "perfect", then observations having a fixed-effect with perfect fit (e.g. only 0 outcomes in Poisson estimations) will be removed. If "singleton", all observations for which a fixed-effect appears only once will be removed. The meaning of "both" and "none" is direct.</p></dd>
+
+
 <dt>fixef.tol</dt>
 <dd><p>Precision used to obtain the fixed-effects. Defaults to <code>1e-6</code>. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations.</p></dd>
+
+
 <dt>fixef.iter</dt>
 <dd><p>Maximum number of iterations in fixed-effects algorithm (only in use for 2+ fixed-effects). Default is 10000.</p></dd>
+
+
 <dt>collin.tol</dt>
 <dd><p>Numeric scalar, default is <code>1e-10</code>. Threshold deciding when variables should be considered collinear and subsequently removed from the estimation. Higher values means more variables will be removed (if there is presence of collinearity). One signal of presence of collinearity is t-stats that are extremely low (for instance when t-stats &lt; 1e-3).</p></dd>
+
+
 <dt>glm.iter</dt>
 <dd><p>Number of iterations of the glm algorithm. Default is 25.</p></dd>
+
+
 <dt>glm.tol</dt>
 <dd><p>Tolerance level for the glm algorithm. Default is <code>1e-8</code>.</p></dd>
+
+
 <dt>nthreads</dt>
 <dd><p>The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. The default is to use 50% of all threads. You can set permanently the number of threads used within this package using the function <code><a href="setFixest_nthreads.html">setFixest_nthreads</a></code>.</p></dd>
+
+
 <dt>lean</dt>
 <dd><p>Logical, default is <code>FALSE</code>. If <code>TRUE</code> then all large objects are removed from the returned result: this will save memory but will block the possibility to use many methods. It is recommended to use the arguments <code>se</code> or <code>cluster</code> to obtain the appropriate standard-errors at estimation time, since obtaining different SEs won't be possible afterwards.</p></dd>
+
+
 <dt>warn</dt>
 <dd><p>Logical, default is <code>TRUE</code>. Whether warnings should be displayed (concerns warnings relating to convergence state).</p></dd>
+
+
 <dt>notes</dt>
 <dd><p>Logical. By default, three notes are displayed: when NAs are removed, when some fixed-effects are removed because of only 0 (or 0/1) outcomes, or when a variable is dropped because of collinearity. To avoid displaying these messages, you can set <code>notes = FALSE</code>. You can remove these messages permanently by using <code>setFixest_notes(FALSE)</code>.</p></dd>
+
+
 <dt>verbose</dt>
 <dd><p>Integer. Higher values give more information. In particular, it can detail the number of iterations in the demeaning algoritmh (the first number is the left-hand-side, the other numbers are the right-hand-side variables). It can also detail the step-halving algorithm.</p></dd>
+
+
 <dt>only.coef</dt>
 <dd><p>Logical, default is <code>FALSE</code>. If <code>TRUE</code>, then only the estimated coefficients are returned. Note that the length of the vector returned is always the length of the number of coefficients to be estimated: this means that the variables found to be collinear are returned with an NA value.</p></dd>
+
+
 <dt>combine.quick</dt>
 <dd><p>Logical. When you combine different variables to transform them into a single fixed-effects you can do e.g. <code>y ~ x | paste(var1, var2)</code>. The algorithm provides a shorthand to do the same operation: <code>y ~ x | var1^var2</code>. Because pasting variables is a costly operation, the internal algorithm may use a numerical trick to hasten the process. The cost of doing so is that you lose the labels. If you are interested in getting the value of the fixed-effects coefficients after the estimation, you should use <code>combine.quick = FALSE</code>. By default it is equal to <code>FALSE</code> if the number of observations is lower than 50,000, and to <code>TRUE</code> otherwise.</p></dd>
+
+
 <dt>mem.clean</dt>
 <dd><p>Logical, default is <code>FALSE</code>. Only to be used if the data set is large compared to the available RAM. If <code>TRUE</code> then intermediary objects are removed as much as possible and <code><a href="https://rdrr.io/r/base/gc.html" class="external-link">gc</a></code> is run before each substantial C++ section in the internal code to avoid memory issues.</p></dd>
+
+
 <dt>only.env</dt>
 <dd><p>(Advanced users.) Logical, default is <code>FALSE</code>. If <code>TRUE</code>, then only the environment used to make the estimation is returned.</p></dd>
+
+
 <dt>env</dt>
 <dd><p>(Advanced users.) A <code>fixest</code> environment created by a <code>fixest</code> estimation with <code>only.env = TRUE</code>. Default is missing. If provided, the data from this environment will be used to perform the estimation.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Not currently used.</p></dd>
+
+
 <dt>y</dt>
 <dd><p>Numeric vector/matrix/data.frame of the dependent variable(s). Multiple dependent variables will return a <code>fixest_multi</code> object.</p></dd>
+
+
 <dt>X</dt>
 <dd><p>Numeric matrix of the regressors.</p></dd>
+
+
 <dt>fixef_df</dt>
 <dd><p>Matrix/data.frame of the fixed-effects.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A <code>fixest</code> object. Note that <code>fixest</code> objects contain many elements and most of them are for internal use, they are presented here only for information. To access them, it is safer to use the user-level methods (e.g. <code><a href="vcov.fixest.html">vcov.fixest</a></code>, <code><a href="resid.fixest.html">resid.fixest</a></code>, etc) or functions (like for instance <code><a href="fitstat.html">fitstat</a></code> to access any fit statistic).</p>
+    
+
+<p>A <code>fixest</code> object. Note that <code>fixest</code> objects contain many elements and most of them are for internal use, they are presented here only for information. To access them, it is safer to use the user-level methods (e.g. <code><a href="vcov.fixest.html">vcov.fixest</a></code>, <code><a href="resid.fixest.html">resid.fixest</a></code>, etc) or functions (like for instance <code><a href="fitstat.html">fitstat</a></code> to access any fit statistic).</p>
 <dl><dt>nobs</dt>
 <dd><p>The number of observations.</p></dd>
+
 <dt>fml</dt>
 <dd><p>The linear formula of the call.</p></dd>
+
 <dt>call</dt>
 <dd><p>The call of the function.</p></dd>
+
 <dt>method</dt>
 <dd><p>The method used to estimate the model.</p></dd>
+
 <dt>family</dt>
 <dd><p>The family used to estimate the model.</p></dd>
+
 <dt>fml_all</dt>
 <dd><p>A list containing different parts of the formula. Always contain the linear formula. Then, if relevant: <code>fixef</code>: the fixed-effects.</p></dd>
+
 <dt>nparams</dt>
 <dd><p>The number of parameters of the model.</p></dd>
+
 <dt>fixef_vars</dt>
 <dd><p>The names of each fixed-effect dimension.</p></dd>
+
 <dt>fixef_id</dt>
 <dd><p>The list (of length the number of fixed-effects) of the fixed-effects identifiers for each observation.</p></dd>
+
 <dt>fixef_sizes</dt>
 <dd><p>The size of each fixed-effect (i.e. the number of unique identifierfor each fixed-effect dimension).</p></dd>
+
 <dt>y</dt>
 <dd><p>(When relevant.) The dependent variable (used to compute the within-R2 when fixed-effects are present).</p></dd>
+
 <dt>convStatus</dt>
 <dd><p>Logical, convergence status of the IRWLS algorithm.</p></dd>
+
 <dt>irls_weights</dt>
 <dd><p>The weights of the last iteration of the IRWLS algorithm.</p></dd>
+
 <dt>obs_selection</dt>
 <dd><p>(When relevant.) List containing vectors of integers. It represents the sequential selection of observation vis a vis the original data set.</p></dd>
+
 <dt>fixef_removed</dt>
 <dd><p>(When relevant.) In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the list (for each fixed-effect dimension) of the fixed-effect identifiers that were removed.</p></dd>
+
 <dt>coefficients</dt>
 <dd><p>The named vector of estimated coefficients.</p></dd>
+
 <dt>coeftable</dt>
 <dd><p>The table of the coefficients with their standard errors, z-values and p-values.</p></dd>
+
 <dt>loglik</dt>
 <dd><p>The loglikelihood.</p></dd>
+
 <dt>deviance</dt>
 <dd><p>Deviance of the fitted model.</p></dd>
+
 <dt>iterations</dt>
 <dd><p>Number of iterations of the algorithm.</p></dd>
+
 <dt>ll_null</dt>
 <dd><p>Log-likelihood of the null model (i.e. with the intercept only).</p></dd>
+
 <dt>ssr_null</dt>
 <dd><p>Sum of the squared residuals of the null model (containing only with the intercept).</p></dd>
+
 <dt>pseudo_r2</dt>
 <dd><p>The adjusted pseudo R2.</p></dd>
+
 <dt>fitted.values</dt>
 <dd><p>The fitted values are the expected value of the dependent variable for the fitted model: that is \(E(Y|X)\).</p></dd>
+
 <dt>linear.predictors</dt>
 <dd><p>The linear predictors.</p></dd>
+
 <dt>residuals</dt>
 <dd><p>The residuals (y minus the fitted values).</p></dd>
+
 <dt>sq.cor</dt>
 <dd><p>Squared correlation between the dependent variable and the expected predictor (i.e. fitted.values) obtained by the estimation.</p></dd>
+
 <dt>hessian</dt>
 <dd><p>The Hessian of the parameters.</p></dd>
+
 <dt>cov.iid</dt>
 <dd><p>The variance-covariance matrix of the parameters.</p></dd>
+
 <dt>se</dt>
 <dd><p>The standard-error of the parameters.</p></dd>
+
 <dt>scores</dt>
 <dd><p>The matrix of the scores (first derivative for each observation).</p></dd>
+
 <dt>residuals</dt>
 <dd><p>The difference between the dependent variable and the expected predictor.</p></dd>
+
 <dt>sumFE</dt>
 <dd><p>The sum of the fixed-effects coefficients for each observation.</p></dd>
+
 <dt>offset</dt>
 <dd><p>(When relevant.) The offset formula.</p></dd>
+
 <dt>weights</dt>
 <dd><p>(When relevant.) The weights formula.</p></dd>
+
 <dt>collin.var</dt>
 <dd><p>(When relevant.) Vector containing the variables removed because of collinearity.</p></dd>
+
 <dt>collin.coef</dt>
 <dd><p>(When relevant.) Vector of coefficients, where the values of the variables removed because of collinearity are NA.</p></dd>
+
 </dl></div>
     <div id="details">
     <h2>Details</h2>
@@ -448,6 +566,7 @@ Finally <code>mvsw</code> will add, in a stepwise fashion all possible combinati
 <p>In all <code>fixest</code> estimations, this special parsing is enabled, so you don't need to use <code>xpd</code>.</p>
 <p>One-sided formulas can be expanded with the DSB operator: let <code>x = ~sepal + petal</code>, then <code>xpd(y ~ .[x])</code> leads to <code>color ~ sepal + petal</code>.</p>
 <p>You can even use multiple square brackets within a single variable, but then the use of nesting is required. For example, the following <code>xpd(y ~ .[".[letters[1:2]]_.[1:2]"])</code> will create <code>y ~ a_1 + b_2</code>. Remember that the nested character string is parsed with <code><a href="dsb.html">dsb</a></code>, which explains this behavior.</p>
+<p>When the element to be expanded i) is equal to the empty string or, ii) is of length 0, it is replaced with a neutral element, namely <code>1</code>. For example, <code>x = "" ; xpd(y ~ .[x])</code> leads to <code>y ~ 1</code>.</p>
     </div>
     <div id="references">
     <h2>References</h2>
@@ -467,18 +586,18 @@ And other estimation methods: <code><a href="feols.html">feols</a></code>, <code
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="co"># Poisson estimation</span></span>
-<span class="r-in"><span class="va">res</span> <span class="op">=</span> <span class="fu">feglm</span><span class="op">(</span><span class="va">Sepal.Length</span> <span class="op">~</span> <span class="va">Sepal.Width</span> <span class="op">+</span> <span class="va">Petal.Length</span> <span class="op">|</span> <span class="va">Species</span>, <span class="va">iris</span>, <span class="st">"poisson"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># You could also use fepois</span></span>
-<span class="r-in"><span class="va">res_pois</span> <span class="op">=</span> <span class="fu">fepois</span><span class="op">(</span><span class="va">Sepal.Length</span> <span class="op">~</span> <span class="va">Sepal.Width</span> <span class="op">+</span> <span class="va">Petal.Length</span> <span class="op">|</span> <span class="va">Species</span>, <span class="va">iris</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># With the fit method:</span></span>
-<span class="r-in"><span class="va">res_fit</span> <span class="op">=</span> <span class="fu">feglm.fit</span><span class="op">(</span><span class="va">iris</span><span class="op">$</span><span class="va">Sepal.Length</span>, <span class="va">iris</span><span class="op">[</span>, <span class="fl">2</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, <span class="va">iris</span><span class="op">$</span><span class="va">Species</span>, <span class="st">"poisson"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># All results are identical:</span></span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">res</span>, <span class="va">res_pois</span>, <span class="va">res_fit</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Poisson estimation</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">=</span> <span class="fu">feglm</span><span class="op">(</span><span class="va">Sepal.Length</span> <span class="op">~</span> <span class="va">Sepal.Width</span> <span class="op">+</span> <span class="va">Petal.Length</span> <span class="op">|</span> <span class="va">Species</span>, <span class="va">iris</span>, <span class="st">"poisson"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># You could also use fepois</span></span></span>
+<span class="r-in"><span><span class="va">res_pois</span> <span class="op">=</span> <span class="fu">fepois</span><span class="op">(</span><span class="va">Sepal.Length</span> <span class="op">~</span> <span class="va">Sepal.Width</span> <span class="op">+</span> <span class="va">Petal.Length</span> <span class="op">|</span> <span class="va">Species</span>, <span class="va">iris</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># With the fit method:</span></span></span>
+<span class="r-in"><span><span class="va">res_fit</span> <span class="op">=</span> <span class="fu">feglm.fit</span><span class="op">(</span><span class="va">iris</span><span class="op">$</span><span class="va">Sepal.Length</span>, <span class="va">iris</span><span class="op">[</span>, <span class="fl">2</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, <span class="va">iris</span><span class="op">$</span><span class="va">Species</span>, <span class="st">"poisson"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># All results are identical:</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">res</span>, <span class="va">res_pois</span>, <span class="va">res_fit</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                res           res_pois            res_fit</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:       Sepal.Length       Sepal.Length  iris$Sepal.Length</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                         </span>
@@ -495,18 +614,18 @@ And other estimation methods: <code><a href="feols.html">feols</a></code>, <code
 <span class="r-out co"><span class="r-pr">#&gt;</span> BIC                         570.76             570.76             570.76</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Note that you have many more examples in feols</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Multiple estimations:</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># 6 estimations</span></span>
-<span class="r-in"><span class="va">est_mult</span> <span class="op">=</span> <span class="fu">fepois</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">Ozone</span>, <span class="va">Solar.R</span><span class="op">)</span> <span class="op">~</span> <span class="va">Wind</span> <span class="op">+</span> <span class="va">Temp</span> <span class="op">+</span> <span class="fu"><a href="stepwise.html">csw0</a></span><span class="op">(</span><span class="va">Wind</span><span class="op">:</span><span class="va">Temp</span>, <span class="va">Day</span><span class="op">)</span>, <span class="va">airquality</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># We can display the results for the first lhs:</span></span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_mult</span><span class="op">[</span>lhs <span class="op">=</span> <span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Note that you have many more examples in feols</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Multiple estimations:</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># 6 estimations</span></span></span>
+<span class="r-in"><span><span class="va">est_mult</span> <span class="op">=</span> <span class="fu">fepois</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">Ozone</span>, <span class="va">Solar.R</span><span class="op">)</span> <span class="op">~</span> <span class="va">Wind</span> <span class="op">+</span> <span class="va">Temp</span> <span class="op">+</span> <span class="fu"><a href="stepwise.html">csw0</a></span><span class="op">(</span><span class="va">Wind</span><span class="op">:</span><span class="va">Temp</span>, <span class="va">Day</span><span class="op">)</span>, <span class="va">airquality</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># We can display the results for the first lhs:</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_mult</span><span class="op">[</span>lhs <span class="op">=</span> <span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 est_mult[lhs = 1].1 est_mult[lhs = ..2 est_mult[lhs = ..3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:               Ozone              Ozone              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                          </span>
@@ -523,9 +642,9 @@ And other estimation methods: <code><a href="feols.html">feols</a></code>, <code
 <span class="r-out co"><span class="r-pr">#&gt;</span> BIC                         1,564.7            1,568.7            1,561.5</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># And now the second (access can be made by name)</span></span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_mult</span><span class="op">[</span>lhs <span class="op">=</span> <span class="st">"Solar.R"</span><span class="op">]</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># And now the second (access can be made by name)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_mult</span><span class="op">[</span>lhs <span class="op">=</span> <span class="st">"Solar.R"</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 est_mult[lhs = ..1 est_mult[lhs = ..2 est_mult[lhs = "..3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Solar.R            Solar.R             Solar.R</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                          </span>
@@ -539,13 +658,13 @@ And other estimation methods: <code><a href="feols.html">feols</a></code>, <code
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                   146                146                 146</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Squared Cor.               0.08076            0.08166             0.08983</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Pseudo R2                  0.06045            0.06207             0.07100</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> BIC                        8,192.6            8,183.5             8,110.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> BIC                        8,192.6            8,183.5             8,110.7</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Now we focus on the two last right hand sides</span></span>
-<span class="r-in"><span class="co"># (note that .N can be used to specify the last item)</span></span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_mult</span><span class="op">[</span>rhs <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="va">.N</span><span class="op">]</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Now we focus on the two last right hand sides</span></span></span>
+<span class="r-in"><span><span class="co"># (note that .N can be used to specify the last item)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_mult</span><span class="op">[</span>rhs <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="va">.N</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 est_mult[rhs = ..1 est_mult[rhs = ..2 est_mult[rhs = ..3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone            Solar.R              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                         </span>
@@ -574,16 +693,16 @@ And other estimation methods: <code><a href="feols.html">feols</a></code>, <code
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                    146</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Squared Cor.                0.08983</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Pseudo R2                   0.07100</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> BIC                         8,110.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> BIC                         8,110.7</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Combining with split</span></span>
-<span class="r-in"><span class="va">est_split</span> <span class="op">=</span> <span class="fu">fepois</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">Ozone</span>, <span class="va">Solar.R</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="stepwise.html">sw</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/poly.html" class="external-link">poly</a></span><span class="op">(</span><span class="va">Wind</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/poly.html" class="external-link">poly</a></span><span class="op">(</span><span class="va">Temp</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span>
-<span class="r-in">                  <span class="va">airquality</span>, split <span class="op">=</span> <span class="op">~</span> <span class="va">Month</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># You can display everything at once with the print method</span></span>
-<span class="r-in"><span class="va">est_split</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Combining with split</span></span></span>
+<span class="r-in"><span><span class="va">est_split</span> <span class="op">=</span> <span class="fu">fepois</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">Ozone</span>, <span class="va">Solar.R</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="stepwise.html">sw</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/poly.html" class="external-link">poly</a></span><span class="op">(</span><span class="va">Wind</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/poly.html" class="external-link">poly</a></span><span class="op">(</span><span class="va">Temp</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                  <span class="va">airquality</span>, split <span class="op">=</span> <span class="op">~</span> <span class="va">Month</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># You can display everything at once with the print method</span></span></span>
+<span class="r-in"><span><span class="va">est_split</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: IID </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -745,13 +864,54 @@ And other estimation methods: <code><a href="feols.html">feols</a></code>, <code
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)     5.111358   0.015302 334.02914  &lt; 2.2e-16 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)1  1.286054   0.251169   5.12026 3.0511e-07 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)2 -0.928769   0.260074  -3.57117 3.5539e-04 ***</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Different way of displaying the results with "compact"</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est_split</span>, <span class="st">"compact"</span><span class="op">)</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in sprintf("%s%.*s", res[i], s + 2 - nchar(res[i]), "0000000000000000"):</span> argument for '*' conversion specification must be a number</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># You can still select which sample/LHS/RHS to display</span></span>
-<span class="r-in"><span class="va">est_split</span><span class="op">[</span>sample <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, lhs <span class="op">=</span> <span class="fl">1</span>, rhs <span class="op">=</span> <span class="fl">1</span><span class="op">]</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Different way of displaying the results with "compact"</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est_split</span>, <span class="st">"compact"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    sample     lhs           rhs     (Intercept)   poly(Wind, 2)1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1       5 Ozone   poly(Wind, 2) 3.30*** (0.042) -6.41*** (0.617)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2       5 Ozone   poly(Temp, 2) 4.06*** (0.109)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3       5 Solar.R poly(Wind, 2) 5.21*** (0.018)  -0.570* (0.272)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4       5 Solar.R poly(Temp, 2) 5.10*** (0.052)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5       6 Ozone   poly(Wind, 2) 3.07*** (0.125)   6.10** (1.92) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6       6 Ozone   poly(Temp, 2) 3.42*** (0.081)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7       6 Solar.R poly(Wind, 2) 5.22*** (0.014)  2.22*** (0.178)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8       6 Solar.R poly(Temp, 2) 5.20*** (0.020)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9       7 Ozone   poly(Wind, 2) 3.78*** (0.043) -6.72*** (0.703)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10      7 Ozone   poly(Temp, 2) 2.60*** (0.190)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11      7 Solar.R poly(Wind, 2) 5.36*** (0.014) -0.683** (0.217)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12      7 Solar.R poly(Temp, 2) 5.11*** (0.056)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13      8 Ozone   poly(Wind, 2) 3.76*** (0.042) -6.96*** (0.698)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14      8 Ozone   poly(Temp, 2) 3.14*** (0.098)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15      8 Solar.R poly(Wind, 2) 5.13*** (0.016)  -0.459. (0.272)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16      8 Solar.R poly(Temp, 2) 4.93*** (0.041)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17      9 Ozone   poly(Wind, 2) 3.36*** (0.037) -4.04*** (0.493)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18      9 Ozone   poly(Temp, 2) 3.37*** (0.038)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19      9 Solar.R poly(Wind, 2) 5.12*** (0.015) -0.564** (0.194)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20      9 Solar.R poly(Temp, 2) 5.11*** (0.015)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       poly(Wind, 2)2   poly(Temp, 2)1    poly(Temp, 2)2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    3.08*** (0.570)                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2                     11.3*** (1.45)      2.51* (1.17) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   -1.83*** (0.251)                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4                    -2.63*** (0.636)  -5.60*** (0.432)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5     -2.28* (1.03)                                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6                       3.26* (1.29)    5.67*** (1.56) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7  -0.625*** (0.140)                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8                     3.29*** (0.365)     0.156 (0.323)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9     -0.959 (0.682)                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10                    24.9*** (3.06)   -8.58*** (1.77) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11     0.014 (0.277)                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12                    4.83*** (0.928)    -1.11. (0.616)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13    -0.344 (0.486)                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14                    17.3*** (1.75)   -5.78*** (0.897)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15   0.684** (0.247)                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16                    4.22*** (0.817)   -0.794. (0.462)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17   2.99*** (0.470)                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18                    6.10*** (0.691)   2.25*** (0.627)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19     0.144 (0.225)                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20                    1.29*** (0.251) -0.929*** (0.260)</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># You can still select which sample/LHS/RHS to display</span></span></span>
+<span class="r-in"><span><span class="va">est_split</span><span class="op">[</span>sample <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, lhs <span class="op">=</span> <span class="fl">1</span>, rhs <span class="op">=</span> <span class="fl">1</span><span class="op">]</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: IID </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dep. var.: Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Expl. vars.: poly(Wind, 2)</span>
@@ -766,8 +926,8 @@ And other estimation methods: <code><a href="feols.html">feols</a></code>, <code
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)     3.07100   0.124756 24.61599 &lt; 2.2e-16 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)1  6.09901   1.922777  3.17198  0.001514 ** </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)2 -2.28442   1.031893 -2.21381  0.026842 *  </span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -782,8 +942,7 @@ And other estimation methods: <code><a href="feols.html">feols</a></code>, <code
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>
