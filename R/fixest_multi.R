@@ -1273,7 +1273,7 @@ residuals.fixest_multi <- resid.fixest_multi
 #' @examples
 #'
 #' base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
-#' est = feols(y ~ csw(x.[,1:3]) | sw0(species), base, vcov = "iid)
+#' est = feols(y ~ csw(x.[,1:3]) | sw0(species), base, vcov = "iid")
 #'
 #' confint(est)
 #'
