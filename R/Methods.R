@@ -130,8 +130,8 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
         if(from_summary && !isTRUE(x$summary_from_fit)){
             n = Inf
         } else {
-            if(nb_coef <= 10){
-                n = 10
+            if(nb_coef <= 15){
+                n = 15
             } else {
                 n = 8
                 msgRemaining = paste0("... ", nb_coef - n, " coefficients remaining (display them with summary() or use argument n)\n")
