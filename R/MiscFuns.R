@@ -1526,6 +1526,7 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 #'
 #' The definitions of the macro variables will replace in verbatim the macro variables. Therefore, you can include multi-part formulas if you wish but then beware of the order of the macros variable in the formula. For example, using the `airquality` data, say you want to set as controls the variable `Temp` and `Day` fixed-effects, you can do `setFixest_fml(..ctrl = ~Temp | Day)`, but then `feols(Ozone ~ Wind + ..ctrl, airquality)` will be quite different from `feols(Ozone ~ ..ctrl + Wind, airquality)`, so beware!
 #'
+#'
 #' @section Dot square bracket operator in formulas:
 #'
 #' In a formula, the dot square bracket (DSB) operator can: i) create manifold variables at once, or ii) capture values from the current environment and put them verbatim in the formula.
@@ -1545,6 +1546,8 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 #' One-sided formulas can be expanded with the DSB operator: let `x = ~sepal + petal`, then `xpd(y ~ .[x])` leads to `color ~ sepal + petal`.
 #'
 #' You can even use multiple square brackets within a single variable, but then the use of nesting is required. For example, the following `xpd(y ~ .[".[letters[1:2]]_.[1:2]"])` will create `y ~ a_1 + b_2`. Remember that the nested character string is parsed with [`dsb`], which explains this behavior.
+#'
+#' When the element to be expanded i) is equal to the empty string or, ii) is of length 0, it is replaced with a neutral element, namely `1`. For example, `x = "" ; xpd(y ~ .[x])` leads to `y ~ 1`.
 #'
 #' @section Regular expressions:
 #'
@@ -3275,6 +3278,11 @@ dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE
             if(length(value) == 2 && value[1] == "~"){
                 value = char_to_vars(value[2])
             }
+        }
+
+        if(length(value) == 0 || (is.character(value) && length(value) == 1 && nchar(value) == 0)){
+            # Neutral element in formulas
+            value = "1"
         }
 
         res[[i]] = value

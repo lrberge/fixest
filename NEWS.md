@@ -101,6 +101,14 @@ coeftable(mult_est)
  
  - new argument `frame` to tell where to fetch the values of the variables expanded with the dot square bracket operator.
  
+ - empty strings or empty elements expanded with `.[]` are now set to be equal to `1` (the neutral element in formulas):
+```R
+x = ""
+xpd(y ~ .[x] + .[NULL])
+#> y ~ 1 + 1
+
+```
+ 
  - regex values can be negated: just start with a `!`:
 ```R
 xpd(am ~ ..("!^am"), data = mtcars)
