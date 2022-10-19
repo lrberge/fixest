@@ -491,7 +491,7 @@ The placement in \code{fixef.group} is defined similarly, only the default place
 \section{Escaping special Latex characters}{
 
 
-By default on all instances (with the notable exception of the elements of \code{\link{style.tex}}) special Latex characters are escaped. This means that \code{title="Exports in million $."} will be exported as "Exports in million \\$.": the dollar sign will be escaped. This is true for the following characters: &, $, \%, _, ^ and #.
+By default on all instances (with the notable exception of the elements of \code{\link{style.tex}}) special Latex characters are escaped. This means that \code{title="Exports in million $."} will be exported as \code{"Exports in million \\\\$."}: the dollar sign will be escaped. This is true for the following characters: &, \code{$}, \%, _, ^ and #.
 
 Note, importantly, that equations are NOT escaped. This means that \code{title="Functional form $a_i \\\\times x^b$, variation in \%."} will be displayed as: \code{"Functional form $a_i \\\\times x^b$, variation in \\\\\%."}: only the last percentage will be escaped.
 
