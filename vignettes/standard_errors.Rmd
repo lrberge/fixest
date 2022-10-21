@@ -12,7 +12,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE, 
                       eval = TRUE,
                       comment = "#>")
@@ -53,7 +53,7 @@ summary(gravity, vcov = "twoway", ssc = ssc(adj = FALSE, cluster.adj = FALSE))
 
 The argument `vcov` can be equal to either: `"iid"`, `"hetero"`, `"cluster"`, `"twoway"`, `"NW"`, `"DK"`, or `"conley"`.
 
-If `vcov = "iid"`, then the standard-errors are based on the assumption that the errors are all independent and generated with the same law (in particular, same variance). If `vcov = "hetero"`, this corresponds to the classic hereoskedasticity-robust standard-errors (White correction), where it is assumed that the errors are independent but the variance of their generative law may vary. 
+If `vcov = "iid"`, then the standard-errors are based on the assumption that the errors are non correlated and homoskedastic. If `vcov = "hetero"`, this corresponds to the classic hereoskedasticity-robust standard-errors (White correction), where it is assumed that the errors are non correlated but the variance of their generative law may vary. 
 
 If `vcov = "cluster"`, then arbitrary correlation of the errors within clusters is accounted for. Same for `vcov = "twoway"`: arbitrary correlation within each of the two clusters is accounted for. 
 
@@ -113,14 +113,16 @@ Argument `cluster.df` is only relevant when you apply two-way clustering (or hig
 
 Now instead of having a specific adjustment for each matrix, there is only one adjustment of $G_{min}/(G_{min}-1)$ where $G_{min}$ is the minimum cluster size (here $G_{min}=\min(G_{id},G_{time})$).
 
-Argument `t.df` is only relevant when standard-errors are clustered. It affects the way the *p-value* is computed. It can be equal to: either `"conventional"`, or `"min"` (the default). By default, when standard-errors are clustered, the degrees of freedom used in the Student t distribution is equal to the minimum cluster size (among all clusters used to cluster the VCOV). If `t.df="conventional"`, the degrees of freedom used to find the p-value from the Student t distribution is equal to the number of observations minus the number of estimated coefficients.
+Argument `t.df` is only relevant when standard-errors are clustered. It affects the way the *p-value* and *confidence intervals* are computed. It can be equal to: either `"conventional"`, or `"min"` (the default). 
+By default, when standard-errors are clustered, the degrees of freedom used in the Student t distribution is equal to the minimum cluster size (among all clusters used to cluster the VCOV) minus one. 
+If `t.df="conventional"`, the degrees of freedom used to find the p-value from the Student t distribution is equal to the number of observations minus the number of estimated coefficients.
 
 
 ## Replicating standard-errors from other methods
 
 This section illustrates how the results from `fixest` compares with the ones from other methods. It also shows how to replicate the latter from `fixest`.
 
-```{r, echo = FALSE}
+```{r, include = FALSE}
 is_plm = requireNamespace("plm", quietly = TRUE)
 
 if(!is_plm){
@@ -128,6 +130,9 @@ if(!is_plm){
     cat("Evaluation of the next chunks requires 'plm' which is not installed.")
 } else {
     knitr::opts_chunk$set(eval = TRUE)
+    
+    library(plm)
+    library(sandwich)
 }
 
 ```
@@ -256,19 +261,17 @@ From `fixest` version 0.7.0 onwards, the standard-errors and p-values are comput
 
 Here are the differences and similarities with `lfe`:
 
-```{r, eval = TRUE, echo = FALSE}
+```{r, include = FALSE}
 is_lfe = requireNamespace("lfe", quietly = TRUE)
 if(!is_lfe){
   cat("The evaluation of the next chunks of code require the package 'lfe' which is not available.")
+} else {
+    # avoids ugly startup messages popping + does not require the use of the not very elegant suppressPackageStartupMessages
+    library(lfe)
 }
 ```
 
-```{r, eval = is_lfe, include = FALSE}
-# avoids ugly startup messages popping + does not require the use of the not very elegant suppressPackageStartupMessages
-library(lfe)
-```
-
-```{r, eval = is_lfe && is_plm, warning = FALSE}
+```{r, eval = is_lfe, warning = FALSE}
 library(lfe)
 
 # lfe: clustered by firm
