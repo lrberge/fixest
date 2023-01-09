@@ -32,19 +32,13 @@ Numeric vectors can be cut easily into: a) equal parts, b) user-specified bins.
 
 Use \code{"cut::n"} to cut the vector into \code{n} (roughly) equal parts. Percentiles are used to partition the data, hence some data distributions can lead to create less than \code{n} parts (for example if P0 is the same as P50).
 
-The user can specify custom bins with the following syntax: \verb{"cut::a]b]c]"etc}. Here the numbers \code{a}, \code{b}, \code{c}, etc, are a sequence of increasing numbers, each followed by an open or closed square bracket. The numbers can be specified as either plain numbers (e.g. \code{"cut::5]12[32["}), quartiles (e.g. \code{"cut::q1]q3["}), or percentiles (e.g. \code{"cut::p10]p15]p90]"}). Values of different types can be mixed: \code{"cut::5]q2[p80["} is valid provided the median (\code{q2}) is indeed greater than \code{5}, otherwise an error is thrown.
+The user can specify custom bins with the following syntax: \code{"cut::a]b]c]"}. Here the numbers \code{a}, \code{b}, \code{c}, etc, are a sequence of increasing numbers, each followed by an open or closed square bracket. The numbers can be specified as either plain numbers (e.g. \code{"cut::5]12[32["}), quartiles (e.g. \code{"cut::q1]q3["}), or percentiles (e.g. \code{"cut::p10]p15]p90]"}). Values of different types can be mixed: \code{"cut::5]q2[p80["} is valid provided the median (\code{q2}) is indeed greater than \code{5}, otherwise an error is thrown.
 
 The square bracket right of each number tells whether the numbers should be included or excluded from the current bin. For example, say \code{x} ranges from 0 to 100, then \code{"cut::5]"} will create two  bins: one from 0 to 5 and a second from 6 to 100. With \code{"cut::5["} the bins would have been 0-4 and 5-100.
 
-A factor is returned. The labels report the min and max values in each bin.
+A factor is always returned. The labels always report the min and max values in each bin.
 
 To have user-specified bin labels, just add them in the character vector following \code{'cut::values'}. You don't need to provide all of them, and \code{NA} values fall back to the default label. For example, \code{bin = c("cut::4", "Q1", NA, "Q3")} will modify only the first and third label that will be displayed as \code{"Q1"} and \code{"Q3"}.
-
-["\verb{), quartiles (e.g. }"cut::q1]: R:\%22\%60),\%20quartiles\%20(e.g.\%20\%60\%22cut::q1
-["\verb{), or percentiles (e.g. }"cut::p10]: R:\%22\%60),\%20or\%20percentiles\%20(e.g.\%20\%60\%22cut::p10
-["\verb{ is valid provided the median (}q2\verb{) is indeed greater than }5`, otherwise an error is thrown.
-
-The square bracket right of each number tells whether the numbers should be included or excluded from the current bin. For example, say \code{x} ranges from 0 to 100, then `"cut::5]: R:\%22\%60\%20is\%20valid\%20provided\%20the\%20median\%20(\%60q2\%60)\%20is\%20indeed\%20greater\%20than\%20\%605\%60,\%20otherwise\%20an\%20error\%20is\%20thrown.\%0A\%0AThe\%20square\%20bracket\%20right\%20of\%20each\%20number\%20tells\%20whether\%20the\%20numbers\%20should\%20be\%20included\%20or\%20excluded\%20from\%20the\%20current\%20bin.\%20For\%20example,\%20say\%20\%60x\%60\%20ranges\%20from\%200\%20to\%20100,\%20then\%20\%60\%22cut::5
 }
 
 \section{\code{bin} vs \code{ref}}{

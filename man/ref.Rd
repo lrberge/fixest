@@ -9,11 +9,11 @@ ref(x, ref)
 \arguments{
 \item{x}{A vector of any type (must be atomic though).}
 
-\item{ref}{A vector or a list, or special binning values (explained later). If a vector, it must correspond to (partially matched) values of the vector \code{x}. The vector \code{x} which will be transformed into a factor and these values will be placed first in the levels. That's the main usage of this function. You can also bin on-the-fly the values of \code{x}, using the same syntax as the function \code{\link{bin}}. Here's a description of what bin does: To create a new value from old values, use \code{bin = list("new_value"=old_values)} with \code{old_values} a vector of existing values. You can use \code{.()} for \code{list()}.
-It accepts regular expressions, but they must start with an \code{"@"}, like in \code{bin="@Aug|Dec"}. It accepts one-sided formulas which must contain the variable \code{x}, e.g. \code{bin=list("<2" = ~x < 2)}.
+\item{ref}{A vector or a list, or special binning values (explained later). If a vector, it must correspond to (partially matched) values of the vector \code{x}. The vector \code{x} which will be transformed into a factor and these values will be placed first in the levels. That's the main usage of this function. You can also bin on-the-fly the values of \code{x}, using the same syntax as the function \code{\link{bin}}. To create a new value from old values, use \code{ref = list("new_value"=old_values)} with \code{old_values} a vector of existing values. You can use \code{.()} for \code{list()}.
+It accepts regular expressions, but they must start with an \code{"@"}, like in \code{ref="@Aug|Dec"}. It accepts one-sided formulas which must contain the variable \code{x}, e.g. \code{ref=list("<2" = ~x < 2)}.
 The names of the list are the new names. If the new name is missing, the first value matched becomes the new name. In the name, adding \code{"@d"}, with \code{d} a digit, will relocate the value in position \code{d}: useful to change the position of factors.
 If the vector \code{x} is numeric, you can use the special value \code{"bin::digit"} to group every \code{digit} element.
-For example if \code{x} represents years, using \code{bin="bin::2"} creates bins of two years.
+For example if \code{x} represents years, using \code{ref="bin::2"} creates bins of two years.
 With any data, using \code{"!bin::digit"} groups every digit consecutive values starting from the first value.
 Using \code{"!!bin::digit"} is the same but starting from the last value.
 With numeric vectors you can: a) use \code{"cut::n"} to cut the vector into \code{n} equal parts, b) use \code{"cut::a]b["} to create the following bins: \verb{[min, a]}, \verb{]a, b[}, \verb{[b, max]}.
@@ -25,6 +25,22 @@ It returns a factor of the same length as \code{x}, where levels have been modif
 \description{
 Takes a variables of any types, transforms it into a factors, and modifies the values of the factors. Useful in estimations when you want to set some value of a vector as a reference.
 }
+\section{"Cutting" a numeric vector}{
+
+
+Numeric vectors can be cut easily into: a) equal parts, b) user-specified bins.
+
+Use \code{"cut::n"} to cut the vector into \code{n} (roughly) equal parts. Percentiles are used to partition the data, hence some data distributions can lead to create less than \code{n} parts (for example if P0 is the same as P50).
+
+The user can specify custom bins with the following syntax: \code{"cut::a]b]c]"}. Here the numbers \code{a}, \code{b}, \code{c}, etc, are a sequence of increasing numbers, each followed by an open or closed square bracket. The numbers can be specified as either plain numbers (e.g. \code{"cut::5]12[32["}), quartiles (e.g. \code{"cut::q1]q3["}), or percentiles (e.g. \code{"cut::p10]p15]p90]"}). Values of different types can be mixed: \code{"cut::5]q2[p80["} is valid provided the median (\code{q2}) is indeed greater than \code{5}, otherwise an error is thrown.
+
+The square bracket right of each number tells whether the numbers should be included or excluded from the current bin. For example, say \code{x} ranges from 0 to 100, then \code{"cut::5]"} will create two  bins: one from 0 to 5 and a second from 6 to 100. With \code{"cut::5["} the bins would have been 0-4 and 5-100.
+
+A factor is always returned. The labels always report the min and max values in each bin.
+
+To have user-specified bin labels, just add them in the character vector following \code{'cut::values'}. You don't need to provide all of them, and \code{NA} values fall back to the default label. For example, \code{bin = c("cut::4", "Q1", NA, "Q3")} will modify only the first and third label that will be displayed as \code{"Q1"} and \code{"Q3"}.
+}
+
 \section{\code{bin} vs \code{ref}}{
 
 
@@ -102,7 +118,7 @@ table(ref(month_num, .("@5 five"=5)))
 
 }
 \seealso{
-To bin the values of a vectors: \code{\link{bin}}.
+To bin the values of a vector: \code{\link{bin}}.
 }
 \author{
 Laurent Berge

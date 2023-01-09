@@ -2,6 +2,10 @@
 
 # fixest 0.11.1
 
+## Documentation bug
+
+- fix bug in the help of `bin`
+
 ## C++ code
 
 - replace stdint with cstdint

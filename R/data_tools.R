@@ -26,11 +26,11 @@
 #'
 #' Use `"cut::n"` to cut the vector into `n` (roughly) equal parts. Percentiles are used to partition the data, hence some data distributions can lead to create less than `n` parts (for example if P0 is the same as P50).
 #'
-#' The user can specify custom bins with the following syntax: `"cut::a]b]c]"etc`. Here the numbers `a`, `b`, `c`, etc, are a sequence of increasing numbers, each followed by an open or closed square bracket. The numbers can be specified as either plain numbers (e.g. `"cut::5]12[32["`), quartiles (e.g. `"cut::q1]q3["`), or percentiles (e.g. `"cut::p10]p15]p90]"`). Values of different types can be mixed: `"cut::5]q2[p80["` is valid provided the median (`q2`) is indeed greater than `5`, otherwise an error is thrown.
+#' The user can specify custom bins with the following syntax: `"cut::a]b]c]"`. Here the numbers `a`, `b`, `c`, etc, are a sequence of increasing numbers, each followed by an open or closed square bracket. The numbers can be specified as either plain numbers (e.g. \code{"cut::5]12[32["}), quartiles (e.g. \code{"cut::q1]q3["}), or percentiles (e.g. `"cut::p10]p15]p90]"`). Values of different types can be mixed: \code{"cut::5]q2[p80["} is valid provided the median (`q2`) is indeed greater than `5`, otherwise an error is thrown.
 #'
 #' The square bracket right of each number tells whether the numbers should be included or excluded from the current bin. For example, say `x` ranges from 0 to 100, then `"cut::5]"` will create two  bins: one from 0 to 5 and a second from 6 to 100. With `"cut::5["` the bins would have been 0-4 and 5-100.
 #'
-#' A factor is returned. The labels report the min and max values in each bin.
+#' A factor is always returned. The labels always report the min and max values in each bin.
 #'
 #' To have user-specified bin labels, just add them in the character vector following `'cut::values'`. You don't need to provide all of them, and `NA` values fall back to the default label. For example, `bin = c("cut::4", "Q1", NA, "Q3")` will modify only the first and third label that will be displayed as `"Q1"` and `"Q3"`.
 #'
@@ -169,14 +169,16 @@ bin = function(x, bin){
 #'
 #' Takes a variables of any types, transforms it into a factors, and modifies the values of the factors. Useful in estimations when you want to set some value of a vector as a reference.
 #'
+#' @inheritSection bin "Cutting" a numeric vector
 #' @inheritSection bin `bin` vs `ref`
 #'
+#'
 #' @param x A vector of any type (must be atomic though).
-#' @param ref A vector or a list, or special binning values (explained later). If a vector, it must correspond to (partially matched) values of the vector `x`. The vector `x` which will be transformed into a factor and these values will be placed first in the levels. That's the main usage of this function. You can also bin on-the-fly the values of `x`, using the same syntax as the function [`bin`]. Here's a description of what bin does: To create a new value from old values, use `bin = list("new_value"=old_values)` with `old_values` a vector of existing values. You can use `.()` for `list()`.
-#' It accepts regular expressions, but they must start with an `"@"`, like in `bin="@Aug|Dec"`. It accepts one-sided formulas which must contain the variable `x`, e.g. `bin=list("<2" = ~x < 2)`.
+#' @param ref A vector or a list, or special binning values (explained later). If a vector, it must correspond to (partially matched) values of the vector `x`. The vector `x` which will be transformed into a factor and these values will be placed first in the levels. That's the main usage of this function. You can also bin on-the-fly the values of `x`, using the same syntax as the function [`bin`]. To create a new value from old values, use `ref = list("new_value"=old_values)` with `old_values` a vector of existing values. You can use `.()` for `list()`.
+#' It accepts regular expressions, but they must start with an `"@"`, like in `ref="@Aug|Dec"`. It accepts one-sided formulas which must contain the variable `x`, e.g. `ref=list("<2" = ~x < 2)`.
 #' The names of the list are the new names. If the new name is missing, the first value matched becomes the new name. In the name, adding `"@d"`, with `d` a digit, will relocate the value in position `d`: useful to change the position of factors.
 #' If the vector `x` is numeric, you can use the special value `"bin::digit"` to group every `digit` element.
-#' For example if `x` represents years, using `bin="bin::2"` creates bins of two years.
+#' For example if `x` represents years, using `ref="bin::2"` creates bins of two years.
 #' With any data, using `"!bin::digit"` groups every digit consecutive values starting from the first value.
 #' Using `"!!bin::digit"` is the same but starting from the last value.
 #' With numeric vectors you can: a) use `"cut::n"` to cut the vector into `n` equal parts, b) use `"cut::a]b["` to create the following bins: `[min, a]`, `]a, b[`, `[b, max]`.
@@ -189,7 +191,7 @@ bin = function(x, bin){
 #' Laurent Berge
 #'
 #' @seealso
-#' To bin the values of a vectors: [`bin`].
+#' To bin the values of a vector: [`bin`].
 #'
 #' @examples
 #'
