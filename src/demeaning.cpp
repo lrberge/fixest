@@ -32,9 +32,9 @@
 #include <Rcpp.h>
 #include <math.h>
 #include <vector>
-#include <stdint.h>
-    #ifdef _OPENMP
-#include <omp.h>
+#include <cstdint>
+#ifdef _OPENMP
+    #include <omp.h>
 #else
     #define omp_get_thread_num() 0
 #endif
