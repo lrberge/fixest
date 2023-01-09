@@ -43,6 +43,7 @@
 
 using namespace Rcpp;
 using std::vector;
+using std::int64_t;
 
 
 /* CHANGELOG:

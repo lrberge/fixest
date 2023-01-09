@@ -1,7 +1,7 @@
 #include <Rcpp.h>
 #include <math.h>
 #include <vector>
-#include <stdint.h>
+#include <cstdint>
 #ifdef _OPENMP
 #include <omp.h>
 #else
@@ -11,6 +11,8 @@
 // [[Rcpp::plugins(openmp)]]
 
 using namespace Rcpp;
+
+using std::int64_t;
 
 
 // [[Rcpp::export]]

@@ -49,15 +49,13 @@
 
 #include <Rcpp.h>
 #include <vector>
+#include <cstdint>
 
 using namespace Rcpp;
 using std::vector;
 
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::plugins(openmp)]]
-
-
-
 
 inline unsigned long long float_to_ull(void *u, int i) {
     unsigned long long *pu_ll = reinterpret_cast<unsigned long long*>(u);

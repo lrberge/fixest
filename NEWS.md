@@ -1,4 +1,11 @@
 
+
+# fixest 0.11.1
+
+## C++ code
+
+- replace stdint with cstdint
+
 # fixest 0.11.0
 
 ## Bug fixes
