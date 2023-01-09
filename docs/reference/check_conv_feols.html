@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,49 +76,60 @@
     <p>Checks the convergence of a <code>feols</code> estimation by computing the first-order conditions of all fixed-effects (all should be close to 0)</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">check_conv_feols</span><span class="op">(</span><span class="va">x</span><span class="op">)</span>
-
-<span class="co"># S3 method for fixest_check_conv</span>
-<span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">object</span>, type <span class="op">=</span> <span class="st">"short"</span>, <span class="va">...</span><span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">check_conv_feols</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for fixest_check_conv</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">object</span>, type <span class="op">=</span> <span class="st">"short"</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>A <code><a href="feols.html">feols</a></code> estimation that should contain fixed-effects.</p></dd>
+
+
 <dt>object</dt>
 <dd><p>An object returned by <code>check_conv_feols</code>.</p></dd>
+
+
 <dt>type</dt>
 <dd><p>Either "short" (default) or "detail". If "short", only the maximum absolute FOC are displayed, otherwise the 2 smallest and the 2 largest FOC are reported for each fixed-effect and each variable.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Not currently used.</p>
 <p>Note that this function first re-demeans the variables, thus possibly incurring some extra computation time.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>It returns a list of <code>N</code> elements, <code>N</code> being the number of variables in the estimation (dependent variable + explanatory variables +, if IV, endogenous variables and instruments). For each variable, all the first-order conditions for each fixed-effect are returned.</p>
+    
+
+<p>It returns a list of <code>N</code> elements, <code>N</code> being the number of variables in the estimation (dependent variable + explanatory variables +, if IV, endogenous variables and instruments). For each variable, all the first-order conditions for each fixed-effect are returned.</p>
     </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="va">iris</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">base</span><span class="op">$</span><span class="va">FE</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">30</span>, <span class="fl">5</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># one estimation with fixed-effects + varying slopes</span></span>
-<span class="r-in"><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">|</span> <span class="va">species</span><span class="op">[</span><span class="va">x2</span><span class="op">]</span> <span class="op">+</span> <span class="va">FE</span><span class="op">[</span><span class="va">x3</span><span class="op">]</span>, <span class="va">base</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Checking the convergence</span></span>
-<span class="r-in"><span class="va">conv</span> <span class="op">=</span> <span class="fu">check_conv_feols</span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># We can check that al values are close to 0</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">conv</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="va">iris</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">base</span><span class="op">$</span><span class="va">FE</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">30</span>, <span class="fl">5</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># one estimation with fixed-effects + varying slopes</span></span></span>
+<span class="r-in"><span><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">|</span> <span class="va">species</span><span class="op">[</span><span class="va">x2</span><span class="op">]</span> <span class="op">+</span> <span class="va">FE</span><span class="op">[</span><span class="va">x3</span><span class="op">]</span>, <span class="va">base</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Checking the convergence</span></span></span>
+<span class="r-in"><span><span class="va">conv</span> <span class="op">=</span> <span class="fu">check_conv_feols</span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># We can check that al values are close to 0</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">conv</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Maximum absolute value of the first-order conditions:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              FE     FE[[x3]]      species species[[x2]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> y  1.598727e-15 1.154394e-15 2.246661e-07  1.502477e-07</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> x1 9.769908e-16 5.367730e-16 4.490874e-07  3.018886e-07</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">conv</span>, <span class="st">"detail"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">conv</span>, <span class="st">"detail"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Smallest and largest values of the first-order conditions:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> y  </span>
@@ -132,9 +145,9 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |      species: -3.83e-07, -6.57e-08,  4.49e-07</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |species[[x2]]: -6.90e-08, -1.69e-08,  3.02e-07</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> __| </span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -149,8 +162,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,52 +76,67 @@
     <p>This functions defines or extracts the default type of standard-errors to computed in <code>fixest</code> <code><a href="summary.fixest.html">summary</a></code>, and <code><a href="vcov.fixest.html">vcov</a></code>.</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">setFixest_vcov</span><span class="op">(</span>
-  no_FE <span class="op">=</span> <span class="st">"iid"</span>,
-  one_FE <span class="op">=</span> <span class="st">"cluster"</span>,
-  two_FE <span class="op">=</span> <span class="st">"cluster"</span>,
-  panel <span class="op">=</span> <span class="st">"cluster"</span>,
-  all <span class="op">=</span> <span class="cn">NULL</span>,
-  reset <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span>
-
-<span class="fu">getFixest_vcov</span><span class="op">(</span><span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">setFixest_vcov</span><span class="op">(</span></span>
+<span>  no_FE <span class="op">=</span> <span class="st">"iid"</span>,</span>
+<span>  one_FE <span class="op">=</span> <span class="st">"cluster"</span>,</span>
+<span>  two_FE <span class="op">=</span> <span class="st">"cluster"</span>,</span>
+<span>  panel <span class="op">=</span> <span class="st">"cluster"</span>,</span>
+<span>  all <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  reset <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">getFixest_vcov</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>no_FE</dt>
 <dd><p>Character scalar equal to either: <code>"iid"</code> (default), or <code>"hetero"</code>. The type of standard-errors to use by default for estimations without fixed-effects.</p></dd>
+
+
 <dt>one_FE</dt>
 <dd><p>Character scalar equal to either: <code>"iid"</code>, <code>"hetero"</code>, or <code>"cluster"</code> (default). The type of standard-errors to use by default for estimations with <em>one</em> fixed-effect.</p></dd>
+
+
 <dt>two_FE</dt>
 <dd><p>Character scalar equal to either: <code>"iid"</code>, <code>"hetero"</code>, <code>"cluster"</code> (default), or <code>"twoway"</code>. The type of standard-errors to use by default for estimations with <em>two or more</em> fixed-effects.</p></dd>
+
+
 <dt>panel</dt>
 <dd><p>Character scalar equal to either: <code>"iid"</code>, <code>"hetero"</code>, <code>"cluster"</code> (default), or <code>"driscoll_kraaay"</code>. The type of standard-errors to use by default for estimations with the argument <code>panel.id</code> set up. Note that panel has precedence over the presence of fixed-effects.</p></dd>
+
+
 <dt>all</dt>
 <dd><p>Character scalar equal to either: <code>"iid"</code>, or <code>"hetero"</code>. By default is is NULL. If provided, it sets all the SEs to that value.</p></dd>
+
+
 <dt>reset</dt>
 <dd><p>Logical, default is <code>FALSE</code>. Whether to reset to the default values.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>The function <code>getFixest_vcov()</code> returns a list with three elements containing the default for estimations i) without, ii) with one, or iii) with two or more fixed-effects.</p>
+    
+
+<p>The function <code>getFixest_vcov()</code> returns a list with three elements containing the default for estimations i) without, ii) with one, or iii) with two or more fixed-effects.</p>
     </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="co"># By default:</span></span>
-<span class="r-in"><span class="co"># - no fixed-effect (FE): standard</span></span>
-<span class="r-in"><span class="co"># - one or more FEs: cluster</span></span>
-<span class="r-in"><span class="co"># - panel: cluster on panel id</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">base_did</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">est_no_FE</span>  <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span>, <span class="va">base_did</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">est_one_FE</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">|</span> <span class="va">id</span>, <span class="va">base_did</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">est_two_FE</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">period</span>, <span class="va">base_did</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">est_panel</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">period</span>, <span class="va">base_did</span>, panel.id <span class="op">=</span> <span class="op">~</span><span class="va">id</span> <span class="op">+</span> <span class="va">period</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_no_FE</span>, <span class="va">est_one_FE</span>, <span class="va">est_two_FE</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># By default:</span></span></span>
+<span class="r-in"><span><span class="co"># - no fixed-effect (FE): standard</span></span></span>
+<span class="r-in"><span><span class="co"># - one or more FEs: cluster</span></span></span>
+<span class="r-in"><span><span class="co"># - panel: cluster on panel id</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">base_did</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">est_no_FE</span>  <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span>, <span class="va">base_did</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">est_one_FE</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">|</span> <span class="va">id</span>, <span class="va">base_did</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">est_two_FE</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">period</span>, <span class="va">base_did</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">est_panel</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">period</span>, <span class="va">base_did</span>, panel.id <span class="op">=</span> <span class="op">~</span><span class="va">id</span> <span class="op">+</span> <span class="va">period</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_no_FE</span>, <span class="va">est_one_FE</span>, <span class="va">est_two_FE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                          est_no_FE         est_one_FE         est_two_FE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:                  y                  y                  y</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                         </span>
@@ -135,11 +152,11 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                       --            0.26507            0.30776</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Changing the default standard-errors</span></span>
-<span class="r-in"><span class="fu">setFixest_vcov</span><span class="op">(</span>no_FE <span class="op">=</span> <span class="st">"hetero"</span>, one_FE <span class="op">=</span> <span class="st">"iid"</span>,</span>
-<span class="r-in">               two_FE <span class="op">=</span> <span class="st">"twoway"</span>, panel <span class="op">=</span> <span class="st">"drisc"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_no_FE</span>, <span class="va">est_one_FE</span>, <span class="va">est_two_FE</span>, <span class="va">est_panel</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Changing the default standard-errors</span></span></span>
+<span class="r-in"><span><span class="fu">setFixest_vcov</span><span class="op">(</span>no_FE <span class="op">=</span> <span class="st">"hetero"</span>, one_FE <span class="op">=</span> <span class="st">"iid"</span>,</span></span>
+<span class="r-in"><span>               two_FE <span class="op">=</span> <span class="st">"twoway"</span>, panel <span class="op">=</span> <span class="st">"drisc"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_no_FE</span>, <span class="va">est_one_FE</span>, <span class="va">est_two_FE</span>, <span class="va">est_panel</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                          est_no_FE         est_one_FE         est_two_FE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:                  y                  y                  y</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                         </span>
@@ -169,11 +186,11 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                  0.30776</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Resetting the defaults</span></span>
-<span class="r-in"><span class="fu">setFixest_vcov</span><span class="op">(</span>reset <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Resetting the defaults</span></span></span>
+<span class="r-in"><span><span class="fu">setFixest_vcov</span><span class="op">(</span>reset <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -188,8 +205,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

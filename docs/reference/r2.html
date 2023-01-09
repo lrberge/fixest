@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,20 +76,29 @@
     <p>Reports different R2s for <code>fixest</code> estimations (e.g. <code><a href="feglm.html">feglm</a></code> or <code><a href="feols.html">feols</a></code>).</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">r2</span><span class="op">(</span><span class="va">x</span>, type <span class="op">=</span> <span class="st">"all"</span>, full_names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">r2</span><span class="op">(</span><span class="va">x</span>, type <span class="op">=</span> <span class="st">"all"</span>, full_names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>A <code>fixest</code> object, e.g. obtained with function <code><a href="feglm.html">feglm</a></code> or <code><a href="feols.html">feols</a></code>.</p></dd>
+
+
 <dt>type</dt>
 <dd><p>A character vector representing the R2 to compute. The R2 codes are of the form: "wapr2" with letters "w" (within), "a" (adjusted) and "p" (pseudo) possibly missing. E.g. to get the regular R2: use <code>type = "r2"</code>, the within adjusted R2: use <code>type = "war2"</code>, the pseudo R2: use <code>type = "pr2"</code>, etc. Use <code>"cor2"</code> for the squared correlation. By default, all R2s are computed.</p></dd>
+
+
 <dt>full_names</dt>
 <dd><p>Logical scalar, default is <code>FALSE</code>. If <code>TRUE</code> then names of the vector in output will have full names instead of keywords (e.g. <code>Squared Correlation</code> instead of <code>cor2</code>, etc).</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Returns a named vector.</p>
+    
+
+<p>Returns a named vector.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -103,43 +114,43 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="co"># Load trade data</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">trade</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># We estimate the effect of distance on trade (with 3 fixed-effects)</span></span>
-<span class="r-in"><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">Euros</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">dist_km</span><span class="op">)</span><span class="op">|</span><span class="va">Origin</span><span class="op">+</span><span class="va">Destination</span><span class="op">+</span><span class="va">Product</span>, <span class="va">trade</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Squared correlation:</span></span>
-<span class="r-in"><span class="fu">r2</span><span class="op">(</span><span class="va">est</span>, <span class="st">"cor2"</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Load trade data</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">trade</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># We estimate the effect of distance on trade (with 3 fixed-effects)</span></span></span>
+<span class="r-in"><span><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">Euros</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">dist_km</span><span class="op">)</span><span class="op">|</span><span class="va">Origin</span><span class="op">+</span><span class="va">Destination</span><span class="op">+</span><span class="va">Product</span>, <span class="va">trade</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Squared correlation:</span></span></span>
+<span class="r-in"><span><span class="fu">r2</span><span class="op">(</span><span class="va">est</span>, <span class="st">"cor2"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      cor2 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.7040186 </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># "regular" r2:</span></span>
-<span class="r-in"><span class="fu">r2</span><span class="op">(</span><span class="va">est</span>, <span class="st">"r2"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># "regular" r2:</span></span></span>
+<span class="r-in"><span><span class="fu">r2</span><span class="op">(</span><span class="va">est</span>, <span class="st">"r2"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        r2 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.7040186 </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># pseudo r2 (equivalent to GLM with Gaussian family)</span></span>
-<span class="r-in"><span class="fu">r2</span><span class="op">(</span><span class="va">est</span>, <span class="st">"pr2"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># pseudo r2 (equivalent to GLM with Gaussian family)</span></span></span>
+<span class="r-in"><span><span class="fu">r2</span><span class="op">(</span><span class="va">est</span>, <span class="st">"pr2"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       pr2 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.2353827 </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># adjusted within r2</span></span>
-<span class="r-in"><span class="fu">r2</span><span class="op">(</span><span class="va">est</span>, <span class="st">"war2"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># adjusted within r2</span></span></span>
+<span class="r-in"><span><span class="fu">r2</span><span class="op">(</span><span class="va">est</span>, <span class="st">"war2"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      war2 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.2182526 </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># all four at once</span></span>
-<span class="r-in"><span class="fu">r2</span><span class="op">(</span><span class="va">est</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cor2"</span>, <span class="st">"r2"</span>, <span class="st">"pr2"</span>, <span class="st">"war2"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># all four at once</span></span></span>
+<span class="r-in"><span><span class="fu">r2</span><span class="op">(</span><span class="va">est</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cor2"</span>, <span class="st">"r2"</span>, <span class="st">"pr2"</span>, <span class="st">"war2"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      cor2        r2       pr2      war2 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.7040186 0.7040186 0.2353827 0.2182526 </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># same with full names instead of codes</span></span>
-<span class="r-in"><span class="fu">r2</span><span class="op">(</span><span class="va">est</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cor2"</span>, <span class="st">"r2"</span>, <span class="st">"pr2"</span>, <span class="st">"war2"</span><span class="op">)</span>, full_names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># same with full names instead of codes</span></span></span>
+<span class="r-in"><span><span class="fu">r2</span><span class="op">(</span><span class="va">est</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cor2"</span>, <span class="st">"r2"</span>, <span class="st">"pr2"</span>, <span class="st">"war2"</span><span class="op">)</span>, full_names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Squared Correlation                  R2           Pseudo R2  Adjusted Within R2 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           0.7040186           0.7040186           0.2353827           0.2182526 </span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -154,8 +165,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

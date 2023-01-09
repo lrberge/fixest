@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,63 +76,98 @@
     <p>This function shows the means and standard-deviations of several variables conditional on whether they are from the treated or the control group. The groups can further be split according to a pre/post variable. Results can be seamlessly be exported to Latex.</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">did_means</span><span class="op">(</span>
-  <span class="va">fml</span>,
-  <span class="va">base</span>,
-  <span class="va">treat_var</span>,
-  <span class="va">post_var</span>,
-  tex <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">treat_dict</span>,
-  dict <span class="op">=</span> <span class="fu"><a href="setFixest_dict.html">getFixest_dict</a></span><span class="op">(</span><span class="op">)</span>,
-  <span class="va">file</span>,
-  replace <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">title</span>,
-  <span class="va">label</span>,
-  raw <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">indiv</span>,
-  <span class="va">treat_first</span>,
-  prepostnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Before"</span>, <span class="st">"After"</span><span class="op">)</span>,
-  diff.inv <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">did_means</span><span class="op">(</span></span>
+<span>  <span class="va">fml</span>,</span>
+<span>  <span class="va">base</span>,</span>
+<span>  <span class="va">treat_var</span>,</span>
+<span>  <span class="va">post_var</span>,</span>
+<span>  tex <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">treat_dict</span>,</span>
+<span>  dict <span class="op">=</span> <span class="fu"><a href="setFixest_dict.html">getFixest_dict</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  <span class="va">file</span>,</span>
+<span>  replace <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">title</span>,</span>
+<span>  <span class="va">label</span>,</span>
+<span>  raw <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">indiv</span>,</span>
+<span>  <span class="va">treat_first</span>,</span>
+<span>  prepostnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Before"</span>, <span class="st">"After"</span><span class="op">)</span>,</span>
+<span>  diff.inv <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>fml</dt>
 <dd><p>Either a formula of the type <code>var1 + ... + varN ~ treat</code> or <code>var1 + ... + varN ~ treat | post</code>. Either a data.frame/matrix containing all the variables for which the means are to be computed (they must be numeric of course). Both the treatment and the post variables must contain only exactly two values. You can use a point to select all the variables of the data set: <code>. ~ treat</code>.</p></dd>
+
+
 <dt>base</dt>
 <dd><p>A data base containing all the variables in the formula <code>fml</code>.</p></dd>
+
+
 <dt>treat_var</dt>
 <dd><p>Only if argument <code>fml</code> is <em>not</em> a formula. The vector identifying the treated and the control observations (the vector can be of any type but must contain only two possible values). Must be of the same length as the data.</p></dd>
+
+
 <dt>post_var</dt>
 <dd><p>Only if argument <code>fml</code> is <em>not</em> a formula. The vector identifying the periods (pre/post) of the observations (the vector can be of any type but must contain only two possible values). The first value (in the sorted sense) of the vector is taken as the pre period. Must be of the same length as the data.</p></dd>
+
+
 <dt>tex</dt>
 <dd><p>Should the result be displayed in Latex? Default is <code>FALSE</code>. Automatically set to <code>TRUE</code> if the table is to be saved in a file using the argument <code>file</code>.</p></dd>
+
+
 <dt>treat_dict</dt>
 <dd><p>A character vector of length two. What are the names of the treated and the control? This should be a dictionary: e.g. <code>c("1"="Treated", "0" = "Control")</code>.</p></dd>
+
+
 <dt>dict</dt>
 <dd><p>A named character vector. A dictionary between the variables names and an alias. For instance <code>dict=c("x"="Inflation Rate")</code> would replace the variable name <code>x</code> by “Inflation Rate”.</p></dd>
+
+
 <dt>file</dt>
 <dd><p>A file path. If given, the table is written in Latex into this file.</p></dd>
+
+
 <dt>replace</dt>
 <dd><p>Default is <code>TRUE</code>, which means that when the table is exported, the existing file is not erased.</p></dd>
+
+
 <dt>title</dt>
 <dd><p>Character string giving the Latex title of the table. (Only if exported.)</p></dd>
+
+
 <dt>label</dt>
 <dd><p>Character string giving the Latex label of the table. (Only if exported.)</p></dd>
+
+
 <dt>raw</dt>
 <dd><p>Logical, default is <code>FALSE</code>. If <code>TRUE</code>, it returns the information without formatting.</p></dd>
+
+
 <dt>indiv</dt>
 <dd><p>Either the variable name of individual identifiers, a one sided formula, or a vector. If the data is that of a panel, this can be used to track the number of individuals per group.</p></dd>
+
+
 <dt>treat_first</dt>
 <dd><p>Which value of the 'treatment' vector should appear on the left? By default the max value appears first (e.g. if the treatment variable is a 0/1 vector, 1 appears first).</p></dd>
+
+
 <dt>prepostnames</dt>
 <dd><p>Only if there is a 'post' variable. The names of the pre and post periods to be displayed in Latex. Default is <code>c("Before", "After")</code>.</p></dd>
+
+
 <dt>diff.inv</dt>
 <dd><p>Logical, default to <code>FALSE</code>. Whether to inverse the difference.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>It returns a data.frame or a Latex table with the conditional means and statistical differences between the groups.</p>
+    
+
+<p>It returns a data.frame or a Latex table with the conditional means and statistical differences between the groups.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -140,28 +177,28 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="co"># Playing around with the DiD data</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">base_did</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># means of treat/control</span></span>
-<span class="r-in"><span class="fu">did_means</span><span class="op">(</span><span class="va">y</span><span class="op">+</span><span class="va">x1</span><span class="op">+</span><span class="va">period</span><span class="op">~</span><span class="va">treat</span>, <span class="va">base_did</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Playing around with the DiD data</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">base_did</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># means of treat/control</span></span></span>
+<span class="r-in"><span><span class="fu">did_means</span><span class="op">(</span><span class="va">y</span><span class="op">+</span><span class="va">x1</span><span class="op">+</span><span class="va">period</span><span class="op">~</span><span class="va">treat</span>, <span class="va">base_did</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           vars    cond: 1      cond: 0 Difference t-stat</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1            y    3.3 (6)     0.68 (5)       2.64   7.83</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2           x1 0.13 (3.1) -0.066 (2.8)      0.199    1.1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3       period  5.5 (2.9)    5.5 (2.9)          0      0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4 Observations        550          530                  </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># same but inverting the difference</span></span>
-<span class="r-in"><span class="fu">did_means</span><span class="op">(</span><span class="va">y</span><span class="op">+</span><span class="va">x1</span><span class="op">+</span><span class="va">period</span><span class="op">~</span><span class="va">treat</span>, <span class="va">base_did</span>, diff.inv <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># same but inverting the difference</span></span></span>
+<span class="r-in"><span><span class="fu">did_means</span><span class="op">(</span><span class="va">y</span><span class="op">+</span><span class="va">x1</span><span class="op">+</span><span class="va">period</span><span class="op">~</span><span class="va">treat</span>, <span class="va">base_did</span>, diff.inv <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           vars    cond: 1      cond: 0 Difference t-stat</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1            y    3.3 (6)     0.68 (5)      -2.64  -7.83</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2           x1 0.13 (3.1) -0.066 (2.8)     -0.199   -1.1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3       period  5.5 (2.9)    5.5 (2.9)          0      0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4 Observations        550          530                  </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># now treat/control, before/after</span></span>
-<span class="r-in"><span class="fu">did_means</span><span class="op">(</span><span class="va">y</span><span class="op">+</span><span class="va">x1</span><span class="op">+</span><span class="va">period</span><span class="op">~</span><span class="va">treat</span><span class="op">|</span><span class="va">post</span>, <span class="va">base_did</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># now treat/control, before/after</span></span></span>
+<span class="r-in"><span><span class="fu">did_means</span><span class="op">(</span><span class="va">y</span><span class="op">+</span><span class="va">x1</span><span class="op">+</span><span class="va">period</span><span class="op">~</span><span class="va">treat</span><span class="op">|</span><span class="va">post</span>, <span class="va">base_did</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           vars    cond: 1     cond: 0 Difference t-stat     cond: 1     cond: 0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1            y 0.47 (5.1)    0.32 (5)      0.142  0.326   6.2 (5.5)       1 (5)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2           x1 0.17 (3.1) 0.046 (2.9)      0.125  0.487 0.095 (3.1) -0.18 (2.8)</span>
@@ -172,9 +209,9 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2      0.272   1.07</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3          0      0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4                  </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># same but with a new line giving the number of unique "indiv" for each case</span></span>
-<span class="r-in"><span class="fu">did_means</span><span class="op">(</span><span class="va">y</span><span class="op">+</span><span class="va">x1</span><span class="op">+</span><span class="va">period</span><span class="op">~</span><span class="va">treat</span><span class="op">|</span><span class="va">post</span>, <span class="va">base_did</span>, indiv <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># same but with a new line giving the number of unique "indiv" for each case</span></span></span>
+<span class="r-in"><span><span class="fu">did_means</span><span class="op">(</span><span class="va">y</span><span class="op">+</span><span class="va">x1</span><span class="op">+</span><span class="va">period</span><span class="op">~</span><span class="va">treat</span><span class="op">|</span><span class="va">post</span>, <span class="va">base_did</span>, indiv <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            vars    cond: 1     cond: 0 Difference t-stat     cond: 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1             y 0.47 (5.1)    0.32 (5)      0.142  0.326   6.2 (5.5)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2            x1 0.17 (3.1) 0.046 (2.9)      0.125  0.487 0.095 (3.1)</span>
@@ -187,9 +224,9 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3     8 (1.4)          0      0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4         265                  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5          53                  </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># same but with the treat case "0" coming first</span></span>
-<span class="r-in"><span class="fu">did_means</span><span class="op">(</span><span class="va">y</span><span class="op">+</span><span class="va">x1</span><span class="op">+</span><span class="va">period</span><span class="op">~</span><span class="va">treat</span><span class="op">|</span><span class="va">post</span>, <span class="va">base_did</span>, indiv <span class="op">=</span> <span class="op">~</span><span class="va">id</span>, treat_first <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># same but with the treat case "0" coming first</span></span></span>
+<span class="r-in"><span><span class="fu">did_means</span><span class="op">(</span><span class="va">y</span><span class="op">+</span><span class="va">x1</span><span class="op">+</span><span class="va">period</span><span class="op">~</span><span class="va">treat</span><span class="op">|</span><span class="va">post</span>, <span class="va">base_did</span>, indiv <span class="op">=</span> <span class="op">~</span><span class="va">id</span>, treat_first <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            vars     cond: 0    cond: 1 Difference t-stat     cond: 0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1             y    0.32 (5) 0.47 (5.1)     -0.142 -0.326       1 (5)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2            x1 0.046 (2.9) 0.17 (3.1)     -0.125 -0.487 -0.18 (2.8)</span>
@@ -202,9 +239,9 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3     8 (1.4)          0      0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4         275                  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5          55                  </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Selecting all the variables with "."</span></span>
-<span class="r-in"><span class="fu">did_means</span><span class="op">(</span><span class="va">.</span><span class="op">~</span><span class="va">treat</span><span class="op">|</span><span class="va">post</span>, <span class="va">base_did</span>, indiv <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Selecting all the variables with "."</span></span></span>
+<span class="r-in"><span><span class="fu">did_means</span><span class="op">(</span><span class="va">.</span><span class="op">~</span><span class="va">treat</span><span class="op">|</span><span class="va">post</span>, <span class="va">base_did</span>, indiv <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            vars    cond: 1     cond: 0 Difference t-stat     cond: 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1             y 0.47 (5.1)    0.32 (5)      0.142  0.326   6.2 (5.5)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2            x1 0.17 (3.1) 0.046 (2.9)      0.125  0.487 0.095 (3.1)</span>
@@ -217,8 +254,8 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3     8 (1.4)          0      0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4         265                  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5          53                  </span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -233,8 +270,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

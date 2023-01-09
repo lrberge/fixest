@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,16 +76,21 @@
     <p>Transforms a <code>fixest_panel</code> object into a regular data.frame.</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">unpanel</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">unpanel</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>A <code>fixest_panel</code> object (obtained from function <code><a href="panel.html">panel</a></code>).</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Returns a data set of the exact same dimension. Only the attribute 'panel_info' is erased.</p>
+    
+
+<p>Returns a data set of the exact same dimension. Only the attribute 'panel_info' is erased.</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
@@ -96,14 +103,14 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">base_did</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Setting a data set as a panel</span></span>
-<span class="r-in"><span class="va">pdat</span> <span class="op">=</span> <span class="fu"><a href="panel.html">panel</a></span><span class="op">(</span><span class="va">base_did</span>, <span class="op">~</span><span class="va">id</span><span class="op">+</span><span class="va">period</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># ... allows you to use leads and lags in estimations</span></span>
-<span class="r-in"><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span><span class="op">~</span><span class="fu"><a href="l.html">l</a></span><span class="op">(</span><span class="va">x1</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span>, <span class="va">pdat</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">base_did</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Setting a data set as a panel</span></span></span>
+<span class="r-in"><span><span class="va">pdat</span> <span class="op">=</span> <span class="fu"><a href="panel.html">panel</a></span><span class="op">(</span><span class="va">base_did</span>, <span class="op">~</span><span class="va">id</span><span class="op">+</span><span class="va">period</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># ... allows you to use leads and lags in estimations</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span><span class="op">~</span><span class="fu"><a href="l.html">l</a></span><span class="op">(</span><span class="va">x1</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span>, <span class="va">pdat</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 108 observations removed because of NA values (RHS: 108).</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: y</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 972 </span>
@@ -115,18 +122,18 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 4.90919   Adj. R2: 0.264064</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Now unpanel =&gt; returns the initial data set</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">pdat</span><span class="op">)</span> ; <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">pdat</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Now unpanel =&gt; returns the initial data set</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">pdat</span><span class="op">)</span> ; <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">pdat</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "fixest_panel" "data.frame"  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1080    6</span>
-<span class="r-in"><span class="va">new_base</span> <span class="op">=</span> <span class="fu">unpanel</span><span class="op">(</span><span class="va">pdat</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">new_base</span><span class="op">)</span> ; <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">new_base</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="va">new_base</span> <span class="op">=</span> <span class="fu">unpanel</span><span class="op">(</span><span class="va">pdat</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">new_base</span><span class="op">)</span> ; <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">new_base</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "data.frame"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1080    6</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -141,8 +148,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

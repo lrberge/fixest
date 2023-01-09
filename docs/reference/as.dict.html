@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,16 +76,21 @@
     <p>Transforms a single character string containing a dictionary in a textual format into a proper dictionary, that is a named character vector</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">as.dict</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">as.dict</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>A character scalar of the form <code>"variable 1: definition \n variable 2: definition"</code> etc. Each line of this character must contain at most one definition with, on the left the variable name, and on the right its definition. The separation between the variable and its definition must be a colon followed with a single space (i.e. ": "). You can stack definitions within a single line by making use of a semi colon: <code>"var1: def; var2: def"</code>. White spaces on the left and right are ignored. You can add commented lines with a <code>"#"</code>. Non-empty, non-commented lines that don't have the proper format witll raise an error.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>It returns a named character vector.</p>
+    
+
+<p>It returns a named character vector.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -100,22 +107,22 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="va">x</span> <span class="op">=</span> <span class="st">"# Main vars</span>
-<span class="r-in">     mpg: Miles per gallon</span>
-<span class="r-in">     hp: Horsepower</span>
-<span class="r-in"></span>
-<span class="r-in">     # Categorical variables</span>
-<span class="r-in">     cyl: Number of cylinders; vs: Engine"</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">as.dict</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"# Main vars</span></span></span>
+<span class="r-in"><span><span class="st">     mpg: Miles per gallon</span></span></span>
+<span class="r-in"><span><span class="st">     hp: Horsepower</span></span></span>
+<span class="r-in"><span><span class="st"></span></span></span>
+<span class="r-in"><span><span class="st">     # Categorical variables</span></span></span>
+<span class="r-in"><span><span class="st">     cyl: Number of cylinders; vs: Engine"</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">as.dict</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                   mpg                    hp                   cyl </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    "Miles per gallon"          "Horsepower" "Number of cylinders" </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                    vs </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              "Engine" </span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -130,8 +137,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

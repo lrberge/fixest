@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,27 +76,40 @@
     <p>This function extracts the fitted values from a model estimated with <code><a href="femlm.html">femlm</a></code>, <code><a href="feols.html">feols</a></code> or <code><a href="feglm.html">feglm</a></code>. The fitted values that are returned are the <em>expected predictor</em>.</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for fixest</span>
-<span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">object</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"response"</span>, <span class="st">"link"</span><span class="op">)</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="co"># S3 method for fixest</span>
-<span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted.values</a></span><span class="op">(</span><span class="va">object</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"response"</span>, <span class="st">"link"</span><span class="op">)</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for fixest</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">object</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"response"</span>, <span class="st">"link"</span><span class="op">)</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for fixest</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted.values</a></span><span class="op">(</span><span class="va">object</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"response"</span>, <span class="st">"link"</span><span class="op">)</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>object</dt>
 <dd><p>A <code>fixest</code> object. Obtained using the functions <code><a href="femlm.html">femlm</a></code>, <code><a href="feols.html">feols</a></code> or <code><a href="feglm.html">feglm</a></code>.</p></dd>
+
+
 <dt>type</dt>
 <dd><p>Character either equal to <code>"response"</code> (default) or <code>"link"</code>. If <code>type="response"</code>, then the output is at the level of the response variable, i.e. it is the expected predictor \(E(Y|X)\). If <code>"link"</code>, then the output is at the level of the explanatory variables, i.e. the linear predictor \(X\cdot \beta\).</p></dd>
+
+
 <dt>na.rm</dt>
 <dd><p>Logical, default is <code>TRUE</code>. If <code>FALSE</code> the number of observation returned will be the number of observations in the original data set, otherwise it will be the number of observations used in the estimation.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Not currently used.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>It returns a numeric vector of length the number of observations used to estimate the model.
-If <code>type = "response"</code>, the value returned is the expected predictor, i.e. the expected value of the dependent variable for the fitted model: \(E(Y|X)\).
+    
+
+<p>It returns a numeric vector of length the number of observations used to estimate the model.</p>
+
+
+<p>If <code>type = "response"</code>, the value returned is the expected predictor, i.e. the expected value of the dependent variable for the fitted model: \(E(Y|X)\).
 If <code>type = "link"</code>, the value returned is the linear predictor of the fitted model, that is \(X\cdot \beta\) (remind that \(E(Y|X) = f(X\cdot \beta)\)).</p>
     </div>
     <div id="details">
@@ -112,26 +127,26 @@ If <code>type = "link"</code>, the value returned is the linear predictor of the
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="co"># simple estimation on iris data, using "Species" fixed-effects</span></span>
-<span class="r-in"><span class="va">res_poisson</span> <span class="op">=</span> <span class="fu"><a href="femlm.html">femlm</a></span><span class="op">(</span><span class="va">Sepal.Length</span> <span class="op">~</span> <span class="va">Sepal.Width</span> <span class="op">+</span> <span class="va">Petal.Length</span> <span class="op">+</span></span>
-<span class="r-in">                    <span class="va">Petal.Width</span> <span class="op">|</span> <span class="va">Species</span>, <span class="va">iris</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># we extract the fitted values</span></span>
-<span class="r-in"><span class="va">y_fitted_poisson</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">res_poisson</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Same estimation but in OLS (Gaussian family)</span></span>
-<span class="r-in"><span class="va">res_gaussian</span> <span class="op">=</span> <span class="fu"><a href="femlm.html">femlm</a></span><span class="op">(</span><span class="va">Sepal.Length</span> <span class="op">~</span> <span class="va">Sepal.Width</span> <span class="op">+</span> <span class="va">Petal.Length</span> <span class="op">+</span></span>
-<span class="r-in">                    <span class="va">Petal.Width</span> <span class="op">|</span> <span class="va">Species</span>, <span class="va">iris</span>, family <span class="op">=</span> <span class="st">"gaussian"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">y_fitted_gaussian</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">res_gaussian</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># comparison of the fit for the two families</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">iris</span><span class="op">$</span><span class="va">Sepal.Length</span>, <span class="va">y_fitted_poisson</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">iris</span><span class="op">$</span><span class="va">Sepal.Length</span>, <span class="va">y_fitted_gaussian</span>, col <span class="op">=</span> <span class="fl">2</span>, pch <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># simple estimation on iris data, using "Species" fixed-effects</span></span></span>
+<span class="r-in"><span><span class="va">res_poisson</span> <span class="op">=</span> <span class="fu"><a href="femlm.html">femlm</a></span><span class="op">(</span><span class="va">Sepal.Length</span> <span class="op">~</span> <span class="va">Sepal.Width</span> <span class="op">+</span> <span class="va">Petal.Length</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>                    <span class="va">Petal.Width</span> <span class="op">|</span> <span class="va">Species</span>, <span class="va">iris</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># we extract the fitted values</span></span></span>
+<span class="r-in"><span><span class="va">y_fitted_poisson</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">res_poisson</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Same estimation but in OLS (Gaussian family)</span></span></span>
+<span class="r-in"><span><span class="va">res_gaussian</span> <span class="op">=</span> <span class="fu"><a href="femlm.html">femlm</a></span><span class="op">(</span><span class="va">Sepal.Length</span> <span class="op">~</span> <span class="va">Sepal.Width</span> <span class="op">+</span> <span class="va">Petal.Length</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>                    <span class="va">Petal.Width</span> <span class="op">|</span> <span class="va">Species</span>, <span class="va">iris</span>, family <span class="op">=</span> <span class="st">"gaussian"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">y_fitted_gaussian</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">res_gaussian</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># comparison of the fit for the two families</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">iris</span><span class="op">$</span><span class="va">Sepal.Length</span>, <span class="va">y_fitted_poisson</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">iris</span><span class="op">$</span><span class="va">Sepal.Length</span>, <span class="va">y_fitted_gaussian</span>, col <span class="op">=</span> <span class="fl">2</span>, pch <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="fitted.fixest-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -146,8 +161,7 @@ If <code>type = "link"</code>, the value returned is the linear predictor of the
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

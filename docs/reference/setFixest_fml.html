@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,20 +76,27 @@
     <p>You can set formula macros globally with <code>setFixest_fml</code>. These macros can then be used in <code>fixest</code> estimations or when using the function <code>xpd</code>.</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">setFixest_fml</span><span class="op">(</span><span class="va">...</span>, reset <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-
-<span class="fu">getFixest_fml</span><span class="op">(</span><span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">setFixest_fml</span><span class="op">(</span><span class="va">...</span>, reset <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">getFixest_fml</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>...</dt>
 <dd><p>Definition of the macro variables. Each argument name corresponds to the name of the macro variable. It is required that each macro variable name starts with two dots (e.g. <code>..ctrl</code>). The value of each argument must be a one-sided formula or a character vector, it is the definition of the macro variable. Example of a valid call: <code>setFixest_fml(..ctrl = ~ var1 + var2)</code>. In the function <code>xpd</code>, the default macro variables are taken from <code>getFixest_fml</code>, any variable in <code>...</code> will replace these values. You can enclose values in <code>.[]</code>, if so they will be evaluated from the current environment. For example <code>..ctrl = ~ x.[1:2] + .[z]</code> will lead to <code>~x1 + x2 + var</code> if <code>z</code> is equal to <code>"var"</code>.</p></dd>
+
+
 <dt>reset</dt>
 <dd><p>A logical scalar, defaults to <code>FALSE</code>. If <code>TRUE</code>, all macro variables are first reset (i.e. deleted).</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>The function <code>getFixest_fml()</code> returns a list of character strings, the names corresponding to the macro variable names, the character strings corresponding to their definition.</p>
+    
+
+<p>The function <code>getFixest_fml()</code> returns a list of character strings, the names corresponding to the macro variable names, the character strings corresponding to their definition.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -101,15 +110,15 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="co"># Small examples with airquality data</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">airquality</span><span class="op">)</span></span>
-<span class="r-in"><span class="co"># we set two macro variables</span></span>
-<span class="r-in"><span class="fu">setFixest_fml</span><span class="op">(</span>..ctrl <span class="op">=</span> <span class="op">~</span> <span class="va">Temp</span> <span class="op">+</span> <span class="va">Day</span>,</span>
-<span class="r-in">              ..ctrl_long <span class="op">=</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/stats/poly.html" class="external-link">poly</a></span><span class="op">(</span><span class="va">Temp</span>, <span class="fl">2</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/poly.html" class="external-link">poly</a></span><span class="op">(</span><span class="va">Day</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Using the macro in lm with xpd:</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Wind</span> <span class="op">+</span> <span class="va">..ctrl</span><span class="op">)</span>, <span class="va">airquality</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Small examples with airquality data</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">airquality</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># we set two macro variables</span></span></span>
+<span class="r-in"><span><span class="fu">setFixest_fml</span><span class="op">(</span>..ctrl <span class="op">=</span> <span class="op">~</span> <span class="va">Temp</span> <span class="op">+</span> <span class="va">Day</span>,</span></span>
+<span class="r-in"><span>              ..ctrl_long <span class="op">=</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/stats/poly.html" class="external-link">poly</a></span><span class="op">(</span><span class="va">Temp</span>, <span class="fl">2</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/poly.html" class="external-link">poly</a></span><span class="op">(</span><span class="va">Day</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Using the macro in lm with xpd:</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Wind</span> <span class="op">+</span> <span class="va">..ctrl</span><span class="op">)</span>, <span class="va">airquality</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> lm(formula = xpd(Ozone ~ Wind + ..ctrl), data = airquality)</span>
@@ -118,7 +127,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)         Wind         Temp          Day  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    -76.5168      -3.0681       1.8622       0.2506  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Wind</span> <span class="op">+</span> <span class="va">..ctrl_long</span><span class="op">)</span>, <span class="va">airquality</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Wind</span> <span class="op">+</span> <span class="va">..ctrl_long</span><span class="op">)</span>, <span class="va">airquality</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> lm(formula = xpd(Ozone ~ Wind + ..ctrl_long), data = airquality)</span>
@@ -129,13 +138,13 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span>  poly(Day, 2)2  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         20.483  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># You can use the macros without xpd() in fixest estimations</span></span>
-<span class="r-in"><span class="va">a</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Wind</span> <span class="op">+</span> <span class="va">..ctrl</span>, <span class="va">airquality</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># You can use the macros without xpd() in fixest estimations</span></span></span>
+<span class="r-in"><span><span class="va">a</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Wind</span> <span class="op">+</span> <span class="va">..ctrl</span>, <span class="va">airquality</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 37 observations removed because of NA values (LHS: 37).</span>
-<span class="r-in"><span class="va">b</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Wind</span> <span class="op">+</span> <span class="va">..ctrl_long</span>, <span class="va">airquality</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="va">b</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Wind</span> <span class="op">+</span> <span class="va">..ctrl_long</span>, <span class="va">airquality</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 37 observations removed because of NA values (LHS: 37).</span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">a</span>, <span class="va">b</span>, keep <span class="op">=</span> <span class="st">"Int|Win"</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">a</span>, <span class="va">b</span>, keep <span class="op">=</span> <span class="st">"Int|Win"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                  a                  b</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                      </span>
@@ -147,14 +156,14 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Adj. R2                    0.56164            0.60447</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Using .[]</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="va">iris</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">i</span> <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">3</span></span>
-<span class="r-in"><span class="va">z</span> <span class="op">=</span> <span class="st">"species"</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x.</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span> <span class="op">+</span> <span class="va">.</span><span class="op">[</span><span class="va">z</span><span class="op">]</span><span class="op">)</span>, <span class="va">base</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Using .[]</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="va">iris</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">i</span> <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">3</span></span></span>
+<span class="r-in"><span><span class="va">z</span> <span class="op">=</span> <span class="st">"species"</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x.</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span> <span class="op">+</span> <span class="va">.</span><span class="op">[</span><span class="va">z</span><span class="op">]</span><span class="op">)</span>, <span class="va">base</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> lm(formula = xpd(y ~ x.[2:3] + .[z]), data = base)</span>
@@ -165,9 +174,9 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span>  speciesvirginica  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         -2.112647  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># No xpd() needed in feols</span></span>
-<span class="r-in"><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x.</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span> <span class="op">+</span> <span class="va">.</span><span class="op">[</span><span class="va">z</span><span class="op">]</span>, <span class="va">base</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># No xpd() needed in feols</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x.</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span> <span class="op">+</span> <span class="va">.</span><span class="op">[</span><span class="va">z</span><span class="op">]</span>, <span class="va">base</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: y</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 150 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: IID </span>
@@ -180,20 +189,20 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 0.333482   Adj. R2: 0.832221</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Auto completion with '..' suffix</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># You can trigger variables autocompletion with the '..' suffix</span></span>
-<span class="r-in"><span class="co"># You need to provide the argument data</span></span>
-<span class="r-in"><span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="va">iris</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x..</span>, data <span class="op">=</span> <span class="va">base</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Auto completion with '..' suffix</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># You can trigger variables autocompletion with the '..' suffix</span></span></span>
+<span class="r-in"><span><span class="co"># You need to provide the argument data</span></span></span>
+<span class="r-in"><span><span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="va">iris</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x..</span>, data <span class="op">=</span> <span class="va">base</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> y ~ x1 + x2 + x3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x0000000046739a08&gt;</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># In fixest estimations, this is automatically taken care of</span></span>
-<span class="r-in"><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x..</span>, data <span class="op">=</span> <span class="va">base</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000002349e99eaa0&gt;</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># In fixest estimations, this is automatically taken care of</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x..</span>, data <span class="op">=</span> <span class="va">base</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: y</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 150 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: IID </span>
@@ -205,25 +214,25 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 0.310327   Adj. R2: 0.855706</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># You can use xpd for stepwise estimations</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Note that for stepwise estimations in fixest, you can use</span></span>
-<span class="r-in"><span class="co"># the stepwise functions: sw, sw0, csw, csw0</span></span>
-<span class="r-in"><span class="co"># -&gt; see help in feols or in the dedicated vignette</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># we want to look at the effect of x1 on y</span></span>
-<span class="r-in"><span class="co"># controlling for different variables</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">base</span> <span class="op">=</span> <span class="va">iris</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># We first create a matrix with all possible combinations of variables</span></span>
-<span class="r-in"><span class="va">my_args</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span><span class="op">]</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">""</span>, <span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">(</span><span class="va">all_combs</span> <span class="op">=</span> <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/as.matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="st">"expand.grid"</span>, <span class="va">my_args</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># You can use xpd for stepwise estimations</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Note that for stepwise estimations in fixest, you can use</span></span></span>
+<span class="r-in"><span><span class="co"># the stepwise functions: sw, sw0, csw, csw0</span></span></span>
+<span class="r-in"><span><span class="co"># -&gt; see help in feols or in the dedicated vignette</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># we want to look at the effect of x1 on y</span></span></span>
+<span class="r-in"><span><span class="co"># controlling for different variables</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">base</span> <span class="op">=</span> <span class="va">iris</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># We first create a matrix with all possible combinations of variables</span></span></span>
+<span class="r-in"><span><span class="va">my_args</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span><span class="op">]</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">""</span>, <span class="va">x</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">(</span><span class="va">all_combs</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="st">"expand.grid"</span>, <span class="va">my_args</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      Var1 Var2 Var3     </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1,] ""   ""   ""       </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,] "x2" ""   ""       </span>
@@ -233,13 +242,13 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> [6,] "x2" ""   "species"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [7,] ""   "x3" "species"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [8,] "x2" "x3" "species"</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">res_all</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in"><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">all_combs</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
-<span class="r-in">  <span class="va">res_all</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">..v</span>, ..v <span class="op">=</span> <span class="va">all_combs</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span><span class="op">)</span>, <span class="va">base</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">res_all</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">res_all</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">all_combs</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">res_all</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">..v</span>, ..v <span class="op">=</span> <span class="va">all_combs</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span><span class="op">)</span>, <span class="va">base</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">res_all</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                             model 1            model 2            model 3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:                   y                  y                  y</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                          </span>
@@ -286,18 +295,18 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Adj. R2                      0.72500            0.86271</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"><span class="fu"><a href="coefplot.html">coefplot</a></span><span class="op">(</span><span class="va">res_all</span>, group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Species <span class="op">=</span> <span class="st">"^^species"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="coefplot.html">coefplot</a></span><span class="op">(</span><span class="va">res_all</span>, group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Species <span class="op">=</span> <span class="st">"^^species"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="setFixest_fml-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># You can use macros to grep variables in your data set</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Example 1: setting a macro variable globally</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">longley</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">setFixest_fml</span><span class="op">(</span>..many_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"GNP|ployed"</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">longley</span><span class="op">)</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="va">..many_vars</span>, <span class="va">longley</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># You can use macros to grep variables in your data set</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Example 1: setting a macro variable globally</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">longley</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">setFixest_fml</span><span class="op">(</span>..many_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"GNP|ployed"</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">longley</span><span class="op">)</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="va">..many_vars</span>, <span class="va">longley</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: Armed.Forces</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 16 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: IID </span>
@@ -311,10 +320,10 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 36.1   Adj. R2: 0.569345</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Example 2: using ..("regex") or regex("regex") to grep the variables "live"</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="fu">..</span><span class="op">(</span><span class="st">"GNP|ployed"</span><span class="op">)</span>, <span class="va">longley</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Example 2: using ..("regex") or regex("regex") to grep the variables "live"</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="fu">..</span><span class="op">(</span><span class="st">"GNP|ployed"</span><span class="op">)</span>, <span class="va">longley</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: Armed.Forces</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 16 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: IID </span>
@@ -328,11 +337,11 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 36.1   Adj. R2: 0.569345</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Example 3: same as Ex.2 but without using a fixest estimation</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Here we need to use xpd():</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/regex.html" class="external-link">regex</a></span><span class="op">(</span><span class="st">"GNP|ployed"</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">longley</span><span class="op">)</span>, <span class="va">longley</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Example 3: same as Ex.2 but without using a fixest estimation</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Here we need to use xpd():</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="fu">regex</span><span class="op">(</span><span class="st">"GNP|ployed"</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">longley</span><span class="op">)</span>, <span class="va">longley</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> lm(formula = xpd(Armed.Forces ~ Population + regex("GNP|ployed"), </span>
@@ -344,9 +353,9 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Employed  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     -50.0598  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Stepwise estimation with regex: use a comma after the parenthesis</span></span>
-<span class="r-in"><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="fu"><a href="stepwise.html">sw</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/regex.html" class="external-link">regex</a></span><span class="op">(</span>,<span class="st">"GNP|ployed"</span><span class="op">)</span><span class="op">)</span>, <span class="va">longley</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Stepwise estimation with regex: use a comma after the parenthesis</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="fu"><a href="stepwise.html">sw</a></span><span class="op">(</span><span class="fu">regex</span><span class="op">(</span>,<span class="st">"GNP|ployed"</span><span class="op">)</span><span class="op">)</span>, <span class="va">longley</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: IID </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Expl. vars.: Population + GNP.deflator</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               Estimate Std. Error  t value Pr(&gt;|t|)    </span>
@@ -371,9 +380,9 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept) -396.96880  310.16774 -1.27985  0.22297 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Population    -9.63435    8.44253 -1.14117  0.27439 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Employed      27.38861   16.72199  1.63788  0.12541 </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Multiple LHS</span></span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="fu">..</span><span class="op">(</span><span class="st">"GNP|ployed"</span><span class="op">)</span> <span class="op">~</span> <span class="va">Population</span>, <span class="va">longley</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Multiple LHS</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="fu">..</span><span class="op">(</span><span class="st">"GNP|ployed"</span><span class="op">)</span> <span class="op">~</span> <span class="va">Population</span>, <span class="va">longley</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 feols(..("GNP|..1 feols(..("GNP|pl..2 feols(..("GN..3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:      GNP.deflator                 GNP      Unemployed</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                      </span>
@@ -397,116 +406,116 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Adj. R2                    0.91680</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># lhs and rhs arguments</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># to create a one sided formula from a character vector</span></span>
-<span class="r-in"><span class="va">vars</span> <span class="op">=</span> <span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span>
-<span class="r-in"><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span>rhs <span class="op">=</span> <span class="va">vars</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># lhs and rhs arguments</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># to create a one sided formula from a character vector</span></span></span>
+<span class="r-in"><span><span class="va">vars</span> <span class="op">=</span> <span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span>rhs <span class="op">=</span> <span class="va">vars</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ~a + b + c + d + e</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x0000000046739a08&gt;</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Alternatively, to replace the RHS</span></span>
-<span class="r-in"><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fl">1</span>, rhs <span class="op">=</span> <span class="va">vars</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000002349e99eaa0&gt;</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Alternatively, to replace the RHS</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fl">1</span>, rhs <span class="op">=</span> <span class="va">vars</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> y ~ a + b + c + d + e</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x0000000046739a08&gt;</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># To create a two sided formula</span></span>
-<span class="r-in"><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span>lhs <span class="op">=</span> <span class="st">"y"</span>, rhs <span class="op">=</span> <span class="va">vars</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000002349e99eaa0&gt;</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># To create a two sided formula</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span>lhs <span class="op">=</span> <span class="st">"y"</span>, rhs <span class="op">=</span> <span class="va">vars</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> y ~ a + b + c + d + e</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x0000000046739a08&gt;</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># argument 'add'</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="op">~</span><span class="va">x1</span>, add <span class="op">=</span> <span class="op">~</span> <span class="va">x2</span> <span class="op">+</span> <span class="va">x3</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000002349e99eaa0&gt;</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># argument 'add'</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="op">~</span><span class="va">x1</span>, add <span class="op">=</span> <span class="op">~</span> <span class="va">x2</span> <span class="op">+</span> <span class="va">x3</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ~x1 + x2 + x3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x0000000046739a08&gt;</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># also works with character vectors</span></span>
-<span class="r-in"><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="op">~</span><span class="va">x1</span>, add <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x2"</span>, <span class="st">"x3"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000002349e99eaa0&gt;</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># also works with character vectors</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="op">~</span><span class="va">x1</span>, add <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x2"</span>, <span class="st">"x3"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ~x1 + x2 + x3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x0000000046739a08&gt;</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># only adds to the RHS</span></span>
-<span class="r-in"><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span>, add <span class="op">=</span> <span class="op">~</span><span class="va">bon</span> <span class="op">+</span> <span class="va">jour</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000002349e99eaa0&gt;</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># only adds to the RHS</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span>, add <span class="op">=</span> <span class="op">~</span><span class="va">bon</span> <span class="op">+</span> <span class="va">jour</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> y ~ x + bon + jour</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x0000000046739a08&gt;</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Dot square bracket operator</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># The basic use id to add variables in the formula</span></span>
-<span class="r-in"><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x1"</span>, <span class="st">"x2"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">.</span><span class="op">[</span><span class="va">x</span><span class="op">]</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000002349e99eaa0&gt;</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Dot square bracket operator</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># The basic use id to add variables in the formula</span></span></span>
+<span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x1"</span>, <span class="st">"x2"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">.</span><span class="op">[</span><span class="va">x</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> y ~ x1 + x2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x0000000046739a08&gt;</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Alternatively, one-sided formulas can be used and their content will be inserted verbatim</span></span>
-<span class="r-in"><span class="va">x</span> <span class="op">=</span> <span class="op">~</span><span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span></span>
-<span class="r-in"><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">.</span><span class="op">[</span><span class="va">x</span><span class="op">]</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000002349e99eaa0&gt;</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Alternatively, one-sided formulas can be used and their content will be inserted verbatim</span></span></span>
+<span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="op">~</span><span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">.</span><span class="op">[</span><span class="va">x</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> y ~ x1 + x2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x0000000046739a08&gt;</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># You can create multiple variables at once</span></span>
-<span class="r-in"><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x.</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span> <span class="op">+</span> <span class="va">z.</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000002349e99eaa0&gt;</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># You can create multiple variables at once</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x.</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span> <span class="op">+</span> <span class="va">z.</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> y ~ x1 + x2 + x3 + x4 + x5 + z2 + z3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x0000000046739a08&gt;</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># You can summon variables from the environment to complete variables names</span></span>
-<span class="r-in"><span class="va">var</span> <span class="op">=</span> <span class="st">"a"</span></span>
-<span class="r-in"><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x.</span><span class="op">[</span><span class="va">var</span><span class="op">]</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000002349e99eaa0&gt;</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># You can summon variables from the environment to complete variables names</span></span></span>
+<span class="r-in"><span><span class="va">var</span> <span class="op">=</span> <span class="st">"a"</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x.</span><span class="op">[</span><span class="va">var</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> y ~ xa</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x0000000046739a08&gt;</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># ... the variables can be multiple</span></span>
-<span class="r-in"><span class="va">vars</span> <span class="op">=</span> <span class="va">LETTERS</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span>
-<span class="r-in"><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x.</span><span class="op">[</span><span class="va">vars</span><span class="op">]</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000002349e99eaa0&gt;</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># ... the variables can be multiple</span></span></span>
+<span class="r-in"><span><span class="va">vars</span> <span class="op">=</span> <span class="va">LETTERS</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x.</span><span class="op">[</span><span class="va">vars</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> y ~ xA + xB + xC</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x0000000046739a08&gt;</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># You can have "complex" variable names but they must be nested in character form</span></span>
-<span class="r-in"><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">.</span><span class="op">[</span><span class="st">"x.[vars]_sq"</span><span class="op">]</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000002349e99eaa0&gt;</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># You can have "complex" variable names but they must be nested in character form</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">.</span><span class="op">[</span><span class="st">"x.[vars]_sq"</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> y ~ xA_sq + xB_sq + xC_sq</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x0000000046739a08&gt;</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># DSB can be used within regular expressions</span></span>
-<span class="r-in"><span class="va">re</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"GNP"</span>, <span class="st">"Pop"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">Unemployed</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/regex.html" class="external-link">regex</a></span><span class="op">(</span><span class="st">".[re]"</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">longley</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000002349e99eaa0&gt;</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># DSB can be used within regular expressions</span></span></span>
+<span class="r-in"><span><span class="va">re</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"GNP"</span>, <span class="st">"Pop"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">Unemployed</span> <span class="op">~</span> <span class="fu">regex</span><span class="op">(</span><span class="st">".[re]"</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">longley</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Unemployed ~ GNP.deflator + GNP + Population</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x0000000046739a08&gt;</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># =&gt; equivalent to regex("GNP|Pop")</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Use .[,var] (NOTE THE COMMA!) to expand with commas</span></span>
-<span class="r-in"><span class="co"># !! can break the formula if missused</span></span>
-<span class="r-in"><span class="va">vars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"wage"</span>, <span class="st">"unemp"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">y.</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="stepwise.html">csw</a></span><span class="op">(</span><span class="va">.</span><span class="op">[</span>,<span class="va">vars</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000002349e99eaa0&gt;</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># =&gt; equivalent to regex("GNP|Pop")</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Use .[,var] (NOTE THE COMMA!) to expand with commas</span></span></span>
+<span class="r-in"><span><span class="co"># !! can break the formula if missused</span></span></span>
+<span class="r-in"><span><span class="va">vars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"wage"</span>, <span class="st">"unemp"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">y.</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="stepwise.html">csw</a></span><span class="op">(</span><span class="va">.</span><span class="op">[</span>,<span class="va">vars</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> c(y1, y2, y3) ~ csw(wage, unemp)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x0000000046739a08&gt;</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Example of use of .[] within a loop</span></span>
-<span class="r-in"><span class="va">res_all</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in"><span class="kw">for</span><span class="op">(</span><span class="va">p</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span><span class="op">{</span></span>
-<span class="r-in">  <span class="va">res_all</span><span class="op">[[</span><span class="va">p</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Wind</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/poly.html" class="external-link">poly</a></span><span class="op">(</span><span class="va">Temp</span>, <span class="va">.</span><span class="op">[</span><span class="va">p</span><span class="op">]</span><span class="op">)</span>, <span class="va">airquality</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000002349e99eaa0&gt;</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Example of use of .[] within a loop</span></span></span>
+<span class="r-in"><span><span class="va">res_all</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="kw">for</span><span class="op">(</span><span class="va">p</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span><span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">res_all</span><span class="op">[[</span><span class="va">p</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Wind</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/poly.html" class="external-link">poly</a></span><span class="op">(</span><span class="va">Temp</span>, <span class="va">.</span><span class="op">[</span><span class="va">p</span><span class="op">]</span><span class="op">)</span>, <span class="va">airquality</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 37 observations removed because of NA values (LHS: 37).</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 37 observations removed because of NA values (LHS: 37).</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 37 observations removed because of NA values (LHS: 37).</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">res_all</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">res_all</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                            model 1            model 2            model 3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone              Ozone              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                         </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Constant          72.28*** (6.847)   70.40*** (6.518)   71.31*** (6.512)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind            -3.055*** (0.6633) -2.866*** (0.6315) -2.928*** (0.6295)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1       214.6*** (29.17)   209.0*** (27.73)   201.5*** (28.02)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1       214.7*** (29.17)   209.0*** (27.73)   201.5*** (28.02)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2                          93.36*** (25.44)   101.7*** (25.91)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)3                                               -37.32 (25.03)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ __________________ __________________ __________________</span>
@@ -516,18 +525,19 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Adj. R2                    0.56108            0.60469            0.60896</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># The former can be compactly estimated with:</span></span>
-<span class="r-in"><span class="va">res_compact</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Wind</span> <span class="op">+</span> <span class="fu"><a href="stepwise.html">sw</a></span><span class="op">(</span><span class="va">.</span><span class="op">[</span>, <span class="st">"poly(Temp, .[1:3])"</span><span class="op">]</span><span class="op">)</span>, <span class="va">airquality</span><span class="op">)</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 37 observations removed because of NA values (LHS: 37). [This msg only concerns the variables common to all estimations.]</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">res_compact</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># The former can be compactly estimated with:</span></span></span>
+<span class="r-in"><span><span class="va">res_compact</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Wind</span> <span class="op">+</span> <span class="fu"><a href="stepwise.html">sw</a></span><span class="op">(</span><span class="va">.</span><span class="op">[</span>, <span class="st">"poly(Temp, .[1:3])"</span><span class="op">]</span><span class="op">)</span>, <span class="va">airquality</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 37 observations removed because of NA values (LHS: 37).</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       |-&gt; this msg only concerns the variables common to all estimations</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">res_compact</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                      res_compact.1      res_compact.2      res_compact.3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone              Ozone              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                         </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Constant          72.28*** (6.847)   70.40*** (6.518)   71.31*** (6.512)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wind            -3.055*** (0.6633) -2.866*** (0.6315) -2.928*** (0.6295)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1       214.6*** (29.17)   209.0*** (27.73)   201.5*** (28.02)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1       214.7*** (29.17)   209.0*** (27.73)   201.5*** (28.02)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2                          93.36*** (25.44)   101.7*** (25.91)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)3                                               -37.32 (25.03)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ __________________ __________________ __________________</span>
@@ -537,32 +547,32 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Adj. R2                    0.56108            0.60469            0.60896</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># How does it work?</span></span>
-<span class="r-in"><span class="co"># 1)  .[, stuff] evaluates stuff and, if a vector, aggregates it with commas</span></span>
-<span class="r-in"><span class="co">#     Comma aggregation is done thanks to the comma placed after the square bracket</span></span>
-<span class="r-in"><span class="co">#     If .[stuff], then aggregation is with sums.</span></span>
-<span class="r-in"><span class="co"># 2) stuff is evaluated, and if it is a character string, it is evaluated with</span></span>
-<span class="r-in"><span class="co"># the function dsb which expands values in .[]</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Wrapping up:</span></span>
-<span class="r-in"><span class="co"># 2) evaluation of dsb("poly(Temp, .[1:3])") leads to the vector:</span></span>
-<span class="r-in"><span class="co">#    c("poly(Temp, 1)", "poly(Temp, 2)", "poly(Temp, 3)")</span></span>
-<span class="r-in"><span class="co"># 1) .[, c("poly(Temp, 1)", "poly(Temp, 2)", "poly(Temp, 3)")] leads to</span></span>
-<span class="r-in"><span class="co">#    poly(Temp, 1), poly(Temp, 2), poly(Temp, 3)</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Hence sw(.[, "poly(Temp, .[1:3])"]) becomes:</span></span>
-<span class="r-in"><span class="co">#       sw(poly(Temp, 1), poly(Temp, 2), poly(Temp, 3))</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># In non-fixest functions: guessing the data allows to use regex</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># When used in non-fixest functions, the algorithm tries to "guess" the data</span></span>
-<span class="r-in"><span class="co"># so that ..("regex") can be directly evaluated without passing the argument 'data'</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">longley</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="fu">..</span><span class="op">(</span><span class="st">"GNP|ployed"</span><span class="op">)</span><span class="op">)</span>, <span class="va">longley</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># How does it work?</span></span></span>
+<span class="r-in"><span><span class="co"># 1)  .[, stuff] evaluates stuff and, if a vector, aggregates it with commas</span></span></span>
+<span class="r-in"><span><span class="co">#     Comma aggregation is done thanks to the comma placed after the square bracket</span></span></span>
+<span class="r-in"><span><span class="co">#     If .[stuff], then aggregation is with sums.</span></span></span>
+<span class="r-in"><span><span class="co"># 2) stuff is evaluated, and if it is a character string, it is evaluated with</span></span></span>
+<span class="r-in"><span><span class="co"># the function dsb which expands values in .[]</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Wrapping up:</span></span></span>
+<span class="r-in"><span><span class="co"># 2) evaluation of dsb("poly(Temp, .[1:3])") leads to the vector:</span></span></span>
+<span class="r-in"><span><span class="co">#    c("poly(Temp, 1)", "poly(Temp, 2)", "poly(Temp, 3)")</span></span></span>
+<span class="r-in"><span><span class="co"># 1) .[, c("poly(Temp, 1)", "poly(Temp, 2)", "poly(Temp, 3)")] leads to</span></span></span>
+<span class="r-in"><span><span class="co">#    poly(Temp, 1), poly(Temp, 2), poly(Temp, 3)</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Hence sw(.[, "poly(Temp, .[1:3])"]) becomes:</span></span></span>
+<span class="r-in"><span><span class="co">#       sw(poly(Temp, 1), poly(Temp, 2), poly(Temp, 3))</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># In non-fixest functions: guessing the data allows to use regex</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># When used in non-fixest functions, the algorithm tries to "guess" the data</span></span></span>
+<span class="r-in"><span><span class="co"># so that ..("regex") can be directly evaluated without passing the argument 'data'</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">longley</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="fu">..</span><span class="op">(</span><span class="st">"GNP|ployed"</span><span class="op">)</span><span class="op">)</span>, <span class="va">longley</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> lm(formula = xpd(Armed.Forces ~ Population + ..("GNP|ployed")), </span>
@@ -574,9 +584,9 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Employed  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     -50.0598  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># same for the auto completion with '..'</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="va">GN..</span><span class="op">)</span>, <span class="va">longley</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># same for the auto completion with '..'</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="va">GN..</span><span class="op">)</span>, <span class="va">longley</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> lm(formula = xpd(Armed.Forces ~ Population + GN..), data = longley)</span>
@@ -585,8 +595,8 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span>  (Intercept)    Population  GNP.deflator           GNP  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     3901.079       -43.219         2.522         3.039  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -601,8 +611,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

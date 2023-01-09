@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,43 +76,64 @@
     <p>This function creates the left-hand-side or the right-hand-side(s) of a <code><a href="femlm.html">femlm</a></code>, <code><a href="feols.html">feols</a></code> or <code><a href="feglm.html">feglm</a></code> estimation.</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for fixest</span>
-<span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span>
-  <span class="va">object</span>,
-  <span class="va">data</span>,
-  type <span class="op">=</span> <span class="st">"rhs"</span>,
-  na.rm <span class="op">=</span> <span class="cn">TRUE</span>,
-  subset <span class="op">=</span> <span class="cn">FALSE</span>,
-  as.matrix <span class="op">=</span> <span class="cn">FALSE</span>,
-  as.df <span class="op">=</span> <span class="cn">FALSE</span>,
-  collin.rm <span class="op">=</span> <span class="cn">TRUE</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for fixest</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  <span class="va">data</span>,</span>
+<span>  type <span class="op">=</span> <span class="st">"rhs"</span>,</span>
+<span>  na.rm <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  subset <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  as.matrix <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  as.df <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  collin.rm <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>object</dt>
 <dd><p>A <code>fixest</code> object. Obtained using the functions <code><a href="femlm.html">femlm</a></code>, <code><a href="feols.html">feols</a></code> or <code><a href="feglm.html">feglm</a></code>.</p></dd>
+
+
 <dt>data</dt>
 <dd><p>If missing (default) then the original data is obtained by evaluating the <code>call</code>. Otherwise, it should be a <code>data.frame</code>.</p></dd>
+
+
 <dt>type</dt>
 <dd><p>Character vector or one sided formula, default is "rhs". Contains the type of matrix/data.frame to be returned. Possible values are: "lhs", "rhs", "fixef", "iv.rhs1" (1st stage RHS), "iv.rhs2" (2nd stage RHS), "iv.endo" (endogenous vars.), "iv.exo" (exogenous vars), "iv.inst" (instruments).</p></dd>
+
+
 <dt>na.rm</dt>
 <dd><p>Default is <code>TRUE</code>. Should observations with NAs be removed from the matrix?</p></dd>
+
+
 <dt>subset</dt>
 <dd><p>Logical or character vector. Default is <code>FALSE</code>. If <code>TRUE</code>, then the matrix created will be restricted only to the variables contained in the argument <code>data</code>, which can then contain a subset of the variables used in the estimation. If a character vector, then only the variables matching the elements of the vector via regular expressions will be created.</p></dd>
+
+
 <dt>as.matrix</dt>
 <dd><p>Logical scalar, default is <code>FALSE</code>. Whether to coerce the result to a matrix.</p></dd>
+
+
 <dt>as.df</dt>
 <dd><p>Logical scalar, default is <code>FALSE</code>. Whether to coerce the result to a data.frame.</p></dd>
+
+
 <dt>collin.rm</dt>
 <dd><p>Logical scalar, default is <code>TRUE</code>. Whether to remove variables that were found to be collinear during the estimation. Beware: it does not perform a collinearity check.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Not currently used.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>It returns either a vector, a matrix or a data.frame. It returns a vector for the dependent variable ("lhs"), a data.frame for the fixed-effects ("fixef") and a matrix for any other type.</p>
+    
+
+<p>It returns either a vector, a matrix or a data.frame. It returns a vector for the dependent variable ("lhs"), a data.frame for the fixed-effects ("fixef") and a matrix for any other type.</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
@@ -123,12 +146,12 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="va">base</span> <span class="op">=</span> <span class="va">iris</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/stats/poly.html" class="external-link">poly</a></span><span class="op">(</span><span class="va">x1</span>, <span class="fl">2</span><span class="op">)</span> <span class="op">+</span> <span class="va">x2</span>, <span class="va">base</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">base</span> <span class="op">=</span> <span class="va">iris</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/stats/poly.html" class="external-link">poly</a></span><span class="op">(</span><span class="va">x1</span>, <span class="fl">2</span><span class="op">)</span> <span class="op">+</span> <span class="va">x2</span>, <span class="va">base</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      (Intercept) poly(x1, 2)1 poly(x1, 2)2  x2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1,]           1  0.083201357 -0.016039377 1.4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,]           1 -0.010776079 -0.053252127 1.4</span>
@@ -136,11 +159,11 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> [4,]           1  0.008019408 -0.057805919 1.5</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [5,]           1  0.101996844  0.009397687 1.4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [6,]           1  0.158383306  0.121697905 1.7</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Illustration of subset</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># subset =&gt; character vector</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="va">est</span>, subset <span class="op">=</span> <span class="st">"x1"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Illustration of subset</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># subset =&gt; character vector</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="va">est</span>, subset <span class="op">=</span> <span class="st">"x1"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      poly(x1, 2)1 poly(x1, 2)2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1,]  0.083201357 -0.016039377</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,] -0.010776079 -0.053252127</span>
@@ -148,9 +171,9 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> [4,]  0.008019408 -0.057805919</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [5,]  0.101996844  0.009397687</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [6,]  0.158383306  0.121697905</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># subset =&gt; TRUE, only works with data argument!!</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="va">est</span>, data <span class="op">=</span> <span class="va">base</span><span class="op">[</span>, <span class="st">"x1"</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span>, subset <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># subset =&gt; TRUE, only works with data argument!!</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="va">est</span>, data <span class="op">=</span> <span class="va">base</span><span class="op">[</span>, <span class="st">"x1"</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span>, subset <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   poly(x1, 2)1 poly(x1, 2)2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1  0.083201357 -0.016039377</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2 -0.010776079 -0.053252127</span>
@@ -158,9 +181,9 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4  0.008019408 -0.057805919</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5  0.101996844  0.009397687</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6  0.158383306  0.121697905</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -175,8 +198,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

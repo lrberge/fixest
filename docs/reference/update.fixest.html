@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,25 +76,38 @@
     <p>Updates and re-estimates a <code>fixest</code> model (estimated with <code><a href="femlm.html">femlm</a></code>, <code><a href="feols.html">feols</a></code> or <code><a href="feglm.html">feglm</a></code>). This function updates the formulas and use previous starting values to estimate a new <code>fixest</code> model. The data is obtained from the original <code>call</code>.</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for fixest</span>
-<span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/update.dev.pkg.html" class="external-link">update</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">fml.update</span>, nframes <span class="op">=</span> <span class="fl">1</span>, evaluate <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for fixest</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">fml.update</span>, nframes <span class="op">=</span> <span class="fl">1</span>, evaluate <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>object</dt>
 <dd><p>A <code>fixest</code> object. Obtained using the functions <code><a href="femlm.html">femlm</a></code>, <code><a href="feols.html">feols</a></code> or <code><a href="feglm.html">feglm</a></code>.</p></dd>
+
+
 <dt>fml.update</dt>
 <dd><p>Changes to be made to the original argument <code>fml</code>. See more information on <code><a href="https://rdrr.io/r/stats/update.formula.html" class="external-link">update.formula</a></code>. You can add/withdraw both variables and fixed-effects. E.g. <code>. ~ . + x2 | . + z2</code> would add the variable <code>x2</code> and the cluster <code>z2</code> to the former estimation.</p></dd>
+
+
 <dt>nframes</dt>
 <dd><p>(Advanced users.) Defaults to 1. Number of frames up the stack where to perform the evaluation of the updated call. By default, this is the parent frame.</p></dd>
+
+
 <dt>evaluate</dt>
 <dd><p>Logical, default is <code>TRUE</code>. If <code>FALSE</code>, only the updated call is returned.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Other arguments to be passed to the functions <code><a href="femlm.html">femlm</a></code>, <code><a href="feols.html">feols</a></code> or <code><a href="feglm.html">feglm</a></code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>It returns a <code>fixest</code> object (see details in <code><a href="femlm.html">femlm</a></code>, <code><a href="feols.html">feols</a></code> or <code><a href="feglm.html">feglm</a></code>).</p>
+    
+
+<p>It returns a <code>fixest</code> object (see details in <code><a href="femlm.html">femlm</a></code>, <code><a href="feols.html">feols</a></code> or <code><a href="feglm.html">feglm</a></code>).</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
@@ -105,24 +120,24 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="co"># Example using trade data</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">trade</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># main estimation</span></span>
-<span class="r-in"><span class="va">est_pois</span> <span class="op">=</span> <span class="fu"><a href="feglm.html">fepois</a></span><span class="op">(</span><span class="va">Euros</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">dist_km</span><span class="op">)</span> <span class="op">|</span> <span class="va">Origin</span> <span class="op">+</span> <span class="va">Destination</span>, <span class="va">trade</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># we add the variable log(Year)</span></span>
-<span class="r-in"><span class="va">est_2</span> <span class="op">=</span> <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/update.dev.pkg.html" class="external-link">update</a></span><span class="op">(</span><span class="va">est_pois</span>, <span class="va">.</span> <span class="op">~</span> <span class="va">.</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">Year</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># we add another fixed-effect: "Product"</span></span>
-<span class="r-in"><span class="va">est_3</span> <span class="op">=</span> <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/update.dev.pkg.html" class="external-link">update</a></span><span class="op">(</span><span class="va">est_2</span>, <span class="va">.</span> <span class="op">~</span> <span class="va">.</span> <span class="op">|</span> <span class="va">.</span> <span class="op">+</span> <span class="va">Product</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># we remove the fixed-effect "Origin" and the variable log(dist_km)</span></span>
-<span class="r-in"><span class="va">est_4</span> <span class="op">=</span> <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/update.dev.pkg.html" class="external-link">update</a></span><span class="op">(</span><span class="va">est_3</span>, <span class="va">.</span> <span class="op">~</span> <span class="va">.</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">dist_km</span><span class="op">)</span> <span class="op">|</span> <span class="va">.</span> <span class="op">-</span> <span class="va">Origin</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Quick look at the 4 estimations</span></span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_pois</span>, <span class="va">est_2</span>, <span class="va">est_3</span>, <span class="va">est_4</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Example using trade data</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">trade</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># main estimation</span></span></span>
+<span class="r-in"><span><span class="va">est_pois</span> <span class="op">=</span> <span class="fu"><a href="feglm.html">fepois</a></span><span class="op">(</span><span class="va">Euros</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">dist_km</span><span class="op">)</span> <span class="op">|</span> <span class="va">Origin</span> <span class="op">+</span> <span class="va">Destination</span>, <span class="va">trade</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># we add the variable log(Year)</span></span></span>
+<span class="r-in"><span><span class="va">est_2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span><span class="va">est_pois</span>, <span class="va">.</span> <span class="op">~</span> <span class="va">.</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">Year</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># we add another fixed-effect: "Product"</span></span></span>
+<span class="r-in"><span><span class="va">est_3</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span><span class="va">est_2</span>, <span class="va">.</span> <span class="op">~</span> <span class="va">.</span> <span class="op">|</span> <span class="va">.</span> <span class="op">+</span> <span class="va">Product</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># we remove the fixed-effect "Origin" and the variable log(dist_km)</span></span></span>
+<span class="r-in"><span><span class="va">est_4</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span><span class="va">est_3</span>, <span class="va">.</span> <span class="op">~</span> <span class="va">.</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">dist_km</span><span class="op">)</span> <span class="op">|</span> <span class="va">.</span> <span class="op">-</span> <span class="va">Origin</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Quick look at the 4 estimations</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_pois</span>, <span class="va">est_2</span>, <span class="va">est_3</span>, <span class="va">est_4</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                           est_pois              est_2              est_3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Euros              Euros              Euros</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                         </span>
@@ -156,7 +171,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> BIC                     3.85e+12</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -171,8 +186,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

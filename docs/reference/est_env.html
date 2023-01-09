@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,26 +76,41 @@
     <p>This is a function advanced users which allows to estimate any <code>fixest</code> estimation from a <code>fixest</code> environment obtained with <code>only.env = TRUE</code> in a <code>fixest</code> estimation.</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">est_env</span><span class="op">(</span><span class="va">env</span>, <span class="va">y</span>, <span class="va">X</span>, <span class="va">weights</span>, <span class="va">endo</span>, <span class="va">inst</span><span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">est_env</span><span class="op">(</span><span class="va">env</span>, <span class="va">y</span>, <span class="va">X</span>, <span class="va">weights</span>, <span class="va">endo</span>, <span class="va">inst</span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>env</dt>
 <dd><p>An environment obtained from a <code>fixest</code> estimation with <code>only.env = TRUE</code>. This is intended for advanced users so there is no error handling: any other kind of input will fail with a poor error message.</p></dd>
+
+
 <dt>y</dt>
 <dd><p>A vector representing the dependent variable. Should be of the same length as the number of observations in the initial estimation.</p></dd>
+
+
 <dt>X</dt>
 <dd><p>A matrix representing the independent variables. Should be of the same dimension as in the initial estimation.</p></dd>
+
+
 <dt>weights</dt>
 <dd><p>A vector of weights (i.e. with only positive values). Should be of the same length as the number of observations in the initial estimation. If identical to the scalar 1, this will mean that no weights will be used in the estimation.</p></dd>
+
+
 <dt>endo</dt>
 <dd><p>A matrix representing the endogenous regressors in IV estimations. It should be of the same dimension as the original endogenous regressors.</p></dd>
+
+
 <dt>inst</dt>
 <dd><p>A matrix representing the instruments in IV estimations. It should be of the same dimension as the original instruments.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>It returns the results of a <code>fixest</code> estimation: the one that was summoned when obtaining the environment.</p>
+    
+
+<p>It returns the results of a <code>fixest</code> estimation: the one that was summoned when obtaining the environment.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -116,60 +133,60 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="co"># Let's make a short simulation</span></span>
-<span class="r-in"><span class="co"># Inspired from Grant McDermott bboot function</span></span>
-<span class="r-in"><span class="co"># See https://twitter.com/grant_mcdermott/status/1487528757418102787</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Simple function that computes a Bayesian bootstrap</span></span>
-<span class="r-in"><span class="va">bboot</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">n_sim</span> <span class="op">=</span> <span class="fl">100</span><span class="op">)</span><span class="op">{</span></span>
-<span class="r-in">  <span class="co"># We bootstrap on the weights</span></span>
-<span class="r-in">  <span class="co"># Works with fixed-effects/IVs</span></span>
-<span class="r-in">  <span class="co">#  and with any fixest function that accepts weights</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="va">core_env</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span><span class="va">x</span>, only.coef <span class="op">=</span> <span class="cn">TRUE</span>, only.env <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in">  <span class="va">n_obs</span> <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">nobs</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="va">res_all</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></span><span class="op">(</span><span class="st">"list"</span>, <span class="va">n_sim</span><span class="op">)</span></span>
-<span class="r-in">  <span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">n_sim</span><span class="op">)</span><span class="op">{</span></span>
-<span class="r-in">    <span class="co"># # begin: NOT RUN</span></span>
-<span class="r-in">    <span class="co"># # We could directly assign in the environment:</span></span>
-<span class="r-in">    <span class="co"># assign("weights.value", rexp(n_obs, rate = 1), core_env)</span></span>
-<span class="r-in">    <span class="co"># res_all[[i]] = est_env(env = core_env)</span></span>
-<span class="r-in">    <span class="co">#   end: NOT RUN</span></span>
-<span class="r-in"></span>
-<span class="r-in">    <span class="co"># Instead we can use the argument weights, which does the same</span></span>
-<span class="r-in">    <span class="va">res_all</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="fu">est_env</span><span class="op">(</span>env <span class="op">=</span> <span class="va">core_env</span>, weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Exponential.html" class="external-link">rexp</a></span><span class="op">(</span><span class="va">n_obs</span>, rate <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">res_all</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">wt</span> <span class="op">+</span> <span class="va">hp</span>, <span class="va">mtcars</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">boot_res</span> <span class="op">=</span> <span class="fu">bboot</span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">coef</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">boot_res</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">std_err</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">boot_res</span>, <span class="fl">2</span>, <span class="va">sd</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Comparing the results with the main estimation</span></span>
-<span class="r-in"><span class="fu"><a href="coeftable.html">coeftable</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Let's make a short simulation</span></span></span>
+<span class="r-in"><span><span class="co"># Inspired from Grant McDermott bboot function</span></span></span>
+<span class="r-in"><span><span class="co"># See https://twitter.com/grant_mcdermott/status/1487528757418102787</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Simple function that computes a Bayesian bootstrap</span></span></span>
+<span class="r-in"><span><span class="va">bboot</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">n_sim</span> <span class="op">=</span> <span class="fl">100</span><span class="op">)</span><span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="co"># We bootstrap on the weights</span></span></span>
+<span class="r-in"><span>  <span class="co"># Works with fixed-effects/IVs</span></span></span>
+<span class="r-in"><span>  <span class="co">#  and with any fixest function that accepts weights</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="va">core_env</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span><span class="va">x</span>, only.coef <span class="op">=</span> <span class="cn">TRUE</span>, only.env <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">n_obs</span> <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">nobs</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="va">res_all</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></span><span class="op">(</span><span class="st">"list"</span>, <span class="va">n_sim</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">n_sim</span><span class="op">)</span><span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="co"># # begin: NOT RUN</span></span></span>
+<span class="r-in"><span>    <span class="co"># # We could directly assign in the environment:</span></span></span>
+<span class="r-in"><span>    <span class="co"># assign("weights.value", rexp(n_obs, rate = 1), core_env)</span></span></span>
+<span class="r-in"><span>    <span class="co"># res_all[[i]] = est_env(env = core_env)</span></span></span>
+<span class="r-in"><span>    <span class="co">#   end: NOT RUN</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="co"># Instead we can use the argument weights, which does the same</span></span></span>
+<span class="r-in"><span>    <span class="va">res_all</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="fu">est_env</span><span class="op">(</span>env <span class="op">=</span> <span class="va">core_env</span>, weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Exponential.html" class="external-link">rexp</a></span><span class="op">(</span><span class="va">n_obs</span>, rate <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">res_all</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">wt</span> <span class="op">+</span> <span class="va">hp</span>, <span class="va">mtcars</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">boot_res</span> <span class="op">=</span> <span class="fu">bboot</span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">coef</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">boot_res</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">std_err</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">boot_res</span>, <span class="fl">2</span>, <span class="va">sd</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Comparing the results with the main estimation</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="coeftable.html">coeftable</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                Estimate Std. Error   t value     Pr(&gt;|t|)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept) 37.22727012 1.59878754 23.284689 2.565459e-20</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> wt          -3.87783074 0.63273349 -6.128695 1.119647e-06</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> hp          -0.03177295 0.00902971 -3.518712 1.451229e-03</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"type")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "IID"</span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">coef</span>, <span class="va">std_err</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">coef</span>, <span class="va">std_err</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                    coef     std_err</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept) 37.06416839 1.878346352</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> wt          -3.82426295 0.613391938</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> hp          -0.03262888 0.006218552</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -184,8 +201,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

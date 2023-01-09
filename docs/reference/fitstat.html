@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,36 +76,53 @@
     <p>Computes various fit statistics for <code>fixest</code> estimations.</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">fitstat</span><span class="op">(</span>
-  <span class="va">x</span>,
-  <span class="va">type</span>,
-  simplify <span class="op">=</span> <span class="cn">FALSE</span>,
-  verbose <span class="op">=</span> <span class="cn">TRUE</span>,
-  show_types <span class="op">=</span> <span class="cn">FALSE</span>,
-  frame <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">fitstat</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">type</span>,</span>
+<span>  simplify <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  show_types <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  frame <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>A <code>fixest</code> estimation.</p></dd>
+
+
 <dt>type</dt>
 <dd><p>Character vector or one sided formula. The type of fit statistic to be computed. The classic ones are: n, rmse, r2, pr2, f, wald, ivf, ivwald. You have the full list in the details section or use <code>show_types = TRUE</code>. Further, you can register your own types with <code><a href="fitstat_register.html">fitstat_register</a></code>.</p></dd>
+
+
 <dt>simplify</dt>
 <dd><p>Logical, default is <code>FALSE</code>. By default a list is returned whose names are the selected types. If <code>simplify = TRUE</code> and only one type is selected, then the element is directly returned (ie will not be nested in a list).</p></dd>
+
+
 <dt>verbose</dt>
 <dd><p>Logical, default is <code>TRUE</code>. If <code>TRUE</code>, an object of class <code>fixest_fitstat</code> is returned (so its associated print method will be triggered). If <code>FALSE</code> a simple list is returned instead.</p></dd>
+
+
 <dt>show_types</dt>
 <dd><p>Logical, default is <code>FALSE</code>. If <code>TRUE</code>, only prompts all available types.</p></dd>
+
+
 <dt>frame</dt>
 <dd><p>An environment in which to evaluate variables, default is <code><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame()</a></code>. Only used if the argument <code>type</code> is a formula and some values in the formula have to be extended with the dot square bracket operator. Mostly for internal use.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Other elements to be passed to other methods and may be used to compute the statistics (for example you can pass on arguments to compute the VCOV when using <code>type = "g"</code> or <code>type = "wald"</code>.).</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>By default an object of class <code>fixest_fitstat</code> is returned. Using <code>verbose = FALSE</code> returns a simple a list. Finally, if only one type is selected, <code>simplify = TRUE</code> leads to the selected type to be returned.</p>
+    
+
+<p>By default an object of class <code>fixest_fitstat</code> is returned. Using <code>verbose = FALSE</code> returns a simple a list. Finally, if only one type is selected, <code>simplify = TRUE</code> leads to the selected type to be returned.</p>
     </div>
     <div id="registering-your-own-types">
     <h2>Registering your own types</h2>
@@ -136,23 +155,23 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">trade</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">gravity</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">Euros</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">dist_km</span><span class="op">)</span> <span class="op">|</span> <span class="va">Destination</span> <span class="op">+</span> <span class="va">Origin</span>, <span class="va">trade</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Extracting the 'working' number of observations used to compute the pvalues</span></span>
-<span class="r-in"><span class="fu">fitstat</span><span class="op">(</span><span class="va">gravity</span>, <span class="st">"g"</span>, simplify <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">trade</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">gravity</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">Euros</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">dist_km</span><span class="op">)</span> <span class="op">|</span> <span class="va">Destination</span> <span class="op">+</span> <span class="va">Origin</span>, <span class="va">trade</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Extracting the 'working' number of observations used to compute the pvalues</span></span></span>
+<span class="r-in"><span><span class="fu">fitstat</span><span class="op">(</span><span class="va">gravity</span>, <span class="st">"g"</span>, simplify <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 15</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Some fit statistics</span></span>
-<span class="r-in"><span class="fu">fitstat</span><span class="op">(</span><span class="va">gravity</span>, <span class="op">~</span> <span class="va">rmse</span> <span class="op">+</span> <span class="va">r2</span> <span class="op">+</span> <span class="va">wald</span> <span class="op">+</span> <span class="va">wf</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Some fit statistics</span></span></span>
+<span class="r-in"><span><span class="fu">fitstat</span><span class="op">(</span><span class="va">gravity</span>, <span class="op">~</span> <span class="va">rmse</span> <span class="op">+</span> <span class="va">r2</span> <span class="op">+</span> <span class="va">wald</span> <span class="op">+</span> <span class="va">wf</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 RMSE: 2.26215</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                   R2: 0.50428</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Wald (joint nullity): stat =   272.8, p &lt; 2.2e-16, on 1 and 38,309 DoF, VCOV: Clustered (Destination).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Wald (joint nullity): stat =   272.9, p &lt; 2.2e-16, on 1 and 38,309 DoF, VCOV: Clustered (Destination).</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   F-test (projected): stat = 5,832.8, p &lt; 2.2e-16, on 1 and 38,295 DoF.</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># You can use them in etable</span></span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">gravity</span>, fitstat <span class="op">=</span> <span class="op">~</span> <span class="va">rmse</span> <span class="op">+</span> <span class="va">r2</span> <span class="op">+</span> <span class="va">wald</span> <span class="op">+</span> <span class="va">wf</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># You can use them in etable</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">gravity</span>, fitstat <span class="op">=</span> <span class="op">~</span> <span class="va">rmse</span> <span class="op">+</span> <span class="va">r2</span> <span class="op">+</span> <span class="va">wald</span> <span class="op">+</span> <span class="va">wf</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                 gravity</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              log(Euros)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                        </span>
@@ -168,9 +187,9 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> F-test (projected)              5,832.8</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># For wald and wf, you could show the pvalue instead:</span></span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">gravity</span>, fitstat <span class="op">=</span> <span class="op">~</span> <span class="va">rmse</span> <span class="op">+</span> <span class="va">r2</span> <span class="op">+</span> <span class="va">wald.p</span> <span class="op">+</span> <span class="va">wf.p</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># For wald and wf, you could show the pvalue instead:</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">gravity</span>, fitstat <span class="op">=</span> <span class="op">~</span> <span class="va">rmse</span> <span class="op">+</span> <span class="va">r2</span> <span class="op">+</span> <span class="va">wald.p</span> <span class="op">+</span> <span class="va">wf.p</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                          gravity</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:                       log(Euros)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                 </span>
@@ -186,20 +205,20 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> F-test (projected), p-value             NaNe-Inf</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Now let's display some statistics that are not built-in</span></span>
-<span class="r-in"><span class="co"># =&gt; we use fitstat_register to create them</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># We need: a) type name, b) the function to be applied</span></span>
-<span class="r-in"><span class="co">#          c) (optional) an alias</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="fitstat_register.html">fitstat_register</a></span><span class="op">(</span><span class="st">"tstand"</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="coeftable.html">tstat</a></span><span class="op">(</span><span class="va">x</span>, se <span class="op">=</span> <span class="st">"stand"</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">"t-stat (regular)"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="fitstat_register.html">fitstat_register</a></span><span class="op">(</span><span class="st">"thc"</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="coeftable.html">tstat</a></span><span class="op">(</span><span class="va">x</span>, se <span class="op">=</span> <span class="st">"heter"</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">"t-stat (HC1)"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="fitstat_register.html">fitstat_register</a></span><span class="op">(</span><span class="st">"t1w"</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="coeftable.html">tstat</a></span><span class="op">(</span><span class="va">x</span>, se <span class="op">=</span> <span class="st">"clus"</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">"t-stat (clustered)"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="fitstat_register.html">fitstat_register</a></span><span class="op">(</span><span class="st">"t2w"</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="coeftable.html">tstat</a></span><span class="op">(</span><span class="va">x</span>, se <span class="op">=</span> <span class="st">"twow"</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">"t-stat (2-way)"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Now we can use these keywords in fitstat:</span></span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">gravity</span>, fitstat <span class="op">=</span> <span class="op">~</span> <span class="va">.</span> <span class="op">+</span> <span class="va">tstand</span> <span class="op">+</span> <span class="va">thc</span> <span class="op">+</span> <span class="va">t1w</span> <span class="op">+</span> <span class="va">t2w</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Now let's display some statistics that are not built-in</span></span></span>
+<span class="r-in"><span><span class="co"># =&gt; we use fitstat_register to create them</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># We need: a) type name, b) the function to be applied</span></span></span>
+<span class="r-in"><span><span class="co">#          c) (optional) an alias</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="fitstat_register.html">fitstat_register</a></span><span class="op">(</span><span class="st">"tstand"</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="coeftable.html">tstat</a></span><span class="op">(</span><span class="va">x</span>, se <span class="op">=</span> <span class="st">"stand"</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">"t-stat (regular)"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="fitstat_register.html">fitstat_register</a></span><span class="op">(</span><span class="st">"thc"</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="coeftable.html">tstat</a></span><span class="op">(</span><span class="va">x</span>, se <span class="op">=</span> <span class="st">"heter"</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">"t-stat (HC1)"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="fitstat_register.html">fitstat_register</a></span><span class="op">(</span><span class="st">"t1w"</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="coeftable.html">tstat</a></span><span class="op">(</span><span class="va">x</span>, se <span class="op">=</span> <span class="st">"clus"</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">"t-stat (clustered)"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="fitstat_register.html">fitstat_register</a></span><span class="op">(</span><span class="st">"t2w"</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="coeftable.html">tstat</a></span><span class="op">(</span><span class="va">x</span>, se <span class="op">=</span> <span class="st">"twow"</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">"t-stat (2-way)"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Now we can use these keywords in fitstat:</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">gravity</span>, fitstat <span class="op">=</span> <span class="op">~</span> <span class="va">.</span> <span class="op">+</span> <span class="va">tstand</span> <span class="op">+</span> <span class="va">thc</span> <span class="op">+</span> <span class="va">t1w</span> <span class="op">+</span> <span class="va">t2w</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                               gravity</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            log(Euros)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                      </span>
@@ -218,11 +237,11 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> t-stat (2-way)                -13.268</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Note that the custom stats we created are can easily lead</span></span>
-<span class="r-in"><span class="co"># to errors, but that's another story!</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Note that the custom stats we created are can easily lead</span></span></span>
+<span class="r-in"><span><span class="co"># to errors, but that's another story!</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -237,8 +256,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

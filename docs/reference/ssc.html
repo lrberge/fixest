@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,48 +76,65 @@
     <p>Provides how the small sample correction should be calculated in <code><a href="vcov.fixest.html">vcov.fixest</a></code>/<code><a href="summary.fixest.html">summary.fixest</a></code>.</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">ssc</span><span class="op">(</span>
-  adj <span class="op">=</span> <span class="cn">TRUE</span>,
-  fixef.K <span class="op">=</span> <span class="st">"nested"</span>,
-  cluster.adj <span class="op">=</span> <span class="cn">TRUE</span>,
-  cluster.df <span class="op">=</span> <span class="st">"min"</span>,
-  t.df <span class="op">=</span> <span class="st">"min"</span>,
-  fixef.force_exact <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span>
-
-<span class="fu">dof</span><span class="op">(</span>
-  adj <span class="op">=</span> <span class="cn">TRUE</span>,
-  fixef.K <span class="op">=</span> <span class="st">"nested"</span>,
-  cluster.adj <span class="op">=</span> <span class="cn">TRUE</span>,
-  cluster.df <span class="op">=</span> <span class="st">"min"</span>,
-  t.df <span class="op">=</span> <span class="st">"min"</span>,
-  fixef.force_exact <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span>
-
-<span class="fu">setFixest_ssc</span><span class="op">(</span>ssc.type <span class="op">=</span> <span class="fu">ssc</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
-
-<span class="fu">getFixest_ssc</span><span class="op">(</span><span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">ssc</span><span class="op">(</span></span>
+<span>  adj <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  fixef.K <span class="op">=</span> <span class="st">"nested"</span>,</span>
+<span>  cluster.adj <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  cluster.df <span class="op">=</span> <span class="st">"min"</span>,</span>
+<span>  t.df <span class="op">=</span> <span class="st">"min"</span>,</span>
+<span>  fixef.force_exact <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">dof</span><span class="op">(</span></span>
+<span>  adj <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  fixef.K <span class="op">=</span> <span class="st">"nested"</span>,</span>
+<span>  cluster.adj <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  cluster.df <span class="op">=</span> <span class="st">"min"</span>,</span>
+<span>  t.df <span class="op">=</span> <span class="st">"min"</span>,</span>
+<span>  fixef.force_exact <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">setFixest_ssc</span><span class="op">(</span>ssc.type <span class="op">=</span> <span class="fu">ssc</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">getFixest_ssc</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>adj</dt>
 <dd><p>Logical scalar, defaults to <code>TRUE</code>. Whether to apply a small sample adjustment of the form <code>(n - 1) / (n - K)</code>, with <code>K</code> the number of estimated parameters. If <code>FALSE</code>, then no adjustment is made.</p></dd>
+
+
 <dt>fixef.K</dt>
 <dd><p>Character scalar equal to <code>"nested"</code> (default), <code>"none"</code> or <code>"full"</code>. In the small sample adjustment, how to account for the fixed-effects parameters. If <code>"none"</code>, the fixed-effects parameters are discarded, meaning the number of parameters (<code>K</code>) is only equal to the number of variables. If <code>"full"</code>, then the number of parameters is equal to the number of variables plus the number of fixed-effects. Finally, if <code>"nested"</code>, then the number of parameters is equal to the number of variables plus the number of fixed-effects that <em>are not</em> nested in the clusters used to cluster the standard-errors.</p></dd>
+
+
 <dt>cluster.adj</dt>
 <dd><p>Logical scalar, default is <code>TRUE</code>. How to make the small sample correction when clustering the standard-errors? If <code>TRUE</code> a <code>G/(G-1)</code> correction is performed with <code>G</code> the number of cluster values.</p></dd>
+
+
 <dt>cluster.df</dt>
 <dd><p>Either "conventional" or "min" (default). Only relevant when the variance-covariance matrix is two-way clustered (or higher). It governs how the small sample adjustment for the clusters is to be performed. [Sorry for the jargon that follows.] By default a unique adjustment is made, of the form G_min/(G_min-1) with G_min the smallest G_i. If <code>cluster.df="conventional"</code> then the i-th "sandwich" matrix is adjusted with G_i/(G_i-1) with G_i the number of unique clusters.</p></dd>
+
+
 <dt>t.df</dt>
 <dd><p>Either "conventional", "min" (default) or an integer scalar. Only relevant when the variance-covariance matrix is clustered. It governs how the p-values should be computed. By default, the degrees of freedom of the Student t distribution is equal to the minimum size of the clusters with which the VCOV has been clustered minus one. If <code>t.df="conventional"</code>, then the degrees of freedom of the Student t distribution is equal to the number of observations minus the number of estimated variables. You can also pass a number to manually specify the DoF of the t-distribution.</p></dd>
+
+
 <dt>fixef.force_exact</dt>
 <dd><p>Logical, default is <code>FALSE</code>. If there are 2 or more fixed-effects, these fixed-effects they can be irregular, meaning they can provide the same information. If so, the "real" number of parameters should be lower than the total number of fixed-effects. If <code>fixef.force_exact = TRUE</code>, then <code><a href="fixef.fixest.html">fixef.fixest</a></code> is first run to determine the exact number of parameters among the fixed-effects. Mostly, panels of the type individual-firm require <code>fixef.force_exact = TRUE</code> (but it adds computational costs).</p></dd>
+
+
 <dt>ssc.type</dt>
 <dd><p>An object of class <code>ssc.type</code> obtained with the function <code>ssc</code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>It returns a <code>ssc.type</code> object.</p>
+    
+
+<p>It returns a <code>ssc.type</code> object.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -137,69 +156,69 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Equivalence with lm/glm standard-errors</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># LM</span></span>
-<span class="r-in"><span class="co"># In the absence of fixed-effects,</span></span>
-<span class="r-in"><span class="co"># by default, the standard-errors are computed in the same way</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">res</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Petal.Length</span> <span class="op">~</span> <span class="va">Petal.Width</span> <span class="op">+</span> <span class="va">Species</span>, <span class="va">iris</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">res_lm</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">Petal.Length</span> <span class="op">~</span> <span class="va">Petal.Width</span> <span class="op">+</span> <span class="va">Species</span>, <span class="va">iris</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">res_lm</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Equivalence with lm/glm standard-errors</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># LM</span></span></span>
+<span class="r-in"><span><span class="co"># In the absence of fixed-effects,</span></span></span>
+<span class="r-in"><span><span class="co"># by default, the standard-errors are computed in the same way</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Petal.Length</span> <span class="op">~</span> <span class="va">Petal.Width</span> <span class="op">+</span> <span class="va">Species</span>, <span class="va">iris</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res_lm</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">Petal.Length</span> <span class="op">~</span> <span class="va">Petal.Width</span> <span class="op">+</span> <span class="va">Species</span>, <span class="va">iris</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">res_lm</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                   (Intercept) Petal.Width Speciesversicolor Speciesvirginica</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)                 1           1                 1                1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Petal.Width                 1           1                 1                1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Speciesversicolor           1           1                 1                1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Speciesvirginica            1           1                 1                1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># GLM</span></span>
-<span class="r-in"><span class="co"># By default, there is no small sample adjustment in glm, as opposed to feglm.</span></span>
-<span class="r-in"><span class="co"># To get the same SEs, we need to use ssc(adj = FALSE)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">res_pois</span> <span class="op">=</span> <span class="fu"><a href="feglm.html">fepois</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">Petal.Length</span><span class="op">)</span> <span class="op">~</span> <span class="va">Petal.Width</span> <span class="op">+</span> <span class="va">Species</span>, <span class="va">iris</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">res_glm</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">Petal.Length</span><span class="op">)</span> <span class="op">~</span> <span class="va">Petal.Width</span> <span class="op">+</span> <span class="va">Species</span>, <span class="va">iris</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">poisson</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">res_pois</span>, ssc <span class="op">=</span> <span class="fu">ssc</span><span class="op">(</span>adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">res_glm</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># GLM</span></span></span>
+<span class="r-in"><span><span class="co"># By default, there is no small sample adjustment in glm, as opposed to feglm.</span></span></span>
+<span class="r-in"><span><span class="co"># To get the same SEs, we need to use ssc(adj = FALSE)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">res_pois</span> <span class="op">=</span> <span class="fu"><a href="feglm.html">fepois</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">Petal.Length</span><span class="op">)</span> <span class="op">~</span> <span class="va">Petal.Width</span> <span class="op">+</span> <span class="va">Species</span>, <span class="va">iris</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res_glm</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">Petal.Length</span><span class="op">)</span> <span class="op">~</span> <span class="va">Petal.Width</span> <span class="op">+</span> <span class="va">Species</span>, <span class="va">iris</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">poisson</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">res_pois</span>, ssc <span class="op">=</span> <span class="fu">ssc</span><span class="op">(</span>adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">res_glm</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                   (Intercept) Petal.Width Speciesversicolor Speciesvirginica</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)                 1           1                 1                1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Petal.Width                 1           1                 1                1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Speciesversicolor           1           1                 1                1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Speciesvirginica            1           1                 1                1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Same example with the Gamma</span></span>
-<span class="r-in"><span class="va">res_gamma</span> <span class="op">=</span> <span class="fu"><a href="feglm.html">feglm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">Petal.Length</span><span class="op">)</span> <span class="op">~</span> <span class="va">Petal.Width</span> <span class="op">+</span> <span class="va">Species</span>, <span class="va">iris</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">Gamma</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">res_glm_gamma</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">Petal.Length</span><span class="op">)</span> <span class="op">~</span> <span class="va">Petal.Width</span> <span class="op">+</span> <span class="va">Species</span>, <span class="va">iris</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">Gamma</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">res_gamma</span>, ssc <span class="op">=</span> <span class="fu">ssc</span><span class="op">(</span>adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">res_glm_gamma</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Same example with the Gamma</span></span></span>
+<span class="r-in"><span><span class="va">res_gamma</span> <span class="op">=</span> <span class="fu"><a href="feglm.html">feglm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">Petal.Length</span><span class="op">)</span> <span class="op">~</span> <span class="va">Petal.Width</span> <span class="op">+</span> <span class="va">Species</span>, <span class="va">iris</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">Gamma</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res_glm_gamma</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">Petal.Length</span><span class="op">)</span> <span class="op">~</span> <span class="va">Petal.Width</span> <span class="op">+</span> <span class="va">Species</span>, <span class="va">iris</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">Gamma</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">res_gamma</span>, ssc <span class="op">=</span> <span class="fu">ssc</span><span class="op">(</span>adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">res_glm_gamma</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                   (Intercept) Petal.Width Speciesversicolor Speciesvirginica</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)                 1           1                 1                1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Petal.Width                 1           1                 1                1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Speciesversicolor           1           1                 1                1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Speciesvirginica            1           1                 1                1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Fixed-effects corrections</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># We create "irregular" FEs</span></span>
-<span class="r-in"><span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">base</span><span class="op">$</span><span class="va">y</span> <span class="op">=</span> <span class="va">base</span><span class="op">$</span><span class="va">x</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">base</span><span class="op">$</span><span class="va">fe1</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">3</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">base</span><span class="op">$</span><span class="va">fe2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, each <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span> <span class="op">|</span> <span class="va">fe1</span> <span class="op">+</span> <span class="va">fe2</span>, <span class="va">base</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># fe1: 3 FEs</span></span>
-<span class="r-in"><span class="co"># fe2: 5 FEs</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Clustered standard-errors: by fe1</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Default: fixef.K = "nested"</span></span>
-<span class="r-in"><span class="co">#  =&gt; adjustment K = 1 + 5 (i.e. x + fe2)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Fixed-effects corrections</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># We create "irregular" FEs</span></span></span>
+<span class="r-in"><span><span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">base</span><span class="op">$</span><span class="va">y</span> <span class="op">=</span> <span class="va">base</span><span class="op">$</span><span class="va">x</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">base</span><span class="op">$</span><span class="va">fe1</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">3</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">base</span><span class="op">$</span><span class="va">fe2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, each <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span> <span class="op">|</span> <span class="va">fe1</span> <span class="op">+</span> <span class="va">fe2</span>, <span class="va">base</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># fe1: 3 FEs</span></span></span>
+<span class="r-in"><span><span class="co"># fe2: 5 FEs</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Clustered standard-errors: by fe1</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Default: fixef.K = "nested"</span></span></span>
+<span class="r-in"><span><span class="co">#  =&gt; adjustment K = 1 + 5 (i.e. x + fe2)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: y</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 10 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-effects: fe1: 3,  fe2: 5</span>
@@ -210,7 +229,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 0.73031     Adj. R2: -1.26941</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 Within R2: 0.219994</span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">est</span>, attr <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ssc"</span>, <span class="st">"dof.K"</span><span class="op">)</span><span class="op">]</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">est</span>, attr <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ssc"</span>, <span class="st">"dof.K"</span><span class="op">)</span><span class="op">]</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $ssc</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $adj</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
@@ -236,11 +255,11 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> $dof.K</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 6</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># fixef.K = FALSE</span></span>
-<span class="r-in"><span class="co">#  =&gt; adjustment K = 1 (i.e. only x)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span>, ssc <span class="op">=</span> <span class="fu">ssc</span><span class="op">(</span>fixef.K <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># fixef.K = FALSE</span></span></span>
+<span class="r-in"><span><span class="co">#  =&gt; adjustment K = 1 (i.e. only x)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span>, ssc <span class="op">=</span> <span class="fu">ssc</span><span class="op">(</span>fixef.K <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: y</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 10 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-effects: fe1: 3,  fe2: 5</span>
@@ -251,13 +270,13 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 0.73031     Adj. R2: -1.26941</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 Within R2: 0.219994</span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">est</span>, ssc <span class="op">=</span> <span class="fu">ssc</span><span class="op">(</span>fixef.K <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span>, attr <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"dof.K"</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">est</span>, ssc <span class="op">=</span> <span class="fu">ssc</span><span class="op">(</span>fixef.K <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span>, attr <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"dof.K"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># fixef.K = TRUE</span></span>
-<span class="r-in"><span class="co">#  =&gt; adjustment K = 1 + 3 + 5 - 1 (i.e. x + fe1 + fe2 - 1 restriction)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span>, ssc <span class="op">=</span> <span class="fu">ssc</span><span class="op">(</span>fixef.K <span class="op">=</span> <span class="st">"full"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># fixef.K = TRUE</span></span></span>
+<span class="r-in"><span><span class="co">#  =&gt; adjustment K = 1 + 3 + 5 - 1 (i.e. x + fe1 + fe2 - 1 restriction)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span>, ssc <span class="op">=</span> <span class="fu">ssc</span><span class="op">(</span>fixef.K <span class="op">=</span> <span class="st">"full"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: y</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 10 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-effects: fe1: 3,  fe2: 5</span>
@@ -268,13 +287,13 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 0.73031     Adj. R2: -1.26941</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 Within R2: 0.219994</span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">est</span>, ssc <span class="op">=</span> <span class="fu">ssc</span><span class="op">(</span>fixef.K <span class="op">=</span> <span class="st">"full"</span><span class="op">)</span>, attr <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"dof.K"</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">est</span>, ssc <span class="op">=</span> <span class="fu">ssc</span><span class="op">(</span>fixef.K <span class="op">=</span> <span class="st">"full"</span><span class="op">)</span>, attr <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"dof.K"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 8</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># fixef.K = TRUE &amp; fixef.force_exact = TRUE</span></span>
-<span class="r-in"><span class="co">#  =&gt; adjustment K = 1 + 3 + 5 - 2 (i.e. x + fe1 + fe2 - 2 restrictions)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span>, ssc <span class="op">=</span> <span class="fu">ssc</span><span class="op">(</span>fixef.K <span class="op">=</span> <span class="st">"full"</span>, fixef.force_exact <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># fixef.K = TRUE &amp; fixef.force_exact = TRUE</span></span></span>
+<span class="r-in"><span><span class="co">#  =&gt; adjustment K = 1 + 3 + 5 - 2 (i.e. x + fe1 + fe2 - 2 restrictions)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span>, ssc <span class="op">=</span> <span class="fu">ssc</span><span class="op">(</span>fixef.K <span class="op">=</span> <span class="st">"full"</span>, fixef.force_exact <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: y</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 10 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-effects: fe1: 3,  fe2: 5</span>
@@ -285,25 +304,25 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 0.73031     Adj. R2: -1.26941</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 Within R2: 0.219994</span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">est</span>, ssc <span class="op">=</span> <span class="fu">ssc</span><span class="op">(</span>fixef.K <span class="op">=</span> <span class="st">"full"</span>, fixef.force_exact <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, attr <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"dof.K"</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">est</span>, ssc <span class="op">=</span> <span class="fu">ssc</span><span class="op">(</span>fixef.K <span class="op">=</span> <span class="st">"full"</span>, fixef.force_exact <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, attr <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"dof.K"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 7</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># There are two restrictions:</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="fu"><a href="fixef_reexported.html">fixef</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span>, <span class="st">"references"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># There are two restrictions:</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="fu"><a href="fixef_reexported.html">fixef</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span>, <span class="st">"references"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: The fixed-effects are not regular, they cannot be straightforwardly interpreted.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> fe1 fe2 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   0   2 </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># To permanently set the default ssc:</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># eg no small sample adjustment:</span></span>
-<span class="r-in"><span class="fu">setFixest_ssc</span><span class="op">(</span><span class="fu">ssc</span><span class="op">(</span>adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Factory default</span></span>
-<span class="r-in"><span class="fu">setFixest_ssc</span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># To permanently set the default ssc:</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># eg no small sample adjustment:</span></span></span>
+<span class="r-in"><span><span class="fu">setFixest_ssc</span><span class="op">(</span><span class="fu">ssc</span><span class="op">(</span>adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Factory default</span></span></span>
+<span class="r-in"><span><span class="fu">setFixest_ssc</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -318,8 +337,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

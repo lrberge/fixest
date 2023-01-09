@@ -46,6 +46,9 @@
     <loc>/reference/AIC.fixest.html</loc>
   </url>
   <url>
+    <loc>/reference/as.dict.html</loc>
+  </url>
+  <url>
     <loc>/reference/as.list.fixest_multi.html</loc>
   </url>
   <url>
@@ -79,6 +82,15 @@
     <loc>/reference/coefplot.html</loc>
   </url>
   <url>
+    <loc>/reference/coeftable.default.html</loc>
+  </url>
+  <url>
+    <loc>/reference/coeftable.fixest.html</loc>
+  </url>
+  <url>
+    <loc>/reference/coeftable.fixest_multi.html</loc>
+  </url>
+  <url>
     <loc>/reference/coeftable.html</loc>
   </url>
   <url>
@@ -86,6 +98,9 @@
   </url>
   <url>
     <loc>/reference/confint.fixest.html</loc>
+  </url>
+  <url>
+    <loc>/reference/confint.fixest_multi.html</loc>
   </url>
   <url>
     <loc>/reference/degrees_freedom.html</loc>
@@ -128,6 +143,9 @@
   </url>
   <url>
     <loc>/reference/extraline_register.html</loc>
+  </url>
+  <url>
+    <loc>/reference/fdim.html</loc>
   </url>
   <url>
     <loc>/reference/feglm.html</loc>
@@ -191,6 +209,9 @@
   </url>
   <url>
     <loc>/reference/model.matrix.fixest.html</loc>
+  </url>
+  <url>
+    <loc>/reference/models.html</loc>
   </url>
   <url>
     <loc>/reference/nobs.fixest.html</loc>

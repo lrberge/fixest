@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,21 +76,32 @@
     <p>Computes the clustered VCOV of <code>fixest</code> objects.</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">vcov_cluster</span><span class="op">(</span><span class="va">x</span>, cluster <span class="op">=</span> <span class="cn">NULL</span>, ssc <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vcov_cluster</span><span class="op">(</span><span class="va">x</span>, cluster <span class="op">=</span> <span class="cn">NULL</span>, ssc <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>A <code>fixest</code> object.</p></dd>
+
+
 <dt>cluster</dt>
 <dd><p>Either i) a character vector giving the names of the variables onto which to cluster, or ii) a formula giving those names, or iii) a vector/list/data.frame giving the hard values of the clusters. Note that in cases i) and ii) the variables are fetched directly in the data set used for the estimation.</p></dd>
+
+
 <dt>ssc</dt>
 <dd><p>An object returned by the function <code><a href="ssc.html">ssc</a></code>. It specifies how to perform the small sample correction.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>If the first argument is a <code>fixest</code> object, then a VCOV is returned (i.e. a symmetric matrix).
-If the first argument is not a <code>fixest</code> object, then a) implicitly the arguments are shifted to the left (i.e. <code>vcov_cluster(~var1 + var2)</code> is equivalent to <code>vcov_cluster(cluster = ~var1 + var2)</code>) and b) a VCOV-<em>request</em> is returned and NOT a VCOV. That VCOV-request can then be used in the argument <code>vcov</code> of various <code>fixest</code> functions (e.g. <code><a href="vcov.fixest.html">vcov.fixest</a></code> or even in the estimation calls).</p>
+    
+
+<p>If the first argument is a <code>fixest</code> object, then a VCOV is returned (i.e. a symmetric matrix).</p>
+
+
+<p>If the first argument is not a <code>fixest</code> object, then a) implicitly the arguments are shifted to the left (i.e. <code>vcov_cluster(~var1 + var2)</code> is equivalent to <code>vcov_cluster(cluster = ~var1 + var2)</code>) and b) a VCOV-<em>request</em> is returned and NOT a VCOV. That VCOV-request can then be used in the argument <code>vcov</code> of various <code>fixest</code> functions (e.g. <code><a href="vcov.fixest.html">vcov.fixest</a></code> or even in the estimation calls).</p>
     </div>
     <div id="references">
     <h2>References</h2>
@@ -101,43 +114,43 @@ If the first argument is not a <code>fixest</code> object, then a) implicitly th
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="va">base</span> <span class="op">=</span> <span class="va">iris</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">base</span><span class="op">$</span><span class="va">clu</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">30</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span>, <span class="va">base</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># VCOV: using a formula giving the name of the clusters</span></span>
-<span class="r-in"><span class="fu">vcov_cluster</span><span class="op">(</span><span class="va">est</span>, <span class="op">~</span><span class="va">species</span> <span class="op">+</span> <span class="va">clu</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">base</span> <span class="op">=</span> <span class="va">iris</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">base</span><span class="op">$</span><span class="va">clu</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">30</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span>, <span class="va">base</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># VCOV: using a formula giving the name of the clusters</span></span></span>
+<span class="r-in"><span><span class="fu">vcov_cluster</span><span class="op">(</span><span class="va">est</span>, <span class="op">~</span><span class="va">species</span> <span class="op">+</span> <span class="va">clu</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             (Intercept)         x1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   0.6046144 -0.2634955</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> x1           -0.2634955  0.1235058</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># works as well with a character vector</span></span>
-<span class="r-in"><span class="fu">vcov_cluster</span><span class="op">(</span><span class="va">est</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"species"</span>, <span class="st">"clu"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># works as well with a character vector</span></span></span>
+<span class="r-in"><span><span class="fu">vcov_cluster</span><span class="op">(</span><span class="va">est</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"species"</span>, <span class="st">"clu"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             (Intercept)         x1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   0.6046144 -0.2634955</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> x1           -0.2634955  0.1235058</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># you can also combine the two with '^'</span></span>
-<span class="r-in"><span class="fu">vcov_cluster</span><span class="op">(</span><span class="va">est</span>, <span class="op">~</span><span class="va">species</span><span class="op">^</span><span class="va">clu</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># you can also combine the two with '^'</span></span></span>
+<span class="r-in"><span><span class="fu">vcov_cluster</span><span class="op">(</span><span class="va">est</span>, <span class="op">~</span><span class="va">species</span><span class="op">^</span><span class="va">clu</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             (Intercept)          x1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)  0.27358801 -0.09893941</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> x1          -0.09893941  0.03852919</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Using VCOV requests</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># per se: pretty useless...</span></span>
-<span class="r-in"><span class="fu">vcov_cluster</span><span class="op">(</span><span class="op">~</span><span class="va">species</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Using VCOV requests</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># per se: pretty useless...</span></span></span>
+<span class="r-in"><span><span class="fu">vcov_cluster</span><span class="op">(</span><span class="op">~</span><span class="va">species</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ~species</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x0000000045b0d0c8&gt;</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># ...but VCOV-requests can be used at estimation time:</span></span>
-<span class="r-in"><span class="co"># it may be more explicit than...</span></span>
-<span class="r-in"><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span>, <span class="va">base</span>, vcov <span class="op">=</span> <span class="fu">vcov_cluster</span><span class="op">(</span><span class="st">"species"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000002349d05e388&gt;</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># ...but VCOV-requests can be used at estimation time:</span></span></span>
+<span class="r-in"><span><span class="co"># it may be more explicit than...</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span>, <span class="va">base</span>, vcov <span class="op">=</span> <span class="fu">vcov_cluster</span><span class="op">(</span><span class="st">"species"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: y</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 150 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Clustered (species) </span>
@@ -147,9 +160,9 @@ If the first argument is not a <code>fixest</code> object, then a) implicitly th
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 0.819578   Adj. R2: 0.007159</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># ...the equivalent, built-in way:</span></span>
-<span class="r-in"><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span>, <span class="va">base</span>, vcov <span class="op">=</span> <span class="op">~</span><span class="va">species</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># ...the equivalent, built-in way:</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span>, <span class="va">base</span>, vcov <span class="op">=</span> <span class="op">~</span><span class="va">species</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: y</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 150 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Clustered (species) </span>
@@ -159,10 +172,10 @@ If the first argument is not a <code>fixest</code> object, then a) implicitly th
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 0.819578   Adj. R2: 0.007159</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># The argument vcov does not accept hard values,</span></span>
-<span class="r-in"><span class="co"># so you can feed them with a VCOV-request:</span></span>
-<span class="r-in"><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span>, <span class="va">base</span>, vcov <span class="op">=</span> <span class="fu">vcov_cluster</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">30</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># The argument vcov does not accept hard values,</span></span></span>
+<span class="r-in"><span><span class="co"># so you can feed them with a VCOV-request:</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span>, <span class="va">base</span>, vcov <span class="op">=</span> <span class="fu">vcov_cluster</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">30</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: y</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 150 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Clustered (rep(1:5, 30)) </span>
@@ -172,8 +185,8 @@ If the first argument is not a <code>fixest</code> object, then a) implicitly th
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 0.819578   Adj. R2: 0.007159</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -188,8 +201,7 @@ If the first argument is not a <code>fixest</code> object, then a) implicitly th
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

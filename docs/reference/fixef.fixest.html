@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,38 +76,57 @@
     <p>This function retrieves the fixed effects from a <code>fixest</code> estimation. It is useful only when there are one or more fixed-effect dimensions.</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for fixest</span>
-<span class="fu"><a href="fixef_reexported.html">fixef</a></span><span class="op">(</span>
-  <span class="va">object</span>,
-  notes <span class="op">=</span> <span class="fu"><a href="setFixest_notes.html">getFixest_notes</a></span><span class="op">(</span><span class="op">)</span>,
-  sorted <span class="op">=</span> <span class="cn">TRUE</span>,
-  nthreads <span class="op">=</span> <span class="fu"><a href="setFixest_nthreads.html">getFixest_nthreads</a></span><span class="op">(</span><span class="op">)</span>,
-  fixef.tol <span class="op">=</span> <span class="fl">1e-05</span>,
-  fixef.iter <span class="op">=</span> <span class="fl">10000</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for fixest</span></span>
+<span><span class="fu"><a href="fixef_reexported.html">fixef</a></span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  notes <span class="op">=</span> <span class="fu"><a href="setFixest_notes.html">getFixest_notes</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  sorted <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  nthreads <span class="op">=</span> <span class="fu"><a href="setFixest_nthreads.html">getFixest_nthreads</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  fixef.tol <span class="op">=</span> <span class="fl">1e-05</span>,</span>
+<span>  fixef.iter <span class="op">=</span> <span class="fl">10000</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>object</dt>
 <dd><p>A <code>fixest</code> estimation (e.g. obtained using <code><a href="feols.html">feols</a></code> or <code><a href="feglm.html">feglm</a></code>).</p></dd>
+
+
 <dt>notes</dt>
 <dd><p>Logical. Whether to display a note when the fixed-effects coefficients are not regular.</p></dd>
+
+
 <dt>sorted</dt>
 <dd><p>Logical, default is <code>TRUE</code>. Whether to order the fixed-effects by their names. If <code>FALSE</code>, then the order used in the demeaning algorithm is used.</p></dd>
+
+
 <dt>nthreads</dt>
 <dd><p>The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. The default is to use 50% of all threads. You can set permanently the number of threads used within this package using the function <code><a href="setFixest_nthreads.html">setFixest_nthreads</a></code>.</p></dd>
+
+
 <dt>fixef.tol</dt>
 <dd><p>Precision used to obtain the fixed-effects. Defaults to <code>1e-5</code>. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations. Argument <code>fixef.tol</code> cannot be lower than <code>10000*.Machine$double.eps</code>. Note that this parameter is dynamically controlled by the algorithm.</p></dd>
+
+
 <dt>fixef.iter</dt>
 <dd><p>Maximum number of iterations in fixed-effects algorithm (only in use for 2+ fixed-effects). Default is 10000.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Not currently used.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A list containing the vectors of the fixed effects.
-If there is more than 1 fixed-effect, then the attribute “references” is created. This is a vector of length the number of fixed-effects, each element contains the number of coefficients set as references. By construction, the elements of the first fixed-effect dimension are never set as references. In the presence of regular fixed-effects, there should be Q-1 references (with Q the number of fixed-effects).</p>
+    
+
+<p>A list containing the vectors of the fixed effects.</p>
+
+
+<p>If there is more than 1 fixed-effect, then the attribute “references” is created. This is a vector of length the number of fixed-effects, each element contains the number of coefficients set as references. By construction, the elements of the first fixed-effect dimension are never set as references. In the presence of regular fixed-effects, there should be Q-1 references (with Q the number of fixed-effects).</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -122,22 +143,22 @@ If there is more than 1 fixed-effect, then the attribute “references” is cre
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">trade</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># We estimate the effect of distance on trade =&gt; we account for 3 fixed-effects</span></span>
-<span class="r-in"><span class="va">est_pois</span> <span class="op">=</span> <span class="fu"><a href="femlm.html">femlm</a></span><span class="op">(</span><span class="va">Euros</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">dist_km</span><span class="op">)</span><span class="op">|</span><span class="va">Origin</span><span class="op">+</span><span class="va">Destination</span><span class="op">+</span><span class="va">Product</span>, <span class="va">trade</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Obtaining the fixed-effects coefficients:</span></span>
-<span class="r-in"><span class="va">fe_trade</span> <span class="op">=</span> <span class="fu"><a href="fixef_reexported.html">fixef</a></span><span class="op">(</span><span class="va">est_pois</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># The fixed-effects of the first fixed-effect dimension:</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">fe_trade</span><span class="op">$</span><span class="va">Origin</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">trade</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># We estimate the effect of distance on trade =&gt; we account for 3 fixed-effects</span></span></span>
+<span class="r-in"><span><span class="va">est_pois</span> <span class="op">=</span> <span class="fu"><a href="femlm.html">femlm</a></span><span class="op">(</span><span class="va">Euros</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">dist_km</span><span class="op">)</span><span class="op">|</span><span class="va">Origin</span><span class="op">+</span><span class="va">Destination</span><span class="op">+</span><span class="va">Product</span>, <span class="va">trade</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Obtaining the fixed-effects coefficients:</span></span></span>
+<span class="r-in"><span><span class="va">fe_trade</span> <span class="op">=</span> <span class="fu"><a href="fixef_reexported.html">fixef</a></span><span class="op">(</span><span class="va">est_pois</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># The fixed-effects of the first fixed-effect dimension:</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">fe_trade</span><span class="op">$</span><span class="va">Origin</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       AT       BE       DE       DK       ES       FI </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 22.67038 23.72304 24.86999 23.60329 25.12917 21.80906 </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Summary information:</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fe_trade</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Summary information:</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fe_trade</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed_effects coefficients</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                         Origin Destination Product</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Number of fixed-effects     15          15      20</span>
@@ -154,11 +175,11 @@ If there is more than 1 fixed-effect, then the attribute “references” is cre
 <span class="r-out co"><span class="r-pr">#&gt;</span> -----</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Product: 1     2     3     4      5                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            0 1.414 0.656 1.449 -1.521 ... 15 remaining</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Plotting them:</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fe_trade</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Plotting them:</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fe_trade</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="fixef.fixest-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -173,8 +194,7 @@ If there is more than 1 fixed-effect, then the attribute “references” is cre
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

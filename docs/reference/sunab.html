@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,47 +76,70 @@
     <p>User-level method to implement staggered difference-in-difference estimations a la Sun and Abraham (Journal of Econometrics, forthcoming).</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">sunab</span><span class="op">(</span>
-  <span class="va">cohort</span>,
-  <span class="va">period</span>,
-  ref.c <span class="op">=</span> <span class="cn">NULL</span>,
-  ref.p <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>,
-  <span class="va">bin</span>,
-  <span class="va">bin.rel</span>,
-  <span class="va">bin.c</span>,
-  <span class="va">bin.p</span>,
-  att <span class="op">=</span> <span class="cn">FALSE</span>,
-  no_agg <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span>
-
-<span class="fu">sunab_att</span><span class="op">(</span><span class="va">cohort</span>, <span class="va">period</span>, ref.c <span class="op">=</span> <span class="cn">NULL</span>, ref.p <span class="op">=</span> <span class="op">-</span><span class="fl">1</span><span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">sunab</span><span class="op">(</span></span>
+<span>  <span class="va">cohort</span>,</span>
+<span>  <span class="va">period</span>,</span>
+<span>  ref.c <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ref.p <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>,</span>
+<span>  <span class="va">bin</span>,</span>
+<span>  <span class="va">bin.rel</span>,</span>
+<span>  <span class="va">bin.c</span>,</span>
+<span>  <span class="va">bin.p</span>,</span>
+<span>  att <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  no_agg <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">sunab_att</span><span class="op">(</span><span class="va">cohort</span>, <span class="va">period</span>, ref.c <span class="op">=</span> <span class="cn">NULL</span>, ref.p <span class="op">=</span> <span class="op">-</span><span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>cohort</dt>
 <dd><p>A vector representing the cohort. It should represent the period at which the treatment has been received (and thus be fixed for each unit).</p></dd>
+
+
 <dt>period</dt>
 <dd><p>A vector representing the period. It can be either a relative time period (with negative values representing the before the treatment and positive values after the treatment), or a regular time period. In the latter case, the relative time period will be created from the cohort information (which represents the time at which the treatment has been received).</p></dd>
+
+
 <dt>ref.c</dt>
 <dd><p>A vector of references for the cohort. By default the never treated cohorts are taken as reference and the always treated are excluded from the estimation. You can add more references with this argument, which means that dummies will not be created for them (but they will remain in the estimation).</p></dd>
+
+
 <dt>ref.p</dt>
 <dd><p>A vector of references for the (relative!) period. By default the first relative period (RP) before the treatment, i.e. -1, is taken as reference. You can instead use your own references (i.e. RPs for which dummies will not be created -- but these observations remain in the sample). Please note that you will need at least two references. You can use the special variables <code>.F</code> and <code>.L</code> to access the first and the last relative periods.</p></dd>
+
+
 <dt>bin</dt>
 <dd><p>A list of values to be grouped, a vector, or the special value <code>"bin::digit"</code>. The binning will be applied to both the cohort and the period (to bin them separately, see <code>bin.c</code> and <code>bin.p</code>). To create a new value from old values, use <code>bin = list("new_value"=old_values)</code> with <code>old_values</code> a vector of existing values. It accepts regular expressions, but they must start with an <code>"@"</code>, like in <code>bin="@Aug|Dec"</code>. The names of the list are the new names. If the new name is missing, the first value matched becomes the new name. Feeding in a vector is like using a list without name and only a single element. If the vector is numeric, you can use the special value <code>"bin::digit"</code> to group every <code>digit</code> element. For example if <code>x</code> represent years, using <code>bin="bin::2"</code> create bins of two years. Using <code>"!bin::digit"</code> groups every digit consecutive values starting from the first value. Using <code>"!!bin::digit"</code> is the same bu starting from the last value. In both cases, <code>x</code> is not required to be numeric.</p></dd>
+
+
 <dt>bin.rel</dt>
 <dd><p>A list or a vector defining which values to bin. Only applies to the relative periods and <em>not</em> the cohorts. Please refer to the help of the argument <code>bin</code> to understand the different ways to do the binning (or look at the help of <code><a href="bin.html">bin</a></code>).</p></dd>
+
+
 <dt>bin.c</dt>
 <dd><p>A list or a vector defining which values to bin. Only applies to the cohort. Please refer to the help of the argument <code>bin</code> to understand the different ways to do the binning (or look at the help of <code><a href="bin.html">bin</a></code>).</p></dd>
+
+
 <dt>bin.p</dt>
 <dd><p>A list or a vector defining which values to bin. Only applies to the period. Please refer to the help of the argument <code>bin</code> to understand the different ways to do the binning (or look at the help of <code><a href="bin.html">bin</a></code>).</p></dd>
+
+
 <dt>att</dt>
 <dd><p>Logical, default is <code>FALSE</code>. If <code>TRUE</code>: then the total average treatment effect for the treated is computed (instead of the ATT for each relative period).</p></dd>
+
+
 <dt>no_agg</dt>
 <dd><p>Logical, default is <code>FALSE</code>. If <code>TRUE</code>: then there is no aggregation, leading to the estimation of all <code>cohort x time to treatment</code> coefficients.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>If not used within a <code>fixest</code> estimation, this function will return a matrix of interacted coefficients.</p>
+    
+
+<p>If not used within a <code>fixest</code> estimation, this function will return a matrix of interacted coefficients.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -143,10 +168,10 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="co"># Simple DiD example</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">base_stagg</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">base_stagg</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Simple DiD example</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">base_stagg</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">base_stagg</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   id year year_treated time_to_treatment treated treatment_effect_true</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2 90    1            2                -1       1                     0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3 89    1            3                -2       1                     0</span>
@@ -161,22 +186,22 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5 -0.7204263 -0.65103066</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6 -3.6711678 -5.33381664</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 7 -0.3152137  0.49562631</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Note that the year_treated is set to 1000 for the never treated</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">base_stagg</span><span class="op">$</span><span class="va">year_treated</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Note that the year_treated is set to 1000 for the never treated</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">base_stagg</span><span class="op">$</span><span class="va">year_treated</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     2     3     4     5     6     7     8     9    10 10000 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    50    50    50    50    50    50    50    50    50   500 </span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">base_stagg</span><span class="op">$</span><span class="va">time_to_treatment</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">base_stagg</span><span class="op">$</span><span class="va">time_to_treatment</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> -1000    -9    -8    -7    -6    -5    -4    -3    -2    -1     0     1     2 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   500     5    10    15    20    25    30    35    40    45    45    40    35 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     3     4     5     6     7     8 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    30    25    20    15    10     5 </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># The DiD estimation</span></span>
-<span class="r-in"><span class="va">res_sunab</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu">sunab</span><span class="op">(</span><span class="va">year_treated</span>, <span class="va">year</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">base_stagg</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">res_sunab</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># The DiD estimation</span></span></span>
+<span class="r-in"><span><span class="va">res_sunab</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu">sunab</span><span class="op">(</span><span class="va">year_treated</span>, <span class="va">year</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">base_stagg</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">res_sunab</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                          res_sunab</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:                  y</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                   </span>
@@ -208,29 +233,29 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                  0.87641</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># By default the reference periods are the first year and the year before the treatment</span></span>
-<span class="r-in"><span class="co"># i.e. ref.p = c(-1, .F); where .F is a shortcut for the first period.</span></span>
-<span class="r-in"><span class="co"># Say you want to set as references the first three periods on top of -1</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">res_sunab_3ref</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu">sunab</span><span class="op">(</span><span class="va">year_treated</span>, <span class="va">year</span>, ref.p <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">.F</span> <span class="op">+</span> <span class="fl">0</span><span class="op">:</span><span class="fl">2</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">|</span></span>
-<span class="r-in">                         <span class="va">id</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">base_stagg</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Display the two results</span></span>
-<span class="r-in"><span class="fu"><a href="coefplot.html">iplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">res_sunab</span>, <span class="va">res_sunab_3ref</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># By default the reference periods are the first year and the year before the treatment</span></span></span>
+<span class="r-in"><span><span class="co"># i.e. ref.p = c(-1, .F); where .F is a shortcut for the first period.</span></span></span>
+<span class="r-in"><span><span class="co"># Say you want to set as references the first three periods on top of -1</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">res_sunab_3ref</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu">sunab</span><span class="op">(</span><span class="va">year_treated</span>, <span class="va">year</span>, ref.p <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">.F</span> <span class="op">+</span> <span class="fl">0</span><span class="op">:</span><span class="fl">2</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">|</span></span></span>
+<span class="r-in"><span>                         <span class="va">id</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">base_stagg</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Display the two results</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="coefplot.html">iplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">res_sunab</span>, <span class="va">res_sunab_3ref</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="sunab-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># ... + show all refs</span></span>
-<span class="r-in"><span class="fu"><a href="coefplot.html">iplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">res_sunab</span>, <span class="va">res_sunab_3ref</span><span class="op">)</span>, ref <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># ... + show all refs</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="coefplot.html">iplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">res_sunab</span>, <span class="va">res_sunab_3ref</span><span class="op">)</span>, ref <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="sunab-2.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># ATT</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># To get the total ATT, you can use summary with the agg argument:</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res_sunab</span>, agg <span class="op">=</span> <span class="st">"ATT"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># ATT</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># To get the total ATT, you can use summary with the agg argument:</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res_sunab</span>, agg <span class="op">=</span> <span class="st">"ATT"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: y</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 950 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-effects: id: 95,  year: 10</span>
@@ -242,9 +267,9 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 0.921817     Adj. R2: 0.887984</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                  Within R2: 0.876406</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># You can also look at the total effect per cohort</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res_sunab</span>, agg <span class="op">=</span> <span class="st">"cohort"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># You can also look at the total effect per cohort</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res_sunab</span>, agg <span class="op">=</span> <span class="st">"cohort"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: y</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 950 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-effects: id: 95,  year: 10</span>
@@ -264,29 +289,29 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 0.921817     Adj. R2: 0.887984</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                  Within R2: 0.876406</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Binning</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Binning can be done in many different ways</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># binning the cohort</span></span>
-<span class="r-in"><span class="va">est_bin.c</span>   <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu">sunab</span><span class="op">(</span><span class="va">year_treated</span>, <span class="va">year</span>, bin.c <span class="op">=</span> <span class="fl">3</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">base_stagg</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># binning the period</span></span>
-<span class="r-in"><span class="va">est_bin.p</span>   <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu">sunab</span><span class="op">(</span><span class="va">year_treated</span>, <span class="va">year</span>, bin.p <span class="op">=</span> <span class="fl">3</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">base_stagg</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Binning</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Binning can be done in many different ways</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># binning the cohort</span></span></span>
+<span class="r-in"><span><span class="va">est_bin.c</span>   <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu">sunab</span><span class="op">(</span><span class="va">year_treated</span>, <span class="va">year</span>, bin.c <span class="op">=</span> <span class="fl">3</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">base_stagg</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># binning the period</span></span></span>
+<span class="r-in"><span><span class="va">est_bin.p</span>   <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu">sunab</span><span class="op">(</span><span class="va">year_treated</span>, <span class="va">year</span>, bin.p <span class="op">=</span> <span class="fl">3</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">base_stagg</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 1 observation removed because of NA values (RHS: 1).</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># binning both the cohort and the period</span></span>
-<span class="r-in"><span class="va">est_bin</span>     <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu">sunab</span><span class="op">(</span><span class="va">year_treated</span>, <span class="va">year</span>, bin <span class="op">=</span> <span class="fl">3</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">base_stagg</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># binning both the cohort and the period</span></span></span>
+<span class="r-in"><span><span class="va">est_bin</span>     <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu">sunab</span><span class="op">(</span><span class="va">year_treated</span>, <span class="va">year</span>, bin <span class="op">=</span> <span class="fl">3</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">base_stagg</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 1 observation removed because of NA values (RHS: 1).</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># binning the relative period, grouping every two years</span></span>
-<span class="r-in"><span class="va">est_bin.rel</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu">sunab</span><span class="op">(</span><span class="va">year_treated</span>, <span class="va">year</span>, bin.rel <span class="op">=</span> <span class="st">"bin::2"</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">base_stagg</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_bin.c</span>, <span class="va">est_bin.p</span>, <span class="va">est_bin</span>, <span class="va">est_bin.rel</span>, keep <span class="op">=</span> <span class="st">"year"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># binning the relative period, grouping every two years</span></span></span>
+<span class="r-in"><span><span class="va">est_bin.rel</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu">sunab</span><span class="op">(</span><span class="va">year_treated</span>, <span class="va">year</span>, bin.rel <span class="op">=</span> <span class="st">"bin::2"</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">base_stagg</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_bin.c</span>, <span class="va">est_bin.p</span>, <span class="va">est_bin</span>, <span class="va">est_bin.rel</span>, keep <span class="op">=</span> <span class="st">"year"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                          est_bin.c          est_bin.p            est_bin</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:                  y                  y                  y</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                         </span>
@@ -346,8 +371,8 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                  0.86455</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -362,8 +387,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

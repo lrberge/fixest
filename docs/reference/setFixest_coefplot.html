@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,152 +76,245 @@
     <p>You can set the default values of most arguments of <code><a href="coefplot.html">coefplot</a></code> with this function.</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">setFixest_coefplot</span><span class="op">(</span>
-  <span class="va">style</span>,
-  horiz <span class="op">=</span> <span class="cn">FALSE</span>,
-  dict <span class="op">=</span> <span class="fu"><a href="setFixest_dict.html">getFixest_dict</a></span><span class="op">(</span><span class="op">)</span>,
-  <span class="va">keep</span>,
-  ci.width <span class="op">=</span> <span class="st">"1%"</span>,
-  ci_level <span class="op">=</span> <span class="fl">0.95</span>,
-  pt.pch <span class="op">=</span> <span class="fl">20</span>,
-  pt.bg <span class="op">=</span> <span class="cn">NULL</span>,
-  cex <span class="op">=</span> <span class="fl">1</span>,
-  pt.cex <span class="op">=</span> <span class="va">cex</span>,
-  col <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">8</span>,
-  pt.col <span class="op">=</span> <span class="va">col</span>,
-  ci.col <span class="op">=</span> <span class="va">col</span>,
-  lwd <span class="op">=</span> <span class="fl">1</span>,
-  pt.lwd <span class="op">=</span> <span class="va">lwd</span>,
-  ci.lwd <span class="op">=</span> <span class="va">lwd</span>,
-  ci.lty <span class="op">=</span> <span class="fl">1</span>,
-  grid <span class="op">=</span> <span class="cn">TRUE</span>,
-  grid.par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>lty <span class="op">=</span> <span class="fl">3</span>, col <span class="op">=</span> <span class="st">"gray"</span><span class="op">)</span>,
-  zero <span class="op">=</span> <span class="cn">TRUE</span>,
-  zero.par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>col <span class="op">=</span> <span class="st">"black"</span>, lwd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,
-  pt.join <span class="op">=</span> <span class="cn">FALSE</span>,
-  pt.join.par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>col <span class="op">=</span> <span class="va">pt.col</span>, lwd <span class="op">=</span> <span class="va">lwd</span><span class="op">)</span>,
-  ci.join <span class="op">=</span> <span class="cn">FALSE</span>,
-  ci.join.par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>lwd <span class="op">=</span> <span class="va">lwd</span>, col <span class="op">=</span> <span class="va">col</span>, lty <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,
-  ci.fill <span class="op">=</span> <span class="cn">FALSE</span>,
-  ci.fill.par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>col <span class="op">=</span> <span class="st">"lightgray"</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>,
-  ref.line <span class="op">=</span> <span class="st">"auto"</span>,
-  ref.line.par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>col <span class="op">=</span> <span class="st">"black"</span>, lty <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,
-  <span class="va">lab.cex</span>,
-  lab.min.cex <span class="op">=</span> <span class="fl">0.85</span>,
-  lab.max.mar <span class="op">=</span> <span class="fl">0.25</span>,
-  lab.fit <span class="op">=</span> <span class="st">"auto"</span>,
-  <span class="va">xlim.add</span>,
-  <span class="va">ylim.add</span>,
-  <span class="va">sep</span>,
-  <span class="va">bg</span>,
-  group <span class="op">=</span> <span class="st">"auto"</span>,
-  group.par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>lwd <span class="op">=</span> <span class="fl">2</span>, line <span class="op">=</span> <span class="fl">3</span>, tcl <span class="op">=</span> <span class="fl">0.75</span><span class="op">)</span>,
-  main <span class="op">=</span> <span class="st">"Effect on __depvar__"</span>,
-  value.lab <span class="op">=</span> <span class="st">"Estimate and __ci__ Conf. Int."</span>,
-  ylab <span class="op">=</span> <span class="cn">NULL</span>,
-  xlab <span class="op">=</span> <span class="cn">NULL</span>,
-  sub <span class="op">=</span> <span class="cn">NULL</span>,
-  reset <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span>
-
-<span class="fu">getFixest_coefplot</span><span class="op">(</span><span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">setFixest_coefplot</span><span class="op">(</span></span>
+<span>  <span class="va">style</span>,</span>
+<span>  horiz <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  dict <span class="op">=</span> <span class="fu"><a href="setFixest_dict.html">getFixest_dict</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  <span class="va">keep</span>,</span>
+<span>  ci.width <span class="op">=</span> <span class="st">"1%"</span>,</span>
+<span>  ci_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  pt.pch <span class="op">=</span> <span class="fl">20</span>,</span>
+<span>  pt.bg <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cex <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  pt.cex <span class="op">=</span> <span class="va">cex</span>,</span>
+<span>  col <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">8</span>,</span>
+<span>  pt.col <span class="op">=</span> <span class="va">col</span>,</span>
+<span>  ci.col <span class="op">=</span> <span class="va">col</span>,</span>
+<span>  lwd <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  pt.lwd <span class="op">=</span> <span class="va">lwd</span>,</span>
+<span>  ci.lwd <span class="op">=</span> <span class="va">lwd</span>,</span>
+<span>  ci.lty <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  grid <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  grid.par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>lty <span class="op">=</span> <span class="fl">3</span>, col <span class="op">=</span> <span class="st">"gray"</span><span class="op">)</span>,</span>
+<span>  zero <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  zero.par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>col <span class="op">=</span> <span class="st">"black"</span>, lwd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  pt.join <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  pt.join.par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>col <span class="op">=</span> <span class="va">pt.col</span>, lwd <span class="op">=</span> <span class="va">lwd</span><span class="op">)</span>,</span>
+<span>  ci.join <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  ci.join.par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>lwd <span class="op">=</span> <span class="va">lwd</span>, col <span class="op">=</span> <span class="va">col</span>, lty <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span>
+<span>  ci.fill <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  ci.fill.par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>col <span class="op">=</span> <span class="st">"lightgray"</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>,</span>
+<span>  ref.line <span class="op">=</span> <span class="st">"auto"</span>,</span>
+<span>  ref.line.par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>col <span class="op">=</span> <span class="st">"black"</span>, lty <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span>
+<span>  <span class="va">lab.cex</span>,</span>
+<span>  lab.min.cex <span class="op">=</span> <span class="fl">0.85</span>,</span>
+<span>  lab.max.mar <span class="op">=</span> <span class="fl">0.25</span>,</span>
+<span>  lab.fit <span class="op">=</span> <span class="st">"auto"</span>,</span>
+<span>  <span class="va">xlim.add</span>,</span>
+<span>  <span class="va">ylim.add</span>,</span>
+<span>  <span class="va">sep</span>,</span>
+<span>  <span class="va">bg</span>,</span>
+<span>  group <span class="op">=</span> <span class="st">"auto"</span>,</span>
+<span>  group.par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>lwd <span class="op">=</span> <span class="fl">2</span>, line <span class="op">=</span> <span class="fl">3</span>, tcl <span class="op">=</span> <span class="fl">0.75</span><span class="op">)</span>,</span>
+<span>  main <span class="op">=</span> <span class="st">"Effect on __depvar__"</span>,</span>
+<span>  value.lab <span class="op">=</span> <span class="st">"Estimate and __ci__ Conf. Int."</span>,</span>
+<span>  ylab <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  xlab <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  sub <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  reset <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">getFixest_coefplot</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>style</dt>
 <dd><p>A character scalar giving the style of the plot to be used. You can set styles with the function <code>setFixest_coefplot</code>, setting all the default values of the function. If missing, then it switches to either "default" or "iplot", depending on the calling function.</p></dd>
+
+
 <dt>horiz</dt>
 <dd><p>A logical scalar, default is <code>FALSE</code>. Whether to display the confidence intervals horizontally instead of vertically.</p></dd>
+
+
 <dt>dict</dt>
 <dd><p>A named character vector or a logical scalar. It changes the original variable names to the ones contained in the <code>dict</code>ionary. E.g. to change the variables named <code>a</code> and <code>b3</code> to (resp.) “$log(a)$” and to “$bonus^3$”, use <code>dict=c(a="$log(a)$",b3="$bonus^3$")</code>. By default, it is equal to <code><a href="setFixest_dict.html">getFixest_dict()</a></code>, a default dictionary which can be set with <code><a href="setFixest_dict.html">setFixest_dict</a></code>. You can use <code>dict = FALSE</code> to disable it. By default <code>dict</code> modifies the entries in the global dictionary, to disable this behavior, use "reset" as the first element (ex: <code>dict=c("reset", mpg="Miles per gallon")</code>).</p></dd>
+
+
 <dt>keep</dt>
 <dd><p>Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see <code><a href="https://rdrr.io/r/base/regex.html" class="external-link">base::regex</a></code> help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument <code>dict</code>). Example: you have the variable <code>x1</code> to <code>x55</code> and want to display only <code>x1</code> to <code>x9</code>, then you could use <code>keep = "x[[:digit:]]$"</code>. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain “Intercept” is kept). See details.</p></dd>
+
+
 <dt>ci.width</dt>
 <dd><p>The width of the extremities of the confidence intervals. Default is <code>0.1</code>.</p></dd>
+
+
 <dt>ci_level</dt>
 <dd><p>Scalar between 0 and 1: the level of the CI. By default it is equal to 0.95.</p></dd>
+
+
 <dt>pt.pch</dt>
 <dd><p>The patch of the coefficient estimates. Default is 1 (circle).</p></dd>
+
+
 <dt>pt.bg</dt>
 <dd><p>The background color of the point estimate (when the <code>pt.pch</code> is in 21 to 25). Defaults to NULL.</p></dd>
+
+
 <dt>cex</dt>
 <dd><p>Numeric, default is 1. Expansion factor for the points</p></dd>
+
+
 <dt>pt.cex</dt>
 <dd><p>The size of the coefficient estimates. Default is the other argument <code>cex</code>.</p></dd>
+
+
 <dt>col</dt>
 <dd><p>The color of the points and the confidence intervals. Default is 1 ("black"). Note that you can set the colors separately for each of them with <code>pt.col</code> and <code>ci.col</code>.</p></dd>
+
+
 <dt>pt.col</dt>
 <dd><p>The color of the coefficient estimates. Default is equal to the other argument <code>col</code>.</p></dd>
+
+
 <dt>ci.col</dt>
 <dd><p>The color of the confidence intervals. Default is equal to the other argument <code>col</code>.</p></dd>
+
+
 <dt>lwd</dt>
 <dd><p>General line with. Default is 1.</p></dd>
+
+
 <dt>pt.lwd</dt>
 <dd><p>The line width of the coefficient estimates. Default is equal to the other argument <code>lwd</code>.</p></dd>
+
+
 <dt>ci.lwd</dt>
 <dd><p>The line width of the confidence intervals. Default is equal to the other argument <code>lwd</code>.</p></dd>
+
+
 <dt>ci.lty</dt>
 <dd><p>The line type of the confidence intervals. Default is 1.</p></dd>
+
+
 <dt>grid</dt>
 <dd><p>Logical, default is <code>TRUE</code>. Whether a grid should be displayed. You can set the display of the grid with the argument <code>grid.par</code>.</p></dd>
+
+
 <dt>grid.par</dt>
 <dd><p>List. Parameters of the grid. The default values are: <code>lty = 3</code> and <code>col = "gray"</code>. You can add any graphical parameter that will be passed to <code><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">graphics::abline</a></code>. You also have two additional arguments: use <code>horiz = FALSE</code> to disable the horizontal lines, and use <code>vert = FALSE</code> to disable the vertical lines. Eg: <code>grid.par = list(vert = FALSE, col = "red", lwd = 2)</code>.</p></dd>
+
+
 <dt>zero</dt>
 <dd><p>Logical, default is <code>TRUE</code>. Whether the 0-line should be emphasized. You can set the parameters of that line with the argument <code>zero.par</code>.</p></dd>
+
+
 <dt>zero.par</dt>
 <dd><p>List. Parameters of the zero-line. The default values are <code>col = "black"</code> and <code>lwd = 1</code>. You can add any graphical parameter that will be passed to <code><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">graphics::abline</a></code>. Example: <code>zero.par = list(col = "darkblue", lwd = 3)</code>.</p></dd>
+
+
 <dt>pt.join</dt>
 <dd><p>Logical, default is <code>FALSE</code>. If <code>TRUE</code>, then the coefficient estimates are joined with a line.</p></dd>
+
+
 <dt>pt.join.par</dt>
 <dd><p>List. Parameters of the line joining the coefficients. The default values are: <code>col = pt.col</code> and <code>lwd = lwd</code>. You can add any graphical parameter that will be passed to <code><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></code>. Eg: <code>pt.join.par = list(lty = 2)</code>.</p></dd>
+
+
 <dt>ci.join</dt>
 <dd><p>Logical default to <code>FALSE</code>. Whether to join the extremities of the confidence intervals. If <code>TRUE</code>, then you can set the graphical parameters with the argument <code>ci.join.par</code>.</p></dd>
+
+
 <dt>ci.join.par</dt>
 <dd><p>A list of parameters to be passed to <code><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">graphics::lines</a></code>. Only used if <code>ci.join=TRUE</code>. By default it is equal to <code>list(lwd = lwd, col = col, lty = 2)</code>.</p></dd>
+
+
 <dt>ci.fill</dt>
 <dd><p>Logical default to <code>FALSE</code>. Whether to fill the confidence intervals with a color. If <code>TRUE</code>, then you can set the graphical parameters with the argument <code>ci.fill.par</code>.</p></dd>
+
+
 <dt>ci.fill.par</dt>
 <dd><p>A list of parameters to be passed to <code><a href="https://rdrr.io/r/graphics/polygon.html" class="external-link">graphics::polygon</a></code>. Only used if <code>ci.fill=TRUE</code>. By default it is equal to <code>list(col = "lightgray", alpha = 0.5)</code>. Note that <code>alpha</code> is a special parameter that adds transparency to the color (ranges from 0 to 1).</p></dd>
+
+
 <dt>ref.line</dt>
 <dd><p>Logical or numeric, default is "auto", whose behavior depends on the situation. It is <code>TRUE</code> only if: i) interactions are plotted, ii) the x values are numeric and iii) a reference is found. If <code>TRUE</code>, then a vertical line is drawn at the level of the reference value. Otherwise, if numeric a vertical line will be drawn at that specific value.</p></dd>
+
+
 <dt>ref.line.par</dt>
 <dd><p>List. Parameters of the vertical line on the reference. The default values are: <code>col = "black"</code> and <code>lty = 2</code>. You can add any graphical parameter that will be passed to <code><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">graphics::abline</a></code>. Eg: <code>ref.line.par = list(lty = 1, lwd = 3)</code>.</p></dd>
+
+
 <dt>lab.cex</dt>
 <dd><p>The size of the labels of the coefficients. Default is missing. It is automatically set by an internal algorithm which can go as low as <code>lab.min.cex</code> (another argument).</p></dd>
+
+
 <dt>lab.min.cex</dt>
 <dd><p>The minimum size of the coefficients labels, as set by the internal algorithm. Default is 0.85.</p></dd>
+
+
 <dt>lab.max.mar</dt>
 <dd><p>The maximum size the left margin can take when trying to fit the coefficient labels into it (only when <code>horiz = TRUE</code>). This is used in the internal algorithm fitting the coefficient labels. Default is <code>0.25</code>.</p></dd>
+
+
 <dt>lab.fit</dt>
 <dd><p>The method to fit the coefficient labels into the plotting region (only when <code>horiz = FALSE</code>). Can be <code>"auto"</code> (the default), <code>"simple"</code>, <code>"multi"</code> or <code>"tilted"</code>. If <code>"simple"</code>, then the classic axis is drawn. If <code>"multi"</code>, then the coefficient labels are fit horizontally across several lines, such that they don't collide. If <code>"tilted"</code>, then the labels are tilted. If <code>"auto"</code>, an automatic choice between the three is made.</p></dd>
+
+
 <dt>xlim.add</dt>
 <dd><p>A numeric vector of length 1 or 2. It represents an extension factor of xlim, in percentage. Eg: <code>xlim.add = c(0, 0.5)</code> extends <code>xlim</code> of 50% on the right. If of length 1, positive values represent the right, and negative values the left (Eg: <code>xlim.add = -0.5</code> is equivalent to <code>xlim.add = c(0.5, 0)</code>).</p></dd>
+
+
 <dt>ylim.add</dt>
 <dd><p>A numeric vector of length 1 or 2. It represents an extension factor of ylim, in percentage. Eg: <code>ylim.add = c(0, 0.5)</code> extends <code>ylim</code> of 50% on the top. If of length 1, positive values represent the top, and negative values the bottom (Eg: <code>ylim.add = -0.5</code> is equivalent to <code>ylim.add = c(0.5, 0)</code>).</p></dd>
+
+
 <dt>sep</dt>
 <dd><p>The distance between two estimates -- only when argument <code>object</code> is a list of estimation results.</p></dd>
+
+
 <dt>bg</dt>
 <dd><p>Background color for the plot. By default it is white.</p></dd>
+
+
 <dt>group</dt>
 <dd><p>A list, default is missing. Each element of the list reports the coefficients to be grouped while the name of the element is the group name. Each element of the list can be either: i) a character vector of length 1, ii) of length 2, or ii) a numeric vector. If equal to: i) then it is interpreted as a pattern: all element fitting the regular expression will be grouped (note that you can use the special character "^^" to clean the beginning of the names, see example), if ii) it corrsponds to the first and last elements to be grouped, if iii) it corresponds to the coefficients numbers to be grouped. If equal to a character vector, you can use a percentage to tell the algorithm to look at the coefficients before aliasing (e.g. <code>"%varname"</code>). Example of valid uses: <code>group=list(group_name=\"pattern\")</code>, <code>group=list(group_name=c(\"var_start\", \"var_end\"))</code>, <code>group=list(group_name=1:2))</code>. See details.</p></dd>
+
+
 <dt>group.par</dt>
 <dd><p>A list of parameters controlling the display of the group. The parameters controlling the line are: <code>lwd</code>, <code>tcl</code> (length of the tick), <code>line.adj</code> (adjustment of the position, default is 0), <code>tick</code> (whether to add the ticks), <code>lwd.ticks</code>, <code>col.ticks</code>. Then the parameters controlling the text: <code>text.adj</code> (adjustment of the position, default is 0), <code>text.cex</code>, <code>text.font</code>, <code>text.col</code>.</p></dd>
+
+
 <dt>main</dt>
 <dd><p>The title of the plot. Default is <code>"Effect on __depvar__"</code>. You can use the special variable <code>__depvar__</code> to set the title (useful when you set the plot default with <code>setFixest_coefplot</code>).</p></dd>
+
+
 <dt>value.lab</dt>
 <dd><p>The label to appear on the side of the coefficient values. If <code>horiz = FALSE</code>, the label appears in the y-axis. If <code>horiz = TRUE</code>, then it appears on the x-axis. The default is equal to <code>"Estimate and __ci__ Conf. Int."</code>, with <code>__ci__</code> a special variable giving the value of the confidence interval.</p></dd>
+
+
 <dt>ylab</dt>
 <dd><p>The label of the y-axis, default is <code>NULL</code>. Note that if <code>horiz = FALSE</code>, it overrides the value of the argument <code>value.lab</code>.</p></dd>
+
+
 <dt>xlab</dt>
 <dd><p>The label of the x-axis, default is <code>NULL</code>. Note that if <code>horiz = TRUE</code>, it overrides the value of the argument <code>value.lab</code>.</p></dd>
+
+
 <dt>sub</dt>
 <dd><p>A subtitle, default is <code>NULL</code>.</p></dd>
+
+
 <dt>reset</dt>
 <dd><p>Logical, default is <code>TRUE</code>. If <code>TRUE</code>, then the arguments that <em>are not</em> set during the call are reset to their "factory"-default values. If <code>FALSE</code>, on the other hand, arguments that have already been modified are not changed.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Doesn't return anything.</p>
+    
+
+<p>Doesn't return anything.</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
@@ -228,36 +323,36 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="co"># coefplot has many arguments, which makes it highly flexible.</span></span>
-<span class="r-in"><span class="co"># If you don't like the default style of coefplot. No worries,</span></span>
-<span class="r-in"><span class="co"># you can set *your* default by using the function</span></span>
-<span class="r-in"><span class="co"># setFixest_coefplot()</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Estimation</span></span>
-<span class="r-in"><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Petal.Length</span> <span class="op">~</span> <span class="va">Petal.Width</span> <span class="op">+</span> <span class="va">Sepal.Length</span> <span class="op">+</span></span>
-<span class="r-in">                <span class="va">Sepal.Width</span> <span class="op">|</span> <span class="va">Species</span>, <span class="va">iris</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Plot with default style</span></span>
-<span class="r-in"><span class="fu"><a href="coefplot.html">coefplot</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># coefplot has many arguments, which makes it highly flexible.</span></span></span>
+<span class="r-in"><span><span class="co"># If you don't like the default style of coefplot. No worries,</span></span></span>
+<span class="r-in"><span><span class="co"># you can set *your* default by using the function</span></span></span>
+<span class="r-in"><span><span class="co"># setFixest_coefplot()</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Estimation</span></span></span>
+<span class="r-in"><span><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Petal.Length</span> <span class="op">~</span> <span class="va">Petal.Width</span> <span class="op">+</span> <span class="va">Sepal.Length</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>                <span class="va">Sepal.Width</span> <span class="op">|</span> <span class="va">Species</span>, <span class="va">iris</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Plot with default style</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="coefplot.html">coefplot</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="setFixest_coefplot-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Now we permanently change some arguments</span></span>
-<span class="r-in"><span class="va">dict</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Petal.Length"</span><span class="op">=</span><span class="st">"Length (Petal)"</span>, <span class="st">"Petal.Width"</span><span class="op">=</span><span class="st">"Width (Petal)"</span>,</span>
-<span class="r-in">         <span class="st">"Sepal.Length"</span><span class="op">=</span><span class="st">"Length (Sepal)"</span>, <span class="st">"Sepal.Width"</span><span class="op">=</span><span class="st">"Width (Sepal)"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">setFixest_coefplot</span><span class="op">(</span>ci.col <span class="op">=</span> <span class="fl">2</span>, pt.col <span class="op">=</span> <span class="st">"darkblue"</span>, ci.lwd <span class="op">=</span> <span class="fl">3</span>,</span>
-<span class="r-in">                   pt.cex <span class="op">=</span> <span class="fl">2</span>, pt.pch <span class="op">=</span> <span class="fl">15</span>, ci.width <span class="op">=</span> <span class="fl">0</span>, dict <span class="op">=</span> <span class="va">dict</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Tadaaa!</span></span>
-<span class="r-in"><span class="fu"><a href="coefplot.html">coefplot</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Now we permanently change some arguments</span></span></span>
+<span class="r-in"><span><span class="va">dict</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Petal.Length"</span><span class="op">=</span><span class="st">"Length (Petal)"</span>, <span class="st">"Petal.Width"</span><span class="op">=</span><span class="st">"Width (Petal)"</span>,</span></span>
+<span class="r-in"><span>         <span class="st">"Sepal.Length"</span><span class="op">=</span><span class="st">"Length (Sepal)"</span>, <span class="st">"Sepal.Width"</span><span class="op">=</span><span class="st">"Width (Sepal)"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">setFixest_coefplot</span><span class="op">(</span>ci.col <span class="op">=</span> <span class="fl">2</span>, pt.col <span class="op">=</span> <span class="st">"darkblue"</span>, ci.lwd <span class="op">=</span> <span class="fl">3</span>,</span></span>
+<span class="r-in"><span>                   pt.cex <span class="op">=</span> <span class="fl">2</span>, pt.pch <span class="op">=</span> <span class="fl">15</span>, ci.width <span class="op">=</span> <span class="fl">0</span>, dict <span class="op">=</span> <span class="va">dict</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Tadaaa!</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="coefplot.html">coefplot</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="setFixest_coefplot-2.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># To reset to the default settings:</span></span>
-<span class="r-in"><span class="fu">setFixest_coefplot</span><span class="op">(</span><span class="st">"all"</span>, reset <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="coefplot.html">coefplot</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># To reset to the default settings:</span></span></span>
+<span class="r-in"><span><span class="fu">setFixest_coefplot</span><span class="op">(</span><span class="st">"all"</span>, reset <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="coefplot.html">coefplot</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="setFixest_coefplot-3.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -272,8 +367,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,26 +76,37 @@
     <p>Produce lags or leads in the formulas of <code>fixest</code> estimations or when creating variables in a <code><a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table</a></code>. The data must be set as a panel beforehand (either with the function <code><a href="panel.html">panel</a></code> or with the argument <code>panel.id</code> in the estimation).</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">f</span><span class="op">(</span><span class="va">x</span>, lead <span class="op">=</span> <span class="fl">1</span>, fill <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>
-
-<span class="fu">d</span><span class="op">(</span><span class="va">x</span>, lag <span class="op">=</span> <span class="fl">1</span>, fill <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>
-
-<span class="fu">l</span><span class="op">(</span><span class="va">x</span>, lag <span class="op">=</span> <span class="fl">1</span>, fill <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">f</span><span class="op">(</span><span class="va">x</span>, lead <span class="op">=</span> <span class="fl">1</span>, fill <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">d</span><span class="op">(</span><span class="va">x</span>, lag <span class="op">=</span> <span class="fl">1</span>, fill <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">l</span><span class="op">(</span><span class="va">x</span>, lag <span class="op">=</span> <span class="fl">1</span>, fill <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>The variable.</p></dd>
+
+
 <dt>lead</dt>
 <dd><p>A vector of integers giving the number of leads. Negative values lead to lags. This argument can be a vector when using it in fixest estimations. When creating variables in a <code><a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table</a></code>, it <strong>must</strong> be of length one.</p></dd>
+
+
 <dt>fill</dt>
 <dd><p>A scalar, default is <code>NA</code>. How to fill the missing values due to the lag/lead? Note that in a <code>fixest</code> estimation, 'fill' must be numeric (not required when creating new variables).</p></dd>
+
+
 <dt>lag</dt>
 <dd><p>A vector of integers giving the number of lags. Negative values lead to leads. This argument can be a vector when using it in fixest estimations. When creating variables in a <code><a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table</a></code>, it <strong>must</strong> be of length one.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>These functions can only be used i) in a formula of a <code>fixest</code> estimation, or ii) when creating variables within a <code>fixest_panel</code> object (obtained with function <code><a href="panel.html">panel</a></code>) which is alaos a <code><a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table</a></code>.</p>
+    
+
+<p>These functions can only be used i) in a formula of a <code>fixest</code> estimation, or ii) when creating variables within a <code>fixest_panel</code> object (obtained with function <code><a href="panel.html">panel</a></code>) which is alaos a <code><a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table</a></code>.</p>
     </div>
     <div id="functions">
     <h2>Functions</h2>
@@ -108,20 +121,20 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">base_did</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Setting a data set as a panel...</span></span>
-<span class="r-in"><span class="va">pdat</span> <span class="op">=</span> <span class="fu"><a href="panel.html">panel</a></span><span class="op">(</span><span class="va">base_did</span>, <span class="op">~</span> <span class="va">id</span> <span class="op">+</span> <span class="va">period</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># ...then using the functions l and f</span></span>
-<span class="r-in"><span class="va">est1</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu">l</span><span class="op">(</span><span class="va">x1</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span>, <span class="va">pdat</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">base_did</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Setting a data set as a panel...</span></span></span>
+<span class="r-in"><span><span class="va">pdat</span> <span class="op">=</span> <span class="fu"><a href="panel.html">panel</a></span><span class="op">(</span><span class="va">base_did</span>, <span class="op">~</span> <span class="va">id</span> <span class="op">+</span> <span class="va">period</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># ...then using the functions l and f</span></span></span>
+<span class="r-in"><span><span class="va">est1</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu">l</span><span class="op">(</span><span class="va">x1</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span>, <span class="va">pdat</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 108 observations removed because of NA values (RHS: 108).</span>
-<span class="r-in"><span class="va">est2</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="fu">f</span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op">~</span> <span class="fu">l</span><span class="op">(</span><span class="va">x1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span>, <span class="va">pdat</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="va">est2</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="fu">f</span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op">~</span> <span class="fu">l</span><span class="op">(</span><span class="va">x1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span>, <span class="va">pdat</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 216 observations removed because of NA values (LHS: 108, RHS: 216).</span>
-<span class="r-in"><span class="va">est3</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="fu">l</span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op">~</span> <span class="fu">l</span><span class="op">(</span><span class="va">x1</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span>, <span class="va">pdat</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="va">est3</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="fu">l</span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op">~</span> <span class="fu">l</span><span class="op">(</span><span class="va">x1</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span>, <span class="va">pdat</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 324 observations removed because of NA values (LHS: 108, RHS: 324).</span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, <span class="va">est3</span>, order <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"f"</span>, <span class="st">"^x"</span><span class="op">)</span>, drop <span class="op">=</span> <span class="st">"Int"</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, <span class="va">est3</span>, order <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"f"</span>, <span class="st">"^x"</span><span class="op">)</span>, drop <span class="op">=</span> <span class="st">"Int"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                               est1               est2               est3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:                  y             f(y,1)             l(y,1)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                         </span>
@@ -138,9 +151,9 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Adj. R2                    0.26406            0.25438            0.25480</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># or using the argument panel.id</span></span>
-<span class="r-in"><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="fu">f</span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op">~</span> <span class="fu">l</span><span class="op">(</span><span class="va">x1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span>, <span class="va">base_did</span>, panel.id <span class="op">=</span> <span class="op">~</span><span class="va">id</span> <span class="op">+</span> <span class="va">period</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># or using the argument panel.id</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="fu">f</span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op">~</span> <span class="fu">l</span><span class="op">(</span><span class="va">x1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span>, <span class="va">base_did</span>, panel.id <span class="op">=</span> <span class="op">~</span><span class="va">id</span> <span class="op">+</span> <span class="va">period</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 216 observations removed because of NA values (LHS: 108, RHS: 216).</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: f(y, 1)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 864 </span>
@@ -153,7 +166,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 4.97418   Adj. R2: 0.254377</span>
-<span class="r-in"><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="fu">d</span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op">~</span> <span class="fu">d</span><span class="op">(</span><span class="va">x1</span><span class="op">)</span>, <span class="va">base_did</span>, panel.id <span class="op">=</span> <span class="op">~</span><span class="va">id</span> <span class="op">+</span> <span class="va">period</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="fu">d</span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op">~</span> <span class="fu">d</span><span class="op">(</span><span class="va">x1</span><span class="op">)</span>, <span class="va">base_did</span>, panel.id <span class="op">=</span> <span class="op">~</span><span class="va">id</span> <span class="op">+</span> <span class="va">period</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 108 observations removed because of NA values (LHS: 108, RHS: 108).</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: d(y, 1)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 972 </span>
@@ -164,21 +177,21 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 5.83885   Adj. R2: 0.329253</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># l() and f() can also be used within a data.table:</span></span>
-<span class="r-in"><span class="kw">if</span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st"><a href="https://r-datatable.com" class="external-link">"data.table"</a></span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
-<span class="r-in">  <span class="va">pdat_dt</span> <span class="op">=</span> <span class="fu"><a href="panel.html">panel</a></span><span class="op">(</span><span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="va">base_did</span><span class="op">)</span>, <span class="op">~</span><span class="va">id</span><span class="op">+</span><span class="va">period</span><span class="op">)</span></span>
-<span class="r-in">  <span class="co"># Now since pdat_dt is also a data.table</span></span>
-<span class="r-in">  <span class="co">#   you can create lags/leads directly</span></span>
-<span class="r-in">  <span class="va">pdat_dt</span><span class="op">[</span>, <span class="va">x1_l1</span> <span class="op">:=</span> <span class="fu">l</span><span class="op">(</span><span class="va">x1</span><span class="op">)</span><span class="op">]</span></span>
-<span class="r-in">  <span class="va">pdat_dt</span><span class="op">[</span>, <span class="va">x1_d1</span> <span class="op">:=</span> <span class="fu">d</span><span class="op">(</span><span class="va">x1</span><span class="op">)</span><span class="op">]</span></span>
-<span class="r-in">  <span class="va">pdat_dt</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x1_l1_fill0"</span>, <span class="st">"y_f2"</span><span class="op">)</span> <span class="op">:=</span> <span class="fu">.</span><span class="op">(</span><span class="fu">l</span><span class="op">(</span><span class="va">x1</span>, fill <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>, <span class="fu">f</span><span class="op">(</span><span class="va">y</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
-<span class="r-in"><span class="op">}</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># l() and f() can also be used within a data.table:</span></span></span>
+<span class="r-in"><span><span class="kw">if</span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st"><a href="https://r-datatable.com" class="external-link">"data.table"</a></span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">pdat_dt</span> <span class="op">=</span> <span class="fu"><a href="panel.html">panel</a></span><span class="op">(</span><span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="va">base_did</span><span class="op">)</span>, <span class="op">~</span><span class="va">id</span><span class="op">+</span><span class="va">period</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="co"># Now since pdat_dt is also a data.table</span></span></span>
+<span class="r-in"><span>  <span class="co">#   you can create lags/leads directly</span></span></span>
+<span class="r-in"><span>  <span class="va">pdat_dt</span><span class="op">[</span>, <span class="va">x1_l1</span> <span class="op">:=</span> <span class="fu">l</span><span class="op">(</span><span class="va">x1</span><span class="op">)</span><span class="op">]</span></span></span>
+<span class="r-in"><span>  <span class="va">pdat_dt</span><span class="op">[</span>, <span class="va">x1_d1</span> <span class="op">:=</span> <span class="fu">d</span><span class="op">(</span><span class="va">x1</span><span class="op">)</span><span class="op">]</span></span></span>
+<span class="r-in"><span>  <span class="va">pdat_dt</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x1_l1_fill0"</span>, <span class="st">"y_f2"</span><span class="op">)</span> <span class="op">:=</span> <span class="fu">.</span><span class="op">(</span><span class="fu">l</span><span class="op">(</span><span class="va">x1</span>, fill <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>, <span class="fu">f</span><span class="op">(</span><span class="va">y</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: data.table</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -193,8 +206,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

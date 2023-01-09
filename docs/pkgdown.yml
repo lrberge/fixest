@@ -1,5 +1,5 @@
-pandoc: '2.18'
-pkgdown: 2.0.0
+pandoc: 2.19.2
+pkgdown: 2.0.6
 pkgdown_sha: ~
 articles:
   etable_new_features: etable_new_features.html
@@ -7,5 +7,5 @@ articles:
   fixest_walkthrough: fixest_walkthrough.html
   multiple_estimations: multiple_estimations.html
   standard_errors: standard_errors.html
-last_built: 2022-10-18T21:11Z
+last_built: 2023-01-09T12:15Z
 

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,25 +76,38 @@
     <p>Simple tool that aggregates the value of CATT coefficients in staggered difference-in-difference setups (see details).</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for fixest</span>
-<span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html" class="external-link">aggregate</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">agg</span>, full <span class="op">=</span> <span class="cn">FALSE</span>, use_weights <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for fixest</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html" class="external-link">aggregate</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">agg</span>, full <span class="op">=</span> <span class="cn">FALSE</span>, use_weights <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>A <code>fixest</code> object.</p></dd>
+
+
 <dt>agg</dt>
 <dd><p>A character scalar describing the variable names to be aggregated, it is pattern-based. For <code><a href="sunab.html">sunab</a></code> estimations, the following keywords work: "att", "period", "cohort" and <code>FALSE</code> (to have full disaggregation). All variables that match the pattern will be aggregated. It must be of the form <code>"(root)"</code>, the parentheses must be there and the resulting variable name will be <code>"root"</code>. You can add another root with parentheses: <code>"(root1)regex(root2)"</code>, in which case the resulting name is <code>"root1::root2"</code>. To name the resulting variable differently you can pass a named vector: <code>c("name" = "pattern")</code> or <code>c("name" = "pattern(root2)")</code>. It's a bit intricate sorry, please see the examples.</p></dd>
+
+
 <dt>full</dt>
 <dd><p>Logical scalar, defaults to <code>FALSE</code>. If <code>TRUE</code>, then all coefficients are returned, not only the aggregated coefficients.</p></dd>
+
+
 <dt>use_weights</dt>
 <dd><p>Logical, default is <code>TRUE</code>. If the estimation was weighted, whether the aggregation should take into account the weights. Basically if the weights reflected frequency it should be <code>TRUE</code>.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Arguments to be passed to <code><a href="summary.fixest.html">summary.fixest</a></code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>It returns a matrix representing a table of coefficients.</p>
+    
+
+<p>It returns a matrix representing a table of coefficients.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -110,55 +125,55 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># DiD example</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">base_stagg</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># 2 kind of estimations:</span></span>
-<span class="r-in"><span class="co"># - regular TWFE model</span></span>
-<span class="r-in"><span class="co"># - estimation with cohort x time_to_treatment interactions, later aggregated</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Note: the never treated have a time_to_treatment equal to -1000</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Now we perform the estimation</span></span>
-<span class="r-in"><span class="va">res_twfe</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu"><a href="i.html">i</a></span><span class="op">(</span><span class="va">time_to_treatment</span>, <span class="va">treated</span>,</span>
-<span class="r-in">                            ref <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1000</span><span class="op">)</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">base_stagg</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># we use the "i." prefix to force year_treated to be considered as a factor</span></span>
-<span class="r-in"><span class="va">res_cohort</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu"><a href="i.html">i</a></span><span class="op">(</span><span class="va">time_to_treatment</span>, <span class="va">i.year_treated</span>,</span>
-<span class="r-in">                              ref <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1000</span><span class="op">)</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">base_stagg</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Displaying the results</span></span>
-<span class="r-in"><span class="fu"><a href="coefplot.html">iplot</a></span><span class="op">(</span><span class="va">res_twfe</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">6</span>, <span class="fl">8</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">att_true</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">base_stagg</span><span class="op">$</span><span class="va">treatment_effect_true</span>,</span>
-<span class="r-in">                  <span class="va">base_stagg</span><span class="op">$</span><span class="va">time_to_treatment</span>, <span class="va">mean</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="op">-</span><span class="fl">9</span><span class="op">:</span><span class="fl">8</span> <span class="op">+</span> <span class="fl">0.15</span>, <span class="va">att_true</span>, pch <span class="op">=</span> <span class="fl">15</span>, col <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># The aggregate effect for each period</span></span>
-<span class="r-in"><span class="va">agg_coef</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html" class="external-link">aggregate</a></span><span class="op">(</span><span class="va">res_cohort</span>, <span class="st">"(ti.*nt)::(-?[[:digit:]]+)"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">9</span><span class="op">:</span><span class="op">-</span><span class="fl">2</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span> <span class="op">+</span> <span class="fl">.35</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">agg_coef</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>, pch <span class="op">=</span> <span class="fl">17</span>, col <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">ci_low</span> <span class="op">=</span> <span class="va">agg_coef</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="va">agg_coef</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span></span>
-<span class="r-in"><span class="va">ci_up</span> <span class="op">=</span> <span class="va">agg_coef</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="va">agg_coef</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/segments.html" class="external-link">segments</a></span><span class="op">(</span>x0 <span class="op">=</span> <span class="va">x</span>, y0 <span class="op">=</span> <span class="va">ci_low</span>, x1 <span class="op">=</span> <span class="va">x</span>, y1 <span class="op">=</span> <span class="va">ci_up</span>, col <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"topleft"</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span>, pch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">15</span>, <span class="fl">17</span><span class="op">)</span>,</span>
-<span class="r-in">       legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TWFE"</span>, <span class="st">"True"</span>, <span class="st">"Sun &amp; Abraham"</span><span class="op">)</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># DiD example</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">base_stagg</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># 2 kind of estimations:</span></span></span>
+<span class="r-in"><span><span class="co"># - regular TWFE model</span></span></span>
+<span class="r-in"><span><span class="co"># - estimation with cohort x time_to_treatment interactions, later aggregated</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Note: the never treated have a time_to_treatment equal to -1000</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Now we perform the estimation</span></span></span>
+<span class="r-in"><span><span class="va">res_twfe</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu"><a href="i.html">i</a></span><span class="op">(</span><span class="va">time_to_treatment</span>, <span class="va">treated</span>,</span></span>
+<span class="r-in"><span>                            ref <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1000</span><span class="op">)</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">base_stagg</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># we use the "i." prefix to force year_treated to be considered as a factor</span></span></span>
+<span class="r-in"><span><span class="va">res_cohort</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu"><a href="i.html">i</a></span><span class="op">(</span><span class="va">time_to_treatment</span>, <span class="va">i.year_treated</span>,</span></span>
+<span class="r-in"><span>                              ref <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1000</span><span class="op">)</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">base_stagg</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Displaying the results</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="coefplot.html">iplot</a></span><span class="op">(</span><span class="va">res_twfe</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">6</span>, <span class="fl">8</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">att_true</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">base_stagg</span><span class="op">$</span><span class="va">treatment_effect_true</span>,</span></span>
+<span class="r-in"><span>                  <span class="va">base_stagg</span><span class="op">$</span><span class="va">time_to_treatment</span>, <span class="va">mean</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="op">-</span><span class="fl">9</span><span class="op">:</span><span class="fl">8</span> <span class="op">+</span> <span class="fl">0.15</span>, <span class="va">att_true</span>, pch <span class="op">=</span> <span class="fl">15</span>, col <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># The aggregate effect for each period</span></span></span>
+<span class="r-in"><span><span class="va">agg_coef</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html" class="external-link">aggregate</a></span><span class="op">(</span><span class="va">res_cohort</span>, <span class="st">"(ti.*nt)::(-?[[:digit:]]+)"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">9</span><span class="op">:</span><span class="op">-</span><span class="fl">2</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span> <span class="op">+</span> <span class="fl">.35</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">agg_coef</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>, pch <span class="op">=</span> <span class="fl">17</span>, col <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">ci_low</span> <span class="op">=</span> <span class="va">agg_coef</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="va">agg_coef</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">ci_up</span> <span class="op">=</span> <span class="va">agg_coef</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="va">agg_coef</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/segments.html" class="external-link">segments</a></span><span class="op">(</span>x0 <span class="op">=</span> <span class="va">x</span>, y0 <span class="op">=</span> <span class="va">ci_low</span>, x1 <span class="op">=</span> <span class="va">x</span>, y1 <span class="op">=</span> <span class="va">ci_up</span>, col <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"topleft"</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span>, pch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">15</span>, <span class="fl">17</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>       legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TWFE"</span>, <span class="st">"True"</span>, <span class="st">"Sun &amp; Abraham"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="aggregate.fixest-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># The ATT</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html" class="external-link">aggregate</a></span><span class="op">(</span><span class="va">res_cohort</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ATT"</span> <span class="op">=</span> <span class="st">"treatment::[^-]"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># The ATT</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html" class="external-link">aggregate</a></span><span class="op">(</span><span class="va">res_cohort</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ATT"</span> <span class="op">=</span> <span class="st">"treatment::[^-]"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      Estimate Std. Error   t value     Pr(&gt;|t|)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ATT -1.133749  0.2050705 -5.528584 2.882038e-07</span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">base_stagg</span>, <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">treatment_effect_true</span><span class="op">[</span><span class="va">time_to_treatment</span> <span class="op">&gt;=</span> <span class="fl">0</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">base_stagg</span>, <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">treatment_effect_true</span><span class="op">[</span><span class="va">time_to_treatment</span> <span class="op">&gt;=</span> <span class="fl">0</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] -1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># The total effect for each cohort</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html" class="external-link">aggregate</a></span><span class="op">(</span><span class="va">res_cohort</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cohort"</span> <span class="op">=</span> <span class="st">"::[^-].*year_treated::([[:digit:]]+)"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># The total effect for each cohort</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html" class="external-link">aggregate</a></span><span class="op">(</span><span class="va">res_cohort</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cohort"</span> <span class="op">=</span> <span class="st">"::[^-].*year_treated::([[:digit:]]+)"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error     t value     Pr(&gt;|t|)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cohort::2   2.4347382  0.2860464   8.5116905 2.666655e-13</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cohort::3   1.3766102  0.6197413   2.2212658 2.873387e-02</span>
@@ -169,8 +184,8 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> cohort::8  -5.0928206  0.3505856 -14.5266109 9.239445e-26</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cohort::9  -7.2367302  0.3288544 -22.0058788 7.398376e-39</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cohort::10 -8.7115753  0.5128055 -16.9880706 2.100254e-30</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -185,8 +200,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

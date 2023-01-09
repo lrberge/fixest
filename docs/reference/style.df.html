@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,63 +76,98 @@
     <p>This function describes the style of data.frames created with the function <code><a href="etable.html">etable</a></code>.</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">style.df</span><span class="op">(</span>
-  depvar.title <span class="op">=</span> <span class="st">"Dependent Var.:"</span>,
-  fixef.title <span class="op">=</span> <span class="st">"Fixed-Effects:"</span>,
-  fixef.line <span class="op">=</span> <span class="st">"-"</span>,
-  fixef.prefix <span class="op">=</span> <span class="st">""</span>,
-  fixef.suffix <span class="op">=</span> <span class="st">""</span>,
-  slopes.title <span class="op">=</span> <span class="st">"Varying Slopes:"</span>,
-  slopes.line <span class="op">=</span> <span class="st">"-"</span>,
-  slopes.format <span class="op">=</span> <span class="st">"__var__ (__slope__)"</span>,
-  stats.title <span class="op">=</span> <span class="st">"_"</span>,
-  stats.line <span class="op">=</span> <span class="st">"_"</span>,
-  yesNo <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Yes"</span>, <span class="st">"No"</span><span class="op">)</span>,
-  headers.sep <span class="op">=</span> <span class="cn">TRUE</span>,
-  signif.code <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>`***` <span class="op">=</span> <span class="fl">0.001</span>, `**` <span class="op">=</span> <span class="fl">0.01</span>, `*` <span class="op">=</span> <span class="fl">0.05</span>, . <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span>,
-  interaction.combine <span class="op">=</span> <span class="st">" x "</span>,
-  i.equal <span class="op">=</span> <span class="st">" = "</span>,
-  default <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">style.df</span><span class="op">(</span></span>
+<span>  depvar.title <span class="op">=</span> <span class="st">"Dependent Var.:"</span>,</span>
+<span>  fixef.title <span class="op">=</span> <span class="st">"Fixed-Effects:"</span>,</span>
+<span>  fixef.line <span class="op">=</span> <span class="st">"-"</span>,</span>
+<span>  fixef.prefix <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  fixef.suffix <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  slopes.title <span class="op">=</span> <span class="st">"Varying Slopes:"</span>,</span>
+<span>  slopes.line <span class="op">=</span> <span class="st">"-"</span>,</span>
+<span>  slopes.format <span class="op">=</span> <span class="st">"__var__ (__slope__)"</span>,</span>
+<span>  stats.title <span class="op">=</span> <span class="st">"_"</span>,</span>
+<span>  stats.line <span class="op">=</span> <span class="st">"_"</span>,</span>
+<span>  yesNo <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Yes"</span>, <span class="st">"No"</span><span class="op">)</span>,</span>
+<span>  headers.sep <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  signif.code <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>`***` <span class="op">=</span> <span class="fl">0.001</span>, `**` <span class="op">=</span> <span class="fl">0.01</span>, `*` <span class="op">=</span> <span class="fl">0.05</span>, . <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span>,</span>
+<span>  interaction.combine <span class="op">=</span> <span class="st">" x "</span>,</span>
+<span>  i.equal <span class="op">=</span> <span class="st">" = "</span>,</span>
+<span>  default <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>depvar.title</dt>
 <dd><p>Character scalar. Default is <code>"Dependent Var.:"</code>. The row name of the dependent variables.</p></dd>
+
+
 <dt>fixef.title</dt>
 <dd><p>Character scalar. Default is <code>"Fixed-Effects:"</code>. The header preceding the fixed-effects. If equal to the empty string, then this line is removed.</p></dd>
+
+
 <dt>fixef.line</dt>
 <dd><p>A single character. Default is <code>"-"</code>. A character that will be used to create a line of separation for the fixed-effects header. Used only if <code>fixef.title</code> is not the empty string.</p></dd>
+
+
 <dt>fixef.prefix</dt>
 <dd><p>Character scalar. Default is <code>""</code>. A prefix to appear before each fixed-effect name.</p></dd>
+
+
 <dt>fixef.suffix</dt>
 <dd><p>Character scalar. Default is <code>""</code>. A suffix to appear after each fixed-effect name.</p></dd>
+
+
 <dt>slopes.title</dt>
 <dd><p>Character scalar. Default is <code>"Varying Slopes:"</code>. The header preceding the variables with varying slopes. If equal to the empty string, then this line is removed.</p></dd>
+
+
 <dt>slopes.line</dt>
 <dd><p>Character scalar. Default is <code>"-"</code>. A character that will be used to create a line of separation for the variables with varying slopes header. Used only if <code>slopes.line</code> is not the empty string.</p></dd>
+
+
 <dt>slopes.format</dt>
 <dd><p>Character scalar. Default is <code>"__var__ (__slope__)"</code>. The format of the name of the varying slopes. The values <code>__var__</code> and <code>__slope__</code> are special characters that will be replaced by the value of the variable name and slope name, respectively.</p></dd>
+
+
 <dt>stats.title</dt>
 <dd><p>Character scalar. Default is <code>"_"</code>. The header preceding the statistics section. If equal to the empty string, then this line is removed. If equal to single character (like in the default), then this character will be expanded to take the full column width.</p></dd>
+
+
 <dt>stats.line</dt>
 <dd><p>Character scalar. Default is <code>"_"</code>. A character that will be used to create a line of separation for the statistics header. Used only if <code>stats.title</code> is not the empty string.</p></dd>
+
+
 <dt>yesNo</dt>
 <dd><p>Character vector of length 1 or 2. Default is <code>c("Yes", "No")</code>. Used to inform on the presence or absence of fixed-effects in the estimation. If of length 1, then automatically the second value is considered as the empty string.</p></dd>
+
+
 <dt>headers.sep</dt>
 <dd><p>Logical, default is <code>TRUE</code>. Whether to add a line of separation between the headers and the coefficients.</p></dd>
+
+
 <dt>signif.code</dt>
 <dd><p>Named numeric vector, used to provide the significance codes with respect to the p-value of the coefficients. Default is <code>c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)</code>. To suppress the significance codes, use <code>signif.code=NA</code> or <code>signif.code=NULL</code>. Can also be equal to <code>"letters"</code>, then the default becomes <code>c("a"=0.01, "b"=0.05, "c"=0.10)</code>.</p></dd>
+
+
 <dt>interaction.combine</dt>
 <dd><p>Character scalar, defaults to <code>" x "</code>. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if <code>dict = c(x1="Wind", x2="Rain")</code> and you have the following interaction <code>x1:x2</code>, then it will be renamed (by default) <code>Wind x Rain</code> -- using <code>interaction.combine = "*"</code> would lead to <code>Wind*Rain</code>.</p></dd>
+
+
 <dt>i.equal</dt>
 <dd><p>Character scalar, defaults to <code>" = "</code>. Only affects factor variables created with the function <code><a href="i.html">i</a></code>, tells how the variable should be linked to its value. For example if you have the Species factor from the iris data set, by default the display of the variable is <code>Species = Setosa</code>, etc. If <code>i.equal = ": "</code> the display becomes <code>Species: Setosa</code>.</p></dd>
+
+
 <dt>default</dt>
 <dd><p>Logical, default is <code>FALSE</code>. If <code>TRUE</code>, all the values not provided by the user are set to their default.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>It returns an object of class <code>fixest_style_df</code>.</p>
+    
+
+<p>It returns an object of class <code>fixest_style_df</code>.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -140,16 +177,16 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="co"># Multiple estimations =&gt; see details in feols</span></span>
-<span class="r-in"><span class="va">aq</span> <span class="op">=</span> <span class="va">airquality</span></span>
-<span class="r-in"><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">Ozone</span>, <span class="va">Solar.R</span><span class="op">)</span> <span class="op">~</span></span>
-<span class="r-in">                <span class="va">Wind</span> <span class="op">+</span> <span class="fu"><a href="stepwise.html">csw</a></span><span class="op">(</span><span class="va">Temp</span>, <span class="va">Temp</span><span class="op">^</span><span class="fl">2</span>, <span class="va">Temp</span><span class="op">^</span><span class="fl">3</span><span class="op">)</span> <span class="op">|</span> <span class="va">Month</span> <span class="op">+</span> <span class="va">Day</span>,</span>
-<span class="r-in">            data <span class="op">=</span> <span class="va">aq</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Default result</span></span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Multiple estimations =&gt; see details in feols</span></span></span>
+<span class="r-in"><span><span class="va">aq</span> <span class="op">=</span> <span class="va">airquality</span></span></span>
+<span class="r-in"><span><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">Ozone</span>, <span class="va">Solar.R</span><span class="op">)</span> <span class="op">~</span></span></span>
+<span class="r-in"><span>                <span class="va">Wind</span> <span class="op">+</span> <span class="fu"><a href="stepwise.html">csw</a></span><span class="op">(</span><span class="va">Temp</span>, <span class="va">Temp</span><span class="op">^</span><span class="fl">2</span>, <span class="va">Temp</span><span class="op">^</span><span class="fl">3</span><span class="op">)</span> <span class="op">|</span> <span class="va">Month</span> <span class="op">+</span> <span class="va">Day</span>,</span></span>
+<span class="r-in"><span>            data <span class="op">=</span> <span class="va">aq</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Default result</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                             est.1            est.2            est.3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:             Ozone            Ozone            Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                    </span>
@@ -183,10 +220,10 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2              0.08937          0.09740         0.11577</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Playing a bit with the styles</span></span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est</span>, style.df <span class="op">=</span> <span class="fu">style.df</span><span class="op">(</span>fixef.title <span class="op">=</span> <span class="st">""</span>, fixef.suffix <span class="op">=</span> <span class="st">" FE"</span>,</span>
-<span class="r-in">                                 stats.line <span class="op">=</span> <span class="st">" "</span>, yesNo <span class="op">=</span> <span class="st">"yes"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Playing a bit with the styles</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est</span>, style.df <span class="op">=</span> <span class="fu">style.df</span><span class="op">(</span>fixef.title <span class="op">=</span> <span class="st">""</span>, fixef.suffix <span class="op">=</span> <span class="st">" FE"</span>,</span></span>
+<span class="r-in"><span>                                 stats.line <span class="op">=</span> <span class="st">" "</span>, yesNo <span class="op">=</span> <span class="st">"yes"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                             est.1            est.2            est.3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:             Ozone            Ozone            Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                    </span>
@@ -218,8 +255,8 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2              0.08937          0.09740         0.11577</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -234,8 +271,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

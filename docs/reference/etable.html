@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -77,248 +77,248 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">etable</span><span class="op">(</span>
-  <span class="va">...</span>,
-  vcov <span class="op">=</span> <span class="cn">NULL</span>,
-  stage <span class="op">=</span> <span class="fl">2</span>,
-  agg <span class="op">=</span> <span class="cn">NULL</span>,
-  se <span class="op">=</span> <span class="cn">NULL</span>,
-  ssc <span class="op">=</span> <span class="cn">NULL</span>,
-  cluster <span class="op">=</span> <span class="cn">NULL</span>,
-  .vcov <span class="op">=</span> <span class="cn">NULL</span>,
-  .vcov_args <span class="op">=</span> <span class="cn">NULL</span>,
-  digits <span class="op">=</span> <span class="fl">4</span>,
-  digits.stats <span class="op">=</span> <span class="fl">5</span>,
-  <span class="va">tex</span>,
-  fitstat <span class="op">=</span> <span class="cn">NULL</span>,
-  title <span class="op">=</span> <span class="cn">NULL</span>,
-  coefstat <span class="op">=</span> <span class="st">"se"</span>,
-  ci <span class="op">=</span> <span class="fl">0.95</span>,
-  se.row <span class="op">=</span> <span class="cn">NULL</span>,
-  se.below <span class="op">=</span> <span class="cn">NULL</span>,
-  keep <span class="op">=</span> <span class="cn">NULL</span>,
-  drop <span class="op">=</span> <span class="cn">NULL</span>,
-  order <span class="op">=</span> <span class="cn">NULL</span>,
-  dict <span class="op">=</span> <span class="cn">TRUE</span>,
-  file <span class="op">=</span> <span class="cn">NULL</span>,
-  replace <span class="op">=</span> <span class="cn">FALSE</span>,
-  convergence <span class="op">=</span> <span class="cn">NULL</span>,
-  signif.code <span class="op">=</span> <span class="cn">NULL</span>,
-  label <span class="op">=</span> <span class="cn">NULL</span>,
-  float <span class="op">=</span> <span class="cn">NULL</span>,
-  headers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"auto"</span><span class="op">)</span>,
-  fixef_sizes <span class="op">=</span> <span class="cn">FALSE</span>,
-  fixef_sizes.simplify <span class="op">=</span> <span class="cn">TRUE</span>,
-  keepFactors <span class="op">=</span> <span class="cn">TRUE</span>,
-  family <span class="op">=</span> <span class="cn">NULL</span>,
-  powerBelow <span class="op">=</span> <span class="op">-</span><span class="fl">5</span>,
-  interaction.combine <span class="op">=</span> <span class="cn">NULL</span>,
-  interaction.order <span class="op">=</span> <span class="cn">NULL</span>,
-  i.equal <span class="op">=</span> <span class="cn">NULL</span>,
-  depvar <span class="op">=</span> <span class="cn">TRUE</span>,
-  style.tex <span class="op">=</span> <span class="cn">NULL</span>,
-  style.df <span class="op">=</span> <span class="cn">NULL</span>,
-  notes <span class="op">=</span> <span class="cn">NULL</span>,
-  group <span class="op">=</span> <span class="cn">NULL</span>,
-  extralines <span class="op">=</span> <span class="cn">NULL</span>,
-  fixef.group <span class="op">=</span> <span class="cn">NULL</span>,
-  placement <span class="op">=</span> <span class="st">"htbp"</span>,
-  drop.section <span class="op">=</span> <span class="cn">NULL</span>,
-  poly_dict <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">""</span>, <span class="st">" square"</span>, <span class="st">" cube"</span><span class="op">)</span>,
-  postprocess.tex <span class="op">=</span> <span class="cn">NULL</span>,
-  postprocess.df <span class="op">=</span> <span class="cn">NULL</span>,
-  tpt <span class="op">=</span> <span class="cn">FALSE</span>,
-  arraystretch <span class="op">=</span> <span class="cn">NULL</span>,
-  adjustbox <span class="op">=</span> <span class="cn">NULL</span>,
-  fontsize <span class="op">=</span> <span class="cn">NULL</span>,
-  fit_format <span class="op">=</span> <span class="st">"__var__"</span>,
-  coef.just <span class="op">=</span> <span class="cn">NULL</span>,
-  tabular <span class="op">=</span> <span class="st">"normal"</span>,
-  highlight <span class="op">=</span> <span class="cn">NULL</span>,
-  coef.style <span class="op">=</span> <span class="cn">NULL</span>,
-  meta <span class="op">=</span> <span class="cn">NULL</span>,
-  meta.time <span class="op">=</span> <span class="cn">NULL</span>,
-  meta.author <span class="op">=</span> <span class="cn">NULL</span>,
-  meta.sys <span class="op">=</span> <span class="cn">NULL</span>,
-  meta.call <span class="op">=</span> <span class="cn">NULL</span>,
-  meta.comment <span class="op">=</span> <span class="cn">NULL</span>,
-  view <span class="op">=</span> <span class="cn">FALSE</span>,
-  export <span class="op">=</span> <span class="cn">NULL</span>,
-  markdown <span class="op">=</span> <span class="cn">NULL</span>,
-  page.width <span class="op">=</span> <span class="st">"fit"</span>,
-  div.class <span class="op">=</span> <span class="st">"etable"</span>
-<span class="op">)</span>
-
-<span class="fu">setFixest_etable</span><span class="op">(</span>
-  digits <span class="op">=</span> <span class="fl">4</span>,
-  digits.stats <span class="op">=</span> <span class="fl">5</span>,
-  <span class="va">fitstat</span>,
-  coefstat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"se"</span>, <span class="st">"tstat"</span>, <span class="st">"confint"</span><span class="op">)</span>,
-  ci <span class="op">=</span> <span class="fl">0.95</span>,
-  se.below <span class="op">=</span> <span class="cn">TRUE</span>,
-  <span class="va">keep</span>,
-  <span class="va">drop</span>,
-  <span class="va">order</span>,
-  <span class="va">dict</span>,
-  <span class="va">float</span>,
-  fixef_sizes <span class="op">=</span> <span class="cn">FALSE</span>,
-  fixef_sizes.simplify <span class="op">=</span> <span class="cn">TRUE</span>,
-  <span class="va">family</span>,
-  powerBelow <span class="op">=</span> <span class="op">-</span><span class="fl">5</span>,
-  interaction.order <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">depvar</span>,
-  style.tex <span class="op">=</span> <span class="cn">NULL</span>,
-  style.df <span class="op">=</span> <span class="cn">NULL</span>,
-  notes <span class="op">=</span> <span class="cn">NULL</span>,
-  group <span class="op">=</span> <span class="cn">NULL</span>,
-  extralines <span class="op">=</span> <span class="cn">NULL</span>,
-  fixef.group <span class="op">=</span> <span class="cn">NULL</span>,
-  placement <span class="op">=</span> <span class="st">"htbp"</span>,
-  drop.section <span class="op">=</span> <span class="cn">NULL</span>,
-  view <span class="op">=</span> <span class="cn">FALSE</span>,
-  markdown <span class="op">=</span> <span class="cn">NULL</span>,
-  view.cache <span class="op">=</span> <span class="cn">FALSE</span>,
-  page.width <span class="op">=</span> <span class="st">"fit"</span>,
-  postprocess.tex <span class="op">=</span> <span class="cn">NULL</span>,
-  postprocess.df <span class="op">=</span> <span class="cn">NULL</span>,
-  fit_format <span class="op">=</span> <span class="st">"__var__"</span>,
-  meta.time <span class="op">=</span> <span class="cn">NULL</span>,
-  meta.author <span class="op">=</span> <span class="cn">NULL</span>,
-  meta.sys <span class="op">=</span> <span class="cn">NULL</span>,
-  meta.call <span class="op">=</span> <span class="cn">NULL</span>,
-  meta.comment <span class="op">=</span> <span class="cn">NULL</span>,
-  reset <span class="op">=</span> <span class="cn">FALSE</span>,
-  save <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span>
-
-<span class="fu">getFixest_etable</span><span class="op">(</span><span class="op">)</span>
-
-<span class="co"># S3 method for etable_tex</span>
-<span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="co"># S3 method for etable_df</span>
-<span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="fu">log_etable</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"pdflatex"</span><span class="op">)</span>
-
-<span class="fu">esttable</span><span class="op">(</span>
-  <span class="va">...</span>,
-  vcov <span class="op">=</span> <span class="cn">NULL</span>,
-  stage <span class="op">=</span> <span class="fl">2</span>,
-  agg <span class="op">=</span> <span class="cn">NULL</span>,
-  se <span class="op">=</span> <span class="cn">NULL</span>,
-  ssc <span class="op">=</span> <span class="cn">NULL</span>,
-  cluster <span class="op">=</span> <span class="cn">NULL</span>,
-  .vcov <span class="op">=</span> <span class="cn">NULL</span>,
-  .vcov_args <span class="op">=</span> <span class="cn">NULL</span>,
-  digits <span class="op">=</span> <span class="fl">4</span>,
-  digits.stats <span class="op">=</span> <span class="fl">5</span>,
-  fitstat <span class="op">=</span> <span class="cn">NULL</span>,
-  coefstat <span class="op">=</span> <span class="st">"se"</span>,
-  ci <span class="op">=</span> <span class="fl">0.95</span>,
-  se.row <span class="op">=</span> <span class="cn">NULL</span>,
-  se.below <span class="op">=</span> <span class="cn">NULL</span>,
-  keep <span class="op">=</span> <span class="cn">NULL</span>,
-  drop <span class="op">=</span> <span class="cn">NULL</span>,
-  order <span class="op">=</span> <span class="cn">NULL</span>,
-  dict <span class="op">=</span> <span class="cn">TRUE</span>,
-  file <span class="op">=</span> <span class="cn">NULL</span>,
-  replace <span class="op">=</span> <span class="cn">FALSE</span>,
-  convergence <span class="op">=</span> <span class="cn">NULL</span>,
-  signif.code <span class="op">=</span> <span class="cn">NULL</span>,
-  headers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"auto"</span><span class="op">)</span>,
-  fixef_sizes <span class="op">=</span> <span class="cn">FALSE</span>,
-  fixef_sizes.simplify <span class="op">=</span> <span class="cn">TRUE</span>,
-  keepFactors <span class="op">=</span> <span class="cn">TRUE</span>,
-  family <span class="op">=</span> <span class="cn">NULL</span>,
-  powerBelow <span class="op">=</span> <span class="op">-</span><span class="fl">5</span>,
-  interaction.combine <span class="op">=</span> <span class="cn">NULL</span>,
-  interaction.order <span class="op">=</span> <span class="cn">NULL</span>,
-  i.equal <span class="op">=</span> <span class="cn">NULL</span>,
-  depvar <span class="op">=</span> <span class="cn">TRUE</span>,
-  style.df <span class="op">=</span> <span class="cn">NULL</span>,
-  group <span class="op">=</span> <span class="cn">NULL</span>,
-  extralines <span class="op">=</span> <span class="cn">NULL</span>,
-  fixef.group <span class="op">=</span> <span class="cn">NULL</span>,
-  drop.section <span class="op">=</span> <span class="cn">NULL</span>,
-  poly_dict <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">""</span>, <span class="st">" square"</span>, <span class="st">" cube"</span><span class="op">)</span>,
-  postprocess.df <span class="op">=</span> <span class="cn">NULL</span>,
-  fit_format <span class="op">=</span> <span class="st">"__var__"</span>,
-  coef.just <span class="op">=</span> <span class="cn">NULL</span>,
-  highlight <span class="op">=</span> <span class="cn">NULL</span>,
-  coef.style <span class="op">=</span> <span class="cn">NULL</span>,
-  export <span class="op">=</span> <span class="cn">NULL</span>,
-  page.width <span class="op">=</span> <span class="st">"fit"</span>,
-  div.class <span class="op">=</span> <span class="st">"etable"</span>
-<span class="op">)</span>
-
-<span class="fu">esttex</span><span class="op">(</span>
-  <span class="va">...</span>,
-  vcov <span class="op">=</span> <span class="cn">NULL</span>,
-  stage <span class="op">=</span> <span class="fl">2</span>,
-  agg <span class="op">=</span> <span class="cn">NULL</span>,
-  se <span class="op">=</span> <span class="cn">NULL</span>,
-  ssc <span class="op">=</span> <span class="cn">NULL</span>,
-  cluster <span class="op">=</span> <span class="cn">NULL</span>,
-  .vcov <span class="op">=</span> <span class="cn">NULL</span>,
-  .vcov_args <span class="op">=</span> <span class="cn">NULL</span>,
-  digits <span class="op">=</span> <span class="fl">4</span>,
-  digits.stats <span class="op">=</span> <span class="fl">5</span>,
-  fitstat <span class="op">=</span> <span class="cn">NULL</span>,
-  title <span class="op">=</span> <span class="cn">NULL</span>,
-  coefstat <span class="op">=</span> <span class="st">"se"</span>,
-  ci <span class="op">=</span> <span class="fl">0.95</span>,
-  se.row <span class="op">=</span> <span class="cn">NULL</span>,
-  se.below <span class="op">=</span> <span class="cn">NULL</span>,
-  keep <span class="op">=</span> <span class="cn">NULL</span>,
-  drop <span class="op">=</span> <span class="cn">NULL</span>,
-  order <span class="op">=</span> <span class="cn">NULL</span>,
-  dict <span class="op">=</span> <span class="cn">TRUE</span>,
-  file <span class="op">=</span> <span class="cn">NULL</span>,
-  replace <span class="op">=</span> <span class="cn">FALSE</span>,
-  convergence <span class="op">=</span> <span class="cn">NULL</span>,
-  signif.code <span class="op">=</span> <span class="cn">NULL</span>,
-  label <span class="op">=</span> <span class="cn">NULL</span>,
-  float <span class="op">=</span> <span class="cn">NULL</span>,
-  headers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"auto"</span><span class="op">)</span>,
-  fixef_sizes <span class="op">=</span> <span class="cn">FALSE</span>,
-  fixef_sizes.simplify <span class="op">=</span> <span class="cn">TRUE</span>,
-  keepFactors <span class="op">=</span> <span class="cn">TRUE</span>,
-  family <span class="op">=</span> <span class="cn">NULL</span>,
-  powerBelow <span class="op">=</span> <span class="op">-</span><span class="fl">5</span>,
-  interaction.combine <span class="op">=</span> <span class="cn">NULL</span>,
-  interaction.order <span class="op">=</span> <span class="cn">NULL</span>,
-  i.equal <span class="op">=</span> <span class="cn">NULL</span>,
-  depvar <span class="op">=</span> <span class="cn">TRUE</span>,
-  style.tex <span class="op">=</span> <span class="cn">NULL</span>,
-  notes <span class="op">=</span> <span class="cn">NULL</span>,
-  group <span class="op">=</span> <span class="cn">NULL</span>,
-  extralines <span class="op">=</span> <span class="cn">NULL</span>,
-  fixef.group <span class="op">=</span> <span class="cn">NULL</span>,
-  placement <span class="op">=</span> <span class="st">"htbp"</span>,
-  drop.section <span class="op">=</span> <span class="cn">NULL</span>,
-  poly_dict <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">""</span>, <span class="st">" square"</span>, <span class="st">" cube"</span><span class="op">)</span>,
-  postprocess.tex <span class="op">=</span> <span class="cn">NULL</span>,
-  tpt <span class="op">=</span> <span class="cn">FALSE</span>,
-  arraystretch <span class="op">=</span> <span class="cn">NULL</span>,
-  adjustbox <span class="op">=</span> <span class="cn">NULL</span>,
-  fontsize <span class="op">=</span> <span class="cn">NULL</span>,
-  fit_format <span class="op">=</span> <span class="st">"__var__"</span>,
-  tabular <span class="op">=</span> <span class="st">"normal"</span>,
-  highlight <span class="op">=</span> <span class="cn">NULL</span>,
-  coef.style <span class="op">=</span> <span class="cn">NULL</span>,
-  meta <span class="op">=</span> <span class="cn">NULL</span>,
-  meta.time <span class="op">=</span> <span class="cn">NULL</span>,
-  meta.author <span class="op">=</span> <span class="cn">NULL</span>,
-  meta.sys <span class="op">=</span> <span class="cn">NULL</span>,
-  meta.call <span class="op">=</span> <span class="cn">NULL</span>,
-  meta.comment <span class="op">=</span> <span class="cn">NULL</span>,
-  view <span class="op">=</span> <span class="cn">FALSE</span>,
-  export <span class="op">=</span> <span class="cn">NULL</span>,
-  markdown <span class="op">=</span> <span class="cn">NULL</span>,
-  page.width <span class="op">=</span> <span class="st">"fit"</span>,
-  div.class <span class="op">=</span> <span class="st">"etable"</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">etable</span><span class="op">(</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  vcov <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  stage <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  agg <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  se <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ssc <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cluster <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .vcov <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .vcov_args <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  digits <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  digits.stats <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  <span class="va">tex</span>,</span>
+<span>  fitstat <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  title <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  coefstat <span class="op">=</span> <span class="st">"se"</span>,</span>
+<span>  ci <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  se.row <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  se.below <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  keep <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  drop <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  order <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  dict <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  file <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  replace <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  convergence <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  signif.code <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  label <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  float <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  headers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"auto"</span><span class="op">)</span>,</span>
+<span>  fixef_sizes <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  fixef_sizes.simplify <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  keepFactors <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  family <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  powerBelow <span class="op">=</span> <span class="op">-</span><span class="fl">5</span>,</span>
+<span>  interaction.combine <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  interaction.order <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  i.equal <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  depvar <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  style.tex <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  style.df <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  notes <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  group <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  extralines <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  fixef.group <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  placement <span class="op">=</span> <span class="st">"htbp"</span>,</span>
+<span>  drop.section <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  poly_dict <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">""</span>, <span class="st">" square"</span>, <span class="st">" cube"</span><span class="op">)</span>,</span>
+<span>  postprocess.tex <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  postprocess.df <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  tpt <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  arraystretch <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  adjustbox <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  fontsize <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  fit_format <span class="op">=</span> <span class="st">"__var__"</span>,</span>
+<span>  coef.just <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  tabular <span class="op">=</span> <span class="st">"normal"</span>,</span>
+<span>  highlight <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  coef.style <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  meta <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  meta.time <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  meta.author <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  meta.sys <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  meta.call <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  meta.comment <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  view <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  export <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  markdown <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  page.width <span class="op">=</span> <span class="st">"fit"</span>,</span>
+<span>  div.class <span class="op">=</span> <span class="st">"etable"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">setFixest_etable</span><span class="op">(</span></span>
+<span>  digits <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  digits.stats <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  <span class="va">fitstat</span>,</span>
+<span>  coefstat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"se"</span>, <span class="st">"tstat"</span>, <span class="st">"confint"</span><span class="op">)</span>,</span>
+<span>  ci <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  se.below <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  <span class="va">keep</span>,</span>
+<span>  <span class="va">drop</span>,</span>
+<span>  <span class="va">order</span>,</span>
+<span>  <span class="va">dict</span>,</span>
+<span>  <span class="va">float</span>,</span>
+<span>  fixef_sizes <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  fixef_sizes.simplify <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  <span class="va">family</span>,</span>
+<span>  powerBelow <span class="op">=</span> <span class="op">-</span><span class="fl">5</span>,</span>
+<span>  interaction.order <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">depvar</span>,</span>
+<span>  style.tex <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  style.df <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  notes <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  group <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  extralines <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  fixef.group <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  placement <span class="op">=</span> <span class="st">"htbp"</span>,</span>
+<span>  drop.section <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  view <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  markdown <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  view.cache <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  page.width <span class="op">=</span> <span class="st">"fit"</span>,</span>
+<span>  postprocess.tex <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  postprocess.df <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  fit_format <span class="op">=</span> <span class="st">"__var__"</span>,</span>
+<span>  meta.time <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  meta.author <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  meta.sys <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  meta.call <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  meta.comment <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  reset <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  save <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">getFixest_etable</span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for etable_tex</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for etable_df</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">log_etable</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"pdflatex"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">esttable</span><span class="op">(</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  vcov <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  stage <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  agg <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  se <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ssc <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cluster <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .vcov <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .vcov_args <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  digits <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  digits.stats <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  fitstat <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  coefstat <span class="op">=</span> <span class="st">"se"</span>,</span>
+<span>  ci <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  se.row <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  se.below <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  keep <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  drop <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  order <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  dict <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  file <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  replace <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  convergence <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  signif.code <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  headers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"auto"</span><span class="op">)</span>,</span>
+<span>  fixef_sizes <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  fixef_sizes.simplify <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  keepFactors <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  family <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  powerBelow <span class="op">=</span> <span class="op">-</span><span class="fl">5</span>,</span>
+<span>  interaction.combine <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  interaction.order <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  i.equal <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  depvar <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  style.df <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  group <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  extralines <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  fixef.group <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  drop.section <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  poly_dict <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">""</span>, <span class="st">" square"</span>, <span class="st">" cube"</span><span class="op">)</span>,</span>
+<span>  postprocess.df <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  fit_format <span class="op">=</span> <span class="st">"__var__"</span>,</span>
+<span>  coef.just <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  highlight <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  coef.style <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  export <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  page.width <span class="op">=</span> <span class="st">"fit"</span>,</span>
+<span>  div.class <span class="op">=</span> <span class="st">"etable"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">esttex</span><span class="op">(</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  vcov <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  stage <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  agg <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  se <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ssc <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cluster <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .vcov <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .vcov_args <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  digits <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  digits.stats <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  fitstat <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  title <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  coefstat <span class="op">=</span> <span class="st">"se"</span>,</span>
+<span>  ci <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  se.row <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  se.below <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  keep <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  drop <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  order <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  dict <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  file <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  replace <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  convergence <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  signif.code <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  label <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  float <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  headers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"auto"</span><span class="op">)</span>,</span>
+<span>  fixef_sizes <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  fixef_sizes.simplify <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  keepFactors <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  family <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  powerBelow <span class="op">=</span> <span class="op">-</span><span class="fl">5</span>,</span>
+<span>  interaction.combine <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  interaction.order <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  i.equal <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  depvar <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  style.tex <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  notes <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  group <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  extralines <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  fixef.group <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  placement <span class="op">=</span> <span class="st">"htbp"</span>,</span>
+<span>  drop.section <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  poly_dict <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">""</span>, <span class="st">" square"</span>, <span class="st">" cube"</span><span class="op">)</span>,</span>
+<span>  postprocess.tex <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  tpt <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  arraystretch <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  adjustbox <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  fontsize <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  fit_format <span class="op">=</span> <span class="st">"__var__"</span>,</span>
+<span>  tabular <span class="op">=</span> <span class="st">"normal"</span>,</span>
+<span>  highlight <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  coef.style <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  meta <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  meta.time <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  meta.author <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  meta.sys <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  meta.call <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  meta.comment <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  view <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  export <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  markdown <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  page.width <span class="op">=</span> <span class="st">"fit"</span>,</span>
+<span>  div.class <span class="op">=</span> <span class="st">"etable"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -717,15 +717,15 @@ The options are a comma-separated list of items. By default the highlighting is 
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">est1</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="fu"><a href="i.html">i</a></span><span class="op">(</span><span class="va">Month</span><span class="op">)</span> <span class="op">/</span> <span class="va">Wind</span> <span class="op">+</span> <span class="va">Temp</span>, data <span class="op">=</span> <span class="va">airquality</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">est1</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="fu"><a href="i.html">i</a></span><span class="op">(</span><span class="va">Month</span><span class="op">)</span> <span class="op">/</span> <span class="va">Wind</span> <span class="op">+</span> <span class="va">Temp</span>, data <span class="op">=</span> <span class="va">airquality</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 37 observations removed because of NA values (LHS: 37).</span>
-<span class="r-in"><span class="va">est2</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="fu"><a href="i.html">i</a></span><span class="op">(</span><span class="va">Month</span>, <span class="va">Wind</span><span class="op">)</span> <span class="op">+</span> <span class="va">Temp</span> <span class="op">|</span> <span class="va">Month</span>, data <span class="op">=</span> <span class="va">airquality</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="va">est2</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="fu"><a href="i.html">i</a></span><span class="op">(</span><span class="va">Month</span>, <span class="va">Wind</span><span class="op">)</span> <span class="op">+</span> <span class="va">Temp</span> <span class="op">|</span> <span class="va">Month</span>, data <span class="op">=</span> <span class="va">airquality</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 37 observations removed because of NA values (LHS: 37).</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Displaying the two results in a single table</span></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Displaying the two results in a single table</span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                               est1               est2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                      </span>
@@ -749,9 +749,9 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                       --            0.58296</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># keep/drop: keeping only interactions</span></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, keep <span class="op">=</span> <span class="st">" x "</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># keep/drop: keeping only interactions</span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, keep <span class="op">=</span> <span class="st">" x "</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                               est1               est2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                      </span>
@@ -769,8 +769,8 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                       --            0.58296</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"><span class="co"># or using drop  (see regexp help):</span></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, drop <span class="op">=</span> <span class="st">"^(Month|Temp|\\()"</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="co"># or using drop  (see regexp help):</span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, drop <span class="op">=</span> <span class="st">"^(Month|Temp|\\()"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                               est1               est2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                      </span>
@@ -789,9 +789,9 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                       --            0.58296</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># keep/drop: dropping interactions</span></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, drop <span class="op">=</span> <span class="st">" x "</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># keep/drop: dropping interactions</span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, drop <span class="op">=</span> <span class="st">" x "</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                              est1              est2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:             Ozone             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                    </span>
@@ -810,8 +810,8 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                      --           0.58296</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"><span class="co"># or using keep ("!" reverses the effect):</span></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, keep <span class="op">=</span> <span class="st">"! x "</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="co"># or using keep ("!" reverses the effect):</span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, keep <span class="op">=</span> <span class="st">"! x "</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                              est1              est2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:             Ozone             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                    </span>
@@ -830,9 +830,9 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                      --           0.58296</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># order: Wind variable first, intercept last (note the "!" to reverse the effect)</span></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, order <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Wind"</span>, <span class="st">"!Inter"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># order: Wind variable first, intercept last (note the "!" to reverse the effect)</span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, order <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Wind"</span>, <span class="st">"!Inter"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                               est1               est2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                      </span>
@@ -856,8 +856,8 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                       --            0.58296</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"><span class="co"># Month, then interactions, then the rest</span></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, order <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"^Month"</span>, <span class="st">" x "</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="co"># Month, then interactions, then the rest</span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, order <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"^Month"</span>, <span class="st">" x "</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                               est1               est2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                      </span>
@@ -881,16 +881,16 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                       --            0.58296</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># dict</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># You can rename variables with dict = c(var1 = alias1, var2 = alias2, etc)</span></span>
-<span class="r-in"><span class="co"># You can also rename values taken by factors.</span></span>
-<span class="r-in"><span class="co"># Here's a full example:</span></span>
-<span class="r-in"><span class="va">dict</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Temp <span class="op">=</span> <span class="st">"Temperature"</span>, <span class="st">"Month::5"</span><span class="op">=</span><span class="st">"May"</span>, <span class="st">"6"</span><span class="op">=</span><span class="st">"Jun"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, dict <span class="op">=</span> <span class="va">dict</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># dict</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># You can rename variables with dict = c(var1 = alias1, var2 = alias2, etc)</span></span></span>
+<span class="r-in"><span><span class="co"># You can also rename values taken by factors.</span></span></span>
+<span class="r-in"><span><span class="co"># Here's a full example:</span></span></span>
+<span class="r-in"><span><span class="va">dict</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Temp <span class="op">=</span> <span class="st">"Temperature"</span>, <span class="st">"Month::5"</span><span class="op">=</span><span class="st">"May"</span>, <span class="st">"6"</span><span class="op">=</span><span class="st">"Jun"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, dict <span class="op">=</span> <span class="va">dict</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                 est1               est2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:                Ozone              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                        </span>
@@ -914,17 +914,17 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                         --            0.58296</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"><span class="co"># Note the difference of treatment between Jun and May</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Assume the following dictionary:</span></span>
-<span class="r-in"><span class="va">dict</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Month::5"</span><span class="op">=</span><span class="st">"May"</span>, <span class="st">"Month::6"</span><span class="op">=</span><span class="st">"Jun"</span>, <span class="st">"Month::7"</span><span class="op">=</span><span class="st">"Jul"</span>,</span>
-<span class="r-in">         <span class="st">"Month::8"</span><span class="op">=</span><span class="st">"Aug"</span>, <span class="st">"Month::9"</span><span class="op">=</span><span class="st">"Sep"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># We would like to keep only the Months, but now the names are all changed...</span></span>
-<span class="r-in"><span class="co"># How to do?</span></span>
-<span class="r-in"><span class="co"># We can use the special character '%' to make reference to the original names.</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, dict <span class="op">=</span> <span class="va">dict</span>, keep <span class="op">=</span> <span class="st">"%Month"</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="co"># Note the difference of treatment between Jun and May</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Assume the following dictionary:</span></span></span>
+<span class="r-in"><span><span class="va">dict</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Month::5"</span><span class="op">=</span><span class="st">"May"</span>, <span class="st">"Month::6"</span><span class="op">=</span><span class="st">"Jun"</span>, <span class="st">"Month::7"</span><span class="op">=</span><span class="st">"Jul"</span>,</span></span>
+<span class="r-in"><span>         <span class="st">"Month::8"</span><span class="op">=</span><span class="st">"Aug"</span>, <span class="st">"Month::9"</span><span class="op">=</span><span class="st">"Sep"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># We would like to keep only the Months, but now the names are all changed...</span></span></span>
+<span class="r-in"><span><span class="co"># How to do?</span></span></span>
+<span class="r-in"><span><span class="co"># We can use the special character '%' to make reference to the original names.</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, dict <span class="op">=</span> <span class="va">dict</span>, keep <span class="op">=</span> <span class="st">"%Month"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                              est1               est2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:             Ozone              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                     </span>
@@ -946,12 +946,12 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                      --            0.58296</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># signif.code</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, signif.code <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">" A"</span><span class="op">=</span><span class="fl">0.01</span>, <span class="st">" B"</span><span class="op">=</span><span class="fl">0.05</span>, <span class="st">" C"</span><span class="op">=</span><span class="fl">0.1</span>, <span class="st">" D"</span><span class="op">=</span><span class="fl">0.15</span>, <span class="st">" F"</span><span class="op">=</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># signif.code</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, signif.code <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">" A"</span><span class="op">=</span><span class="fl">0.01</span>, <span class="st">" B"</span><span class="op">=</span><span class="fl">0.05</span>, <span class="st">" C"</span><span class="op">=</span><span class="fl">0.1</span>, <span class="st">" D"</span><span class="op">=</span><span class="fl">0.15</span>, <span class="st">" F"</span><span class="op">=</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                              est1              est2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:             Ozone             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                    </span>
@@ -975,18 +975,18 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                      --           0.58296</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 ' A' 0.01 ' B' 0.05 ' C' 0.1 ' D' 0.15 ' F' 1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Using the argument style to customize Latex exports</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># If you don't like the default layout of the table, no worries!</span></span>
-<span class="r-in"><span class="co"># You can modify many parameters with the argument style</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># To drop the headers before each section, use:</span></span>
-<span class="r-in"><span class="co"># Note that a space adds an extra line</span></span>
-<span class="r-in"><span class="va">style_noHeaders</span> <span class="op">=</span> <span class="fu"><a href="style.tex.html">style.tex</a></span><span class="op">(</span>var.title <span class="op">=</span> <span class="st">""</span>, fixef.title <span class="op">=</span> <span class="st">""</span>, stats.title <span class="op">=</span> <span class="st">" "</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, dict <span class="op">=</span> <span class="va">dict</span>, tex <span class="op">=</span> <span class="cn">TRUE</span>, style.tex <span class="op">=</span> <span class="va">style_noHeaders</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Using the argument style to customize Latex exports</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># If you don't like the default layout of the table, no worries!</span></span></span>
+<span class="r-in"><span><span class="co"># You can modify many parameters with the argument style</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># To drop the headers before each section, use:</span></span></span>
+<span class="r-in"><span><span class="co"># Note that a space adds an extra line</span></span></span>
+<span class="r-in"><span><span class="va">style_noHeaders</span> <span class="op">=</span> <span class="fu"><a href="style.tex.html">style.tex</a></span><span class="op">(</span>var.title <span class="op">=</span> <span class="st">""</span>, fixef.title <span class="op">=</span> <span class="st">""</span>, stats.title <span class="op">=</span> <span class="st">" "</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, dict <span class="op">=</span> <span class="va">dict</span>, tex <span class="op">=</span> <span class="cn">TRUE</span>, style.tex <span class="op">=</span> <span class="va">style_noHeaders</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> \begingroup</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> \centering</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> \begin{tabular}{lcc}</span>
@@ -1024,11 +1024,11 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span>    \multicolumn{3}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> \end{tabular}</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> \par\endgroup</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># To change the lines of the table + dropping the table footer</span></span>
-<span class="r-in"><span class="va">style_lines</span> <span class="op">=</span> <span class="fu"><a href="style.tex.html">style.tex</a></span><span class="op">(</span>line.top <span class="op">=</span> <span class="st">"\\toprule"</span>, line.bottom <span class="op">=</span> <span class="st">"\\bottomrule"</span>,</span>
-<span class="r-in">                    tablefoot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, dict <span class="op">=</span> <span class="va">dict</span>, tex <span class="op">=</span> <span class="cn">TRUE</span>, style.tex <span class="op">=</span> <span class="va">style_lines</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># To change the lines of the table + dropping the table footer</span></span></span>
+<span class="r-in"><span><span class="va">style_lines</span> <span class="op">=</span> <span class="fu"><a href="style.tex.html">style.tex</a></span><span class="op">(</span>line.top <span class="op">=</span> <span class="st">"\\toprule"</span>, line.bottom <span class="op">=</span> <span class="st">"\\bottomrule"</span>,</span></span>
+<span class="r-in"><span>                    tablefoot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, dict <span class="op">=</span> <span class="va">dict</span>, tex <span class="op">=</span> <span class="cn">TRUE</span>, style.tex <span class="op">=</span> <span class="va">style_lines</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> \begingroup</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> \centering</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> \begin{tabular}{lcc}</span>
@@ -1071,9 +1071,9 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span>    \bottomrule</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> \end{tabular}</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> \par\endgroup</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Or you have the predefined type "aer"</span></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, dict <span class="op">=</span> <span class="va">dict</span>, tex <span class="op">=</span> <span class="cn">TRUE</span>, style.tex <span class="op">=</span> <span class="fu"><a href="style.tex.html">style.tex</a></span><span class="op">(</span><span class="st">"aer"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Or you have the predefined type "aer"</span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, dict <span class="op">=</span> <span class="va">dict</span>, tex <span class="op">=</span> <span class="cn">TRUE</span>, style.tex <span class="op">=</span> <span class="fu"><a href="style.tex.html">style.tex</a></span><span class="op">(</span><span class="st">"aer"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> \begingroup</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> \centering</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> \begin{tabular}{lcc}</span>
@@ -1113,23 +1113,23 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span>    \bottomrule</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> \end{tabular}</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> \par\endgroup</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Group and extralines</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Sometimes it's useful to group control variables into a single line</span></span>
-<span class="r-in"><span class="co"># You can achieve that with the group argument</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="setFixest_fml.html">setFixest_fml</a></span><span class="op">(</span>..ctrl <span class="op">=</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/stats/poly.html" class="external-link">poly</a></span><span class="op">(</span><span class="va">Wind</span>, <span class="fl">2</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/poly.html" class="external-link">poly</a></span><span class="op">(</span><span class="va">Temp</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">est_c0</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span>, data <span class="op">=</span> <span class="va">airquality</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Group and extralines</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Sometimes it's useful to group control variables into a single line</span></span></span>
+<span class="r-in"><span><span class="co"># You can achieve that with the group argument</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="setFixest_fml.html">setFixest_fml</a></span><span class="op">(</span>..ctrl <span class="op">=</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/stats/poly.html" class="external-link">poly</a></span><span class="op">(</span><span class="va">Wind</span>, <span class="fl">2</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/poly.html" class="external-link">poly</a></span><span class="op">(</span><span class="va">Temp</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">est_c0</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span>, data <span class="op">=</span> <span class="va">airquality</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span>
-<span class="r-in"><span class="va">est_c1</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="va">..ctrl</span>, data <span class="op">=</span> <span class="va">airquality</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="va">est_c1</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="va">..ctrl</span>, data <span class="op">=</span> <span class="va">airquality</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span>
-<span class="r-in"><span class="va">est_c2</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="va">Solar.R</span><span class="op">^</span><span class="fl">2</span> <span class="op">+</span> <span class="va">..ctrl</span>, data <span class="op">=</span> <span class="va">airquality</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="va">est_c2</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="va">Solar.R</span><span class="op">^</span><span class="fl">2</span> <span class="op">+</span> <span class="va">..ctrl</span>, data <span class="op">=</span> <span class="va">airquality</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est_c0</span>, <span class="va">est_c1</span>, <span class="va">est_c2</span>, group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Controls <span class="op">=</span> <span class="st">"poly"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est_c0</span>, <span class="va">est_c1</span>, <span class="va">est_c2</span>, group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Controls <span class="op">=</span> <span class="st">"poly"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                             est_c0            est_c1           est_c2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone             Ozone            Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                      </span>
@@ -1144,25 +1144,25 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Adj. R2                    0.11328           0.69861          0.69758</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># 'group' here does the same as drop = "poly", but adds an extra line</span></span>
-<span class="r-in"><span class="co"># with TRUE/FALSE where the variables were found</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># 'extralines' adds an extra line, where you can add the value for each model</span></span>
-<span class="r-in"><span class="va">est_all</span>  <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="va">Temp</span> <span class="op">+</span> <span class="va">Wind</span>, data <span class="op">=</span> <span class="va">airquality</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># 'group' here does the same as drop = "poly", but adds an extra line</span></span></span>
+<span class="r-in"><span><span class="co"># with TRUE/FALSE where the variables were found</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># 'extralines' adds an extra line, where you can add the value for each model</span></span></span>
+<span class="r-in"><span><span class="va">est_all</span>  <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="va">Temp</span> <span class="op">+</span> <span class="va">Wind</span>, data <span class="op">=</span> <span class="va">airquality</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span>
-<span class="r-in"><span class="va">est_sub1</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="va">Temp</span> <span class="op">+</span> <span class="va">Wind</span>, data <span class="op">=</span> <span class="va">airquality</span>,</span>
-<span class="r-in">                 subset <span class="op">=</span> <span class="op">~</span> <span class="va">Month</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fl">5</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="va">est_sub1</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="va">Temp</span> <span class="op">+</span> <span class="va">Wind</span>, data <span class="op">=</span> <span class="va">airquality</span>,</span></span>
+<span class="r-in"><span>                 subset <span class="op">=</span> <span class="op">~</span> <span class="va">Month</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fl">5</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 28 observations removed because of NA values (LHS: 26, RHS: 4).</span>
-<span class="r-in"><span class="va">est_sub2</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="va">Temp</span> <span class="op">+</span> <span class="va">Wind</span>, data <span class="op">=</span> <span class="va">airquality</span>,</span>
-<span class="r-in">                 subset <span class="op">=</span> <span class="op">~</span> <span class="va">Month</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fl">7</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="va">est_sub2</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="va">Temp</span> <span class="op">+</span> <span class="va">Wind</span>, data <span class="op">=</span> <span class="va">airquality</span>,</span></span>
+<span class="r-in"><span>                 subset <span class="op">=</span> <span class="op">~</span> <span class="va">Month</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fl">7</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 13 observations removed because of NA values (LHS: 10, RHS: 3).</span>
-<span class="r-in"><span class="va">est_sub3</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="va">Temp</span> <span class="op">+</span> <span class="va">Wind</span>, data <span class="op">=</span> <span class="va">airquality</span>,</span>
-<span class="r-in">                 subset <span class="op">=</span> <span class="op">~</span> <span class="va">Month</span> <span class="op">==</span> <span class="fl">9</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="va">est_sub3</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="va">Temp</span> <span class="op">+</span> <span class="va">Wind</span>, data <span class="op">=</span> <span class="va">airquality</span>,</span></span>
+<span class="r-in"><span>                 subset <span class="op">=</span> <span class="op">~</span> <span class="va">Month</span> <span class="op">==</span> <span class="fl">9</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 1 observation removed because of NA values (LHS: 1).</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est_all</span>, <span class="va">est_sub1</span>, <span class="va">est_sub2</span>, <span class="va">est_sub3</span>,</span>
-<span class="r-in">       extralines <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"Sub-sample"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"All"</span>, <span class="st">"May-June"</span>, <span class="st">"Jul.-Aug."</span>, <span class="st">"Sept."</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est_all</span>, <span class="va">est_sub1</span>, <span class="va">est_sub2</span>, <span class="va">est_sub3</span>,</span></span>
+<span class="r-in"><span>       extralines <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"Sub-sample"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"All"</span>, <span class="st">"May-June"</span>, <span class="st">"Jul.-Aug."</span>, <span class="st">"Sept."</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                            est_all         est_sub1          est_sub2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone            Ozone             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                      </span>
@@ -1192,22 +1192,22 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Adj. R2                   0.68330</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># You can monitor the placement of the new lines with two special characters</span></span>
-<span class="r-in"><span class="co"># at the beginning of the row name.</span></span>
-<span class="r-in"><span class="co"># 1) "^", "-" or "_" which mean the coefficients, the fixed-effects or the</span></span>
-<span class="r-in"><span class="co"># statistics section.</span></span>
-<span class="r-in"><span class="co"># 2) "^" or "_" which mean first or last line of the section</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Ex: starting with "_^" will place the line at the top of the stat. section</span></span>
-<span class="r-in"><span class="co">#     starting with "-_" will place the line at the bottom of the FEs section</span></span>
-<span class="r-in"><span class="co">#     etc.</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># You can use a single character which will represent the section,</span></span>
-<span class="r-in"><span class="co"># the line would then appear at the bottom of the section.</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Examples</span></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est_c0</span>, <span class="va">est_c1</span>, <span class="va">est_c2</span>, group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"_Controls"</span> <span class="op">=</span> <span class="st">"poly"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># You can monitor the placement of the new lines with two special characters</span></span></span>
+<span class="r-in"><span><span class="co"># at the beginning of the row name.</span></span></span>
+<span class="r-in"><span><span class="co"># 1) "^", "-" or "_" which mean the coefficients, the fixed-effects or the</span></span></span>
+<span class="r-in"><span><span class="co"># statistics section.</span></span></span>
+<span class="r-in"><span><span class="co"># 2) "^" or "_" which mean first or last line of the section</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Ex: starting with "_^" will place the line at the top of the stat. section</span></span></span>
+<span class="r-in"><span><span class="co">#     starting with "-_" will place the line at the bottom of the FEs section</span></span></span>
+<span class="r-in"><span><span class="co">#     etc.</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># You can use a single character which will represent the section,</span></span></span>
+<span class="r-in"><span><span class="co"># the line would then appear at the bottom of the section.</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Examples</span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est_c0</span>, <span class="va">est_c1</span>, <span class="va">est_c2</span>, group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"_Controls"</span> <span class="op">=</span> <span class="st">"poly"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                             est_c0            est_c1           est_c2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone             Ozone            Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                      </span>
@@ -1222,8 +1222,8 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Controls                        No               Yes              Yes</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est_all</span>, <span class="va">est_sub1</span>, <span class="va">est_sub2</span>, <span class="va">est_sub3</span>,</span>
-<span class="r-in">       extralines <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"^^Sub-sample"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"All"</span>, <span class="st">"May-June"</span>, <span class="st">"Jul.-Aug."</span>, <span class="st">"Sept."</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est_all</span>, <span class="va">est_sub1</span>, <span class="va">est_sub2</span>, <span class="va">est_sub3</span>,</span></span>
+<span class="r-in"><span>       extralines <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"^^Sub-sample"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"All"</span>, <span class="st">"May-June"</span>, <span class="st">"Jul.-Aug."</span>, <span class="st">"Sept."</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                            est_all         est_sub1          est_sub2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone            Ozone             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                      </span>
@@ -1253,21 +1253,21 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Adj. R2                   0.68330</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># headers</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># You can add header lines with 'headers'</span></span>
-<span class="r-in"><span class="co"># These lines will appear at the top of the table</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># first, 3 estimations</span></span>
-<span class="r-in"><span class="va">est_header</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">Ozone</span>, <span class="va">Solar.R</span>, <span class="va">Wind</span><span class="op">)</span> <span class="op">~</span>  <span class="fu"><a href="https://rdrr.io/r/stats/poly.html" class="external-link">poly</a></span><span class="op">(</span><span class="va">Temp</span>, <span class="fl">2</span><span class="op">)</span>, <span class="va">airquality</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># header =&gt; vector: adds a line w/t title</span></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est_header</span>, headers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"B"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># headers</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># You can add header lines with 'headers'</span></span></span>
+<span class="r-in"><span><span class="co"># These lines will appear at the top of the table</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># first, 3 estimations</span></span></span>
+<span class="r-in"><span><span class="va">est_header</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">Ozone</span>, <span class="va">Solar.R</span>, <span class="va">Wind</span><span class="op">)</span> <span class="op">~</span>  <span class="fu"><a href="https://rdrr.io/r/stats/poly.html" class="external-link">poly</a></span><span class="op">(</span><span class="va">Temp</span>, <span class="fl">2</span><span class="op">)</span>, <span class="va">airquality</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># header =&gt; vector: adds a line w/t title</span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est_header</span>, headers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"B"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                     est_header.1     est_header.2      est_header.3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                A                A                 B</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Ozone          Solar.R              Wind</span>
@@ -1282,10 +1282,10 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Adj. R2                  0.53615          0.06400           0.19943</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># header =&gt; list: identical way to do the previous header</span></span>
-<span class="r-in"><span class="co"># The form is: list(item1 = #item1, item2 = #item2,  etc)</span></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est_header</span>, headers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"A"</span> <span class="op">=</span> <span class="fl">2</span>, <span class="st">"B"</span> <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># header =&gt; list: identical way to do the previous header</span></span></span>
+<span class="r-in"><span><span class="co"># The form is: list(item1 = #item1, item2 = #item2,  etc)</span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est_header</span>, headers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"A"</span> <span class="op">=</span> <span class="fl">2</span>, <span class="st">"B"</span> <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                     est_header.1     est_header.2      est_header.3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                A                A                 B</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Ozone          Solar.R              Wind</span>
@@ -1300,10 +1300,10 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Adj. R2                  0.53615          0.06400           0.19943</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Adding a title +</span></span>
-<span class="r-in"><span class="co"># when an element is to be repeated only once, you can avoid the "= 1":</span></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est_header</span>, headers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"A"</span> <span class="op">=</span> <span class="fl">2</span>, <span class="st">"B"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Adding a title +</span></span></span>
+<span class="r-in"><span><span class="co"># when an element is to be repeated only once, you can avoid the "= 1":</span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est_header</span>, headers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"A"</span> <span class="op">=</span> <span class="fl">2</span>, <span class="st">"B"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                     est_header.1     est_header.2      est_header.3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Group                          A                A                 B</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Ozone          Solar.R              Wind</span>
@@ -1318,16 +1318,16 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Adj. R2                  0.53615          0.06400           0.19943</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># To change the placement, add as first character:</span></span>
-<span class="r-in"><span class="co"># - "^" =&gt; top</span></span>
-<span class="r-in"><span class="co"># - "-" =&gt; mid (default)</span></span>
-<span class="r-in"><span class="co"># - "_" =&gt; bottom</span></span>
-<span class="r-in"><span class="co"># Note that "mid" and "top" are only distinguished when tex = TRUE</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Placing the new header line at the bottom</span></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est_header</span>, headers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"_Group"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"B"</span><span class="op">)</span>,</span>
-<span class="r-in">                                  <span class="st">"^Currency"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"US $"</span> <span class="op">=</span> <span class="fl">2</span>, <span class="st">"CA $"</span> <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># To change the placement, add as first character:</span></span></span>
+<span class="r-in"><span><span class="co"># - "^" =&gt; top</span></span></span>
+<span class="r-in"><span><span class="co"># - "-" =&gt; mid (default)</span></span></span>
+<span class="r-in"><span><span class="co"># - "_" =&gt; bottom</span></span></span>
+<span class="r-in"><span><span class="co"># Note that "mid" and "top" are only distinguished when tex = TRUE</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Placing the new header line at the bottom</span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est_header</span>, headers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"_Group"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"B"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                                  <span class="st">"^Currency"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"US $"</span> <span class="op">=</span> <span class="fl">2</span>, <span class="st">"CA $"</span> <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                     est_header.1     est_header.2      est_header.3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Currency                    US $             US $              CA $</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Ozone          Solar.R              Wind</span>
@@ -1343,12 +1343,12 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Adj. R2                  0.53615          0.06400           0.19943</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># In Latex, you can add "grouped underlines" (cmidrule from the booktabs package)</span></span>
-<span class="r-in"><span class="co"># by adding ":_:" in the title:</span></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est_header</span>, tex <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span class="r-in">       headers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"^:_:Group"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"B"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># In Latex, you can add "grouped underlines" (cmidrule from the booktabs package)</span></span></span>
+<span class="r-in"><span><span class="co"># by adding ":_:" in the title:</span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est_header</span>, tex <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>       headers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"^:_:Group"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"B"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> \begingroup</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> \centering</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> \begin{tabular}{lccc}</span>
@@ -1374,14 +1374,14 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span>    \multicolumn{4}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> \end{tabular}</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> \par\endgroup</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># extralines and headers: .() for list()</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># In the two arguments extralines and headers, .() can be used for list()</span></span>
-<span class="r-in"><span class="co"># For example:</span></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est_header</span>, headers <span class="op">=</span> <span class="fu">.</span><span class="op">(</span><span class="st">"^Currency"</span> <span class="op">=</span> <span class="fu">.</span><span class="op">(</span><span class="st">"US $"</span> <span class="op">=</span> <span class="fl">2</span>, <span class="st">"CA $"</span> <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># extralines and headers: .() for list()</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># In the two arguments extralines and headers, .() can be used for list()</span></span></span>
+<span class="r-in"><span><span class="co"># For example:</span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est_header</span>, headers <span class="op">=</span> <span class="fu">.</span><span class="op">(</span><span class="st">"^Currency"</span> <span class="op">=</span> <span class="fu">.</span><span class="op">(</span><span class="st">"US $"</span> <span class="op">=</span> <span class="fl">2</span>, <span class="st">"CA $"</span> <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                     est_header.1     est_header.2      est_header.3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Currency                    US $             US $              CA $</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Ozone          Solar.R              Wind</span>
@@ -1396,25 +1396,25 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Adj. R2                  0.53615          0.06400           0.19943</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># fixef.group</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># You can group the fixed-effects line with fixef.group</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">est_0fe</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="va">Temp</span> <span class="op">+</span> <span class="va">Wind</span>, <span class="va">airquality</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># fixef.group</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># You can group the fixed-effects line with fixef.group</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">est_0fe</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="va">Temp</span> <span class="op">+</span> <span class="va">Wind</span>, <span class="va">airquality</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span>
-<span class="r-in"><span class="va">est_1fe</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="va">Temp</span> <span class="op">+</span> <span class="va">Wind</span> <span class="op">|</span> <span class="va">Month</span>, <span class="va">airquality</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="va">est_1fe</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="va">Temp</span> <span class="op">+</span> <span class="va">Wind</span> <span class="op">|</span> <span class="va">Month</span>, <span class="va">airquality</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span>
-<span class="r-in"><span class="va">est_2fe</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="va">Temp</span> <span class="op">+</span> <span class="va">Wind</span> <span class="op">|</span> <span class="va">Month</span> <span class="op">+</span> <span class="va">Day</span>, <span class="va">airquality</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="va">est_2fe</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="va">Temp</span> <span class="op">+</span> <span class="va">Wind</span> <span class="op">|</span> <span class="va">Month</span> <span class="op">+</span> <span class="va">Day</span>, <span class="va">airquality</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># A) automatic way =&gt; simply use fixef.group = TRUE</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est_0fe</span>, <span class="va">est_2fe</span>, fixef.group <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># A) automatic way =&gt; simply use fixef.group = TRUE</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est_0fe</span>, <span class="va">est_2fe</span>, fixef.group <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                            est_0fe          est_2fe</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone            Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                    </span>
@@ -1431,11 +1431,11 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                       --          0.61471</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Note that when grouping would lead to inconsistencies across models,</span></span>
-<span class="r-in"><span class="co"># it is avoided</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est_0fe</span>, <span class="va">est_1fe</span>, <span class="va">est_2fe</span>, fixef.group <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Note that when grouping would lead to inconsistencies across models,</span></span></span>
+<span class="r-in"><span><span class="co"># it is avoided</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est_0fe</span>, <span class="va">est_1fe</span>, <span class="va">est_2fe</span>, fixef.group <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                            est_0fe           est_1fe          est_2fe</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone             Ozone            Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                      </span>
@@ -1453,10 +1453,10 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                       --           0.53154          0.61471</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># B) customized way =&gt; use a list</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est_0fe</span>, <span class="va">est_2fe</span>, fixef.group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"Dates"</span> <span class="op">=</span> <span class="st">"Month|Day"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># B) customized way =&gt; use a list</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est_0fe</span>, <span class="va">est_2fe</span>, fixef.group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"Dates"</span> <span class="op">=</span> <span class="st">"Month|Day"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                            est_0fe          est_2fe</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone            Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                    </span>
@@ -1473,11 +1473,11 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                       --          0.61471</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Note that when a user grouping would lead to inconsistencies,</span></span>
-<span class="r-in"><span class="co"># the term partial replaces yes/no and the fixed-effects are not removed.</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est_0fe</span>, <span class="va">est_1fe</span>, <span class="va">est_2fe</span>, fixef.group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"Dates"</span> <span class="op">=</span> <span class="st">"Month|Day"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Note that when a user grouping would lead to inconsistencies,</span></span></span>
+<span class="r-in"><span><span class="co"># the term partial replaces yes/no and the fixed-effects are not removed.</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est_0fe</span>, <span class="va">est_1fe</span>, <span class="va">est_2fe</span>, fixef.group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"Dates"</span> <span class="op">=</span> <span class="st">"Month|Day"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>In etable(est_0fe, est_1fe, est_2fe, fixef.group = l...:</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span>  In 'fixef.group', the group leads to an inconsistent row (defined by</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> "Month|Day").</span>
@@ -1501,13 +1501,13 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                       --           0.53154          0.61471</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Using customized placement =&gt; as with 'group' and 'extralines',</span></span>
-<span class="r-in"><span class="co"># the user can control the placement of the new line.</span></span>
-<span class="r-in"><span class="co"># See the previous 'group' examples and the dedicated section in the help.</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># On top of the coefficients:</span></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est_0fe</span>, <span class="va">est_2fe</span>, fixef.group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"^^Dates"</span> <span class="op">=</span> <span class="st">"Month|Day"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Using customized placement =&gt; as with 'group' and 'extralines',</span></span></span>
+<span class="r-in"><span><span class="co"># the user can control the placement of the new line.</span></span></span>
+<span class="r-in"><span><span class="co"># See the previous 'group' examples and the dedicated section in the help.</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># On top of the coefficients:</span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est_0fe</span>, <span class="va">est_2fe</span>, fixef.group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"^^Dates"</span> <span class="op">=</span> <span class="st">"Month|Day"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                            est_0fe          est_2fe</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone            Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                    </span>
@@ -1523,9 +1523,9 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                       --          0.61471</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Last line of the statistics</span></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est_0fe</span>, <span class="va">est_2fe</span>, fixef.group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"_Dates"</span> <span class="op">=</span> <span class="st">"Month|Day"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Last line of the statistics</span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est_0fe</span>, <span class="va">est_2fe</span>, fixef.group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"_Dates"</span> <span class="op">=</span> <span class="st">"Month|Day"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                            est_0fe          est_2fe</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone            Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                    </span>
@@ -1541,18 +1541,18 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dates                           No              Yes</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Using custom functions to compute the standard errors</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># You can use external functions to compute the VCOVs</span></span>
-<span class="r-in"><span class="co"># by feeding functions in the 'vcov' argument.</span></span>
-<span class="r-in"><span class="co"># Let's use some covariances from the sandwich package</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est_c0</span>, <span class="va">est_c1</span>, <span class="va">est_c2</span>, vcov <span class="op">=</span> <span class="fu">sandwich</span><span class="fu">::</span><span class="va"><a href="https://sandwich.R-Forge.R-project.org/reference/vcovHC.html" class="external-link">vcovHC</a></span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Using custom functions to compute the standard errors</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># You can use external functions to compute the VCOVs</span></span></span>
+<span class="r-in"><span><span class="co"># by feeding functions in the 'vcov' argument.</span></span></span>
+<span class="r-in"><span><span class="co"># Let's use some covariances from the sandwich package</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est_c0</span>, <span class="va">est_c1</span>, <span class="va">est_c2</span>, vcov <span class="op">=</span> <span class="fu">sandwich</span><span class="fu">::</span><span class="va"><a href="https://sandwich.R-Forge.R-project.org/reference/vcovHC.html" class="external-link">vcovHC</a></span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                             est_c0             est_c1            est_c2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone              Ozone             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                        </span>
@@ -1570,9 +1570,9 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Adj. R2                    0.11328            0.69861           0.69758</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># To add extra arguments to vcovHC, you need to write your wrapper:</span></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est_c0</span>, <span class="va">est_c1</span>, <span class="va">est_c2</span>, vcov <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu">sandwich</span><span class="fu">::</span><span class="fu"><a href="https://sandwich.R-Forge.R-project.org/reference/vcovHC.html" class="external-link">vcovHC</a></span><span class="op">(</span><span class="va">x</span>, type <span class="op">=</span> <span class="st">"HC0"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># To add extra arguments to vcovHC, you need to write your wrapper:</span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est_c0</span>, <span class="va">est_c1</span>, <span class="va">est_c2</span>, vcov <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu">sandwich</span><span class="fu">::</span><span class="fu"><a href="https://sandwich.R-Forge.R-project.org/reference/vcovHC.html" class="external-link">vcovHC</a></span><span class="op">(</span><span class="va">x</span>, type <span class="op">=</span> <span class="st">"HC0"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                             est_c0             est_c1            est_c2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone              Ozone             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                        </span>
@@ -1590,15 +1590,15 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Adj. R2                    0.11328            0.69861           0.69758</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Customize which fit statistic to display</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># You can change the fit statistics with the argument fitstat</span></span>
-<span class="r-in"><span class="co"># and you can rename them with the dictionary</span></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, fitstat <span class="op">=</span> <span class="op">~</span> <span class="va">r2</span> <span class="op">+</span> <span class="va">n</span> <span class="op">+</span> <span class="va">G</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Customize which fit statistic to display</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># You can change the fit statistics with the argument fitstat</span></span></span>
+<span class="r-in"><span><span class="co"># and you can rename them with the dictionary</span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, fitstat <span class="op">=</span> <span class="op">~</span> <span class="va">r2</span> <span class="op">+</span> <span class="va">n</span> <span class="op">+</span> <span class="va">G</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                               est1               est2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                      </span>
@@ -1622,9 +1622,9 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> G                              105                  5</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># If you use a formula, '.' means the default:</span></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, fitstat <span class="op">=</span> <span class="op">~</span> <span class="va">ll</span> <span class="op">+</span> <span class="va">.</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># If you use a formula, '.' means the default:</span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, fitstat <span class="op">=</span> <span class="op">~</span> <span class="va">ll</span> <span class="op">+</span> <span class="va">.</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                               est1               est2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                      </span>
@@ -1649,24 +1649,24 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                       --            0.58296</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Computing a different SE for each model</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="va">Wind</span> <span class="op">+</span> <span class="va">Temp</span>, data <span class="op">=</span> <span class="va">airquality</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Computing a different SE for each model</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="va">Wind</span> <span class="op">+</span> <span class="va">Temp</span>, data <span class="op">=</span> <span class="va">airquality</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Method 1: use summary</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">s1</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span>, <span class="st">"iid"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">s2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span>, cluster <span class="op">=</span> <span class="op">~</span> <span class="va">Month</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">s3</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span>, cluster <span class="op">=</span> <span class="op">~</span> <span class="va">Day</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">s4</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span>, cluster <span class="op">=</span> <span class="op">~</span> <span class="va">Day</span> <span class="op">+</span> <span class="va">Month</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">s1</span>, <span class="va">s2</span>, <span class="va">s3</span>, <span class="va">s4</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Method 1: use summary</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">s1</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span>, <span class="st">"iid"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">s2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span>, cluster <span class="op">=</span> <span class="op">~</span> <span class="va">Month</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">s3</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span>, cluster <span class="op">=</span> <span class="op">~</span> <span class="va">Day</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">s4</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span>, cluster <span class="op">=</span> <span class="op">~</span> <span class="va">Day</span> <span class="op">+</span> <span class="va">Month</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">s1</span>, <span class="va">s2</span>, <span class="va">s3</span>, <span class="va">s4</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                            model 1           model 2            model 3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone             Ozone              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                        </span>
@@ -1694,13 +1694,13 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Adj. R2                   0.59484</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Method 2: using a list in the argument 'vcov'</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">est_bis</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="va">Wind</span> <span class="op">+</span> <span class="va">Temp</span> <span class="op">|</span> <span class="va">Month</span>, data <span class="op">=</span> <span class="va">airquality</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Method 2: using a list in the argument 'vcov'</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">est_bis</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="va">Wind</span> <span class="op">+</span> <span class="va">Temp</span> <span class="op">|</span> <span class="va">Month</span>, data <span class="op">=</span> <span class="va">airquality</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est</span>, <span class="va">est_bis</span>, vcov <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"hetero"</span>, <span class="op">~</span> <span class="va">Month</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est</span>, <span class="va">est_bis</span>, vcov <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"hetero"</span>, <span class="op">~</span> <span class="va">Month</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                est           est_bis</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                     </span>
@@ -1717,10 +1717,10 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                       --           0.53154</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># When you have only one model, this model is replicated</span></span>
-<span class="r-in"><span class="co"># along the elements of the vcov list.</span></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est</span>, vcov <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"hetero"</span>, <span class="op">~</span> <span class="va">Month</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># When you have only one model, this model is replicated</span></span></span>
+<span class="r-in"><span><span class="co"># along the elements of the vcov list.</span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est</span>, vcov <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"hetero"</span>, <span class="op">~</span> <span class="va">Month</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                est             est.1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                     </span>
@@ -1735,18 +1735,18 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Adj. R2                    0.59484           0.59484</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Method 3: Using "each" or "times" in vcov</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># If the first element of the list in 'vcov' is "each" or "times",</span></span>
-<span class="r-in"><span class="co"># then all models will be replicated and all the VCOVs will be</span></span>
-<span class="r-in"><span class="co"># applied to each model. The order in which they are replicated</span></span>
-<span class="r-in"><span class="co"># are governed by the each/times keywords.</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># each</span></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est</span>, <span class="va">est_bis</span>, vcov <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"each"</span>, <span class="st">"iid"</span>, <span class="op">~</span> <span class="va">Month</span>, <span class="op">~</span> <span class="va">Day</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Method 3: Using "each" or "times" in vcov</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># If the first element of the list in 'vcov' is "each" or "times",</span></span></span>
+<span class="r-in"><span><span class="co"># then all models will be replicated and all the VCOVs will be</span></span></span>
+<span class="r-in"><span><span class="co"># applied to each model. The order in which they are replicated</span></span></span>
+<span class="r-in"><span><span class="co"># are governed by the each/times keywords.</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># each</span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est</span>, <span class="va">est_bis</span>, vcov <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"each"</span>, <span class="st">"iid"</span>, <span class="op">~</span> <span class="va">Month</span>, <span class="op">~</span> <span class="va">Day</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                est             est.1              est.2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone             Ozone              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                        </span>
@@ -1778,9 +1778,9 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                  0.53154           0.53154            0.53154</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># times</span></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est</span>, <span class="va">est_bis</span>, vcov <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"times"</span>, <span class="st">"iid"</span>, <span class="op">~</span> <span class="va">Month</span>, <span class="op">~</span> <span class="va">Day</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># times</span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est</span>, <span class="va">est_bis</span>, vcov <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"times"</span>, <span class="st">"iid"</span>, <span class="op">~</span> <span class="va">Month</span>, <span class="op">~</span> <span class="va">Day</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                est            est_bis             est.1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:              Ozone              Ozone             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                        </span>
@@ -1812,22 +1812,22 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                 0.53154                 --            0.53154</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Notes and markup</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Notes can be also be set in a dictionary</span></span>
-<span class="r-in"><span class="co"># You can use markdown markup to put text into italic/bold</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">dict</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"note 1"</span> <span class="op">=</span> <span class="st">"*Notes:* This data is not really random."</span>,</span>
-<span class="r-in">         <span class="st">"source 1"</span> <span class="op">=</span> <span class="st">"**Source:** the internet?"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="fu"><a href="stepwise.html">csw</a></span><span class="op">(</span><span class="va">Solar.R</span>, <span class="va">Wind</span>, <span class="va">Temp</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">airquality</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Notes and markup</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Notes can be also be set in a dictionary</span></span></span>
+<span class="r-in"><span><span class="co"># You can use markdown markup to put text into italic/bold</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">dict</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"note 1"</span> <span class="op">=</span> <span class="st">"*Notes:* This data is not really random."</span>,</span></span>
+<span class="r-in"><span>         <span class="st">"source 1"</span> <span class="op">=</span> <span class="st">"**Source:** the internet?"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="fu"><a href="stepwise.html">csw</a></span><span class="op">(</span><span class="va">Solar.R</span>, <span class="va">Wind</span>, <span class="va">Temp</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">airquality</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       |-&gt; this msg only concerns the variables common to all estimations</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">etable</span><span class="op">(</span><span class="va">est</span>, dict <span class="op">=</span> <span class="va">dict</span>, tex <span class="op">=</span> <span class="cn">TRUE</span>, notes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"note 1"</span>, <span class="st">"source 1"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">etable</span><span class="op">(</span><span class="va">est</span>, dict <span class="op">=</span> <span class="va">dict</span>, tex <span class="op">=</span> <span class="cn">TRUE</span>, notes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"note 1"</span>, <span class="st">"source 1"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> \begingroup</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> \centering</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> \begin{tabular}{lccc}</span>
@@ -1858,9 +1858,9 @@ The options are a comma-separated list of items. By default the highlighting is 
 <span class="r-out co"><span class="r-pr">#&gt;</span> \textit{Notes:} This data is not really random.\\</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> \textbf{Source:} the internet?</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> \par\endgroup</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>

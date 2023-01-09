@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -77,20 +77,20 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for fixest_multi</span>
-<span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span>
-  <span class="va">object</span>,
-  type <span class="op">=</span> <span class="st">"short"</span>,
-  vcov <span class="op">=</span> <span class="cn">NULL</span>,
-  se <span class="op">=</span> <span class="cn">NULL</span>,
-  cluster <span class="op">=</span> <span class="cn">NULL</span>,
-  ssc <span class="op">=</span> <span class="cn">NULL</span>,
-  .vcov <span class="op">=</span> <span class="cn">NULL</span>,
-  stage <span class="op">=</span> <span class="fl">2</span>,
-  lean <span class="op">=</span> <span class="cn">FALSE</span>,
-  n <span class="op">=</span> <span class="fl">1000</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for fixest_multi</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  type <span class="op">=</span> <span class="st">"short"</span>,</span>
+<span>  vcov <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  se <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cluster <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ssc <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .vcov <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  stage <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  lean <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  n <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -152,16 +152,16 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="va">base</span> <span class="op">=</span> <span class="va">iris</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Multiple estimation</span></span>
-<span class="r-in"><span class="va">res</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu"><a href="stepwise.html">csw</a></span><span class="op">(</span><span class="va">x1</span>, <span class="va">x2</span>, <span class="va">x3</span><span class="op">)</span>, <span class="va">base</span>, split <span class="op">=</span> <span class="op">~</span><span class="va">species</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># By default, the type is "short"</span></span>
-<span class="r-in"><span class="co"># You can still use the arguments from summary.fixest</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span>, se <span class="op">=</span> <span class="st">"hetero"</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">base</span> <span class="op">=</span> <span class="va">iris</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Multiple estimation</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu"><a href="stepwise.html">csw</a></span><span class="op">(</span><span class="va">x1</span>, <span class="va">x2</span>, <span class="va">x3</span><span class="op">)</span>, <span class="va">base</span>, split <span class="op">=</span> <span class="op">~</span><span class="va">species</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># By default, the type is "short"</span></span></span>
+<span class="r-in"><span><span class="co"># You can still use the arguments from summary.fixest</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span>, se <span class="op">=</span> <span class="st">"hetero"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Heteroskedasticity-robust </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ### Sample: setosa</span>
@@ -223,8 +223,8 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> x1           0.330337   0.122494  2.696759 9.7515e-03 ** </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> x2           0.945536   0.080881 11.690520 2.2562e-15 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> x3          -0.169753   0.210310 -0.807154 4.2373e-01    </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"long"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"long"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ### Sample: setosa</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -348,8 +348,8 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 0.305014   Adj. R2: 0.749908</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"compact"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"compact"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   lhs     sample          rhs     (Intercept)               x1               x2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1   y setosa     x1           2.64*** (0.310) 0.690*** (0.090)                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2   y setosa     x1 + x2      2.30*** (0.385) 0.667*** (0.090)    0.283 (0.197)</span>
@@ -370,8 +370,8 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> 7               </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 8               </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 9 -0.170 (0.198)</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"se_compact"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"se_compact"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   lhs     sample          rhs (Intercept) (Intercept)__se        x1     x1__se</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1   y setosa     x1             2.6390012       0.3100143 0.6904897 0.08989888</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2   y setosa     x1 + x2        2.3037382       0.3852942 0.6674162 0.09035581</span>
@@ -392,8 +392,8 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> 7        NA         NA         NA        NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 8 0.9348189 0.08960197         NA        NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 9 0.9455356 0.09072204 -0.1697527 0.1980724</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"se_long"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"se_long"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    lhs     sample          rhs type (Intercept)         x1         x2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1    y setosa     x1           coef   2.6390012 0.69048972         NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2    y setosa     x1             se   0.3100143 0.08989888         NA</span>
@@ -432,8 +432,8 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> 16         NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 17 -0.1697527</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 18  0.1980724</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>

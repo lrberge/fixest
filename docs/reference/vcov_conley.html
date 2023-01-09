@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,39 +76,58 @@
     <p>Compute VCOVs robust to spatial correlation, a la Conley (1999).</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">vcov_conley</span><span class="op">(</span>
-  <span class="va">x</span>,
-  lat <span class="op">=</span> <span class="cn">NULL</span>,
-  lon <span class="op">=</span> <span class="cn">NULL</span>,
-  cutoff <span class="op">=</span> <span class="cn">NULL</span>,
-  pixel <span class="op">=</span> <span class="fl">0</span>,
-  distance <span class="op">=</span> <span class="st">"triangular"</span>,
-  ssc <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span>
-
-<span class="fu">conley</span><span class="op">(</span>cutoff <span class="op">=</span> <span class="cn">NULL</span>, pixel <span class="op">=</span> <span class="cn">NULL</span>, distance <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vcov_conley</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  lat <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  lon <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cutoff <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  pixel <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  distance <span class="op">=</span> <span class="st">"triangular"</span>,</span>
+<span>  ssc <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">conley</span><span class="op">(</span>cutoff <span class="op">=</span> <span class="cn">NULL</span>, pixel <span class="op">=</span> <span class="cn">NULL</span>, distance <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>A <code>fixest</code> object.</p></dd>
+
+
 <dt>lat</dt>
 <dd><p>A character scalar or a one sided formula giving the name of the variable representing the latitude. The latitude must lie in [-90, 90], [0, 180] or [-180, 0].</p></dd>
+
+
 <dt>lon</dt>
 <dd><p>A character scalar or a one sided formula giving the name of the variable representing the longitude. The longitude must be in [-180, 180], [0, 360] or [-360, 0].</p></dd>
+
+
 <dt>cutoff</dt>
 <dd><p>The distance cutoff, in km. You can express the cutoff in miles by writing the number in character form and adding "mi" as a suffix: cutoff = "100mi" would be 100 miles. If missing, a rule of thumb is used to deduce the cutoff.</p></dd>
+
+
 <dt>pixel</dt>
 <dd><p>A positive numeric scalar, default is 0. If a positive number, the coordinates of each observation are pooled into <code>pixel</code> x <code>pixel</code> km squares. This lowers the precision but can (depending on the cases) greatly improve computational speed at a low precision cost. Note that if the <code>cutoff</code> was expressed in miles, then <code>pixel</code> will also be in miles.</p></dd>
+
+
 <dt>distance</dt>
 <dd><p>How to compute the distance between points. It can be equal to "triangular" (default) or "spherical". The latter case corresponds to the great circle distance and is more precise than triangular but is a bit more intensive computationally.</p></dd>
+
+
 <dt>ssc</dt>
 <dd><p>An object returned by the function <code><a href="ssc.html">ssc</a></code>. It specifies how to perform the small sample correction.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>If the first argument is a <code>fixest</code> object, then a VCOV is returned (i.e. a symmetric matrix).
-If the first argument is not a <code>fixest</code> object, then a) implicitly the arguments are shifted to the left (i.e. <code>vcov_conley("lat", "long")</code> is equivalent to <code>vcov_conley(lat = "lat", lon = "long")</code>) and b) a VCOV-<em>request</em> is returned and NOT a VCOV. That VCOV-request can then be used in the argument <code>vcov</code> of various <code>fixest</code> functions (e.g. <code><a href="vcov.fixest.html">vcov.fixest</a></code> or even in the estimation calls).</p>
+    
+
+<p>If the first argument is a <code>fixest</code> object, then a VCOV is returned (i.e. a symmetric matrix).</p>
+
+
+<p>If the first argument is not a <code>fixest</code> object, then a) implicitly the arguments are shifted to the left (i.e. <code>vcov_conley("lat", "long")</code> is equivalent to <code>vcov_conley(lat = "lat", lon = "long")</code>) and b) a VCOV-<em>request</em> is returned and NOT a VCOV. That VCOV-request can then be used in the argument <code>vcov</code> of various <code>fixest</code> functions (e.g. <code><a href="vcov.fixest.html">vcov.fixest</a></code> or even in the estimation calls).</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -122,11 +143,11 @@ If the first argument is not a <code>fixest</code> object, then a) implicitly th
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">quakes</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># We use conley() in the vcov argument of the estimation</span></span>
-<span class="r-in"><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">depth</span> <span class="op">~</span> <span class="va">mag</span>, <span class="va">quakes</span>, <span class="fu">conley</span><span class="op">(</span><span class="fl">100</span><span class="op">)</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">quakes</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># We use conley() in the vcov argument of the estimation</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">depth</span> <span class="op">~</span> <span class="va">mag</span>, <span class="va">quakes</span>, <span class="fu">conley</span><span class="op">(</span><span class="fl">100</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: depth</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 1,000 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Conley (100km) </span>
@@ -135,17 +156,17 @@ If the first argument is not a <code>fixest</code> object, then a) implicitly th
 <span class="r-out co"><span class="r-pr">#&gt;</span> mag         -123.421    19.2323 -6.41737 2.1389e-10 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 209.5   Adj. R2: 0.052245</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Post estimation</span></span>
-<span class="r-in"><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">depth</span> <span class="op">~</span> <span class="va">mag</span>, <span class="va">quakes</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">vcov_conley</span><span class="op">(</span><span class="va">est</span>, cutoff <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 209.6   Adj. R2: 0.052245</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Post estimation</span></span></span>
+<span class="r-in"><span><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">depth</span> <span class="op">~</span> <span class="va">mag</span>, <span class="va">quakes</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">vcov_conley</span><span class="op">(</span><span class="va">est</span>, cutoff <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             (Intercept)        mag</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   11859.324 -1955.8155</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> mag           -1955.816   369.8824</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -160,8 +181,7 @@ If the first argument is not a <code>fixest</code> object, then a) implicitly th
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

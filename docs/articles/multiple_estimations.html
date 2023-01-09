@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -50,19 +50,22 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    </li>
+<li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul>
 </li>
@@ -94,7 +97,7 @@
                         <h4 data-toc-skip class="author">Laurent
 Berge</h4>
             
-            <h4 data-toc-skip class="date">2022-10-18</h4>
+            <h4 data-toc-skip class="date">2023-01-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/vignettes/multiple_estimations.Rmd" class="external-link"><code>vignettes/multiple_estimations.Rmd</code></a></small>
       <div class="hidden name"><code>multiple_estimations.Rmd</code></div>
@@ -113,118 +116,118 @@ inclusion of variables in the RHS or in the fixed-effects part of the
 formula. On the other hand, intuitive methods are introduced to
 manipulate the results from multiple estimations, making it easy to
 visualize or export any wanted set of results.</p>
-<div class="section level1">
-<h1 id="first-illustration">First illustration<a class="anchor" aria-label="anchor" href="#first-illustration"></a>
-</h1>
+<div class="section level2">
+<h2 id="first-illustration">First illustration<a class="anchor" aria-label="anchor" href="#first-illustration"></a>
+</h2>
 <p>What does a multiple estimation look like? Let’s give it a try:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">base</span> <span class="op">=</span> <span class="va">iris</span>
-<span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y1"</span>, <span class="st">"y2"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"species"</span><span class="op">)</span>
-
-<span class="va">res_multi</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">y1</span>, <span class="va">y2</span><span class="op">)</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu"><a href="../reference/stepwise.html">csw</a></span><span class="op">(</span><span class="va">x2</span>, <span class="va">x2</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">|</span> <span class="fu"><a href="../reference/stepwise.html">sw0</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span>, <span class="va">base</span>, fsplit <span class="op">=</span> <span class="op">~</span><span class="va">species</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">base</span> <span class="op">=</span> <span class="va">iris</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y1"</span>, <span class="st">"y2"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"species"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">res_multi</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">y1</span>, <span class="va">y2</span><span class="op">)</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu"><a href="../reference/stepwise.html">csw</a></span><span class="op">(</span><span class="va">x2</span>, <span class="va">x2</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">|</span> <span class="fu"><a href="../reference/stepwise.html">sw0</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span>, <span class="va">base</span>, fsplit <span class="op">=</span> <span class="op">~</span><span class="va">species</span><span class="op">)</span></span></code></pre></div>
 <p>With the previous line of code (90 characters long), we have just
 performed 32 estimations: eight different functional forms on four
 different samples.</p>
 <p>The previous code leads to the following results:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res_multi</span>, <span class="st">"compact"</span>, se <span class="op">=</span> <span class="st">"hetero"</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">##         sample   fixef lhs               rhs     (Intercept)                x1</span>
-<span class="co">## 1  Full sample 1        y1 x1 + x2           4.19*** (0.104)  0.542*** (0.076)</span>
-<span class="co">## 2  Full sample 1        y1 x1 + x2 + I(x2^2) 4.27*** (0.101)  0.719*** (0.082)</span>
-<span class="co">## 3  Full sample 1        y2 x1 + x2           3.59*** (0.103) -0.257*** (0.066)</span>
-<span class="co">## 4  Full sample 1        y2 x1 + x2 + I(x2^2) 3.68*** (0.097)    -0.030 (0.078)</span>
-<span class="co">## 5  Full sample species  y1 x1 + x2                            0.906*** (0.076)</span>
-<span class="co">## 6  Full sample species  y1 x1 + x2 + I(x2^2)                  0.900*** (0.077)</span>
-<span class="co">## 7  Full sample species  y2 x1 + x2                              0.155* (0.073)</span>
-<span class="co">## 8  Full sample species  y2 x1 + x2 + I(x2^2)                    0.148. (0.075)</span>
-<span class="co">## 9  setosa      1        y1 x1 + x2           4.25*** (0.474)     0.399 (0.325)</span>
-<span class="co">## 10 setosa      1        y1 x1 + x2 + I(x2^2) 4.00*** (0.504)     0.405 (0.325)</span>
-<span class="co">## 11 setosa      1        y2 x1 + x2           2.89*** (0.416)     0.247 (0.305)</span>
-<span class="co">## 12 setosa      1        y2 x1 + x2 + I(x2^2) 2.82*** (0.423)     0.248 (0.304)</span>
-<span class="co">## 13 setosa      species  y1 x1 + x2                               0.399 (0.325)</span>
-<span class="co">## 14 setosa      species  y1 x1 + x2 + I(x2^2)                     0.405 (0.325)</span>
-<span class="co">## 15 setosa      species  y2 x1 + x2                               0.247 (0.305)</span>
-<span class="co">## 16 setosa      species  y2 x1 + x2 + I(x2^2)                     0.248 (0.304)</span>
-<span class="co">## 17 versicolor  1        y1 x1 + x2           2.38*** (0.423)  0.934*** (0.166)</span>
-<span class="co">## 18 versicolor  1        y1 x1 + x2 + I(x2^2)   0.323 (1.44)   0.901*** (0.164)</span>
-<span class="co">## 19 versicolor  1        y2 x1 + x2           1.25*** (0.275)     0.067 (0.095)</span>
-<span class="co">## 20 versicolor  1        y2 x1 + x2 + I(x2^2)   0.097 (1.01)      0.048 (0.099)</span>
-<span class="co">## 21 versicolor  species  y1 x1 + x2                            0.934*** (0.166)</span>
-<span class="co">## 22 versicolor  species  y1 x1 + x2 + I(x2^2)                  0.901*** (0.164)</span>
-<span class="co">## 23 versicolor  species  y2 x1 + x2                               0.067 (0.095)</span>
-<span class="co">## 24 versicolor  species  y2 x1 + x2 + I(x2^2)                     0.048 (0.099)</span>
-<span class="co">## 25 virginica   1        y1 x1 + x2             1.05. (0.539)  0.995*** (0.090)</span>
-<span class="co">## 26 virginica   1        y1 x1 + x2 + I(x2^2)   -2.39 (2.04)   0.994*** (0.088)</span>
-<span class="co">## 27 virginica   1        y2 x1 + x2             1.06. (0.572)     0.149 (0.107)</span>
-<span class="co">## 28 virginica   1        y2 x1 + x2 + I(x2^2)    1.10 (1.76)      0.149 (0.108)</span>
-<span class="co">## 29 virginica   species  y1 x1 + x2                            0.995*** (0.090)</span>
-<span class="co">## 30 virginica   species  y1 x1 + x2 + I(x2^2)                  0.994*** (0.088)</span>
-<span class="co">## 31 virginica   species  y2 x1 + x2                               0.149 (0.107)</span>
-<span class="co">## 32 virginica   species  y2 x1 + x2 + I(x2^2)                     0.149 (0.108)</span>
-<span class="co">##                  x2          I(x2^2)</span>
-<span class="co">## 1   -0.320. (0.170)                 </span>
-<span class="co">## 2  -1.52*** (0.307) 0.348*** (0.075)</span>
-<span class="co">## 3    0.364* (0.142)                 </span>
-<span class="co">## 4  -1.18*** (0.313) 0.446*** (0.074)</span>
-<span class="co">## 5    -0.006 (0.163)                 </span>
-<span class="co">## 6     0.290 (0.408)   -0.088 (0.117)</span>
-<span class="co">## 7  0.623*** (0.114)                 </span>
-<span class="co">## 8    0.951* (0.472)   -0.097 (0.125)</span>
-<span class="co">## 9    0.712. (0.418)                 </span>
-<span class="co">## 10    2.51. (1.47)     -2.91 (2.10) </span>
-<span class="co">## 11    0.702 (0.560)                 </span>
-<span class="co">## 12     1.27 (2.39)    -0.911 (3.28) </span>
-<span class="co">## 13   0.712. (0.418)                 </span>
-<span class="co">## 14    2.51. (1.47)     -2.91 (2.10) </span>
-<span class="co">## 15    0.702 (0.560)                 </span>
-<span class="co">## 16     1.27 (2.39)    -0.911 (3.28) </span>
-<span class="co">## 17   -0.320 (0.364)                 </span>
-<span class="co">## 18     3.01 (2.31)     -1.24 (0.841)</span>
-<span class="co">## 19 0.929*** (0.244)                 </span>
-<span class="co">## 20    2.80. (1.65)    -0.695 (0.583)</span>
-<span class="co">## 21   -0.320 (0.364)                 </span>
-<span class="co">## 22     3.01 (2.31)     -1.24 (0.841)</span>
-<span class="co">## 23 0.929*** (0.244)                 </span>
-<span class="co">## 24    2.80. (1.65)    -0.695 (0.583)</span>
-<span class="co">## 25    0.007 (0.205)                 </span>
-<span class="co">## 26    3.50. (2.09)    -0.870 (0.519)</span>
-<span class="co">## 27 0.535*** (0.122)                 </span>
-<span class="co">## 28    0.503 (1.56)     0.008 (0.388)</span>
-<span class="co">## 29    0.007 (0.205)                 </span>
-<span class="co">## 30    3.50. (2.09)    -0.870 (0.519)</span>
-<span class="co">## 31 0.535*** (0.122)                 </span>
-<span class="co">## 32    0.503 (1.56)     0.008 (0.388)</span></code></pre>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res_multi</span>, <span class="st">"compact"</span>, se <span class="op">=</span> <span class="st">"hetero"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##         sample   fixef lhs               rhs     (Intercept)                x1</span></span>
+<span><span class="co">## 1  Full sample 1        y1 x1 + x2           4.19*** (0.104)  0.542*** (0.076)</span></span>
+<span><span class="co">## 2  Full sample 1        y1 x1 + x2 + I(x2^2) 4.27*** (0.101)  0.719*** (0.082)</span></span>
+<span><span class="co">## 3  Full sample 1        y2 x1 + x2           3.59*** (0.103) -0.257*** (0.066)</span></span>
+<span><span class="co">## 4  Full sample 1        y2 x1 + x2 + I(x2^2) 3.68*** (0.097)    -0.030 (0.078)</span></span>
+<span><span class="co">## 5  Full sample species  y1 x1 + x2                            0.906*** (0.076)</span></span>
+<span><span class="co">## 6  Full sample species  y1 x1 + x2 + I(x2^2)                  0.900*** (0.077)</span></span>
+<span><span class="co">## 7  Full sample species  y2 x1 + x2                              0.155* (0.073)</span></span>
+<span><span class="co">## 8  Full sample species  y2 x1 + x2 + I(x2^2)                    0.148. (0.075)</span></span>
+<span><span class="co">## 9  setosa      1        y1 x1 + x2           4.25*** (0.474)     0.399 (0.325)</span></span>
+<span><span class="co">## 10 setosa      1        y1 x1 + x2 + I(x2^2) 4.00*** (0.504)     0.405 (0.325)</span></span>
+<span><span class="co">## 11 setosa      1        y2 x1 + x2           2.89*** (0.416)     0.247 (0.305)</span></span>
+<span><span class="co">## 12 setosa      1        y2 x1 + x2 + I(x2^2) 2.82*** (0.423)     0.248 (0.304)</span></span>
+<span><span class="co">## 13 setosa      species  y1 x1 + x2                               0.399 (0.325)</span></span>
+<span><span class="co">## 14 setosa      species  y1 x1 + x2 + I(x2^2)                     0.405 (0.325)</span></span>
+<span><span class="co">## 15 setosa      species  y2 x1 + x2                               0.247 (0.305)</span></span>
+<span><span class="co">## 16 setosa      species  y2 x1 + x2 + I(x2^2)                     0.248 (0.304)</span></span>
+<span><span class="co">## 17 versicolor  1        y1 x1 + x2           2.38*** (0.423)  0.934*** (0.166)</span></span>
+<span><span class="co">## 18 versicolor  1        y1 x1 + x2 + I(x2^2)   0.323 (1.44)   0.901*** (0.164)</span></span>
+<span><span class="co">## 19 versicolor  1        y2 x1 + x2           1.25*** (0.275)     0.067 (0.095)</span></span>
+<span><span class="co">## 20 versicolor  1        y2 x1 + x2 + I(x2^2)   0.097 (1.01)      0.048 (0.099)</span></span>
+<span><span class="co">## 21 versicolor  species  y1 x1 + x2                            0.934*** (0.166)</span></span>
+<span><span class="co">## 22 versicolor  species  y1 x1 + x2 + I(x2^2)                  0.901*** (0.164)</span></span>
+<span><span class="co">## 23 versicolor  species  y2 x1 + x2                               0.067 (0.095)</span></span>
+<span><span class="co">## 24 versicolor  species  y2 x1 + x2 + I(x2^2)                     0.048 (0.099)</span></span>
+<span><span class="co">## 25 virginica   1        y1 x1 + x2             1.05. (0.539)  0.995*** (0.090)</span></span>
+<span><span class="co">## 26 virginica   1        y1 x1 + x2 + I(x2^2)   -2.39 (2.04)   0.994*** (0.088)</span></span>
+<span><span class="co">## 27 virginica   1        y2 x1 + x2             1.06. (0.572)     0.149 (0.107)</span></span>
+<span><span class="co">## 28 virginica   1        y2 x1 + x2 + I(x2^2)    1.10 (1.76)      0.149 (0.108)</span></span>
+<span><span class="co">## 29 virginica   species  y1 x1 + x2                            0.995*** (0.090)</span></span>
+<span><span class="co">## 30 virginica   species  y1 x1 + x2 + I(x2^2)                  0.994*** (0.088)</span></span>
+<span><span class="co">## 31 virginica   species  y2 x1 + x2                               0.149 (0.107)</span></span>
+<span><span class="co">## 32 virginica   species  y2 x1 + x2 + I(x2^2)                     0.149 (0.108)</span></span>
+<span><span class="co">##                  x2          I(x2^2)</span></span>
+<span><span class="co">## 1   -0.320. (0.170)                 </span></span>
+<span><span class="co">## 2  -1.52*** (0.307) 0.348*** (0.075)</span></span>
+<span><span class="co">## 3    0.364* (0.142)                 </span></span>
+<span><span class="co">## 4  -1.18*** (0.313) 0.446*** (0.074)</span></span>
+<span><span class="co">## 5    -0.006 (0.163)                 </span></span>
+<span><span class="co">## 6     0.290 (0.408)   -0.088 (0.117)</span></span>
+<span><span class="co">## 7  0.623*** (0.114)                 </span></span>
+<span><span class="co">## 8    0.951* (0.472)   -0.097 (0.125)</span></span>
+<span><span class="co">## 9    0.712. (0.418)                 </span></span>
+<span><span class="co">## 10    2.51. (1.47)     -2.91 (2.10) </span></span>
+<span><span class="co">## 11    0.702 (0.560)                 </span></span>
+<span><span class="co">## 12     1.27 (2.39)    -0.911 (3.28) </span></span>
+<span><span class="co">## 13   0.712. (0.418)                 </span></span>
+<span><span class="co">## 14    2.51. (1.47)     -2.91 (2.10) </span></span>
+<span><span class="co">## 15    0.702 (0.560)                 </span></span>
+<span><span class="co">## 16     1.27 (2.39)    -0.911 (3.28) </span></span>
+<span><span class="co">## 17   -0.320 (0.364)                 </span></span>
+<span><span class="co">## 18     3.01 (2.31)     -1.24 (0.841)</span></span>
+<span><span class="co">## 19 0.929*** (0.244)                 </span></span>
+<span><span class="co">## 20    2.80. (1.65)    -0.695 (0.583)</span></span>
+<span><span class="co">## 21   -0.320 (0.364)                 </span></span>
+<span><span class="co">## 22     3.01 (2.31)     -1.24 (0.841)</span></span>
+<span><span class="co">## 23 0.929*** (0.244)                 </span></span>
+<span><span class="co">## 24    2.80. (1.65)    -0.695 (0.583)</span></span>
+<span><span class="co">## 25    0.007 (0.205)                 </span></span>
+<span><span class="co">## 26    3.50. (2.09)    -0.870 (0.519)</span></span>
+<span><span class="co">## 27 0.535*** (0.122)                 </span></span>
+<span><span class="co">## 28    0.503 (1.56)     0.008 (0.388)</span></span>
+<span><span class="co">## 29    0.007 (0.205)                 </span></span>
+<span><span class="co">## 30    3.50. (2.09)    -0.870 (0.519)</span></span>
+<span><span class="co">## 31 0.535*** (0.122)                 </span></span>
+<span><span class="co">## 32    0.503 (1.56)     0.008 (0.388)</span></span></code></pre>
 <p>This vignette now details how to perform multiple estimations for
 multiple: LHSs, RHSs, fixed-effects, or samples. It then comes to
 describe the various methods to access the results.</p>
 </div>
-<div class="section level1">
-<h1 id="performing-multiple-estimations">Performing multiple estimations<a class="anchor" aria-label="anchor" href="#performing-multiple-estimations"></a>
-</h1>
-<div class="section level4">
-<h4 id="multiple-lhs">Multiple LHS<a class="anchor" aria-label="anchor" href="#multiple-lhs"></a>
-</h4>
+<div class="section level2">
+<h2 id="performing-multiple-estimations">Performing multiple estimations<a class="anchor" aria-label="anchor" href="#performing-multiple-estimations"></a>
+</h2>
+<div class="section level5">
+<h5 id="multiple-lhs">Multiple LHS<a class="anchor" aria-label="anchor" href="#multiple-lhs"></a>
+</h5>
 <p>To perform an estimation on multiple LHS, simply wrap the different
 LHS in <code><a href="https://rdrr.io/r/base/c.html" class="external-link">c()</a></code>:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">y1</span>, <span class="va">y2</span><span class="op">)</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span>, <span class="va">base</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">##                 feols(c(y1, y2)..1 feols(c(y1, y2) ..2</span>
-<span class="co">## Dependent Var.:                 y1                  y2</span>
-<span class="co">##                                                       </span>
-<span class="co">## Constant         4.191*** (0.0970)   3.587*** (0.0937)</span>
-<span class="co">## x1              0.5418*** (0.0693) -0.2571*** (0.0669)</span>
-<span class="co">## x2               -0.3196* (0.1605)    0.3640* (0.1550)</span>
-<span class="co">## _______________ __________________ ___________________</span>
-<span class="co">## S.E. type                      IID                 IID</span>
-<span class="co">## Observations                   150                 150</span>
-<span class="co">## R2                         0.76626             0.21310</span>
-<span class="co">## Adj. R2                    0.76308             0.20240</span>
-<span class="co">## ---</span>
-<span class="co">## Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></code></pre>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">y1</span>, <span class="va">y2</span><span class="op">)</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span>, <span class="va">base</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##                 feols(c(y1, y2)..1 feols(c(y1, y2) ..2</span></span>
+<span><span class="co">## Dependent Var.:                 y1                  y2</span></span>
+<span><span class="co">##                                                       </span></span>
+<span><span class="co">## Constant         4.191*** (0.0970)   3.587*** (0.0937)</span></span>
+<span><span class="co">## x1              0.5418*** (0.0693) -0.2571*** (0.0669)</span></span>
+<span><span class="co">## x2               -0.3196* (0.1605)    0.3640* (0.1550)</span></span>
+<span><span class="co">## _______________ __________________ ___________________</span></span>
+<span><span class="co">## S.E. type                      IID                 IID</span></span>
+<span><span class="co">## Observations                   150                 150</span></span>
+<span><span class="co">## R2                         0.76626             0.21310</span></span>
+<span><span class="co">## Adj. R2                    0.76308             0.20240</span></span>
+<span><span class="co">## ---</span></span>
+<span><span class="co">## Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre>
 </div>
-<div class="section level4">
-<h4 id="multiple-rhs-and-fixed-effects-stepwise-functions">Multiple RHS and fixed-effects: stepwise functions<a class="anchor" aria-label="anchor" href="#multiple-rhs-and-fixed-effects-stepwise-functions"></a>
-</h4>
+<div class="section level5">
+<h5 id="multiple-rhs-and-fixed-effects-stepwise-functions">Multiple RHS and fixed-effects: stepwise functions<a class="anchor" aria-label="anchor" href="#multiple-rhs-and-fixed-effects-stepwise-functions"></a>
+</h5>
 <p>To estimate multiple RHS (or fixed-effects), you need to use a
 specific set of functions: the <em>stepwise</em> functions. There are
 five of them: <code>sw</code>, <code>sw0</code>, <code>csw</code>,
@@ -259,43 +262,43 @@ fixed-effects part of the formula. Note that at most one stepwise
 function can be applied per part.</p>
 <p>Here is an example:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y1</span> <span class="op">~</span> <span class="fu"><a href="../reference/stepwise.html">csw</a></span><span class="op">(</span><span class="va">x1</span>, <span class="va">x2</span><span class="op">)</span> <span class="op">|</span> <span class="fu"><a href="../reference/stepwise.html">sw0</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span>, <span class="va">base</span>, cluster <span class="op">=</span> <span class="op">~</span><span class="va">species</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">##                 feols(y1 ~ csw..1 feols(y1 ~ cs..2 feols(y1 ~ csw..3</span>
-<span class="co">## Dependent Var.:                y1               y1                y1</span>
-<span class="co">##                                                                     </span>
-<span class="co">## Constant         4.307** (0.1917) 4.191** (0.2443)                  </span>
-<span class="co">## x1              0.4089** (0.0401) 0.5418* (0.1115) 0.9046** (0.0758)</span>
-<span class="co">## x2                                -0.3196 (0.1707)                  </span>
-<span class="co">## Fixed-Effects:  ----------------- ---------------- -----------------</span>
-<span class="co">## species                        No               No               Yes</span>
-<span class="co">## _______________ _________________ ________________ _________________</span>
-<span class="co">## S.E.: Clustered       by: species      by: species       by: species</span>
-<span class="co">## Observations                  150              150               150</span>
-<span class="co">## R2                        0.75995          0.76626           0.83672</span>
-<span class="co">## Within R2                      --               --           0.57178</span>
-<span class="co">## </span>
-<span class="co">##                 feols(y1 ~ csw..4</span>
-<span class="co">## Dependent Var.:                y1</span>
-<span class="co">##                                  </span>
-<span class="co">## Constant                         </span>
-<span class="co">## x1              0.9059** (0.0814)</span>
-<span class="co">## x2               -0.0060 (0.1260)</span>
-<span class="co">## Fixed-Effects:  -----------------</span>
-<span class="co">## species                       Yes</span>
-<span class="co">## _______________ _________________</span>
-<span class="co">## S.E.: Clustered       by: species</span>
-<span class="co">## Observations                  150</span>
-<span class="co">## R2                        0.83673</span>
-<span class="co">## Within R2                 0.57179</span>
-<span class="co">## ---</span>
-<span class="co">## Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></code></pre>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y1</span> <span class="op">~</span> <span class="fu"><a href="../reference/stepwise.html">csw</a></span><span class="op">(</span><span class="va">x1</span>, <span class="va">x2</span><span class="op">)</span> <span class="op">|</span> <span class="fu"><a href="../reference/stepwise.html">sw0</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span>, <span class="va">base</span>, cluster <span class="op">=</span> <span class="op">~</span><span class="va">species</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##                 feols(y1 ~ csw..1 feols(y1 ~ cs..2 feols(y1 ~ csw..3</span></span>
+<span><span class="co">## Dependent Var.:                y1               y1                y1</span></span>
+<span><span class="co">##                                                                     </span></span>
+<span><span class="co">## Constant         4.307** (0.1917) 4.191** (0.2443)                  </span></span>
+<span><span class="co">## x1              0.4089** (0.0401) 0.5418* (0.1115) 0.9046** (0.0758)</span></span>
+<span><span class="co">## x2                                -0.3196 (0.1707)                  </span></span>
+<span><span class="co">## Fixed-Effects:  ----------------- ---------------- -----------------</span></span>
+<span><span class="co">## species                        No               No               Yes</span></span>
+<span><span class="co">## _______________ _________________ ________________ _________________</span></span>
+<span><span class="co">## S.E.: Clustered       by: species      by: species       by: species</span></span>
+<span><span class="co">## Observations                  150              150               150</span></span>
+<span><span class="co">## R2                        0.75995          0.76626           0.83672</span></span>
+<span><span class="co">## Within R2                      --               --           0.57178</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">##                 feols(y1 ~ csw..4</span></span>
+<span><span class="co">## Dependent Var.:                y1</span></span>
+<span><span class="co">##                                  </span></span>
+<span><span class="co">## Constant                         </span></span>
+<span><span class="co">## x1              0.9059** (0.0814)</span></span>
+<span><span class="co">## x2               -0.0060 (0.1260)</span></span>
+<span><span class="co">## Fixed-Effects:  -----------------</span></span>
+<span><span class="co">## species                       Yes</span></span>
+<span><span class="co">## _______________ _________________</span></span>
+<span><span class="co">## S.E.: Clustered       by: species</span></span>
+<span><span class="co">## Observations                  150</span></span>
+<span><span class="co">## R2                        0.83673</span></span>
+<span><span class="co">## Within R2                 0.57179</span></span>
+<span><span class="co">## ---</span></span>
+<span><span class="co">## Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre>
 <p>As you can see, if the stepwise functions are in both parts, there
 will be as many estimations as the cardinal product of the two
 parts.</p>
 </div>
-<div class="section level4">
-<h4 id="split-sample-estimations">Split sample estimations<a class="anchor" aria-label="anchor" href="#split-sample-estimations"></a>
-</h4>
+<div class="section level5">
+<h5 id="split-sample-estimations">Split sample estimations<a class="anchor" aria-label="anchor" href="#split-sample-estimations"></a>
+</h5>
 <p>To perform split sample estimations, use either the argument
 <code>split</code> or <code>fsplit</code>. The argument
 <code>split</code> accepts a variable that will be treated as a factor,
@@ -303,55 +306,55 @@ and an estimation will be performed for each sub-sample defined by each
 level of this variable. The argument <code>fsplit</code> is identical
 but first adds the full sample.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y1</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span>, <span class="va">base</span>, fsplit <span class="op">=</span> <span class="op">~</span><span class="va">species</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">##                  feols(y1 ~ x1 +..1 feols(y1 ~ x1 ..2 feols(y1 ~ x1 +..3</span>
-<span class="co">## Sample (species)        Full sample            setosa         versicolor</span>
-<span class="co">## Dependent Var.:                  y1                y1                 y1</span>
-<span class="co">##                                                                         </span>
-<span class="co">## Constant          4.191*** (0.0970) 4.248*** (0.4114)  2.381*** (0.4493)</span>
-<span class="co">## x1               0.5418*** (0.0693)   0.3990 (0.2958) 0.9342*** (0.1693)</span>
-<span class="co">## x2                -0.3196* (0.1605)   0.7121 (0.4874)   -0.3200 (0.4024)</span>
-<span class="co">## ________________ __________________ _________________ __________________</span>
-<span class="co">## S.E. type                       IID               IID                IID</span>
-<span class="co">## Observations                    150                50                 50</span>
-<span class="co">## R2                          0.76626           0.11173            0.57432</span>
-<span class="co">## Adj. R2                     0.76308           0.07393            0.55620</span>
-<span class="co">## </span>
-<span class="co">##                  feols(y1 ~ x1 +..4</span>
-<span class="co">## Sample (species)          virginica</span>
-<span class="co">## Dependent Var.:                  y1</span>
-<span class="co">##                                    </span>
-<span class="co">## Constant            1.052* (0.5139)</span>
-<span class="co">## x1               0.9946*** (0.0893)</span>
-<span class="co">## x2                  0.0071 (0.1795)</span>
-<span class="co">## ________________ __________________</span>
-<span class="co">## S.E. type                       IID</span>
-<span class="co">## Observations                     50</span>
-<span class="co">## R2                          0.74689</span>
-<span class="co">## Adj. R2                     0.73612</span>
-<span class="co">## ---</span>
-<span class="co">## Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></code></pre>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y1</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span>, <span class="va">base</span>, fsplit <span class="op">=</span> <span class="op">~</span><span class="va">species</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##                  feols(y1 ~ x1 +..1 feols(y1 ~ x1 ..2 feols(y1 ~ x1 +..3</span></span>
+<span><span class="co">## Sample (species)        Full sample            setosa         versicolor</span></span>
+<span><span class="co">## Dependent Var.:                  y1                y1                 y1</span></span>
+<span><span class="co">##                                                                         </span></span>
+<span><span class="co">## Constant          4.191*** (0.0970) 4.248*** (0.4114)  2.381*** (0.4493)</span></span>
+<span><span class="co">## x1               0.5418*** (0.0693)   0.3990 (0.2958) 0.9342*** (0.1693)</span></span>
+<span><span class="co">## x2                -0.3196* (0.1605)   0.7121 (0.4874)   -0.3200 (0.4024)</span></span>
+<span><span class="co">## ________________ __________________ _________________ __________________</span></span>
+<span><span class="co">## S.E. type                       IID               IID                IID</span></span>
+<span><span class="co">## Observations                    150                50                 50</span></span>
+<span><span class="co">## R2                          0.76626           0.11173            0.57432</span></span>
+<span><span class="co">## Adj. R2                     0.76308           0.07393            0.55620</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">##                  feols(y1 ~ x1 +..4</span></span>
+<span><span class="co">## Sample (species)          virginica</span></span>
+<span><span class="co">## Dependent Var.:                  y1</span></span>
+<span><span class="co">##                                    </span></span>
+<span><span class="co">## Constant            1.052* (0.5139)</span></span>
+<span><span class="co">## x1               0.9946*** (0.0893)</span></span>
+<span><span class="co">## x2                  0.0071 (0.1795)</span></span>
+<span><span class="co">## ________________ __________________</span></span>
+<span><span class="co">## S.E. type                       IID</span></span>
+<span><span class="co">## Observations                     50</span></span>
+<span><span class="co">## R2                          0.74689</span></span>
+<span><span class="co">## Adj. R2                     0.73612</span></span>
+<span><span class="co">## ---</span></span>
+<span><span class="co">## Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre>
 </div>
-<div class="section level4">
-<h4 id="combining-multiple-estimations">Combining multiple estimations<a class="anchor" aria-label="anchor" href="#combining-multiple-estimations"></a>
-</h4>
+<div class="section level5">
+<h5 id="combining-multiple-estimations">Combining multiple estimations<a class="anchor" aria-label="anchor" href="#combining-multiple-estimations"></a>
+</h5>
 <p>You can combine multiple LHS to multiple RHS to multiple
 fixed-effects to multiple samples. The total number of estimations is
 always equal to the cardinal product of the total number of parts.</p>
 </div>
 </div>
-<div class="section level1">
-<h1 id="manipulation-of-multiple-estimations">Manipulation of multiple estimations<a class="anchor" aria-label="anchor" href="#manipulation-of-multiple-estimations"></a>
-</h1>
+<div class="section level2">
+<h2 id="manipulation-of-multiple-estimations">Manipulation of multiple estimations<a class="anchor" aria-label="anchor" href="#manipulation-of-multiple-estimations"></a>
+</h2>
 <p>We’ve just seen how to perform multiple estimations, now let’s see
 how to manipulate them. First a multiple estimation is a
 <code>fixest_multi</code> object with its own set of methods. We can
 access its elements by using keys. There are five keys:
 <code>sample</code>, <code>lhs</code>, <code>rhs</code>,
 <code>fixef</code>, and <code>iv</code>.</p>
-<div class="section level3">
-<h3 id="basic-access">Basic access<a class="anchor" aria-label="anchor" href="#basic-access"></a>
-</h3>
+<div class="section level4">
+<h4 id="basic-access">Basic access<a class="anchor" aria-label="anchor" href="#basic-access"></a>
+</h4>
 <p><code>res_multi[sample = 1]</code> returns all the results for the
 first sample. <code>res_multi[lhs = .N]</code> returns all the results
 for the last dependent variable (the special variable <code>.N</code>
@@ -364,9 +367,9 @@ all samples but the first, and for the first dependent variable.</p>
 character string <code>"spe"</code> is contained in the fixed-effects
 part of the formula.</p>
 </div>
-<div class="section level3">
-<h3 id="putting-order">Putting order<a class="anchor" aria-label="anchor" href="#putting-order"></a>
-</h3>
+<div class="section level4">
+<h4 id="putting-order">Putting order<a class="anchor" aria-label="anchor" href="#putting-order"></a>
+</h4>
 <p>The results in a <code>fixest_multi</code> object have a specific
 order, organized in a tree. By default the order is <span class="math inline">\(sample \rightarrow lhs \rightarrow fixef
 \rightarrow rhs \rightarrow iv\)</span>.</p>
@@ -384,53 +387,53 @@ Then the sample and the LHS will follow.</p>
 <p>This subsetting can then be used to easily obtain the appropriate set
 of results and ordering:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="va">res_multi</span><span class="op">[</span>lhs <span class="op">=</span> <span class="fl">1</span>, fixef <span class="op">=</span> <span class="fl">1</span>, rhs <span class="op">=</span> <span class="cn">TRUE</span>, sample <span class="op">=</span> <span class="op">-</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">##                  res_multi[lhs ..1 res_multi[lhs =..2 res_multi[lhs =..3</span>
-<span class="co">## Sample (species)            setosa         versicolor          virginica</span>
-<span class="co">## Dependent Var.:                 y1                 y1                 y1</span>
-<span class="co">##                                                                         </span>
-<span class="co">## Constant         4.248*** (0.4114)  2.381*** (0.4493)    1.052* (0.5139)</span>
-<span class="co">## x1                 0.3990 (0.2958) 0.9342*** (0.1693) 0.9946*** (0.0893)</span>
-<span class="co">## x2                 0.7121 (0.4874)   -0.3200 (0.4024)    0.0071 (0.1795)</span>
-<span class="co">## x2 square                                                               </span>
-<span class="co">## ________________ _________________ __________________ __________________</span>
-<span class="co">## S.E. type                      IID                IID                IID</span>
-<span class="co">## Observations                    50                 50                 50</span>
-<span class="co">## R2                         0.11173            0.57432            0.74689</span>
-<span class="co">## Adj. R2                    0.07393            0.55620            0.73612</span>
-<span class="co">## </span>
-<span class="co">##                  res_multi[lhs ..4 res_multi[lhs =..5 res_multi[lhs =..6</span>
-<span class="co">## Sample (species)            setosa         versicolor          virginica</span>
-<span class="co">## Dependent Var.:                 y1                 y1                 y1</span>
-<span class="co">##                                                                         </span>
-<span class="co">## Constant         4.004*** (0.4892)     0.3234 (1.791)     -2.393 (2.173)</span>
-<span class="co">## x1                 0.4048 (0.2963) 0.9006*** (0.1710) 0.9939*** (0.0878)</span>
-<span class="co">## x2                   2.511 (2.011)      3.015 (2.839)      3.504 (2.153)</span>
-<span class="co">## x2 square           -2.913 (3.157)     -1.236 (1.042)   -0.8703 (0.5340)</span>
-<span class="co">## ________________ _________________ __________________ __________________</span>
-<span class="co">## S.E. type                      IID                IID                IID</span>
-<span class="co">## Observations                    50                 50                 50</span>
-<span class="co">## R2                         0.12786            0.58696            0.76071</span>
-<span class="co">## Adj. R2                    0.07098            0.56002            0.74510</span>
-<span class="co">## ---</span>
-<span class="co">## Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></code></pre>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="va">res_multi</span><span class="op">[</span>lhs <span class="op">=</span> <span class="fl">1</span>, fixef <span class="op">=</span> <span class="fl">1</span>, rhs <span class="op">=</span> <span class="cn">TRUE</span>, sample <span class="op">=</span> <span class="op">-</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##                  res_multi[lhs ..1 res_multi[lhs =..2 res_multi[lhs =..3</span></span>
+<span><span class="co">## Sample (species)            setosa         versicolor          virginica</span></span>
+<span><span class="co">## Dependent Var.:                 y1                 y1                 y1</span></span>
+<span><span class="co">##                                                                         </span></span>
+<span><span class="co">## Constant         4.248*** (0.4114)  2.381*** (0.4493)    1.052* (0.5139)</span></span>
+<span><span class="co">## x1                 0.3990 (0.2958) 0.9342*** (0.1693) 0.9946*** (0.0893)</span></span>
+<span><span class="co">## x2                 0.7121 (0.4874)   -0.3200 (0.4024)    0.0071 (0.1795)</span></span>
+<span><span class="co">## x2 square                                                               </span></span>
+<span><span class="co">## ________________ _________________ __________________ __________________</span></span>
+<span><span class="co">## S.E. type                      IID                IID                IID</span></span>
+<span><span class="co">## Observations                    50                 50                 50</span></span>
+<span><span class="co">## R2                         0.11173            0.57432            0.74689</span></span>
+<span><span class="co">## Adj. R2                    0.07393            0.55620            0.73612</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">##                  res_multi[lhs ..4 res_multi[lhs =..5 res_multi[lhs =..6</span></span>
+<span><span class="co">## Sample (species)            setosa         versicolor          virginica</span></span>
+<span><span class="co">## Dependent Var.:                 y1                 y1                 y1</span></span>
+<span><span class="co">##                                                                         </span></span>
+<span><span class="co">## Constant         4.004*** (0.4892)     0.3234 (1.791)     -2.393 (2.173)</span></span>
+<span><span class="co">## x1                 0.4048 (0.2963) 0.9006*** (0.1710) 0.9939*** (0.0878)</span></span>
+<span><span class="co">## x2                   2.511 (2.011)      3.015 (2.839)      3.504 (2.153)</span></span>
+<span><span class="co">## x2 square           -2.913 (3.157)     -1.236 (1.042)   -0.8703 (0.5340)</span></span>
+<span><span class="co">## ________________ _________________ __________________ __________________</span></span>
+<span><span class="co">## S.E. type                      IID                IID                IID</span></span>
+<span><span class="co">## Observations                    50                 50                 50</span></span>
+<span><span class="co">## R2                         0.12786            0.58696            0.76071</span></span>
+<span><span class="co">## Adj. R2                    0.07098            0.56002            0.74510</span></span>
+<span><span class="co">## ---</span></span>
+<span><span class="co">## Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre>
 </div>
 </div>
-<div class="section level1">
-<h1 id="some-notes">Some notes<a class="anchor" aria-label="anchor" href="#some-notes"></a>
-</h1>
-<div class="section level4">
-<h4 id="note-on-standard-errors">Note on standard-errors<a class="anchor" aria-label="anchor" href="#note-on-standard-errors"></a>
-</h4>
+<div class="section level2">
+<h2 id="some-notes">Some notes<a class="anchor" aria-label="anchor" href="#some-notes"></a>
+</h2>
+<div class="section level5">
+<h5 id="note-on-standard-errors">Note on standard-errors<a class="anchor" aria-label="anchor" href="#note-on-standard-errors"></a>
+</h5>
 <p>Defining the standard-errors at estimation time, by using the
 arguments <code>se</code> or <code>cluster</code>, can be useful to
 obtain a coherent set of standard-errors across results, especially if
 the fixed-effects are modified (which will modify the default clustering
 of standard-errors across models).</p>
 </div>
-<div class="section level4">
-<h4 id="note-on-ivs">Note on IVs<a class="anchor" aria-label="anchor" href="#note-on-ivs"></a>
-</h4>
+<div class="section level5">
+<h5 id="note-on-ivs">Note on IVs<a class="anchor" aria-label="anchor" href="#note-on-ivs"></a>
+</h5>
 <p>IV estimations return a regular <code>fixest</code> object. The
 <code>summary</code> applied to it however can return a
 <code>fixest_multi</code> object. This is the case when both the first
@@ -440,9 +443,9 @@ using, e.g. <code>res[iv = 1]</code>. Note, importantly, that the index
 refers to the order of the results and 1 here does not mean the first
 stage.</p>
 </div>
-<div class="section level4">
-<h4 id="note-on-memory-usage">Note on memory usage<a class="anchor" aria-label="anchor" href="#note-on-memory-usage"></a>
-</h4>
+<div class="section level5">
+<h5 id="note-on-memory-usage">Note on memory usage<a class="anchor" aria-label="anchor" href="#note-on-memory-usage"></a>
+</h5>
 <p>The objects returned by <code>fixest</code> estimations are large.
 They contain the necessary information to apply various methods without
 incurring additional computing costs. This is particularly true for
@@ -484,8 +487,7 @@ saved can be considerable.</p>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer>

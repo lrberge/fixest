@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,18 +76,28 @@
     <p>Treat a variable as a factor, or interacts a variable with a factor. Values to be dropped/kept from the factor can be easily set. Note that to interact fixed-effects, this function should not be used: instead use directly the syntax <code>fe1^fe2</code>.</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">i</span><span class="op">(</span><span class="va">factor_var</span>, <span class="va">var</span>, <span class="va">ref</span>, <span class="va">keep</span>, <span class="va">bin</span>, <span class="va">ref2</span>, <span class="va">keep2</span>, <span class="va">bin2</span>, <span class="va">...</span><span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">i</span><span class="op">(</span><span class="va">factor_var</span>, <span class="va">var</span>, <span class="va">ref</span>, <span class="va">keep</span>, <span class="va">bin</span>, <span class="va">ref2</span>, <span class="va">keep2</span>, <span class="va">bin2</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>factor_var</dt>
 <dd><p>A vector (of any type) that will be treated as a factor. You can set references (i.e. exclude values for which to create dummies) with the <code>ref</code> argument.</p></dd>
+
+
 <dt>var</dt>
 <dd><p>A variable of the same length as <code>factor_var</code>. This variable will be interacted with the factor in <code>factor_var</code>. It can be numeric or factor-like. To force a numeric variable to be treated as a factor, you can add the <code>i.</code> prefix to a variable name. For instance take a numeric variable <code>x_num</code>: <code>i(x_fact, x_num)</code> will treat <code>x_num</code> as numeric while <code>i(x_fact, i.x_num)</code> will treat <code>x_num</code> as a factor (it's a shortcut to <code>as.factor(x_num)</code>).</p></dd>
+
+
 <dt>ref</dt>
 <dd><p>A vector of values to be taken as references from <code>factor_var</code>. Can also be a logical: if <code>TRUE</code>, then the first value of <code>factor_var</code> will be removed. If <code>ref</code> is a character vector, partial matching is applied to values; use "@" as the first character to enable regular expression matching. See examples.</p></dd>
+
+
 <dt>keep</dt>
 <dd><p>A vector of values to be kept from <code>factor_var</code> (all others are dropped). By default they should be values from <code>factor_var</code> and if <code>keep</code> is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.</p></dd>
+
+
 <dt>bin</dt>
 <dd><p>A list of values to be grouped, a vector, a formula, or the special values <code>"bin::digit"</code> or <code>"cut::values"</code>. To create a new value from old values, use <code>bin = list("new_value"=old_values)</code> with <code>old_values</code> a vector of existing values. You can use <code>.()</code> for <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.
 It accepts regular expressions, but they must start with an <code>"@"</code>, like in <code>bin="@Aug|Dec"</code>. It accepts one-sided formulas which must contain the variable <code>x</code>, e.g. <code>bin=list("&lt;2" = ~x &lt; 2)</code>.
@@ -96,18 +108,29 @@ With any data, using <code>"!bin::digit"</code> groups every digit consecutive v
 Using <code>"!!bin::digit"</code> is the same but starting from the last value.
 With numeric vectors you can: a) use <code>"cut::n"</code> to cut the vector into <code>n</code> equal parts, b) use <code>"cut::a]b["</code> to create the following bins: <code>[min, a]</code>, <code>]a, b[</code>, <code>[b, max]</code>.
 The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to p100) followed by an open or closed square bracket. You can add custom bin names by adding them in the character vector after <code>'cut::values'</code>. See details and examples. Dot square bracket expansion (see <code><a href="dsb.html">dsb</a></code>) is enabled.</p></dd>
+
+
 <dt>ref2</dt>
 <dd><p>A vector of values to be dropped from <code>var</code>. By default they should be values from <code>var</code> and if <code>ref2</code> is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.</p></dd>
+
+
 <dt>keep2</dt>
 <dd><p>A vector of values to be kept from <code>var</code> (all others are dropped). By default they should be values from <code>var</code> and if <code>keep2</code> is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.</p></dd>
+
+
 <dt>bin2</dt>
 <dd><p>A list or vector defining the binning of the second variable. See help for the argument <code>bin</code> for details (or look at the help of the function <code><a href="bin.html">bin</a></code>). You can use <code>.()</code> for <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Not currently used.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>It returns a matrix with number of rows the length of <code>factor_var</code>. If there is no interacted variable or it is interacted with a numeric variable, the number of columns is equal to the number of cases contained in <code>factor_var</code> minus the reference(s). If the interacted variable is a factor, the number of columns is the number of combined cases between <code>factor_var</code> and <code>var</code>.</p>
+    
+
+<p>It returns a matrix with number of rows the length of <code>factor_var</code>. If there is no interacted variable or it is interacted with a numeric variable, the number of columns is equal to the number of cases contained in <code>factor_var</code> minus the reference(s). If the interacted variable is a factor, the number of columns is the number of combined cases between <code>factor_var</code> and <code>var</code>.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -125,16 +148,16 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Simple illustration</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span>
-<span class="r-in"><span class="va">y</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># interaction</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="fu">i</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, ref <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Simple illustration</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">y</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># interaction</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="fu">i</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, ref <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    x y b c d</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1  a 1 0 0 0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2  b 2 2 0 0</span>
@@ -146,9 +169,9 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 <span class="r-out co"><span class="r-pr">#&gt;</span> 8  d 4 0 0 4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 9  a 4 0 0 0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 10 b 4 4 0 0</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># without interaction</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu">i</span><span class="op">(</span><span class="va">x</span>, <span class="st">"b"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># without interaction</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu">i</span><span class="op">(</span><span class="va">x</span>, <span class="st">"b"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    x a c d</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1  a 1 0 0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2  b 0 0 0</span>
@@ -160,10 +183,10 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 <span class="r-out co"><span class="r-pr">#&gt;</span> 8  d 0 0 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 9  a 1 0 0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 10 b 0 0 0</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># you can interact factors too</span></span>
-<span class="r-in"><span class="va">z</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"e"</span>, <span class="st">"f"</span>, <span class="st">"g"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">3</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">z</span>, <span class="fu">i</span><span class="op">(</span><span class="va">x</span>, <span class="va">z</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># you can interact factors too</span></span></span>
+<span class="r-in"><span><span class="va">z</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"e"</span>, <span class="st">"f"</span>, <span class="st">"g"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">3</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">z</span>, <span class="fu">i</span><span class="op">(</span><span class="va">x</span>, <span class="va">z</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    x z a.e a.g b.e b.f b.g c.e c.f d.e d.f</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1  a e   1   0   0   0   0   0   0   0   0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2  b e   0   0   1   0   0   0   0   0   0</span>
@@ -175,9 +198,9 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 <span class="r-out co"><span class="r-pr">#&gt;</span> 8  d f   0   0   0   0   0   0   0   0   1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 9  a g   0   1   0   0   0   0   0   0   0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 10 b g   0   0   0   0   1   0   0   0   0</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># to force a numeric variable to be treated as a factor: use i.</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="fu">i</span><span class="op">(</span><span class="va">x</span>, <span class="va">i.y</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># to force a numeric variable to be treated as a factor: use i.</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="fu">i</span><span class="op">(</span><span class="va">x</span>, <span class="va">i.y</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    x y a.1 a.3 a.4 b.2 b.3 b.4 c.2 c.4 d.3 d.4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1  a 1   1   0   0   0   0   0   0   0   0   0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2  b 2   0   0   0   1   0   0   0   0   0   0</span>
@@ -189,9 +212,9 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 <span class="r-out co"><span class="r-pr">#&gt;</span> 8  d 4   0   0   0   0   0   0   0   0   0   1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 9  a 4   0   0   1   0   0   0   0   0   0   0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 10 b 4   0   0   0   0   0   1   0   0   0   0</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Binning</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu">i</span><span class="op">(</span><span class="va">x</span>, bin <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>ab <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"b"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Binning</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu">i</span><span class="op">(</span><span class="va">x</span>, bin <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>ab <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"b"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    x ab c d</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1  a  1 0 0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2  b  1 0 0</span>
@@ -203,10 +226,10 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 <span class="r-out co"><span class="r-pr">#&gt;</span> 8  d  0 0 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 9  a  1 0 0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 10 b  1 0 0</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Same as before but using .() for list() and a regular expression</span></span>
-<span class="r-in"><span class="co"># note that to trigger a regex, you need to use an @ first</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu">i</span><span class="op">(</span><span class="va">x</span>, bin <span class="op">=</span> <span class="fu">.</span><span class="op">(</span>ab <span class="op">=</span> <span class="st">"@a|b"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Same as before but using .() for list() and a regular expression</span></span></span>
+<span class="r-in"><span><span class="co"># note that to trigger a regex, you need to use an @ first</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu">i</span><span class="op">(</span><span class="va">x</span>, bin <span class="op">=</span> <span class="fu">.</span><span class="op">(</span>ab <span class="op">=</span> <span class="st">"@a|b"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    x ab c d</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1  a  1 0 0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2  b  1 0 0</span>
@@ -218,29 +241,29 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 <span class="r-out co"><span class="r-pr">#&gt;</span> 8  d  0 0 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 9  a  1 0 0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 10 b  1 0 0</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># In fixest estimations</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">base_did</span><span class="op">)</span></span>
-<span class="r-in"><span class="co"># We interact the variable 'period' with the variable 'treat'</span></span>
-<span class="r-in"><span class="va">est_did</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu">i</span><span class="op">(</span><span class="va">period</span>, <span class="va">treat</span>, <span class="fl">5</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">period</span>, <span class="va">base_did</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># =&gt; plot only interactions with iplot</span></span>
-<span class="r-in"><span class="fu"><a href="coefplot.html">iplot</a></span><span class="op">(</span><span class="va">est_did</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># In fixest estimations</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">base_did</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># We interact the variable 'period' with the variable 'treat'</span></span></span>
+<span class="r-in"><span><span class="va">est_did</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu">i</span><span class="op">(</span><span class="va">period</span>, <span class="va">treat</span>, <span class="fl">5</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">period</span>, <span class="va">base_did</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># =&gt; plot only interactions with iplot</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="coefplot.html">iplot</a></span><span class="op">(</span><span class="va">est_did</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="i-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Using i() for factors</span></span>
-<span class="r-in"><span class="va">est_bis</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu">i</span><span class="op">(</span><span class="va">period</span>, keep <span class="op">=</span> <span class="fl">3</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span> <span class="op">+</span> <span class="fu">i</span><span class="op">(</span><span class="va">period</span>, <span class="va">treat</span>, <span class="fl">5</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span>, <span class="va">base_did</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># we plot the second set of variables created with i()</span></span>
-<span class="r-in"><span class="co"># =&gt; we need to use keep (otherwise only the first one is represented)</span></span>
-<span class="r-in"><span class="fu"><a href="coefplot.html">coefplot</a></span><span class="op">(</span><span class="va">est_bis</span>, keep <span class="op">=</span> <span class="st">"trea"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Using i() for factors</span></span></span>
+<span class="r-in"><span><span class="va">est_bis</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu">i</span><span class="op">(</span><span class="va">period</span>, keep <span class="op">=</span> <span class="fl">3</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span> <span class="op">+</span> <span class="fu">i</span><span class="op">(</span><span class="va">period</span>, <span class="va">treat</span>, <span class="fl">5</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span>, <span class="va">base_did</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># we plot the second set of variables created with i()</span></span></span>
+<span class="r-in"><span><span class="co"># =&gt; we need to use keep (otherwise only the first one is represented)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="coefplot.html">coefplot</a></span><span class="op">(</span><span class="va">est_bis</span>, keep <span class="op">=</span> <span class="st">"trea"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="i-2.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># =&gt; special treatment in etable</span></span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_bis</span>, dict <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"6"</span> <span class="op">=</span> <span class="st">"six"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># =&gt; special treatment in etable</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_bis</span>, dict <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"6"</span> <span class="op">=</span> <span class="st">"six"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                 est_bis</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:                       y</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                        </span>
@@ -267,25 +290,25 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within R2                       0.45396</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Interact two factors</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># We use the i. prefix to consider week as a factor</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">airquality</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">aq</span> <span class="op">=</span> <span class="va">airquality</span></span>
-<span class="r-in"><span class="va">aq</span><span class="op">$</span><span class="va">week</span> <span class="op">=</span> <span class="va">aq</span><span class="op">$</span><span class="va">Day</span> <span class="op"><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">%/%</a></span> <span class="fl">7</span> <span class="op">+</span> <span class="fl">1</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Interacting Month and week:</span></span>
-<span class="r-in"><span class="va">res_2F</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="fu">i</span><span class="op">(</span><span class="va">Month</span>, <span class="va">i.week</span><span class="op">)</span>, <span class="va">aq</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Interact two factors</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># We use the i. prefix to consider week as a factor</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">airquality</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">aq</span> <span class="op">=</span> <span class="va">airquality</span></span></span>
+<span class="r-in"><span><span class="va">aq</span><span class="op">$</span><span class="va">week</span> <span class="op">=</span> <span class="va">aq</span><span class="op">$</span><span class="va">Day</span> <span class="op"><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">%/%</a></span> <span class="fl">7</span> <span class="op">+</span> <span class="fl">1</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Interacting Month and week:</span></span></span>
+<span class="r-in"><span><span class="va">res_2F</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="fu">i</span><span class="op">(</span><span class="va">Month</span>, <span class="va">i.week</span><span class="op">)</span>, <span class="va">aq</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Same but dropping the 5th Month and 1st week</span></span>
-<span class="r-in"><span class="va">res_2F_bis</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="fu">i</span><span class="op">(</span><span class="va">Month</span>, <span class="va">i.week</span>, ref <span class="op">=</span> <span class="fl">5</span>, ref2 <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, <span class="va">aq</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Same but dropping the 5th Month and 1st week</span></span></span>
+<span class="r-in"><span><span class="va">res_2F_bis</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="fu">i</span><span class="op">(</span><span class="va">Month</span>, <span class="va">i.week</span>, ref <span class="op">=</span> <span class="fl">5</span>, ref2 <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, <span class="va">aq</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">res_2F</span>, <span class="va">res_2F_bis</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">res_2F</span>, <span class="va">res_2F_bis</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                 res_2F        res_2F_bis</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:                  Ozone             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                         </span>
@@ -319,14 +342,14 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Adj. R2                        0.40795           0.27844</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Binning</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">airquality</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="fu">i</span><span class="op">(</span><span class="va">Month</span>, bin <span class="op">=</span> <span class="st">"bin::2"</span><span class="op">)</span>, <span class="va">airquality</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Binning</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">airquality</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="fu">i</span><span class="op">(</span><span class="va">Month</span>, bin <span class="op">=</span> <span class="st">"bin::2"</span><span class="op">)</span>, <span class="va">airquality</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 37 observations removed because of NA values (LHS: 37).</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 116 </span>
@@ -337,9 +360,9 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month::8     21.3119    7.51740 2.83501 0.00543040 ** </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 31.1   Adj. R2: 0.083194</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="fu">i</span><span class="op">(</span><span class="va">Month</span>, bin <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>summer <span class="op">=</span> <span class="fl">7</span><span class="op">:</span><span class="fl">9</span><span class="op">)</span><span class="op">)</span>, <span class="va">airquality</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 31.2   Adj. R2: 0.083194</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="fu">i</span><span class="op">(</span><span class="va">Month</span>, bin <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>summer <span class="op">=</span> <span class="fl">7</span><span class="op">:</span><span class="fl">9</span><span class="op">)</span><span class="op">)</span>, <span class="va">airquality</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 37 observations removed because of NA values (LHS: 37).</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 116 </span>
@@ -350,10 +373,10 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Month::summer 25.86610    7.04559 3.671249 0.00037013 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 30.8   Adj. R2: 0.102158</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 30.9   Adj. R2: 0.102158</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -368,8 +391,7 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

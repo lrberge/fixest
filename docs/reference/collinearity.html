@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,18 +76,25 @@
     <p>In some occasions, the optimization algorithm of <code><a href="femlm.html">femlm</a></code> may fail to converge, or the variance-covariance matrix may not be available. The most common reason of why this happens is collinearity among variables. This function helps to find out which set of variables is problematic.</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">collinearity</span><span class="op">(</span><span class="va">x</span>, <span class="va">verbose</span><span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">collinearity</span><span class="op">(</span><span class="va">x</span>, <span class="va">verbose</span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>A <code>fixest</code> object obtained from, e.g. functions <code><a href="femlm.html">femlm</a></code>, <code><a href="feols.html">feols</a></code> or <code><a href="feglm.html">feglm</a></code>.</p></dd>
+
+
 <dt>verbose</dt>
 <dd><p>An integer. If higher than or equal to 1, then a note is prompted at each step of the algorithm. By default <code>verbose = 0</code> for small problems and to 1 for large problems.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>It returns a text message with the identified diagnostics.</p>
+    
+
+<p>It returns a text message with the identified diagnostics.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -98,45 +107,45 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="co"># Creating an example data base:</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">fe_1</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">100</span>, <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">fe_2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">100</span>, <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span>, <span class="va">fe_1</span><span class="op">)</span><span class="op">**</span><span class="fl">2</span></span>
-<span class="r-in"><span class="va">y</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span>, <span class="va">fe_2</span><span class="op">)</span><span class="op">**</span><span class="fl">2</span></span>
-<span class="r-in"><span class="va">z</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">3</span><span class="op">)</span><span class="op">**</span><span class="fl">2</span></span>
-<span class="r-in"><span class="va">dep</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">100</span>, <span class="va">x</span><span class="op">*</span><span class="va">y</span><span class="op">*</span><span class="va">z</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">fe_1</span>, <span class="va">fe_2</span>, <span class="va">x</span>, <span class="va">y</span>, <span class="va">z</span>, <span class="va">dep</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># creating collinearity problems:</span></span>
-<span class="r-in"><span class="va">base</span><span class="op">$</span><span class="va">v1</span> <span class="op">=</span> <span class="va">base</span><span class="op">$</span><span class="va">v2</span> <span class="op">=</span> <span class="va">base</span><span class="op">$</span><span class="va">v3</span> <span class="op">=</span> <span class="va">base</span><span class="op">$</span><span class="va">v4</span> <span class="op">=</span> <span class="fl">0</span></span>
-<span class="r-in"><span class="va">base</span><span class="op">$</span><span class="va">v1</span><span class="op">[</span><span class="va">base</span><span class="op">$</span><span class="va">fe_1</span> <span class="op">==</span> <span class="fl">1</span><span class="op">]</span> <span class="op">=</span> <span class="fl">1</span></span>
-<span class="r-in"><span class="va">base</span><span class="op">$</span><span class="va">v2</span><span class="op">[</span><span class="va">base</span><span class="op">$</span><span class="va">fe_1</span> <span class="op">==</span> <span class="fl">2</span><span class="op">]</span> <span class="op">=</span> <span class="fl">1</span></span>
-<span class="r-in"><span class="va">base</span><span class="op">$</span><span class="va">v3</span><span class="op">[</span><span class="va">base</span><span class="op">$</span><span class="va">fe_1</span> <span class="op">==</span> <span class="fl">3</span><span class="op">]</span> <span class="op">=</span> <span class="fl">1</span></span>
-<span class="r-in"><span class="va">base</span><span class="op">$</span><span class="va">v4</span><span class="op">[</span><span class="va">base</span><span class="op">$</span><span class="va">fe_2</span> <span class="op">==</span> <span class="fl">1</span><span class="op">]</span> <span class="op">=</span> <span class="fl">1</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Estimations:</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Collinearity with the fixed-effects:</span></span>
-<span class="r-in"><span class="va">res_1</span> <span class="op">=</span> <span class="fu"><a href="femlm.html">femlm</a></span><span class="op">(</span><span class="va">dep</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">+</span> <span class="va">v1</span> <span class="op">+</span> <span class="va">v2</span> <span class="op">+</span> <span class="va">v4</span> <span class="op">|</span> <span class="va">fe_1</span> <span class="op">+</span> <span class="va">fe_2</span>, <span class="va">base</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Creating an example data base:</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fe_1</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">100</span>, <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fe_2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">100</span>, <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span>, <span class="va">fe_1</span><span class="op">)</span><span class="op">**</span><span class="fl">2</span></span></span>
+<span class="r-in"><span><span class="va">y</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span>, <span class="va">fe_2</span><span class="op">)</span><span class="op">**</span><span class="fl">2</span></span></span>
+<span class="r-in"><span><span class="va">z</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">3</span><span class="op">)</span><span class="op">**</span><span class="fl">2</span></span></span>
+<span class="r-in"><span><span class="va">dep</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">100</span>, <span class="va">x</span><span class="op">*</span><span class="va">y</span><span class="op">*</span><span class="va">z</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">fe_1</span>, <span class="va">fe_2</span>, <span class="va">x</span>, <span class="va">y</span>, <span class="va">z</span>, <span class="va">dep</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># creating collinearity problems:</span></span></span>
+<span class="r-in"><span><span class="va">base</span><span class="op">$</span><span class="va">v1</span> <span class="op">=</span> <span class="va">base</span><span class="op">$</span><span class="va">v2</span> <span class="op">=</span> <span class="va">base</span><span class="op">$</span><span class="va">v3</span> <span class="op">=</span> <span class="va">base</span><span class="op">$</span><span class="va">v4</span> <span class="op">=</span> <span class="fl">0</span></span></span>
+<span class="r-in"><span><span class="va">base</span><span class="op">$</span><span class="va">v1</span><span class="op">[</span><span class="va">base</span><span class="op">$</span><span class="va">fe_1</span> <span class="op">==</span> <span class="fl">1</span><span class="op">]</span> <span class="op">=</span> <span class="fl">1</span></span></span>
+<span class="r-in"><span><span class="va">base</span><span class="op">$</span><span class="va">v2</span><span class="op">[</span><span class="va">base</span><span class="op">$</span><span class="va">fe_1</span> <span class="op">==</span> <span class="fl">2</span><span class="op">]</span> <span class="op">=</span> <span class="fl">1</span></span></span>
+<span class="r-in"><span><span class="va">base</span><span class="op">$</span><span class="va">v3</span><span class="op">[</span><span class="va">base</span><span class="op">$</span><span class="va">fe_1</span> <span class="op">==</span> <span class="fl">3</span><span class="op">]</span> <span class="op">=</span> <span class="fl">1</span></span></span>
+<span class="r-in"><span><span class="va">base</span><span class="op">$</span><span class="va">v4</span><span class="op">[</span><span class="va">base</span><span class="op">$</span><span class="va">fe_2</span> <span class="op">==</span> <span class="fl">1</span><span class="op">]</span> <span class="op">=</span> <span class="fl">1</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Estimations:</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Collinearity with the fixed-effects:</span></span></span>
+<span class="r-in"><span><span class="va">res_1</span> <span class="op">=</span> <span class="fu"><a href="femlm.html">femlm</a></span><span class="op">(</span><span class="va">dep</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">+</span> <span class="va">v1</span> <span class="op">+</span> <span class="va">v2</span> <span class="op">+</span> <span class="va">v4</span> <span class="op">|</span> <span class="va">fe_1</span> <span class="op">+</span> <span class="va">fe_2</span>, <span class="va">base</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>[femlm]: The optimization algorithm did not converge, the results are not reliable. The information matrix is singular: presence of collinearity.</span>
-<span class="r-in"><span class="fu">collinearity</span><span class="op">(</span><span class="va">res_1</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Variables 'v1' and 'v2' are collinear with fixed-effects 'fe_1'."</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># =&gt; collinearity with the first fixed-effect identified, we drop v1 and v2</span></span>
-<span class="r-in"><span class="va">res_1bis</span> <span class="op">=</span> <span class="fu"><a href="femlm.html">femlm</a></span><span class="op">(</span><span class="va">dep</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">+</span> <span class="va">v4</span> <span class="op">|</span> <span class="va">fe_1</span> <span class="op">+</span> <span class="va">fe_2</span>, <span class="va">base</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu">collinearity</span><span class="op">(</span><span class="va">res_1</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Variables 'v1' and 'v2' are collinear with fixed-effects `fe_1`."</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># =&gt; collinearity with the first fixed-effect identified, we drop v1 and v2</span></span></span>
+<span class="r-in"><span><span class="va">res_1bis</span> <span class="op">=</span> <span class="fu"><a href="femlm.html">femlm</a></span><span class="op">(</span><span class="va">dep</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">+</span> <span class="va">v4</span> <span class="op">|</span> <span class="va">fe_1</span> <span class="op">+</span> <span class="va">fe_2</span>, <span class="va">base</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>[femlm]: The information matrix is singular: presence of collinearity.</span>
-<span class="r-in"><span class="fu">collinearity</span><span class="op">(</span><span class="va">res_1bis</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Variable 'v4' is collinear with fixed-effects 'fe_2'."</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Multi-Collinearity:</span></span>
-<span class="r-in"><span class="va">res_2</span> <span class="op">=</span>  <span class="fu"><a href="femlm.html">femlm</a></span><span class="op">(</span><span class="va">dep</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">+</span> <span class="va">v1</span> <span class="op">+</span> <span class="va">v2</span> <span class="op">+</span> <span class="va">v3</span> <span class="op">+</span> <span class="va">v4</span>, <span class="va">base</span><span class="op">)</span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>[femlm]: The information matrix is singular: presence of collinearity.</span>
-<span class="r-in"><span class="fu">collinearity</span><span class="op">(</span><span class="va">res_2</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Variable 'v1' is collinear with variables '(Intercept)', 'v2' and 'v3'."</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span><span class="fu">collinearity</span><span class="op">(</span><span class="va">res_1bis</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Variable 'v4' is collinear with fixed-effects `fe_2`."</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Multi-Collinearity:</span></span></span>
+<span class="r-in"><span><span class="va">res_2</span> <span class="op">=</span>  <span class="fu"><a href="femlm.html">femlm</a></span><span class="op">(</span><span class="va">dep</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">+</span> <span class="va">v1</span> <span class="op">+</span> <span class="va">v2</span> <span class="op">+</span> <span class="va">v3</span> <span class="op">+</span> <span class="va">v4</span>, <span class="va">base</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>[femlm]: The optimization algorithm did not converge, the results are not reliable. The information matrix is singular: presence of collinearity.</span>
+<span class="r-in"><span><span class="fu">collinearity</span><span class="op">(</span><span class="va">res_2</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Variable `v1` is collinear with variables '(Intercept)', 'v2' and 'v3'."</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -151,8 +160,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

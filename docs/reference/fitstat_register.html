@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,18 +76,27 @@
     <p>Enables the registration of custom fi statistics that can be easily summoned with the function <code><a href="fitstat.html">fitstat</a></code>.</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">fitstat_register</span><span class="op">(</span><span class="va">type</span>, <span class="va">fun</span>, alias <span class="op">=</span> <span class="cn">NULL</span>, subtypes <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">fitstat_register</span><span class="op">(</span><span class="va">type</span>, <span class="va">fun</span>, alias <span class="op">=</span> <span class="cn">NULL</span>, subtypes <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>type</dt>
 <dd><p>A character scalar giving the type-name.</p></dd>
+
+
 <dt>fun</dt>
 <dd><p>A function to be applied to a <code>fixest</code> estimation. It must return either a scalar, or a list of unitary elements. If the number of elements returned is greater than 1, then each element must be named! If the fit statistic is not valid for a given estimation, a plain <code>NA</code> value should be returned.</p></dd>
+
+
 <dt>alias</dt>
 <dd><p>A (named) character vector. An alias to be used in lieu of the type name in the display methods (ie when used in <code><a href="print.fixest_fitstat.html">print.fixest_fitstat</a></code> or <code><a href="etable.html">etable</a></code>). If the function returns several values, i.e. sub-types, you can give an alias to these sub-types. The syntax is <code>c("type" = "alias", "subtype_i" = "alias_i")</code>, with "type" (resp. "subtype") the value of the argument <code>type</code> resp. (<code>subtypes</code>). You can also give an alias encompassing the type and sub-type with the syntax <code>c("type.subtype_i" = "alias")</code>.</p></dd>
+
+
 <dt>subtypes</dt>
 <dd><p>A character vector giving the name of each element returned by the function <code>fun</code>. This is only used when the function returns more than one value. Note that you can use the shortcut "test" when the sub-types are "stat", "p" and "df"; and "test2" when these are "stat", "p", "df1" and "df2".</p></dd>
+
 </dl></div>
     <div id="details">
     <h2>Details</h2>
@@ -98,53 +109,53 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="co"># An estimation</span></span>
-<span class="r-in"><span class="va">base</span> <span class="op">=</span> <span class="va">iris</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span> <span class="op">|</span> <span class="va">species</span>, <span class="va">base</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># single valued tests</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># say you want to add the coefficient of variation of the dependent variable</span></span>
-<span class="r-in"><span class="va">cv</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">est</span><span class="op">)</span><span class="op">{</span></span>
-<span class="r-in">  <span class="va">y</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="va">est</span>, type <span class="op">=</span> <span class="st">"lhs"</span><span class="op">)</span></span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Now we register the routine</span></span>
-<span class="r-in"><span class="fu">fitstat_register</span><span class="op">(</span><span class="st">"cvy"</span>, <span class="va">cv</span>, <span class="st">"Coef. of Variation (dep. var.)"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># now we can summon the registered routine with its type ("cvy")</span></span>
-<span class="r-in"><span class="fu"><a href="fitstat.html">fitstat</a></span><span class="op">(</span><span class="va">est</span>, <span class="st">"cvy"</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># An estimation</span></span></span>
+<span class="r-in"><span><span class="va">base</span> <span class="op">=</span> <span class="va">iris</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span> <span class="op">|</span> <span class="va">species</span>, <span class="va">base</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># single valued tests</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># say you want to add the coefficient of variation of the dependent variable</span></span></span>
+<span class="r-in"><span><span class="va">cv</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">est</span><span class="op">)</span><span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">y</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="va">est</span>, type <span class="op">=</span> <span class="st">"lhs"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Now we register the routine</span></span></span>
+<span class="r-in"><span><span class="fu">fitstat_register</span><span class="op">(</span><span class="st">"cvy"</span>, <span class="va">cv</span>, <span class="st">"Coef. of Variation (dep. var.)"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># now we can summon the registered routine with its type ("cvy")</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="fitstat.html">fitstat</a></span><span class="op">(</span><span class="va">est</span>, <span class="st">"cvy"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Coef. of Variation (dep. var.): 0.141711</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Multi valued tests</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Let's say you want a Wald test with an heteroskedasticiy robust variance</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># First we create the function</span></span>
-<span class="r-in"><span class="va">hc_wald</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">est</span><span class="op">)</span><span class="op">{</span></span>
-<span class="r-in">  <span class="va">w</span> <span class="op">=</span> <span class="fu"><a href="wald.html">wald</a></span><span class="op">(</span><span class="va">est</span>, keep <span class="op">=</span> <span class="st">"!Intercept"</span>, print <span class="op">=</span> <span class="cn">FALSE</span>, se <span class="op">=</span> <span class="st">"hetero"</span><span class="op">)</span></span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">w</span>, <span class="fl">4</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"><span class="co"># This test returns a vector of 4 elements: stat, p, df1 and df2</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Now we register the routine</span></span>
-<span class="r-in"><span class="fu">fitstat_register</span><span class="op">(</span><span class="st">"hc_wald"</span>, <span class="va">hc_wald</span>, <span class="st">"Wald (HC1)"</span>, <span class="st">"test2"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># You can access the statistic, as before</span></span>
-<span class="r-in"><span class="fu"><a href="fitstat.html">fitstat</a></span><span class="op">(</span><span class="va">est</span>, <span class="st">"hc_wald"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Multi valued tests</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Let's say you want a Wald test with an heteroskedasticiy robust variance</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># First we create the function</span></span></span>
+<span class="r-in"><span><span class="va">hc_wald</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">est</span><span class="op">)</span><span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">w</span> <span class="op">=</span> <span class="fu"><a href="wald.html">wald</a></span><span class="op">(</span><span class="va">est</span>, keep <span class="op">=</span> <span class="st">"!Intercept"</span>, print <span class="op">=</span> <span class="cn">FALSE</span>, se <span class="op">=</span> <span class="st">"hetero"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">w</span>, <span class="fl">4</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="co"># This test returns a vector of 4 elements: stat, p, df1 and df2</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Now we register the routine</span></span></span>
+<span class="r-in"><span><span class="fu">fitstat_register</span><span class="op">(</span><span class="st">"hc_wald"</span>, <span class="va">hc_wald</span>, <span class="st">"Wald (HC1)"</span>, <span class="st">"test2"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># You can access the statistic, as before</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="fitstat.html">fitstat</a></span><span class="op">(</span><span class="va">est</span>, <span class="st">"hc_wald"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wald (HC1): stat = 122.7, p &lt; 2.2e-16, on 2 and 145 DoF.</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># But you can also access the sub elements</span></span>
-<span class="r-in"><span class="fu"><a href="fitstat.html">fitstat</a></span><span class="op">(</span><span class="va">est</span>, <span class="st">"hc_wald.p"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># But you can also access the sub elements</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="fitstat.html">fitstat</a></span><span class="op">(</span><span class="va">est</span>, <span class="st">"hc_wald.p"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wald (HC1), p-value: 6.573e-32</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -159,8 +170,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

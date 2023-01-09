@@ -20,7 +20,7 @@ function setFixest_print)."><!-- mathjax --><script src="https://cdnjs.cloudflar
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -35,19 +35,21 @@ function setFixest_print)."><!-- mathjax --><script src="https://cdnjs.cloudflar
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -80,12 +82,14 @@ the estimation. The type of output can be customized by the user (using
 function <code>setFixest_print</code>).</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for fixest</span>
-<span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">n</span>, type <span class="op">=</span> <span class="st">"table"</span>, fitstat <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="fu">setFixest_print</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"table"</span>, fitstat <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
-
-<span class="fu">getFixest_print</span><span class="op">(</span><span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for fixest</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">n</span>, type <span class="op">=</span> <span class="st">"table"</span>, fitstat <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">setFixest_print</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"table"</span>, fitstat <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">getFixest_print</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
@@ -93,13 +97,19 @@ function <code>setFixest_print</code>).</p>
 <dd><p>A <code>fixest</code> object. Obtained using the methods
 <code><a href="femlm.html">femlm</a></code>, <code><a href="feols.html">feols</a></code> or
 <code><a href="feglm.html">feglm</a></code>.</p></dd>
+
+
 <dt>n</dt>
 <dd><p>Integer, number of coefficients to display. By default, only the
 first 8 coefficients are displayed if <code>x</code> does not come from
 <code><a href="summary.fixest.html">summary.fixest</a></code>.</p></dd>
+
+
 <dt>type</dt>
 <dd><p>Either <code>"table"</code> (default) to display the coefficients table
 or <code>"coef"</code> to display only the coefficients.</p></dd>
+
+
 <dt>fitstat</dt>
 <dd><p>A formula or a character vector representing which fit
 statistic to display. The types must be valid types of the function
@@ -107,8 +117,11 @@ statistic to display. The types must be valid types of the function
 type of estimation (OLS, GLM, IV, with/without fixed-effect). Providing the
 argument <code>fitstat</code> overrides the default fit statistics, you can
 however use the point "." to summon them back. Ex 1: <code>fitstat = ~ . + ll</code> adds the log-likelihood to the default values. Ex 2: <code>fitstat = ~ ll + pr2</code> only displays the log-likelihood and the pseudo-R2.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Other arguments to be passed to <code><a href="vcov.fixest.html">vcov.fixest</a></code>.</p></dd>
+
 </dl></div>
     <div id="details">
     <h2>Details</h2>
@@ -131,17 +144,17 @@ visualize the results of multiple estimations.</p></div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="co"># Load trade data</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">trade</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># We estimate the effect of distance on trade</span></span>
-<span class="r-in"><span class="co">#   =&gt; we account for 3 fixed-effects (FEs)</span></span>
-<span class="r-in"><span class="va">est_pois</span> <span class="op">=</span> <span class="fu"><a href="feglm.html">fepois</a></span><span class="op">(</span><span class="va">Euros</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">dist_km</span><span class="op">)</span><span class="op">|</span><span class="va">Origin</span><span class="op">+</span><span class="va">Destination</span><span class="op">+</span><span class="va">Product</span>, <span class="va">trade</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># displaying the results</span></span>
-<span class="r-in"><span class="co">#  (by default SEs are clustered if FEs are used)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">est_pois</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Load trade data</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">trade</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># We estimate the effect of distance on trade</span></span></span>
+<span class="r-in"><span><span class="co">#   =&gt; we account for 3 fixed-effects (FEs)</span></span></span>
+<span class="r-in"><span><span class="va">est_pois</span> <span class="op">=</span> <span class="fu"><a href="feglm.html">fepois</a></span><span class="op">(</span><span class="va">Euros</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">dist_km</span><span class="op">)</span><span class="op">|</span><span class="va">Origin</span><span class="op">+</span><span class="va">Destination</span><span class="op">+</span><span class="va">Product</span>, <span class="va">trade</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># displaying the results</span></span></span>
+<span class="r-in"><span><span class="co">#  (by default SEs are clustered if FEs are used)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">est_pois</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Poisson estimation, Dep. Var.: Euros</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 38,325 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-effects: Origin: 15,  Destination: 15,  Product: 20</span>
@@ -152,27 +165,27 @@ visualize the results of multiple estimations.</p></div>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Log-Likelihood: -7.133e+11   Adj. Pseudo R2: 0.760389</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            BIC:  1.427e+12     Squared Cor.: 0.60377 </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># By default the coefficient table is displayed.</span></span>
-<span class="r-in"><span class="co">#  If the user wished to display only the coefficents, use option type:</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">est_pois</span>, type <span class="op">=</span> <span class="st">"coef"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># By default the coefficient table is displayed.</span></span></span>
+<span class="r-in"><span><span class="co">#  If the user wished to display only the coefficents, use option type:</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">est_pois</span>, type <span class="op">=</span> <span class="st">"coef"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    -1.527747 </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># To permanently display coef. only, use setFixest_print:</span></span>
-<span class="r-in"><span class="fu">setFixest_print</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"coef"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">est_pois</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># To permanently display coef. only, use setFixest_print:</span></span></span>
+<span class="r-in"><span><span class="fu">setFixest_print</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"coef"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">est_pois</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    -1.527747 </span>
-<span class="r-in"><span class="co"># back to default:</span></span>
-<span class="r-in"><span class="fu">setFixest_print</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"table"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># fitstat</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># We modify which fit statistic to display</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">est_pois</span>, fitstat <span class="op">=</span> <span class="op">~</span> <span class="va">.</span> <span class="op">+</span> <span class="va">lr</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="co"># back to default:</span></span></span>
+<span class="r-in"><span><span class="fu">setFixest_print</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"table"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># fitstat</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># We modify which fit statistic to display</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">est_pois</span>, fitstat <span class="op">=</span> <span class="op">~</span> <span class="va">.</span> <span class="op">+</span> <span class="va">lr</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Poisson estimation, Dep. Var.: Euros</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 38,325 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-effects: Origin: 15,  Destination: 15,  Product: 20</span>
@@ -184,11 +197,11 @@ visualize the results of multiple estimations.</p></div>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Log-Likelihood: -7.133e+11   Adj. Pseudo R2: 0.760389</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            BIC:  1.427e+12     Squared Cor.: 0.60377 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> LR: stat = 4.527e+12, p &lt; 2.2e-16, on 49 DoF.</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># We add the LR test to the default (represented by the ".")</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># to show only the LR stat:</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">est_pois</span>, fitstat <span class="op">=</span> <span class="op">~</span> <span class="va">.</span> <span class="op">+</span> <span class="va">lr.stat</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># We add the LR test to the default (represented by the ".")</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># to show only the LR stat:</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">est_pois</span>, fitstat <span class="op">=</span> <span class="op">~</span> <span class="va">.</span> <span class="op">+</span> <span class="va">lr.stat</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Poisson estimation, Dep. Var.: Euros</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 38,325 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-effects: Origin: 15,  Destination: 15,  Product: 20</span>
@@ -200,10 +213,10 @@ visualize the results of multiple estimations.</p></div>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Log-Likelihood: -7.133e+11   Adj. Pseudo R2: 0.760389 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            BIC:  1.427e+12     Squared Cor.: 0.60377  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                   LR, stat.: 4.527e+12</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># To modify the defaults:</span></span>
-<span class="r-in"><span class="fu">setFixest_print</span><span class="op">(</span>fitstat <span class="op">=</span> <span class="op">~</span> <span class="va">.</span> <span class="op">+</span> <span class="va">lr.stat</span> <span class="op">+</span> <span class="va">rmse</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">est_pois</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># To modify the defaults:</span></span></span>
+<span class="r-in"><span><span class="fu">setFixest_print</span><span class="op">(</span>fitstat <span class="op">=</span> <span class="op">~</span> <span class="va">.</span> <span class="op">+</span> <span class="va">lr.stat</span> <span class="op">+</span> <span class="va">rmse</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">est_pois</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Poisson estimation, Dep. Var.: Euros</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 38,325 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-effects: Origin: 15,  Destination: 15,  Product: 20</span>
@@ -215,11 +228,11 @@ visualize the results of multiple estimations.</p></div>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Log-Likelihood: -7.133e+11   Adj. Pseudo R2: 0.760389    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            BIC:  1.427e+12     Squared Cor.: 0.60377     </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      LR, stat.:  4.527e+12             RMSE: 88,419,292.2</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Back to default (NULL == default)</span></span>
-<span class="r-in"><span class="fu">setFixest_print</span><span class="op">(</span>fitstat <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Back to default (NULL == default)</span></span></span>
+<span class="r-in"><span><span class="fu">setFixest_print</span><span class="op">(</span>fitstat <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -234,8 +247,7 @@ visualize the results of multiple estimations.</p></div>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

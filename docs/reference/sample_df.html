@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,20 +76,29 @@
     <p>This function is useful to check a data set. It gives a random number of rows of the input data set.</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">sample_df</span><span class="op">(</span><span class="va">x</span>, n <span class="op">=</span> <span class="fl">10</span>, previous <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">sample_df</span><span class="op">(</span><span class="va">x</span>, n <span class="op">=</span> <span class="fl">10</span>, previous <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>A data set: either a vector, a matrix or a data frame.</p></dd>
+
+
 <dt>n</dt>
 <dd><p>The number of random rows/elements to sample randomly.</p></dd>
+
+
 <dt>previous</dt>
 <dd><p>Logical scalar. Whether the results of the previous draw should be returned.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A data base (resp vector) with <code>n</code> rows (resp elements).</p>
+    
+
+<p>A data base (resp vector) with <code>n</code> rows (resp elements).</p>
     </div>
     <div id="author">
     <h2>Author</h2>
@@ -96,8 +107,8 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="fu">sample_df</span><span class="op">(</span><span class="va">iris</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">sample_df</span><span class="op">(</span><span class="va">iris</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Sepal.Length Sepal.Width Petal.Length Petal.Width    Species</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 117          6.5         3.0          5.5         1.8  virginica</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 139          6.0         3.0          4.8         1.8  virginica</span>
@@ -109,8 +120,8 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> 110          7.2         3.6          6.1         2.5  virginica</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 82           5.5         2.4          3.7         1.0 versicolor</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 51           7.0         3.2          4.7         1.4 versicolor</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">sample_df</span><span class="op">(</span><span class="va">iris</span>, previous <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">sample_df</span><span class="op">(</span><span class="va">iris</span>, previous <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Sepal.Length Sepal.Width Petal.Length Petal.Width    Species</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 117          6.5         3.0          5.5         1.8  virginica</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 139          6.0         3.0          4.8         1.8  virginica</span>
@@ -122,7 +133,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> 110          7.2         3.6          6.1         2.5  virginica</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 82           5.5         2.4          3.7         1.0 versicolor</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 51           7.0         3.2          4.7         1.4 versicolor</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -137,8 +148,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

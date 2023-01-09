@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,35 +76,58 @@
     <p>Subsets a fixest_multi object using different keys.</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre><code># S3 method for fixest_multi
-[(x, i, sample, lhs, rhs, fixef, iv, I, reorder = TRUE, drop = FALSE)</code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre><code># S3 method for fixest_multi
+[(x, i, sample, lhs, rhs, fixef, iv, I, reorder = TRUE, drop = FALSE)</code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>A <code>fixest_multi</code> object, obtained from a <code>fixest</code> estimation leading to multiple results.</p></dd>
+
+
 <dt>i</dt>
 <dd><p>An integer vector. Represents the estimations to extract.</p></dd>
+
+
 <dt>sample</dt>
 <dd><p>An integer vector, a logical scalar, or a character vector. It represents the <code>sample</code> identifiers for which the results should be extracted. Only valid when the <code>fixest</code> estimation was a split sample. You can use <code>.N</code> to refer to the last element. If logical, all elements are selected in both cases, but <code>FALSE</code> leads <code>sample</code> to become the rightmost key (just try it out).</p></dd>
+
+
 <dt>lhs</dt>
 <dd><p>An integer vector, a logical scalar, or a character vector. It represents the left-hand-sides identifiers for which the results should be extracted. Only valid when the <code>fixest</code> estimation contained multiple left-hand-sides. You can use <code>.N</code> to refer to the last element. If logical, all elements are selected in both cases, but <code>FALSE</code> leads <code>lhs</code> to become the rightmost key (just try it out).</p></dd>
+
+
 <dt>rhs</dt>
 <dd><p>An integer vector or a logical scalar. It represents the right-hand-sides identifiers for which the results should be extracted. Only valid when the <code>fixest</code> estimation contained multiple right-hand-sides. You can use <code>.N</code> to refer to the last element. If logical, all elements are selected in both cases, but <code>FALSE</code> leads <code>rhs</code> to become the rightmost key (just try it out).</p></dd>
+
+
 <dt>fixef</dt>
 <dd><p>An integer vector or a logical scalar. It represents the fixed-effects identifiers for which the results should be extracted. Only valid when the <code>fixest</code> estimation contained fixed-effects in a stepwise fashion. You can use <code>.N</code> to refer to the last element. If logical, all elements are selected in both cases, but <code>FALSE</code> leads <code>fixef</code> to become the rightmost key (just try it out).</p></dd>
+
+
 <dt>iv</dt>
 <dd><p>An integer vector or a logical scalar. It represent the stages of the IV. Note that the length can be greater than 2 when there are multiple endogenous regressors (the first stage corresponding to multiple estimations). Note that the order of the stages depends on the <code>stage</code> argument from <code><a href="summary.fixest.html">summary.fixest</a></code>. If logical, all elements are selected in both cases, but <code>FALSE</code> leads <code>iv</code> to become the rightmost key (just try it out).</p></dd>
+
+
 <dt>I</dt>
 <dd><p>An integer vector. Represents the root element to extract.</p></dd>
+
+
 <dt>reorder</dt>
 <dd><p>Logical, default is <code>TRUE</code>. Indicates whether reordering of the results should be performed depending on the user input.</p></dd>
+
+
 <dt>drop</dt>
 <dd><p>Logical, default is <code>FALSE</code>. If the result contains only one estimation, then if <code>drop = TRUE</code> it will be transformed into a <code>fixest</code> object (instead of <code>fixest_multi</code>).</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>It returns a <code>fixest_multi</code> object. If there is only one estimation left in the object, then the result is simplified into a <code>fixest</code> object.</p>
+    
+
+<p>It returns a <code>fixest_multi</code> object. If there is only one estimation left in the object, then the result is simplified into a <code>fixest</code> object.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -116,21 +141,21 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="co"># Estimation with multiple samples/LHS/RHS</span></span>
-<span class="r-in"><span class="va">aq</span> <span class="op">=</span> <span class="va">airquality</span><span class="op">[</span><span class="va">airquality</span><span class="op">$</span><span class="va">Month</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fl">5</span><span class="op">:</span><span class="fl">6</span>, <span class="op">]</span></span>
-<span class="r-in"><span class="va">est_split</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">Ozone</span>, <span class="va">Solar.R</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="stepwise.html">sw</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/poly.html" class="external-link">poly</a></span><span class="op">(</span><span class="va">Wind</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/poly.html" class="external-link">poly</a></span><span class="op">(</span><span class="va">Temp</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span>
-<span class="r-in">                  <span class="va">aq</span>, split <span class="op">=</span> <span class="op">~</span> <span class="va">Month</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># By default: sample is the root</span></span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_split</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Estimation with multiple samples/LHS/RHS</span></span></span>
+<span class="r-in"><span><span class="va">aq</span> <span class="op">=</span> <span class="va">airquality</span><span class="op">[</span><span class="va">airquality</span><span class="op">$</span><span class="va">Month</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fl">5</span><span class="op">:</span><span class="fl">6</span>, <span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">est_split</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">Ozone</span>, <span class="va">Solar.R</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="stepwise.html">sw</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/poly.html" class="external-link">poly</a></span><span class="op">(</span><span class="va">Wind</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/poly.html" class="external-link">poly</a></span><span class="op">(</span><span class="va">Temp</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                  <span class="va">aq</span>, split <span class="op">=</span> <span class="op">~</span> <span class="va">Month</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># By default: sample is the root</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_split</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                      est_split.1      est_split.2      est_split.3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Sample (Month)                 5                5                5</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Ozone            Ozone          Solar.R</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        26.06*** (4.090) 41.22*** (6.910) 182.6*** (23.38)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        26.06*** (4.090) 41.22*** (6.910) 182.7*** (23.38)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1      -89.96* (35.56)                    -142.3 (205.4)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2        66.46 (39.66)                    -177.0 (233.0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2        66.46 (39.66)                    -177.1 (233.1)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1                       215.9** (67.18)                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2                         92.23 (63.43)                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ ________________ ________________</span>
@@ -143,11 +168,11 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Sample (Month)                 5              6               6</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:          Solar.R          Ozone           Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        191.5*** (37.62) 25.43* (7.310) 30.73** (6.188)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        191.6*** (37.62) 25.43* (7.310) 30.73** (6.188)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1                       91.24 (82.49)                </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2                      -43.18 (65.91)                </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1        124.0 (373.5)                 -6.996 (59.32)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2       -484.8 (322.6)                 121.5* (47.13)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1        124.1 (373.5)                 -6.996 (59.32)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2       -484.8 (322.7)                 121.6* (47.13)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ ______________ _______________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID            IID             IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                  27              9               9</span>
@@ -158,10 +183,10 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Sample (Month)                 6                6</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:          Solar.R          Solar.R</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        196.5*** (16.70) 161.6*** (37.25)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        196.5*** (16.70) 161.7*** (37.25)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1       233.8. (129.0)                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2       -51.86 (111.4)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1                         313.1 (344.5)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1                         313.2 (344.5)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2                         78.76 (214.4)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ ________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID              IID</span>
@@ -170,9 +195,9 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Adj. R2                  0.06493          0.10550</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Let's reorder, by considering lhs the root</span></span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_split</span><span class="op">[</span>lhs <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="va">.N</span><span class="op">]</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Let's reorder, by considering lhs the root</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_split</span><span class="op">[</span>lhs <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="va">.N</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 est_split[lhs..1 est_split[lhs..2 est_split[l..3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Sample (Month)                 5                5              6</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Ozone            Ozone          Ozone</span>
@@ -192,11 +217,11 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Sample (Month)                6                5                5</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:           Ozone          Solar.R          Solar.R</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        30.73** (6.188) 182.6*** (23.38) 191.5*** (37.62)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        30.73** (6.188) 182.7*** (23.38) 191.6*** (37.62)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1                       -142.3 (205.4)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2                       -177.0 (233.0)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1      -6.996 (59.32)                     124.0 (373.5)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2      121.5* (47.13)                    -484.8 (322.6)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2                       -177.1 (233.1)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1      -6.996 (59.32)                     124.1 (373.5)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2      121.6* (47.13)                    -484.8 (322.7)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ _______________ ________________ ________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                   IID              IID              IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                  9               27               27</span>
@@ -207,10 +232,10 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Sample (Month)                 6                6</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:          Solar.R          Solar.R</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        196.5*** (16.70) 161.6*** (37.25)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        196.5*** (16.70) 161.7*** (37.25)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1       233.8. (129.0)                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2       -51.86 (111.4)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1                         313.1 (344.5)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1                         313.2 (344.5)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2                         78.76 (214.4)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ ________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID              IID</span>
@@ -219,9 +244,9 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Adj. R2                  0.06493          0.10550</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Selecting only one LHS and RHS</span></span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_split</span><span class="op">[</span>lhs <span class="op">=</span> <span class="st">"Ozone"</span>, rhs <span class="op">=</span> <span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Selecting only one LHS and RHS</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_split</span><span class="op">[</span>lhs <span class="op">=</span> <span class="st">"Ozone"</span>, rhs <span class="op">=</span> <span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 est_split[lhs..1 est_split[l..2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Sample (Month)                 5              6</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Ozone          Ozone</span>
@@ -236,16 +261,16 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Adj. R2                  0.16702       -0.08550</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Taking the first root (here sample = 5)</span></span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_split</span><span class="op">[</span>I <span class="op">=</span> <span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Taking the first root (here sample = 5)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_split</span><span class="op">[</span>I <span class="op">=</span> <span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 est_split[I =..1 est_split[I =..2 est_split[I =..3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Sample (Month)                 5                5                5</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Ozone            Ozone          Solar.R</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        26.06*** (4.090) 41.22*** (6.910) 182.6*** (23.38)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        26.06*** (4.090) 41.22*** (6.910) 182.7*** (23.38)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1      -89.96* (35.56)                    -142.3 (205.4)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2        66.46 (39.66)                    -177.0 (233.0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2        66.46 (39.66)                    -177.1 (233.1)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1                       215.9** (67.18)                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2                         92.23 (63.43)                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ ________________ ________________</span>
@@ -258,11 +283,11 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Sample (Month)                 5</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:          Solar.R</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        191.5*** (37.62)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        191.6*** (37.62)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1                     </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1        124.0 (373.5)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2       -484.8 (322.6)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1        124.1 (373.5)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2       -484.8 (322.7)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                  27</span>
@@ -270,17 +295,17 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Adj. R2                  0.21456</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># The first and last estimations</span></span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_split</span><span class="op">[</span>i <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">.N</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># The first and last estimations</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">est_split</span><span class="op">[</span>i <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">.N</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 est_split[i =..1 est_split[i =..2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Sample (Month)                 5                6</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Ozone          Solar.R</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        26.06*** (4.090) 161.6*** (37.25)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant        26.06*** (4.090) 161.7*** (37.25)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1      -89.96* (35.56)                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2        66.46 (39.66)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1                         313.1 (344.5)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1                         313.2 (344.5)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2                         78.76 (214.4)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ ________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID              IID</span>
@@ -289,7 +314,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Adj. R2                  0.16702          0.10550</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -304,8 +329,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

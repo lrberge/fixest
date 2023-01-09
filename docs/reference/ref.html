@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -32,19 +32,21 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
-    </li>
-    <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
-    </li>
-    <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a>
     </li>
     <li>
       <a href="../articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
       <a href="../articles/standard_errors.html">On standard-errors</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">Estimation tables</li>
+    <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
     </li>
   </ul></li>
 <li>
@@ -74,12 +76,16 @@
     <p>Takes a variables of any types, transforms it into a factors, and modifies the values of the factors. Useful in estimations when you want to set some value of a vector as a reference.</p>
     </div>
 
-    <div id="ref-usage">Usage,<div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">ref</span><span class="op">(</span><span class="va">x</span>, <span class="va">ref</span><span class="op">)</span></code></pre></div></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">ref</span><span class="op">(</span><span class="va">x</span>, <span class="va">ref</span><span class="op">)</span></span></code></pre></div>
+    </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>A vector of any type (must be atomic though).</p></dd>
+
+
 <dt>ref</dt>
 <dd><p>A vector or a list, or special binning values (explained later). If a vector, it must correspond to (partially matched) values of the vector <code>x</code>. The vector <code>x</code> which will be transformed into a factor and these values will be placed first in the levels. That's the main usage of this function. You can also bin on-the-fly the values of <code>x</code>, using the same syntax as the function <code><a href="bin.html">bin</a></code>. Here's a description of what bin does: To create a new value from old values, use <code>bin = list("new_value"=old_values)</code> with <code>old_values</code> a vector of existing values. You can use <code>.()</code> for <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.
 It accepts regular expressions, but they must start with an <code>"@"</code>, like in <code>bin="@Aug|Dec"</code>. It accepts one-sided formulas which must contain the variable <code>x</code>, e.g. <code>bin=list("&lt;2" = ~x &lt; 2)</code>.
@@ -90,10 +96,13 @@ With any data, using <code>"!bin::digit"</code> groups every digit consecutive v
 Using <code>"!!bin::digit"</code> is the same but starting from the last value.
 With numeric vectors you can: a) use <code>"cut::n"</code> to cut the vector into <code>n</code> equal parts, b) use <code>"cut::a]b["</code> to create the following bins: <code>[min, a]</code>, <code>]a, b[</code>, <code>[b, max]</code>.
 The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to p100) followed by an open or closed square bracket. You can add custom bin names by adding them in the character vector after <code>'cut::values'</code>. See details and examples. Dot square bracket expansion (see <code><a href="dsb.html">dsb</a></code>) is enabled.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>It returns a factor of the same length as <code>x</code>, where levels have been modified according to the argument <code>ref</code>.</p>
+    
+
+<p>It returns a factor of the same length as <code>x</code>, where levels have been modified according to the argument <code>ref</code>.</p>
     </div>
     <div id="bin-vs-ref">
     <h2><code>bin</code> vs <code>ref</code></h2>
@@ -116,58 +125,58 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">airquality</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># A vector of months</span></span>
-<span class="r-in"><span class="va">month_num</span> <span class="op">=</span> <span class="va">airquality</span><span class="op">$</span><span class="va">Month</span></span>
-<span class="r-in"><span class="va">month_lab</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"may"</span>, <span class="st">"june"</span>, <span class="st">"july"</span>, <span class="st">"august"</span>, <span class="st">"september"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">month_fact</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">month_num</span>, labels <span class="op">=</span> <span class="va">month_lab</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">month_num</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">airquality</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># A vector of months</span></span></span>
+<span class="r-in"><span><span class="va">month_num</span> <span class="op">=</span> <span class="va">airquality</span><span class="op">$</span><span class="va">Month</span></span></span>
+<span class="r-in"><span><span class="va">month_lab</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"may"</span>, <span class="st">"june"</span>, <span class="st">"july"</span>, <span class="st">"august"</span>, <span class="st">"september"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">month_fact</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">month_num</span>, labels <span class="op">=</span> <span class="va">month_lab</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">month_num</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> month_num</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  5  6  7  8  9 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 31 30 31 31 30 </span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">month_fact</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">month_fact</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> month_fact</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       may      june      july    august september </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        31        30        31        31        30 </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Main use</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Without argument: equivalent to as.factor</span></span>
-<span class="r-in"><span class="fu">ref</span><span class="op">(</span><span class="va">month_num</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Main use</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Without argument: equivalent to as.factor</span></span></span>
+<span class="r-in"><span><span class="fu">ref</span><span class="op">(</span><span class="va">month_num</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   [1] 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 6 6 6 6 6 6</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [38] 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 7 7 7 7 7 7 7 7 7 7 7 7 7</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [75] 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [112] 8 8 8 8 8 8 8 8 8 8 8 8 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [149] 9 9 9 9 9</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Levels: 5 6 7 8 9</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Main usage: to set a level first:</span></span>
-<span class="r-in"><span class="co"># (Note that partial matching is enabled.)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu">ref</span><span class="op">(</span><span class="va">month_fact</span>, <span class="st">"aug"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Main usage: to set a level first:</span></span></span>
+<span class="r-in"><span><span class="co"># (Note that partial matching is enabled.)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu">ref</span><span class="op">(</span><span class="va">month_fact</span>, <span class="st">"aug"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    august       may      june      july september </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        31        31        30        31        30 </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># You can rename the level on-the-fly</span></span>
-<span class="r-in"><span class="co"># (Northern hemisphere specific!)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu">ref</span><span class="op">(</span><span class="va">month_fact</span>, <span class="fu">.</span><span class="op">(</span><span class="st">"Hot month"</span><span class="op">=</span><span class="st">"aug"</span>,</span>
-<span class="r-in">                        <span class="st">"Late summer"</span> <span class="op">=</span> <span class="st">"sept"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># You can rename the level on-the-fly</span></span></span>
+<span class="r-in"><span><span class="co"># (Northern hemisphere specific!)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu">ref</span><span class="op">(</span><span class="va">month_fact</span>, <span class="fu">.</span><span class="op">(</span><span class="st">"Hot month"</span><span class="op">=</span><span class="st">"aug"</span>,</span></span>
+<span class="r-in"><span>                        <span class="st">"Late summer"</span> <span class="op">=</span> <span class="st">"sept"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Hot month Late summer         may        june        july </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          31          30          31          30          31 </span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Main use is in estimations:</span></span>
-<span class="r-in"><span class="va">a</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Petal.Width</span> <span class="op">~</span> <span class="va">Petal.Length</span> <span class="op">+</span> <span class="va">Species</span>, <span class="va">iris</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># We change the reference</span></span>
-<span class="r-in"><span class="va">b</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Petal.Width</span> <span class="op">~</span> <span class="va">Petal.Length</span> <span class="op">+</span> <span class="fu">ref</span><span class="op">(</span><span class="va">Species</span>, <span class="st">"vers"</span><span class="op">)</span>, <span class="va">iris</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">a</span>, <span class="va">b</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Main use is in estimations:</span></span></span>
+<span class="r-in"><span><span class="va">a</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Petal.Width</span> <span class="op">~</span> <span class="va">Petal.Length</span> <span class="op">+</span> <span class="va">Species</span>, <span class="va">iris</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># We change the reference</span></span></span>
+<span class="r-in"><span><span class="va">b</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Petal.Width</span> <span class="op">~</span> <span class="va">Petal.Length</span> <span class="op">+</span> <span class="fu">ref</span><span class="op">(</span><span class="va">Species</span>, <span class="st">"vers"</span><span class="op">)</span>, <span class="va">iris</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">a</span>, <span class="va">b</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                               a                   b</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:                     Petal.Width         Petal.Width</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                    </span>
@@ -184,43 +193,43 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Adj. R2                                 0.94446             0.94446</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Binning</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># You can also bin factor values on the fly</span></span>
-<span class="r-in"><span class="co"># Using @ first means a regular expression will be used to match the values.</span></span>
-<span class="r-in"><span class="co"># Note that the value created is placed first.</span></span>
-<span class="r-in"><span class="co"># To avoid that behavior =&gt; use the function "bin"</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu">ref</span><span class="op">(</span><span class="va">month_fact</span>, <span class="fu">.</span><span class="op">(</span>summer <span class="op">=</span> <span class="st">"@jul|aug|sep"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Binning</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># You can also bin factor values on the fly</span></span></span>
+<span class="r-in"><span><span class="co"># Using @ first means a regular expression will be used to match the values.</span></span></span>
+<span class="r-in"><span><span class="co"># Note that the value created is placed first.</span></span></span>
+<span class="r-in"><span><span class="co"># To avoid that behavior =&gt; use the function "bin"</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu">ref</span><span class="op">(</span><span class="va">month_fact</span>, <span class="fu">.</span><span class="op">(</span>summer <span class="op">=</span> <span class="st">"@jul|aug|sep"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> summer    may   june </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     92     31     30 </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Please refer to the example in the bin help page for more example.</span></span>
-<span class="r-in"><span class="co"># The syntax is the same.</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># Precise relocation</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># You can place a factor at the location you want</span></span>
-<span class="r-in"><span class="co">#  by adding "@digit" in the name first:</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu">ref</span><span class="op">(</span><span class="va">month_num</span>, <span class="fu">.</span><span class="op">(</span><span class="st">"@5"</span><span class="op">=</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Please refer to the example in the bin help page for more example.</span></span></span>
+<span class="r-in"><span><span class="co"># The syntax is the same.</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Precise relocation</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># You can place a factor at the location you want</span></span></span>
+<span class="r-in"><span><span class="co">#  by adding "@digit" in the name first:</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu">ref</span><span class="op">(</span><span class="va">month_num</span>, <span class="fu">.</span><span class="op">(</span><span class="st">"@5"</span><span class="op">=</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  6  7  8  9  5 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 30 31 31 30 31 </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Same with renaming</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu">ref</span><span class="op">(</span><span class="va">month_num</span>, <span class="fu">.</span><span class="op">(</span><span class="st">"@5 five"</span><span class="op">=</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Same with renaming</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu">ref</span><span class="op">(</span><span class="va">month_num</span>, <span class="fu">.</span><span class="op">(</span><span class="st">"@5 five"</span><span class="op">=</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    6    7    8    9 five </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   30   31   31   30   31 </span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -235,8 +244,7 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.1</span>
       </span>
     </div>
 
@@ -72,7 +72,14 @@
     </div>
 
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.11.0" id="fixest-0110">fixest 0.11.0<a class="anchor" aria-label="anchor" href="#fixest-0110"></a></h2>
+<h2 class="page-header" data-toc-text="0.11.1" id="fixest-0111">fixest 0.11.1<a class="anchor" aria-label="anchor" href="#fixest-0111"></a></h2>
+<div class="section level3">
+<h3 id="c-code-0-11-1">C++ code<a class="anchor" aria-label="anchor" href="#c-code-0-11-1"></a></h3>
+<ul><li>replace stdint with cstdint</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="0.11.0" id="fixest-0110">fixest 0.11.0<small>2022-10-19</small><a class="anchor" aria-label="anchor" href="#fixest-0110"></a></h2>
 <div class="section level3">
 <h3 id="bug-fixes-0-11-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-11-0"></a></h3>
 <ul><li><p>fix bug in function <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> leading to methods to throw errors in R devel. Thanks to <a href="https://github.com/vincentarelbundock" class="external-link">@vincentarelbundock</a> for reporting (<a href="https://github.com/lrberge/fixest/issues/291" class="external-link">#291</a>).</p></li>
@@ -297,7 +304,7 @@
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.10.4" id="fixest-0104">fixest 0.10.4<a class="anchor" aria-label="anchor" href="#fixest-0104"></a></h2>
+<h2 class="page-header" data-toc-text="0.10.4" id="fixest-0104">fixest 0.10.4<small>2022-03-31</small><a class="anchor" aria-label="anchor" href="#fixest-0104"></a></h2>
 <div class="section level3">
 <h3 id="hot-fix-0-10-4">Hot fix<a class="anchor" aria-label="anchor" href="#hot-fix-0-10-4"></a></h3>
 <ul><li>fix major bug related to the extraction of fixed-effects (function <code>fixef</code>) when there are 3+ fixed-effects. This bug led to, in some specific circumstances, wrong values for the fixed-effects coefficients. Thanks a lot to <a href="https://github.com/pachadotdev" class="external-link">@pachadotdev</a> (<a href="https://github.com/lrberge/fixest/issues/286" class="external-link">#286</a>) for finding this out!</li>
@@ -315,12 +322,12 @@
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.10.3" id="fixest-0103">fixest 0.10.3<a class="anchor" aria-label="anchor" href="#fixest-0103"></a></h2>
+<h2 class="page-header" data-toc-text="0.10.3" id="fixest-0103">fixest 0.10.3<small>2022-03-01</small><a class="anchor" aria-label="anchor" href="#fixest-0103"></a></h2>
 <ul><li><p>fix bug linked to the proper identification of estimations with only fixed-effects.</p></li>
 <li><p>remove the use of <code>anyNA.data.frame</code> leading to a dependency to R 3.6.3 (reported by <a href="https://github.com/MichaelChirico" class="external-link">@MichaelChirico</a>, <a href="https://github.com/lrberge/fixest/issues/261" class="external-link">#261</a>).</p></li>
 </ul></div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.10.2" id="fixest-0102">fixest 0.10.2<a class="anchor" aria-label="anchor" href="#fixest-0102"></a></h2>
+<h2 class="page-header" data-toc-text="0.10.2" id="fixest-0102">fixest 0.10.2<small>2022-02-17</small><a class="anchor" aria-label="anchor" href="#fixest-0102"></a></h2>
 <div class="section level3">
 <h3 id="bug-fixes-0-10-2">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-10-2"></a></h3>
 <ul><li><p>fix bug in stepwise estimations when two (stepwised) explanatory variables have exactly the same NAs values.</p></li>
@@ -469,7 +476,7 @@
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.10.1" id="fixest-0101">fixest 0.10.1<a class="anchor" aria-label="anchor" href="#fixest-0101"></a></h2>
+<h2 class="page-header" data-toc-text="0.10.1" id="fixest-0101">fixest 0.10.1<small>2021-10-30</small><a class="anchor" aria-label="anchor" href="#fixest-0101"></a></h2>
 <div class="section level3">
 <h3 id="bug-fixes-0-10-1">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-10-1"></a></h3>
 <ul><li><p>remove new R native piping test <code>|&gt;</code> which led to errors in R &lt; 4.1.0 despite conditional testing.</p></li>
@@ -642,7 +649,7 @@
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.10.0" id="fixest-0100">fixest 0.10.0<a class="anchor" aria-label="anchor" href="#fixest-0100"></a></h2>
+<h2 class="page-header" data-toc-text="0.10.0" id="fixest-0100">fixest 0.10.0<small>2021-09-28</small><a class="anchor" aria-label="anchor" href="#fixest-0100"></a></h2>
 <div class="section level3">
 <h3 id="bugs-fixes-0-10-0">Bugs fixes<a class="anchor" aria-label="anchor" href="#bugs-fixes-0-10-0"></a></h3>
 <ul><li><p>Fix bug occurring in IV models with multiple instruments and with multithreading on. That bug could lead to the wrong imputation of the IV residuals, hence affecting the standard-errors (although the order of magnitude of the variation should be minor). Thanks to <a href="https://github.com/whitfillp" class="external-link">@whitfillp</a>, <a href="https://github.com/lrberge/fixest/issues/182" class="external-link">#182</a>.</p></li>
@@ -759,7 +766,7 @@
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.9.0" id="fixest-090">fixest 0.9.0<a class="anchor" aria-label="anchor" href="#fixest-090"></a></h2>
+<h2 class="page-header" data-toc-text="0.9.0" id="fixest-090">fixest 0.9.0<small>2021-06-19</small><a class="anchor" aria-label="anchor" href="#fixest-090"></a></h2>
 <div class="section level3">
 <h3 id="bugs-0-9-0">Bugs<a class="anchor" aria-label="anchor" href="#bugs-0-9-0"></a></h3>
 <ul><li><p>Major bug, leading R to crash, occurring when the same variable was used with several different slopes (thanks to <a href="https://github.com/Oravishayrizi" class="external-link">@Oravishayrizi</a>, <a href="https://github.com/lrberge/fixest/issues/119" class="external-link">#119</a>).</p></li>
@@ -873,7 +880,7 @@
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.8.4" id="fixest-084">fixest 0.8.4<a class="anchor" aria-label="anchor" href="#fixest-084"></a></h2>
+<h2 class="page-header" data-toc-text="0.8.4" id="fixest-084">fixest 0.8.4<small>2021-03-29</small><a class="anchor" aria-label="anchor" href="#fixest-084"></a></h2>
 <div class="section level3">
 <h3 id="bugs-0-8-4">Bugs<a class="anchor" aria-label="anchor" href="#bugs-0-8-4"></a></h3>
 <ul><li><p>Fix bug <code>depvar = FALSE</code> not working when tex output was requested (thanks to <a href="https://github.com/apoorvalal" class="external-link">@apoorvalal</a> and <a href="https://github.com/pbaylis" class="external-link">@pbaylis</a>, <a href="https://github.com/lrberge/fixest/issues/104" class="external-link">#104</a>).</p></li>
@@ -903,7 +910,7 @@
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.8.3" id="fixest-083-2021-03-01">fixest 0.8.3 (2021-03-01)<a class="anchor" aria-label="anchor" href="#fixest-083-2021-03-01"></a></h2>
+<h2 class="page-header" data-toc-text="0.8.3" id="fixest-083-2021-03-01">fixest 0.8.3 (2021-03-01)<small>2021-03-01</small><a class="anchor" aria-label="anchor" href="#fixest-083-2021-03-01"></a></h2>
 <div class="section level3">
 <h3 id="bugs-0-8-3">Bugs<a class="anchor" aria-label="anchor" href="#bugs-0-8-3"></a></h3>
 <ul><li><p>Remove test that leads to a (uber odd) bug on fedora devel.</p></li>
@@ -916,7 +923,7 @@
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.8.2" id="fixest-082-2021-02-11">fixest 0.8.2 (2021-02-11)<a class="anchor" aria-label="anchor" href="#fixest-082-2021-02-11"></a></h2>
+<h2 class="page-header" data-toc-text="0.8.2" id="fixest-082-2021-02-11">fixest 0.8.2 (2021-02-11)<small>2021-02-11</small><a class="anchor" aria-label="anchor" href="#fixest-082-2021-02-11"></a></h2>
 <div class="section level3">
 <h3 id="bugs-0-8-2">Bugs<a class="anchor" aria-label="anchor" href="#bugs-0-8-2"></a></h3>
 <ul><li><p>Fix bug in IV estimations when <code>lean = TRUE</code> (thanks to <a href="https://github.com/reifjulian" class="external-link">@reifjulian</a>, <a href="https://github.com/lrberge/fixest/issues/88" class="external-link">#88</a>).</p></li>
@@ -933,7 +940,7 @@
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.8.1" id="fixest-081-2021-01-13">fixest 0.8.1 (2021-01-13)<a class="anchor" aria-label="anchor" href="#fixest-081-2021-01-13"></a></h2>
+<h2 class="page-header" data-toc-text="0.8.1" id="fixest-081-2021-01-13">fixest 0.8.1 (2021-01-13)<small>2021-01-13</small><a class="anchor" aria-label="anchor" href="#fixest-081-2021-01-13"></a></h2>
 <div class="section level3">
 <h3 id="bugs-0-8-1">Bugs<a class="anchor" aria-label="anchor" href="#bugs-0-8-1"></a></h3>
 <ul><li><p>Bug in <code>etable</code> when the default value of <code>fitstat</code> was set with <code>setFixest_etable</code>.</p></li>
@@ -973,7 +980,7 @@
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.8.0" id="fixest-080-2020-12-14">fixest 0.8.0 (2020-12-14)<a class="anchor" aria-label="anchor" href="#fixest-080-2020-12-14"></a></h2>
+<h2 class="page-header" data-toc-text="0.8.0" id="fixest-080-2020-12-14">fixest 0.8.0 (2020-12-14)<small>2020-12-14</small><a class="anchor" aria-label="anchor" href="#fixest-080-2020-12-14"></a></h2>
 <div class="section level3">
 <h3 id="bugs-0-8-0">Bugs<a class="anchor" aria-label="anchor" href="#bugs-0-8-0"></a></h3>
 <ul><li><p>Major bug when predict was used in the presence of fixed-effects (thanks to <a href="https://github.com/jurojas5" class="external-link">@jurojas5</a>, <a href="https://github.com/lrberge/fixest/issues/54" class="external-link">#54</a>). Introduced in version 0.7.</p></li>
@@ -1100,7 +1107,7 @@
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.7.1" id="fixest-071-2020-10-27">fixest 0.7.1 (2020-10-27)<a class="anchor" aria-label="anchor" href="#fixest-071-2020-10-27"></a></h2>
+<h2 class="page-header" data-toc-text="0.7.1" id="fixest-071-2020-10-27">fixest 0.7.1 (2020-10-27)<small>2020-10-27</small><a class="anchor" aria-label="anchor" href="#fixest-071-2020-10-27"></a></h2>
 <div class="section level3">
 <h3 id="hotfixes-0-7-1">Hotfixes<a class="anchor" aria-label="anchor" href="#hotfixes-0-7-1"></a></h3>
 <ul><li><p>Fix bug int overflow in estimations with only one variable.</p></li>
@@ -1120,7 +1127,7 @@
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.7.0" id="fixest-070-2020-10-24">fixest 0.7.0 (2020-10-24)<a class="anchor" aria-label="anchor" href="#fixest-070-2020-10-24"></a></h2>
+<h2 class="page-header" data-toc-text="0.7.0" id="fixest-070-2020-10-24">fixest 0.7.0 (2020-10-24)<small>2020-10-24</small><a class="anchor" aria-label="anchor" href="#fixest-070-2020-10-24"></a></h2>
 <div class="section level3">
 <h3 id="bugs-0-7-0">Bugs<a class="anchor" aria-label="anchor" href="#bugs-0-7-0"></a></h3>
 <ul><li><p>Major bug when fixed-effects were combined with <code>^</code> and they contained NAs (thanks to <a href="https://github.com/poliquin" class="external-link">@poliquin</a>, <a href="https://github.com/lrberge/fixest/issues/35" class="external-link">#35</a>).</p></li>
@@ -1224,7 +1231,7 @@
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.6.0" id="fixest-060-2020-07-13">fixest 0.6.0 (2020-07-13)<a class="anchor" aria-label="anchor" href="#fixest-060-2020-07-13"></a></h2>
+<h2 class="page-header" data-toc-text="0.6.0" id="fixest-060-2020-07-13">fixest 0.6.0 (2020-07-13)<small>2020-07-13</small><a class="anchor" aria-label="anchor" href="#fixest-060-2020-07-13"></a></h2>
 <div class="section level3">
 <h3 id="bugs-0-6-0">Bugs<a class="anchor" aria-label="anchor" href="#bugs-0-6-0"></a></h3>
 <ul><li><p>In <code>vcov</code>, the degree-of-freedom in the small sample correction correction was fixed to “nested” and couldn’t be modified, now corrected. Further, “nested” was not properly accounted for, now corrected.</p></li>
@@ -1270,7 +1277,7 @@
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.5.1" id="fixest-051-2020-06-18">fixest 0.5.1 (2020-06-18)<a class="anchor" aria-label="anchor" href="#fixest-051-2020-06-18"></a></h2>
+<h2 class="page-header" data-toc-text="0.5.1" id="fixest-051-2020-06-18">fixest 0.5.1 (2020-06-18)<small>2020-06-18</small><a class="anchor" aria-label="anchor" href="#fixest-051-2020-06-18"></a></h2>
 <div class="section level3">
 <h3 id="hotfix-0-5-1">Hotfix<a class="anchor" aria-label="anchor" href="#hotfix-0-5-1"></a></h3>
 <ul><li>Fixed bug introduced in the previous update (memory access error). Does not affect any of the results but could lead R to crash unexpectedly (odds were low though since access was adjacent).</li>
@@ -1298,7 +1305,7 @@
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.5.0" id="fixest-050-2020-06-10">fixest 0.5.0 (2020-06-10)<a class="anchor" aria-label="anchor" href="#fixest-050-2020-06-10"></a></h2>
+<h2 class="page-header" data-toc-text="0.5.0" id="fixest-050-2020-06-10">fixest 0.5.0 (2020-06-10)<small>2020-06-10</small><a class="anchor" aria-label="anchor" href="#fixest-050-2020-06-10"></a></h2>
 <div class="section level3">
 <h3 id="bug-fixes-0-5-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-5-0"></a></h3>
 <ul><li>Bug with estimations with varying slopes if the fixed-effect relative to the slope is not in its decreasing order (thanks to Davide Proserpio).</li>
@@ -1368,7 +1375,7 @@
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.4.1" id="fixest-041-2020-04-13">fixest 0.4.1 (2020-04-13)<a class="anchor" aria-label="anchor" href="#fixest-041-2020-04-13"></a></h2>
+<h2 class="page-header" data-toc-text="0.4.1" id="fixest-041-2020-04-13">fixest 0.4.1 (2020-04-13)<small>2020-04-14</small><a class="anchor" aria-label="anchor" href="#fixest-041-2020-04-13"></a></h2>
 <div class="section level3">
 <h3 id="bug-fixes-0-4-1">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-4-1"></a></h3>
 <ul><li>Major bug leading R to crash when using non-linear-in-parameters right-hand-sides in feNmlm. Only occured when some observations were removed from the data set (due to NAness or to perfect fit). [Thanks to <a href="https://github.com/marissachilds" class="external-link">@marissachilds</a>, GH issue <a href="https://github.com/lrberge/fixest/issues/17" class="external-link">#17</a>.]</li>
@@ -1388,7 +1395,7 @@
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.4.0" id="fixest-040-2020-03-27">fixest 0.4.0 (2020-03-27)<a class="anchor" aria-label="anchor" href="#fixest-040-2020-03-27"></a></h2>
+<h2 class="page-header" data-toc-text="0.4.0" id="fixest-040-2020-03-27">fixest 0.4.0 (2020-03-27)<small>2020-03-29</small><a class="anchor" aria-label="anchor" href="#fixest-040-2020-03-27"></a></h2>
 <div class="section level3">
 <h3 id="user-visible-changes-latex-export-0-4-0">User visible changes: Latex export<a class="anchor" aria-label="anchor" href="#user-visible-changes-latex-export-0-4-0"></a></h3>
 <ul><li>Better Latex special character escaping (errors reported by <a href="https://github.com/dlindzee" class="external-link">@dlindzee</a>, <a href="https://github.com/lrberge/fixest/issues/15" class="external-link">#15</a>).</li>
@@ -1420,7 +1427,7 @@
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.3.1" id="fixest-031-2020-02-09">fixest 0.3.1 (2020-02-09)<a class="anchor" aria-label="anchor" href="#fixest-031-2020-02-09"></a></h2>
+<h2 class="page-header" data-toc-text="0.3.1" id="fixest-031-2020-02-09">fixest 0.3.1 (2020-02-09)<small>2020-02-09</small><a class="anchor" aria-label="anchor" href="#fixest-031-2020-02-09"></a></h2>
 <div class="section level3">
 <h3 id="major-bug-fix-0-3-1">Major bug fix<a class="anchor" aria-label="anchor" href="#major-bug-fix-0-3-1"></a></h3>
 <ul><li>[panel] Fixed faulty memory access when taking the lead of a variable.</li>
@@ -1438,7 +1445,7 @@
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.3.0" id="fixest-030-2020-02-01">fixest 0.3.0 (2020-02-01)<a class="anchor" aria-label="anchor" href="#fixest-030-2020-02-01"></a></h2>
+<h2 class="page-header" data-toc-text="0.3.0" id="fixest-030-2020-02-01">fixest 0.3.0 (2020-02-01)<small>2020-02-01</small><a class="anchor" aria-label="anchor" href="#fixest-030-2020-02-01"></a></h2>
 <div class="section level3">
 <h3 id="new-feature-lagging-0-3-0">New feature: Lagging<a class="anchor" aria-label="anchor" href="#new-feature-lagging-0-3-0"></a></h3>
 <ul><li><p>You can now add lags and leads in any <code>fixest</code> estimations. You only need to provide the panel identifiers with the new argument <code>panel.id</code>, then you’re free to use the new functions <code><a href="../reference/l.html">l()</a></code> for lags and <code><a href="../reference/l.html">f()</a></code> for leads.</p></li>
@@ -1501,7 +1508,7 @@
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.2.1" id="fixest-021-2019-11-22">fixest 0.2.1 (2019-11-22)<a class="anchor" aria-label="anchor" href="#fixest-021-2019-11-22"></a></h2>
+<h2 class="page-header" data-toc-text="0.2.1" id="fixest-021-2019-11-22">fixest 0.2.1 (2019-11-22)<small>2019-11-23</small><a class="anchor" aria-label="anchor" href="#fixest-021-2019-11-22"></a></h2>
 <div class="section level3">
 <h3 id="major-bug-correction-0-2-1">Major bug correction<a class="anchor" aria-label="anchor" href="#major-bug-correction-0-2-1"></a></h3>
 <ul><li>lag.formula: Bug introduced from previous update which could lead to wrong results. Now fixed.</li>
@@ -1512,7 +1519,7 @@
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.2.0" id="fixest-020-2019-11-19">fixest 0.2.0 (2019-11-19)<a class="anchor" aria-label="anchor" href="#fixest-020-2019-11-19"></a></h2>
+<h2 class="page-header" data-toc-text="0.2.0" id="fixest-020-2019-11-19">fixest 0.2.0 (2019-11-19)<small>2019-11-19</small><a class="anchor" aria-label="anchor" href="#fixest-020-2019-11-19"></a></h2>
 <div class="section level3">
 <h3 id="new-function-0-2-0">New function<a class="anchor" aria-label="anchor" href="#new-function-0-2-0"></a></h3>
 <p>-[did_means] New function <code>did_means</code> to conveniently compare means of groups of observations (both treat/control and pre/post). Contains tools to easily export in Latex.</p>
@@ -1544,14 +1551,14 @@
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.1.2" id="fixest-012-2019-10-04">fixest 0.1.2 (2019-10-04)<a class="anchor" aria-label="anchor" href="#fixest-012-2019-10-04"></a></h2>
+<h2 class="page-header" data-toc-text="0.1.2" id="fixest-012-2019-10-04">fixest 0.1.2 (2019-10-04)<small>2019-10-04</small><a class="anchor" aria-label="anchor" href="#fixest-012-2019-10-04"></a></h2>
 <div class="section level3">
 <h3 id="major-bug-correction-0-1-2">Major bug correction<a class="anchor" aria-label="anchor" href="#major-bug-correction-0-1-2"></a></h3>
 <ul><li>lag.formula: When the data was not in a particular format, the results could be wrong. Now corrected.</li>
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.1.1" id="fixest-011-2019-09-20">fixest 0.1.1 (2019-09-20)<a class="anchor" aria-label="anchor" href="#fixest-011-2019-09-20"></a></h2>
+<h2 class="page-header" data-toc-text="0.1.1" id="fixest-011-2019-09-20">fixest 0.1.1 (2019-09-20)<small>2019-09-20</small><a class="anchor" aria-label="anchor" href="#fixest-011-2019-09-20"></a></h2>
 <div class="section level3">
 <h3 id="major-bug-correction-0-1-1">Major bug correction<a class="anchor" aria-label="anchor" href="#major-bug-correction-0-1-1"></a></h3>
 <ul><li>feglm: bug when a) the deviance at initialization was higher than the deviance of the first iteration of the IRWLS and b) the step-halving was unable to find a lower deviance. This led the estimation to fail with an error although it should have been performed properly.</li>
@@ -1572,7 +1579,7 @@
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.1.0" id="fixest-010-2019-09-03">fixest 0.1.0 (2019-09-03)<a class="anchor" aria-label="anchor" href="#fixest-010-2019-09-03"></a></h2>
+<h2 class="page-header" data-toc-text="0.1.0" id="fixest-010-2019-09-03">fixest 0.1.0 (2019-09-03)<small>2019-09-03</small><a class="anchor" aria-label="anchor" href="#fixest-010-2019-09-03"></a></h2>
 <div class="section level3">
 <h3 id="first-version-0-1-0">First version<a class="anchor" aria-label="anchor" href="#first-version-0-1-0"></a></h3>
 <ul><li><p>This package is an effort to create a family of fast and user-friendly functions to perform estimations with multiple fixed-effects (F.E.).</p></li>
