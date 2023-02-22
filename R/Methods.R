@@ -952,7 +952,7 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE, nthrea
 
         nthreads = check_set_nthreads(nthreads)
 
-        table_id_I = as.integer(unlist(lapply(fe_id_list, table), use.names = FALSE))
+        table_id_I = as.integer(unlist(lapply(fe_id_list, tabulate), use.names = FALSE))
 
         S_demean = cpp_demean(y = S, X_raw = 0, r_weights = 0, iterMax = as.integer(fixef.iter),
                               diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
@@ -2603,7 +2603,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
         }
 
         var_keep = intersect(names(coef), colnames(matrix_linear))
-        value_linear = value_linear + as.vector(matrix_linear[, var_keep, drop = FALSE] %*% coef[var_keep])
+        value_linear = value_linear + c(matrix_linear[, var_keep, drop = FALSE] %*% coef[var_keep])
     }
 
     #
