@@ -952,7 +952,7 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE, nthrea
 
         nthreads = check_set_nthreads(nthreads)
 
-        table_id_I = as.integer(unlist(lapply(fe_id_list, table), use.names = FALSE))
+        table_id_I = as.integer(unlist(lapply(fe_id_list, tabulate), use.names = FALSE))
 
         S_demean = cpp_demean(y = S, X_raw = 0, r_weights = 0, iterMax = as.integer(fixef.iter),
                               diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
@@ -1102,7 +1102,7 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE, nthrea
                 fixef_sizes = fixef_sizes[new_order]
 
                 fe_id_list = object$fixef_id[new_order]
-                table_id_I = as.integer(unlist(lapply(fe_id_list, table), use.names = FALSE))
+                table_id_I = as.integer(unlist(lapply(fe_id_list, tabulate), use.names = FALSE))
 
                 slope_flag = rep(0L, Q)
                 slope_variables = list()
