@@ -2603,7 +2603,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
         }
 
         var_keep = intersect(names(coef), colnames(matrix_linear))
-        value_linear = value_linear + as.vector(matrix_linear[, var_keep, drop = FALSE] %*% coef[var_keep])
+        value_linear = value_linear + c(matrix_linear[, var_keep, drop = FALSE] %*% coef[var_keep])
     }
 
     #
