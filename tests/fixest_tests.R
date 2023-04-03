@@ -2170,13 +2170,14 @@ est = feols(y ~ x1 + x2 | species, base)
 test(nrow(confint(est)), 2)
 test(nrow(confint(est, "x1")), 1)
 
+est_coefplot_prms = coefplot(est, only.params = TRUE)$prms[, 2:3]
+test(confint(est), est_coefplot_prms)
+
 est_pois = fepois(y ~ x1 | species, base)
 test(nrow(confint(est_pois)), 1)
 
-
 est_iv = feols(y ~ x1 | species | x2 ~ x3, base)
 test(nrow(confint(est_iv)), 2)
-
 
 ####
 #### etable ####
