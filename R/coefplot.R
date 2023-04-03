@@ -1445,7 +1445,7 @@ coefplot = function(object, ..., style = NULL, sd, ci_low, ci_high, x, x.shift =
 
 
 coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
-                         keep, drop, order, ci_level = 0.95, ref = "auto",
+                         keep, drop, order, ci_level = 0.95, dof = NULL, ref = "auto",
                          only.i = TRUE, sep, as.multiple = FALSE){
 
     # get the default for:
@@ -1622,11 +1622,13 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
 
             names(estimate) = rownames(mat)
 
-            if("fml" %in% names(object)){
+            if ("fml" %in% names(object)) {
                 depvar = gsub(" ", "", as.character(object$fml)[[2]])
-                if(depvar %in% names(dict)) depvar = dict[depvar]
+                if (depvar %in% names(dict)) depvar = dict[depvar]
                 varlist$depvar = depvar
             }
+            
+            dof = tryCatch(degrees_freedom(object, "t"), error = function(e) NULL)
 
         } else if(is.matrix(object)){
             # object is a matrix containing the coefs and SEs
@@ -1658,7 +1660,8 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
             if(!missing(ci_low) || !missing(ci_high)) warning("Since 'sd' is provided, arguments 'ci_low' or 'ci_high' are ignored.")
 
             # We compute the CI
-            nb = abs(qnorm((1 - ci_level)/2))
+            if (is.null(dof)) dof = Inf
+            nb = abs(qt((1 - ci_level) / 2, df = dof))
             ci_high = estimate + nb*sd
             ci_low = estimate - nb*sd
         }
