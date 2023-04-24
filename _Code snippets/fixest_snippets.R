@@ -475,7 +475,65 @@ rbind(fixest = coef(res_feols), wfe = coef(res_wfe))
 rbind(fixest = se(res_feols), wfe = se(res_wfe))
 
 
+####
+#### F-test: 2-models comparion ####
+####
 
+f_test = function(m1, m2 = NULL) {
+   # F test between two models
+   # if the second model is missing and the 
+   # first model has fixed-effects, then the tests
+   # is the comparison without FEs
+
+   if(missing(m2) || is.null(m2)){
+      if(!is.null(m1$fixef_id)){
+         m2 = update(m1, . ~ . | 1)
+      }
+   }
+
+   if(m1$ssr < m2$ssr){
+      # we revert the two models
+      tmp = m2
+      m2 = m1
+      m1 = tmp
+   }
+
+   ssr_c = m1$ssr
+   ssr_u = m2$ssr
+
+   dfr_c = degrees_freedom(m1, "resid", vcov = "iid")
+   dfr_u = degrees_freedom(m2, "resid", vcov = "iid")
+
+   n_restriction = dfr_c - dfr_u
+   f_stat = (ssr_c - ssr_u) / ssr_u * dfr_u / n_restriction
+   pval = 1 - pf(f_stat, n_restriction, dfr_u)
+
+   data.frame(f_stat, pval)
+}
+
+m = feols(Petal.Length ~ Sepal.Length | Species, iris)
+mm = feols(Petal.Length ~ Sepal.Length + Sepal.Width | Species, iris)
+
+f_test(m, mm)
+#>     f_stat      pval
+#> 1 0.250248 0.6176589
+
+m = lm(Petal.Length ~ Sepal.Length + Species, iris)
+mm = lm(Petal.Length ~ Sepal.Length + Sepal.Width + Species, iris)
+
+anova(m, mm)
+#> Analysis of Variance Table
+#> Model 1: Petal.Length ~ Sepal.Length + Species
+#> Model 2: Petal.Length ~ Sepal.Length + Sepal.Width + Species
+#>   Res.Df    RSS Df Sum of Sq      F Pr(>F)
+#> 1    146 11.657
+#> 2    145 11.637  1  0.020084 0.2502 0.6177
+
+# comparison with no FE:
+m = feols(Petal.Length ~ Sepal.Length | Species, iris)
+f_test(m)
+#>     f_stat pval
+#> 1 624.9854    0
 
 
 
