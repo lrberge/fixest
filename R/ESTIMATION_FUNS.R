@@ -77,7 +77,7 @@
 #'
 #' Of course you can still add the fixed-effects, but the IV formula must always come last, like in `fml = y ~ x1 | fe1 + fe2 | x_endo ~ x_inst`.
 #'
-#' If you want to estimate a model without exogenous variables, use `"1"` as a placeholder: e.g. `fml = y ~ 1 | x_endo + x_inst`.
+#' If you want to estimate a model without exogenous variables, use `"1"` as a placeholder: e.g. `fml = y ~ 1 | x_endo ~ x_inst`.
 #'
 #' By default, the second stage regression is returned. You can access the first stage(s) regressions either directly in the slot `iv_first_stage` (not recommended), or using the argument `stage = 1` from the function [`summary.fixest`]. For example `summary(iv_est, stage = 1)` will give the first stage(s). Note that using summary you can display both the second and first stages at the same time using, e.g., `stage = 1:2` (using `2:1` would reverse the order).
 #'
