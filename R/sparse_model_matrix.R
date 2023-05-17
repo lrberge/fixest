@@ -28,7 +28,7 @@
 #' est = feols(wt ~ i(vs) + poly(hp, 2) | cyl, mtcars)
 #' 
 #'
-#'
+#' @export
 sparse_model_matrix = function(object, data, type = "rhs", na.rm = TRUE,  collin.rm = TRUE, combine = TRUE, ...) {
     # We evaluate the formula with the past call
     # type: lhs, rhs, fixef, iv.endo, iv.inst, iv.rhs1, iv.rhs2
