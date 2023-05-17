@@ -2136,6 +2136,130 @@ test(names(m_lhs_rhs_fixef), c("y1", "fit_x2", "x1", "species"))
 
 
 ####
+#### sparse_model_matrix ####
+####
+
+
+base = iris
+names(base) = c("y1", "x1", "x2", "x3", "species")
+base$y2 = 10 + rnorm(150) + 0.5 * base$x1
+base$x4 = rnorm(150) + 0.5 * base$y1
+base$fe2 = rep(letters[1:15], 10)
+base$fe2[50:51] = NA
+base$y2[base$fe2 == "a" & !is.na(base$fe2)] = 0
+base$x2[1:5] = NA
+base$x3[6] = NA
+base$fe3 = rep(letters[1:10], 15)
+base$id = rep(1:15, each = 10)
+base$time = rep(1:10, 15)
+
+base_bis = base[1:50, ]
+base_bis$id = rep(1:5, each = 10)
+base_bis$time = rep(1:10, 5)
+
+
+res = feols(y1 ~ x1 + x2 + x3, base)
+sm1 = sparse_model_matrix(
+  res, type = "lhs",
+  na.rm = TRUE
+)
+test(length(sm1), res$nobs)
+
+sm1_na = sparse_model_matrix(
+  res, data = base, 
+  type = "lhs",
+  na.rm = FALSE
+)
+test(length(sm1_na), res$nobs_origin)
+test(max(abs(sm1_na - base$y1), na.rm = TRUE), 0)
+
+
+sm2 = sparse_model_matrix(
+  res, type = c("lhs", "rhs"), data = base, 
+  combine = FALSE, na.rm = FALSE
+)
+y = sm2[["lhs"]]
+X = sm2[["rhs"]]
+obs_rm = res$obs_selection$obsRemoved
+res_bis = Matrix::solve(
+  MatrixExtra::crossprod(X[obs_rm, ]), 
+  MatrixExtra::crossprod(X[obs_rm, ], y[obs_rm])
+)
+test(as.numeric(res_bis), res$coefficients)
+
+# No constant
+res_nocons = feols(mpg ~ 0 + i(cyl), mtcars)
+sm_nocons = sparse_model_matrix(res_nocons, type = "rhs")
+test("(Intercept)" %in% colnames(sm_nocons), FALSE)
+
+# Lag 
+data(base_did)
+pdat = panel(base_did, ~ id + period)
+est1 = feols(y ~ l(x1, 0:1), pdat)
+res_lag = feols(y1 ~ l(x1, 1:2) + x2 + x3, base, panel = ~id + time)
+test(nrow(sm_lag), nobs(res_lag))
+
+
+# TODO: Fix poly and newdata
+# With poly
+# res_poly = feols(y1 ~ poly(x1, 2), base)
+# works
+# res_poly = feols(y1 ~ x1, base)
+# sm_poly_old = sparse_model_matrix(res_poly)
+# sm_poly_new = sparse_model_matrix(res_poly, data = base_bis)
+# test(sm_poly_old[1:50, 3], sm_poly_new[, 3])
+
+
+# Interacted fixef
+res = feols(y1 ~ x1 + x2 + x3 | species^fe2, base)
+sm_ife = sparse_model_matrix(res, data = base, type = "fixef", collin.rm = FALSE)
+
+# fixef
+res = feols(y1 ~ x1 + x2 + x3 | species + fe2, base)
+sm_fe = sparse_model_matrix(res, data = base, type = "fixef")
+test(ncol(sm_fe), 17)
+
+sm_fe_no_collin_rm = sparse_model_matrix(res, data = base, type = "fixef", collin.rm = FALSE)
+test(ncol(sm_fe_no_collin_rm), 18)
+
+sm_fe_base_bis = sparse_model_matrix(res, data = base_bis, type = "fixef")
+
+
+# Time-varying slopes
+res_slopes = feols(y1 ~ x1 + x2 + x3 | fe2[I(x2+1)], data = base[7:48, ])
+sm_slopes = sparse_model_matrix(res_slopes, type = "fixef")
+
+# IV
+res_iv = feols(y1 ~ x1 | x2 ~ x3, base)
+
+sm_rhs1 = sparse_model_matrix(res_iv, type = "iv.rhs1")
+test(colnames(sm_rhs1)[-1], c("x3", "x1"))
+
+sm_rhs2 = sparse_model_matrix(res_iv, type = "iv.rhs2")
+test(colnames(sm_rhs2)[-1], c("fit_x2", "x1"))
+
+sm_endo = sparse_model_matrix(res_iv, type = "iv.endo")
+test(colnames(sm_endo), "x2")
+
+sm_exo  = sparse_model_matrix(res_iv, type = "iv.exo")
+test(colnames(sm_exo)[-1], "x1")
+
+sm_inst  = sparse_model_matrix(res_iv, type = "iv.inst")
+test(colnames(sm_inst), "x3")
+
+# several
+res_mult = feols(y1 ~ x1 | species | x2 ~ x3, base)
+
+sm_lhs_rhs_fixef = sparse_model_matrix(res_mult, type = c("lhs", "iv.rhs2", "fixef"))
+test(colnames(sm_lhs_rhs_fixef), c("y1", "fit_x2", "x1", "species::setosa", "species::versicolor", "species::virginica"))
+
+
+# non-linear model
+res_pois = fepois(Sepal.Length ~ Sepal.Width + Petal.Length | Species, iris)
+sp_pois = sparse_model_matrix(res_pois, data = iris)
+
+
+####
 #### fitstat ####
 ####
 
