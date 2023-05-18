@@ -2129,7 +2129,7 @@ oldargs_to_vcov = function(se, cluster, vcov, .vcov = NULL){
             }
         }
 
-        check_arg(.vcov, "matrix | function")
+        check_arg(.vcov, "matrix | function | named list L1")
 
         vcov = .vcov
         attr(vcov, "deparsed_arg") = fetch_arg_deparse(".vcov")
