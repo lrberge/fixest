@@ -2,8 +2,6 @@
 #'
 #' This function creates the left-hand-side or the right-hand-side(s) of a [`femlm`], [`feols`] or [`feglm`] estimation. Note that this function currently does not accept a formula
 #'
-#' @method sparse_model_matrix fixest
-#'
 #' @inheritParams nobs.fixest
 #'
 #' @param data If missing (default) then the original data is obtained by evaluating the `call`. Otherwise, it should be a `data.frame`.
@@ -25,7 +23,8 @@
 #'
 #' @examples
 #'
-#' est = feols(wt ~ i(vs) + poly(hp, 2) | cyl, mtcars)
+#' est = feols(wt ~ i(vs) + hp | cyl, mtcars)
+#' sparse_model_matrix(est)
 #' 
 #'
 #' @export
@@ -70,7 +69,7 @@ sparse_model_matrix = function(object, data, type = "rhs", na.rm = TRUE,  collin
     if (missnull(data)) {
         original_data = TRUE
 
-        data = fetch_data(object, "To apply 'sparse_model_matrix.fixest', ")
+        data = fetch_data(object, "To apply 'sparse_model_matrix', ")
     }
 
     # control of the data

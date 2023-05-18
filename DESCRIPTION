@@ -15,7 +15,7 @@ Authors@R:
              role = "ctb",
              email = "grantmcd@uoregon.edu",
              comment = c(ORCID = "0000-0001-7883-8573")))
-Imports: stats, graphics, grDevices, tools, utils, methods, numDeriv, nlme, sandwich, Rcpp(>= 1.0.5), dreamerr(>= 1.2.3)
+Imports: stats, graphics, grDevices, tools, utils, methods, numDeriv, nlme, sandwich, Rcpp(>= 1.0.5), dreamerr(>= 1.2.3), Matrix
 Suggests: knitr, rmarkdown, data.table, plm, MASS, pander, ggplot2, lfe, tinytex, pdftools
 LinkingTo: Rcpp
 Depends: R(>= 3.5.0)
@@ -28,6 +28,6 @@ URL: https://lrberge.github.io/fixest/, https://github.com/lrberge/fixest
 SystemRequirements: C++11
 VignetteBuilder: knitr
 LazyData: true
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.3
 Roxygen: list(markdown = TRUE)
 Encoding: UTF-8

@@ -2139,7 +2139,6 @@ test(names(m_lhs_rhs_fixef), c("y1", "fit_x2", "x1", "species"))
 #### sparse_model_matrix ####
 ####
 
-
 base = iris
 names(base) = c("y1", "x1", "x2", "x3", "species")
 base$y2 = 10 + rnorm(150) + 0.5 * base$x1
@@ -2181,9 +2180,9 @@ sm2 = sparse_model_matrix(
 y = sm2[["lhs"]]
 X = sm2[["rhs"]]
 obs_rm = res$obs_selection$obsRemoved
-res_bis = Matrix::solve(
-  MatrixExtra::crossprod(X[obs_rm, ]), 
-  MatrixExtra::crossprod(X[obs_rm, ], y[obs_rm])
+res_bis = solve(
+  crossprod(as.matrix(X)[obs_rm, ]), 
+  crossprod(as.matrix(X)[obs_rm, ], as.matrix(y)[obs_rm, ])
 )
 test(as.numeric(res_bis), res$coefficients)
 
@@ -2193,10 +2192,8 @@ sm_nocons = sparse_model_matrix(res_nocons, type = "rhs")
 test("(Intercept)" %in% colnames(sm_nocons), FALSE)
 
 # Lag 
-data(base_did)
-pdat = panel(base_did, ~ id + period)
-est1 = feols(y ~ l(x1, 0:1), pdat)
 res_lag = feols(y1 ~ l(x1, 1:2) + x2 + x3, base, panel = ~id + time)
+sm_lag = sparse_model_matrix(res_lag, type = "rhs")
 test(nrow(sm_lag), nobs(res_lag))
 
 

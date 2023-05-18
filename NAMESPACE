@@ -36,6 +36,8 @@ export(to_integer, demean, obs)
 export(as.dict)
 # setters & getters
 exportPattern("^(s|g)etFixest")
+# sparse_model_matrix
+export(sparse_model_matrix)
 
 # coeftable and co
 export(coeftable, se, pvalue, tstat)
