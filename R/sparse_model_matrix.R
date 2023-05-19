@@ -100,7 +100,7 @@ sparse_model_matrix = function(object, data, type = "rhs", na.rm = TRUE,  collin
       }
     }
 
-    # na.rm = FALSE and collin.rm = FALSE doesn't work with type = "fixef"
+    # na.rm = FALSE doesn't work with type = "fixef" (which FE col gets NA?)
     if (("fixef" %in% type & !na.rm)) {
         # na.rm = TRUE
         message("na.rm = FALSE doesn't work with type = 'fixef'. It has been set to TRUE.")
@@ -117,10 +117,8 @@ sparse_model_matrix = function(object, data, type = "rhs", na.rm = TRUE,  collin
       fml_linear = split_fml[[1]]
       
       fml_0 = attr(stats::terms(fml_linear), "intercept") == 0
-      # TODO: Check if they are only heterogeneous slopes
       fake_intercept = !is.null(split_fml[[2]]) | fml_0
-      
-
+    
     } else {
       fml_linear = formula(object, type = "linear")
       
@@ -132,7 +130,6 @@ sparse_model_matrix = function(object, data, type = "rhs", na.rm = TRUE,  collin
 
     res = list()
 
-    # TODO: multiple outcome variables doesn't work 
     if ("lhs" %in% type) {
         lhs_text = deparse_long(fml_linear[[2]])
         lhs = eval(fml_linear[[2]], data) 
@@ -162,9 +159,6 @@ sparse_model_matrix = function(object, data, type = "rhs", na.rm = TRUE,  collin
         res[["rhs"]] = linear.mat
     }
 
-    #
-    # Fixef
-    #
     if ("fixef" %in% type) {
 
         if (isFormula && (length(split_fml) < 2)) {
@@ -218,16 +212,28 @@ sparse_model_matrix = function(object, data, type = "rhs", na.rm = TRUE,  collin
               fe_var = fe_vars[i]
               xi = fixef_df[[fe_var]]
 
-              col_id = unclass(droplevels(as.factor(xi)))
-              col_levels = attr(col_id, "levels")
+              where_na = which(is.na(xi))       
+              xi_quf = quickUnclassFactor(xi[-where_na], addItem = TRUE)
+
+              col_id = xi_quf$x
+              col_levels = as.character(xi_quf$items)
 
               slope_vars = slope_var_list[[i]]
               n_slope_vars = if (is.null(slope_vars)) 0 else length(slope_vars)
 
+              # Be careful with NAs
               # First fixed-effect by itself
-              val_all[[j]] = as.numeric(col_id > 0)
-              col_id[is.na(col_id)] = 1
-              id_all[[j]] = cbind(rowid, running_cols[j] + col_id)
+              val_all[[j]] = c(rep(1, length(col_id)), rep(NA, length(where_na)))
+              id_all[[j]] = cbind(
+                c(
+                  rowid[-where_na],
+                  rowid[where_na]
+                ), 
+                c(
+                  running_cols[j] + col_id, 
+                  rep(running_cols[j] + 1, length(where_na))
+                )
+              )
               names_all[[j]] = paste0(fe_var, "::", col_levels)
               j = j + 1
 
@@ -235,9 +241,18 @@ sparse_model_matrix = function(object, data, type = "rhs", na.rm = TRUE,  collin
                 slope_var = slope_vars[k]
                 slope = slope_df[[slope_var]]
 
-                id_all[[j]] = cbind(rowid, running_cols[j] + col_id)
-                val_all[[j]] = as.numeric(slope)
-                names_all[[j]] = paste0(fe_var, "[[", slope_var, "]]", "::", attr(col_id, "levels"))
+                val_all[[j]] = c(as.numeric(slope[-where_na]), rep(NA, length(where_na)))
+                id_all[[j]] = cbind(
+                  c(
+                    rowid[-where_na],         
+                    rowid[where_na]
+                  ), 
+                  c(
+                    running_cols[j] + col_id, 
+                    rep(running_cols[j] + 1, length(where_na))
+                  )
+                )
+                names_all[[j]] = paste0(fe_var, "[[", slope_var, "]]", "::", col_levels)
                 j = j + 1
               }
             }
@@ -256,7 +271,7 @@ sparse_model_matrix = function(object, data, type = "rhs", na.rm = TRUE,  collin
 
             # Keep non-zero FEs
             if (collin.rm == TRUE) {
-              fixefs = fixef(object)
+              fixefs = fixef(object, sorted = TRUE)
 
               select =	lapply(
                 names(fixefs), 
@@ -586,13 +601,7 @@ vars_to_sparse_mat = function(vars, data, collin.rm = FALSE, object = NULL, type
 
     }
 
-    # Check
-    # if (isTRUE(object$iv)) {
-    #     fml_iv = object$fml_all$iv
-    #     fml = .xpd(..lhs ~ ..endo + ..rhs, ..lhs = fml[[2]], ..endo = fml_iv[[2]], ..rhs = fml[[3]])
-    # }
-
-    # TODO: Check in on this
+    # TODO: Should I use error_sender?
     # mat = error_sender(fixest_model_matrix_extra(
     #     object = object, newdata = data, original_data = original_data,
     #     fml = fml, fake_intercept = fake_intercept,
@@ -615,7 +624,7 @@ vars_to_sparse_mat = function(vars, data, collin.rm = FALSE, object = NULL, type
         if (isTRUE(object$iv)) {
           fml_iv = object$fml_all$iv
           endo = fml_iv[[2]]
-          # TODO: See if a similar trick helps with multiple outcome variables
+          
           # Trick to get the rhs variables as a character vector
           endo = .xpd(~ ..endo, ..endo = endo)
           endo = attr(stats::terms(endo), "term.labels")
@@ -632,7 +641,7 @@ vars_to_sparse_mat = function(vars, data, collin.rm = FALSE, object = NULL, type
             } else {
               keep = coefs
             }
-          } else if(type == "iv.exo") {
+          } else if (type == "iv.exo") {
             keep = coefs
           } else if (type == "iv.exo") {
             keep = c(endo, coefs)
