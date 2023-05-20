@@ -1756,6 +1756,11 @@ glm_probit  = glm(y_bin ~ x1 + x2, family = binomial("probit"), base)
 feglm_probit = feglm(y_bin ~ x1 + x2, base, binomial("probit"))
 test(hatvalues(feglm_probit), hatvalues(glm_probit))
 
+# Fixed effects
+fm_fe  = lm(y ~ x1 + x2 + factor(species), base)
+ffm_fe = feols(y ~ x1 + x2 | species, base)
+test(hatvalues(ffm_fe), hatvalues(fm_fe))
+
 
 ####
 #### sandwich ####

@@ -32,6 +32,7 @@ sparse_model_matrix(mpg ~ i(vs) | gear^cyl, data = mtcars, type = c("rhs", "fixe
 ```
 
 
+- `hatvalues` now works with fixed effects. It also allows for approximate computation (via `exact` and `p` arguments). For details on the approximation, see (Kline, Saggio, and Sølvsten 2020).
 ## Documentation bug
 
 - fix bug in the help of `bin`

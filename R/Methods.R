@@ -3728,15 +3728,17 @@ deviance.fixest = function(object, ...){
 
 #' Hat values for `fixest` objects
 #'
-#' Computes the hat values for [`feols`] or [`feglm`] estimations. Only works when there are no fixed-effects.
+#' Computes the hat values for [`feols`] or [`feglm`] estimations. 
 #'
 #' @param model A fixest object. For instance from feols or feglm.
+#' @param exact Logical scalar, default is `TRUE`. Whether the diagonals of the projection matrix should be calculated exactly. If `FALSE`, then it will be 
+#' @param p Numeric scala, default is 1000. This is only used when `exact == FALSE`. This determined the number of bootstrap samples used to estimate the projection matrix.
 #' @param ... Not currently used.
 #'
 #' @details
 #' Hat values are not available for [`fenegbin`][fixest::femlm], [`femlm`] and [`feNmlm`] estimations.
-#'
-#' When there are fixed-effects, the hat values of the reduced form are different from the hat values of the full model. And we cannot get costlessly the hat values of the full model from the reduced form. It would require to reestimate the model with the fixed-effects as regular variables.
+#' 
+#' When `exact == FALSE`, the Johnson-Lindenstrauss approximation (LA) algorithm is used which approximates the diagonals of the projection matrix. For more precision (but longer time), increase the value of `p`. 
 #'
 #' @return
 #' Returns a vector of the same length as the number of observations used in the estimation.
@@ -3747,12 +3749,8 @@ deviance.fixest = function(object, ...){
 #' head(hatvalues(est))
 #'
 #'
-hatvalues.fixest = function(model, ...){
-    # Only works for feglm/feols objects + no fixed-effects
-    # When there are fixed-effects the hatvalues of the reduced form is different from
-    #  the hatvalues of the full model. And we cannot get costlessly the hatvalues of the full
-    #  model from the reduced form. => we need to reestimate the model with the FEs as
-    #  regular variables.
+hatvalues.fixest = function(model, exact = TRUE, p = 1000, ...){
+    # Only works for feglm/feols objects
 
     if(isTRUE(model$lean)){
         # LATER: recompute it
@@ -3764,29 +3762,82 @@ hatvalues.fixest = function(model, ...){
     }
 
     method = model$method_type
-    family = model$family
 
-    msg = "hatvalues.fixest: 'hatvalues' is not implemented for estimations with fixed-effects."
-
-    # An error is in fact nicer than a message + NA return due to the interplay with sandwich
-    if(!is.null(model$fixef_id)){
-        stop(msg)
-    }
-
-    if(method == "feols"){
-        X = model.matrix(model)
-
-        res = cpp_diag_XUtX(X, model$cov.iid / model$sigma2)
-
-    } else if(method == "feglm"){
-        XW = model.matrix(model) * sqrt(model$irls_weights)
-        res = cpp_diag_XUtX(XW, model$cov.iid)
-
-    } else {
+    if (!(method %in% c("feols", "feglm"))) {
         stop("'hatvalues' is currently not implemented for function ", method, ".")
     }
 
-    res
+    X = sparse_model_matrix(model, type = c("rhs", "fixef"), collin.rm = TRUE, na.rm = TRUE, combine = TRUE)
+    
+    if (method == "feglm") X = X * sqrt(model$irls_weights)
+    
+    fe_only = isTRUE(model$onlyFixef)
+
+    Xt <- Matrix::t(X)
+    S_xx = Matrix::crossprod(X)
+
+    # If there are only fixed effects, then can do this *super fast*
+    if (fe_only == TRUE) {
+        # https://stackoverflow.com/questions/39533785/how-to-compute-diagx-solvea-tx-efficiently-without-taking-matrix-i
+        U = Matrix::chol(S_xx)
+        Z = Matrix::solve(Matrix::t(U), Xt)
+        P_ii = Matrix::colSums(Z ^ 2)
+        
+        return(P_ii)
+    } 
+    
+    # Note: This might fail if looking at too large of a matrix
+    if (exact == TRUE) {
+        # Z = (X'X)^{-1} X'
+        Z = Matrix::solve(S_xx, Xt)
+
+        # X %*% Z = X (X'X)^{-1} X'
+        # P_ii = diag(X %*% Z) = colSums(X * Z)
+        P_ii = Matrix::rowSums(X * Matrix::t(Z))
+
+        return(P_ii)
+    }
+
+    if (exact == FALSE) {
+
+        n <- nrow(X)
+        
+        # Using speed heuristics based on n*p and trying
+        # Solve for Z = (X'X)^{-1} (X' R_p)
+        if (n * p <= 1000000) {
+
+          # Fastest for small n*p (b/c of my for loop)
+          Rp <- matrix(rbinom(n * p, 1, 0.5) * 2 - 1, nrow = p, ncol = n)
+          X_Rp <- Matrix::tcrossprod(Xt, Rp)
+          Z = Matrix::solve(S_xx, X_Rp)
+        
+          # P_ii = 1/p || X_i' Z ||^2
+          P_ii = Matrix::colSums(Matrix::crossprod(Z, Xt)^2) / p 
+
+        } else {
+          # Slightly slower, but very memory efficient
+          # Theory: https://cs-people.bu.edu/evimaria/cs565/achlioptas.pdf
+          P_ii = rep(0, n)
+
+          for (j in 1:p) {
+            # Rademacher Weights (-1, 1)
+            Rp_j <- matrix(
+              (runif(n) > 0.5) * 2 - 1,
+              # Uncomment for speed-up
+              # rademacher::sample_rademacher(n), 
+              nrow = 1, ncol = n
+            )
+            X_Rp_j <- Matrix::tcrossprod(Xt, Rp_j)
+
+            Zj <- Matrix::solve(S_xx, X_Rp_j)
+            P_ii = P_ii + as.numeric(X %*% Zj)^2 / p
+          }
+        }
+
+        return(P_ii)
+
+    }
+
 }
 
 ####
