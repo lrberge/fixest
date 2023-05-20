@@ -212,8 +212,11 @@ sparse_model_matrix = function(object, data, type = "rhs", na.rm = TRUE,  collin
               fe_var = fe_vars[i]
               xi = fixef_df[[fe_var]]
 
-              where_na = which(is.na(xi))       
-              xi_quf = quickUnclassFactor(xi[-where_na], addItem = TRUE)
+              keep = which(!is.na(xi))
+              if (length(keep) == 0) stop("All values of the fixed-effect variable '", fe_var, "' are NA.")
+
+              xi = xi[keep]
+              xi_quf = quickUnclassFactor(xi, addItem = TRUE)
 
               col_id = xi_quf$x
               col_levels = as.character(xi_quf$items)
@@ -223,15 +226,15 @@ sparse_model_matrix = function(object, data, type = "rhs", na.rm = TRUE,  collin
 
               # Be careful with NAs
               # First fixed-effect by itself
-              val_all[[j]] = c(rep(1, length(col_id)), rep(NA, length(where_na)))
+              val_all[[j]] = c(rep(1, length(col_id)), rep(NA, nrows - length(keep)))
               id_all[[j]] = cbind(
                 c(
-                  rowid[-where_na],
-                  rowid[where_na]
+                  rowid[keep],
+                  rowid[-keep]
                 ), 
                 c(
                   running_cols[j] + col_id, 
-                  rep(running_cols[j] + 1, length(where_na))
+                  rep(running_cols[j] + 1, nrows - length(keep))
                 )
               )
               names_all[[j]] = paste0(fe_var, "::", col_levels)
@@ -241,15 +244,15 @@ sparse_model_matrix = function(object, data, type = "rhs", na.rm = TRUE,  collin
                 slope_var = slope_vars[k]
                 slope = slope_df[[slope_var]]
 
-                val_all[[j]] = c(as.numeric(slope[-where_na]), rep(NA, length(where_na)))
+                val_all[[j]] = c(as.numeric(slope[keep]), rep(NA, nrows - length(keep)))
                 id_all[[j]] = cbind(
                   c(
-                    rowid[-where_na],         
-                    rowid[where_na]
+                    rowid[keep],         
+                    rowid[-keep]
                   ), 
                   c(
                     running_cols[j] + col_id, 
-                    rep(running_cols[j] + 1, length(where_na))
+                    rep(running_cols[j] + 1, nrows - length(keep))
                   )
                 )
                 names_all[[j]] = paste0(fe_var, "[[", slope_var, "]]", "::", col_levels)
