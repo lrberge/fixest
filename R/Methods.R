@@ -3807,7 +3807,7 @@ hatvalues.fixest = function(model, exact = TRUE, p = 1000, ...){
         if (n * p <= 1000000) {
 
           # Fastest for small n*p (b/c of my for loop)
-          Rp <- matrix(rbinom(n * p, 1, 0.5) * 2 - 1, nrow = p, ncol = n)
+          Rp <- matrix((stats::runif(n*p) > 0.5) * 2 - 1, nrow = p, ncol = n)
           X_Rp <- Matrix::tcrossprod(Xt, Rp)
           Z = Matrix::solve(S_xx, X_Rp)
         
@@ -3822,7 +3822,7 @@ hatvalues.fixest = function(model, exact = TRUE, p = 1000, ...){
           for (j in 1:p) {
             # Rademacher Weights (-1, 1)
             Rp_j <- matrix(
-              (runif(n) > 0.5) * 2 - 1,
+              (stats::runif(n) > 0.5) * 2 - 1,
               # Uncomment for speed-up
               # rademacher::sample_rademacher(n), 
               nrow = 1, ncol = n
