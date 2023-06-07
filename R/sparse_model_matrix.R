@@ -167,7 +167,7 @@ sparse_model_matrix = function(object, data, type = "rhs", na.rm = TRUE,  collin
           mat_FE = NULL
         } else { 
 
-            if(isFormula) {
+            if (isFormula) {
               fixef_fml = .xpd(~ ..fe, ..fe = split_fml[[2]])
             } else {
               fixef_fml = object$fml_all$fixef

@@ -3738,7 +3738,16 @@ deviance.fixest = function(object, ...){
 #' @details
 #' Hat values are not available for [`fenegbin`][fixest::femlm], [`femlm`] and [`feNmlm`] estimations.
 #' 
-#' When `exact == FALSE`, the Johnson-Lindenstrauss approximation (LA) algorithm is used which approximates the diagonals of the projection matrix. For more precision (but longer time), increase the value of `p`. 
+#' Hat values for generalized linear model are disussed in Belsley, Kuh and Welsch (1980), Cook and Weisberg (1982), etc.
+#' 
+#' When `exact == FALSE`, the Johnson-Lindenstrauss approximation (JLA) algorithm is used which approximates the diagonals of the projection matrix. For more precision (but longer time), increase the value of `p`. See Kline, Saggio, and Sølvsten (2020) for details.
+#' 
+#' 
+#' @references
+#' Belsley, D. A., Kuh, E. and Welsch, R. E. (1980). *Regression Diagnostics*. New York: Wiley.
+#' Cook, R. D. and Weisberg, S. (1982). *Residuals and Influence in Regression*. London: Chapman and Hall.
+#' Kline, P., Saggio R., and Sølvsten, M. (2020). *Leave‐Out Estimation of Variance Components*. Econometrica.
+#' 
 #'
 #' @return
 #' Returns a vector of the same length as the number of observations used in the estimation.
@@ -3757,6 +3766,10 @@ hatvalues.fixest = function(model, exact = TRUE, p = 1000, ...){
         stop("The method 'hatvalues.fixest' cannot be applied to 'lean' fixest objects. Please re-estimate with 'lean = FALSE'.")
     }
 
+    if (!is.null(res$iv)) {
+      stop("The method 'hatvalues.fixest' cannot be applied to ")
+    }
+
     if(is_user_level_call()){
         validate_dots()
     }
@@ -3769,8 +3782,14 @@ hatvalues.fixest = function(model, exact = TRUE, p = 1000, ...){
 
     X = sparse_model_matrix(model, type = c("rhs", "fixef"), collin.rm = TRUE, na.rm = TRUE, combine = TRUE)
     
-    if (method == "feglm") X = X * sqrt(model$irls_weights)
-    
+    if (method == "feols") {
+      weights = model$weights
+      if (is.null(weights)) weights = 1
+    } else {
+      weights = model$irls_weights
+    }
+    X = X * sqrt(weights)
+
     fe_only = isTRUE(model$onlyFixef)
 
     Xt <- Matrix::t(X)
@@ -3807,7 +3826,7 @@ hatvalues.fixest = function(model, exact = TRUE, p = 1000, ...){
         if (n * p <= 1000000) {
 
           # Fastest for small n*p (b/c of my for loop)
-          Rp <- matrix((stats::runif(n*p) > 0.5) * 2 - 1, nrow = p, ncol = n)
+          Rp <- matrix((stats::runif(n * p) > 0.5) * 2 - 1, nrow = p, ncol = n)
           X_Rp <- Matrix::tcrossprod(Xt, Rp)
           Z = Matrix::solve(S_xx, X_Rp)
         
