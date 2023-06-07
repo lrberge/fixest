@@ -32,7 +32,10 @@ sparse_model_matrix(mpg ~ i(vs) | gear^cyl, data = mtcars, type = c("rhs", "fixe
 ```
 
 
-- `hatvalues` now works with fixed effects. It also allows for approximate computation (via `exact` and `p` arguments). For details on the approximation, see (Kline, Saggio, and Sølvsten 2020).
+- `hatvalues` now works with fixed effects. It also allows for approximate computation (via `exact` and `p` arguments). For details on the approximation, see [Kline, Saggio, and Sølvsten 2020](https://eml.berkeley.edu/~pkline/papers/KSS2020.pdf).
+
+- Add `HC2` and `HC3` options to `vcov` for `feols` and `feglm` models. With this gets added the `vcov_hetero` function.
+
 ## Documentation bug
 
 - fix bug in the help of `bin`
@@ -1052,7 +1055,7 @@ Common methods have been extended to `fixest_multi` objects.
 
   - Improve error messages. 
   
-  - `hatvalues.fixest`: now returns an error instead of a message when fixed-effects are present (it makes the interplay with `sadnwich` 'nicer').
+  - `hatvalues.fixest`: now returns an error instead of a message when fixed-effects are present (it makes the interplay with `sandwich` 'nicer').
 
 # fixest 0.8.4
 

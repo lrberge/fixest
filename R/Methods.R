@@ -3766,7 +3766,7 @@ hatvalues.fixest = function(model, exact = TRUE, p = 1000, ...){
         stop("The method 'hatvalues.fixest' cannot be applied to 'lean' fixest objects. Please re-estimate with 'lean = FALSE'.")
     }
 
-    if (!is.null(res$iv)) {
+    if (!is.null(model$iv)) {
       stop("The method 'hatvalues.fixest' cannot be applied to ")
     }
 

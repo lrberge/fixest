@@ -726,6 +726,12 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
     if(!missing(nthreads)) nthreads = check_set_nthreads(nthreads)
 
 
+    # Get default ssc if none is provied 
+    # ssc related => we accept NULL
+    # we check ssc since it can be used by the funs
+    if(missnull(ssc)) ssc = getFixest_ssc()
+    check_arg(ssc, "class(ssc.type)", .message = "The argument 'ssc' must be an object created by the function ssc().")
+
     ####
     #### ... scores ####
     ####
@@ -748,6 +754,44 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
         scores = object$scores
     }
 
+    # For HC1, apply cluster.adj (N / N - 1) if ssc$ssc.adj = TRUE to match vcovHC(type = "HC1")
+    if (vcov %in% c("hetero", "white", "hc1") & ssc$cluster.adj) {
+      n = nrow(scores)
+      scores = scores * sqrt(n / (n - 1))
+    }
+
+    # For HC2/ HC3, need to divide scores by hatvalues
+    if (vcov %in% c("hc2", "hc3")) {
+
+      if (isTRUE(object$iv)) {
+        stop("hc2/hc3 vcov are not defined for IV estimates")
+      }
+      
+      exact = ifelse(is.null(extra_args$exact), TRUE, extra_args$exact)
+      p = ifelse(is.null(extra_args$p), 500, extra_args$p)
+      P_ii = hatvalues(object, exact = exact, p = p)
+
+      problem_idx = which(P_ii > (1 - sqrt(.Machine$double.eps)))
+      if (length(problem_idx) > 0L) {
+        
+        if (length(problem_idx) > 10L) {
+          problem_idx = c(problem_idx[1:10], "...")
+        }
+
+        stop(
+          sprintf(
+            "When calculating the diagonals of the projection matrix, one of the columns was found to equal 1 (or within Machine epsilon). This is most likely due to a fixed effect with only 1 observation, so removing that observation would make that coefficient non-estimable. The problem rows of the data are rows: %s", 
+            paste(problem_idx, collapse = ", ")
+          )
+        )
+      }
+
+      if (vcov == "hc2") {
+        scores = scores / sqrt(1 - P_ii)
+      } else if (vcov == "hc3") {
+        scores = scores / (1 - P_ii)
+      }
+    }
 
     ####
     #### ... bread ####
@@ -812,11 +856,6 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
     # we compute the vcov. The adjustment (which is a pain in the neck) will come after that
     # Here vcov is ALWAYS a character scalar
 
-    # ssc related => we accept NULL
-    # we check ssc since it can be used by the funs
-    if(missnull(ssc)) ssc = getFixest_ssc()
-    check_arg(ssc, "class(ssc.type)", .message = "The argument 'ssc' must be an object created by the function ssc().")
-
     fun_name = vcov_select$fun_name
     args = list(bread = bread, scores = scores, vars = vcov_vars, ssc = ssc,
                 sandwich = sandwich, nthreads = nthreads,
@@ -840,7 +879,6 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
     ####
 
     # ssc is a ssc object in here
-
     n_fe = n_fe_ok = length(object$fixef_id)
 
     # we adjust the fixef sizes to account for slopes
@@ -954,6 +992,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
         K = max(K, length(object$coefficients) + 1)
     }
 
+    # TODO: There never is an attr "ss_adj". I think this can be safely removed?
     # Small sample adjustment
     ss_adj = attr(vcov_noAdj, "ss_adj")
     if(!is.null(ss_adj)){
@@ -963,6 +1002,12 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
         attr(vcov_noAdj, "ss_adj") = NULL
     } else {
         ss_adj = ifelse(ssc$adj, (n - 1) / (n - K), 1)
+
+        # TODO: think about this? It's not standard to apply ss_adj, but don't like removing the option from the user?
+        # Don't apply ss_adj to hc2/hc3 since they are small-sample adjusted already!
+        # if (vcov %in% c("hc2", "hc3")) {
+        #   ss_adj = 1
+        # }
     }
 
     vcov_mat = vcov_noAdj * ss_adj
@@ -1573,6 +1618,72 @@ vcov_conley = function(x, lat = NULL, lon = NULL, cutoff = NULL, pixel = 0,
     res
 }
 
+#' Heteroskedasticity-Robust VCOV
+#'
+#' Computes the heteroskedasticity-robust VCOV of `fixest` objects.
+#'
+#' @param x A `fixest` object.
+#' @param type A string scalar. Either "HC1"/"HC2"/"HC3"
+#' @param exact A logical scalar. Should the hat matrix be calculated exactly or approximated using the JLA algorithm? Default = TRUE. See [`hatvalues.fixest`] for details.
+#' @param p A numeric scalar. The number of draws should be used when approximating the hat matrix? Note that larger `p` are more accurate, but slower. This is only used when `exact = TRUE`. Default is 500.
+#' @param ssc An object returned by the function [`ssc`]. It specifies how to perform the small sample correction.
+#'
+#' @return
+#' If the first argument is a `fixest` object, then a VCOV is returned (i.e. a symmetric matrix).
+#'
+#' If the first argument is not a `fixest` object, then a) implicitly the arguments are shifted to the left (i.e. `vcov_hetero("HC3")` is equivalent to `vcov_hetero(type = "HC3")` and b) a VCOV-*request* is returned and NOT a VCOV. That VCOV-request can then be used in the argument `vcov` of various `fixest` functions (e.g. [`vcov.fixest`] or even in the estimation calls).
+#'
+#' @author
+#' Laurent Berge and Kyle Butts
+#'
+#' @references
+#' Cameron AC, Gelbach JB, Miller DL (2011). "Robust Inference with Multiway Clustering." *Journal of Business & Economic Statistics*, 29(2), 238-249. doi:10.1198/jbes.2010.07136.
+#'
+#' @examples
+#'
+#' base = iris
+#' names(base) = c("y", "x1", "x2", "x3", "species")
+#' base$clu = rep(1:5, 30)
+#'
+#' est = feols(y ~ x1 | species, base)
+#'
+#' vcov_hetero(est, "hc1")
+#' vcov_hetero(est, "hc2", ssc = ssc(adj = FALSE))
+#' vcov_hetero(est, "hc3", ssc = ssc(adj = FALSE))
+#'
+#' # Using approximate hatvalues
+#' vcov_hetero(est, "hc3", exact = FALSE, p = 500)
+#'
+#'
+vcov_hetero = function(x, type = "hc1", exact = TRUE, p = 500, ssc = NULL){
+    # User-level function to compute clustered SEs
+    # typically we only do checking and reshaping here
+
+    # slide_args allows the implicit allocation of arguments
+    # it makes semi-global changes => the values of the args here are modified
+    slide_args(x, type = type, exact = exact, p = p, ssc = ssc)
+    IS_REQUEST = is.null(x)
+
+    check_value(ssc, "NULL class(ssc.type)", .message = "The argument 'ssc' must be an object created by the function ssc().")
+
+
+    # We create the request
+    use_request = IS_REQUEST
+
+    extra_args = list(exact = exact, p = p)
+    vcov_request = list(vcov = type, ssc = ssc, extra_args = extra_args)
+    class(vcov_request) = "fixest_vcov_request"
+    
+
+    if(IS_REQUEST){
+        res = vcov_request
+    } else {
+        res = vcov(x, vcov = vcov_request)
+    }
+
+    res
+}
+
 
 ####
 #### SETUP ####
@@ -1592,7 +1703,7 @@ vcov_setup = function(){
     # Heteroskedasticity robust
     #
 
-    vcov_hetero_setup = list(name = c("hetero", "white", "hc1"), fun_name = "vcov_hetero_internal", vcov_label = "Heteroskedasticity-robust")
+    vcov_hetero_setup = list(name = c("hetero", "white", "hc1", "hc2", "hc3"), fun_name = "vcov_hetero_internal", vcov_label = "Heteroskedasticity-robust")
 
     #
     # cluster(s)
@@ -1766,12 +1877,7 @@ vcov_hetero_internal = function(bread, scores, sandwich, ssc, nthreads, ...){
     if(!sandwich){
         vcov_noAdj = cpppar_crossprod(scores, 1, nthreads)
     } else {
-        # we make a n/(n-1) adjustment to match vcovHC(type = "HC1")
-
-        n = nrow(scores)
-        adj = ifelse(ssc$cluster.adj, n / (n-1), 1)
-
-        vcov_noAdj = cpppar_crossprod(cpppar_matprod(scores, bread, nthreads), 1, nthreads) * adj
+        vcov_noAdj = cpppar_crossprod(cpppar_matprod(scores, bread, nthreads), 1, nthreads)
     }
 
     vcov_noAdj
