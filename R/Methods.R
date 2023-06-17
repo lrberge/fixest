@@ -3780,55 +3780,93 @@ hatvalues.fixest = function(model, exact = TRUE, p = 1000, ...){
         stop("'hatvalues' is currently not implemented for function ", method, ".")
     }
 
-    X = sparse_model_matrix(model, type = c("rhs", "fixef"), collin.rm = TRUE, na.rm = TRUE, combine = TRUE)
-    
+    mats = sparse_model_matrix(
+      model, type = c("rhs", "fixef"), 
+      collin.rm = TRUE, na.rm = TRUE, 
+      combine = FALSE
+    )
+
+    # Check for slope.vars and move to rhs
+    if (!is.null(model$slope_flag)) {
+      slope_var_cols = which(
+        grepl("\\[\\[", colnames(mats$fixef))
+      )
+      mats$rhs = cbind(
+        mats$rhs, mats$fixef[, slope_var_cols]
+      )
+      mats$fixef = mats$fixef[, -slope_var_cols]
+    }
+
     if (method == "feols") {
       weights = model$weights
-      if (is.null(weights)) weights = 1
+      if (is.null(weights)) weights = rep(1, model$nobs)
     } else {
       weights = model$irls_weights
     }
-    X = X * sqrt(weights)
 
-    fe_only = isTRUE(model$onlyFixef)
+    # Deal with fixed effects
+    if (!is.null(model$fixef_vars)) {
+      f = model.matrix(model, type = "fixef")
+      f = f[, model$fixef_vars]
 
-    Xt <- Matrix::t(X)
-    S_xx = Matrix::crossprod(X)
+      if (!is.null(mats$rhs)) {
+        X = demean(
+          as.matrix(mats$rhs), f, 
+          weights = weights
+        )
+      }
+      
+      FEs = mats$fixef * sqrt(weights)
 
-    # If there are only fixed effects, then can do this *super fast*
-    if (fe_only == TRUE) {
-        # https://stackoverflow.com/questions/39533785/how-to-compute-diagx-solvea-tx-efficiently-without-taking-matrix-i
-        U = Matrix::chol(S_xx)
-        Z = Matrix::solve(Matrix::t(U), Xt)
-        P_ii = Matrix::colSums(Z ^ 2)
-        
-        return(P_ii)
-    } 
-    
+      X = X * sqrt(weights)
+
+    } else if (!is.null(mats$rhs)) {
+      X = mats$rhs
+      X = X * sqrt(weights)
+
+      FEs = NULL
+    }
+
+    P_ii_X = P_ii_FE = 0
+  
+    if (!is.null(model$fixef_vars)) {
+      # https://stackoverflow.com/questions/39533785/how-to-compute-diagx-solvea-tx-efficiently-without-taking-matrix-i
+      U = Matrix::chol(Matrix::crossprod(FEs))
+      Z = Matrix::solve(Matrix::t(U), Matrix::t(FEs))
+      P_ii_FE = Matrix::colSums(Z ^ 2)
+    }
+
+    if (is.null(mats$rhs)) {
+      return(P_ii_FE)
+    }
+
     # Note: This might fail if looking at too large of a matrix
     if (exact == TRUE) {
+        tXX = Matrix::crossprod(X)
+
         # Z = (X'X)^{-1} X'
-        Z = Matrix::solve(S_xx, Xt)
+        Z = Matrix::solve(tXX, Matrix::t(X))
 
         # X %*% Z = X (X'X)^{-1} X'
-        # P_ii = diag(X %*% Z) = colSums(X * Z)
-        P_ii = Matrix::rowSums(X * Matrix::t(Z))
+        # P_ii = diag(X %*% Z) = rowSums(X * Z)
+        P_ii_X = Matrix::rowSums(X * Matrix::t(Z))
 
-        return(P_ii)
     }
 
     if (exact == FALSE) {
 
+        tXX = Matrix::crossprod(X)
+        Xt = Matrix::t(X)
         n <- nrow(X)
         
         # Using speed heuristics based on n*p and trying
         # Solve for Z = (X'X)^{-1} (X' R_p)
         if (n * p <= 1000000) {
-
+          
           # Fastest for small n*p (b/c of my for loop)
           Rp <- matrix((stats::runif(n * p) > 0.5) * 2 - 1, nrow = p, ncol = n)
           X_Rp <- Matrix::tcrossprod(Xt, Rp)
-          Z = Matrix::solve(S_xx, X_Rp)
+          Z = Matrix::solve(tXX, X_Rp)
         
           # P_ii = 1/p || X_i' Z ||^2
           P_ii = Matrix::colSums(Matrix::crossprod(Z, Xt)^2) / p 
@@ -3848,14 +3886,14 @@ hatvalues.fixest = function(model, exact = TRUE, p = 1000, ...){
             )
             X_Rp_j <- Matrix::tcrossprod(Xt, Rp_j)
 
-            Zj <- Matrix::solve(S_xx, X_Rp_j)
+            Zj <- Matrix::solve(tXX, X_Rp_j)
             P_ii = P_ii + as.numeric(X %*% Zj)^2 / p
           }
         }
 
-        return(P_ii)
-
     }
+
+    return(P_ii_FE + P_ii_X)
 
 }
 
