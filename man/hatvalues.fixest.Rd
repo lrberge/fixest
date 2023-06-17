@@ -9,7 +9,7 @@
 \arguments{
 \item{model}{A fixest object. For instance from feols or feglm.}
 
-\item{exact}{Logical scalar, default is \code{TRUE}. Whether the diagonals of the projection matrix should be calculated exactly. If \code{FALSE}, then it will be}
+\item{exact}{Logical scalar, default is \code{TRUE}. Whether the diagonals of the projection matrix should be calculated exactly. If \code{FALSE}, then it will be approximated using a JLA algorithm. See details. Unless you have a very large number of observations, it is recommended to keep the default value.}
 
 \item{p}{Numeric scala, default is 1000. This is only used when \code{exact == FALSE}. This determined the number of bootstrap samples used to estimate the projection matrix.}
 

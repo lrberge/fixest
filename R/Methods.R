@@ -3731,7 +3731,7 @@ deviance.fixest = function(object, ...){
 #' Computes the hat values for [`feols`] or [`feglm`] estimations. 
 #'
 #' @param model A fixest object. For instance from feols or feglm.
-#' @param exact Logical scalar, default is `TRUE`. Whether the diagonals of the projection matrix should be calculated exactly. If `FALSE`, then it will be 
+#' @param exact Logical scalar, default is `TRUE`. Whether the diagonals of the projection matrix should be calculated exactly. If `FALSE`, then it will be approximated using a JLA algorithm. See details. Unless you have a very large number of observations, it is recommended to keep the default value.
 #' @param p Numeric scala, default is 1000. This is only used when `exact == FALSE`. This determined the number of bootstrap samples used to estimate the projection matrix.
 #' @param ... Not currently used.
 #'
@@ -3762,12 +3762,11 @@ hatvalues.fixest = function(model, exact = TRUE, p = 1000, ...){
     # Only works for feglm/feols objects
 
     if(isTRUE(model$lean)){
-        # LATER: recompute it
         stop("The method 'hatvalues.fixest' cannot be applied to 'lean' fixest objects. Please re-estimate with 'lean = FALSE'.")
     }
 
     if (!is.null(model$iv)) {
-      stop("The method 'hatvalues.fixest' cannot be applied to ")
+      stop("The method 'hatvalues.fixest' cannot be applied to IV models.")
     }
 
     if(is_user_level_call()){
@@ -3780,121 +3779,156 @@ hatvalues.fixest = function(model, exact = TRUE, p = 1000, ...){
         stop("'hatvalues' is currently not implemented for function ", method, ".")
     }
 
-    mats = sparse_model_matrix(
-      model, type = c("rhs", "fixef"), 
+    # Outline: Blockwise Formula for Projection Matrix
+    # https://en.wikipedia.org/wiki/Projection_matrix#Blockwise_formula
+    # Part 1: fixed effects
+    # Part 2: slope vars (demeaned by fixed effects)
+    # Part 3: rhs vars (demeaned by fixed effects and slope vars)
+    # Sum the three parts to get the projection matrix
+    P_ii_list = list()
+    mats = list()
+    mats$fixef = sparse_model_matrix(
+      model, type = c("fixef"), 
       collin.rm = TRUE, na.rm = TRUE, 
-      combine = FALSE
+      sortCols = FALSE
     )
 
-    # Check for slope.vars and move to rhs
+    # Check for slope.vars and move to seperate matrix
     if (!is.null(model$slope_flag)) {
       slope_var_cols = which(
         grepl("\\[\\[", colnames(mats$fixef))
       )
-      mats$rhs = cbind(
-        mats$rhs, mats$fixef[, slope_var_cols]
-      )
+      mats$slope_vars = mats$fixef[, slope_var_cols]
       mats$fixef = mats$fixef[, -slope_var_cols]
     }
 
+    # Get weights
     if (method == "feols") {
       weights = model$weights
-      if (is.null(weights)) weights = rep(1, model$nobs)
     } else {
       weights = model$irls_weights
     }
-
-    # Deal with fixed effects
+    
     if (!is.null(model$fixef_vars)) {
       f = model.matrix(model, type = "fixef")
       f = f[, model$fixef_vars]
-
-      if (!is.null(mats$rhs)) {
-        X = demean(
-          as.matrix(mats$rhs), f, 
+      
+      # Matrix of fixed effects times weights
+      if (!is.null(weights)) mats$fixef = mats$fixef * sqrt(weights)
+      
+      # Demean X by FEs and slope_vars
+      if (is.null(model$onlyFixef) & method == "feols") {
+        mats$rhs = demean(model)[, -1, drop = FALSE] 
+        if (!is.null(weights)) mats$rhs = mats$rhs * sqrt(weights)
+      }
+      if (is.null(model$onlyFixef) & method == "feglm") {
+        mats$rhs = demean(
+          model.matrix(model, "rhs"),
+          f,
           weights = weights
         )
+        if (!is.null(weights)) mats$rhs = mats$rhs * sqrt(weights)
       }
+
+      # Demean slope_vars by FEs
+      if (!is.null(mats$slope_vars)) {
+        mats$slope_vars = demean(
+          as.matrix(mats$slope_vars), 
+          f, 
+          weights = weights
+        ) 
+        if (!is.null(weights)) mats$slope_vars = mats$slope_vars * sqrt(weights)
+      }
+
+    } else if (is.null(model$onlyFixef)) {
+      mats$rhs = sparse_model_matrix(
+        model, type = c("rhs"), 
+        collin.rm = TRUE, na.rm = TRUE
+      )
       
-      FEs = mats$fixef * sqrt(weights)
-
-      X = X * sqrt(weights)
-
-    } else if (!is.null(mats$rhs)) {
-      X = mats$rhs
-      X = X * sqrt(weights)
-
-      FEs = NULL
+      if (!is.null(weights)) mats$rhs = mats$rhs * sqrt(weights)
     }
-
-    P_ii_X = P_ii_FE = 0
   
-    if (!is.null(model$fixef_vars)) {
-      # https://stackoverflow.com/questions/39533785/how-to-compute-diagx-solvea-tx-efficiently-without-taking-matrix-i
-      U = Matrix::chol(Matrix::crossprod(FEs))
-      Z = Matrix::solve(Matrix::t(U), Matrix::t(FEs))
-      P_ii_FE = Matrix::colSums(Z ^ 2)
-    }
 
-    if (is.null(mats$rhs)) {
-      return(P_ii_FE)
+    # Caclulate P_ii's
+    if (!is.null(mats$fixef)) {
+      # https://stackoverflow.com/questions/39533785/how-to-compute-diagx-solvea-tx-efficiently-without-taking-matrix-i
+      U = Matrix::chol(Matrix::crossprod(mats$fixef))
+      Z = Matrix::solve(Matrix::t(U), Matrix::t(mats$fixef))
+      P_ii_list$fixef = Matrix::colSums(Z ^ 2)
     }
 
     # Note: This might fail if looking at too large of a matrix
     if (exact == TRUE) {
-        tXX = Matrix::crossprod(X)
-
-        # Z = (X'X)^{-1} X'
-        Z = Matrix::solve(tXX, Matrix::t(X))
-
-        # X %*% Z = X (X'X)^{-1} X'
-        # P_ii = diag(X %*% Z) = rowSums(X * Z)
-        P_ii_X = Matrix::rowSums(X * Matrix::t(Z))
-
-    }
-
-    if (exact == FALSE) {
-
-        tXX = Matrix::crossprod(X)
-        Xt = Matrix::t(X)
-        n <- nrow(X)
-        
-        # Using speed heuristics based on n*p and trying
-        # Solve for Z = (X'X)^{-1} (X' R_p)
-        if (n * p <= 1000000) {
-          
-          # Fastest for small n*p (b/c of my for loop)
-          Rp <- matrix((stats::runif(n * p) > 0.5) * 2 - 1, nrow = p, ncol = n)
-          X_Rp <- Matrix::tcrossprod(Xt, Rp)
-          Z = Matrix::solve(tXX, X_Rp)
-        
-          # P_ii = 1/p || X_i' Z ||^2
-          P_ii = Matrix::colSums(Matrix::crossprod(Z, Xt)^2) / p 
-
-        } else {
-          # Slightly slower, but very memory efficient
-          # Theory: https://cs-people.bu.edu/evimaria/cs565/achlioptas.pdf
-          P_ii = rep(0, n)
-
-          for (j in 1:p) {
-            # Rademacher Weights (-1, 1)
-            Rp_j <- matrix(
-              (stats::runif(n) > 0.5) * 2 - 1,
-              # Uncomment for speed-up
-              # rademacher::sample_rademacher(n), 
-              nrow = 1, ncol = n
+        if (!is.null(mats$slope_vars)) { 
+            Z = Matrix::solve(
+              Matrix::crossprod(mats$slope_vars), 
+              Matrix::t(mats$slope_vars)
             )
-            X_Rp_j <- Matrix::tcrossprod(Xt, Rp_j)
-
-            Zj <- Matrix::solve(tXX, X_Rp_j)
-            P_ii = P_ii + as.numeric(X %*% Zj)^2 / p
-          }
+            # P_ii = diag(X %*% Z) = rowSums(X * Z)
+            P_ii_list$slope_vars = Matrix::rowSums(
+              mats$slope_vars * Matrix::t(Z)
+            )
         }
 
+        if (!is.null(mats$rhs)) {
+            tXXinv = model$cov.iid 
+            if (method == "feols") tXXinv = tXXinv / model$sigma2
+            
+            P_ii_list$rhs = Matrix::rowSums(
+              mats$rhs * Matrix::t(tXXinv %*% Matrix::t(mats$rhs))
+            )
+        }
     }
 
-    return(P_ii_FE + P_ii_X)
+    # Theory: https://cs-people.bu.edu/evimaria/cs565/achlioptas.pdf
+    if (exact == FALSE) {
+      n = model$nobs
 
+      if (!is.null(mats$slope_vars)) { 
+        P_ii_list$slope_vars = rep(0, n)
+        tSS = Matrix::crossprod(mats$slope_vars)
+        tS = Matrix::t(mats$slope_vars)
+      }
+      if (!is.null(mats$rhs)) { 
+        P_ii_list$rhs = rep(0, n)
+        tXX = Matrix::crossprod(mats$rhs)
+        tX = Matrix::t(mats$rhs)
+      }
+
+      for (j in 1:p) {
+        # Rademacher Weights (-1, 1)
+        Rp_j <- matrix(
+          (stats::runif(n) > 0.5) * 2 - 1,
+          # Uncomment for speed-up
+          # rademacher::sample_rademacher(n), 
+          nrow = 1, ncol = n
+        )
+          
+          
+        if (!is.null(mats$slope_vars)) {
+          tS_Rp_j <- Matrix::tcrossprod(tS, Rp_j)
+
+          Zj <- Matrix::solve(tSS, tS_Rp_j)
+          P_ii_list$slope_vars = 
+            P_ii_list$slope_vars + 
+            as.numeric(mats$slope_vars %*% Zj)^2 / p
+        }
+
+        if (!is.null(mats$rhs)) { 
+          tX_Rp_j <- Matrix::tcrossprod(tX, Rp_j)
+
+          Zj <- Matrix::solve(tXX, tX_Rp_j)
+          P_ii_list$rhs = 
+            P_ii_list$rhs + 
+            as.numeric(mats$rhs %*% Zj)^2 / p
+        }
+      }
+    }
+
+    P_ii = Reduce("+", P_ii_list)
+    
+    return(P_ii)
 }
 
 ####
