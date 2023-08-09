@@ -16,7 +16,7 @@ vcovClust = fixest:::vcovClust
 setFixest_notes(FALSE)
 
 # Check tests with data.table/tibble/data.frame
-# as_df_type <- as.data.frame
+as_df_type <- as.data.frame
 # as_df_type <- data.table::as.data.table
 # as_df_type <- tibble::as_tibble
 iris = as_df_type(iris)
