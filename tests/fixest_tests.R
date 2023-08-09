@@ -15,6 +15,12 @@ vcovClust = fixest:::vcovClust
 
 setFixest_notes(FALSE)
 
+# Check tests with data.table/tibble/data.frame
+# as_df_type <- as.data.frame
+# as_df_type <- data.table::as.data.table
+# as_df_type <- tibble::as_tibble
+iris = as_df_type(iris)
+
 ####
 #### ESTIMATIONS ####
 ####
@@ -132,8 +138,8 @@ for(model in c("ols", "pois", "logit", "negbin", "Gamma")){
 
                         # I MUST do that.... => subset does not work...
                         base_tmp = base[qui, ]
-                        base_tmp$my_offset = my_offset[qui]
-                        base_tmp$my_weight = my_weight[qui]
+                        if(use_offset) base_tmp$my_offset = my_offset[qui]
+                        if(use_weights) base_tmp$my_weight = my_weight[qui]
                         res_bis = glm(fml_stats, base_tmp, family = my_family, weights = my_weight, offset = my_offset)
                     } else {
                         res_bis = glm(fml_stats, data = base, family = my_family, weights = my_weight, offset = my_offset)
@@ -377,6 +383,7 @@ chunk("LAGGING")
 
 data(base_did)
 base = base_did
+base = as_df_type(base)
 
 n = nrow(base)
 
@@ -476,6 +483,11 @@ cat("data.table...")
 # We just check there is no bug (consistency should be OK)
 
 library(data.table)
+
+test(
+  lag(x1 ~ id + period, -1, data = as.data.frame(base)), 
+  lag(x1 ~ id + period, -1, data = as.data.table(base))
+)
 
 base_dt = data.table(id = c("A", "A", "B", "B"),
                      time = c(1, 2, 1, 3),
@@ -993,6 +1005,7 @@ chunk("STANDARD ERRORS")
 # We create "irregular" FEs
 set.seed(0)
 base = data.frame(x = rnorm(20))
+base = as_df_type(base)
 base$y = base$x + rnorm(20)
 base$fe1 = rep(rep(1:3, c(4, 3, 3)), 2)
 base$fe2 = rep(rep(1:5, each = 2), 2)
@@ -1177,6 +1190,7 @@ test(se(est_feols, se = "twoway", ssc = ssc(fixef.K = "full", cluster.df = "conv
 #
 
 data(trade)
+trade = as_df_type(trade)
 
 est_pois = femlm(Euros ~ log(dist_km)|Origin+Destination, trade)
 
@@ -1678,6 +1692,7 @@ for(type in 1:2){
 chunk("DEMEAN")
 
 data(trade)
+trade = as_df_type(trade)
 
 base = trade
 base$ln_euros = log(base$Euros)

@@ -101,9 +101,10 @@ collinearity = function(x, verbose){
 
 	if(is.matrix(data)){
 	    data = as.data.frame(data)
-	} else {
-	    class(data) = "data.frame"
-	}
+	} 
+  # else {
+	#     class(data) = "data.frame"
+	# }
 
 	if(isFE){
 		linear_fml = update(linear_fml, ~ . + 1)
@@ -704,11 +705,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
             if(usePost) all_vars = setdiff(all_vars, as.character(pipe))
             if(IS_INDIV) all_vars = setdiff(all_vars, indiv_varname)
 
-            if("data.table" %in% class(base)){
-                mat_vars = as.data.frame(base[, all_vars, with = FALSE])
-            } else {
-                mat_vars = base[, all_vars, FALSE]
-            }
+            mat_vars = subset(base, select = all_vars)
 
             # we drop non-numeric info + note
             base_small = head(mat_vars, 10)
@@ -721,7 +718,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
                 message("NOTE: The variable", enumerate_items(pblm, "s.is"), " removed because they are non-numeric.")
             }
 
-            mat_vars = as.matrix(mat_vars[, is_num, FALSE])
+            mat_vars = as.matrix(subset(mat_vars, select = is_num))
         } else {
             # we swap the formula to use model.frame
             fml_x = as.formula(paste0("1~", deparse_long(fml[[2]]), "-1"))
@@ -3658,13 +3655,13 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
         useModel.matrix = FALSE
         if(IS_I){
             linear.varnames = all.vars(fml_no_inter[[2]])
-            is_num = sapply(data[, dataNames %in% linear.varnames, FALSE], is.numeric)
+            is_num = sapply(subset(data, select = (dataNames %in% linear.varnames)), is.numeric)
             if(length(is_num) > 0 && (any(!is_num) || grepl("factor", deparse_long(fml_no_inter)))){
                 useModel.matrix = TRUE
             }
         } else {
             linear.varnames = all.vars(fml[[2]])
-            is_num = sapply(data[, dataNames %in% linear.varnames, FALSE], is.numeric)
+            is_num = sapply(subset(data, select = (dataNames %in% linear.varnames)), is.numeric)
             if(length(is_num) == 0 || any(!is_num) || grepl("factor", deparse_long(fml))){
                 useModel.matrix = TRUE
             }
@@ -4007,7 +4004,7 @@ prepare_df = function(vars, base, fastCombine = NA){
     all_vars = cpp_colon_to_star(vars)
 
     if(all(all_vars %in% names(base))){
-        res = base[, all_vars, drop = FALSE]
+        res = subset(base, select = all_vars)
     } else {
         all_vars_call = str2lang(paste0("list(", paste0(all_vars, collapse = ", "), ")"))
         data_list = try(eval(all_vars_call, base))
@@ -4103,7 +4100,7 @@ prepare_cluster_mat = function(fml, base, fastCombine){
     all_vars = gsub(":", "*", all_var_names)
 
     if(all(all_vars %in% names(base))){
-        res = base[, all_vars, drop = FALSE]
+        res = subset(base, select = all_vars)
     } else {
         all_vars_call = str2lang(paste0("list(", paste0(all_vars, collapse = ", "), ")"))
         data_list = eval(all_vars_call, base)

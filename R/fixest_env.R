@@ -307,7 +307,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
                 if(any(diff(all_len) != 0)){
                     stop("The lengths of the vectors in fixef_df differ (currently it is: ", enumerate_items(all_len), ").")
                 }
-                fixef_df = as.data.frame(fixef_df)
+                # fixef_df = as.data.frame(fixef_df)
             }
 
             if(!is.matrix(fixef_df) && !"data.frame" %in% class(fixef_df)){
@@ -1069,7 +1069,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
 
                 complete_vars = intersect(unique(complete_vars), names(data))
 
-                data = data[subset, complete_vars, drop = FALSE]
+                data = subset(data, select = complete_vars)[subset, , drop = FALSE]
             }
 
             # We add subset to the obs selected

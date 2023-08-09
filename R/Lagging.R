@@ -594,9 +594,10 @@ lag.formula = function(x, k = 1, data, time.step = NULL, fill = NA,
                 stop("The variables of 'data' have no name (data is a matrix without column names).")
             }
             data = as.data.frame(data)
-        } else if("data.table" %in% class(data)){
-            data = as.data.frame(data)
-        }
+        } 
+        # else if("data.table" %in% class(data)){
+        #     data = as.data.frame(data)
+        # }
         existing_vars = names(data)
     } else {
         DATA_MISSING = TRUE

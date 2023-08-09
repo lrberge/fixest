@@ -3264,7 +3264,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
         stop("The argument 'data' must be a data.frame or a matrix.")
     }
 
-    data = as.data.frame(data)
+    # data = as.data.frame(data)
 
     # Panel setup
     panel__meta__info = set_panel_meta_info(object, data)
