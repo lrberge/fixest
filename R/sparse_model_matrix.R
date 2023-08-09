@@ -84,7 +84,7 @@ sparse_model_matrix = function(object, data, type = "rhs", na.rm = TRUE,  collin
         stop("The argument 'data' must be a data.frame or a matrix.")
     }
 
-    data = as.data.frame(data)
+    # data = as.data.frame(data)
 
     # Allows passage of formula to sparse_model_matrix. A bit inefficient, but it works.
     isFormula = FALSE
