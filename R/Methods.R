@@ -3811,7 +3811,7 @@ hatvalues.fixest = function(model, exact = TRUE, p = 1000, ...){
     
     if (!is.null(model$fixef_vars)) {
       f = model.matrix(model, type = "fixef")
-      f = f[, model$fixef_vars]
+      f = subset(f, select = model$fixef_vars)
       
       # Matrix of fixed effects times weights
       if (!is.null(weights)) mats$fixef = mats$fixef * sqrt(weights)
