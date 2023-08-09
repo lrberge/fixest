@@ -36,6 +36,8 @@ export(to_integer, demean, obs)
 export(as.dict)
 # setters & getters
 exportPattern("^(s|g)etFixest")
+# sparse_model_matrix
+export(sparse_model_matrix)
 
 # coeftable and co
 export(coeftable, se, pvalue, tstat)
@@ -54,7 +56,7 @@ S3method(tstat, fixest)
 S3method(tstat, fixest_multi)
 
 # VCOV funs
-export(vcov_cluster, vcov_DK, vcov_NW, vcov_conley)
+export(vcov_cluster, vcov_DK, vcov_NW, vcov_conley, vcov_hetero)
 
 # Data manipulation
 export(n_unik, osize, sample_df, fdim)

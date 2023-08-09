@@ -55,9 +55,9 @@ The following vignette: \href{https://lrberge.github.io/fixest/articles/standard
 }
 \section{Functions}{
 \itemize{
-\item \code{dof}: This function is deprecated and will be removed at some point (in 6 months from August 2021). Exactly the same as \code{ssc}.
-}}
+\item \code{dof()}: This function is deprecated and will be removed at some point (in 6 months from August 2021). Exactly the same as \code{ssc}.
 
+}}
 \examples{
 
 #

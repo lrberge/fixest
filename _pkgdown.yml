@@ -84,6 +84,7 @@ reference:
         - weights.fixest
         - formula.fixest
         - terms.fixest
+        - sparse_model_matrix
     - title: Formula tools
       desc: Tools to manipulate formulas
       contents:
