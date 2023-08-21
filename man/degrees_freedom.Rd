@@ -42,9 +42,9 @@ Simple utility to extract the degrees of freedom from a \code{fixest} estimation
 }
 \section{Functions}{
 \itemize{
-\item \code{degrees_freedom_iid}: Gets the degrees of freedom of a \code{fixest} estimation
-}}
+\item \code{degrees_freedom_iid()}: Gets the degrees of freedom of a \code{fixest} estimation
 
+}}
 \examples{
 
 # First: an estimation

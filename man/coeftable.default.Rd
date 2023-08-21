@@ -41,15 +41,15 @@ Default method to extracts the coefficients table and its sub-components from an
 }
 \section{Functions}{
 \itemize{
-\item \code{se.default}: Extracts the standard-errors from an estimation
+\item \code{se(default)}: Extracts the standard-errors from an estimation
 
-\item \code{tstat.default}: Extracts the standard-errors from an estimation
+\item \code{tstat(default)}: Extracts the standard-errors from an estimation
 
-\item \code{pvalue.default}: Extracts the p-values from an estimation
+\item \code{pvalue(default)}: Extracts the p-values from an estimation
 
-\item \code{se.matrix}: Extracts the standard-errors from a VCOV matrix
+\item \code{se(matrix)}: Extracts the standard-errors from a VCOV matrix
+
 }}
-
 \examples{
 
 # NOTA: This function is really made to handle fixest objects

@@ -424,11 +424,11 @@ When the argument \code{postprocessing.tex} is not missing, two additional tags 
 }
 \section{Functions}{
 \itemize{
-\item \code{esttable}: Exports the results of multiple \code{fixest} estimations in a Latex table.
+\item \code{esttable()}: Exports the results of multiple \code{fixest} estimations in a Latex table.
 
-\item \code{esttex}: Exports the results of multiple \code{fixest} estimations in a Latex table.
+\item \code{esttex()}: Exports the results of multiple \code{fixest} estimations in a Latex table.
+
 }}
-
 \section{How does \code{digits} handle the number of decimals displayed?}{
 
 

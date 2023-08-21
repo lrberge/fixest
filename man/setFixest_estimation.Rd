@@ -54,7 +54,7 @@ getFixest_estimation()
 
 \item{glm.tol}{Tolerance level for the glm algorithm. Default is \code{1e-8}.}
 
-\item{reset}{Logical, default to \code{FALSE}. Whether to reset all values.}
+\item{reset}{Logical scalar, default is \code{FALSE}. Whether to reset all values.}
 }
 \value{
 The function \code{getFixest_estimation} returns the currently set global defaults.

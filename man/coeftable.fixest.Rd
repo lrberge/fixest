@@ -84,13 +84,13 @@ This set of tiny functions is primarily constructed for \code{fixest} estimation
 }
 \section{Functions}{
 \itemize{
-\item \code{se.fixest}: Extracts the standard-error of an estimation
+\item \code{se(fixest)}: Extracts the standard-error of an estimation
 
-\item \code{tstat.fixest}: Extracts the t-statistics of an estimation
+\item \code{tstat(fixest)}: Extracts the t-statistics of an estimation
 
-\item \code{pvalue.fixest}: Extracts the p-value of an estimation
+\item \code{pvalue(fixest)}: Extracts the p-value of an estimation
+
 }}
-
 \examples{
 
 # Some data and estimation

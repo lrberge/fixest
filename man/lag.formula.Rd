@@ -48,9 +48,9 @@ Lags a variable using panel id + time identifiers in a formula.
 }
 \section{Functions}{
 \itemize{
-\item \code{lag_fml}: Lags a variable using a formula syntax
-}}
+\item \code{lag_fml()}: Lags a variable using a formula syntax
 
+}}
 \examples{
 # simple example with an unbalanced panel
 base = data.frame(id = rep(1:2, each = 4),

@@ -77,13 +77,13 @@ Series of methods to extract the coefficients table or its sub-components from a
 }
 \section{Functions}{
 \itemize{
-\item \code{se.fixest_multi}: Extracts the standard-errors from \code{fixest_multi} estimations
+\item \code{se(fixest_multi)}: Extracts the standard-errors from \code{fixest_multi} estimations
 
-\item \code{tstat.fixest_multi}: Extracts the t-stats from \code{fixest_multi} estimations
+\item \code{tstat(fixest_multi)}: Extracts the t-stats from \code{fixest_multi} estimations
 
-\item \code{pvalue.fixest_multi}: Extracts the p-values from \code{fixest_multi} estimations
+\item \code{pvalue(fixest_multi)}: Extracts the p-values from \code{fixest_multi} estimations
+
 }}
-
 \examples{
 
 base = setNames(iris, c("y", "x1", "x2", "x3", "species"))

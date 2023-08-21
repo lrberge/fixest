@@ -248,9 +248,9 @@ This function plots the results of estimations (coefficients and confidence inte
 }
 \section{Functions}{
 \itemize{
-\item \code{iplot}: Plots the coefficients generated with i()
-}}
+\item \code{iplot()}: Plots the coefficients generated with i()
 
+}}
 \section{Setting custom default values}{
 
 The function \code{coefplot} dispose of many arguments to parametrize the plots. Most of these arguments can be set once an for all using the function \code{\link{setFixest_coefplot}}. See Example 3 below for a demonstration.

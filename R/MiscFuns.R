@@ -7105,7 +7105,7 @@ getFixest_fml = function(){
 #' @inheritParams feNmlm
 #' @inheritParams feglm
 #'
-#' @param reset Logical, default to `FALSE`. Whether to reset all values.
+#' @param reset Logical scalar, default is `FALSE`. Whether to reset all values.
 #'
 #' @return
 #' The function `getFixest_estimation` returns the currently set global defaults.
