@@ -145,7 +145,6 @@ reference:
         - bread.fixest
         - collinearity
         - estfun.fixest
-        - _index_
         - rep.fixest
     - title: Data sets
       desc: Data sets used in the examples
