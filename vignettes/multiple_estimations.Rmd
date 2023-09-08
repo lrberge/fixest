@@ -126,7 +126,7 @@ etable(res_multi[lhs = 1, fixef = 1, rhs = TRUE, sample = -1])
 
 #### Note on standard-errors
 
-Defining the standard-errors at estimation time, by using the arguments `se` or `cluster`, can be useful to obtain a coherent set of standard-errors across results, especially if the fixed-effects are modified (which will modify the default clustering of standard-errors across models).
+Defining the standard-errors at estimation time, by using the arguments `vcov`, can be useful to obtain a coherent set of standard-errors across results, especially if the fixed-effects are modified (which will modify the default clustering of standard-errors across models).
 
 #### Note on IVs
 

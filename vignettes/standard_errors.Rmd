@@ -122,7 +122,7 @@ If `t.df="conventional"`, the degrees of freedom used to find the p-value from t
 
 This section illustrates how the results from `fixest` compares with the ones from other methods. It also shows how to replicate the latter from `fixest`.
 
-```{r, include = FALSE}
+```{r, eval = TRUE, include = FALSE}
 is_plm = requireNamespace("plm", quietly = TRUE)
 
 if(!is_plm){
@@ -135,6 +135,12 @@ if(!is_plm){
     library(sandwich)
 }
 
+```
+
+```{r, eval = !is_plm, include = !is_plm}
+# NOTE:
+# Evaluation of the next chunks requires the package 'plm' which is not installed.
+# The code output is not reported.
 ```
 
 #### The data set and heteroskedasticity-robust SEs
@@ -261,17 +267,25 @@ From `fixest` version 0.7.0 onwards, the standard-errors and p-values are comput
 
 Here are the differences and similarities with `lfe`:
 
-```{r, include = FALSE}
+```{r, eval = TRUE, include = FALSE}
 is_lfe = requireNamespace("lfe", quietly = TRUE)
-if(!is_lfe){
-  cat("The evaluation of the next chunks of code require the package 'lfe' which is not available.")
-} else {
+is_lfe_plm = is_lfe && is_plm
+if(is_lfe){
     # avoids ugly startup messages popping + does not require the use of the not very elegant suppressPackageStartupMessages
     library(lfe)
 }
 ```
 
-```{r, eval = is_lfe, warning = FALSE}
+```{r, eval = !is_lfe_plm, include = !is_lfe_plm, echo = FALSE}
+if(!is_lfe){
+  cat("The evaluation of the next chunks of code requires the package 'lfe' which is not installed")
+} else {
+  cat("The evaluation of the next chunks of code requires the package 'plm' (for the data set) which is not installed.",
+    "\nThe code output is not reported.")
+}
+```
+
+```{r, eval = is_lfe_plm, warning = FALSE}
 library(lfe)
 
 # lfe: clustered by firm
