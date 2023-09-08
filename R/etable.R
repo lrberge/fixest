@@ -5306,10 +5306,15 @@ fix_pkgwdown_path = function(){
             # A) we get the path
             # B) we transform to URI
             # C) we replace the line
+            
+            done = FALSE
 
             pat = "<img.+\\.\\./.+/fixest/.+/images/"
             qui = which(grepl(pat, text))
             for(i in qui){
+                if(!done){
+                    message("Fixing pkgdown paths.")
+                }
                 # ex: line = "<img src = \"../../../Google drive/fixest/fixest/vignettes/images/etable/etable_tex_2021-12-02_1.05477838.png\">"
                 line = text[i]
                 line_split = strsplit(line, "src *= *\"")[[1]]
