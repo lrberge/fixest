@@ -12,3 +12,5 @@ Rplots.pdf
 .Renviron
 **/desktop.ini
 .vscode
+
+vignettes/*.html
