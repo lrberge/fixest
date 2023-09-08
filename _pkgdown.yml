@@ -1,4 +1,8 @@
 
+url: https://lrberge.github.io/fixest/
+
+template:
+  bootstrap: 5
 
 title: fixest
 
