@@ -7,5 +7,8 @@ articles:
   fixest_walkthrough: fixest_walkthrough.html
   multiple_estimations: multiple_estimations.html
   standard_errors: standard_errors.html
-last_built: 2023-09-08T08:27Z
+last_built: 2023-09-08T09:07Z
+urls:
+  reference: https://lrberge.github.io/fixest/reference
+  article: https://lrberge.github.io/fixest/articles
 
