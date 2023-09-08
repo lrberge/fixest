@@ -87,11 +87,11 @@
 
 
 <dt>ref</dt>
-<dd><p>A vector or a list, or special binning values (explained later). If a vector, it must correspond to (partially matched) values of the vector <code>x</code>. The vector <code>x</code> which will be transformed into a factor and these values will be placed first in the levels. That's the main usage of this function. You can also bin on-the-fly the values of <code>x</code>, using the same syntax as the function <code><a href="bin.html">bin</a></code>. Here's a description of what bin does: To create a new value from old values, use <code>bin = list("new_value"=old_values)</code> with <code>old_values</code> a vector of existing values. You can use <code>.()</code> for <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.
-It accepts regular expressions, but they must start with an <code>"@"</code>, like in <code>bin="@Aug|Dec"</code>. It accepts one-sided formulas which must contain the variable <code>x</code>, e.g. <code>bin=list("&lt;2" = ~x &lt; 2)</code>.
+<dd><p>A vector or a list, or special binning values (explained later). If a vector, it must correspond to (partially matched) values of the vector <code>x</code>. The vector <code>x</code> which will be transformed into a factor and these values will be placed first in the levels. That's the main usage of this function. You can also bin on-the-fly the values of <code>x</code>, using the same syntax as the function <code><a href="bin.html">bin</a></code>. To create a new value from old values, use <code>ref = list("new_value"=old_values)</code> with <code>old_values</code> a vector of existing values. You can use <code>.()</code> for <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.
+It accepts regular expressions, but they must start with an <code>"@"</code>, like in <code>ref="@Aug|Dec"</code>. It accepts one-sided formulas which must contain the variable <code>x</code>, e.g. <code>ref=list("&lt;2" = ~x &lt; 2)</code>.
 The names of the list are the new names. If the new name is missing, the first value matched becomes the new name. In the name, adding <code>"@d"</code>, with <code>d</code> a digit, will relocate the value in position <code>d</code>: useful to change the position of factors.
 If the vector <code>x</code> is numeric, you can use the special value <code>"bin::digit"</code> to group every <code>digit</code> element.
-For example if <code>x</code> represents years, using <code>bin="bin::2"</code> creates bins of two years.
+For example if <code>x</code> represents years, using <code>ref="bin::2"</code> creates bins of two years.
 With any data, using <code>"!bin::digit"</code> groups every digit consecutive values starting from the first value.
 Using <code>"!!bin::digit"</code> is the same but starting from the last value.
 With numeric vectors you can: a) use <code>"cut::n"</code> to cut the vector into <code>n</code> equal parts, b) use <code>"cut::a]b["</code> to create the following bins: <code>[min, a]</code>, <code>]a, b[</code>, <code>[b, max]</code>.
@@ -103,6 +103,18 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
     
 
 <p>It returns a factor of the same length as <code>x</code>, where levels have been modified according to the argument <code>ref</code>.</p>
+    </div>
+    <div id="-cutting-a-numeric-vector">
+    <h2>"Cutting" a numeric vector</h2>
+    
+
+
+<p>Numeric vectors can be cut easily into: a) equal parts, b) user-specified bins.</p>
+<p>Use <code>"cut::n"</code> to cut the vector into <code>n</code> (roughly) equal parts. Percentiles are used to partition the data, hence some data distributions can lead to create less than <code>n</code> parts (for example if P0 is the same as P50).</p>
+<p>The user can specify custom bins with the following syntax: <code>"cut::a]b]c]"</code>. Here the numbers <code>a</code>, <code>b</code>, <code>c</code>, etc, are a sequence of increasing numbers, each followed by an open or closed square bracket. The numbers can be specified as either plain numbers (e.g. <code>"cut::5]12[32["</code>), quartiles (e.g. <code>"cut::q1]q3["</code>), or percentiles (e.g. <code>"cut::p10]p15]p90]"</code>). Values of different types can be mixed: <code>"cut::5]q2[p80["</code> is valid provided the median (<code>q2</code>) is indeed greater than <code>5</code>, otherwise an error is thrown.</p>
+<p>The square bracket right of each number tells whether the numbers should be included or excluded from the current bin. For example, say <code>x</code> ranges from 0 to 100, then <code>"cut::5]"</code> will create two  bins: one from 0 to 5 and a second from 6 to 100. With <code>"cut::5["</code> the bins would have been 0-4 and 5-100.</p>
+<p>A factor is always returned. The labels always report the min and max values in each bin.</p>
+<p>To have user-specified bin labels, just add them in the character vector following <code>'cut::values'</code>. You don't need to provide all of them, and <code>NA</code> values fall back to the default label. For example, <code>bin = c("cut::4", "Q1", NA, "Q3")</code> will modify only the first and third label that will be displayed as <code>"Q1"</code> and <code>"Q3"</code>.</p>
     </div>
     <div id="bin-vs-ref">
     <h2><code>bin</code> vs <code>ref</code></h2>
@@ -116,7 +128,7 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 </ul></div>
     <div id="see-also">
     <h2>See also</h2>
-    <div class="dont-index"><p>To bin the values of a vectors: <code><a href="bin.html">bin</a></code>.</p></div>
+    <div class="dont-index"><p>To bin the values of a vector: <code><a href="bin.html">bin</a></code>.</p></div>
     </div>
     <div id="author">
     <h2>Author</h2>
@@ -244,7 +256,7 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

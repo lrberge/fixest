@@ -130,7 +130,7 @@
 
 
 <dt>vcov</dt>
-<dd><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href="vcov_cluster.html">vcov_cluster</a></code>, <code><a href="vcov_hac.html">vcov_NW</a></code>, <code><a href="vcov_hac.html">NW</a></code>, <code><a href="vcov_hac.html">vcov_DK</a></code>, <code><a href="vcov_hac.html">DK</a></code>, <code><a href="vcov_conley.html">vcov_conley</a></code> and <code><a href="vcov_conley.html">conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the <code>vcov</code> documentation in the <a href="https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1" class="external-link">vignette</a>.</p></dd>
+<dd><p>A function to be used to compute the standard-errors of each fixest object. You can pass extra arguments to this function using the argument <code>.vcov_args</code>. See the example.</p></dd>
 
 
 <dt>keep</dt>
@@ -172,9 +172,9 @@
     <div id="functions">
     <h2>Functions</h2>
     
-<ul><li><p><code>se.fixest_multi</code>: Extracts the standard-errors from <code>fixest_multi</code> estimations</p></li>
-<li><p><code>tstat.fixest_multi</code>: Extracts the t-stats from <code>fixest_multi</code> estimations</p></li>
-<li><p><code>pvalue.fixest_multi</code>: Extracts the p-values from <code>fixest_multi</code> estimations</p></li>
+<ul><li><p><code>se(fixest_multi)</code>: Extracts the standard-errors from <code>fixest_multi</code> estimations</p></li>
+<li><p><code>tstat(fixest_multi)</code>: Extracts the t-stats from <code>fixest_multi</code> estimations</p></li>
+<li><p><code>pvalue(fixest_multi)</code>: Extracts the p-values from <code>fixest_multi</code> estimations</p></li>
 </ul></div>
 
     <div id="ref-examples">
@@ -484,7 +484,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

@@ -111,14 +111,10 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 
 <p>Numeric vectors can be cut easily into: a) equal parts, b) user-specified bins.</p>
 <p>Use <code>"cut::n"</code> to cut the vector into <code>n</code> (roughly) equal parts. Percentiles are used to partition the data, hence some data distributions can lead to create less than <code>n</code> parts (for example if P0 is the same as P50).</p>
-<p>The user can specify custom bins with the following syntax: <code>"cut::a]b]c]"etc</code>. Here the numbers <code>a</code>, <code>b</code>, <code>c</code>, etc, are a sequence of increasing numbers, each followed by an open or closed square bracket. The numbers can be specified as either plain numbers (e.g. <code>"cut::5]12[32["</code>), quartiles (e.g. <code>"cut::q1]q3["</code>), or percentiles (e.g. <code>"cut::p10]p15]p90]"</code>). Values of different types can be mixed: <code>"cut::5]q2[p80["</code> is valid provided the median (<code>q2</code>) is indeed greater than <code>5</code>, otherwise an error is thrown.</p>
+<p>The user can specify custom bins with the following syntax: <code>"cut::a]b]c]"</code>. Here the numbers <code>a</code>, <code>b</code>, <code>c</code>, etc, are a sequence of increasing numbers, each followed by an open or closed square bracket. The numbers can be specified as either plain numbers (e.g. <code>"cut::5]12[32["</code>), quartiles (e.g. <code>"cut::q1]q3["</code>), or percentiles (e.g. <code>"cut::p10]p15]p90]"</code>). Values of different types can be mixed: <code>"cut::5]q2[p80["</code> is valid provided the median (<code>q2</code>) is indeed greater than <code>5</code>, otherwise an error is thrown.</p>
 <p>The square bracket right of each number tells whether the numbers should be included or excluded from the current bin. For example, say <code>x</code> ranges from 0 to 100, then <code>"cut::5]"</code> will create two  bins: one from 0 to 5 and a second from 6 to 100. With <code>"cut::5["</code> the bins would have been 0-4 and 5-100.</p>
-<p>A factor is returned. The labels report the min and max values in each bin.</p>
+<p>A factor is always returned. The labels always report the min and max values in each bin.</p>
 <p>To have user-specified bin labels, just add them in the character vector following <code>'cut::values'</code>. You don't need to provide all of them, and <code>NA</code> values fall back to the default label. For example, <code>bin = c("cut::4", "Q1", NA, "Q3")</code> will modify only the first and third label that will be displayed as <code>"Q1"</code> and <code>"Q3"</code>.</p>
-<p>["<code>), quartiles (e.g. </code>"cut::q1]: R:%22%60),%20quartiles%20(e.g.%20%60%22cut::q1
-["<code>), or percentiles (e.g. </code>"cut::p10]: R:%22%60),%20or%20percentiles%20(e.g.%20%60%22cut::p10
-["<code> is valid provided the median (</code>q2<code>) is indeed greater than </code>5`, otherwise an error is thrown.</p>
-<p>The square bracket right of each number tells whether the numbers should be included or excluded from the current bin. For example, say <code>x</code> ranges from 0 to 100, then `"cut::5]: R:%22%60%20is%20valid%20provided%20the%20median%20(%60q2%60)%20is%20indeed%20greater%20than%20%605%60,%20otherwise%20an%20error%20is%20thrown.%0A%0AThe%20square%20bracket%20right%20of%20each%20number%20tells%20whether%20the%20numbers%20should%20be%20included%20or%20excluded%20from%20the%20current%20bin.%20For%20example,%20say%20%60x%60%20ranges%20from%200%20to%20100,%20then%20%60%22cut::5</p>
     </div>
     <div id="bin-vs-ref">
     <h2><code>bin</code> vs <code>ref</code></h2>
@@ -324,7 +320,7 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>
