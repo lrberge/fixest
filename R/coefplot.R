@@ -1785,7 +1785,7 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
                     df.t = tryCatch(nobs(object) - length(coef(object)), 
                                     error = function(e) NULL)
                     if(is.null(df.t)){
-                        if(not_too_many_messages){
+                        if(not_too_many_messages("coefplot_df")){
                             message("The degrees of freedom for the t distribution could",
                                     " not be deduced. Using a Normal distribution instead.\n",
                                     "Note that you can provide the argument `df.t` directly.")
@@ -1794,7 +1794,7 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
                     }
                 }
                 
-                nb = abs(qt(1-ci_level) / 2, df.t)
+                nb = abs( qt( (1-ci_level) / 2, df.t) )
             }
             
             ci_high = estimate + nb*sd

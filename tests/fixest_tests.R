@@ -2198,6 +2198,16 @@ test(all(confint(est)[, 1] > est_coefplot_prms_larger[, 1]), TRUE)
 est_coefplot_prms_smaller = coefplot(est, df.t = Inf, only.params = TRUE)$prms[, 2:3]
 test(all(confint(est)[, 1] < est_coefplot_prms_smaller[, 1]), TRUE)
 
+# ... checking with non fixest objects
+est = feols(y ~ x1 + x2, base)
+mat_default = coefplot(coeftable(est), only.params = TRUE)$prms[, 2:3]
+est_inf = coefplot(est, df.t = Inf, only.params = TRUE)$prms[, 2:3]
+test(mat_default, est_inf)
+
+mat_custom = coefplot(coeftable(est), df.t = 5, only.params = TRUE)$prms[, 2:3]
+est_custom = coefplot(est, df.t = 5, only.params = TRUE)$prms[, 2:3]
+test(mat_custom, est_custom)
+
 ####
 #### etable ####
 ####

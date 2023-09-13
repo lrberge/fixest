@@ -6735,7 +6735,7 @@ char_to_vars = function(x){
     res = c()
     x = str2lang(x)
 
-    while(is_operator(x, "+")){
+    while(is_operator(x, "+")){p
         res = c(res, deparse_long(x[[3]]))
         x = x[[2]]
     }
