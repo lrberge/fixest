@@ -6735,7 +6735,7 @@ char_to_vars = function(x){
     res = c()
     x = str2lang(x)
 
-    while(is_operator(x, "+")){p
+    while(is_operator(x, "+")){
         res = c(res, deparse_long(x[[3]]))
         x = x[[2]]
     }
@@ -6747,6 +6747,7 @@ char_to_vars = function(x){
 
 not_too_many_messages = function(key){
     # we don't proc in less than 2 seconds
+    # avoid ugly looping issues
     all_times = getOption("fixest_all_timings")
     old_time = all_times[[key]]
     if(is.null(old_time) || as.numeric(Sys.time() - old_time) > 2){
