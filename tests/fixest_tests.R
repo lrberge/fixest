@@ -2173,10 +2173,30 @@ test(nrow(confint(est, "x1")), 1)
 est_pois = fepois(y ~ x1 | species, base)
 test(nrow(confint(est_pois)), 1)
 
-
 est_iv = feols(y ~ x1 | species | x2 ~ x3, base)
 test(nrow(confint(est_iv)), 2)
 
+#
+# coefplot confidence intervals
+#
+
+est_coefplot_prms = coefplot(est, only.params = TRUE)$prms[, 2:3]
+test(confint(est), est_coefplot_prms)
+
+est_pois_coefplot_prms = coefplot(est_pois, only.params = TRUE)$prms[, 2:3]
+test(confint(est_pois), est_pois_coefplot_prms)
+
+est_iv_coefplot_prms = coefplot(est_iv, only.params = TRUE)$prms[, 2:3]
+test(confint(est_iv), est_iv_coefplot_prms)
+
+# ... changing the df.t argument
+
+est = feols(y ~ x1 + x2, base)
+est_coefplot_prms_larger = coefplot(est, df.t = 5, only.params = TRUE)$prms[, 2:3]
+test(all(confint(est)[, 1] > est_coefplot_prms_larger[, 1]), TRUE)
+
+est_coefplot_prms_smaller = coefplot(est, df.t = Inf, only.params = TRUE)$prms[, 2:3]
+test(all(confint(est)[, 1] < est_coefplot_prms_smaller[, 1]), TRUE)
 
 ####
 #### etable ####
