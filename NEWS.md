@@ -1,4 +1,9 @@
 
+# fixest 0.11.2
+
+## Bugs
+
+- fix bug "t value" displaying in lieu of "z value". Thanks to issue on [easystats/parameters #892](https://github.com/easystats/parameters/issues/892). Very ancient bug!
 
 # fixest 0.11.1
 
