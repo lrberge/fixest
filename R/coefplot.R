@@ -62,6 +62,10 @@
 #' to [`graphics::abline`]. Example: `zero.par = list(col = "darkblue", lwd = 3)`.
 #' @param pt.join Logical, default is `FALSE`. If `TRUE`, then the coefficient estimates 
 #' are joined with a line.
+#' @param df.t Integer scalar or `NULL` (default). The degrees of freedom (DoF) to use
+#' when computing the confidence intervals with the Student t. By default it 
+#' tries to capture the DoF from the estimation. To use a Normal law to compute the 
+#' confidence interval, use `df.t = Inf`.
 #' @param pt.join.par List. Parameters of the line joining the coefficients. The 
 #' default values are: `col = pt.col` and `lwd = lwd`. You can add any graphical 
 #' parameter that will be passed to [`lines`]. Eg: `pt.join.par = list(lty = 2)`.

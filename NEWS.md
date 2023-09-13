@@ -5,6 +5,8 @@
 
 - fix bug "t value" displaying in lieu of "z value". Thanks to issue on [easystats/parameters #892](https://github.com/easystats/parameters/issues/892). Very ancient bug!
 
+- fix bug in coefplot: now the confidence intervals use the Student t when appropriate (before that, only the Normal law was used). Thanks to Grant McDermott, [#409](https://github.com/lrberge/fixest/pull/408)
+
 # fixest 0.11.1
 
 ## Documentation bug

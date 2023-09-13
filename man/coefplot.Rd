@@ -150,6 +150,11 @@ For each estimate.}
 \item{ci_high}{If \code{sd} is not provided, the upper bound of the confidence interval.
 For each estimate.}
 
+\item{df.t}{Integer scalar or \code{NULL} (default). The degrees of freedom (DoF) to use
+when computing the confidence intervals with the Student t. By default it
+tries to capture the DoF from the estimation. To use a Normal law to compute the
+confidence interval, use \code{df.t = Inf}.}
+
 \item{x}{The value of the x-axis. If missing, the names of the argument \code{estimate}
 are used.}
 
