@@ -25,9 +25,8 @@ Description: Fast and user-friendly estimation of econometric models with multip
 License: GPL-3
 BugReports: https://github.com/lrberge/fixest/issues
 URL: https://lrberge.github.io/fixest/, https://github.com/lrberge/fixest
-SystemRequirements: C++11
 VignetteBuilder: knitr
 LazyData: true
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.3
 Roxygen: list(markdown = TRUE)
 Encoding: UTF-8

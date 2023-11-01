@@ -1,378 +1,378 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>/404.html</loc>
+    <loc>https://lrberge.github.io/fixest/404.html</loc>
   </url>
   <url>
-    <loc>/articles/etable_new_features.html</loc>
+    <loc>https://lrberge.github.io/fixest/articles/etable_new_features.html</loc>
   </url>
   <url>
-    <loc>/articles/exporting_tables.html</loc>
+    <loc>https://lrberge.github.io/fixest/articles/exporting_tables.html</loc>
   </url>
   <url>
-    <loc>/articles/fixest_walkthrough.html</loc>
+    <loc>https://lrberge.github.io/fixest/articles/fixest_walkthrough.html</loc>
   </url>
   <url>
-    <loc>/articles/index.html</loc>
+    <loc>https://lrberge.github.io/fixest/articles/index.html</loc>
   </url>
   <url>
-    <loc>/articles/multiple_estimations.html</loc>
+    <loc>https://lrberge.github.io/fixest/articles/multiple_estimations.html</loc>
   </url>
   <url>
-    <loc>/articles/standard_errors.html</loc>
+    <loc>https://lrberge.github.io/fixest/articles/standard_errors.html</loc>
   </url>
   <url>
-    <loc>/authors.html</loc>
+    <loc>https://lrberge.github.io/fixest/authors.html</loc>
   </url>
   <url>
-    <loc>/CONTRIBUTORS.html</loc>
+    <loc>https://lrberge.github.io/fixest/CONTRIBUTORS.html</loc>
   </url>
   <url>
-    <loc>/index.html</loc>
+    <loc>https://lrberge.github.io/fixest/index.html</loc>
   </url>
   <url>
-    <loc>/news/index.html</loc>
+    <loc>https://lrberge.github.io/fixest/news/index.html</loc>
   </url>
   <url>
-    <loc>/ONGOING_ISSUES.html</loc>
+    <loc>https://lrberge.github.io/fixest/ONGOING_ISSUES.html</loc>
   </url>
   <url>
-    <loc>/Readme.html</loc>
+    <loc>https://lrberge.github.io/fixest/Readme.html</loc>
   </url>
   <url>
-    <loc>/reference/aggregate.fixest.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/aggregate.fixest.html</loc>
   </url>
   <url>
-    <loc>/reference/AIC.fixest.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/AIC.fixest.html</loc>
   </url>
   <url>
-    <loc>/reference/as.dict.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/as.dict.html</loc>
   </url>
   <url>
-    <loc>/reference/as.list.fixest_multi.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/as.list.fixest_multi.html</loc>
   </url>
   <url>
-    <loc>/reference/base_did.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/base_did.html</loc>
   </url>
   <url>
-    <loc>/reference/base_stagg.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/base_stagg.html</loc>
   </url>
   <url>
-    <loc>/reference/BIC.fixest.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/BIC.fixest.html</loc>
   </url>
   <url>
-    <loc>/reference/bin.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/bin.html</loc>
   </url>
   <url>
-    <loc>/reference/bread.fixest.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/bread.fixest.html</loc>
   </url>
   <url>
-    <loc>/reference/cash-.fixest_multi.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/cash-.fixest_multi.html</loc>
   </url>
   <url>
-    <loc>/reference/check_conv_feols.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/check_conv_feols.html</loc>
   </url>
   <url>
-    <loc>/reference/coef.fixest.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/coef.fixest.html</loc>
   </url>
   <url>
-    <loc>/reference/coef.fixest_multi.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/coef.fixest_multi.html</loc>
   </url>
   <url>
-    <loc>/reference/coefplot.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/coefplot.html</loc>
   </url>
   <url>
-    <loc>/reference/coeftable.default.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/coeftable.default.html</loc>
   </url>
   <url>
-    <loc>/reference/coeftable.fixest.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/coeftable.fixest.html</loc>
   </url>
   <url>
-    <loc>/reference/coeftable.fixest_multi.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/coeftable.fixest_multi.html</loc>
   </url>
   <url>
-    <loc>/reference/coeftable.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/coeftable.html</loc>
   </url>
   <url>
-    <loc>/reference/collinearity.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/collinearity.html</loc>
   </url>
   <url>
-    <loc>/reference/confint.fixest.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/confint.fixest.html</loc>
   </url>
   <url>
-    <loc>/reference/confint.fixest_multi.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/confint.fixest_multi.html</loc>
   </url>
   <url>
-    <loc>/reference/degrees_freedom.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/degrees_freedom.html</loc>
   </url>
   <url>
-    <loc>/reference/demean.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/demean.html</loc>
   </url>
   <url>
-    <loc>/reference/deviance.fixest.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/deviance.fixest.html</loc>
   </url>
   <url>
-    <loc>/reference/did_estimate_yearly_effects.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/did_estimate_yearly_effects.html</loc>
   </url>
   <url>
-    <loc>/reference/did_means.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/did_means.html</loc>
   </url>
   <url>
-    <loc>/reference/did_plot_yearly_effects.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/did_plot_yearly_effects.html</loc>
   </url>
   <url>
-    <loc>/reference/dof.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/dof.html</loc>
   </url>
   <url>
-    <loc>/reference/dsb.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/dsb.html</loc>
   </url>
   <url>
-    <loc>/reference/errbar.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/errbar.html</loc>
   </url>
   <url>
-    <loc>/reference/estfun.fixest.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/estfun.fixest.html</loc>
   </url>
   <url>
-    <loc>/reference/est_env.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/est_env.html</loc>
   </url>
   <url>
-    <loc>/reference/etable.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/etable.html</loc>
   </url>
   <url>
-    <loc>/reference/extralines_register.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/extralines_register.html</loc>
   </url>
   <url>
-    <loc>/reference/extraline_register.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/extraline_register.html</loc>
   </url>
   <url>
-    <loc>/reference/fdim.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/fdim.html</loc>
   </url>
   <url>
-    <loc>/reference/feglm.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/feglm.html</loc>
   </url>
   <url>
-    <loc>/reference/femlm.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/femlm.html</loc>
   </url>
   <url>
-    <loc>/reference/feNmlm.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/feNmlm.html</loc>
   </url>
   <url>
-    <loc>/reference/feols.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/feols.html</loc>
   </url>
   <url>
-    <loc>/reference/fitstat.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/fitstat.html</loc>
   </url>
   <url>
-    <loc>/reference/fitstat_register.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/fitstat_register.html</loc>
   </url>
   <url>
-    <loc>/reference/fitted.fixest.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/fitted.fixest.html</loc>
   </url>
   <url>
-    <loc>/reference/fixef.fixest.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/fixef.fixest.html</loc>
   </url>
   <url>
-    <loc>/reference/fixef_reexported.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/fixef_reexported.html</loc>
   </url>
   <url>
-    <loc>/reference/fixest-deprecated.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/fixest-deprecated.html</loc>
   </url>
   <url>
-    <loc>/reference/fixest-package.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/fixest-package.html</loc>
   </url>
   <url>
-    <loc>/reference/fixest.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/fixest.html</loc>
   </url>
   <url>
-    <loc>/reference/fixest_startup_msg.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/fixest_startup_msg.html</loc>
   </url>
   <url>
-    <loc>/reference/formula.fixest.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/formula.fixest.html</loc>
   </url>
   <url>
-    <loc>/reference/hatvalues.fixest.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/hatvalues.fixest.html</loc>
   </url>
   <url>
-    <loc>/reference/i.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/i.html</loc>
   </url>
   <url>
-    <loc>/reference/index.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/index.html</loc>
   </url>
   <url>
-    <loc>/reference/l.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/l.html</loc>
   </url>
   <url>
-    <loc>/reference/lag.formula.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/lag.formula.html</loc>
   </url>
   <url>
-    <loc>/reference/logLik.fixest.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/logLik.fixest.html</loc>
   </url>
   <url>
-    <loc>/reference/model.matrix.fixest.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/model.matrix.fixest.html</loc>
   </url>
   <url>
-    <loc>/reference/models.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/models.html</loc>
   </url>
   <url>
-    <loc>/reference/nobs.fixest.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/nobs.fixest.html</loc>
   </url>
   <url>
-    <loc>/reference/n_unik.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/n_unik.html</loc>
   </url>
   <url>
-    <loc>/reference/obs.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/obs.html</loc>
   </url>
   <url>
-    <loc>/reference/obs2remove.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/obs2remove.html</loc>
   </url>
   <url>
-    <loc>/reference/osize.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/osize.html</loc>
   </url>
   <url>
-    <loc>/reference/panel.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/panel.html</loc>
   </url>
   <url>
-    <loc>/reference/plot.fixest.fixef.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/plot.fixest.fixef.html</loc>
   </url>
   <url>
-    <loc>/reference/predict.fixest.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/predict.fixest.html</loc>
   </url>
   <url>
-    <loc>/reference/print.fixest.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/print.fixest.html</loc>
   </url>
   <url>
-    <loc>/reference/print.fixest_fitstat.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/print.fixest_fitstat.html</loc>
   </url>
   <url>
-    <loc>/reference/print.fixest_multi.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/print.fixest_multi.html</loc>
   </url>
   <url>
-    <loc>/reference/r2.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/r2.html</loc>
   </url>
   <url>
-    <loc>/reference/ref.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/ref.html</loc>
   </url>
   <url>
-    <loc>/reference/rep.fixest.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/rep.fixest.html</loc>
   </url>
   <url>
-    <loc>/reference/resid.fixest.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/resid.fixest.html</loc>
   </url>
   <url>
-    <loc>/reference/resid.fixest_multi.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/resid.fixest_multi.html</loc>
   </url>
   <url>
-    <loc>/reference/sample_df.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/sample_df.html</loc>
   </url>
   <url>
-    <loc>/reference/sandwich_reexported.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/sandwich_reexported.html</loc>
   </url>
   <url>
-    <loc>/reference/setFixest_coefplot.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/setFixest_coefplot.html</loc>
   </url>
   <url>
-    <loc>/reference/setFixest_dict.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/setFixest_dict.html</loc>
   </url>
   <url>
-    <loc>/reference/setFixest_dof.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/setFixest_dof.html</loc>
   </url>
   <url>
-    <loc>/reference/setFixest_estimation.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/setFixest_estimation.html</loc>
   </url>
   <url>
-    <loc>/reference/setFixest_fml.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/setFixest_fml.html</loc>
   </url>
   <url>
-    <loc>/reference/setFixest_na_inf.rm.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/setFixest_na_inf.rm.html</loc>
   </url>
   <url>
-    <loc>/reference/setFixest_notes.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/setFixest_notes.html</loc>
   </url>
   <url>
-    <loc>/reference/setFixest_nthreads.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/setFixest_nthreads.html</loc>
   </url>
   <url>
-    <loc>/reference/setFixest_print.type.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/setFixest_print.type.html</loc>
   </url>
   <url>
-    <loc>/reference/setFixest_se.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/setFixest_se.html</loc>
   </url>
   <url>
-    <loc>/reference/setFixest_vcov.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/setFixest_vcov.html</loc>
   </url>
   <url>
-    <loc>/reference/sigma.fixest.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/sigma.fixest.html</loc>
   </url>
   <url>
-    <loc>/reference/ssc.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/ssc.html</loc>
   </url>
   <url>
-    <loc>/reference/stepwise.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/stepwise.html</loc>
   </url>
   <url>
-    <loc>/reference/style.df.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/style.df.html</loc>
   </url>
   <url>
-    <loc>/reference/style.tex.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/style.tex.html</loc>
   </url>
   <url>
-    <loc>/reference/sub-.fixest_multi.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/sub-.fixest_multi.html</loc>
   </url>
   <url>
-    <loc>/reference/sub-.fixest_panel.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/sub-.fixest_panel.html</loc>
   </url>
   <url>
-    <loc>/reference/sub-sub-.fixest_multi.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/sub-sub-.fixest_multi.html</loc>
   </url>
   <url>
-    <loc>/reference/summary.fixest.fixef.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/summary.fixest.fixef.html</loc>
   </url>
   <url>
-    <loc>/reference/summary.fixest.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/summary.fixest.html</loc>
   </url>
   <url>
-    <loc>/reference/summary.fixest.obs2remove.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/summary.fixest.obs2remove.html</loc>
   </url>
   <url>
-    <loc>/reference/summary.fixest_multi.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/summary.fixest_multi.html</loc>
   </url>
   <url>
-    <loc>/reference/sunab.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/sunab.html</loc>
   </url>
   <url>
-    <loc>/reference/terms.fixest.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/terms.fixest.html</loc>
   </url>
   <url>
-    <loc>/reference/to_integer.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/to_integer.html</loc>
   </url>
   <url>
-    <loc>/reference/trade.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/trade.html</loc>
   </url>
   <url>
-    <loc>/reference/unpanel.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/unpanel.html</loc>
   </url>
   <url>
-    <loc>/reference/update.fixest.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/update.fixest.html</loc>
   </url>
   <url>
-    <loc>/reference/vcov.fixest.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/vcov.fixest.html</loc>
   </url>
   <url>
-    <loc>/reference/vcov_cluster.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/vcov_cluster.html</loc>
   </url>
   <url>
-    <loc>/reference/vcov_conley.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/vcov_conley.html</loc>
   </url>
   <url>
-    <loc>/reference/vcov_hac.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/vcov_hac.html</loc>
   </url>
   <url>
-    <loc>/reference/wald.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/wald.html</loc>
   </url>
   <url>
-    <loc>/reference/weights.fixest.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/weights.fixest.html</loc>
   </url>
   <url>
-    <loc>/reference/xpd.html</loc>
+    <loc>https://lrberge.github.io/fixest/reference/xpd.html</loc>
   </url>
 </urlset>

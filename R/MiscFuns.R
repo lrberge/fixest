@@ -5211,26 +5211,36 @@ fixest_pvalue = function(x, zvalue, vcov){
     pvalue
 }
 
-fixest_CI_factor = function(x, level, vcov){
+fixest_CI_factor = function(x, level, vcov = NULL, df.t = NULL){
 
     val = (1 - level) / 2
     val = c(val, 1 - val)
 
     if(use_t_distr(x)){
+        
+        if(missing(vcov) && missing(df.t)){
+            stop("Internal error (=bug): the arguments `vcov` and `df.t` ",
+                 "should not be both missing in fixest_CI_factor().")
 
-        if(missing(vcov)) {
-            stop("Internal error (=bug): the argument `vcov` should not be missing in fixest_CI_factor().")
+        } 
+        
+        if(!missing(df.t)){
+            if(!is.numeric(df.t) && !length(df.t) == 1){
+                stop("Internal error (=bug): the arguments `df.t` ",
+                     "should be numeric in fixest_CI_factor().")
+            }
+        } else {
+            if(is.null(attr(vcov, "dof.K"))){
+                stop("Internal error (=bug): the attribute `dof.K` from `vcov` should not be NULL.")
+            }
 
-        } else if(is.null(attr(vcov, "dof.K"))){
-            stop("Internal error (=bug): the attribute `dof.K` from `vcov` should not be NULL.")
+            # df.t is always an attribute of the vcov
+            df.t = attr(vcov, "df.t")
+            if(is.null(df.t)){
+                df.t = max(nobs(x) - attr(vcov,"dof.K"), 1)
+            }
         }
-
-        # df.t is always an attribute of the vcov
-        df.t = attr(vcov, "df.t")
-        if(is.null(df.t)){
-            df.t = max(nobs(x) - attr(vcov,"dof.K"), 1)
-        }
-
+        
         fact = qt(val, df.t)
 
     } else {
@@ -5242,8 +5252,10 @@ fixest_CI_factor = function(x, level, vcov){
 
 
 #### ................. ####
-#### Small Utilities ####
+#### Small Utilities   ####
 ####
+
+
 
 escape_regex = function(x){
     # escape special characters in regular expressions => to make it as "fixed"
@@ -6730,6 +6742,23 @@ char_to_vars = function(x){
     rev(res)
 }
 
+not_too_many_messages = function(key){
+    # we don't proc in less than 2 seconds
+    # avoid ugly looping issues
+    all_times = getOption("fixest_all_timings")
+    old_time = all_times[[key]]
+    if(is.null(old_time) || as.numeric(Sys.time() - old_time) > 2){
+        if(is.null(all_times)){
+            all_times = list()
+        }
+        all_times[[key]] = Sys.time()
+        options(fixest_all_timings = all_times)
+        return(TRUE)
+    }
+    
+    FALSE
+}
+
 
 #### ............... ####
 #### Setters/Getters ####
@@ -7102,7 +7131,7 @@ getFixest_fml = function(){
 #' @inheritParams feNmlm
 #' @inheritParams feglm
 #'
-#' @param reset Logical, default to `FALSE`. Whether to reset all values.
+#' @param reset Logical scalar, default is `FALSE`. Whether to reset all values.
 #'
 #' @return
 #' The function `getFixest_estimation` returns the currently set global defaults.

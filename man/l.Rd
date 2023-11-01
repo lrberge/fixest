@@ -29,11 +29,11 @@ Produce lags or leads in the formulas of \code{fixest} estimations or when creat
 }
 \section{Functions}{
 \itemize{
-\item \code{f}: Forwards a variable (inverse of lagging) in a \code{fixest} estimation
+\item \code{f()}: Forwards a variable (inverse of lagging) in a \code{fixest} estimation
 
-\item \code{d}: Creates differences (i.e. x - lag(x)) in a \code{fixest} estimation
+\item \code{d()}: Creates differences (i.e. x - lag(x)) in a \code{fixest} estimation
+
 }}
-
 \examples{
 
 data(base_did)

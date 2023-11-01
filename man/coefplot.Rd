@@ -12,6 +12,7 @@ coefplot(
   sd,
   ci_low,
   ci_high,
+  df.t = NULL,
   x,
   x.shift = 0,
   horiz = FALSE,
@@ -73,6 +74,7 @@ iplot(
   sd,
   ci_low,
   ci_high,
+  df.t = NULL,
   x,
   x.shift = 0,
   horiz = FALSE,
@@ -127,23 +129,40 @@ iplot(
 )
 }
 \arguments{
-\item{object}{Can be either: i) an estimation object (obtained for example from \code{\link{feols}}, ii) a list of estimation objects (several results will be plotted at once), iii) a matrix of coefficients table, iv) a numeric vector of the point estimates -- the latter requiring the extra arguments \code{sd} or \code{ci_low} and \code{ci_high}.}
+\item{object}{Can be either: i) an estimation object (obtained for example from
+\code{\link{feols}}, ii) a list of estimation objects (several results will be plotted at
+once), iii) a matrix of coefficients table, iv) a numeric vector of the point
+estimates -- the latter requiring the extra arguments \code{sd} or \code{ci_low} and \code{ci_high}.}
 
-\item{...}{Other arguments to be passed to \code{summary}, if \code{object} is an estimation, and/or to the function \code{plot} or \code{lines} (if \code{add = TRUE}).}
+\item{...}{Other arguments to be passed to \code{summary}, if \code{object} is an estimation,
+and/or to the function \code{plot} or \code{lines} (if \code{add = TRUE}).}
 
-\item{style}{A character scalar giving the style of the plot to be used. You can set styles with the function \code{\link{setFixest_coefplot}}, setting all the default values of the function. If missing, then it switches to either "default" or "iplot", depending on the calling function.}
+\item{style}{A character scalar giving the style of the plot to be used. You
+can set styles with the function \code{\link{setFixest_coefplot}}, setting all the default
+values of the function. If missing, then it switches to either "default" or "iplot",
+depending on the calling function.}
 
 \item{sd}{The standard errors of the estimates. It may be missing.}
 
-\item{ci_low}{If \code{sd} is not provided, the lower bound of the confidence interval. For each estimate.}
+\item{ci_low}{If \code{sd} is not provided, the lower bound of the confidence interval.
+For each estimate.}
 
-\item{ci_high}{If \code{sd} is not provided, the upper bound of the confidence interval. For each estimate.}
+\item{ci_high}{If \code{sd} is not provided, the upper bound of the confidence interval.
+For each estimate.}
 
-\item{x}{The value of the x-axis. If missing, the names of the argument \code{estimate} are used.}
+\item{df.t}{Integer scalar or \code{NULL} (default). The degrees of freedom (DoF) to use
+when computing the confidence intervals with the Student t. By default it
+tries to capture the DoF from the estimation. To use a Normal law to compute the
+confidence interval, use \code{df.t = Inf}.}
 
-\item{x.shift}{Shifts the confidence intervals bars to the left or right, depending on the value of \code{x.shift}. Default is 0.}
+\item{x}{The value of the x-axis. If missing, the names of the argument \code{estimate}
+are used.}
 
-\item{horiz}{A logical scalar, default is \code{FALSE}. Whether to display the confidence intervals horizontally instead of vertically.}
+\item{x.shift}{Shifts the confidence intervals bars to the left or right, depending
+on the value of \code{x.shift}. Default is 0.}
+
+\item{horiz}{A logical scalar, default is \code{FALSE}. Whether to display the confidence
+intervals horizontally instead of vertically.}
 
 \item{dict}{A named character vector or a logical scalar. It changes the original variable names to the ones contained in the \code{dict}ionary. E.g. to change the variables named \code{a} and \code{b3} to (resp.) \dQuote{$log(a)$} and to \dQuote{$bonus^3$}, use \code{dict=c(a="$log(a)$",b3="$bonus^3$")}. By default, it is equal to \code{getFixest_dict()}, a default dictionary which can be set with \code{\link{setFixest_dict}}. You can use \code{dict = FALSE} to disable it. By default \code{dict} modifies the entries in the global dictionary, to disable this behavior, use "reset" as the first element (ex: \code{dict=c("reset", mpg="Miles per gallon")}).}
 
@@ -157,17 +176,20 @@ iplot(
 
 \item{ci_level}{Scalar between 0 and 1: the level of the CI. By default it is equal to 0.95.}
 
-\item{add}{Default is \code{FALSE}, if the intervals are to be added to an existing graph. Note that if it is the case, then the argument \code{x} MUST be numeric.}
+\item{add}{Default is \code{FALSE}, if the intervals are to be added to an existing
+graph. Note that if it is the case, then the argument \code{x} MUST be numeric.}
 
 \item{pt.pch}{The patch of the coefficient estimates. Default is 1 (circle).}
 
-\item{pt.bg}{The background color of the point estimate (when the \code{pt.pch} is in 21 to 25). Defaults to NULL.}
+\item{pt.bg}{The background color of the point estimate (when the \code{pt.pch} is
+in 21 to 25). Defaults to NULL.}
 
 \item{cex}{Numeric, default is 1. Expansion factor for the points}
 
 \item{pt.cex}{The size of the coefficient estimates. Default is the other argument \code{cex}.}
 
-\item{col}{The color of the points and the confidence intervals. Default is 1 ("black"). Note that you can set the colors separately for each of them with \code{pt.col} and \code{ci.col}.}
+\item{col}{The color of the points and the confidence intervals. Default is 1
+("black"). Note that you can set the colors separately for each of them with \code{pt.col} and \code{ci.col}.}
 
 \item{pt.col}{The color of the coefficient estimates. Default is equal to the other argument \code{col}.}
 
@@ -175,95 +197,184 @@ iplot(
 
 \item{lwd}{General line with. Default is 1.}
 
-\item{pt.lwd}{The line width of the coefficient estimates. Default is equal to the other argument \code{lwd}.}
+\item{pt.lwd}{The line width of the coefficient estimates. Default is equal to
+the other argument \code{lwd}.}
 
-\item{ci.lwd}{The line width of the confidence intervals. Default is equal to the other argument \code{lwd}.}
+\item{ci.lwd}{The line width of the confidence intervals. Default is equal to
+the other argument \code{lwd}.}
 
 \item{ci.lty}{The line type of the confidence intervals. Default is 1.}
 
-\item{grid}{Logical, default is \code{TRUE}. Whether a grid should be displayed. You can set the display of the grid with the argument \code{grid.par}.}
+\item{grid}{Logical, default is \code{TRUE}. Whether a grid should be displayed. You
+can set the display of the grid with the argument \code{grid.par}.}
 
-\item{grid.par}{List. Parameters of the grid. The default values are: \code{lty = 3} and \code{col = "gray"}. You can add any graphical parameter that will be passed to \code{\link[graphics:abline]{graphics::abline}}. You also have two additional arguments: use \code{horiz = FALSE} to disable the horizontal lines, and use \code{vert = FALSE} to disable the vertical lines. Eg: \code{grid.par = list(vert = FALSE, col = "red", lwd = 2)}.}
+\item{grid.par}{List. Parameters of the grid. The default values are: \code{lty =  3} and \code{col = "gray"}. You can add any graphical parameter that will be passed
+to \code{\link[graphics:abline]{graphics::abline}}. You also have two additional arguments: use \code{horiz =  FALSE} to disable the horizontal lines, and use \code{vert = FALSE} to disable the
+vertical lines. Eg: \code{grid.par = list(vert = FALSE, col = "red", lwd = 2)}.}
 
-\item{zero}{Logical, default is \code{TRUE}. Whether the 0-line should be emphasized. You can set the parameters of that line with the argument \code{zero.par}.}
+\item{zero}{Logical, default is \code{TRUE}. Whether the 0-line should be emphasized.
+You can set the parameters of that line with the argument \code{zero.par}.}
 
-\item{zero.par}{List. Parameters of the zero-line. The default values are \code{col = "black"} and \code{lwd = 1}. You can add any graphical parameter that will be passed to \code{\link[graphics:abline]{graphics::abline}}. Example: \code{zero.par = list(col = "darkblue", lwd = 3)}.}
+\item{zero.par}{List. Parameters of the zero-line. The default values are
+\code{col = "black"} and \code{lwd = 1}. You can add any graphical parameter that will be passed
+to \code{\link[graphics:abline]{graphics::abline}}. Example: \code{zero.par = list(col = "darkblue", lwd = 3)}.}
 
-\item{pt.join}{Logical, default is \code{FALSE}. If \code{TRUE}, then the coefficient estimates are joined with a line.}
+\item{pt.join}{Logical, default is \code{FALSE}. If \code{TRUE}, then the coefficient estimates
+are joined with a line.}
 
-\item{pt.join.par}{List. Parameters of the line joining the coefficients. The default values are: \code{col = pt.col} and \code{lwd = lwd}. You can add any graphical parameter that will be passed to \code{\link{lines}}. Eg: \code{pt.join.par = list(lty = 2)}.}
+\item{pt.join.par}{List. Parameters of the line joining the coefficients. The
+default values are: \code{col = pt.col} and \code{lwd = lwd}. You can add any graphical
+parameter that will be passed to \code{\link{lines}}. Eg: \code{pt.join.par = list(lty = 2)}.}
 
-\item{ci.join}{Logical default to \code{FALSE}. Whether to join the extremities of the confidence intervals. If \code{TRUE}, then you can set the graphical parameters with the argument \code{ci.join.par}.}
+\item{ci.join}{Logical default to \code{FALSE}. Whether to join the extremities of
+the confidence intervals. If \code{TRUE}, then you can set the graphical parameters
+with the argument \code{ci.join.par}.}
 
-\item{ci.join.par}{A list of parameters to be passed to \code{\link[graphics:lines]{graphics::lines}}. Only used if \code{ci.join=TRUE}. By default it is equal to \code{list(lwd = lwd, col = col, lty = 2)}.}
+\item{ci.join.par}{A list of parameters to be passed to \code{\link[graphics:lines]{graphics::lines}}.
+Only used if \code{ci.join=TRUE}. By default it is equal to \code{list(lwd = lwd, col = col, lty = 2)}.}
 
-\item{ci.fill}{Logical default to \code{FALSE}. Whether to fill the confidence intervals with a color. If \code{TRUE}, then you can set the graphical parameters with the argument \code{ci.fill.par}.}
+\item{ci.fill}{Logical default to \code{FALSE}. Whether to fill the confidence intervals
+with a color. If \code{TRUE}, then you can set the graphical parameters with the argument \code{ci.fill.par}.}
 
-\item{ci.fill.par}{A list of parameters to be passed to \code{\link[graphics:polygon]{graphics::polygon}}. Only used if \code{ci.fill=TRUE}. By default it is equal to \code{list(col = "lightgray", alpha = 0.5)}. Note that \code{alpha} is a special parameter that adds transparency to the color (ranges from 0 to 1).}
+\item{ci.fill.par}{A list of parameters to be passed to \code{\link[graphics:polygon]{graphics::polygon}}.
+Only used if \code{ci.fill=TRUE}. By default it is equal to \code{list(col = "lightgray", alpha = 0.5)}.
+Note that \code{alpha} is a special parameter that adds transparency to the color (ranges from 0 to 1).}
 
-\item{ref}{Used to add points equal to 0 (typically to visualize reference points). Either: i) "auto" (default), ii) a character vector of length 1, iii) a list of length 1, iv) a named integer vector of length 1, or v) a numeric vector. By default, in \code{iplot}, if the argument \code{ref} has been used in the estimation, these references are automatically added. If ii), ie a character scalar, then that coefficient equal to zero is added as the first coefficient. If a list or a named integer vector of length 1, then the integer gives the position of the reference among the coefficients and the name gives the coefficient name. A non-named numeric value of \code{ref} only works if the x-axis is also numeric (which can happen in \code{iplot}).}
+\item{ref}{Used to add points equal to 0 (typically to visualize reference points).
+Either: i) "auto" (default), ii) a character vector of length 1, iii) a list
+of length 1, iv) a named integer vector of length 1, or v) a numeric vector.
+By default, in \code{iplot}, if the argument \code{ref} has been used in the estimation,
+these references are automatically added. If ii), ie a character scalar, then
+that coefficient equal to zero is added as the first coefficient. If a list or
+a named integer vector of length 1, then the integer gives the position of the
+reference among the coefficients and the name gives the coefficient name. A non-named
+numeric value of \code{ref} only works if the x-axis is also numeric (which can happen
+in \code{iplot}).}
 
-\item{ref.line}{Logical or numeric, default is "auto", whose behavior depends on the situation. It is \code{TRUE} only if: i) interactions are plotted, ii) the x values are numeric and iii) a reference is found. If \code{TRUE}, then a vertical line is drawn at the level of the reference value. Otherwise, if numeric a vertical line will be drawn at that specific value.}
+\item{ref.line}{Logical or numeric, default is "auto", whose behavior depends
+on the situation. It is \code{TRUE} only if: i) interactions are plotted, ii) the
+x values are numeric and iii) a reference is found. If \code{TRUE}, then a vertical
+line is drawn at the level of the reference value. Otherwise, if numeric a vertical
+line will be drawn at that specific value.}
 
-\item{ref.line.par}{List. Parameters of the vertical line on the reference. The default values are: \code{col = "black"} and \code{lty = 2}. You can add any graphical parameter that will be passed to \code{\link[graphics:abline]{graphics::abline}}. Eg: \code{ref.line.par = list(lty = 1, lwd = 3)}.}
+\item{ref.line.par}{List. Parameters of the vertical line on the reference. The
+default values are: \code{col = "black"} and \code{lty = 2}. You can add any graphical
+parameter that will be passed to \code{\link[graphics:abline]{graphics::abline}}. Eg: \code{ref.line.par = list(lty = 1, lwd = 3)}.}
 
-\item{lab.cex}{The size of the labels of the coefficients. Default is missing. It is automatically set by an internal algorithm which can go as low as \code{lab.min.cex} (another argument).}
+\item{lab.cex}{The size of the labels of the coefficients. Default is missing.
+It is automatically set by an internal algorithm which can go as low as \code{lab.min.cex}
+(another argument).}
 
-\item{lab.min.cex}{The minimum size of the coefficients labels, as set by the internal algorithm. Default is 0.85.}
+\item{lab.min.cex}{The minimum size of the coefficients labels, as set by the
+internal algorithm. Default is 0.85.}
 
-\item{lab.max.mar}{The maximum size the left margin can take when trying to fit the coefficient labels into it (only when \code{horiz = TRUE}). This is used in the internal algorithm fitting the coefficient labels. Default is \code{0.25}.}
+\item{lab.max.mar}{The maximum size the left margin can take when trying to fit
+the coefficient labels into it (only when \code{horiz = TRUE}). This is used in the
+internal algorithm fitting the coefficient labels. Default is \code{0.25}.}
 
-\item{lab.fit}{The method to fit the coefficient labels into the plotting region (only when \code{horiz = FALSE}). Can be \code{"auto"} (the default), \code{"simple"}, \code{"multi"} or \code{"tilted"}. If \code{"simple"}, then the classic axis is drawn. If \code{"multi"}, then the coefficient labels are fit horizontally across several lines, such that they don't collide. If \code{"tilted"}, then the labels are tilted. If \code{"auto"}, an automatic choice between the three is made.}
+\item{lab.fit}{The method to fit the coefficient labels into the plotting region
+(only when \code{horiz = FALSE}). Can be \code{"auto"} (the default), \code{"simple"}, \code{"multi"}
+or \code{"tilted"}. If \code{"simple"}, then the classic axis is drawn. If \code{"multi"}, then
+the coefficient labels are fit horizontally across several lines, such that they
+don't collide. If \code{"tilted"}, then the labels are tilted. If \code{"auto"}, an automatic
+choice between the three is made.}
 
-\item{xlim.add}{A numeric vector of length 1 or 2. It represents an extension factor of xlim, in percentage. Eg: \code{xlim.add = c(0, 0.5)} extends \code{xlim} of 50\% on the right. If of length 1, positive values represent the right, and negative values the left (Eg: \code{xlim.add = -0.5} is equivalent to \code{xlim.add = c(0.5, 0)}).}
+\item{xlim.add}{A numeric vector of length 1 or 2. It represents an extension
+factor of xlim, in percentage. Eg: \code{xlim.add = c(0, 0.5)} extends \code{xlim} of 50\%
+on the right. If of length 1, positive values represent the right, and negative
+values the left (Eg: \code{xlim.add = -0.5} is equivalent to \code{xlim.add = c(0.5, 0)}).}
 
-\item{ylim.add}{A numeric vector of length 1 or 2. It represents an extension factor of ylim, in percentage. Eg: \code{ylim.add = c(0, 0.5)} extends \code{ylim} of 50\% on the top. If of length 1, positive values represent the top, and negative values the bottom (Eg: \code{ylim.add = -0.5} is equivalent to \code{ylim.add = c(0.5, 0)}).}
+\item{ylim.add}{A numeric vector of length 1 or 2. It represents an extension
+factor of ylim, in percentage. Eg: \code{ylim.add = c(0, 0.5)} extends \code{ylim} of 50\%
+on the top. If of length 1, positive values represent the top, and negative values
+the bottom (Eg: \code{ylim.add = -0.5} is equivalent to \code{ylim.add = c(0.5, 0)}).}
 
-\item{only.params}{Logical, default is \code{FALSE}. If \code{TRUE} no graphic is displayed, only the values of \code{x} and \code{y} used in the plot are returned.}
+\item{only.params}{Logical, default is \code{FALSE}. If \code{TRUE} no graphic is displayed,
+only the values of \code{x} and \code{y} used in the plot are returned.}
 
-\item{sep}{The distance between two estimates -- only when argument \code{object} is a list of estimation results.}
+\item{sep}{The distance between two estimates -- only when argument \code{object}
+is a list of estimation results.}
 
-\item{as.multiple}{Logical: default is \code{FALSE}. Only when \code{object} is a single estimation result: whether each coefficient should have a different color, line type, etc. By default they all get the same style.}
+\item{as.multiple}{Logical: default is \code{FALSE}. Only when \code{object} is a single
+estimation result: whether each coefficient should have a different color, line
+type, etc. By default they all get the same style.}
 
 \item{bg}{Background color for the plot. By default it is white.}
 
-\item{group}{A list, default is missing. Each element of the list reports the coefficients to be grouped while the name of the element is the group name. Each element of the list can be either: i) a character vector of length 1, ii) of length 2, or ii) a numeric vector. If equal to: i) then it is interpreted as a pattern: all element fitting the regular expression will be grouped (note that you can use the special character "^^" to clean the beginning of the names, see example), if ii) it corrsponds to the first and last elements to be grouped, if iii) it corresponds to the coefficients numbers to be grouped. If equal to a character vector, you can use a percentage to tell the algorithm to look at the coefficients before aliasing (e.g. \code{"\%varname"}). Example of valid uses: \verb{group=list(group_name=\\"pattern\\")}, \verb{group=list(group_name=c(\\"var_start\\", \\"var_end\\"))}, \verb{group=list(group_name=1:2))}. See details.}
+\item{group}{A list, default is missing. Each element of the list reports the
+coefficients to be grouped while the name of the element is the group name. Each
+element of the list can be either: i) a character vector of length 1, ii) of
+length 2, or ii) a numeric vector. If equal to: i) then it is interpreted as
+a pattern: all element fitting the regular expression will be grouped (note that
+you can use the special character "^^" to clean the beginning of the names, see
+example), if ii) it corrsponds to the first and last elements to be grouped,
+if iii) it corresponds to the coefficients numbers to be grouped. If equal to
+a character vector, you can use a percentage to tell the algorithm to look at
+the coefficients before aliasing (e.g. \code{"\%varname"}). Example of valid uses:
+\verb{group=list(group_name=\\"pattern\\")}, \verb{group=list(group_name=c(\\"var_start\\", \\"var_end\\"))},
+\verb{group=list(group_name=1:2))}. See details.}
 
-\item{group.par}{A list of parameters controlling the display of the group. The parameters controlling the line are: \code{lwd}, \code{tcl} (length of the tick), \code{line.adj} (adjustment of the position, default is 0), \code{tick} (whether to add the ticks), \code{lwd.ticks}, \code{col.ticks}. Then the parameters controlling the text: \code{text.adj} (adjustment of the position, default is 0), \code{text.cex}, \code{text.font}, \code{text.col}.}
+\item{group.par}{A list of parameters controlling the display of the group. The
+parameters controlling the line are: \code{lwd}, \code{tcl} (length of the tick), \code{line.adj}
+(adjustment of the position, default is 0), \code{tick} (whether to add the ticks),
+\code{lwd.ticks}, \code{col.ticks}. Then the parameters controlling the text: \code{text.adj}
+(adjustment of the position, default is 0), \code{text.cex}, \code{text.font}, \code{text.col}.}
 
-\item{main}{The title of the plot. Default is \code{"Effect on __depvar__"}. You can use the special variable \verb{__depvar__} to set the title (useful when you set the plot default with \code{\link{setFixest_coefplot}}).}
+\item{main}{The title of the plot. Default is \code{"Effect on __depvar__"}. You can
+use the special variable \verb{__depvar__} to set the title (useful when you set the
+plot default with \code{\link{setFixest_coefplot}}).}
 
-\item{value.lab}{The label to appear on the side of the coefficient values. If \code{horiz = FALSE}, the label appears in the y-axis. If \code{horiz = TRUE}, then it appears on the x-axis. The default is equal to \code{"Estimate and __ci__ Conf. Int."}, with \verb{__ci__} a special variable giving the value of the confidence interval.}
+\item{value.lab}{The label to appear on the side of the coefficient values. If
+\code{horiz = FALSE}, the label appears in the y-axis. If \code{horiz = TRUE}, then it
+appears on the x-axis. The default is equal to \code{"Estimate and __ci__ Conf. Int."},
+with \verb{__ci__} a special variable giving the value of the confidence interval.}
 
-\item{ylab}{The label of the y-axis, default is \code{NULL}. Note that if \code{horiz = FALSE}, it overrides the value of the argument \code{value.lab}.}
+\item{ylab}{The label of the y-axis, default is \code{NULL}. Note that if \code{horiz =  FALSE}, it overrides the value of the argument \code{value.lab}.}
 
-\item{xlab}{The label of the x-axis, default is \code{NULL}. Note that if \code{horiz = TRUE}, it overrides the value of the argument \code{value.lab}.}
+\item{xlab}{The label of the x-axis, default is \code{NULL}. Note that if \code{horiz =  TRUE}, it overrides the value of the argument \code{value.lab}.}
 
 \item{sub}{A subtitle, default is \code{NULL}.}
 
-\item{i.select}{Integer scalar, default is 1. In \code{iplot}, used to select which variable created with \code{i()} to select. Only used when there are several variables created with \code{\link{i}}. This is an index, just try increasing numbers to hopefully obtain what you want. Note that it works much better when the variables are "pure" \code{i()} variables and not interacted with other variables. For example: \code{i(species, x1)} is good while \code{i(species):x1} isn't. The latter will also work but the index may feel weird in case there are many \code{i()} variables.}
+\item{i.select}{Integer scalar, default is 1. In \code{iplot}, used to select which
+variable created with \code{i()} to select. Only used when there are several variables
+created with \code{\link{i}}. This is an index, just try increasing numbers to hopefully
+obtain what you want. Note that it works much better when the variables are "pure"
+\code{i()} variables and not interacted with other variables. For example: \code{i(species, x1)}
+is good while \code{i(species):x1} isn't. The latter will also work but the index
+may feel weird in case there are many \code{i()} variables.}
 }
 \description{
-This function plots the results of estimations (coefficients and confidence intervals). The function \code{iplot} restricts the output to variables created with \code{\link{i}}, either interactions with factors or raw factors.
+This function plots the results of estimations (coefficients and confidence intervals).
+The function \code{iplot} restricts the output to variables created with \code{\link{i}}, either
+interactions with factors or raw factors.
 }
 \section{Functions}{
 \itemize{
-\item \code{iplot}: Plots the coefficients generated with i()
-}}
+\item \code{iplot()}: Plots the coefficients generated with i()
 
+}}
 \section{Setting custom default values}{
 
-The function \code{coefplot} dispose of many arguments to parametrize the plots. Most of these arguments can be set once an for all using the function \code{\link{setFixest_coefplot}}. See Example 3 below for a demonstration.
+The function \code{coefplot} dispose of many arguments to parametrize the plots. Most
+of these arguments can be set once an for all using the function \code{\link{setFixest_coefplot}}.
+See Example 3 below for a demonstration.
 }
 
 \section{iplot}{
 
 
-The function \code{iplot} restricts \code{coefplot} to interactions or factors created with the function \code{\link{i}}. Only \emph{one} of the i-variables will be plotted at a time. If you have several i-variables, you can navigate through them with the \code{i.select} argument.
+The function \code{iplot} restricts \code{coefplot} to interactions or factors created
+with the function \code{\link{i}}. Only \emph{one} of the i-variables will be plotted at a time.
+If you have several i-variables, you can navigate through them with the \code{i.select} argument.
 
-The argument \code{i.select} is an index that will go through all the i-variables. It will work well if the variables are pure, meaning not interacted with other variables. If the i-variables are interacted, the index may have an odd behavior but will (in most cases) work all the same, just try some numbers up until you (hopefully) obtain the graph you want.
+The argument \code{i.select} is an index that will go through all the i-variables.
+It will work well if the variables are pure, meaning not interacted with other
+variables. If the i-variables are interacted, the index may have an odd behavior
+but will (in most cases) work all the same, just try some numbers up until you
+(hopefully) obtain the graph you want.
 
-Note, importantly, that interactions of two factor variables are (in general) disregarded since they would require a 3-D plot to be properly represented.
+Note, importantly, that interactions of two factor variables are (in general)
+disregarded since they would require a 3-D plot to be properly represented.
 }
 
 \section{Arguments keep, drop and order}{
@@ -430,7 +541,8 @@ coefplot(est, group = list(Sepal = "^^Sepal.", Species = "^^Species"))
 
 }
 \seealso{
-See \code{\link{setFixest_coefplot}} to set the default values of \code{coefplot}, and the estimation functions: e.g. \code{\link{feols}}, \code{\link[=feglm]{fepois}}, \code{\link{feglm}}, \code{\link[=femlm]{fenegbin}}.
+See \code{\link{setFixest_coefplot}} to set the default values of \code{coefplot}, and the estimation
+functions: e.g. \code{\link{feols}}, \code{\link[=feglm]{fepois}}, \code{\link{feglm}}, \code{\link[=femlm]{fenegbin}}.
 }
 \author{
 Laurent Berge

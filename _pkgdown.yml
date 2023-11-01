@@ -1,4 +1,8 @@
 
+url: https://lrberge.github.io/fixest/
+
+template:
+  bootstrap: 5
 
 title: fixest
 
@@ -145,7 +149,6 @@ reference:
         - bread.fixest
         - collinearity
         - estfun.fixest
-        - _index_
         - rep.fixest
     - title: Data sets
       desc: Data sets used in the examples
