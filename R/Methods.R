@@ -9,6 +9,8 @@
 #### print/summary ####
 ####
 
+
+
 #' A print facility for `fixest` objects.
 #'
 #' This function is very similar to usual `summary` functions as it
@@ -1278,6 +1280,8 @@ plot.fixest.fixef = function(x, n = 5, ...){
 #### fixest own methods ####
 ####
 
+
+
 #' Extracts the coefficients table from an estimation
 #'
 #' Methods to extracts the coefficients table and its sub-components from an estimation.
@@ -1681,6 +1685,8 @@ pvalue.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
 ####
 #### stats ####
 ####
+
+
 
 #' Extracts the number of observations form a `fixest` object
 #'

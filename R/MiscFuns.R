@@ -3011,9 +3011,11 @@ rep.fixest_list = function(x, times = 1, each = 1, vcov, ...){
 }
 
 
-#### ................. ####
-#### Internal Funs     ####
+#### ------------- ####
+#### Internal Funs ####
 ####
+
+
 
 as.character.formula = function(x, ...) as.character.default(x, ...)
 
@@ -5254,8 +5256,8 @@ fixest_CI_factor = function(x, level, vcov = NULL, df.t = NULL){
 }
 
 
-#### ................. ####
-#### Small Utilities   ####
+#### --------------- ####
+#### Small Utilities ####
 ####
 
 
@@ -6763,9 +6765,11 @@ not_too_many_messages = function(key){
 }
 
 
-#### ............... ####
+#### --------------- ####
 #### Setters/Getters ####
 ####
+
+
 
 #' Sets/gets whether to display notes in `fixest` estimation functions
 #'
