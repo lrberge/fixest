@@ -7,13 +7,13 @@
 \format{
 \code{base_did} is a data frame with 1,040 observations and 6 variables named \code{y}, \code{x1}, \code{id}, \code{period}, \code{post} and \code{treat}.
 
-\itemize{
-\item{y: The dependent variable affected by the treatment.}
-\item{x1: An explanatory variable.}
-\item{id: Identifier of the individual.}
-\item{period: From 1 to 10}
-\item{post: Indicator taking value 1 if the period is strictly greater than 5, 0 otherwise.}
-\item{treat: Indicator taking value 1 if the individual is treated, 0 otherwise.}
+\describe{
+\item{y}{The dependent variable affected by the treatment.}
+\item{x1}{ An explanatory variable.}
+\item{id}{ Identifier of the individual.}
+\item{period}{ From 1 to 10}
+\item{post}{ Indicator taking value 1 if the period is strictly greater than 5, 0 otherwise.}
+\item{treat}{ Indicator taking value 1 if the individual is treated, 0 otherwise.}
 
 }
 }

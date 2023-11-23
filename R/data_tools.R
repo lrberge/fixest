@@ -38,11 +38,9 @@
 #'
 #' The functions [`bin`] and [`ref`] are able to do the same thing, then why use one instead of the other? Here are the differences:
 #'
-#' \itemize{
-#' \item{}{`ref` always returns a factor. This is in contrast with `bin` which returns, when possible, a vector of the same type as the vector in input.}
-#' \item{}{`ref` always places the values modified in the first place of the factor levels. On the other hand, `bin` tries to not modify the ordering of the levels. It is possible to make `bin` mimic the behavior of `ref` by adding an `"@"` as the first element of the list in the argument `bin`.}
-#'  \item{}{when a vector (and not a list) is given in input, `ref` will place each element of the vector in the first place of the factor levels. The behavior of `bin` is totally different, `bin` will transform all the values in the vector into a single value in `x` (i.e. it's binning).}
-#' }
+#' * `ref` always returns a factor. This is in contrast with `bin` which returns, when possible, a vector of the same type as the vector in input.
+#' * `ref` always places the values modified in the first place of the factor levels. On the other hand, `bin` tries to not modify the ordering of the levels. It is possible to make `bin` mimic the behavior of `ref` by adding an `"@"` as the first element of the list in the argument `bin`.
+#'  * when a vector (and not a list) is given in input, `ref` will place each element of the vector in the first place of the factor levels. The behavior of `bin` is totally different, `bin` will transform all the values in the vector into a single value in `x` (i.e. it's binning).
 #'
 #' @return
 #' It returns a vector of the same length as `x`.
@@ -310,7 +308,7 @@ ref = function(x, ref){
 #'
 #' In the formula, you can use the following special values: `"."`, `".N"`, `".U"`, and `".NA"`.
 #'
-#' \itemize{
+#' \describe{
 #'
 #' \item{`"."`}{Accesses the default values. If there is only one data set and the data set is *not* a `data.table`, then the default is to display the number of observations and the number of unique rows. If the data is a `data.table`, the number of unique items in the key(s) is displayed instead of the number of unique rows (if the table has keys of course). If there are two or more data sets, then the default is to display the unique items for: a) the variables common across all data sets, if there's less than 4, and b) if no variable is shown in a), the number of variables common across at least two data sets, provided there are less than 5. If the data sets are data tables, the keys are also displayed on top of the common variables. In any case, the number of observations is always displayed.}
 #'

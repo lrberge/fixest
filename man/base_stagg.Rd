@@ -6,17 +6,15 @@
 \title{Sample data for staggered difference in difference}
 \format{
 \code{base_stagg} is a data frame with 950 observations and 7 variables:
-
 \itemize{
-\item{id: panel identifier.}
-\item{year: from 1 to 10.}
-\item{year_treated: the period at which the individual is treated.}
-\item{time_to_treatment: different between the year and the treatment year.}
-\item{treated: indicator taking value 1 if the individual is treated, 0 otherwise.}
-\item{treatment_effect_true: true effect of the treatment.}
-\item{x1: explanatory variable, correlated with the period.}
-\item{y: the dependent variable affected by the treatment.}
-
+\item id: panel identifier.
+\item year: from 1 to 10.
+\item year_treated: the period at which the individual is treated.
+\item time_to_treatment: different between the year and the treatment year.
+\item treated: indicator taking value 1 if the individual is treated, 0 otherwise.
+\item treatment_effect_true: true effect of the treatment.
+\item x1: explanatory variable, correlated with the period.
+\item y: the dependent variable affected by the treatment.
 }
 }
 \source{

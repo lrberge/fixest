@@ -45,11 +45,10 @@ To have user-specified bin labels, just add them in the character vector followi
 
 
 The functions \code{\link{bin}} and \code{\link{ref}} are able to do the same thing, then why use one instead of the other? Here are the differences:
-
 \itemize{
-\item{}{\code{ref} always returns a factor. This is in contrast with \code{bin} which returns, when possible, a vector of the same type as the vector in input.}
-\item{}{\code{ref} always places the values modified in the first place of the factor levels. On the other hand, \code{bin} tries to not modify the ordering of the levels. It is possible to make \code{bin} mimic the behavior of \code{ref} by adding an \code{"@"} as the first element of the list in the argument \code{bin}.}
-\item{}{when a vector (and not a list) is given in input, \code{ref} will place each element of the vector in the first place of the factor levels. The behavior of \code{bin} is totally different, \code{bin} will transform all the values in the vector into a single value in \code{x} (i.e. it's binning).}
+\item \code{ref} always returns a factor. This is in contrast with \code{bin} which returns, when possible, a vector of the same type as the vector in input.
+\item \code{ref} always places the values modified in the first place of the factor levels. On the other hand, \code{bin} tries to not modify the ordering of the levels. It is possible to make \code{bin} mimic the behavior of \code{ref} by adding an \code{"@"} as the first element of the list in the argument \code{bin}.
+\item when a vector (and not a list) is given in input, \code{ref} will place each element of the vector in the first place of the factor levels. The behavior of \code{bin} is totally different, \code{bin} will transform all the values in the vector into a single value in \code{x} (i.e. it's binning).
 }
 }
 

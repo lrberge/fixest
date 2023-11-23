@@ -425,7 +425,7 @@ fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
 #'
 #' The types are case sensitive, please use lower case only. The types available are:
 #'
-#' \itemize{
+#' \describe{
 #' \item{`n`, `ll`, `aic`, `bic`, `rmse`: }{The number of observations, the log-likelihood, the AIC, the BIC and the root mean squared error, respectively.}
 #' \item{`my`: }{Mean of the dependent variable.}
 #' \item{`g`: }{The degrees of freedom used to compute the t-test (it influences the p-values of the coefficients). When the VCOV is clustered, this value is equal to the minimum cluster size, otherwise, it is equal to the sample size minus the number of variables.}

@@ -598,13 +598,13 @@ aggregate.fixest = function(x, agg, full = FALSE, use_weights = TRUE, ...){
 #' @format
 #' `base_did` is a data frame with 1,040 observations and 6 variables named `y`, `x1`, `id`, `period`, `post` and `treat`.
 #'
-#' \itemize{
-#' \item{y: The dependent variable affected by the treatment.}
-#' \item{x1: An explanatory variable.}
-#' \item{id: Identifier of the individual.}
-#' \item{period: From 1 to 10}
-#' \item{post: Indicator taking value 1 if the period is strictly greater than 5, 0 otherwise.}
-#' \item{treat: Indicator taking value 1 if the individual is treated, 0 otherwise.}
+#' \describe{
+#' \item{y}{The dependent variable affected by the treatment.}
+#' \item{x1}{ An explanatory variable.}
+#' \item{id}{ Identifier of the individual.}
+#' \item{period}{ From 1 to 10}
+#' \item{post}{ Indicator taking value 1 if the period is strictly greater than 5, 0 otherwise.}
+#' \item{treat}{ Indicator taking value 1 if the individual is treated, 0 otherwise.}
 #'
 #' }
 #'
@@ -630,17 +630,15 @@ aggregate.fixest = function(x, agg, full = FALSE, use_weights = TRUE, ...){
 #' @format
 #' `base_stagg` is a data frame with 950 observations and 7 variables:
 #'
-#' \itemize{
-#' \item{id: panel identifier.}
-#' \item{year: from 1 to 10.}
-#' \item{year_treated: the period at which the individual is treated.}
-#' \item{time_to_treatment: different between the year and the treatment year.}
-#' \item{treated: indicator taking value 1 if the individual is treated, 0 otherwise.}
-#' \item{treatment_effect_true: true effect of the treatment.}
-#' \item{x1: explanatory variable, correlated with the period.}
-#' \item{y: the dependent variable affected by the treatment.}
+#' * id: panel identifier.
+#' * year: from 1 to 10.
+#' * year_treated: the period at which the individual is treated.
+#' * time_to_treatment: different between the year and the treatment year.
+#' * treated: indicator taking value 1 if the individual is treated, 0 otherwise.
+#' * treatment_effect_true: true effect of the treatment.
+#' * x1: explanatory variable, correlated with the period.
+#' * y: the dependent variable affected by the treatment.
 #'
-#' }
 #'
 #' @source
 #' This data has been generated from \pkg{R}.

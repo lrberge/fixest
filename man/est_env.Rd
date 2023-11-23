@@ -33,7 +33,7 @@ How can it help you make simulations? First make a core estimation with \code{on
 Instead of \code{est_env}, you could use directly \code{fixest} estimations too, like \code{feols}, since they accept the \code{env} argument. The function \code{est_env} is only here to add a bit of generality to avoid the trouble to the user to write conditions (look at the source, it's just a one liner).
 
 Objects of main interest in the environment are:
-\itemize{
+\describe{
 \item{lhs}{The left hand side, or dependent variable.}
 \item{linear.mat}{The matrix of the right-hand-side, or explanatory variables.}
 \item{iv_lhs}{The matrix of the endogenous variables in IV regressions.}

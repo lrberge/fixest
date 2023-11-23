@@ -46,7 +46,7 @@ You can register custom fit statistics with the function \code{fitstat_register}
 
 The types are case sensitive, please use lower case only. The types available are:
 
-\itemize{
+\describe{
 \item{\code{n}, \code{ll}, \code{aic}, \code{bic}, \code{rmse}: }{The number of observations, the log-likelihood, the AIC, the BIC and the root mean squared error, respectively.}
 \item{\code{my}: }{Mean of the dependent variable.}
 \item{\code{g}: }{The degrees of freedom used to compute the t-test (it influences the p-values of the coefficients). When the VCOV is clustered, this value is equal to the minimum cluster size, otherwise, it is equal to the sample size minus the number of variables.}

@@ -1190,9 +1190,7 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE, nthrea
 #'
 #' The package \pkg{fixest} uses the `fixef` method from \pkg{nlme}. Unfortunately, re-exporting this method is required in order not to attach package \pkg{nlme}.
 #'
-#' \itemize{
-#' \item Here is the help from package \pkg{nlme}: [`fixef`][nlme::fixed.effects]. The help from package \pkg{fixest} is here: [`fixef.fixest`].
-#' }
+#' * Here is the help from package \pkg{nlme}: [`fixef`][nlme::fixed.effects]. The help from package \pkg{fixest} is here: [`fixef.fixest`].
 #'
 #' @note
 #' I could find this workaround thanks to the package \pkg{plm}.
@@ -3835,9 +3833,7 @@ estfun.fixest = function(x, ...){
 #'
 #' The package \pkg{fixest} does not use `estfun` or `bread` from \pkg{sandwich}, but these methods have been implemented to allow users to leverage the variances from \pkg{sandwich}.
 #'
-#' \itemize{
-#' \item Here is the help from package \pkg{sandwich}: [`estfun`][sandwich::estfun] and [`bread`][sandwich::bread]. The help from package \pkg{fixest} is here: [`estfun.fixest`] and [`bread.fixest`].
-#' }
+#' * Here is the help from package \pkg{sandwich}: [`estfun`][sandwich::estfun] and [`bread`][sandwich::bread]. The help from package \pkg{fixest} is here: [`estfun.fixest`] and [`bread.fixest`].
 #'
 #'
 #' @name sandwich_reexported
