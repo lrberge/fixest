@@ -15,6 +15,14 @@ vcovClust = fixest:::vcovClust
 
 setFixest_notes(FALSE)
 
+if(fixest:::is_r_check()){
+    if(requireNamespace("data.table", quietly = TRUE)){
+        library(data.table)
+        data.table::setDTthreads(1)
+    }
+    setFixest_nthreads(1)
+}
+
 ####
 #### ESTIMATIONS ####
 ####
