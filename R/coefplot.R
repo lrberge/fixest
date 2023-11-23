@@ -1777,7 +1777,16 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
             if(inherits(object, "fixest")){
                 if(is.null(df.t)){
                     df.t = degrees_freedom(object, "t")
+                    if(is.null(df.t)){
+                        # may for user defined functions using fixest
+                        df.t = degrees_freedom(object, "resid")
+                        if(is.null(df.t)){
+                            # let's be safe
+                            df.t = Inf
+                        }
+                    }
                 }
+                
                 nb = fixest_CI_factor(object, ci_level, df.t = df.t)[2]
             } else {
                 # non fixest objects
