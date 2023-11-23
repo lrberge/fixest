@@ -49,7 +49,7 @@ The standard-errors of the estimates can be easily and intuitively clustered (up
 
 The function `etable` allows to seamlessly export the results of multiple estimations into either a data.frame, or into a Latex table.
 
-The main features of the package are illustrated in this vignette. The theory used to obtain the fixed-effects is based on [Berge (2018)](https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13), "*Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm.*" CREA Discussion Papers, 13.
+The main features of the package are illustrated in this vignette. The theory used to obtain the fixed-effects is based on [Berge (2018)](https://github.com/lrberge/fixest/blob/master/_DOCS/FENmlm_paper.pdf), "*Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm.*" CREA Discussion Papers, 13.
 
 # Simple example using trade data
 

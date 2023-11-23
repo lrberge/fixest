@@ -7,6 +7,8 @@
 
 - fix bug in coefplot: now the confidence intervals use the Student t when appropriate (before that, only the Normal law was used). Thanks to Grant McDermott, [#409](https://github.com/lrberge/fixest/pull/408)
 
+- fix broken links in documentation (to the fixest paper)
+
 # fixest 0.11.1
 
 ## Documentation bug

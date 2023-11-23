@@ -74,7 +74,6 @@ iplot(
   sd,
   ci_low,
   ci_high,
-  df.t = NULL,
   x,
   x.shift = 0,
   horiz = FALSE,

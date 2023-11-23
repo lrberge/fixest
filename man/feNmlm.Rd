@@ -338,7 +338,7 @@ points(x, fitted(est2_NL), col = 4, pch = 2)
 
 }
 \references{
-Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (\href{https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13}{}).
+Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (\href{https://github.com/lrberge/fixest/blob/master/_DOCS/FENmlm_paper.pdf}{}).
 
 For models with multiple fixed-effects:
 
