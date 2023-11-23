@@ -9,6 +9,10 @@
 
 - fix broken links in documentation (to the fixest paper)
 
+- fix bad documentation markup
+
+- adapt to CRAN policy to remove multithreading when checking the package
+
 # fixest 0.11.1
 
 ## Documentation bug
