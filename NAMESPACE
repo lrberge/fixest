@@ -60,7 +60,7 @@ export(vcov_cluster, vcov_DK, vcov_NW, vcov_conley)
 export(n_unik, osize, sample_df, fdim)
 
 # dsb
-export(dsb, .dsb, .dsb0)
+export(dsb)
 S3method(print, dsb)
 
 # deprecated
