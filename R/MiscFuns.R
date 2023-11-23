@@ -6823,13 +6823,16 @@ getFixest_notes = function(){
 #' @examples
 #'
 #' # Gets the current number of threads
-#' getFixest_nthreads()
+#' (nthreads_origin = getFixest_nthreads())
 #'
 #' # To set multi-threading off:
 #' setFixest_nthreads(1)
 #'
-#' # To set it back to default:
+#' # To set it back to default at startup:
 #' setFixest_nthreads()
+#' 
+#' # And back to the original value
+#' setFixest_nthreads(nthreads_origin)
 #'
 #'
 setFixest_nthreads = function(nthreads, save = FALSE){
