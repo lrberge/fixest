@@ -92,7 +92,7 @@
 #'
 #' You can permanently change the way your table looks in Latex by using `setFixest_etable`. The following vignette gives an example as well as illustrates how to use the `style` and postprocessing functions: [Exporting estimation tables](https://lrberge.github.io/fixest/articles/exporting_tables.html).
 #'
-#' When the argument `postprocessing.tex` is not missing, two additional tags will be included in the character vector returned by `etable`: `"%start:tab\\n"` and `"%end:tab\\n"`. These can be used to identify the start and end of the tabular and are useful to insert code within the `table` environment.
+#' When the argument `postprocess.tex` is not missing, two additional tags will be included in the character vector returned by `etable`: `"%start:tab\\n"` and `"%end:tab\\n"`. These can be used to identify the start and end of the tabular and are useful to insert code within the `table` environment.
 #'
 #' @section How does `digits` handle the number of decimals displayed?:
 #'
