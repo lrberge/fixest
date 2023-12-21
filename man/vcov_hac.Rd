@@ -10,9 +10,9 @@
 \alias{driscoll_kraay}
 \title{HAC VCOVs}
 \usage{
-vcov_DK(x, time = NULL, lag = NULL, ssc = NULL)
+vcov_DK(x, time = NULL, lag = NULL, ssc = NULL, vcov_fix = TRUE)
 
-vcov_NW(x, unit = NULL, time = NULL, lag = NULL, ssc = NULL)
+vcov_NW(x, unit = NULL, time = NULL, lag = NULL, ssc = NULL, vcov_fix = TRUE)
 
 NW(lag = NULL)
 

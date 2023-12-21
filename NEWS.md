@@ -1,4 +1,16 @@
 
+# fixest 0.11.3
+
+## Bugs
+
+- fix bug when the covariance matrix was *very* ill-defined. Thanks to Gianluca Russo.
+ 
+## Improvements
+
+- functions `vcov` gains the argument `vcov_fix` to monitor whether to fix the covariance matrix with an eigenvalue decomposition (previously this was always turned on).
+
+
+
 # fixest 0.11.2
 
 ## Bugs

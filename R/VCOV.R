@@ -193,7 +193,7 @@
 #'
 #'
 vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr = FALSE, forceCovariance = FALSE,
-                       keepBounded = FALSE, nthreads = getFixest_nthreads(), ...){
+                       keepBounded = FALSE, nthreads = getFixest_nthreads(), vcov_fix = TRUE, ...){
     # computes the clustered vcov
 
     check_arg(attr, "logical scalar")
@@ -972,12 +972,22 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
     ####
 
 
-    if(any(diag(vcov_mat) < 0)){
+    if(any(diag(vcov_mat) < 0) && vcov_fix){
         # We 'fix' it
         all_attr = attributes(vcov_mat)
         vcov_mat = mat_posdef_fix(vcov_mat)
+        is_complex = isTRUE(attr(vcov_mat, "is_complex"))
+
+        if (is_complex) {
+            # we should never have a complex VCOV, but just in case...
+            message("The VCOV matrix could not be fixed since its eigenvalues were complex. The complex standard-errors are reported for information purposes.")
+            vcov_mat = as.complex(vcov_mat)
+        } else {
+            message("Variance contained negative values in the diagonal and was 'fixed' (a la Cameron, Gelbach & Miller 2011).")
+        }
+
         attributes(vcov_mat) = all_attr
-        message("Variance contained negative values in the diagonal and was 'fixed' (a la Cameron, Gelbach & Miller 2011).")
+
     }
 
     if(is_attr){
@@ -1219,7 +1229,7 @@ dof = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, cluster.df = 
 #' feols(y ~ x1, base, vcov = vcov_cluster(rep(1:5, 30)))
 #'
 #'
-vcov_cluster = function(x, cluster = NULL, ssc = NULL){
+vcov_cluster = function(x, cluster = NULL, ssc = NULL, vcov_fix = TRUE){
     # User-level function to compute clustered SEs
     # typically we only do checking and reshaping here
 
@@ -1306,7 +1316,7 @@ vcov_cluster = function(x, cluster = NULL, ssc = NULL){
     if(IS_REQUEST){
         res = vcov_request
     } else {
-        res = vcov(x, vcov = vcov_request)
+        res = vcov(x, vcov = vcov_request, vcov_fix = vcov_fix)
     }
 
     res
@@ -1383,7 +1393,7 @@ vcov_cluster = function(x, cluster = NULL, ssc = NULL){
 NULL
 
 #' @rdname vcov_hac
-vcov_DK = function(x, time = NULL, lag = NULL, ssc = NULL){
+vcov_DK = function(x, time = NULL, lag = NULL, ssc = NULL, vcov_fix = TRUE){
     # unit and time MUST be variables of the data set
     # otherwise: too error prone + extremely complex to set up + very edge case, so not worth it
     #
@@ -1419,7 +1429,7 @@ vcov_DK = function(x, time = NULL, lag = NULL, ssc = NULL){
     if(IS_REQUEST){
         res = vcov_request
     } else {
-        res = vcov(x, vcov = vcov_request)
+        res = vcov(x, vcov = vcov_request, vcov_fix = vcov_fix)
     }
 
     res
@@ -1427,7 +1437,7 @@ vcov_DK = function(x, time = NULL, lag = NULL, ssc = NULL){
 }
 
 #' @rdname vcov_hac
-vcov_NW = function(x, unit = NULL, time = NULL, lag = NULL, ssc = NULL){
+vcov_NW = function(x, unit = NULL, time = NULL, lag = NULL, ssc = NULL, vcov_fix = TRUE){
     # unit and time MUST be variables of the data set
     # otherwise: too error prone + extremely complex to set up + very edge case, so not worth it
     #
@@ -1471,7 +1481,7 @@ vcov_NW = function(x, unit = NULL, time = NULL, lag = NULL, ssc = NULL){
     if(IS_REQUEST){
         res = vcov_request
     } else {
-        res = vcov(x, vcov = vcov_request)
+        res = vcov(x, vcov = vcov_request, vcov_fix = vcov_fix)
     }
 
     res
@@ -1521,7 +1531,7 @@ vcov_NW = function(x, unit = NULL, time = NULL, lag = NULL, ssc = NULL){
 #'
 #'
 vcov_conley = function(x, lat = NULL, lon = NULL, cutoff = NULL, pixel = 0,
-                       distance = "triangular", ssc = NULL){
+                       distance = "triangular", ssc = NULL, vcov_fix = TRUE){
 
     # slide_args allows the implicit allocation of arguments
     # it makes semi-global changes => the values of the args here are modified
@@ -1567,7 +1577,7 @@ vcov_conley = function(x, lat = NULL, lon = NULL, cutoff = NULL, pixel = 0,
     if(IS_REQUEST){
         res = vcov_request
     } else {
-        res = vcov(x, vcov = vcov_request)
+        res = vcov(x, vcov = vcov_request, vcov_fix = vcov_fix)
     }
 
     res

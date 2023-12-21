@@ -12,7 +12,8 @@ vcov_conley(
   cutoff = NULL,
   pixel = 0,
   distance = "triangular",
-  ssc = NULL
+  ssc = NULL,
+  vcov_fix = TRUE
 )
 
 conley(cutoff = NULL, pixel = NULL, distance = NULL)

@@ -33,7 +33,8 @@
 #'   [`fitstat`]. The default fit statistics depend on the
 #'   type of estimation (OLS, GLM, IV, with/without fixed-effect). Providing the
 #'   argument `fitstat` overrides the default fit statistics, you can
-#'   however use the point "." to summon them back. Ex 1: `fitstat = ~ . + ll` adds the log-likelihood to the default values. Ex 2: `fitstat = ~ ll + pr2` only displays the log-likelihood and the pseudo-R2.
+#'   however use the point "." to summon them back. Ex 1: `fitstat = ~ . + ll` adds the log-likelihood
+#'   to the default values. Ex 2: `fitstat = ~ ll + pr2` only displays the log-likelihood and the pseudo-R2.
 #' @param ... Other arguments to be passed to [`vcov.fixest`].
 #'
 #' @details It is possible to set the default values for the arguments
@@ -339,6 +340,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #' @param lean Logical, default is `FALSE`. Used to reduce the (memory) size of the summary object. If `TRUE`, then all objects of length N (the number of observations) are removed from the result. Note that some `fixest` methods may consequently not work when applied to the summary.
 #' @param forceCovariance (Advanced users.) Logical, default is `FALSE`. In the peculiar case where the obtained Hessian is not invertible (usually because of collinearity of some variables), use this option to force the covariance matrix, by using a generalized inverse of the Hessian. This can be useful to spot where possible problems come from.
 #' @param keepBounded (Advanced users -- `feNmlm` with non-linear part and bounded coefficients only.) Logical, default is `FALSE`. If `TRUE`, then the bounded coefficients (if any) are treated as unrestricted coefficients and their S.E. is computed (otherwise it is not).
+#' @param vcov_fix Logical scalar, default is `TRUE`. If the VCOV ends up not being positive definite, whether to "fix" it using an eigenvalue decomposition (a la Cameron, Gelbach & Miller 2011).
 #' @param n Integer, default is 1000. Number of coefficients to display when the print method is used.
 #' @param ... Only used if the argument `.vocv` is provided and is a function: extra arguments to be passed to that function.
 #'
@@ -455,7 +457,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #'
 summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov = NULL,
                           stage = NULL, lean = FALSE, agg = NULL, forceCovariance = FALSE,
-                          se = NULL, keepBounded = FALSE, n = 1000,
+                          se = NULL, keepBounded = FALSE, n = 1000, vcov_fix = TRUE,
                           nthreads = getFixest_nthreads(), ...){
 
     # computes the clustered SEs and returns the modified vcov and coeftable
@@ -538,6 +540,7 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov
                     res[[length(res) + 1]] = summary(object$iv_first_stage[[i]],
                                                      vcov = vcov, ssc = ssc, lean = lean,
                                                      forceCovariance = forceCovariance,
+                                                     vcov_fix = vcov_fix,
                                                      n = n, nthreads = nthreads, iv = TRUE)
 
                     stage_names[length(stage_names) + 1] = paste0("First stage: ", names(object$iv_first_stage)[i])
@@ -546,7 +549,8 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov
             } else {
                 # We keep the information on clustering => matters for wald tests of 1st stage
                 my_res = summary(object, vcov = vcov, ssc = ssc, lean = lean,
-                                 forceCovariance = forceCovariance, n = n, nthreads = nthreads, iv = TRUE)
+                                 forceCovariance = forceCovariance, vcov_fix = vcov_fix,
+                                 n = n, nthreads = nthreads, iv = TRUE)
 
                 res[[length(res) + 1]] = my_res
                 stage_names[length(stage_names) + 1] = "Second stage"
@@ -587,6 +591,7 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov
 
     } else {
         vcov = vcov.fixest(object, vcov = vcov, ssc = ssc, forceCovariance = forceCovariance,
+                           vcov_fix = vcov_fix,
                            keepBounded = keepBounded, nthreads = nthreads,
                            attr = TRUE, se = se, cluster = cluster, ...)
     }

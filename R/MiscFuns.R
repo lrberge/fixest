@@ -5222,13 +5222,13 @@ fixest_CI_factor = function(x, level, vcov = NULL, df.t = NULL){
     val = c(val, 1 - val)
 
     if(use_t_distr(x)){
-        
+
         if(missing(vcov) && missing(df.t)){
             stop("Internal error (=bug): the arguments `vcov` and `df.t` ",
                  "should not be both missing in fixest_CI_factor().")
 
-        } 
-        
+        }
+
         if(!missing(df.t)){
             if(!is.numeric(df.t) && !length(df.t) == 1){
                 stop("Internal error (=bug): the arguments `df.t` ",
@@ -5245,7 +5245,7 @@ fixest_CI_factor = function(x, level, vcov = NULL, df.t = NULL){
                 df.t = max(nobs(x) - attr(vcov,"dof.K"), 1)
             }
         }
-        
+
         fact = qt(val, df.t)
 
     } else {
@@ -6332,10 +6332,15 @@ mat_posdef_fix = function(X, tol = 1e-10){
     # We don't check it
 
     if(any(diag(X) < tol)){
-        e = eigen(X)
-        dm = dimnames(X)
-        X = tcrossprod(e$vectors %*% diag(pmax(e$values, tol), nrow(X)), e$vectors)
-        dimnames(X) = dm
+        e = eigen(X, symmetric = TRUE)
+
+        if (is.complex(e$values)) {
+            attr(X, "is_complex") = TRUE
+        } else {
+            dm = dimnames(X)
+            X = tcrossprod(e$vectors %*% diag(pmax(e$values, tol), nrow(X)), e$vectors)
+            dimnames(X) = dm
+        }
     }
 
     return(X)
@@ -6760,7 +6765,7 @@ not_too_many_messages = function(key){
         options(fixest_all_timings = all_times)
         return(TRUE)
     }
-    
+
     FALSE
 }
 
@@ -6830,7 +6835,7 @@ getFixest_notes = function(){
 #'
 #' # To set it back to default at startup:
 #' setFixest_nthreads()
-#' 
+#'
 #' # And back to the original value
 #' setFixest_nthreads(nthreads_origin)
 #'

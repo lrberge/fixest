@@ -4,7 +4,7 @@
 \alias{vcov_cluster}
 \title{Clustered VCOV}
 \usage{
-vcov_cluster(x, cluster = NULL, ssc = NULL)
+vcov_cluster(x, cluster = NULL, ssc = NULL, vcov_fix = TRUE)
 }
 \arguments{
 \item{x}{A \code{fixest} object.}

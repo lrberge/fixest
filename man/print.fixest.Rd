@@ -29,7 +29,8 @@ statistic to display. The types must be valid types of the function
 \code{\link{fitstat}}. The default fit statistics depend on the
 type of estimation (OLS, GLM, IV, with/without fixed-effect). Providing the
 argument \code{fitstat} overrides the default fit statistics, you can
-however use the point "." to summon them back. Ex 1: \code{fitstat = ~ . + ll} adds the log-likelihood to the default values. Ex 2: \code{fitstat = ~ ll + pr2} only displays the log-likelihood and the pseudo-R2.}
+however use the point "." to summon them back. Ex 1: \code{fitstat = ~ . + ll} adds the log-likelihood
+to the default values. Ex 2: \code{fitstat = ~ ll + pr2} only displays the log-likelihood and the pseudo-R2.}
 
 \item{...}{Other arguments to be passed to \code{\link{vcov.fixest}}.}
 }

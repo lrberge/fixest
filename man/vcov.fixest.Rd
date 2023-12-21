@@ -14,6 +14,7 @@
   forceCovariance = FALSE,
   keepBounded = FALSE,
   nthreads = getFixest_nthreads(),
+  vcov_fix = TRUE,
   ...
 )
 }
@@ -35,6 +36,8 @@
 \item{keepBounded}{(Advanced users -- \code{feNmlm} with non-linear part and bounded coefficients only.) Logical, default is \code{FALSE}. If \code{TRUE}, then the bounded coefficients (if any) are treated as unrestricted coefficients and their S.E. is computed (otherwise it is not).}
 
 \item{nthreads}{The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. The default is to use 50\% of all threads. You can set permanently the number of threads used within this package using the function \code{\link{setFixest_nthreads}}.}
+
+\item{vcov_fix}{Logical scalar, default is \code{TRUE}. If the VCOV ends up not being positive definite, whether to "fix" it using an eigenvalue decomposition (a la Cameron, Gelbach & Miller 2011).}
 
 \item{...}{Other arguments to be passed to \code{\link{summary.fixest}}.
 
