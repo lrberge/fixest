@@ -31,6 +31,8 @@ driscoll_kraay(lag = NULL)
 
 \item{ssc}{An object returned by the function \code{\link{ssc}}. It specifies how to perform the small sample correction.}
 
+\item{vcov_fix}{Logical scalar, default is \code{TRUE}. If the VCOV ends up not being positive definite, whether to "fix" it using an eigenvalue decomposition (a la Cameron, Gelbach & Miller 2011).}
+
 \item{unit}{A character scalar or a one sided formula giving the name of the variable representing the units of the panel.}
 }
 \value{

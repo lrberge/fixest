@@ -32,6 +32,8 @@ conley(cutoff = NULL, pixel = NULL, distance = NULL)
 \item{distance}{How to compute the distance between points. It can be equal to "triangular" (default) or "spherical". The latter case corresponds to the great circle distance and is more precise than triangular but is a bit more intensive computationally.}
 
 \item{ssc}{An object returned by the function \code{\link{ssc}}. It specifies how to perform the small sample correction.}
+
+\item{vcov_fix}{Logical scalar, default is \code{TRUE}. If the VCOV ends up not being positive definite, whether to "fix" it using an eigenvalue decomposition (a la Cameron, Gelbach & Miller 2011).}
 }
 \value{
 If the first argument is a \code{fixest} object, then a VCOV is returned (i.e. a symmetric matrix).

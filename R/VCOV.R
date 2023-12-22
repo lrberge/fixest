@@ -1177,6 +1177,8 @@ dof = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, cluster.df = 
 #' Clustered VCOV
 #'
 #' Computes the clustered VCOV of `fixest` objects.
+#' 
+#' @inheritParams vcov.fixest
 #'
 #' @param x A `fixest` object.
 #' @param cluster Either i) a character vector giving the names of the variables onto which to cluster, or ii) a formula giving those names, or iii) a vector/list/data.frame giving the hard values of the clusters. Note that in cases i) and ii) the variables are fetched directly in the data set used for the estimation.

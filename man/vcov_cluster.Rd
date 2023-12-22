@@ -12,6 +12,8 @@ vcov_cluster(x, cluster = NULL, ssc = NULL, vcov_fix = TRUE)
 \item{cluster}{Either i) a character vector giving the names of the variables onto which to cluster, or ii) a formula giving those names, or iii) a vector/list/data.frame giving the hard values of the clusters. Note that in cases i) and ii) the variables are fetched directly in the data set used for the estimation.}
 
 \item{ssc}{An object returned by the function \code{\link{ssc}}. It specifies how to perform the small sample correction.}
+
+\item{vcov_fix}{Logical scalar, default is \code{TRUE}. If the VCOV ends up not being positive definite, whether to "fix" it using an eigenvalue decomposition (a la Cameron, Gelbach & Miller 2011).}
 }
 \value{
 If the first argument is a \code{fixest} object, then a VCOV is returned (i.e. a symmetric matrix).
