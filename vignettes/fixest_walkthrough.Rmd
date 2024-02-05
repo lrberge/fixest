@@ -627,7 +627,7 @@ Note that the variable `year_treated` is set to 1000 (i.e. above the maximum val
 
 ```{r, echo=FALSE}
 if(requireNamespace("ggplot2", quietly = TRUE)){
-  library(ggplot2)
+  suppressWarnings(library(ggplot2))
   ggplot(aggregate(base_stagg[, c('year_treated', 'treatment_effect_true')], 
                    by = list(year = base_stagg$year, group = to_integer(base_stagg$year_treated)), 
                    mean), 
