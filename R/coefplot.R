@@ -121,7 +121,7 @@
 #' length 2, or ii) a numeric vector. If equal to: i) then it is interpreted as 
 #' a pattern: all element fitting the regular expression will be grouped (note that 
 #' you can use the special character "^^" to clean the beginning of the names, see 
-#' example), if ii) it corrsponds to the first and last elements to be grouped, 
+#' example), if ii) it corresponds to the first and last elements to be grouped, 
 #' if iii) it corresponds to the coefficients numbers to be grouped. If equal to 
 #' a character vector, you can use a percentage to tell the algorithm to look at 
 #' the coefficients before aliasing (e.g. `"%varname"`). Example of valid uses: 
@@ -168,7 +168,7 @@
 #' variable created with `i()` to select. Only used when there are several variables 
 #' created with [`i`]. This is an index, just try increasing numbers to hopefully 
 #' obtain what you want. Note that it works much better when the variables are "pure" 
-#' `i()` variables and not interacted with other variables. For example: `i(species, x1)` 
+#' `i()` and not interacted with other variables. For example: `i(species, x1)` 
 #' is good while `i(species):x1` isn't. The latter will also work but the index 
 #' may feel weird in case there are many `i()` variables.
 #'
