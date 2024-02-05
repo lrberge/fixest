@@ -3527,7 +3527,9 @@ dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE
           after_no_var = gsub("^[[:alnum:]_\\.]+", "", after)
           var_after = substr(after, 1, nchar(after) - nchar(after_no_var))
 
-          res_txt = paste0(before_no_var, paste0(var_before, res[[i]], var_after, collapse = coll), after_no_var)
+          res_txt = paste0(before_no_var, 
+                           paste0(var_before, res[[i]], var_after, collapse = coll), 
+                           after_no_var)
           i = i + 2
         } else {
           res_txt = paste0(before_no_var, paste0(var_before, res[[i]], collapse = coll))
@@ -3654,7 +3656,9 @@ plot_single_cluster = function(x, n=5, addExp = FALSE, fe_name, ...){
   # name information & points
   points(x_values, y_values)
   text(head(x_values, mid_value), head(y_values, mid_value), head(x_name, mid_value), pos = 3)
-  text(tail(x_values, nb_show-mid_value), tail(y_values, nb_show-mid_value), tail(x_name, nb_show-mid_value), pos = 1)
+  text(tail(x_values, nb_show-mid_value), 
+       tail(y_values, nb_show-mid_value), 
+       tail(x_name, nb_show-mid_value), pos = 1)
 
   if(isSlope){
     fe = gsub("\\[.+", "", fe_name)
@@ -3701,7 +3705,8 @@ prepare_matrix = function(fml, base, fake_intercept = FALSE){
   # Forming the call
   if(attr(t, "intercept") == 1 && !fake_intercept){
     n = nrow(base)
-    all_vars_call = str2lang(paste0("list('(Intercept)' = rep(1, ", n, "), ", paste0(all_vars, collapse = ", "), ")"))
+    all_vars_call = str2lang(paste0("list('(Intercept)' = rep(1, ", n, "), ", 
+                                    paste0(all_vars, collapse = ", "), ")"))
     all_var_names = c("(Intercept)", all_var_names)
   } else {
     all_vars_call = str2lang(paste0("list(", paste0(all_vars, collapse = ", "), ")"))
@@ -3721,9 +3726,12 @@ prepare_matrix = function(fml, base, fake_intercept = FALSE){
     qui_pblm = which(all_n %% 1 != 0)
     if(length(qui_pblm) > 0){
       what = data_list[[qui_pblm]]
-      reason = ifelse(is.null(nrow(what)), paste0("of length ", length(what)), paste0("with ", nrow(what), " rows"))
+      reason = ifelse(is.null(nrow(what)), 
+                      paste0("of length ", length(what)), 
+                      paste0("with ", nrow(what), " rows"))
 
-      stop("Evaluation of ", all_var_names[qui_pblm], " returns an object ", reason, " while the data set has ", nrow(base)," rows.", call. = FALSE)
+      stopi("Evaluation of {bq?all_var_names[qui_pblm]}, returns an object {reason}", 
+            " while the data set has {n ? nrow(base)} rows.", )
     }
 
     all_n_vector = rep(all_n, all_n)
@@ -4040,7 +4048,9 @@ fixef_terms = function(fml, stepwise = FALSE, origin_type = "feols"){
       qui = !grepl("\\]\\]$", var2check_double) | !grepl("\\[\\[", var2check_double) | lengths(strsplit(var2check_double, "\\[")) != 3
       if(any(qui)){
         item_pblm = var2check_double[qui]
-        msg = paste0("Square bracket are special characters used **only** to designate varying slopes (see help). They are currenlty misused (it concerns ", enumerate_items(item_pblm), ").")
+        msg = sma("Square bracket are special characters used **only** to designate ",
+                  "varying slopes (see help). ",
+                  "They are currenlty misused (it concerns {$enum.bq?item_pblm}).")
         class(msg) = "try-error"
         return(msg)
       }
@@ -4050,7 +4060,9 @@ fixef_terms = function(fml, stepwise = FALSE, origin_type = "feols"){
       qui = !grepl("\\]$", var2check_single) | lengths(strsplit(var2check_single, "\\[")) != 2
       if(any(qui)){
         item_pblm = var2check_single[qui]
-        msg = paste0("Square bracket are special characters used **only** to designate varying slopes (see help). They are currenlty misused (it concerns ", enumerate_items(item_pblm), ").")
+        msg = sma("Square bracket are special characters used **only** to designate ",
+                  "varying slopes (see help). ",
+                  "They are currenlty misused (it concerns {$enum.bq?item_pblm}).")
         class(msg) = "try-error"
         return(msg)
       }
@@ -4068,7 +4080,13 @@ fixef_terms = function(fml, stepwise = FALSE, origin_type = "feols"){
 
     what = eval(str2lang(gsub("^i", "get_new_var", var_pblm)))
     n_var = sum(c("var", "f", "f2") %in% names(what))
-    msg = if(n_var == 1) "Using i() to create fixed-effects is not possible, use directly the variable." else paste0("To interact fixed-effects, use the syntax fe1^fe2 (in your case ", deparse(what[[2]]), "^", deparse(what[[3]]), ").")
+    
+    if(n_var == 1){
+      msg = "Using i() to create fixed-effects is not possible, use directly the variable."
+    } else {
+      msg = sma("To interact fixed-effects, use the syntax fe1^fe2 ",
+                "(in your case {deparse(what[[2]])}^{deparse(what[[3]])}).")
+    }
 
     stop("The function i() should not be used in the fixed-effects part of the formula. ", msg)
   }
@@ -4209,7 +4227,8 @@ fml_combine = function(fml_char, fastCombine, vars = FALSE){
   fun2combine = ifelse(fastCombine, "combine_clusters_fast", "combine_clusters")
 
   # we need to change ^ into %^% otherwise terms sends error
-  labels = attr(terms(.xpd(rhs = gsub("\\^(?=[^0-9])", "%^%", fml_char, perl = TRUE))), "term.labels")
+  labels = attr(terms(.xpd(rhs = gsub("\\^(?=[^0-9])", "%^%", fml_char, perl = TRUE))), 
+                "term.labels")
 
   # now we work this out
   for(i in seq_along(labels)){
@@ -4453,10 +4472,12 @@ check_set_nthreads = function(nthreads){
 
   } else if(nthreads > 1){
     if(max_threads == 0){
-      warn_up("OpenMP not detected: cannot use ", nthreads, " threads, single-threaded mode instead.")
+      warn_up("OpenMP not detected: cannot use ", nthreads, 
+              " threads, single-threaded mode instead.")
       nthreads = 1
     } else if(nthreads > max_threads){
-      warn_up("Asked for ", nthreads, " threads while the maximum is ", max_threads, ". Set to ", max_threads, " threads instead.")
+      warn_up("Asked for ", nthreads, " threads while the maximum is ", max_threads, 
+              ". Set to ", max_threads, " threads instead.")
       nthreads = max_threads
     }
 
@@ -4550,7 +4571,8 @@ set_defaults = function(opts_name){
   }
 
   sysOrigin = sys.parent()
-  mc = match.call(definition = sys.function(sysOrigin), call = sys.call(sysOrigin), expand.dots = FALSE)
+  mc = match.call(definition = sys.function(sysOrigin), 
+                  call = sys.call(sysOrigin), expand.dots = FALSE)
   args_in = names(mc)
 
   args2set = setdiff(names(opts), args_in)
@@ -4717,8 +4739,8 @@ assign_flags = function(flags, ...){
 }
 
 items_to_drop = function(items, x, varname, keep = FALSE, argname,
-             keep_first = FALSE, up = 1, no_error = FALSE,
-             valid_ref = FALSE){
+                         keep_first = FALSE, up = 1, no_error = FALSE,
+                         valid_ref = FALSE){
   # selection of items
   # the selection depends on the type of x
   # always returns the IDs of the items to drop
@@ -4751,11 +4773,13 @@ items_to_drop = function(items, x, varname, keep = FALSE, argname,
     }
 
     if(length(x) > 2){
-      stop_up("In argument `", argname, "`, if a formula, it must be one-sided. Problem: `", deparse_long(x), "` is two-sided.")
+      stop_up("In argument `", argname, "`, if a formula, it must be one-sided. Problem: `",
+              deparse_long(x), "` is two-sided.")
     }
 
     is_here = error_sender(eval(x[[2]], list(x = items)),
-                 "In argument `", argname, "`, the evaluation of the formula led to an error:")
+                           "In argument `", argname, 
+                           "`, the evaluation of the formula led to an error:")
     if(length(is_here) != length(items)){
       stop_up("In argument `", argname, "`, the evaluation of the formula must return a logical vector of the same length as `x`. Problem: `", deparse_long(x), "` returns a vector of length ", length(is_here), " (expected: ", length(items), ").")
     }
@@ -4884,10 +4908,10 @@ bin_factor = function(bin, x, varname, no_error = FALSE){
     if(!is.null(bin_names)){
       qui = which(grepl(".[", bin_names, fixed = TRUE))
       for(i in qui){
-        bin_names[i] = error_sender(dsb(bin_names[i], frame = parent.frame(2), nest = FALSE,
-                        vectorize = TRUE, collapse = ""),
-                      dsb("Error when binning: the name (.[bin_names[i]]) expanded",
-                        " with `.[]` led to an error:"))
+        bin_names[i] = error_sender(dsb(bin_names[i], frame = parent.frame(2), 
+                                        nest = FALSE, vectorize = TRUE, collapse = ""),
+                                    sma("Error when binning: the name ({bin_names[i]}) expanded",
+                                        " with `.[]` led to an error:"))
 
       }
     }
@@ -4899,8 +4923,8 @@ bin_factor = function(bin, x, varname, no_error = FALSE){
       qui_bis = which(grepl(".[", value, fixed = TRUE))
       for(j in qui_bis){
         value[[j]] = error_sender(.dsb(value[[j]], frame = parent.frame(2), nest = FALSE),
-                       dsb("Error when binning: the name (.[value[[j]]]) expanded",
-                         " with `.[]` led to an error:"))
+                                  sma("Error when binning: the name ({value[[j]]}) expanded",
+                                      " with `.[]` led to an error:"))
       }
       bin[[i]] = unlist(value)
     }
@@ -4932,7 +4956,7 @@ bin_factor = function(bin, x, varname, no_error = FALSE){
     }
 
     if(!is.numeric(x)){
-      stop_up("To use the special binning `cut::values`, the variable `", varname, "` must be numeric. Currently this is not the case (it is of class ", enumerate_items(class(x)), " instead).")
+      stop_up("To use the special binning `cut::values`, the variable {bq?varname} must be numeric. Currently this is not the case (it is of class {enum.q ? class(x)} instead).")
     }
 
     return(cut_vector(x, bin))
@@ -4951,13 +4975,13 @@ bin_factor = function(bin, x, varname, no_error = FALSE){
     if(is.character(bin) && any(grepl("^!?!?bin::", bin))){
 
       if(length(bin) > 1){
-        stop_up("To use the special binning `bin::digit`, the argument `", argname, "` must be of length 1. Currently it is of length ", length(bin), ".")
+        stop_up("To use the special binning `bin::digit`, the argument {bq?argname} must be of length 1. Currently it is of length {len?bin}.")
       }
 
       d = gsub("^!?!?bin::", "", bin)
       if(any(grepl("[^[:digit:]]", d))){
         bin_type = gsub("^(!?!?bin).*", "\\1", bin)
-        stop_up("In the argument bin, the special binning must be of the form `", bin_type, "::digit`. Currently this is not the case for `", bin_type, "::", d, "`.")
+        stop_up("In the argument bin, the special binning must be of the form `{bin_type}::digit`. Currently this is not the case for `{bin_type}::{d}.")
       }
       d = as.numeric(d)
 
@@ -4966,7 +4990,7 @@ bin_factor = function(bin, x, varname, no_error = FALSE){
 
       if(!consecutive){
         if(!is.numeric(x_items)){
-          stop_up("To use the special binning `bin::digit`, the variable `", varname, "` must be numeric. Currently this is not the case (it is of class ", enumerate_items(class(x_items)), " instead).")
+          stop_up("To use the special binning `bin::digit`, the variable {bq?varname} must be numeric. Currently this is not the case (it is of class {enum.q?class(x_items)} instead).")
         }
 
         new_x = (x_items %/% d) * d
@@ -5427,11 +5451,16 @@ fixest_CI_factor = function(x, level, vcov = NULL, df.t = NULL){
 ####
 
 
+# sma ####
+
+
+sma = string_magic_alias(.check = FALSE)
 
 escape_regex = function(x){
   # escape special characters in regular expressions => to make it as "fixed"
 
-  res = gsub("((?<=[^\\\\])|(?<=^))(\\$|\\.|\\+|\\(|\\)|\\[|\\]|\\?|\\^)", "\\\\\\2", x, perl = TRUE)
+  res = gsub("((?<=[^\\\\])|(?<=^))(\\$|\\.|\\+|\\(|\\)|\\[|\\]|\\?|\\^)", "\\\\\\2", x, 
+             perl = TRUE)
   res
 }
 
@@ -5527,7 +5556,8 @@ mysignif = function (x, d = 2, r = 1){
   sapply(x, .mysignif, d = d, r = r)
 }
 
-format_nber_single = function(x, digits, round = FALSE, pow_above = 10, pow_below = -5, tex = FALSE){
+format_nber_single = function(x, digits, round = FALSE, pow_above = 10, pow_below = -5, 
+                              tex = FALSE){
   # Attention aux nombres ronds => pas chiffre apres la virgule!
 
   if(is.na(x) || !is.numeric(x)){
@@ -5572,8 +5602,10 @@ format_nber_single = function(x, digits, round = FALSE, pow_above = 10, pow_belo
   res
 }
 
-format_number = function(x, digits = 4, round = FALSE, pow_above = 10, pow_below = -5, tex = FALSE){
-  sapply(x, format_nber_single, digits = digits, round = round, pow_above = pow_above, pow_below = pow_below, tex = tex)
+format_number = function(x, digits = 4, round = FALSE, pow_above = 10, 
+                         pow_below = -5, tex = FALSE){
+  sapply(x, format_nber_single, digits = digits, round = round, pow_above = pow_above, 
+         pow_below = pow_below, tex = tex)
 }
 
 index_2D_to_1D = function(i, j, n_j) 1 + (i - 1) * n_j + j - 1
@@ -5623,7 +5655,8 @@ keep_apply = function(x, keep = NULL, logical = FALSE){
     }
   }
 
-  check_arg(keep, "character vector no na", .message = "The arg. `keep` must be a vector of regular expressions (see help(regex)).")
+  check_arg(keep, "character vector no na", 
+            .message = "The arg. `keep` must be a vector of regular expressions (see help(regex)).")
 
   res = x
 
@@ -5659,7 +5692,8 @@ drop_apply = function(x, drop = NULL){
     return(x)
   }
 
-  check_arg(drop, "character vector no na", .message = "The arg. `drop` must be a vector of regular expressions (see help(regex)). ")
+  check_arg(drop, "character vector no na", 
+            .message = "The arg. `drop` must be a vector of regular expressions (see help(regex)). ")
 
   res = x
 
@@ -5692,7 +5726,8 @@ order_apply = function(x, order = NULL){
     return(x)
   }
 
-  check_arg(order, "character vector no na", .message = "The arg. `order` must be a vector of regular expressions (see help(regex)). ")
+  check_arg(order, "character vector no na", 
+            .message = "The arg. `order` must be a vector of regular expressions (see help(regex)). ")
 
   res = x
 
@@ -5770,7 +5805,8 @@ show_vars_limited_width = function(charVect, nbChars = 60, addS = FALSE){
 
   nb_left = n - qui
 
-  text = paste0(text_s, paste0(charVect[1:qui], collapse = ", "), " and ", nb_left, " other", ifelse(nb_left>1, "s", ""), ".")
+  text = paste0(text_s, paste0(charVect[1:qui], collapse = ", "), 
+                " and ", nb_left, " other", ifelse(nb_left>1, "s", ""), ".")
 
   return(text)
 }
@@ -5970,7 +6006,8 @@ extract_fe_slope = function(t){
   slope_fe = gsub("\\[.+", "", slope_terms)
   fe_all = gsub("\\[.+", "", t)
 
-  list(fixef_vars=fixef_vars, slope_vars=slope_vars, slope_fe=slope_fe, slope_terms=slope_terms, fe_all=fe_all)
+  list(fixef_vars=fixef_vars, slope_vars=slope_vars, slope_fe=slope_fe, 
+       slope_terms=slope_terms, fe_all=fe_all)
 }
 
 
@@ -6306,7 +6343,8 @@ fixest_fml_rewriter = function(fml){
     if(isPower){
       # rhs actually also contains the LHS
       rhs_text = deparse_long(fml_parts[[1]])
-      rhs_text = gsub("(?<!I\\()(\\b(\\.[[:alpha:]]|[[:alpha:]])[[:alnum:]\\._]*\\^[[:digit:]]+)", "I(\\1)", rhs_text, perl = TRUE)
+      rhs_text = gsub("(?<!I\\()(\\b(\\.[[:alpha:]]|[[:alpha:]])[[:alnum:]\\._]*\\^[[:digit:]]+)", 
+                      "I(\\1)", rhs_text, perl = TRUE)
 
       if(grepl("\\^[[:alpha:]]", rhs_text)){
         stop_up("The operator `^` between variables can be used only in the fixed-effects part of the formula. Otherwise, please use `:` instead.")
@@ -6408,7 +6446,8 @@ fixest_fml_rewriter = function(fml){
 
     # We only take care of the RHS (we don't care about the LHS)
     no_lhs_text = gsub("^[^~]+~", "", fml_text)
-    no_lhs_text = gsub("(?<!I\\()(\\b(\\.[[:alpha:]]|[[:alpha:]])[[:alnum:]\\._]*\\^[[:digit:]]+)", "I(\\1)", no_lhs_text, perl = TRUE)
+    no_lhs_text = gsub("(?<!I\\()(\\b(\\.[[:alpha:]]|[[:alpha:]])[[:alnum:]\\._]*\\^[[:digit:]]+)", 
+                       "I(\\1)", no_lhs_text, perl = TRUE)
 
     if(grepl("\\^[[:alpha:]]", no_lhs_text)){
       # We check if there is one ^ specifically in the RHS or in the IV part
@@ -6461,7 +6500,8 @@ check_set_digits = function(digits, up = 1){
   # Note that the argument name can be either digits or digits.stats
 
   set_up(up)
-  check_value(digits, "integer scalar GE{1} | character scalar", .arg_name = deparse(substitute(digits)))
+  check_value(digits, "integer scalar GE{1} | character scalar", 
+              .arg_name = deparse(substitute(digits)))
 
   if(is.character(digits)){
     d_type = substr(digits, 1, 1)
@@ -6813,7 +6853,7 @@ NA_fun = function(..., df){
 
 eval_dot = function(x, up = 1){
   # Note that the right use of up is ESSENTIAL
-  # if must refer to the parent frame from which the main call has been made
+  # it must refer to the parent frame from which the main call has been made
   # Otherwise an error will be thrown of "." not existing
 
   x_dp = deparse(substitute(x), 300)
@@ -6984,8 +7024,16 @@ getFixest_notes = function(){
 #'
 #'
 #'
-#' @param nthreads The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. If missing, the default is to use 50% of all threads.
-#' @param save Either a logical or equal to `"reset"`. Default is `FALSE`. If `TRUE` then the value is set permanently at the project level, this means that if you restart R, you will still obtain the previously saved defaults. This is done by writing in the `".Renviron"` file, located in the project's working directory, hence we must have write permission there for this to work, and only works with Rstudio. If equal to "reset", the default at the project level is erased. Since there is writing in a file involved, permission is asked to the user.
+#' @param nthreads The number of threads. Can be: a) an integer lower than, or equal to, the 
+#' maximum number of threads; b) 0: meaning all available threads will be used; c) a number 
+#' strictly between 0 and 1 which represents the fraction of all threads to use. If missing, the 
+#' default is to use 50% of all threads.
+#' @param save Either a logical or equal to `"reset"`. Default is `FALSE`. If `TRUE` then the value 
+#' is set permanently at the project level, this means that if you restart R, you will still obtain 
+#' the previously saved defaults. This is done by writing in the `".Renviron"` file, located in the 
+#' project's working directory, hence we must have write permission there for this to work, and 
+#' only works with Rstudio. If equal to "reset", the default at the project level is erased. Since 
+#' there is writing in a file involved, permission is asked to the user.
 #'
 #' @author
 #' Laurent Berge
@@ -7071,10 +7119,17 @@ getFixest_nthreads = function(){
 #'
 #' Transforms a single character string containing a dictionary in a textual format into a proper dictionary, that is a named character vector
 #'
-#' @param x A character scalar of the form `"variable 1: definition \n variable 2: definition"` etc. Each line of this character must contain at most one definition with, on the left the variable name, and on the right its definition. The separation between the variable and its definition must be a colon followed with a single space (i.e. ": "). You can stack definitions within a single line by making use of a semi colon: `"var1: def; var2: def"`. White spaces on the left and right are ignored. You can add commented lines with a `"#"`. Non-empty, non-commented lines that don't have the proper format witll raise an error.
+#' @param x A character scalar of the form `"variable 1: definition \n variable 2: definition"` 
+#' etc. Each line of this character must contain at most one definition with, on the left the 
+#' variable name, and on the right its definition. The separation between the variable and its 
+#' definition must be a colon followed with a single space (i.e. ": "). You can stack definitions 
+#' within a single line by making use of a semi colon: `"var1: def; var2: def"`. White spaces on 
+#' the left and right are ignored. You can add commented lines with a `"#"`. Non-empty, 
+#' non-commented lines that don't have the proper format witll raise an error.
 #'
 #' @details
-#' This function is mostly used in combination with [`setFixest_dict`] to set the dictionary to be used in the function [`etable`].
+#' This function is mostly used in combination with [`setFixest_dict`] to set the dictionary to be 
+#' used in the function [`etable`].
 #'
 #' @return
 #' It returns a named character vector.
@@ -7124,17 +7179,32 @@ as.dict = function(x){
 
 #' Sets/gets the dictionary relabeling the variables
 #'
-#' Sets/gets the default dictionary used in the function [`etable`], [`did_means`] and [`coefplot`]. The dictionaries are used to relabel variables (usually towards a fancier, more explicit formatting) when exporting them into a Latex table or displaying in graphs. By setting the dictionary with `setFixest_dict`, you can avoid providing the argument `dict`.
+#' Sets/gets the default dictionary used in the function [`etable`], [`did_means`] and 
+#' [`coefplot`]. The dictionaries are used to relabel variables (usually towards a fancier, more 
+#' explicit formatting) when exporting them into a Latex table or displaying in graphs. By setting 
+#' the dictionary with `setFixest_dict`, you can avoid providing the argument `dict`.
 #'
 #'
-#' @param dict A named character vector or a character scalar. E.g. to change my variable named "a" and "b" to (resp.) "$log(a)$" and "$bonus^3$", then use `dict = c(a="$log(a)$", b3="$bonus^3$")`. Alternatively you can feed a character scalar containing the dictionary in the form `"variable 1: definition \n variable 2: definition"`. In that case the function [`as.dict`] will be applied to get a proper dictionary. This dictionary is used in Latex tables or in graphs by the function [`coefplot`]. If you want to separate Latex rendering from rendering in graphs, use an ampersand first to make the variable specific to `coefplot`.
-#' @param ... You can add arguments of the form: `variable_name = "Definition"`. This is an alternative to using a named vector in the argument `dict`.
-#' @param reset Logical, default is `FALSE`. If `TRUE`, then the dictionary is reset. Note that the default dictionary always relabels the variable "(Intercept)" in to "Constant". To overwrite it, you need to add "(Intercept)" explicitly in your dictionary.
+#' @param dict A named character vector or a character scalar. E.g. to change my variable named "a" 
+#' and "b" to (resp.) "$log(a)$" and "$bonus^3$", then use 
+#' `dict = c(a="$log(a)$", b3="$bonus^3$")`. Alternatively you can feed a character scalar 
+#' containing the dictionary in the form `"variable 1: definition \n variable 2: definition"`. In 
+#' that case the function [`as.dict`] will be applied to get a proper dictionary. This dictionary 
+#' is used in Latex tables or in graphs by the function [`coefplot`]. If you want to separate Latex 
+#' rendering from rendering in graphs, use an ampersand first to make the variable specific to 
+#' `coefplot`.
+#' @param ... You can add arguments of the form: `variable_name = "Definition"`. This is an 
+#' alternative to using a named vector in the argument `dict`.
+#' @param reset Logical, default is `FALSE`. If `TRUE`, then the dictionary is reset. Note that the 
+#' default dictionary always relabels the variable "(Intercept)" in to "Constant". To overwrite it, 
+#' you need to add "(Intercept)" explicitly in your dictionary.
 #'
 #' @details
-#' By default the dictionary only grows. This means that successive calls with not erase the previous definitions unless the argument `reset` has been set to `TRUE`.
+#' By default the dictionary only grows. This means that successive calls with not erase the 
+#' previous definitions unless the argument `reset` has been set to `TRUE`.
 #'
-#' The default dictionary is equivalent to having `setFixest_dict("(Intercept)" = "Constant")`. To change this default, you need to provide a new definition to `"(Intercept)"` explicitly.
+#' The default dictionary is equivalent to having `setFixest_dict("(Intercept)" = "Constant")`. To 
+#' change this default, you need to provide a new definition to `"(Intercept)"` explicitly.
 #'
 #' @author
 #' Laurent Berge
@@ -7176,9 +7246,10 @@ setFixest_dict = function(dict = NULL, ..., reset = FALSE){
   }
 
   check_arg(..., "dotnames character scalar",
-        .message = .dsb("In '...', each argument must be named. ",
-                "The argument name corresponds to the variable to be renamed while",
-                " the value must be a character scalar (how the variable should be renamed)."))
+            .message = sma("In '...', each argument must be named. ",
+                           "The argument name corresponds to the variable to be renamed while",
+                           " the value must be a character scalar ",
+                           "(how the variable should be renamed)."))
 
   dots = list(...)
   dict = as.list(dict)
@@ -7261,16 +7332,33 @@ getFixest_print = function(){
 #'
 #' @inherit xpd examples
 #'
-#' @param ... Definition of the macro variables. Each argument name corresponds to the name of the macro variable. It is required that each macro variable name starts with two dots (e.g. `..ctrl`). The value of each argument must be a one-sided formula or a character vector, it is the definition of the macro variable. Example of a valid call: `setFixest_fml(..ctrl = ~ var1 + var2)`. In the function `xpd`, the default macro variables are taken from `getFixest_fml`, any variable in `...` will replace these values. You can enclose values in `.[]`, if so they will be evaluated from the current environment. For example `..ctrl = ~ x.[1:2] + .[z]` will lead to `~x1 + x2 + var` if `z` is equal to `"var"`.
-#' @param reset A logical scalar, defaults to `FALSE`. If `TRUE`, all macro variables are first reset (i.e. deleted).
+#' @param ... Definition of the macro variables. Each argument name corresponds to the name of the 
+#' macro variable. It is required that each macro variable name starts with two dots 
+#' (e.g. `..ctrl`). The value of each argument must be a one-sided formula or a character vector, 
+#' it is the definition of the macro variable. Example of a valid call: 
+#' `setFixest_fml(..ctrl = ~ var1 + var2)`. In the function `xpd`, the default macro variables are 
+#' taken from `getFixest_fml`, any variable in `...` will replace these values. You can enclose 
+#' values in `.[]`, if so they will be evaluated from the current environment. 
+#' For example `..ctrl = ~ x.[1:2] + .[z]` will lead to `~x1 + x2 + var` if `z` is equal to `"var"`.
+#' @param reset A logical scalar, defaults to `FALSE`. If `TRUE`, 
+#' all macro variables are first reset (i.e. deleted).
 #'
 #' @details
-#' In `xpd`, the default macro variables are taken from `getFixest_fml`. Any value in the `...` argument of `xpd` will replace these default values.
+#' In `xpd`, the default macro variables are taken from `getFixest_fml`. 
+#' Any value in the `...` argument of `xpd` will replace these default values.
 #'
-#' The definitions of the macro variables will replace in verbatim the macro variables. Therefore, you can include multipart formulas if you wish but then beware of the order the the macros variable in the formula. For example, using the airquality data, say you want to set as controls the variable `Temp` and `Day` fixed-effects, you can do `setFixest_fml(..ctrl = ~Temp | Day)`, but then `feols(Ozone ~ Wind + ..ctrl, airquality)` will be quite different from `feols(Ozone ~ ..ctrl + Wind, airquality)`, so beware!
+#' The definitions of the macro variables will replace in verbatim the macro variables. 
+#' Therefore, you can include multipart formulas if you wish but then beware of the order the 
+#' macros variable in the formula. For example, using the airquality data, say you want to set as 
+#' controls the variable `Temp` and `Day` fixed-effects, you can do 
+#' `setFixest_fml(..ctrl = ~Temp | Day)`, but then
+#'  `feols(Ozone ~ Wind + ..ctrl, airquality)` will be quite different from 
+#' `feols(Ozone ~ ..ctrl + Wind, airquality)`, so beware!
 #'
 #' @return
-#' The function `getFixest_fml()` returns a list of character strings, the names corresponding to the macro variable names, the character strings corresponding to their definition.
+#' The function `getFixest_fml()` returns a list of character strings, the names 
+#' corresponding to the macro variable names, the character strings corresponding 
+#' to their definition.
 #'
 #' @seealso
 #' [`xpd`] to make use of formula macros.

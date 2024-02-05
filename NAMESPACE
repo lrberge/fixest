@@ -146,6 +146,8 @@ export(fixef)
 importFrom(sandwich, estfun, bread, bwNeweyWest)
 export(estfun, bread)
 
+importFrom(stringmagic, string_magic_alias)
+
 importFrom(stats, cor, dnorm, lm, nlminb, optim,
 			  pnorm, qnorm, as.formula, var, sd, formula,
 			  na.omit, model.frame, "na.pass", poisson, pt, hatvalues,
