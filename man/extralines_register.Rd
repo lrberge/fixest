@@ -11,10 +11,12 @@ extralines_register(type, fun, alias)
 
 \item{fun}{A function to be applied to a \code{fixest} estimation. It must return a scalar.}
 
-\item{alias}{A character scalar. This is the alias to be used in lieu of the type name to form the row name.}
+\item{alias}{A character scalar. This is the alias to be used in lieu of the type name to
+form the row name.}
 }
 \description{
-This function is used to create \code{extralines} (which is an argument of \code{\link{etable}}) macros that can be easily summoned in \code{\link{etable}}.
+This function is used to create \code{extralines} (which is an argument of \code{\link{etable}}) macros
+that can be easily summoned in \code{\link{etable}}.
 }
 \details{
 You can register as many macros as you wish, the only constraint is that the type name should not conflict with a \code{\link{fitstat}} type name.

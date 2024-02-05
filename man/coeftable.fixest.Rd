@@ -55,17 +55,38 @@
 \arguments{
 \item{object}{A \code{fixest} object. For example an estimation obtained from \code{\link{feols}}.}
 
-\item{vcov}{A function to be used to compute the standard-errors of each fixest object. You can pass extra arguments to this function using the argument \code{.vcov_args}. See the example.}
+\item{vcov}{A function to be used to compute the standard-errors of each fixest object. You can
+pass extra arguments to this function using the argument \code{.vcov_args}. See the example.}
 
 \item{ssc}{An object of class \code{ssc.type} obtained with the function \code{\link{ssc}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link{ssc}} for this argument. The arguments and defaults of the function \code{\link{ssc}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "min"}, \code{t.df = "min"}, \verb{fixef.force_exact=FALSE)}. See the help of the function \code{\link{ssc}} for details.}
 
 \item{cluster}{Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \verb{cluster = base[, c("var1, "var2")]}, \verb{cluster = c("var1, "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [resp. 2nd] cluster).}
 
-\item{keep}{Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}} help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{keep = "x[[:digit:]]$"}. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is kept). See details.}
+\item{keep}{Character vector. This element is used to display only a subset of variables. This
+should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}} help for more info). Each
+variable satisfying any of the regular expressions will be kept. This argument is applied post
+aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display
+only \code{x1} to \code{x9}, then you could use \code{keep = "x[[:digit:]]$"}. If the first character is an
+exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that
+does not contain \dQuote{Intercept} is kept). See details.}
 
-\item{drop}{Character vector. This element is used if some variables are not to be displayed. This should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}} help for more info). Each variable satisfying any of the regular expressions will be discarded. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \verb{drop = "x[[:digit:]]\{2\}}". If the first character is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is dropped). See details.}
+\item{drop}{Character vector. This element is used if some variables are not to be displayed.
+This should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}} help for more info). Each
+variable satisfying any of the regular expressions will be discarded. This argument is applied
+post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to
+display only \code{x1} to \code{x9}, then you could use \verb{drop = "x[[:digit:]]\{2\}}". If the first character
+is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable
+that does not contain \dQuote{Intercept} is dropped). See details.}
 
-\item{order}{Character vector. This element is used if the user wants the variables to be ordered in a certain way. This should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}} help for more info). The variables satisfying the first regular expression will be placed first, then the order follows the sequence of regular expressions. This argument is applied post aliasing (see argument \code{dict}). Example: you have the following variables: \code{month1} to \code{month6}, then \code{x1} to \code{x5}, then \code{year1} to \code{year6}. If you want to display first the x's, then the years, then the months you could use: \code{order = c("x", "year")}. If the first character is an exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that does not contain \dQuote{Intercept} goes first).  See details.}
+\item{order}{Character vector. This element is used if the user wants the variables to be
+ordered in a certain way. This should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}}
+help for more info). The variables satisfying the first regular expression will be placed first,
+then the order follows the sequence of regular expressions. This argument is applied post
+aliasing (see argument \code{dict}). Example: you have the following variables: \code{month1} to \code{month6},
+then \code{x1} to \code{x5}, then \code{year1} to \code{year6}. If you want to display first the x's, then the
+years, then the months you could use: \code{order = c("x", "year")}. If the first character is an
+exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that
+does not contain \dQuote{Intercept} goes first).  See details.}
 
 \item{list}{Logical, default is \code{FALSE}. If \code{TRUE}, then a nested list is returned, the first layer is accessed with the coefficients names; the second layer with the following values: \code{coef}, \code{se}, \code{tstat}, \code{pvalue}. Note that the variable \code{"(Intercept)"} is renamed into \code{"constant"}.}
 

@@ -24,37 +24,65 @@ style.df(
 )
 }
 \arguments{
-\item{depvar.title}{Character scalar. Default is \code{"Dependent Var.:"}. The row name of the dependent variables.}
+\item{depvar.title}{Character scalar. Default is \code{"Dependent Var.:"}.
+The row name of the dependent variables.}
 
-\item{fixef.title}{Character scalar. Default is \code{"Fixed-Effects:"}. The header preceding the fixed-effects. If equal to the empty string, then this line is removed.}
+\item{fixef.title}{Character scalar. Default is \code{"Fixed-Effects:"}. The header preceding the
+fixed-effects. If equal to the empty string, then this line is removed.}
 
-\item{fixef.line}{A single character. Default is \code{"-"}. A character that will be used to create a line of separation for the fixed-effects header. Used only if \code{fixef.title} is not the empty string.}
+\item{fixef.line}{A single character. Default is \code{"-"}. A character that will be used to create
+a line of separation for the fixed-effects header. Used only if \code{fixef.title} is not the empty
+string.}
 
-\item{fixef.prefix}{Character scalar. Default is \code{""}. A prefix to appear before each fixed-effect name.}
+\item{fixef.prefix}{Character scalar. Default is \code{""}. A prefix to appear
+before each fixed-effect name.}
 
-\item{fixef.suffix}{Character scalar. Default is \code{""}. A suffix to appear after each fixed-effect name.}
+\item{fixef.suffix}{Character scalar. Default is \code{""}. A suffix to appear
+after each fixed-effect name.}
 
-\item{slopes.title}{Character scalar. Default is \code{"Varying Slopes:"}. The header preceding the variables with varying slopes. If equal to the empty string, then this line is removed.}
+\item{slopes.title}{Character scalar. Default is \code{"Varying Slopes:"}. The header preceding the
+variables with varying slopes. If equal to the empty string, then this line is removed.}
 
-\item{slopes.line}{Character scalar. Default is \code{"-"}. A character that will be used to create a line of separation for the variables with varying slopes header. Used only if \code{slopes.line} is not the empty string.}
+\item{slopes.line}{Character scalar. Default is \code{"-"}. A character that will be used to create a
+line of separation for the variables with varying slopes header. Used only if \code{slopes.line} is
+not the empty string.}
 
-\item{slopes.format}{Character scalar. Default is \code{"__var__ (__slope__)"}. The format of the name of the varying slopes. The values \verb{__var__} and \verb{__slope__} are special characters that will be replaced by the value of the variable name and slope name, respectively.}
+\item{slopes.format}{Character scalar. Default is \code{"__var__ (__slope__)"}. The format of the
+name of the varying slopes. The values \verb{__var__} and \verb{__slope__} are special characters that
+will be replaced by the value of the variable name and slope name, respectively.}
 
-\item{stats.title}{Character scalar. Default is \code{"_"}. The header preceding the statistics section. If equal to the empty string, then this line is removed. If equal to single character (like in the default), then this character will be expanded to take the full column width.}
+\item{stats.title}{Character scalar. Default is \code{"_"}. The header preceding the statistics
+section. If equal to the empty string, then this line is removed. If equal to single character
+(like in the default), then this character will be expanded to take the full column width.}
 
-\item{stats.line}{Character scalar. Default is \code{"_"}. A character that will be used to create a line of separation for the statistics header. Used only if \code{stats.title} is not the empty string.}
+\item{stats.line}{Character scalar. Default is \code{"_"}. A character that will be used to create a
+line of separation for the statistics header. Used only if \code{stats.title} is not the empty string.}
 
-\item{yesNo}{Character vector of length 1 or 2. Default is \code{c("Yes", "No")}. Used to inform on the presence or absence of fixed-effects in the estimation. If of length 1, then automatically the second value is considered as the empty string.}
+\item{yesNo}{Character vector of length 1 or 2. Default is \code{c("Yes", "No")}. Used to inform on
+the presence or absence of fixed-effects in the estimation. If of length 1, then automatically
+the second value is considered as the empty string.}
 
-\item{headers.sep}{Logical, default is \code{TRUE}. Whether to add a line of separation between the headers and the coefficients.}
+\item{headers.sep}{Logical, default is \code{TRUE}. Whether to add a line of separation between the
+headers and the coefficients.}
 
-\item{signif.code}{Named numeric vector, used to provide the significance codes with respect to the p-value of the coefficients. Default is \code{c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)}. To suppress the significance codes, use \code{signif.code=NA} or \code{signif.code=NULL}. Can also be equal to \code{"letters"}, then the default becomes \code{c("a"=0.01, "b"=0.05, "c"=0.10)}.}
+\item{signif.code}{Named numeric vector, used to provide the significance codes with respect to
+the p-value of the coefficients. Default is \code{c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)}. To
+suppress the significance codes, use \code{signif.code=NA} or \code{signif.code=NULL}. Can also be equal
+to \code{"letters"}, then the default becomes \code{c("a"=0.01, "b"=0.05, "c"=0.10)}.}
 
-\item{interaction.combine}{Character scalar, defaults to \code{" x "}. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if \code{dict = c(x1="Wind", x2="Rain")} and you have the following interaction \code{x1:x2}, then it will be renamed (by default) \verb{Wind x Rain} -- using \code{interaction.combine = "*"} would lead to \code{Wind*Rain}.}
+\item{interaction.combine}{Character scalar, defaults to \code{" x "}. When the estimation contains
+interactions, then the variables names (after aliasing) are combined with this argument. For
+example: if \code{dict = c(x1="Wind", x2="Rain")} and you have the following interaction \code{x1:x2},
+then it will be renamed (by default) \verb{Wind x Rain} -- using \code{interaction.combine = "*"} would
+lead to \code{Wind*Rain}.}
 
-\item{i.equal}{Character scalar, defaults to \code{" = "}. Only affects factor variables created with the function \code{\link{i}}, tells how the variable should be linked to its value. For example if you have the Species factor from the iris data set, by default the display of the variable is \code{Species = Setosa}, etc. If \code{i.equal = ": "} the display becomes \code{Species: Setosa}.}
+\item{i.equal}{Character scalar, defaults to \code{" = "}. Only affects factor variables created with
+the function \code{\link{i}}, tells how the variable should be linked to its value. For example if you
+have the Species factor from the iris data set, by default the display of the variable is
+\code{Species = Setosa}, etc. If \code{i.equal = ": "} the display becomes \code{Species: Setosa}.}
 
-\item{default}{Logical, default is \code{FALSE}. If \code{TRUE}, all the values not provided by the user are set to their default.}
+\item{default}{Logical, default is \code{FALSE}. If \code{TRUE}, all the values not provided by the user
+are set to their default.}
 }
 \value{
 It returns an object of class \code{fixest_style_df}.
@@ -65,7 +93,9 @@ This function describes the style of data.frames created with the function \code
 \details{
 @inheritParams etable
 
-The title elements (\code{depvar.title}, \code{fixef.title}, \code{slopes.title} and \code{stats.title}) will be the row names of the returned data.frame. Therefore keep in mind that any two of them should not be identical (since identical row names are forbidden in data.frames).
+The title elements (\code{depvar.title}, \code{fixef.title}, \code{slopes.title} and \code{stats.title}) will be the
+row names of the returned data.frame. Therefore keep in mind that any two of them should not be
+identical (since identical row names are forbidden in data.frames).
 }
 \examples{
 

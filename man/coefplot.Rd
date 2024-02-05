@@ -164,13 +164,39 @@ on the value of \code{x.shift}. Default is 0.}
 \item{horiz}{A logical scalar, default is \code{FALSE}. Whether to display the confidence
 intervals horizontally instead of vertically.}
 
-\item{dict}{A named character vector or a logical scalar. It changes the original variable names to the ones contained in the \code{dict}ionary. E.g. to change the variables named \code{a} and \code{b3} to (resp.) \dQuote{$log(a)$} and to \dQuote{$bonus^3$}, use \code{dict=c(a="$log(a)$",b3="$bonus^3$")}. By default, it is equal to \code{getFixest_dict()}, a default dictionary which can be set with \code{\link{setFixest_dict}}. You can use \code{dict = FALSE} to disable it. By default \code{dict} modifies the entries in the global dictionary, to disable this behavior, use "reset" as the first element (ex: \code{dict=c("reset", mpg="Miles per gallon")}).}
+\item{dict}{A named character vector or a logical scalar. It changes the original variable names
+to the ones contained in the \code{dict}ionary. E.g. to change the variables named \code{a} and \code{b3} to
+(resp.) \dQuote{$log(a)$} and to \dQuote{$bonus^3$}, use \code{dict=c(a="$log(a)$",b3="$bonus^3$")}.
+By default, it is equal to \code{getFixest_dict()}, a default dictionary which can be set with
+\code{\link{setFixest_dict}}. You can use \code{dict = FALSE} to disable it. By default \code{dict} modifies the
+entries in the global dictionary, to disable this behavior, use "reset" as the first element
+(ex: \code{dict=c("reset", mpg="Miles per gallon")}).}
 
-\item{keep}{Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}} help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{keep = "x[[:digit:]]$"}. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is kept). See details.}
+\item{keep}{Character vector. This element is used to display only a subset of variables. This
+should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}} help for more info). Each
+variable satisfying any of the regular expressions will be kept. This argument is applied post
+aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display
+only \code{x1} to \code{x9}, then you could use \code{keep = "x[[:digit:]]$"}. If the first character is an
+exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that
+does not contain \dQuote{Intercept} is kept). See details.}
 
-\item{drop}{Character vector. This element is used if some variables are not to be displayed. This should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}} help for more info). Each variable satisfying any of the regular expressions will be discarded. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \verb{drop = "x[[:digit:]]\{2\}}". If the first character is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is dropped). See details.}
+\item{drop}{Character vector. This element is used if some variables are not to be displayed.
+This should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}} help for more info). Each
+variable satisfying any of the regular expressions will be discarded. This argument is applied
+post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to
+display only \code{x1} to \code{x9}, then you could use \verb{drop = "x[[:digit:]]\{2\}}". If the first character
+is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable
+that does not contain \dQuote{Intercept} is dropped). See details.}
 
-\item{order}{Character vector. This element is used if the user wants the variables to be ordered in a certain way. This should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}} help for more info). The variables satisfying the first regular expression will be placed first, then the order follows the sequence of regular expressions. This argument is applied post aliasing (see argument \code{dict}). Example: you have the following variables: \code{month1} to \code{month6}, then \code{x1} to \code{x5}, then \code{year1} to \code{year6}. If you want to display first the x's, then the years, then the months you could use: \code{order = c("x", "year")}. If the first character is an exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that does not contain \dQuote{Intercept} goes first).  See details.}
+\item{order}{Character vector. This element is used if the user wants the variables to be
+ordered in a certain way. This should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}}
+help for more info). The variables satisfying the first regular expression will be placed first,
+then the order follows the sequence of regular expressions. This argument is applied post
+aliasing (see argument \code{dict}). Example: you have the following variables: \code{month1} to \code{month6},
+then \code{x1} to \code{x5}, then \code{year1} to \code{year6}. If you want to display first the x's, then the
+years, then the months you could use: \code{order = c("x", "year")}. If the first character is an
+exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that
+does not contain \dQuote{Intercept} goes first).  See details.}
 
 \item{ci.width}{The width of the extremities of the confidence intervals. Default is \code{0.1}.}
 
@@ -379,17 +405,35 @@ disregarded since they would require a 3-D plot to be properly represented.
 
 \section{Arguments keep, drop and order}{
 
-The arguments \code{keep}, \code{drop} and \code{order} use regular expressions. If you are not aware of regular expressions, I urge you to learn it, since it is an extremely powerful way to manipulate character strings (and it exists across most programming languages).
+The arguments \code{keep}, \code{drop} and \code{order} use regular expressions. If you are not aware
+of regular expressions, I urge you to learn it, since it is an extremely powerful way
+to manipulate character strings (and it exists across most programming languages).
 
-For example drop = "Wind" would drop any variable whose name contains "Wind". Note that variables such as "Temp:Wind" or "StrongWind" do contain "Wind", so would be dropped. To drop only the variable named "Wind", you need to use \code{drop = "^Wind$"} (with "^" meaning beginning, resp. "$" meaning end, of the string => this is the language of regular expressions).
+For example drop = "Wind" would drop any variable whose name contains "Wind". Note that
+variables such as "Temp:Wind" or "StrongWind" do contain "Wind", so would be dropped.
+To drop only the variable named "Wind", you need to use \code{drop = "^Wind$"} (with "^" meaning
+beginning, resp. "$" meaning end, of the string => this is the language of regular expressions).
 
-Although you can combine several regular expressions in a single character string using pipes, \code{drop} also accepts a vector of regular expressions.
+Although you can combine several regular expressions in a single character string using pipes,
+\code{drop} also accepts a vector of regular expressions.
 
-You can use the special character "!" (exclamation mark) to reverse the effect of the regular expression (this feature is specific to this function). For example \code{drop = "!Wind"} would drop any variable that does not contain "Wind".
+You can use the special character "!" (exclamation mark) to reverse the effect of the regular
+expression (this feature is specific to this function). For example \code{drop = "!Wind"} would drop
+any variable that does not contain "Wind".
 
-You can use the special character "\%" (percentage) to make reference to the original variable name instead of the aliased name. For example, you have a variable named \code{"Month6"}, and use a dictionary \code{dict = c(Month6="June")}. Thus the variable will be displayed as \code{"June"}. If you want to delete that variable, you can use either \code{drop="June"}, or \code{drop="\%Month6"} (which makes reference to its original name).
+You can use the special character "\%" (percentage) to make reference to the original variable
+name instead of the aliased name. For example, you have a variable named \code{"Month6"}, and use a
+dictionary \code{dict = c(Month6="June")}. Thus the variable will be displayed as \code{"June"}. If you
+want to delete that variable, you can use either \code{drop="June"}, or \code{drop="\%Month6"} (which makes
+reference to its original name).
 
-The argument \code{order} takes in a vector of regular expressions, the order will follow the elements of this vector. The vector gives a list of priorities, on the left the elements with highest priority. For example, order = c("Wind", "!Inter", "!Temp") would give highest priorities to the variables containing "Wind" (which would then appear first), second highest priority is the variables not containing "Inter", last, with lowest priority, the variables not containing "Temp". If you had the following variables: (Intercept), Temp:Wind, Wind, Temp you would end up with the following order: Wind, Temp:Wind, Temp, (Intercept).
+The argument \code{order} takes in a vector of regular expressions, the order will follow the
+elements of this vector. The vector gives a list of priorities, on the left the elements with
+highest priority. For example, order = c("Wind", "!Inter", "!Temp") would give highest
+priorities to the variables containing "Wind" (which would then appear first), second highest
+priority is the variables not containing "Inter", last, with lowest priority, the variables not
+containing "Temp". If you had the following variables: (Intercept), Temp:Wind, Wind, Temp you
+would end up with the following order: Wind, Temp:Wind, Temp, (Intercept).
 }
 
 \examples{
