@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -103,55 +103,89 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>main</dt>
-<dd><p>Either "base", "aer" or "qje". Defines the basic style to start from. The styles "aer" and "qje" are almost identical and only differ on the top/bottom lines.</p></dd>
+<dd><p>Either "base", "aer" or "qje". Defines the basic style to start from. The styles
+"aer" and "qje" are almost identical and only differ on the top/bottom lines.</p></dd>
 
 
 <dt>depvar.title</dt>
-<dd><p>A character scalar. The title of the line of the dependent variables (defaults to <code>"Dependent variable(s):"</code> if <code>main = "base"</code> (the 's' appears only if just one variable) and to <code>""</code> if <code>main = "aer"</code>).</p></dd>
+<dd><p>A character scalar. The title of the line of the dependent variables
+(defaults to <code>"Dependent variable(s):"</code> if <code>main = "base"</code> (the 's' appears only if just one
+variable) and to <code>""</code> if <code>main = "aer"</code>).</p></dd>
 
 
 <dt>model.title</dt>
-<dd><p>A character scalar. The title of the line of the models (defaults to <code>"Model:"</code> if <code>main = "base"</code> and to <code>""</code> if <code>main = "aer"</code>).</p></dd>
+<dd><p>A character scalar. The title of the line of the models (defaults to
+<code>"Model:"</code> if <code>main = "base"</code> and to <code>""</code> if <code>main = "aer"</code>).</p></dd>
 
 
 <dt>model.format</dt>
-<dd><p>A character scalar. The value to appear on top of each column. It defaults to <code>"(1)"</code>. Note that 1, i, I, a and A are special characters: if found, their values will be automatically incremented across columns.</p></dd>
+<dd><p>A character scalar. The value to appear on top of each column. It defaults
+to <code>"(1)"</code>. Note that 1, i, I, a and A are special characters: if found, their values will be
+automatically incremented across columns.</p></dd>
 
 
 <dt>line.top</dt>
-<dd><p>A character scalar equal to <code>"simple"</code>, <code>"double"</code>, or anything else. The line at the top of the table (defaults to <code>"double"</code> if <code>main = "base"</code> and to <code>"simple"</code> if <code>main = "aer"</code>). <code>"simple"</code> is equivalent to <code>"\\toprule"</code>, and <code>"double"</code> to <code>"\\tabularnewline \\midrule \\midrule"</code>.</p></dd>
+<dd><p>A character scalar equal to <code>"simple"</code>, <code>"double"</code>, or anything else. The line
+at the top of the table (defaults to <code>"double"</code> if <code>main = "base"</code> and to <code>"simple"</code> if
+<code>main = "aer"</code>). <code>"simple"</code> is equivalent to <code>"\\toprule"</code>, and <code>"double"</code> to
+<code>"\\tabularnewline \\midrule \\midrule"</code>.</p></dd>
 
 
 <dt>line.bottom</dt>
-<dd><p>A character scalar equal to <code>"simple"</code>, <code>"double"</code>, or anything else. The line at the bottom of the table (defaults to <code>"double"</code> if <code>main = "base"</code> and to <code>"simple"</code> if <code>main = "aer"</code>). <code>"simple"</code> is equivalent to <code>"\\bottomrule"</code>, and <code>"double"</code> to <code>"\\midrule \\midrule &amp; \\tabularnewline"</code>.</p></dd>
+<dd><p>A character scalar equal to <code>"simple"</code>, <code>"double"</code>, or anything else. The
+line at the bottom of the table (defaults to <code>"double"</code> if <code>main = "base"</code> and to <code>"simple"</code>
+if <code>main = "aer"</code>). <code>"simple"</code> is equivalent to <code>"\\bottomrule"</code>, and <code>"double"</code> to
+<code>"\\midrule \\midrule &amp; \\tabularnewline"</code>.</p></dd>
 
 
 <dt>var.title</dt>
-<dd><p>A character scalar. The title line appearing before the variables (defaults to <code>"\\midrule \\emph{Variables}"</code> if <code>main = "base"</code> and to <code>"\\midrule"</code> if <code>main = "aer"</code>). Note that the behavior of <code>var.title = " "</code> (a space) is different from <code>var.title = ""</code> (the empty string): in the first case you will get an empty row, while in the second case you get no empty row. To get a line without an empty row, use <code>"\\midrule"</code> (and not <code>"\\midrule "</code>!--the space!).</p></dd>
+<dd><p>A character scalar. The title line appearing before the variables (defaults to
+<code>"\\midrule \\emph{Variables}"</code> if <code>main = "base"</code> and to <code>"\\midrule"</code> if <code>main = "aer"</code>).
+Note that the behavior of <code>var.title = " "</code> (a space) is different from <code>var.title = ""</code>
+(the empty string): in the first case you will get an empty row, while in the second case
+you get no empty row. To get a line without an empty row, use <code>"\\midrule"</code> (and not
+<code>"\\midrule "</code>!--the space!).</p></dd>
 
 
 <dt>fixef.title</dt>
-<dd><p>A character scalar. The title line appearing before the fixed-effects (defaults to <code>"\\midrule \\emph{Fixed-effects}"</code> if <code>main = "base"</code> and to <code>" "</code> if <code>main = "aer"</code>). Note that the behavior of <code>fixef.title = " "</code> (a space) is different from <code>fixef.title = ""</code> (the empty string): in the first case you will get an empty row, while in the second case you get no empty row. To get a line without an empty row, use <code>"\\midrule"</code> (and not <code>"\\midrule "</code>!--the space!).</p></dd>
+<dd><p>A character scalar. The title line appearing before the fixed-effects
+(defaults to <code>"\\midrule \\emph{Fixed-effects}"</code> if <code>main = "base"</code> and to <code>" "</code> if
+<code>main = "aer"</code>). Note that the behavior of <code>fixef.title = " "</code> (a space) is different from
+<code>fixef.title = ""</code> (the empty string): in the first case you will get an empty row, while in the
+second case you get no empty row. To get a line without an empty row, use <code>"\\midrule"</code>
+(and not <code>"\\midrule "</code>!--the space!).</p></dd>
 
 
 <dt>fixef.prefix</dt>
-<dd><p>A prefix to add to the fixed-effects names. Defaults to <code>""</code> (i.e. no prefix).</p></dd>
+<dd><p>A prefix to add to the fixed-effects names. Defaults to <code>""</code>
+(i.e. no prefix).</p></dd>
 
 
 <dt>fixef.suffix</dt>
-<dd><p>A suffix to add to the fixed-effects names. Defaults to <code>""</code> if <code>main = "base"</code>) and to <code>"fixed-effects"</code> if <code>main = "aer"</code>).</p></dd>
+<dd><p>A suffix to add to the fixed-effects names. Defaults to <code>""</code> if
+<code>main = "base"</code>) and to <code>"fixed-effects"</code> if <code>main = "aer"</code>).</p></dd>
 
 
 <dt>fixef.where</dt>
-<dd><p>Either "var" or "stats". Where to place the fixed-effects lines? Defaults to <code>"var"</code>, i.e. just after the variables, if <code>main = "base"</code>) and to <code>"stats"</code>, i.e. just after the statistics, if <code>main = "aer"</code>).</p></dd>
+<dd><p>Either "var" or "stats". Where to place the fixed-effects lines?
+Defaults to <code>"var"</code>, i.e. just after the variables, if <code>main = "base"</code>) and to
+<code>"stats"</code>, i.e. just after the statistics, if <code>main = "aer"</code>).</p></dd>
 
 
 <dt>slopes.title</dt>
-<dd><p>A character scalar. The title line appearing before the variables with varying slopes (defaults to <code>"\\midrule \\emph{Varying Slopes}"</code> if <code>main = "base"</code> and to <code>""</code> if <code>main = "aer"</code>). Note that the behavior of <code>slopes.title = " "</code> (a space) is different from <code>slopes.title = ""</code> (the empty string): in the first case you will get an empty row, while in the second case you get no empty row. To get a line without an empty row, use <code>"\\midrule"</code> (and not <code>"\\midrule "</code>!--the space!).</p></dd>
+<dd><p>A character scalar. The title line appearing before the variables with
+varying slopes (defaults to <code>"\\midrule \\emph{Varying Slopes}"</code> if <code>main = "base"</code>
+and to <code>""</code> if <code>main = "aer"</code>). Note that the behavior of <code>slopes.title = " "</code> (a space)
+is different from <code>slopes.title = ""</code> (the empty string): in the first case you will get
+an empty row, while in the second case you get no empty row. To get a line without an
+empty row, use <code>"\\midrule"</code> (and not <code>"\\midrule "</code>!--the space!).</p></dd>
 
 
 <dt>slopes.format</dt>
-<dd><p>Character scalar representing the format of the slope variable name. There are two special characters: "<strong>var</strong>" and "<strong>slope</strong>", placeholers for the variable and slope names. Defaults to <code>"__var__ (__slope__)"</code> if <code>main = "base"</code>) and to <code>"__var__ $\\times $ __slope__"</code> if <code>main = "aer"</code>).</p></dd>
+<dd><p>Character scalar representing the format of the slope variable name.
+There are two special characters: "<strong>var</strong>" and "<strong>slope</strong>", placeholers for the variable
+and slope names. Defaults to <code>"__var__ (__slope__)"</code> if <code>main = "base"</code>) and
+to <code>"__var__ $\\times $ __slope__"</code> if <code>main = "aer"</code>).</p></dd>
 
 
 <dt>fixef_sizes.prefix</dt>
@@ -159,39 +193,56 @@
 
 
 <dt>fixef_sizes.suffix</dt>
-<dd><p>A suffix to add to the fixed-effects names. Defaults to <code>""</code> (i.e. no suffix).</p></dd>
+<dd><p>A suffix to add to the fixed-effects names. Defaults
+to <code>""</code> (i.e. no suffix).</p></dd>
 
 
 <dt>stats.title</dt>
-<dd><p>A character scalar. The title line appearing before the statistics (defaults to <code>"\\midrule \\emph{Fit statistics"}</code> if <code>main = "base"</code> and to <code>" "</code> if <code>main = "aer"</code>). Note that the behavior of <code>stats.title = " "</code> (a space) is different from <code>stats.title = ""</code> (the empty string): in the first case you will get an empty row, while in the second case you get no empty row. To get a line without an empty row, use <code>"\\midrule"</code> (and not <code>"\\midrule "</code>!--the space!).</p></dd>
+<dd><p>A character scalar. The title line appearing before the statistics
+(defaults to <code>"\\midrule \\emph{Fit statistics"}</code> if <code>main = "base"</code> and to <code>" "</code>
+if <code>main = "aer"</code>). Note that the behavior of <code>stats.title = " "</code> (a space) is different
+from <code>stats.title = ""</code> (the empty string): in the first case you will get an empty row,
+while in the second case you get no empty row. To get a line without an empty row,
+use <code>"\\midrule"</code> (and not <code>"\\midrule "</code>!--the space!).</p></dd>
 
 
 <dt>notes.intro</dt>
-<dd><p>A character scalar. Some tex code appearing just before the notes, defaults to <code>"\\par \\raggedright \n"</code>.</p></dd>
+<dd><p>A character scalar. Some tex code appearing just before the notes,
+defaults to <code>"\\par \\raggedright \n"</code>.</p></dd>
 
 
 <dt>notes.tpt.intro</dt>
-<dd><p>Character scalar. Only used if <code>tpt = TRUE</code>, it is some tex code that is passed before any <code>threeparttable</code> item (can be used for, typically, the font size). Default is the empty string.</p></dd>
+<dd><p>Character scalar. Only used if <code>tpt = TRUE</code>, it is some tex code that is
+passed before any <code>threeparttable</code> item (can be used for, typically, the font size). Default is
+the empty string.</p></dd>
 
 
 <dt>tablefoot</dt>
-<dd><p>A logical scalar. Whether or not to display a footer within the table. Defaults to <code>TRUE</code> if <code>main = "aer"</code>) and <code>FALSE</code> if <code>main = "aer"</code>).</p></dd>
+<dd><p>A logical scalar. Whether or not to display a footer within the table.
+Defaults to <code>TRUE</code> if <code>main = "base"</code>) and <code>FALSE</code> if <code>main = "aer"</code>).</p></dd>
 
 
 <dt>tablefoot.value</dt>
-<dd><p>A character scalar. The notes to be displayed in the footer. Defaults to <code>"default"</code> if <code>main = "base"</code>, which leads to custom footers informing on the type of standard-error and significance codes, depending on the estimations.</p></dd>
+<dd><p>A character scalar. The notes to be displayed in the footer.
+Defaults to <code>"default"</code> if <code>main = "base"</code>, which leads to custom footers informing on
+the type of standard-error and significance codes, depending on the estimations.</p></dd>
 
 
 <dt>yesNo</dt>
-<dd><p>A character vector of length 1 or 2. Defaults to <code>"Yes"</code> if <code>main = "base"</code> and to <code>"$\\checkmark$"</code> if <code>main = "aer"</code> (from package <code>amssymb</code>). This is the message displayed when a given fixed-effect is (or is not) included in a regression. If <code>yesNo</code> is of length 1, then the second element is the empty string.</p></dd>
+<dd><p>A character vector of length 1 or 2. Defaults to <code>"Yes"</code> if <code>main = "base"</code>
+and to <code>"$\\checkmark$"</code> if <code>main = "aer"</code> (from package <code>amssymb</code>). This is the message
+displayed when a given fixed-effect is (or is not) included in a regression.
+If <code>yesNo</code> is of length 1, then the second element is the empty string.</p></dd>
 
 
 <dt>tabular</dt>
-<dd><p>(Tex only.) Character scalar equal to "normal" (default), <code>"*"</code> or <code>"X"</code>. Represents the type of tabular environment to use: either <code>tabular</code>, <code>tabular*</code> or <code>tabularx</code>.</p></dd>
+<dd><p>(Tex only.) Character scalar equal to "normal" (default), <code>"*"</code> or <code>"X"</code>.
+Represents the type of tabular environment to use: either <code>tabular</code>, <code>tabular*</code> or <code>tabularx</code>.</p></dd>
 
 
 <dt>depvar.style</dt>
-<dd><p>Character scalar equal to either <code>" "</code> (default), <code>"*"</code> (italic), <code>"**"</code> (bold), <code>"***"</code> (italic-bold). How the name of the dependent variable should be displayed.</p></dd>
+<dd><p>Character scalar equal to either <code>" "</code> (default), <code>"*"</code> (italic), <code>"**"</code>
+(bold), <code>"***"</code> (italic-bold). How the name of the dependent variable should be displayed.</p></dd>
 
 
 <dt>no_border</dt>
@@ -199,39 +250,64 @@
 
 
 <dt>caption.after</dt>
-<dd><p>Character scalar. Tex code that will be placed right after the caption. Defaults to <code>""</code> for <code>main = "base"</code> and <code>"\\medskip"</code> for <code>main = "aer"</code>.</p></dd>
+<dd><p>Character scalar. Tex code that will be placed right after the caption.
+Defaults to <code>""</code> for <code>main = "base"</code> and <code>"\\medskip"</code> for <code>main = "aer"</code>.</p></dd>
 
 
 <dt>rules_width</dt>
-<dd><p>Character vector of length 1 or 2. This vector gives the width of the <code>booktabs</code> rules: the first element the heavy-width, the second element the light-width. NA values mean no modification. If of length 1, only the heavy rules are modified. The width are in Latex units (ex: <code>"0.1 em"</code>, etc).</p></dd>
+<dd><p>Character vector of length 1 or 2. This vector gives the width of the
+<code>booktabs</code> rules: the first element the heavy-width, the second element the light-width. NA
+values mean no modification. If of length 1, only the heavy rules are modified. The width are in
+Latex units (ex: <code>"0.1 em"</code>, etc).</p></dd>
 
 
 <dt>signif.code</dt>
-<dd><p>Named numeric vector, used to provide the significance codes with respect to the p-value of the coefficients. Default is <code>c("***"=0.01, "**"=0.05, "*"=0.10)</code>. To suppress the significance codes, use <code>signif.code=NA</code> or <code>signif.code=NULL</code>. Can also be equal to <code>"letters"</code>, then the default becomes <code>c("a"=0.01, "b"=0.05, "c"=0.10)</code>.</p></dd>
+<dd><p>Named numeric vector, used to provide the significance codes with respect to
+the p-value of the coefficients. Default is <code>c("***"=0.01, "**"=0.05, "*"=0.10)</code>. To suppress
+the significance codes, use <code>signif.code=NA</code> or <code>signif.code=NULL</code>. Can also be equal to
+<code>"letters"</code>, then the default becomes <code>c("a"=0.01, "b"=0.05, "c"=0.10)</code>.</p></dd>
 
 
 <dt>tpt</dt>
-<dd><p>(Tex only.) Logical scalar, default is FALSE. Whether to use the <code>threeparttable</code> environment. If so, the <code>notes</code> will be integrated into the <code>tablenotes</code> environment.</p></dd>
+<dd><p>(Tex only.) Logical scalar, default is FALSE. Whether to use the <code>threeparttable</code>
+environment. If so, the <code>notes</code> will be integrated into the <code>tablenotes</code> environment.</p></dd>
 
 
 <dt>arraystretch</dt>
-<dd><p>(Tex only.) A numeric scalar, default is <code>NULL</code>. If provided, the command <code>\\renewcommand*{\\arraystretch{x}}</code> is inserted, replacing <code>x</code> by the value of <code>arraystretch</code>. The changes are specific to the current table and do not affect the rest of the document.</p></dd>
+<dd><p>(Tex only.) A numeric scalar, default is <code>NULL</code>. If provided,
+the command <code>\\renewcommand*{\\arraystretch{x}}</code> is inserted, replacing <code>x</code> by the value of
+<code>arraystretch</code>. The changes are specific to the current table and do not affect the rest of the
+document.</p></dd>
 
 
 <dt>adjustbox</dt>
-<dd><p>(Tex only.) A logical, numeric or character scalar, default is <code>NULL</code>. If not <code>NULL</code>, the table is inserted within the <code>adjustbox</code> environment. By default the options are <code>width = 1\\textwidth, center</code> (if <code>TRUE</code>). A numeric value changes the value before <code>\\textwidth</code>. You can also add a character of the form <code>"x tw"</code> or <code>"x th"</code> with <code>x</code> a number and where tw (th) stands for text-width (text-height). Finally any other character value is passed verbatim as an <code>adjustbox</code> option.</p></dd>
+<dd><p>(Tex only.) A logical, numeric or character scalar, default is <code>NULL</code>. If not
+<code>NULL</code>, the table is inserted within the <code>adjustbox</code> environment. By default the options are
+<code>width = 1\\textwidth, center</code> (if <code>TRUE</code>). A numeric value changes the value before
+<code>\\textwidth</code>. You can also add a character of the form <code>"x tw"</code> or <code>"x th"</code> with <code>x</code> a number
+and where tw (th) stands for text-width (text-height). Finally any other character value is
+passed verbatim as an <code>adjustbox</code> option.</p></dd>
 
 
 <dt>fontsize</dt>
-<dd><p>(Tex only.) A character scalar, default is <code>NULL</code>. Can be equal to <code>tiny</code>, <code>scriptsize</code>, <code>footnotesize</code>, <code>small</code>, <code>normalsize</code>, <code>large</code>, or <code>Large</code>. The change affect the table only (and not the rest of the document).</p></dd>
+<dd><p>(Tex only.) A character scalar, default is <code>NULL</code>. Can be equal to <code>tiny</code>,
+<code>scriptsize</code>, <code>footnotesize</code>, <code>small</code>, <code>normalsize</code>, <code>large</code>, or <code>Large</code>. The change affect the
+table only (and not the rest of the document).</p></dd>
 
 
 <dt>interaction.combine</dt>
-<dd><p>Character scalar, defaults to <code>" $\\times$ "</code>. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if <code>dict = c(x1="Wind", x2="Rain")</code> and you have the following interaction <code>x1:x2</code>, then it will be renamed (by default) <code>Wind $\\times$ Rain</code> -- using <code>interaction.combine = "*"</code> would lead to <code>Wind*Rain</code>.</p></dd>
+<dd><p>Character scalar, defaults to <code>" $\\times$ "</code>. When the estimation
+contains interactions, then the variables names (after aliasing) are combined with this
+argument. For example: if <code>dict = c(x1="Wind", x2="Rain")</code> and you have the following
+interaction <code>x1:x2</code>, then it will be renamed (by default) <code>Wind $\\times$ Rain</code> -- using
+<code>interaction.combine = "*"</code> would lead to <code>Wind*Rain</code>.</p></dd>
 
 
 <dt>i.equal</dt>
-<dd><p>Character scalar, defaults to <code>" $=$ "</code>. Only affects factor variables created with the function <code><a href="i.html">i</a></code>, tells how the variable should be linked to its value. For example if you have the Species factor from the iris data set, by default the display of the variable is <code>Species $=$ Setosa</code>, etc. If <code>i.equal = ": "</code> the display becomes <code>Species: Setosa</code>.</p></dd>
+<dd><p>Character scalar, defaults to <code>" $=$ "</code>. Only affects factor variables created
+with the function <code><a href="i.html">i</a></code>, tells how the variable should be linked to its value. For example if
+you have the Species factor from the iris data set, by default the display of the variable is
+<code>Species $=$ Setosa</code>, etc. If <code>i.equal = ": "</code> the display becomes <code>Species: Setosa</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -242,9 +318,13 @@
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The <code>\\checkmark</code> command, used in the "aer" style (in argument <code>yesNo</code>), is in the <code>amssymb</code> package.</p>
-<p>The commands <code>\\toprule</code>, <code>\\midrule</code> and <code>\\bottomrule</code> are in the <code>booktabs</code> package. You can set the width of the top/bottom rules with <code>\\setlength\\heavyrulewidth\{wd\}</code>, and of the midrule with <code>\\setlength\\lightrulewidth\{wd\}</code>.</p>
-<p>Note that all titles (<code>depvar.title</code>, <code>depvar.title</code>, etc) are not escaped, so they must be valid Latex expressions.</p>
+    <p>The <code>\\checkmark</code> command, used in the "aer" style (in argument <code>yesNo</code>), is in the
+<code>amssymb</code> package.</p>
+<p>The commands <code>\\toprule</code>, <code>\\midrule</code> and <code>\\bottomrule</code> are in the <code>booktabs</code> package.
+You can set the width of the top/bottom rules with <code>\\setlength\\heavyrulewidth\{wd\}</code>,
+and of the midrule with <code>\\setlength\\lightrulewidth\{wd\}</code>.</p>
+<p>Note that all titles (<code>depvar.title</code>, <code>depvar.title</code>, etc) are not escaped, so they
+must be valid Latex expressions.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

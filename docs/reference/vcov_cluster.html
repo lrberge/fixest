@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,7 +63,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vcov_cluster</span><span class="op">(</span><span class="va">x</span>, cluster <span class="op">=</span> <span class="cn">NULL</span>, ssc <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vcov_cluster</span><span class="op">(</span><span class="va">x</span>, cluster <span class="op">=</span> <span class="cn">NULL</span>, ssc <span class="op">=</span> <span class="cn">NULL</span>, vcov_fix <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -78,6 +78,10 @@
 
 <dt>ssc</dt>
 <dd><p>An object returned by the function <code><a href="ssc.html">ssc</a></code>. It specifies how to perform the small sample correction.</p></dd>
+
+
+<dt>vcov_fix</dt>
+<dd><p>Logical scalar, default is <code>TRUE</code>. If the VCOV ends up not being positive definite, whether to "fix" it using an eigenvalue decomposition (a la Cameron, Gelbach &amp; Miller 2011).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -132,7 +136,7 @@
 <span class="r-in"><span><span class="co"># per se: pretty useless...</span></span></span>
 <span class="r-in"><span><span class="fu">vcov_cluster</span><span class="op">(</span><span class="op">~</span><span class="va">species</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ~species</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001b1573fe218&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001cdb9de6920&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># ...but VCOV-requests can be used at estimation time:</span></span></span>
 <span class="r-in"><span><span class="co"># it may be more explicit than...</span></span></span>

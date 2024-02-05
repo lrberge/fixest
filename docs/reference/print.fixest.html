@@ -16,7 +16,7 @@ function setFixest_print)."><!-- mathjax --><script src="https://cdnjs.cloudflar
     
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -59,7 +59,7 @@ function setFixest_print)."><!-- mathjax --><script src="https://cdnjs.cloudflar
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>A print facility for <code>fixest</code> objects.</h1>
-      <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/Methods.R" class="external-link"><code>R/Methods.R</code></a>, <a href="https://github.com/lrberge/fixest/blob/HEAD/R/MiscFuns.R" class="external-link"><code>R/MiscFuns.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/methods.R" class="external-link"><code>R/methods.R</code></a>, <a href="https://github.com/lrberge/fixest/blob/HEAD/R/miscfuns.R" class="external-link"><code>R/miscfuns.R</code></a></small>
       <div class="d-none name"><code>print.fixest.Rd</code></div>
     </div>
 
@@ -105,7 +105,8 @@ statistic to display. The types must be valid types of the function
 <code><a href="fitstat.html">fitstat</a></code>. The default fit statistics depend on the
 type of estimation (OLS, GLM, IV, with/without fixed-effect). Providing the
 argument <code>fitstat</code> overrides the default fit statistics, you can
-however use the point "." to summon them back. Ex 1: <code>fitstat = ~ . + ll</code> adds the log-likelihood to the default values. Ex 2: <code>fitstat = ~ ll + pr2</code> only displays the log-likelihood and the pseudo-R2.</p></dd>
+however use the point "." to summon them back. Ex 1: <code>fitstat = ~ . + ll</code> adds the log-likelihood
+to the default values. Ex 2: <code>fitstat = ~ ll + pr2</code> only displays the log-likelihood and the pseudo-R2.</p></dd>
 
 
 <dt>...</dt>
@@ -148,7 +149,7 @@ visualize the results of multiple estimations.</p></div>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 38,325 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-effects: Origin: 15,  Destination: 15,  Product: 20</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Clustered (Origin) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  t value  Pr(&gt;|t|)    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  z value  Pr(&gt;|z|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km) -1.52775   0.115627 -13.2127 &lt; 2.2e-16 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
@@ -179,7 +180,7 @@ visualize the results of multiple estimations.</p></div>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 38,325 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-effects: Origin: 15,  Destination: 15,  Product: 20</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Clustered (Origin) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  t value  Pr(&gt;|t|)    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  z value  Pr(&gt;|z|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km) -1.52775   0.115627 -13.2127 &lt; 2.2e-16 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
@@ -195,7 +196,7 @@ visualize the results of multiple estimations.</p></div>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 38,325 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-effects: Origin: 15,  Destination: 15,  Product: 20</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Clustered (Origin) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  t value  Pr(&gt;|t|)    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  z value  Pr(&gt;|z|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km) -1.52775   0.115627 -13.2127 &lt; 2.2e-16 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
@@ -210,7 +211,7 @@ visualize the results of multiple estimations.</p></div>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 38,325 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-effects: Origin: 15,  Destination: 15,  Product: 20</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Clustered (Origin) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  t value  Pr(&gt;|t|)    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  z value  Pr(&gt;|z|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km) -1.52775   0.115627 -13.2127 &lt; 2.2e-16 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>

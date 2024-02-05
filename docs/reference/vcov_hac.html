@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,7 +53,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>HAC VCOVs</h1>
-      <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/VCOV.R" class="external-link"><code>R/VCOV.R</code></a>, <a href="https://github.com/lrberge/fixest/blob/HEAD/R/VCOV_aliases.R" class="external-link"><code>R/VCOV_aliases.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/VCOV.R" class="external-link"><code>R/VCOV.R</code></a>, <a href="https://github.com/lrberge/fixest/blob/HEAD/R/alias_VCOV.R" class="external-link"><code>R/alias_VCOV.R</code></a></small>
       <div class="d-none name"><code>vcov_hac.Rd</code></div>
     </div>
 
@@ -63,9 +63,9 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vcov_DK</span><span class="op">(</span><span class="va">x</span>, time <span class="op">=</span> <span class="cn">NULL</span>, lag <span class="op">=</span> <span class="cn">NULL</span>, ssc <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vcov_DK</span><span class="op">(</span><span class="va">x</span>, time <span class="op">=</span> <span class="cn">NULL</span>, lag <span class="op">=</span> <span class="cn">NULL</span>, ssc <span class="op">=</span> <span class="cn">NULL</span>, vcov_fix <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">vcov_NW</span><span class="op">(</span><span class="va">x</span>, unit <span class="op">=</span> <span class="cn">NULL</span>, time <span class="op">=</span> <span class="cn">NULL</span>, lag <span class="op">=</span> <span class="cn">NULL</span>, ssc <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="fu">vcov_NW</span><span class="op">(</span><span class="va">x</span>, unit <span class="op">=</span> <span class="cn">NULL</span>, time <span class="op">=</span> <span class="cn">NULL</span>, lag <span class="op">=</span> <span class="cn">NULL</span>, ssc <span class="op">=</span> <span class="cn">NULL</span>, vcov_fix <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">NW</span><span class="op">(</span>lag <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
@@ -92,6 +92,10 @@
 
 <dt>ssc</dt>
 <dd><p>An object returned by the function <code><a href="ssc.html">ssc</a></code>. It specifies how to perform the small sample correction.</p></dd>
+
+
+<dt>vcov_fix</dt>
+<dd><p>Logical scalar, default is <code>TRUE</code>. If the VCOV ends up not being positive definite, whether to "fix" it using an eigenvalue decomposition (a la Cameron, Gelbach &amp; Miller 2011).</p></dd>
 
 
 <dt>unit</dt>

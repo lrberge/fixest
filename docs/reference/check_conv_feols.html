@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,7 +53,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Check the fixed-effects convergence of a <code>feols</code> estimation</h1>
-      <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/MiscFuns.R" class="external-link"><code>R/MiscFuns.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/miscfuns.R" class="external-link"><code>R/miscfuns.R</code></a></small>
       <div class="d-none name"><code>check_conv_feols.Rd</code></div>
     </div>
 
@@ -80,19 +80,24 @@
 
 
 <dt>type</dt>
-<dd><p>Either "short" (default) or "detail". If "short", only the maximum absolute FOC are displayed, otherwise the 2 smallest and the 2 largest FOC are reported for each fixed-effect and each variable.</p></dd>
+<dd><p>Either "short" (default) or "detail". If "short", only the maximum absolute FOC are
+displayed, otherwise the 2 smallest and the 2 largest FOC are reported for each fixed-effect and
+each variable.</p></dd>
 
 
 <dt>...</dt>
 <dd><p>Not currently used.</p>
-<p>Note that this function first re-demeans the variables, thus possibly incurring some extra computation time.</p></dd>
+<p>Note that this function first re-demeans the variables, thus possibly incurring some extra
+computation time.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>It returns a list of <code>N</code> elements, <code>N</code> being the number of variables in the estimation (dependent variable + explanatory variables +, if IV, endogenous variables and instruments). For each variable, all the first-order conditions for each fixed-effect are returned.</p>
+<p>It returns a list of <code>N</code> elements, <code>N</code> being the number of variables in the estimation
+(dependent variable + explanatory variables +, if IV, endogenous variables and instruments). For
+each variable, all the first-order conditions for each fixed-effect are returned.</p>
     </div>
 
     <div class="section level2">

@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -86,67 +86,95 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>depvar.title</dt>
-<dd><p>Character scalar. Default is <code>"Dependent Var.:"</code>. The row name of the dependent variables.</p></dd>
+<dd><p>Character scalar. Default is <code>"Dependent Var.:"</code>.
+The row name of the dependent variables.</p></dd>
 
 
 <dt>fixef.title</dt>
-<dd><p>Character scalar. Default is <code>"Fixed-Effects:"</code>. The header preceding the fixed-effects. If equal to the empty string, then this line is removed.</p></dd>
+<dd><p>Character scalar. Default is <code>"Fixed-Effects:"</code>. The header preceding the
+fixed-effects. If equal to the empty string, then this line is removed.</p></dd>
 
 
 <dt>fixef.line</dt>
-<dd><p>A single character. Default is <code>"-"</code>. A character that will be used to create a line of separation for the fixed-effects header. Used only if <code>fixef.title</code> is not the empty string.</p></dd>
+<dd><p>A single character. Default is <code>"-"</code>. A character that will be used to create
+a line of separation for the fixed-effects header. Used only if <code>fixef.title</code> is not the empty
+string.</p></dd>
 
 
 <dt>fixef.prefix</dt>
-<dd><p>Character scalar. Default is <code>""</code>. A prefix to appear before each fixed-effect name.</p></dd>
+<dd><p>Character scalar. Default is <code>""</code>. A prefix to appear
+before each fixed-effect name.</p></dd>
 
 
 <dt>fixef.suffix</dt>
-<dd><p>Character scalar. Default is <code>""</code>. A suffix to appear after each fixed-effect name.</p></dd>
+<dd><p>Character scalar. Default is <code>""</code>. A suffix to appear
+after each fixed-effect name.</p></dd>
 
 
 <dt>slopes.title</dt>
-<dd><p>Character scalar. Default is <code>"Varying Slopes:"</code>. The header preceding the variables with varying slopes. If equal to the empty string, then this line is removed.</p></dd>
+<dd><p>Character scalar. Default is <code>"Varying Slopes:"</code>. The header preceding the
+variables with varying slopes. If equal to the empty string, then this line is removed.</p></dd>
 
 
 <dt>slopes.line</dt>
-<dd><p>Character scalar. Default is <code>"-"</code>. A character that will be used to create a line of separation for the variables with varying slopes header. Used only if <code>slopes.line</code> is not the empty string.</p></dd>
+<dd><p>Character scalar. Default is <code>"-"</code>. A character that will be used to create a
+line of separation for the variables with varying slopes header. Used only if <code>slopes.line</code> is
+not the empty string.</p></dd>
 
 
 <dt>slopes.format</dt>
-<dd><p>Character scalar. Default is <code>"__var__ (__slope__)"</code>. The format of the name of the varying slopes. The values <code>__var__</code> and <code>__slope__</code> are special characters that will be replaced by the value of the variable name and slope name, respectively.</p></dd>
+<dd><p>Character scalar. Default is <code>"__var__ (__slope__)"</code>. The format of the
+name of the varying slopes. The values <code>__var__</code> and <code>__slope__</code> are special characters that
+will be replaced by the value of the variable name and slope name, respectively.</p></dd>
 
 
 <dt>stats.title</dt>
-<dd><p>Character scalar. Default is <code>"_"</code>. The header preceding the statistics section. If equal to the empty string, then this line is removed. If equal to single character (like in the default), then this character will be expanded to take the full column width.</p></dd>
+<dd><p>Character scalar. Default is <code>"_"</code>. The header preceding the statistics
+section. If equal to the empty string, then this line is removed. If equal to single character
+(like in the default), then this character will be expanded to take the full column width.</p></dd>
 
 
 <dt>stats.line</dt>
-<dd><p>Character scalar. Default is <code>"_"</code>. A character that will be used to create a line of separation for the statistics header. Used only if <code>stats.title</code> is not the empty string.</p></dd>
+<dd><p>Character scalar. Default is <code>"_"</code>. A character that will be used to create a
+line of separation for the statistics header. Used only if <code>stats.title</code> is not the empty string.</p></dd>
 
 
 <dt>yesNo</dt>
-<dd><p>Character vector of length 1 or 2. Default is <code>c("Yes", "No")</code>. Used to inform on the presence or absence of fixed-effects in the estimation. If of length 1, then automatically the second value is considered as the empty string.</p></dd>
+<dd><p>Character vector of length 1 or 2. Default is <code>c("Yes", "No")</code>. Used to inform on
+the presence or absence of fixed-effects in the estimation. If of length 1, then automatically
+the second value is considered as the empty string.</p></dd>
 
 
 <dt>headers.sep</dt>
-<dd><p>Logical, default is <code>TRUE</code>. Whether to add a line of separation between the headers and the coefficients.</p></dd>
+<dd><p>Logical, default is <code>TRUE</code>. Whether to add a line of separation between the
+headers and the coefficients.</p></dd>
 
 
 <dt>signif.code</dt>
-<dd><p>Named numeric vector, used to provide the significance codes with respect to the p-value of the coefficients. Default is <code>c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)</code>. To suppress the significance codes, use <code>signif.code=NA</code> or <code>signif.code=NULL</code>. Can also be equal to <code>"letters"</code>, then the default becomes <code>c("a"=0.01, "b"=0.05, "c"=0.10)</code>.</p></dd>
+<dd><p>Named numeric vector, used to provide the significance codes with respect to
+the p-value of the coefficients. Default is <code>c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)</code>. To
+suppress the significance codes, use <code>signif.code=NA</code> or <code>signif.code=NULL</code>. Can also be equal
+to <code>"letters"</code>, then the default becomes <code>c("a"=0.01, "b"=0.05, "c"=0.10)</code>.</p></dd>
 
 
 <dt>interaction.combine</dt>
-<dd><p>Character scalar, defaults to <code>" x "</code>. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if <code>dict = c(x1="Wind", x2="Rain")</code> and you have the following interaction <code>x1:x2</code>, then it will be renamed (by default) <code>Wind x Rain</code> -- using <code>interaction.combine = "*"</code> would lead to <code>Wind*Rain</code>.</p></dd>
+<dd><p>Character scalar, defaults to <code>" x "</code>. When the estimation contains
+interactions, then the variables names (after aliasing) are combined with this argument. For
+example: if <code>dict = c(x1="Wind", x2="Rain")</code> and you have the following interaction <code>x1:x2</code>,
+then it will be renamed (by default) <code>Wind x Rain</code> -- using <code>interaction.combine = "*"</code> would
+lead to <code>Wind*Rain</code>.</p></dd>
 
 
 <dt>i.equal</dt>
-<dd><p>Character scalar, defaults to <code>" = "</code>. Only affects factor variables created with the function <code><a href="i.html">i</a></code>, tells how the variable should be linked to its value. For example if you have the Species factor from the iris data set, by default the display of the variable is <code>Species = Setosa</code>, etc. If <code>i.equal = ": "</code> the display becomes <code>Species: Setosa</code>.</p></dd>
+<dd><p>Character scalar, defaults to <code>" = "</code>. Only affects factor variables created with
+the function <code><a href="i.html">i</a></code>, tells how the variable should be linked to its value. For example if you
+have the Species factor from the iris data set, by default the display of the variable is
+<code>Species = Setosa</code>, etc. If <code>i.equal = ": "</code> the display becomes <code>Species: Setosa</code>.</p></dd>
 
 
 <dt>default</dt>
-<dd><p>Logical, default is <code>FALSE</code>. If <code>TRUE</code>, all the values not provided by the user are set to their default.</p></dd>
+<dd><p>Logical, default is <code>FALSE</code>. If <code>TRUE</code>, all the values not provided by the user
+are set to their default.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -158,7 +186,9 @@
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>@inheritParams etable</p>
-<p>The title elements (<code>depvar.title</code>, <code>fixef.title</code>, <code>slopes.title</code> and <code>stats.title</code>) will be the row names of the returned data.frame. Therefore keep in mind that any two of them should not be identical (since identical row names are forbidden in data.frames).</p>
+<p>The title elements (<code>depvar.title</code>, <code>fixef.title</code>, <code>slopes.title</code> and <code>stats.title</code>) will be the
+row names of the returned data.frame. Therefore keep in mind that any two of them should not be
+identical (since identical row names are forbidden in data.frames).</p>
     </div>
 
     <div class="section level2">

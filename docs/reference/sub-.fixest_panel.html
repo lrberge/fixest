@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,12 +53,12 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Method to subselect from a <code>fixest_panel</code></h1>
-      <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/Lagging.R" class="external-link"><code>R/Lagging.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/panel.R" class="external-link"><code>R/panel.R</code></a></small>
       <div class="d-none name"><code>sub-.fixest_panel.Rd</code></div>
     </div>
 
     <div class="ref-description section level2">
-    <p>Subselection from a <code>fixest_panel</code> which has been created with the function <code><a href="panel.html">panel</a></code>. Also allows to create lag/lead variables with functions <code><a href="l.html">l</a></code>/<code><a href="l.html">f</a></code> if the <code>fixest_panel</code> is also a <code><a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table</a></code>.</p>
+    <p>Subselection from a <code>fixest_panel</code> which has been created with the function <code><a href="panel.html">panel</a></code>. Also allows to create lag/lead variables with functions <code><a href="l.html">l</a></code>/<code><a href="l.html">f</a></code> if the <code>fixest_panel</code> is also a <code><a href="https://rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table</a></code>.</p>
     </div>
 
     <div class="section level2">
@@ -74,15 +74,15 @@
 
 
 <dt>i</dt>
-<dd><p>Row subselection. Allows <code><a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table</a></code> style selection (provided the data is also a data.table).</p></dd>
+<dd><p>Row subselection. Allows <code><a href="https://rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table</a></code> style selection (provided the data is also a data.table).</p></dd>
 
 
 <dt>j</dt>
-<dd><p>Variable selection. Allows <code><a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table</a></code> style selection/variable creation (provided the data is also a data.table).</p></dd>
+<dd><p>Variable selection. Allows <code><a href="https://rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table</a></code> style selection/variable creation (provided the data is also a data.table).</p></dd>
 
 
 <dt>...</dt>
-<dd><p>Other arguments to be passed to <code>[.data.frame</code> or <code><a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table</a></code> (or whatever the class of the initial data).</p></dd>
+<dd><p>Other arguments to be passed to <code>[.data.frame</code> or <code><a href="https://rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table</a></code> (or whatever the class of the initial data).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -139,7 +139,7 @@
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Using data.table to create new lead/lag variables</span></span></span>
 <span class="r-in"><span><span class="kw">if</span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st"><a href="https://r-datatable.com" class="external-link">"data.table"</a></span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span></span>
-<span class="r-in"><span>  <span class="va">pdat_dt</span> <span class="op">=</span> <span class="fu"><a href="panel.html">panel</a></span><span class="op">(</span><span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="va">base_did</span><span class="op">)</span>, <span class="op">~</span><span class="va">id</span><span class="op">+</span><span class="va">period</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">pdat_dt</span> <span class="op">=</span> <span class="fu"><a href="panel.html">panel</a></span><span class="op">(</span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="va">base_did</span><span class="op">)</span>, <span class="op">~</span><span class="va">id</span><span class="op">+</span><span class="va">period</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># Variable creation</span></span></span>
 <span class="r-in"><span>  <span class="va">pdat_dt</span><span class="op">[</span>, <span class="va">x_l1</span> <span class="op">:=</span> <span class="fu"><a href="l.html">l</a></span><span class="op">(</span><span class="va">x1</span><span class="op">)</span><span class="op">]</span></span></span>

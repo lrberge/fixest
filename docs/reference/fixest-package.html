@@ -16,7 +16,7 @@ To get started, look at the introduction.
     
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -71,14 +71,14 @@ To get started, look at the introduction.
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The main features are:</p><ul><li><p>Estimation. The core functions are: <code><a href="feols.html">feols</a></code>, <code><a href="feglm.html">feglm</a></code> and <code><a href="femlm.html">femlm</a></code> to estimate, respectively, linear models, generalized linear models and maximum likelihood models with multiple fixed-effects. The function <code><a href="feNmlm.html">feNmlm</a></code> allows the inclusion of non-linear in parameters right hand sides. Finally <code><a href="feglm.html">fepois</a></code> and <code><a href="femlm.html">fenegbin</a></code> are shorthands to estimate Poisson and Negative Binomial models.</p></li>
-<li><p>Multiple estimationsYou can perform multiple estimations at once with the <code><a href="stepwise.html">stepwise</a></code> functions. It's then very easy to manipulate multiple results with the associated methods. See an introduction in the dedicated vignette: <a href="https://cran.r-project.org/package=fixest/vignettes/multiple_estimations.html" class="external-link">Multiple estimations</a></p></li>
+<li><p>Multiple estimations: You can perform multiple estimations at once with the <code><a href="stepwise.html">stepwise</a></code> functions. It's then very easy to manipulate multiple results with the associated methods. See an introduction in the dedicated vignette: <a href="https://cran.r-project.org/package=fixest/vignettes/multiple_estimations.html" class="external-link">Multiple estimations</a></p></li>
 <li><p>Easy and flexible clustering of standard-errors. By using the arguments <code>vcov</code> and <code>ssc</code> (see <code><a href="summary.fixest.html">summary.fixest</a></code>). To have a sense of how the standard errors are computed, see the vignette <a href="https://lrberge.github.io/fixest/articles/standard_errors.html">On standard-errors</a>.</p></li>
 <li><p>Visualization and exportation of results. You can visualize the results of multiple estimations in R, or export them in Latex using the function <code><a href="etable.html">etable</a></code>. This vignette details how to customize the Latex tables: <a href="https://lrberge.github.io/fixest/articles/exporting_tables.html">Exporting estimation tables</a>.</p></li>
 <li><p>Plot multiple results. You can plot the coefficients and confidence intervals of estimations easily with the function <code><a href="coefplot.html">coefplot</a></code>. This function also offers a specific layout for interactions.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (<a href="https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13" class="external-link"></a>).</p>
+    <p>Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (<a href="https://github.com/lrberge/fixest/blob/master/_DOCS/FENmlm_paper.pdf" class="external-link"></a>).</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

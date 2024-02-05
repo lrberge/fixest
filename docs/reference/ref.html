@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -107,8 +107,7 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
     
 
 
-<p>The functions <code><a href="bin.html">bin</a></code> and <code>ref</code> are able to do the same thing, then why use one instead of the other? Here are the differences:</p>
-<ul><li><p><code>ref</code> always returns a factor. This is in contrast with <code>bin</code> which returns, when possible, a vector of the same type as the vector in input.</p></li>
+<p>The functions <code><a href="bin.html">bin</a></code> and <code>ref</code> are able to do the same thing, then why use one instead of the other? Here are the differences:</p><ul><li><p><code>ref</code> always returns a factor. This is in contrast with <code>bin</code> which returns, when possible, a vector of the same type as the vector in input.</p></li>
 <li><p><code>ref</code> always places the values modified in the first place of the factor levels. On the other hand, <code>bin</code> tries to not modify the ordering of the levels. It is possible to make <code>bin</code> mimic the behavior of <code>ref</code> by adding an <code>"@"</code> as the first element of the list in the argument <code>bin</code>.</p></li>
 <li><p>when a vector (and not a list) is given in input, <code>ref</code> will place each element of the vector in the first place of the factor levels. The behavior of <code>bin</code> is totally different, <code>bin</code> will transform all the values in the vector into a single value in <code>x</code> (i.e. it's binning).</p></li>
 </ul></div>

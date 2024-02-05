@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,7 +53,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Lags a variable using a formula</h1>
-      <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/Lagging.R" class="external-link"><code>R/Lagging.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/panel.R" class="external-link"><code>R/panel.R</code></a></small>
       <div class="d-none name"><code>lag.formula.Rd</code></div>
     </div>
 
@@ -172,10 +172,10 @@
 <span class="r-in"><span><span class="co"># Error because of duplicate values for (id, time)</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">x</span><span class="op">~</span><span class="va">id</span><span class="op">+</span><span class="va">time</span>, <span class="fl">1</span>, <span class="va">base_dup</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Error : in lag.formula(x ~ id + time, 1, base_dup): </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> The panel identifiers contain duplicate values: this is not allowed</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> since lag/leads are not defined for them. For example (id, time) = (1,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1) appears three times. Please provide data without duplicates -- or you</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> can also use duplicate.method = 'first' (see Details).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> The panel identifiers contain duplicate values: this is not allowed since</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> lag/leads are not defined for them. For example (id, time) = (1, 1) appears</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> three times. Please provide data without duplicates -- or you can also use</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> duplicate.method = 'first' (see Details).</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Error is bypassed, lag corresponds to first occurence of (id, time)</span></span></span>
@@ -195,9 +195,8 @@
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">x</span><span class="op">~</span><span class="va">id</span><span class="op">+</span><span class="va">time</span>, <span class="fl">2</span>, <span class="va">base</span>, time.step <span class="op">=</span> <span class="fl">7</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Error : in lag.formula(x ~ id + time, 2, base, time.step = 7): </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> If 'time.step' is a number, then it must be an exact divisor of all the</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> difference between two consecutive time periods. This is currently not</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> the case: 7 is not a divisor of 1 (the difference btw the time periods 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> and 1).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> difference between two consecutive time periods. This is currently not the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> case: 7 is not a divisor of 1 (the difference btw the time periods 2 and 1).</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Adding NAs + unsorted IDs</span></span></span>
 <span class="r-in"><span><span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, each <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>,</span></span>
@@ -220,7 +219,7 @@
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># You can create variables without specifying the data within data.table:</span></span></span>
 <span class="r-in"><span><span class="kw">if</span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st"><a href="https://r-datatable.com" class="external-link">"data.table"</a></span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span></span>
-<span class="r-in"><span>  <span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a></span><span class="op">(</span>id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, each <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>, year <span class="op">=</span> <span class="fl">1990</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">2</span><span class="op">)</span>, x <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a></span><span class="op">(</span>id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, each <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>, year <span class="op">=</span> <span class="fl">1990</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">2</span><span class="op">)</span>, x <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">base</span><span class="op">[</span>, <span class="va">x.l1</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/stats/lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">x</span><span class="op">~</span><span class="va">id</span><span class="op">+</span><span class="va">year</span>, <span class="fl">1</span><span class="op">)</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    id year x x.l1</span>

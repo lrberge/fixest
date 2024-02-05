@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,6 +56,28 @@
       <small>Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.11.3" id="fixest-0113">fixest 0.11.3<a class="anchor" aria-label="anchor" href="#fixest-0113"></a></h2>
+<div class="section level3">
+<h3 id="bugs-0-11-3">Bugs<a class="anchor" aria-label="anchor" href="#bugs-0-11-3"></a></h3>
+<ul><li>fix bug when the covariance matrix was <em>very</em> ill-defined. Thanks to Gianluca Russo.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="improvements-0-11-3">Improvements<a class="anchor" aria-label="anchor" href="#improvements-0-11-3"></a></h3>
+<ul><li>functions <code>vcov</code> gains the argument <code>vcov_fix</code> to monitor whether to fix the covariance matrix with an eigenvalue decomposition (previously this was always turned on).</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.11.2" id="fixest-0112">fixest 0.11.2<a class="anchor" aria-label="anchor" href="#fixest-0112"></a></h2><p class="text-muted">CRAN release: 2023-11-24</p>
+<div class="section level3">
+<h3 id="bugs-0-11-2">Bugs<a class="anchor" aria-label="anchor" href="#bugs-0-11-2"></a></h3>
+<ul><li><p>fix bug “t value” displaying in lieu of “z value”. Thanks to issue on <a href="https://github.com/easystats/parameters/issues/892" class="external-link">easystats/parameters </a><a href="https://github.com/lrberge/fixest/issues/892" class="external-link">#892</a>. Very ancient bug!</p></li>
+<li><p>fix bug in coefplot: now the confidence intervals use the Student t when appropriate (before that, only the Normal law was used). Thanks to Grant McDermott, <a href="https://github.com/lrberge/fixest/pull/408" class="external-link">#409</a></p></li>
+<li><p>fix broken links in documentation (to the fixest paper)</p></li>
+<li><p>fix bad documentation markup</p></li>
+<li><p>adapt to CRAN policy to remove multithreading when checking the package</p></li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.11.1" id="fixest-0111">fixest 0.11.1<a class="anchor" aria-label="anchor" href="#fixest-0111"></a></h2><p class="text-muted">CRAN release: 2023-01-10</p>
 <div class="section level3">
@@ -307,7 +329,7 @@
 </ul></div>
 <div class="section level3">
 <h3 id="other-0-10-4">Other<a class="anchor" aria-label="anchor" href="#other-0-10-4"></a></h3>
-<ul><li><p>added compatibility with <code>car::deltaMethod</code> following Grant McDermott’s suggestion.</p></li>
+<ul><li><p>added compatibility with <code><a href="https://rdrr.io/pkg/car/man/deltaMethod.html" class="external-link">car::deltaMethod</a></code> following Grant McDermott’s suggestion.</p></li>
 <li><p>new function <code>lag_fml</code> which is an alias to <code>lag.formula</code>. The latter being easily stomped by other function names from other packages.</p></li>
 </ul></div>
 </div>

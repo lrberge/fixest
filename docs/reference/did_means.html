@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,7 +53,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Treated and control sample descriptives</h1>
-      <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/MiscFuns.R" class="external-link"><code>R/MiscFuns.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/miscfuns.R" class="external-link"><code>R/miscfuns.R</code></a></small>
       <div class="d-none name"><code>did_means.Rd</code></div>
     </div>
 
@@ -86,7 +86,11 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>fml</dt>
-<dd><p>Either a formula of the type <code>var1 + ... + varN ~ treat</code> or <code>var1 + ... + varN ~ treat | post</code>. Either a data.frame/matrix containing all the variables for which the means are to be computed (they must be numeric of course). Both the treatment and the post variables must contain only exactly two values. You can use a point to select all the variables of the data set: <code>. ~ treat</code>.</p></dd>
+<dd><p>Either a formula of the type <code>var1 + ... + varN ~ treat</code> or
+<code>var1 + ... + varN ~ treat | post</code>. Either a data.frame/matrix containing
+all the variables for which the means are to be computed (they must be numeric of course).
+Both the treatment and the post variables must contain only exactly two values.
+You can use a point to select all the variables of the data set: <code>. ~ treat</code>.</p></dd>
 
 
 <dt>base</dt>
@@ -94,23 +98,32 @@
 
 
 <dt>treat_var</dt>
-<dd><p>Only if argument <code>fml</code> is <em>not</em> a formula. The vector identifying the treated and the control observations (the vector can be of any type but must contain only two possible values). Must be of the same length as the data.</p></dd>
+<dd><p>Only if argument <code>fml</code> is <em>not</em> a formula. The vector identifying
+the treated and the control observations (the vector can be of any type but must
+contain only two possible values). Must be of the same length as the data.</p></dd>
 
 
 <dt>post_var</dt>
-<dd><p>Only if argument <code>fml</code> is <em>not</em> a formula. The vector identifying the periods (pre/post) of the observations (the vector can be of any type but must contain only two possible values). The first value (in the sorted sense) of the vector is taken as the pre period. Must be of the same length as the data.</p></dd>
+<dd><p>Only if argument <code>fml</code> is <em>not</em> a formula. The vector identifying
+the periods (pre/post) of the observations (the vector can be of any type but
+must contain only two possible values). The first value (in the sorted sense)
+of the vector is taken as the pre period. Must be of the same length as the data.</p></dd>
 
 
 <dt>tex</dt>
-<dd><p>Should the result be displayed in Latex? Default is <code>FALSE</code>. Automatically set to <code>TRUE</code> if the table is to be saved in a file using the argument <code>file</code>.</p></dd>
+<dd><p>Should the result be displayed in Latex? Default is <code>FALSE</code>. Automatically
+set to <code>TRUE</code> if the table is to be saved in a file using the argument <code>file</code>.</p></dd>
 
 
 <dt>treat_dict</dt>
-<dd><p>A character vector of length two. What are the names of the treated and the control? This should be a dictionary: e.g. <code>c("1"="Treated", "0" = "Control")</code>.</p></dd>
+<dd><p>A character vector of length two. What are the names of the treated
+and the control? This should be a dictionary: e.g. <code>c("1"="Treated", "0" = "Control")</code>.</p></dd>
 
 
 <dt>dict</dt>
-<dd><p>A named character vector. A dictionary between the variables names and an alias. For instance <code>dict=c("x"="Inflation Rate")</code> would replace the variable name <code>x</code> by “Inflation Rate”.</p></dd>
+<dd><p>A named character vector. A dictionary between the variables names and an alias.
+For instance <code>dict=c("x"="Inflation Rate")</code> would replace the variable name <code>x</code>
+by “Inflation Rate”.</p></dd>
 
 
 <dt>file</dt>
@@ -118,7 +131,8 @@
 
 
 <dt>replace</dt>
-<dd><p>Default is <code>TRUE</code>, which means that when the table is exported, the existing file is not erased.</p></dd>
+<dd><p>Default is <code>TRUE</code>, which means that when the table is exported, the
+existing file is not erased.</p></dd>
 
 
 <dt>title</dt>
@@ -134,15 +148,20 @@
 
 
 <dt>indiv</dt>
-<dd><p>Either the variable name of individual identifiers, a one sided formula, or a vector. If the data is that of a panel, this can be used to track the number of individuals per group.</p></dd>
+<dd><p>Either the variable name of individual identifiers, a one sided formula,
+or a vector. If the data is that of a panel, this can be used to track the number
+of individuals per group.</p></dd>
 
 
 <dt>treat_first</dt>
-<dd><p>Which value of the 'treatment' vector should appear on the left? By default the max value appears first (e.g. if the treatment variable is a 0/1 vector, 1 appears first).</p></dd>
+<dd><p>Which value of the 'treatment' vector should appear on the left?
+By default the max value appears first (e.g. if the treatment variable is a 0/1 vector,
+1 appears first).</p></dd>
 
 
 <dt>prepostnames</dt>
-<dd><p>Only if there is a 'post' variable. The names of the pre and post periods to be displayed in Latex. Default is <code>c("Before", "After")</code>.</p></dd>
+<dd><p>Only if there is a 'post' variable. The names of the pre and post
+periods to be displayed in Latex. Default is <code>c("Before", "After")</code>.</p></dd>
 
 
 <dt>diff.inv</dt>

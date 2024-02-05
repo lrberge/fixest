@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,7 +53,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Transforms a character string into a dictionary</h1>
-      <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/MiscFuns.R" class="external-link"><code>R/MiscFuns.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/miscfuns.R" class="external-link"><code>R/miscfuns.R</code></a></small>
       <div class="d-none name"><code>as.dict.Rd</code></div>
     </div>
 
@@ -69,7 +69,13 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
-<dd><p>A character scalar of the form <code>"variable 1: definition \n variable 2: definition"</code> etc. Each line of this character must contain at most one definition with, on the left the variable name, and on the right its definition. The separation between the variable and its definition must be a colon followed with a single space (i.e. ": "). You can stack definitions within a single line by making use of a semi colon: <code>"var1: def; var2: def"</code>. White spaces on the left and right are ignored. You can add commented lines with a <code>"#"</code>. Non-empty, non-commented lines that don't have the proper format witll raise an error.</p></dd>
+<dd><p>A character scalar of the form <code>"variable 1: definition \n variable 2: definition"</code>
+etc. Each line of this character must contain at most one definition with, on the left the
+variable name, and on the right its definition. The separation between the variable and its
+definition must be a colon followed with a single space (i.e. ": "). You can stack definitions
+within a single line by making use of a semi colon: <code>"var1: def; var2: def"</code>. White spaces on
+the left and right are ignored. You can add commented lines with a <code>"#"</code>. Non-empty,
+non-commented lines that don't have the proper format witll raise an error.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -80,7 +86,8 @@
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>This function is mostly used in combination with <code><a href="setFixest_dict.html">setFixest_dict</a></code> to set the dictionary to be used in the function <code><a href="etable.html">etable</a></code>.</p>
+    <p>This function is mostly used in combination with <code><a href="setFixest_dict.html">setFixest_dict</a></code> to set the dictionary to be
+used in the function <code><a href="etable.html">etable</a></code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

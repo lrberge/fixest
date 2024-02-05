@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -94,11 +94,24 @@
 
 
 <p>In the formula, you can use the following special values: <code>"."</code>, <code>".N"</code>, <code>".U"</code>, and <code>".NA"</code>.</p>
-<ul><li><p><code>"."</code>Accesses the default values. If there is only one data set and the data set is <em>not</em> a <code>data.table</code>, then the default is to display the number of observations and the number of unique rows. If the data is a <code>data.table</code>, the number of unique items in the key(s) is displayed instead of the number of unique rows (if the table has keys of course). If there are two or more data sets, then the default is to display the unique items for: a) the variables common across all data sets, if there's less than 4, and b) if no variable is shown in a), the number of variables common across at least two data sets, provided there are less than 5. If the data sets are data tables, the keys are also displayed on top of the common variables. In any case, the number of observations is always displayed.</p></li>
-<li><p><code>".N"</code>Displays the number of observations.</p></li>
-<li><p><code>".U"</code>Displays the number of unique rows.</p></li>
-<li><p><code>".NA"</code>Displays the number of rows with at least one NA.</p></li>
-</ul></div>
+<dl><dt><code>"."</code></dt>
+<dd><p>Accesses the default values. If there is only one data set and the data set is <em>not</em> a <code>data.table</code>, then the default is to display the number of observations and the number of unique rows. If the data is a <code>data.table</code>, the number of unique items in the key(s) is displayed instead of the number of unique rows (if the table has keys of course). If there are two or more data sets, then the default is to display the unique items for: a) the variables common across all data sets, if there's less than 4, and b) if no variable is shown in a), the number of variables common across at least two data sets, provided there are less than 5. If the data sets are data tables, the keys are also displayed on top of the common variables. In any case, the number of observations is always displayed.</p></dd>
+
+
+<dt><code>".N"</code></dt>
+<dd><p>Displays the number of observations.</p></dd>
+
+
+<dt><code>".U"</code></dt>
+<dd><p>Displays the number of unique rows.</p></dd>
+
+
+<dt><code>".NA"</code></dt>
+<dd><p>Displays the number of rows with at least one NA.</p></dd>
+
+
+
+</dl></div>
     <div class="section level2">
     <h2 id="the-na-function">The <code>NA</code> function<a class="anchor" aria-label="anchor" href="#the-na-function"></a></h2>
     

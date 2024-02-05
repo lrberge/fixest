@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,7 +53,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Sets/gets the number of threads to use in <code>fixest</code> functions</h1>
-      <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/MiscFuns.R" class="external-link"><code>R/MiscFuns.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/miscfuns.R" class="external-link"><code>R/miscfuns.R</code></a></small>
       <div class="d-none name"><code>setFixest_nthreads.Rd</code></div>
     </div>
 
@@ -71,11 +71,19 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>nthreads</dt>
-<dd><p>The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. If missing, the default is to use 50% of all threads.</p></dd>
+<dd><p>The number of threads. Can be: a) an integer lower than, or equal to, the
+maximum number of threads; b) 0: meaning all available threads will be used; c) a number
+strictly between 0 and 1 which represents the fraction of all threads to use. If missing, the
+default is to use 50% of all threads.</p></dd>
 
 
 <dt>save</dt>
-<dd><p>Either a logical or equal to <code>"reset"</code>. Default is <code>FALSE</code>. If <code>TRUE</code> then the value is set permanently at the project level, this means that if you restart R, you will still obtain the previously saved defaults. This is done by writing in the <code>".Renviron"</code> file, located in the project's working directory, hence we must have write permission there for this to work, and only works with Rstudio. If equal to "reset", the default at the project level is erased. Since there is writing in a file involved, permission is asked to the user.</p></dd>
+<dd><p>Either a logical or equal to <code>"reset"</code>. Default is <code>FALSE</code>. If <code>TRUE</code> then the value
+is set permanently at the project level, this means that if you restart R, you will still obtain
+the previously saved defaults. This is done by writing in the <code>".Renviron"</code> file, located in the
+project's working directory, hence we must have write permission there for this to work, and
+only works with Rstudio. If equal to "reset", the default at the project level is erased. Since
+there is writing in a file involved, permission is asked to the user.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -87,14 +95,17 @@
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Gets the current number of threads</span></span></span>
-<span class="r-in"><span><span class="fu">getFixest_nthreads</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 8</span>
+<span class="r-in"><span><span class="op">(</span><span class="va">nthreads_origin</span> <span class="op">=</span> <span class="fu">getFixest_nthreads</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 6</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># To set multi-threading off:</span></span></span>
 <span class="r-in"><span><span class="fu">setFixest_nthreads</span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># To set it back to default:</span></span></span>
+<span class="r-in"><span><span class="co"># To set it back to default at startup:</span></span></span>
 <span class="r-in"><span><span class="fu">setFixest_nthreads</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># And back to the original value</span></span></span>
+<span class="r-in"><span><span class="fu">setFixest_nthreads</span><span class="op">(</span><span class="va">nthreads_origin</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

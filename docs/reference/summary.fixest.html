@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,7 +53,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Summary of a <code>fixest</code> object. Computes different types of standard errors.</h1>
-      <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/Methods.R" class="external-link"><code>R/Methods.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/R/methods.R" class="external-link"><code>R/methods.R</code></a></small>
       <div class="d-none name"><code>summary.fixest.Rd</code></div>
     </div>
 
@@ -77,6 +77,7 @@
 <span>  se <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  keepBounded <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  n <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  vcov_fix <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  nthreads <span class="op">=</span> <span class="fu"><a href="setFixest_nthreads.html">getFixest_nthreads</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
@@ -143,6 +144,10 @@
 
 <dt>n</dt>
 <dd><p>Integer, default is 1000. Number of coefficients to display when the print method is used.</p></dd>
+
+
+<dt>vcov_fix</dt>
+<dd><p>Logical scalar, default is <code>TRUE</code>. If the VCOV ends up not being positive definite, whether to "fix" it using an eigenvalue decomposition (a la Cameron, Gelbach &amp; Miller 2011).</p></dd>
 
 
 <dt>nthreads</dt>
@@ -238,7 +243,7 @@ Note that if you do so and you use a formula in the <code>cluster</code> argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 38,325 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-effects: Origin: 15,  Destination: 15,  Product: 20</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Clustered (Product &amp; Origin) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  t value  Pr(&gt;|t|)    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  z value  Pr(&gt;|z|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km) -1.52775   0.122773 -12.4437 &lt; 2.2e-16 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
@@ -249,7 +254,7 @@ Note that if you do so and you use a formula in the <code>cluster</code> argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 38,325 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-effects: Origin: 15,  Destination: 15,  Product: 20</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Clustered (Product &amp; Origin) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  t value  Pr(&gt;|t|)    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  z value  Pr(&gt;|z|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km) -1.52775   0.122773 -12.4437 &lt; 2.2e-16 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
@@ -260,7 +265,7 @@ Note that if you do so and you use a formula in the <code>cluster</code> argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 38,325 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-effects: Origin: 15,  Destination: 15,  Product: 20</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Clustered (Product &amp; Origin) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  t value  Pr(&gt;|t|)    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  z value  Pr(&gt;|z|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km) -1.52775   0.122773 -12.4437 &lt; 2.2e-16 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
@@ -273,7 +278,7 @@ Note that if you do so and you use a formula in the <code>cluster</code> argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 38,325 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-effects: Origin: 15,  Destination: 15,  Product: 20</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Clustered (Destination^Product) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  t value  Pr(&gt;|t|)    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  z value  Pr(&gt;|z|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km) -1.52775   0.072633 -21.0337 &lt; 2.2e-16 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
@@ -434,7 +439,7 @@ Note that if you do so and you use a formula in the <code>cluster</code> argumen
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 38,325 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-effects: Origin: 15,  Destination: 15,  Product: 20</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: NULL </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  t value  Pr(&gt;|t|)    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  z value  Pr(&gt;|z|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km) -1.52775   0.120014 -12.7298 &lt; 2.2e-16 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
