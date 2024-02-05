@@ -316,14 +316,14 @@ open_all = function(){
 
     # Opening R files
 
-    R_not_open = c("R/alias_generator.R", "R/RcppExports.R", "R/Deprecated_funs.R", "R/index",
-                   "R/etable_aliases.R", "R/ML_Families.R", "R/VCOV_aliases.R", "R/xaxis.R")
+    R_not_open = c("R/alias_generator.R", "R/RcppExports.R", "./R/deprecated.R", "R/index",
+                   "./R/alias_etable.R", "R/ML_Families.R", "./R/alias_VCOV.R", "./R/graph_xaxis.R")
 
     R_files = list.files("R/", full.names = TRUE)
 
     for(f in R_files){
         if(f %in% R_not_open) next
-        eval(str2lang(.dsb("rstudioapi::navigateToFile('.[f]', moveCursor = FALSE)")))
+        eval(str2lang(sma("rstudioapi::navigateToFile('{f}', moveCursor = FALSE)")))
     }
 
     # Opening extra files
@@ -334,7 +334,7 @@ open_all = function(){
                     "../todo.txt")
 
     for(f in extra_files){
-        eval(str2lang(.dsb("rstudioapi::navigateToFile('.[f]', moveCursor = FALSE)")))
+        eval(str2lang(sma("rstudioapi::navigateToFile('{f}', moveCursor = FALSE)")))
     }
 
 

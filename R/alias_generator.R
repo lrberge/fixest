@@ -22,7 +22,7 @@ create_aliases = function(){
 
     if(!isTRUE(renvir_get("fixest_ROOT"))) return(NULL)
     # we check we're in the right directory (otherwise there can be prblms with Rmakdown)
-    if(!isTRUE(file.exists("R/VCOV_aliases.R"))) return(NULL)
+    if(!isTRUE(file.exists("./R/alias_VCOV.R"))) return(NULL)
 
     gen_etable_aliases()
     gen_iplot()

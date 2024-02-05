@@ -2357,7 +2357,7 @@ gen_vcov_aliases = function(){
 
     text = c(intro, text)
 
-    update_file("R/VCOV_aliases.R", text)
+    update_file("./R/alias_VCOV.R", text)
 
     # We also add the exports to the name space
     header = "# Auto-exports::vcov_aliases"
