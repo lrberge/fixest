@@ -307,7 +307,7 @@ element of the list can be either: i) a character vector of length 1, ii) of
 length 2, or ii) a numeric vector. If equal to: i) then it is interpreted as
 a pattern: all element fitting the regular expression will be grouped (note that
 you can use the special character "^^" to clean the beginning of the names, see
-example), if ii) it corrsponds to the first and last elements to be grouped,
+example), if ii) it corresponds to the first and last elements to be grouped,
 if iii) it corresponds to the coefficients numbers to be grouped. If equal to
 a character vector, you can use a percentage to tell the algorithm to look at
 the coefficients before aliasing (e.g. \code{"\%varname"}). Example of valid uses:
@@ -339,7 +339,7 @@ with \verb{__ci__} a special variable giving the value of the confidence interva
 variable created with \code{i()} to select. Only used when there are several variables
 created with \code{\link{i}}. This is an index, just try increasing numbers to hopefully
 obtain what you want. Note that it works much better when the variables are "pure"
-\code{i()} variables and not interacted with other variables. For example: \code{i(species, x1)}
+\code{i()} and not interacted with other variables. For example: \code{i(species, x1)}
 is good while \code{i(species):x1} isn't. The latter will also work but the index
 may feel weird in case there are many \code{i()} variables.}
 }

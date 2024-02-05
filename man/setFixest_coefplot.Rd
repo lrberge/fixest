@@ -182,7 +182,7 @@ element of the list can be either: i) a character vector of length 1, ii) of
 length 2, or ii) a numeric vector. If equal to: i) then it is interpreted as
 a pattern: all element fitting the regular expression will be grouped (note that
 you can use the special character "^^" to clean the beginning of the names, see
-example), if ii) it corrsponds to the first and last elements to be grouped,
+example), if ii) it corresponds to the first and last elements to be grouped,
 if iii) it corresponds to the coefficients numbers to be grouped. If equal to
 a character vector, you can use a percentage to tell the algorithm to look at
 the coefficients before aliasing (e.g. \code{"\%varname"}). Example of valid uses:
