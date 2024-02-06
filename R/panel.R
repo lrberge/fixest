@@ -21,7 +21,7 @@ panel_setup = function(data, panel.id, time.step = NULL, duplicate.method = "non
     # DATA_MISSING: arg used in lag.formula
 
     set_up(1)
-    check_arg_plus(duplicate.method, "match(none, first)")
+    check_set_arg(duplicate.method, "match(none, first)")
 
     check_arg(panel.id, "character vector len(,2) no na | formula", .message = "The argument 'panel.id' must be either: i) a one sided formula (e.g. ~id+time), ii) a character vector of length 2 (e.g. c('id', 'time'), or iii) a character scalar of two variables separated by a comma (e.g. 'id,time').")
 
@@ -96,7 +96,7 @@ panel_setup = function(data, panel.id, time.step = NULL, duplicate.method = "non
         }
 
     } else {
-        check_arg_plus(time.step, "numeric scalar GT{0} | match(unitary, consecutive, within.consecutive)")
+        check_set_arg(time.step, "numeric scalar GT{0} | match(unitary, consecutive, within.consecutive)")
     }
 
 
@@ -583,7 +583,7 @@ lag.formula = function(x, k = 1, data, time.step = NULL, fill = NA,
     validate_dots(suggest_args = c("k", "data", "time.step", "fill"))
 
     # Controls
-    check_arg_plus(duplicate.method, "match")
+    check_set_arg(duplicate.method, "match")
     check_arg(data, "data.frame | matrix")
     check_arg(k, "integer scalar")
 
@@ -736,7 +736,7 @@ panel = function(data, panel.id, time.step = NULL, duplicate.method = c("none", 
         stop("Argument 'data' must be a data.frame.")
     }
 
-    check_arg_plus(duplicate.method, "match")
+    check_set_arg(duplicate.method, "match")
 
     mc = match.call()
 

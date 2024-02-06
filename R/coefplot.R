@@ -375,7 +375,7 @@ coefplot = function(object, ..., style = NULL, sd, ci_low, ci_high, df.t = NULL,
     dict[names(dict_amp)] = dict_amp
   }
 
-  check_arg_plus(lab.fit, "match(auto, simple, multi, tilted)")
+  check_set_arg(lab.fit, "match(auto, simple, multi, tilted)")
 
   dots = list(...)
 
@@ -2508,7 +2508,7 @@ setFixest_coefplot = function(style, horiz = FALSE, dict = getFixest_dict(), kee
   check_arg(lwd, ci.lwd, "numeric scalar GE{0}")
   check_arg(grid, zero, "logical scalar")
 
-  check_arg_plus("L0 list NULL{list()}", grid.par, zero.par, pt.join.par, ref.line.par)
+  check_set_arg("L0 list NULL{list()}", grid.par, zero.par, pt.join.par, ref.line.par)
 
   check_arg(reset, "logical scalar")
 

@@ -418,7 +418,7 @@ IS_weights_unit = function(index, base){
 
         } else {
             # flexible matching of names
-            check_arg_plus(index, "multi match", .choices = names(base), .message = "If the argument 'index' is a character vector, it must match (at least partially) the names of the data.frame in argument 'base'.")
+            check_set_arg(index, "multi match", .choices = names(base), .message = "If the argument 'index' is a character vector, it must match (at least partially) the names of the data.frame in argument 'base'.")
 
             index = as.data.frame(base)[, index]
         }

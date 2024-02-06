@@ -243,7 +243,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
 
     check_arg(demeaned, notes, warn, mem.clean, only.coef, "logical scalar")
 
-    check_arg_plus(fixef.rm, "match(singleton, perfect, both, none)")
+    check_set_arg(fixef.rm, "match(singleton, perfect, both, none)")
 
     check_arg(collin.tol, "numeric scalar GT{0}")
 
@@ -805,7 +805,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
 
         } else if(!missing(fixef) && length(fixef) >= 1){
             # We check the argument => character vector
-            check_arg_plus(fixef, "multi match", .choices = dataNames, .message = "Argument 'fixef', when provided, must be a character vector of variable names.")
+            check_set_arg(fixef, "multi match", .choices = dataNames, .message = "Argument 'fixef', when provided, must be a character vector of variable names.")
 
             # we transform it into a formula
             fml_fixef = .xpd(rhs = fixef)
@@ -2577,7 +2577,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
     assign("hessian.args", hessian.args, env)
 
     if(origin == "feNmlm"){
-        jacobian.method = check_arg_plus(jacobian.method, "match(simple, Richardson)")
+        jacobian.method = check_set_arg(jacobian.method, "match(simple, Richardson)")
     }
 
     #

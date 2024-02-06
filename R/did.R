@@ -238,7 +238,7 @@ sunab = function(cohort, period, ref.c = NULL, ref.p = -1, bin, bin.rel, bin.c, 
     .F = period_min = min(period)
     .L = period_max = max(period)
     period_list = list(.F = period_min, .L = period_max)
-    check_arg_plus(ref.p, "evalset integer vector no na", .data = period_list)
+    check_set_arg(ref.p, "evalset integer vector no na", .data = period_list)
     if(missing(ref.p)) ref.p = ref.p # One of the oddest line of code I ever wrote ;-)
 
     #

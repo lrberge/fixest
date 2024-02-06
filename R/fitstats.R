@@ -540,7 +540,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
     }
 
     check_arg(x, "class(fixest) mbt")
-    check_arg_plus(type, "character vector no na | os formula")
+    check_set_arg(type, "character vector no na | os formula")
     check_arg(simplify, verbose, "logical scalar")
 
     if("formula" %in% class(type)){
@@ -1349,7 +1349,7 @@ r2 = function(x, type = "all", full_names = FALSE){
 #'
 degrees_freedom = function(x, type, vars = NULL, vcov = NULL, se = NULL, cluster = NULL, ssc = NULL, stage = 2){
     check_arg(x, "class(fixest) mbt")
-    check_arg_plus(type, "match(k, resid, t)")
+    check_set_arg(type, "match(k, resid, t)")
     check_arg(stage, "integer scalar GE{1} LE{2}")
     check_arg(vars, "character vector no na")
 

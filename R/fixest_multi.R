@@ -364,7 +364,7 @@ summary.fixest_multi = function(object, type = "short", vcov = NULL, se = NULL, 
                                 .vcov = NULL, stage = 2, lean = FALSE, n = 1000, ...){
     dots = list(...)
 
-    check_arg_plus(type, "match(short, long, compact, se_compact, se_long)")
+    check_set_arg(type, "match(short, long, compact, se_compact, se_long)")
 
     if(!missing(type) || is.null(attr(object, "print_request"))){
         attr(object, "print_request") = type
@@ -619,7 +619,7 @@ print.fixest_multi = function(x, ...){
 "[[.fixest_multi" = function(x, i){
 
     n = length(x)
-    check_arg_plus(i, "evalset integer scalar mbt", .data = list(.N = n))
+    check_set_arg(i, "evalset integer scalar mbt", .data = list(.N = n))
     if(i < 0 || i > length(x)){
         stop("Index 'i' must lie within [1; ", n, "]. Problem: it is equal to ", i, ".")
     }
@@ -718,7 +718,7 @@ print.fixest_multi = function(x, ...){
     }
 
     if(use_i){
-        check_arg_plus(i, "evalset integer vector l0 no na", .data = list(.N = n))
+        check_set_arg(i, "evalset integer vector l0 no na", .data = list(.N = n))
 
         if(length(i) == 0) return(list())
 
@@ -735,7 +735,7 @@ print.fixest_multi = function(x, ...){
 
     if(use_I){
         I_max = index_n[[1]]
-        check_arg_plus(I, "evalset integer vector no na", .data = list(.N = I_max))
+        check_set_arg(I, "evalset integer vector no na", .data = list(.N = I_max))
 
         if(any(abs(I) > I_max)){
             stop("The index 'I' refers to root elements (here ", names(index_n)[1], "), and thus cannot be greater than ", I_max, ". Currently ", I[which.max(abs(I))], " is not valid.")
@@ -770,7 +770,7 @@ print.fixest_multi = function(x, ...){
 
     s_max = index_n[["sample"]]
     if(is_sample){
-        check_arg_plus(sample, "evalset logical scalar | vector(character, integer) no na", .data = list(.N = s_max))
+        check_set_arg(sample, "evalset logical scalar | vector(character, integer) no na", .data = list(.N = s_max))
         sample = set_index_multi(sample, index_names)
 
         selection$sample = (1:s_max)[sample]
@@ -781,7 +781,7 @@ print.fixest_multi = function(x, ...){
 
     lhs_max = index_n[["lhs"]]
     if(is_lhs){
-        check_arg_plus(lhs, "evalset logical scalar | vector(character, integer) no na", .data = list(.N = lhs_max))
+        check_set_arg(lhs, "evalset logical scalar | vector(character, integer) no na", .data = list(.N = lhs_max))
         lhs = set_index_multi(lhs, index_names)
 
         selection$lhs = (1:lhs_max)[lhs]
@@ -791,7 +791,7 @@ print.fixest_multi = function(x, ...){
 
     rhs_max = index_n[["rhs"]]
     if(is_rhs){
-        check_arg_plus(rhs, "evalset logical scalar | vector(character, integer) no na", .data = list(.N = rhs_max))
+        check_set_arg(rhs, "evalset logical scalar | vector(character, integer) no na", .data = list(.N = rhs_max))
         rhs = set_index_multi(rhs, index_names)
 
         selection$rhs = (1:rhs_max)[rhs]
@@ -801,7 +801,7 @@ print.fixest_multi = function(x, ...){
 
     fixef_max = index_n[["fixef"]]
     if(is_fixef){
-        check_arg_plus(fixef, "evalset logical scalar | vector(character, integer) no na", .data = list(.N = fixef_max))
+        check_set_arg(fixef, "evalset logical scalar | vector(character, integer) no na", .data = list(.N = fixef_max))
         fixef = set_index_multi(fixef, index_names)
 
         selection$fixef = (1:fixef_max)[fixef]
@@ -811,7 +811,7 @@ print.fixest_multi = function(x, ...){
 
     iv_max = index_n[["iv"]]
     if(is_iv){
-        check_arg_plus(iv, "evalset logical scalar | vector(character, integer) no na", .data = list(.N = iv_max))
+        check_set_arg(iv, "evalset logical scalar | vector(character, integer) no na", .data = list(.N = iv_max))
         iv = set_index_multi(iv, index_names)
 
         selection$iv = (1:iv_max)[iv]
@@ -1233,8 +1233,8 @@ resid.fixest_multi = function(object, type = c("response", "deviance", "pearson"
 
     # Je fais un prototype pour le moment, je l'ameliorerai apres (07-04-2021)
 
-    check_arg_plus(type, "match")
-    check_arg_plus(na.rm, "logical scalar")
+    check_set_arg(type, "match")
+    check_set_arg(na.rm, "logical scalar")
 
     res_list = list()
     for(i in seq_along(object)){

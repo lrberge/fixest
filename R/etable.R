@@ -1378,9 +1378,9 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
   #
 
   check_arg(title, "NULL character scalar")
-  check_arg_plus(coefstat, "match(se, tstat, confint)")
+  check_set_arg(coefstat, "match(se, tstat, confint)")
 
-  check_arg_plus(notes, "NULL character vector no na")
+  check_set_arg(notes, "NULL character vector no na")
   if(length(notes) > 0) notes = notes[nchar(notes) > 0]
 
   check_arg("logical scalar", replace, fixef_sizes, fixef_sizes.simplify,
@@ -1441,11 +1441,11 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
   }
 
   check_arg(keep, drop, order, "character vector no na NULL",
-        .message = "The arg. '__ARG__' must be a vector of regular expressions (see help(regex)).")
+            .message = "The arg. '__ARG__' must be a vector of regular expressions (see help(regex)).")
 
   check_arg(file, label, interaction.combine, i.equal, "NULL character scalar")
 
-  check_arg_plus(tabular, "match(normal, *, X)")
+  check_set_arg(tabular, "match(normal, *, X)")
 
   # interaction.combine: Default depends on type
   if(is.null(interaction.combine)){
@@ -1459,7 +1459,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     i.equal = style$i.equal
   }
 
-  check_arg_plus(signif.code, "NULL NA | match(letters) | named numeric vector no na GE{0} LE{1}")
+  check_set_arg(signif.code, "NULL NA | match(letters) | named numeric vector no na GE{0} LE{1}")
 
   if(missnull(signif.code)){
     if(isTex){
@@ -1519,14 +1519,15 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
   if(isTex){
     if(nchar(placement) > 0){
       p_split = strsplit(placement, "")[[1]]
-      check_value(p_split, "strict multi charin(h, t, b, p, H, !)", .message = "Argument 'placement' must be a character string containing only the following characters: 'h', 't', 'b', 'p', 'H', and '!'.")
+      check_value(p_split, "strict multi charin(h, t, b, p, H, !)", 
+                  .message = "Argument 'placement' must be a character string containing only the following characters: 'h', 't', 'b', 'p', 'H', and '!'.")
     }
   }
 
-  check_arg_plus(drop.section, "NULL multi match(fixef, slopes, stats)")
+  check_set_arg(drop.section, "NULL multi match(fixef, slopes, stats)")
 
-  check_arg_plus(group, "NULL{list()} named list l0")
-  check_arg_plus(extralines, "NULL{list()} list l0 | os formula | vector")
+  check_set_arg(group, "NULL{list()} named list l0")
+  check_set_arg(extralines, "NULL{list()} list l0 | os formula | vector")
   # we check it more in depth later
 
   check_arg(fixef.group, "NULL{list()} logical scalar | named list l0")
@@ -1543,7 +1544,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
 
   check_arg(arraystretch, "NULL numeric scalar GT{0}")
 
-  check_arg_plus(fontsize, "NULL match(tiny, scriptsize, footnotesize, small, normalsize, large, Large)")
+  check_set_arg(fontsize, "NULL match(tiny, scriptsize, footnotesize, small, normalsize, large, Large)")
 
   # adjustbox + default
   adjustbox = check_set_adjustbox(adjustbox, .up)
@@ -1600,7 +1601,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     }
 
 
-    check_arg_plus(meta.time, "NULL match(date, time) | logical scalar")
+    check_set_arg(meta.time, "NULL match(date, time) | logical scalar")
     check_arg(meta.call, meta.sys, "NULL logical scalar")
     check_arg(meta.author, "NULL logical scalar | character vector no na")
     check_arg(meta.comment, "NULL character vector no na")
@@ -1949,7 +1950,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
       vcov = mega_vcov
 
     } else {
-      check_value(vcov, "list len(value)", .value = n_models, .message = "If 'vcov' is a list, it must be of the same length as the number of models, or you should add the 'each' or 'times' keyword as the first element of the list.")
+      check_value(vcov, "list len(value)", .value = n_models, 
+                  .message = "If 'vcov' is a list, it must be of the same length as the number of models, or you should add the 'each' or 'times' keyword as the first element of the list.")
     }
   }
 
@@ -2007,7 +2009,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     }
 
     if(missnull(.vcov_args)) .vcov_args = list()
-    check_arg_plus(.vcov_args, "list", .message = "The argument '.vcov_args' must be a list of arguments to be passed to the function in '.vcov'.")
+    check_set_arg(.vcov_args, "list", .message = "The argument '.vcov_args' must be a list of arguments to be passed to the function in '.vcov'.")
   }
 
   # If vcov is provided, we use summary
@@ -4546,7 +4548,7 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat,
   }
 
 
-  check_arg_plus(coefstat, "match")
+  check_set_arg(coefstat, "match")
   check_arg(ci, "numeric scalar GT{0.5} LT{1}")
 
   check_arg("logical scalar", se.below, fixef_sizes, fixef_sizes.simplify,
@@ -4563,9 +4565,9 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat,
 
   check_arg(dict, "NULL logical scalar | named character vector no na")
 
-  check_arg_plus(group, extralines, "NULL{list()} named list l0")
+  check_set_arg(group, extralines, "NULL{list()} named list l0")
 
-  check_arg_plus(fixef.group, "NULL{list()} logical scalar | named list l0")
+  check_set_arg(fixef.group, "NULL{list()} logical scalar | named list l0")
 
   check_arg(placement, "character scalar")
   if(!missing(placement)){
@@ -4574,7 +4576,7 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat,
     check_value(p_split, "strict multi charin(h, t, b, p, H, !)", .message = "Argument 'placement' must be a character string containing only the following characters: 'h', 't', 'b', 'p', 'H', and '!'.")
   }
 
-  check_arg_plus(drop.section, "NULL multi match(fixef, slopes, stats)")
+  check_set_arg(drop.section, "NULL multi match(fixef, slopes, stats)")
 
   check_arg(style.tex, "NULL class(fixest_style_tex)")
 
@@ -4586,7 +4588,7 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat,
   }
 
   # meta
-  check_arg_plus(meta.time, "NULL match(date, time) | logical scalar")
+  check_set_arg(meta.time, "NULL match(date, time) | logical scalar")
   check_arg(meta.call, meta.sys, "NULL logical scalar")
   check_arg(meta.author, "NULL logical scalar | character vector no na")
   check_arg(meta.comment, "NULL character vector no na")
@@ -4659,7 +4661,7 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat,
   options(fixest_etable = opts)
 
   # Saving at the project level if needed
-  check_arg_plus(save, "logical scalar | match(reset)")
+  check_set_arg(save, "logical scalar | match(reset)")
   if(isTRUE(save)){
     renvir_update("fixest_etable", opts)
 
@@ -4828,14 +4830,14 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
   # To implement later:
   # fixef_sizes.where = "obs"
   # se.par = "parentheses"
-  # check_arg_plus(se.par, "match(parentheses, brackets, none)")
+  # check_set_arg(se.par, "match(parentheses, brackets, none)")
   # align
   # check_arg(align, "character vector no na len(,2)")
 
   # Checking
-  check_arg_plus(main, "match(base, aer, qje)")
+  check_set_arg(main, "match(base, aer, qje)")
 
-  check_arg_plus(line.top, line.bottom, "match(simple, double) | character scalar")
+  check_set_arg(line.top, line.bottom, "match(simple, double) | character scalar")
 
   check_arg("character scalar", depvar.title, model.title, var.title)
   check_arg("character scalar", fixef.title, fixef.prefix, fixef.suffix, slopes.title, slopes.format)
@@ -4853,8 +4855,8 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
 
   check_arg(tablefoot.value, "character vector no na")
   check_arg(tablefoot, tpt, no_border, "logical scalar")
-  check_arg_plus(fixef.where, "match(var, stats)")
-  check_arg_plus(tabular, "match(normal, *, X)")
+  check_set_arg(fixef.where, "match(var, stats)")
+  check_set_arg(tabular, "match(normal, *, X)")
 
   check_arg(yesNo, "character vector len(,2) no na")
   if(!missing(yesNo) && length(yesNo) == 1){
@@ -4863,9 +4865,9 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
 
   check_arg(arraystretch, "numeric scalar GT{0}")
   adjustbox = check_set_adjustbox(adjustbox)
-  check_arg_plus(fontsize, "NULL match(tiny, scriptsize, footnotesize, small, normalsize, large, Large)")
+  check_set_arg(fontsize, "NULL match(tiny, scriptsize, footnotesize, small, normalsize, large, Large)")
 
-  check_arg_plus(signif.code, "NULL NA | match(letters) | named numeric vector no na GE{0} LE{1}")
+  check_set_arg(signif.code, "NULL NA | match(letters) | named numeric vector no na GE{0} LE{1}")
 
   mc = match.call()
 
@@ -5044,7 +5046,7 @@ style.df = function(depvar.title = "Dependent Var.:", fixef.title = "Fixed-Effec
 
   check_arg(headers.sep, default, "logical scalar")
 
-  check_arg_plus(signif.code, "NULL NA | match(letters) | named numeric vector no na GE{0} LE{1}")
+  check_set_arg(signif.code, "NULL NA | match(letters) | named numeric vector no na GE{0} LE{1}")
 
   res = list()
 
@@ -5677,7 +5679,7 @@ img {
 
 #' @rdname etable
 log_etable = function(type = "pdflatex"){
-  check_arg_plus(type, "match(pdflatex, magick, tex, dir)")
+  check_set_arg(type, "match(pdflatex, magick, tex, dir)")
 
   dir = getOption("fixest_log_dir")
 

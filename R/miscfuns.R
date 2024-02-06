@@ -2535,7 +2535,7 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
 
 
     ## weights
-    check_arg_plus(weights, "NULL numeric conv vector len(value) GE{0}", .value = nobs)
+    check_set_arg(weights, "NULL numeric conv vector len(value) GE{0}", .value = nobs)
     is_weight = !missing(weights) && !is.null(weights)
 
     ## nthreads (Also seems unnecessarily costly: 250 microseconds)
@@ -2893,7 +2893,7 @@ check_conv_feols = function(x){
 #' @rdname check_conv_feols
 summary.fixest_check_conv = function(object, type = "short", ...){
 
-  check_arg_plus(type, "match(short, detail)")
+  check_set_arg(type, "match(short, detail)")
   if(is_user_level_call()){
     validate_dots(suggest_args = "type")
   }
@@ -7062,7 +7062,7 @@ setFixest_nthreads = function(nthreads, save = FALSE){
 
   max_threads = min(cpp_get_nb_threads(), 1000, max_CRAN) # we cap at 1k nthreads
 
-  check_arg_plus(save, "logical scalar | match(reset)")
+  check_set_arg(save, "logical scalar | match(reset)")
 
   do_reset = identical(save, "reset")
 
@@ -7284,7 +7284,7 @@ getFixest_dict = function(){
 #' @rdname print.fixest
 setFixest_print = function(type = "table", fitstat = NULL){
 
-  check_arg_plus(type, "match(coef, table)")
+  check_set_arg(type, "match(coef, table)")
 
   if(!missnull(fitstat)){
     fitstat = fitstat_validate(fitstat, TRUE)
@@ -7439,7 +7439,7 @@ setFixest_estimation = function(data = NULL, panel.id = NULL, fixef.rm = "perfec
                 demeaned = FALSE, mem.clean = FALSE, glm.iter = 25,
                 glm.tol = 1e-8, reset = FALSE){
 
-  check_arg_plus(fixef.rm, "match(none, perfect, singleton, both)")
+  check_set_arg(fixef.rm, "match(none, perfect, singleton, both)")
   check_arg(fixef.tol, collin.tol, glm.tol, "numeric scalar GT{0}")
   check_arg(fixef.iter, glm.iter, "integer scalar GE{1}")
   check_arg(verbose, "integer scalar GE{0}")

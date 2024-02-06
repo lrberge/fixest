@@ -113,7 +113,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
     # if NOT from summary, we consider the argument 'type'
     if(!from_summary){
         # checking argument type
-        check_arg_plus(type, "match(coef, table)")
+        check_set_arg(type, "match(coef, table)")
 
         if(type == "coef"){
             print(coef(x))
@@ -2098,8 +2098,8 @@ fitted.values.fixest <- fitted.fixest
 resid.fixest = residuals.fixest = function(object, type = c("response", "deviance", "pearson", "working"),
                                            na.rm = TRUE, ...){
 
-    check_arg_plus(type, "match")
-    check_arg_plus(na.rm, "logical scalar")
+    check_set_arg(type, "match")
+    check_set_arg(na.rm, "logical scalar")
 
     method = object$method
     family = object$family
@@ -2320,11 +2320,11 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
     }
 
     # Controls
-    check_arg_plus(type, sample, "match")
+    check_set_arg(type, sample, "match")
     check_arg(fixef, vs.coef, "logical scalar")
     check_arg(se.fit, "logical scalar")
     check_arg(level, "numeric scalar GT{.50} LT{1}")
-    check_arg_plus(interval, "match(none, confidence, prediction)")
+    check_set_arg(interval, "match(none, confidence, prediction)")
     if(!se.fit && interval != "none"){
         se.fit = TRUE
     }
@@ -3137,7 +3137,7 @@ formula.fixest = function(x, type = c("full", "linear", "iv", "NL"), ...){
         stop("formula method not available for fixest estimations obtained from fit methods.")
     }
 
-    check_arg_plus(type, "match")
+    check_set_arg(type, "match")
 
     if(type == "linear"){
         return(x$fml)
@@ -3249,7 +3249,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 
     check_arg(subset, "logical scalar | character vector no na")
 
-    check_arg_plus(as.matrix, as.df, collin.rm, "logical scalar")
+    check_set_arg(as.matrix, as.df, collin.rm, "logical scalar")
 
     # The formulas
     fml_full = formula(object, type = "full")

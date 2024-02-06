@@ -315,7 +315,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
     ####
 
     # Checking the value of vcov
-    check_arg_plus(vcov, "match | formula | function | matrix | list len(1) | class(fixest_vcov_request)", .choices = all_vcov_names)
+    check_set_arg(vcov, "match | formula | function | matrix | list len(1) | class(fixest_vcov_request)", .choices = all_vcov_names)
 
     user_vcov_name = NULL
     if(is.list(vcov) && !inherits(vcov, "fixest_vcov_request")){
@@ -422,7 +422,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
                 vcov = trimws(gsub("\\(.+", "", vcov))
             }
 
-            check_arg_plus(vcov, "match", .message = "If a formula, the arg. 'vcov' must be of the form 'vcov_type ~ vars'. The vcov_type must be a supported VCOV type.", .choices = all_vcov_names)
+            check_set_arg(vcov, "match", .message = "If a formula, the arg. 'vcov' must be of the form 'vcov_type ~ vars'. The vcov_type must be a supported VCOV type.", .choices = all_vcov_names)
 
             if(is_extra){
                 new_req = eval(vcov_fml[[2]], environment(vcov_fml))
@@ -1142,10 +1142,10 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 ssc = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, cluster.df = "min",
                t.df = "min", fixef.force_exact = FALSE){
 
-    check_arg_plus(adj, "loose logical scalar conv")
-    check_arg_plus(fixef.K, "match(none, full, nested)")
-    check_arg_plus(cluster.df, "match(conventional, min)")
-    check_arg_plus(t.df, "match(conventional, min) | integer scalar GT{0}")
+    check_set_arg(adj, "loose logical scalar conv")
+    check_set_arg(fixef.K, "match(none, full, nested)")
+    check_set_arg(cluster.df, "match(conventional, min)")
+    check_set_arg(t.df, "match(conventional, min) | integer scalar GT{0}")
     check_arg(fixef.force_exact, cluster.adj, "logical scalar")
 
     res = list(adj = adj, fixef.K = fixef.K, cluster.adj = cluster.adj, cluster.df = cluster.df,
@@ -2523,12 +2523,12 @@ setFixest_vcov = function(no_FE = "iid", one_FE = "cluster", two_FE = "cluster",
     # That's why I don't allow conley SEs nor NW SEs
     # => they can be not working at times
 
-    check_arg_plus(no_FE,  "match(iid, hetero)")
-    check_arg_plus(one_FE, "match(iid, hetero, cluster)")
-    check_arg_plus(two_FE, "match(iid, hetero, cluster, twoway)")
-    check_arg_plus(panel, "match(iid, hetero, cluster, DK, driscoll_kraay)")
-    check_arg_plus(all,  "NULL match(iid, hetero)")
-    check_arg_plus(reset, "logical scalar")
+    check_set_arg(no_FE,  "match(iid, hetero)")
+    check_set_arg(one_FE, "match(iid, hetero, cluster)")
+    check_set_arg(two_FE, "match(iid, hetero, cluster, twoway)")
+    check_set_arg(panel, "match(iid, hetero, cluster, DK, driscoll_kraay)")
+    check_set_arg(all,  "NULL match(iid, hetero)")
+    check_set_arg(reset, "logical scalar")
 
     opts = getOption("fixest_vcov_default")
     if(is.null(opts) || !is.list(opts) || reset){
