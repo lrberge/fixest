@@ -159,7 +159,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
         iv_msg = "NOTE: all endogenous regressors were removed.\n"
       } else {
         n_rm = sum(grepl("^fit_", x$collin.var))
-        iv_msg = paste0("Important note: ", n_letter(n_rm), " endogenous regressor", plural(n_rm, "s.was"), " removed => IV estimation not valid.\n")
+        iv_msg = sma("Important note: {N?n_rm} endogenous regressor{#s, were} removed => IV estimation not valid.\n")
       }
 
       collinearity_msg = paste0(collinearity_msg, iv_msg)
@@ -187,7 +187,8 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
   if(is.null(se.type)) se.type = "Custom"
 
   if(x$method_type == "feNmlm"){
-    family_format = c(poisson="Poisson", negbin="Negative Binomial", logit="Logit", gaussian="Gaussian")
+    family_format = c(poisson = "Poisson", negbin = "Negative Binomial", 
+                      logit = "Logit", gaussian = "Gaussian")
     msg = ifelse(is.null(x$call$NL.fml), "", "Non-linear ")
     half_line = paste0(msg, "ML estimation, family = ", family_format[x$family])
   } else if(x$method %in% c("feglm", "feglm.fit")) {
@@ -207,9 +208,11 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 
   if(isTRUE(x$iv)){
     glue = function(...) paste(..., collapse = ", ")
-    first_line = paste0("TSLS estimation, Dep. Var.: ", as.character(x$fml)[[2]], ", Endo.: ", glue(get_vars(x$iv_endo_fml)), ", Instr.: ", glue(x$iv_inst_names), "\n")
-    second_line = paste0(ifunit(x$iv_stage, "First", "Second"), " stage: Dep. Var.: ", as.character(x$fml)[[2]], "\n")
-    cat(first_line, second_line, sep = "")
+    first_line = sma("TSLS estimation, Dep. Var.: {as.character(x$fml)[[2]]}, ",
+                     "Endo.: {', 'c ? get_vars(x$iv_endo_fml)}, ",
+                     "Instr.: {', 'c ? x$iv_inst_names}\n")
+    second_line = sma("{Nth.upper ? x$iv_stage} stage: Dep. Var.: ", as.character(x$fml)[[2]], "\n")
+    cma(first_line, second_line)
   } else {
     cat(half_line, ", Dep. Var.: ", as.character(x$fml)[[2]], "\n", sep="")
   }
@@ -224,7 +227,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
       xtra = x$model_info[[extra_info[i]]]
 
       if(length(xtra) == 1){
-        cat(dsb(".[u?nm]:"), xtra, "\n")
+        cma("{upper.first ? nm}: {xtra\n}")
       } else {
         if(xtra$value != "Full sample"){
           cat(dsb(".[u?nm] (.[xtra$var]): .[xtra$value]\n"))
