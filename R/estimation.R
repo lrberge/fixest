@@ -1980,7 +1980,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
     }
 
     res = summary(res, vcov = vcov, agg = agg, ssc = ssc, lean = lean, 
-                  summary_flags = summary_flags)
+                  summary_flags = summary_flags, nthreads = nthreads)
 
     if(isTRUE(dots$iv_call) && lean){
       res$residuals = r
@@ -3152,7 +3152,8 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
     # To compute the RMSE and lean = TRUE
     if(lean) res$ssr = cpp_ssq(res$residuals, weights)
 
-    res = summary(res, vcov = vcov, agg = agg, ssc = ssc, lean = lean, summary_flags = summary_flags)
+    res = summary(res, vcov = vcov, agg = agg, ssc = ssc, lean = lean, 
+                  summary_flags = summary_flags, nthreads = nthreads)
   }
 
   return(res)
@@ -4051,7 +4052,8 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
     # To compute the RMSE and lean = TRUE
     if(lean) res$ssr = cpp_ssq(res$residuals)
 
-    res = summary(res, vcov = vcov, ssc = ssc, agg = agg, lean = lean, summary_flags = summary_flags)
+    res = summary(res, vcov = vcov, ssc = ssc, agg = agg, lean = lean, 
+                  summary_flags = summary_flags, nthreads = nthreads)
   }
 
   return(res)
