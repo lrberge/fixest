@@ -50,39 +50,112 @@ feNmlm(
 )
 }
 \arguments{
-\item{fml}{A formula. This formula gives the linear formula to be estimated (it is similar to a \code{lm} formula), for example: \code{fml = z~x+y}. To include fixed-effects variables, insert them in this formula using a pipe (e.g. \code{fml = z~x+y|fixef_1+fixef_2}). To include a non-linear in parameters element, you must use the argment \code{NL.fml}. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in \code{c()}: ex \code{c(y1, y2)}. For multiple indep. vars, use the stepwise functions: ex \code{x1 + csw(x2, x3)}. This leads to 6 estimation \code{fml = c(y1, y2) ~ x1 + cw0(x2, x3)}. See details. Square brackets starting with a dot can be used to call global variables: \code{y.[i] ~ x.[1:2]} will lead to \code{y3 ~ x1 + x2} if \code{i} is equal to 3 in the current environment (see details in \code{\link{xpd}}).}
+\item{fml}{A formula. This formula gives the linear formula to be estimated
+(it is similar to a \code{lm} formula), for example: \code{fml = z~x+y}. To include
+fixed-effects variables, insert them in this formula using a pipe
+(e.g. \code{fml = z~x+y|fixef_1+fixef_2}). To include a non-linear in parameters element,
+you must use the argment \code{NL.fml}. Multiple estimations can be performed at once:
+for multiple dep. vars, wrap them in \code{c()}: ex \code{c(y1, y2)}. For multiple indep.
+vars, use the stepwise functions: ex \code{x1 + csw(x2, x3)}. This leads to 6 estimation
+\code{fml = c(y1, y2) ~ x1 + cw0(x2, x3)}. See details. Square brackets starting with a
+dot can be used to call global variables: \code{y.[i] ~ x.[1:2]} will lead to
+\code{y3 ~ x1 + x2} if \code{i} is equal to 3 in the current environment (see details in \code{\link{xpd}}).}
 
-\item{data}{A data.frame containing the necessary variables to run the model. The variables of the non-linear right hand side of the formula are identified with this \code{data.frame} names. Can also be a matrix.}
+\item{data}{A data.frame containing the necessary variables to run the model.
+The variables of the non-linear right hand side of the formula are identified
+with this \code{data.frame} names. Can also be a matrix.}
 
-\item{family}{Character scalar. It should provide the family. The possible values are "poisson" (Poisson model with log-link, the default), "negbin" (Negative Binomial model with log-link), "logit" (LOGIT model with log-link), "gaussian" (Gaussian model).}
+\item{family}{Character scalar. It should provide the family. The possible values
+are "poisson" (Poisson model with log-link, the default), "negbin" (Negative Binomial
+model with log-link), "logit" (LOGIT model with log-link), "gaussian" (Gaussian model).}
 
-\item{NL.fml}{A formula. If provided, this formula represents the non-linear part of the right hand side (RHS). Note that contrary to the \code{fml} argument, the coefficients must explicitly appear in this formula. For instance, it can be \code{~a*log(b*x + c*x^3)}, where \code{a}, \code{b}, and \code{c} are the coefficients to be estimated. Note that only the RHS of the formula is to be provided, and NOT the left hand side.}
+\item{NL.fml}{A formula. If provided, this formula represents the non-linear part of
+the right hand side (RHS). Note that contrary to the \code{fml} argument, the
+coefficients must explicitly appear in this formula. For instance, it can be
+\code{~a*log(b*x + c*x^3)}, where \code{a}, \code{b}, and \code{c} are the coefficients to be estimated.
+Note that only the RHS of the formula is to be provided, and NOT the left hand side.}
 
 \item{vcov}{Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: \code{vcov_type ~ variables}. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from \code{\link{vcov_cluster}}, \code{\link[=vcov_hac]{vcov_NW}}, \code{\link[=vcov_hac]{NW}}, \code{\link[=vcov_hac]{vcov_DK}}, \code{\link[=vcov_hac]{DK}}, \code{\link{vcov_conley}} and \code{\link[=vcov_conley]{conley}}. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the \code{vcov} documentation in the \href{https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1}{vignette}.}
 
-\item{fixef}{Character vector. The names of variables to be used as fixed-effects. These variables should contain the identifier of each observation (e.g., think of it as a panel identifier). Note that the recommended way to include fixed-effects is to insert them directly in the formula.}
+\item{fixef}{Character vector. The names of variables to be used as fixed-effects.
+These variables should contain the identifier of each observation (e.g., think of it
+as a panel identifier). Note that the recommended way to include fixed-effects is to
+insert them directly in the formula.}
 
-\item{fixef.rm}{Can be equal to "perfect" (default), "singleton", "both" or "none". Controls which observations are to be removed. If "perfect", then observations having a fixed-effect with perfect fit (e.g. only 0 outcomes in Poisson estimations) will be removed. If "singleton", all observations for which a fixed-effect appears only once will be removed. The meaning of "both" and "none" is direct.}
+\item{fixef.rm}{Can be equal to "perfect" (default), "singleton", "both" or "none".
+Controls which observations are to be removed. If "perfect", then observations
+having a fixed-effect with perfect fit (e.g. only 0 outcomes in Poisson estimations)
+will be removed. If "singleton", all observations for which a fixed-effect appears
+only once will be removed. The meaning of "both" and "none" is direct.}
 
-\item{NL.start}{(For NL models only) A list of starting values for the non-linear parameters. ALL the parameters are to be named and given a staring value. Example: \code{NL.start=list(a=1,b=5,c=0)}. Though, there is an exception: if all parameters are to be given the same starting value, you can use a numeric scalar.}
+\item{NL.start}{(For NL models only) A list of starting values for the non-linear parameters.
+ALL the parameters are to be named and given a staring value.
+Example: \code{NL.start=list(a=1,b=5,c=0)}. Though, there is an exception: if all
+parameters are to be given the same starting value, you can use a numeric scalar.}
 
-\item{lower}{(For NL models only) A list. The lower bound for each of the non-linear parameters that requires one. Example: \code{lower=list(b=0,c=0)}. Beware, if the estimated parameter is at his lower bound, then asymptotic theory cannot be applied and the standard-error of the parameter cannot be estimated because the gradient will not be null. In other words, when at its upper/lower bound, the parameter is considered as 'fixed'.}
+\item{lower}{(For NL models only) A list. The lower bound for each of the non-linear
+parameters that requires one. Example: \code{lower=list(b=0,c=0)}. Beware, if the estimated
+parameter is at his lower bound, then asymptotic theory cannot be applied and the
+standard-error of the parameter cannot be estimated because the gradient will
+not be null. In other words, when at its upper/lower bound, the parameter is
+considered as 'fixed'.}
 
-\item{upper}{(For NL models only) A list. The upper bound for each of the non-linear parameters that requires one. Example: \code{upper=list(a=10,c=50)}. Beware, if the estimated parameter is at his upper bound, then asymptotic theory cannot be applied and the standard-error of the parameter cannot be estimated because the gradient will not be null. In other words, when at its upper/lower bound, the parameter is considered as 'fixed'.}
+\item{upper}{(For NL models only) A list. The upper bound for each of the non-linear
+parameters that requires one. Example: \code{upper=list(a=10,c=50)}. Beware, if the
+estimated parameter is at his upper bound, then asymptotic theory cannot be applied
+and the standard-error of the parameter cannot be estimated because the gradient
+will not be null. In other words, when at its upper/lower bound, the parameter
+is considered as 'fixed'.}
 
-\item{NL.start.init}{(For NL models only) Numeric scalar. If the argument \code{NL.start} is not provided, or only partially filled (i.e. there remain non-linear parameters with no starting value), then the starting value of all remaining non-linear parameters is set to \code{NL.start.init}.}
+\item{NL.start.init}{(For NL models only) Numeric scalar. If the argument \code{NL.start}
+is not provided, or only partially filled (i.e. there remain non-linear parameters
+with no starting value), then the starting value of all remaining non-linear parameters
+is set to \code{NL.start.init}.}
 
-\item{offset}{A formula or a numeric vector. An offset can be added to the estimation. If equal to a formula, it should be of the form (for example) \code{~0.5*x**2}. This offset is linearly added to the elements of the main formula 'fml'.}
+\item{offset}{A formula or a numeric vector. An offset can be added to the estimation.
+If equal to a formula, it should be of the form (for example) \code{~0.5*x**2}. This
+offset is linearly added to the elements of the main formula 'fml'.}
 
-\item{subset}{A vector (logical or numeric) or a one-sided formula. If provided, then the estimation will be performed only on the observations defined by this argument.}
+\item{subset}{A vector (logical or numeric) or a one-sided formula. If provided,
+then the estimation will be performed only on the observations defined by this argument.}
 
-\item{split}{A one sided formula representing a variable (eg \code{split = ~var}) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. If you also want to include the estimation for the full sample, use the argument \code{fsplit} instead. You can use the special operators \verb{\%keep\%} and \verb{\%drop\%} to select only a subset of values for which to split the sample. E.g. \code{split = ~var \%keep\% c("v1", "v2")} will split the sample only according to the values \code{v1} and \code{v2} of the variable \code{var}; it is equivalent to supplying the argument \code{split.keep = c("v1", "v2")}. By default there is partial matching on each value, you can trigger a regular expression evaluation by adding a \code{'@'} first, as in: \code{~var \%drop\% "@^v[12]"} which will drop values starting with \code{"v1"} or \code{"v2"} (of course you need to know regexes!).}
+\item{split}{A one sided formula representing a variable (eg \code{split = ~var}) or a vector.
+If provided, the sample is split according to the variable and one estimation is performed
+for each value of that variable. If you also want to include the estimation for the
+full sample, use the argument \code{fsplit} instead. You can use the special operators
+\verb{\%keep\%} and \verb{\%drop\%} to select only a subset of values for which to split the
+sample. E.g. \code{split = ~var \%keep\% c("v1", "v2")} will split the sample only according
+to the values \code{v1} and \code{v2} of the variable \code{var}; it is equivalent to supplying the
+argument \code{split.keep = c("v1", "v2")}. By default there is partial matching on each value,
+you can trigger a regular expression evaluation by adding a \code{'@'} first,
+as in: \code{~var \%drop\% "@^v[12]"} which will drop values starting with \code{"v1"} or
+\code{"v2"} (of course you need to know regexes!).}
 
-\item{fsplit}{A one sided formula representing a variable (eg \code{split = ~var}) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. This argument is the same as split but also includes the full sample as the first estimation. You can use the special operators \verb{\%keep\%} and \verb{\%drop\%} to select only a subset of values for which to split the sample. E.g. \code{split = ~var \%keep\% c("v1", "v2")} will split the sample only according to the values \code{v1} and \code{v2} of the variable \code{var}; it is equivalent to supplying the argument \code{split.keep = c("v1", "v2")}. By default there is partial matching on each value, you can trigger a regular expression evaluation by adding an \code{'@'} first, as in: \code{~var \%drop\% "@^v[12]"} which will drop values starting with \code{"v1"} or \code{"v2"} (of course you need to know regexes!).}
+\item{fsplit}{A one sided formula representing a variable (eg \code{split = ~var}) or a vector.
+If provided, the sample is split according to the variable and one estimation is performed
+for each value of that variable. This argument is the same as split but also includes the
+full sample as the first estimation. You can use the special operators \verb{\%keep\%} and \verb{\%drop\%}
+to select only a subset of values for which to split the sample.
+E.g. \code{split = ~var \%keep\% c("v1", "v2")} will split the sample only according to the
+values \code{v1} and \code{v2} of the variable \code{var}; it is equivalent to supplying the
+argument \code{split.keep = c("v1", "v2")}. By default there is partial matching on each value,
+you can trigger a regular expression evaluation by adding an \code{'@'} first,
+as in: \code{~var \%drop\% "@^v[12]"} which will drop values starting with \code{"v1"}
+or \code{"v2"} (of course you need to know regexes!).}
 
-\item{split.keep}{A character vector. Only used when \code{split}, or \code{fsplit}, is supplied. If provided, then the sample will be split only on the values of \code{split.keep}. The values in \code{split.keep} will be partially matched to the values of \code{split}. To enable regular expressions, you need to add an \code{'@'} first. For example \code{split.keep = c("v1", "@other|var")} will keep only the value in \code{split} partially matched by \code{"v1"} or the values containing \code{"other"} or \code{"var"}.}
+\item{split.keep}{A character vector. Only used when \code{split}, or \code{fsplit}, is supplied.
+If provided, then the sample will be split only on the values of \code{split.keep}.
+The values in \code{split.keep} will be partially matched to the values of \code{split}.
+To enable regular expressions, you need to add an \code{'@'} first.
+For example \code{split.keep = c("v1", "@other|var")} will keep only the value
+in \code{split} partially matched by \code{"v1"} or the values containing \code{"other"} or \code{"var"}.}
 
-\item{split.drop}{A character vector. Only used when \code{split}, or \code{fsplit}, is supplied. If provided, then the sample will be split only on the values that are not in \code{split.drop}. The values in \code{split.drop} will be partially matched to the values of \code{split}. To enable regular expressions, you need to add an \code{'@'} first. For example \code{split.drop = c("v1", "@other|var")} will drop only the value in \code{split} partially matched by \code{"v1"} or the values containing \code{"other"} or \code{"var"}.}
+\item{split.drop}{A character vector. Only used when \code{split}, or \code{fsplit}, is supplied.
+If provided, then the sample will be split only on the values that are not in \code{split.drop}.
+The values in \code{split.drop} will be partially matched to the values of \code{split}.
+To enable regular expressions, you need to add an \code{'@'} first. For example
+\code{split.drop = c("v1", "@other|var")} will drop only the value in \code{split} partially
+matched by \code{"v1"} or the values containing \code{"other"} or \code{"var"}.}
 
 \item{cluster}{Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1", "var2")]}, \code{cluster = c("var1", "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as fixed-effects in the estimation, you can leave it blank with \code{vcov = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [resp. 2nd] fixed-effect). You can interact two variables using \code{^} with the following syntax: \code{cluster = ~var1^var2} or \code{cluster = "var1^var2"}.}
 
@@ -92,65 +165,126 @@ feNmlm(
 
 \item{panel.id}{The panel identifiers. Can either be: i) a one sided formula (e.g. \code{panel.id = ~id+time}), ii) a character vector of length 2 (e.g. \code{panel.id=c('id', 'time')}, or iii) a character scalar of two variables separated by a comma (e.g. \code{panel.id='id,time'}). Note that you can combine variables with \code{^} only inside formulas (see the dedicated section in \code{\link{feols}}).}
 
-\item{start}{Starting values for the coefficients in the linear part (for the non-linear part, use NL.start). Can be: i) a numeric of length 1 (e.g. \code{start = 0}, the default), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients).}
+\item{start}{Starting values for the coefficients in the linear part (for the non-linear
+part, use NL.start). Can be: i) a numeric of length 1 (e.g. \code{start = 0}, the default),
+ii) a numeric vector of the exact same length as the number of variables, or iii) a
+named vector of any length (the names will be used to initialize the appropriate coefficients).}
 
-\item{jacobian.method}{(For NL models only) Character scalar. Provides the method used to numerically compute the Jacobian of the non-linear part. Can be either \code{"simple"} or \code{"Richardson"}. Default is \code{"simple"}. See the help of \code{\link{jacobian}} for more information.}
+\item{jacobian.method}{(For NL models only) Character scalar. Provides the method
+used to numerically compute the Jacobian of the non-linear part.
+Can be either \code{"simple"} or \code{"Richardson"}. Default is \code{"simple"}.
+See the help of \code{\link{jacobian}} for more information.}
 
-\item{useHessian}{Logical. Should the Hessian be computed in the optimization stage? Default is \code{TRUE}.}
+\item{useHessian}{Logical. Should the Hessian be computed in the optimization stage?
+Default is \code{TRUE}.}
 
-\item{hessian.args}{List of arguments to be passed to function \code{\link{genD}}. Defaults is missing. Only used with the presence of \code{NL.fml}.}
+\item{hessian.args}{List of arguments to be passed to function \code{\link{genD}}.
+Defaults is missing. Only used with the presence of \code{NL.fml}.}
 
-\item{opt.control}{List of elements to be passed to the optimization method \code{\link{nlminb}}. See the help page of \code{\link{nlminb}} for more information.}
+\item{opt.control}{List of elements to be passed to the optimization method \code{\link{nlminb}}.
+See the help page of \code{\link{nlminb}} for more information.}
 
-\item{nthreads}{The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. The default is to use 50\% of all threads. You can set permanently the number of threads used within this package using the function \code{\link{setFixest_nthreads}}.}
+\item{nthreads}{The number of threads. Can be: a) an integer lower than, or equal to,
+the maximum number of threads; b) 0: meaning all available threads will be used;
+c) a number strictly between 0 and 1 which represents the fraction of all threads to use.
+The default is to use 50\% of all threads. You can set permanently the number
+of threads used within this package using the function \code{\link{setFixest_nthreads}}.}
 
-\item{lean}{Logical, default is \code{FALSE}. If \code{TRUE} then all large objects are removed from the returned result: this will save memory but will block the possibility to use many methods. It is recommended to use the arguments \code{se} or \code{cluster} to obtain the appropriate standard-errors at estimation time, since obtaining different SEs won't be possible afterwards.}
+\item{lean}{Logical, default is \code{FALSE}. If \code{TRUE} then all large objects are removed
+from the returned result: this will save memory but will block the possibility to
+use many methods. It is recommended to use the arguments \code{se} or \code{cluster} to
+obtain the appropriate standard-errors at estimation time, since obtaining different
+SEs won't be possible afterwards.}
 
-\item{verbose}{Integer, default is 0. It represents the level of information that should be reported during the optimisation process. If \code{verbose=0}: nothing is reported. If \code{verbose=1}: the value of the coefficients and the likelihood are reported. If \code{verbose=2}: \code{1} + information on the computing time of the null model, the fixed-effects coefficients and the hessian are reported.}
+\item{verbose}{Integer, default is 0. It represents the level of information that
+should be reported during the optimisation process. If \code{verbose=0}:
+nothing is reported. If \code{verbose=1}: the value of the coefficients and the
+likelihood are reported. If \code{verbose=2}: \code{1} + information on the computing time of
+the null model, the fixed-effects coefficients and the hessian are reported.}
 
-\item{theta.init}{Positive numeric scalar. The starting value of the dispersion parameter if \code{family="negbin"}. By default, the algorithm uses as a starting value the theta obtained from the model with only the intercept.}
+\item{theta.init}{Positive numeric scalar. The starting value of the dispersion
+parameter if \code{family="negbin"}. By default, the algorithm uses as a starting value
+the theta obtained from the model with only the intercept.}
 
-\item{fixef.tol}{Precision used to obtain the fixed-effects. Defaults to \code{1e-5}. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations. Argument \code{fixef.tol} cannot be lower than \code{10000*.Machine$double.eps}. Note that this parameter is dynamically controlled by the algorithm.}
+\item{fixef.tol}{Precision used to obtain the fixed-effects. Defaults to \code{1e-5}.
+It corresponds to the maximum absolute difference allowed between two coefficients
+of successive iterations. Argument \code{fixef.tol} cannot be lower
+than \code{10000*.Machine$double.eps}. Note that this parameter is dynamically
+controlled by the algorithm.}
 
-\item{fixef.iter}{Maximum number of iterations in fixed-effects algorithm (only in use for 2+ fixed-effects). Default is 10000.}
+\item{fixef.iter}{Maximum number of iterations in fixed-effects algorithm
+(only in use for 2+ fixed-effects). Default is 10000.}
 
-\item{deriv.tol}{Precision used to obtain the fixed-effects derivatives. Defaults to \code{1e-4}. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations. Argument \code{deriv.tol} cannot be lower than \code{10000*.Machine$double.eps}.}
+\item{deriv.tol}{Precision used to obtain the fixed-effects derivatives. Defaults to \code{1e-4}.
+It corresponds to the maximum absolute difference allowed between two coefficients of
+successive iterations. Argument \code{deriv.tol} cannot be lower than \code{10000*.Machine$double.eps}.}
 
-\item{deriv.iter}{Maximum number of iterations in the algorithm to obtain the derivative of the fixed-effects (only in use for 2+ fixed-effects). Default is 1000.}
+\item{deriv.iter}{Maximum number of iterations in the algorithm to obtain the derivative
+of the fixed-effects (only in use for 2+ fixed-effects). Default is 1000.}
 
-\item{warn}{Logical, default is \code{TRUE}. Whether warnings should be displayed (concerns warnings relating to convergence state).}
+\item{warn}{Logical, default is \code{TRUE}. Whether warnings should be displayed
+(concerns warnings relating to convergence state).}
 
-\item{notes}{Logical. By default, two notes are displayed: when NAs are removed (to show additional information) and when some observations are removed because of only 0 (or 0/1) outcomes in a fixed-effect setup (in Poisson/Neg. Bin./Logit models). To avoid displaying these messages, you can set \code{notes = FALSE}. You can remove these messages permanently by using \code{setFixest_notes(FALSE)}.}
+\item{notes}{Logical. By default, two notes are displayed: when NAs are removed
+(to show additional information) and when some observations are removed because
+of only 0 (or 0/1) outcomes in a fixed-effect setup (in Poisson/Neg. Bin./Logit models).
+To avoid displaying these messages, you can set \code{notes = FALSE}. You can
+remove these messages permanently by using \code{setFixest_notes(FALSE)}.}
 
-\item{combine.quick}{Logical. When you combine different variables to transform them into a single fixed-effects you can do e.g. \code{y ~ x | paste(var1, var2)}. The algorithm provides a shorthand to do the same operation: \code{y ~ x | var1^var2}. Because pasting variables is a costly operation, the internal algorithm may use a numerical trick to hasten the process. The cost of doing so is that you lose the labels. If you are interested in getting the value of the fixed-effects coefficients after the estimation, you should use \code{combine.quick = FALSE}. By default it is equal to \code{FALSE} if the number of observations is lower than 50,000, and to \code{TRUE} otherwise.}
+\item{combine.quick}{Logical. When you combine different variables to transform them
+into a single fixed-effects you can do e.g. \code{y ~ x | paste(var1, var2)}.
+The algorithm provides a shorthand to do the same operation: \code{y ~ x | var1^var2}.
+Because pasting variables is a costly operation, the internal algorithm may use a
+numerical trick to hasten the process. The cost of doing so is that you lose the labels.
+If you are interested in getting the value of the fixed-effects coefficients
+after the estimation, you should use \code{combine.quick = FALSE}. By default it is
+equal to \code{FALSE} if the number of observations is lower than 50,000, and to \code{TRUE}
+otherwise.}
 
-\item{mem.clean}{Logical, default is \code{FALSE}. Only to be used if the data set is large compared to the available RAM. If \code{TRUE} then intermediary objects are removed as much as possible and \code{\link{gc}} is run before each substantial C++ section in the internal code to avoid memory issues.}
+\item{mem.clean}{Logical, default is \code{FALSE}. Only to be used if the data set is
+large compared to the available RAM. If \code{TRUE} then intermediary objects are removed as
+much as possible and \code{\link{gc}} is run before each substantial C++ section in the internal
+code to avoid memory issues.}
 
-\item{only.env}{(Advanced users.) Logical, default is \code{FALSE}. If \code{TRUE}, then only the environment used to make the estimation is returned.}
+\item{only.env}{(Advanced users.) Logical, default is \code{FALSE}. If \code{TRUE}, then only
+the environment used to make the estimation is returned.}
 
-\item{only.coef}{Logical, default is \code{FALSE}. If \code{TRUE}, then only the estimated coefficients are returned. Note that the length of the vector returned is always the length of the number of coefficients to be estimated: this means that the variables found to be collinear are returned with an NA value.}
+\item{only.coef}{Logical, default is \code{FALSE}. If \code{TRUE}, then only the estimated
+coefficients are returned. Note that the length of the vector returned is always
+the length of the number of coefficients to be estimated: this means that the
+variables found to be collinear are returned with an NA value.}
 
-\item{env}{(Advanced users.) A \code{fixest} environment created by a \code{fixest} estimation with \code{only.env = TRUE}. Default is missing. If provided, the data from this environment will be used to perform the estimation.}
+\item{env}{(Advanced users.) A \code{fixest} environment created by a \code{fixest} estimation
+with \code{only.env = TRUE}. Default is missing. If provided, the data from this environment
+will be used to perform the estimation.}
 
 \item{...}{Not currently used.}
 }
 \value{
-A \code{fixest} object. Note that \code{fixest} objects contain many elements and most of them are for internal use, they are presented here only for information. To access them, it is safer to use the user-level methods (e.g. \code{\link{vcov.fixest}}, \code{\link{resid.fixest}}, etc) or functions (like for instance \code{\link{fitstat}} to access any fit statistic).
+A \code{fixest} object. Note that \code{fixest} objects contain many elements and most of them
+are for internal use, they are presented here only for information. To access them,
+it is safer to use the user-level methods (e.g. \code{\link{vcov.fixest}}, \code{\link{resid.fixest}},
+etc) or functions (like for instance \code{\link{fitstat}} to access any fit statistic).
 \item{coefficients}{The named vector of coefficients.}
-\item{coeftable}{The table of the coefficients with their standard errors, z-values and p-values.}
+\item{coeftable}{The table of the coefficients with their standard errors,
+z-values and p-values.}
 \item{loglik}{The loglikelihood.}
 \item{iterations}{Number of iterations of the algorithm.}
 \item{nobs}{The number of observations.}
 \item{nparams}{The number of parameters of the model.}
 \item{call}{The call.}
 \item{fml}{The linear formula of the call.}
-\item{fml_all}{A list containing different parts of the formula. Always contain the linear formula. Then, if relevant: \code{fixef}: the fixed-effects; \code{NL}: the non linear part of the formula.}
+\item{fml_all}{A list containing different parts of the formula. Always contain
+the linear formula. Then, if relevant: \code{fixef}: the fixed-effects; \code{NL}: the non linear
+part of the formula.}
 \item{ll_null}{Log-likelihood of the null model (i.e. with the intercept only).}
 \item{pseudo_r2}{The adjusted pseudo R2.}
 \item{message}{The convergence message from the optimization procedures.}
-\item{sq.cor}{Squared correlation between the dependent variable and the expected predictor (i.e. fitted.values) obtained by the estimation.}
+\item{sq.cor}{Squared correlation between the dependent variable and the expected
+predictor (i.e. fitted.values) obtained by the estimation.}
 \item{hessian}{The Hessian of the parameters.}
-\item{fitted.values}{The fitted values are the expected value of the dependent variable for the fitted model: that is \eqn{E(Y|X)}.}
+\item{fitted.values}{The fitted values are the expected value of the dependent variable
+for the fitted model: that is \eqn{E(Y|X)}.}
 \item{cov.iid}{The variance-covariance matrix of the parameters.}
 \item{se}{The standard-error of the parameters.}
 \item{scores}{The matrix of the scores (first derivative for each observation).}
@@ -159,62 +293,102 @@ A \code{fixest} object. Note that \code{fixest} objects contain many elements an
 \item{sumFE}{The sum of the fixed-effects for each observation.}
 \item{offset}{The offset formula.}
 \item{NL.fml}{The nonlinear formula of the call.}
-\item{bounds}{Whether the coefficients were upper or lower bounded. -- This can only be the case when a non-linear formula is included and the arguments 'lower' or 'upper' are provided.}
-\item{isBounded}{The logical vector that gives for each coefficient whether it was bounded or not. This can only be the case when a non-linear formula is included and the arguments 'lower' or 'upper' are provided.}
+\item{bounds}{Whether the coefficients were upper or lower bounded. -- This can only be
+the case when a non-linear formula is included and the arguments 'lower' or 'upper'
+are provided.}
+\item{isBounded}{The logical vector that gives for each coefficient whether it was
+bounded or not. This can only be the case when a non-linear formula is included
+and the arguments 'lower' or 'upper' are provided.}
 \item{fixef_vars}{The names of each fixed-effect dimension.}
-\item{fixef_id}{The list (of length the number of fixed-effects) of the fixed-effects identifiers for each observation.}
-\item{fixef_sizes}{The size of each fixed-effect (i.e. the number of unique identifierfor each fixed-effect dimension).}
-\item{obs_selection}{(When relevant.) List containing vectors of integers. It represents the sequential selection of observation vis a vis the original data set.}
-\item{fixef_removed}{In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the list (for each fixed-effect dimension) of the fixed-effect identifiers that were removed.}
+\item{fixef_id}{The list (of length the number of fixed-effects) of the
+fixed-effects identifiers for each observation.}
+\item{fixef_sizes}{The size of each fixed-effect (i.e. the number of unique
+identifier for each fixed-effect dimension).}
+\item{obs_selection}{(When relevant.) List containing vectors of integers. It
+represents the sequential selection of observation vis a vis the original data set.}
+\item{fixef_removed}{In the case there were fixed-effects and some observations
+were removed because of only 0/1 outcome within a fixed-effect, it gives the
+list (for each fixed-effect dimension) of the fixed-effect identifiers that were removed.}
 \item{theta}{In the case of a negative binomial estimation: the overdispersion parameter.}
 
 @seealso
-See also \code{\link{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link{fixef.fixest}} to extract the fixed-effects coefficients, and the function \code{\link{etable}} to visualize the results of multiple estimations.
+See also \code{\link{summary.fixest}} to see the results with the appropriate standard-errors,
+\code{\link{fixef.fixest}} to extract the fixed-effects coefficients, and the function \code{\link{etable}}
+to visualize the results of multiple estimations.
 
-And other estimation methods: \code{\link{feols}}, \code{\link{femlm}}, \code{\link{feglm}}, \code{\link[=feglm]{fepois}}, \code{\link[=femlm]{fenegbin}}.
+And other estimation methods: \code{\link{feols}}, \code{\link{femlm}}, \code{\link{feglm}},
+\code{\link[=feglm]{fepois}}, \code{\link[=femlm]{fenegbin}}.
 }
 \description{
-This function estimates maximum likelihood models (e.g., Poisson or Logit) with non-linear in parameters right-hand-sides and is efficient to handle any number of fixed effects. If you do not use non-linear in parameters right-hand-side, use \code{\link{femlm}} or \code{\link{feglm}} instead (their design is simpler).
+This function estimates maximum likelihood models (e.g., Poisson or Logit) with non-linear
+in parameters right-hand-sides and is efficient to handle any number of fixed effects.
+If you do not use non-linear in parameters right-hand-side, use \code{\link{femlm}} or \code{\link{feglm}}
+instead (their design is simpler).
 }
 \details{
-This function estimates maximum likelihood models where the conditional expectations are as follows:
+This function estimates maximum likelihood models where the conditional expectations
+are as follows:
 
 Gaussian likelihood:
 \deqn{E(Y|X)=X\beta}{E(Y|X) = X*beta}
 Poisson and Negative Binomial likelihoods:
 \deqn{E(Y|X)=\exp(X\beta)}{E(Y|X) = exp(X*beta)}
-where in the Negative Binomial there is the parameter \eqn{\theta}{theta} used to model the variance as \eqn{\mu+\mu^2/\theta}{mu+mu^2/theta}, with \eqn{\mu}{mu} the conditional expectation.
+where in the Negative Binomial there is the parameter \eqn{\theta}{theta} used to
+model the variance as \eqn{\mu+\mu^2/\theta}{mu+mu^2/theta}, with \eqn{\mu}{mu} the
+conditional expectation.
 Logit likelihood:
 \deqn{E(Y|X)=\frac{\exp(X\beta)}{1+\exp(X\beta)}}{E(Y|X) = exp(X*beta) / (1 + exp(X*beta))}
 
 When there are one or more fixed-effects, the conditional expectation can be written as:
 \deqn{E(Y|X) = h(X\beta+\sum_{k}\sum_{m}\gamma_{m}^{k}\times C_{im}^{k}),}
-where \eqn{h(.)} is the function corresponding to the likelihood function as shown before. \eqn{C^k} is the matrix associated to fixed-effect dimension \eqn{k} such that \eqn{C^k_{im}} is equal to 1 if observation \eqn{i} is of category \eqn{m} in the fixed-effect dimension \eqn{k} and 0 otherwise.
+where \eqn{h(.)} is the function corresponding to the likelihood function as shown before.
+\eqn{C^k} is the matrix associated to fixed-effect dimension \eqn{k} such that \eqn{C^k_{im}}
+is equal to 1 if observation \eqn{i} is of category \eqn{m} in the
+fixed-effect dimension \eqn{k} and 0 otherwise.
 
-When there are non linear in parameters functions, we can schematically split the set of regressors in two:
+When there are non linear in parameters functions, we can schematically split
+the set of regressors in two:
 \deqn{f(X,\beta)=X^1\beta^1 + g(X^2,\beta^2)}
-with first a linear term and then a non linear part expressed by the function g. That is, we add a non-linear term to the linear terms (which are \eqn{X*beta} and the fixed-effects coefficients). It is always better (more efficient) to put into the argument \code{NL.fml} only the non-linear in parameter terms, and add all linear terms in the \code{fml} argument.
+with first a linear term and then a non linear part expressed by the function g. That is,
+we add a non-linear term to the linear terms (which are \eqn{X*beta} and
+the fixed-effects coefficients). It is always better (more efficient) to put
+into the argument \code{NL.fml} only the non-linear in parameter terms, and
+add all linear terms in the \code{fml} argument.
 
-To estimate only a non-linear formula without even the intercept, you must exclude the intercept from the linear formula by using, e.g., \code{fml = z~0}.
+To estimate only a non-linear formula without even the intercept, you must
+exclude the intercept from the linear formula by using, e.g., \code{fml = z~0}.
 
-The over-dispersion parameter of the Negative Binomial family, theta, is capped at 10,000. If theta reaches this high value, it means that there is no overdispersion.
+The over-dispersion parameter of the Negative Binomial family, theta,
+is capped at 10,000. If theta reaches this high value, it means that there is no overdispersion.
 }
 \section{Lagging variables}{
 
 
-To use leads/lags of variables in the estimation, you can: i) either provide the argument \code{panel.id}, ii) either set your data set as a panel with the function \code{\link{panel}}, \code{\link[=l]{f}} and \code{\link[=l]{d}}.
+To use leads/lags of variables in the estimation, you can: i) either provide the argument
+\code{panel.id}, ii) either set your data set as a panel with the function
+\code{\link{panel}}, \code{\link[=l]{f}} and \code{\link[=l]{d}}.
 
-You can provide several leads/lags/differences at once: e.g. if your formula is equal to \code{f(y) ~ l(x, -1:1)}, it means that the dependent variable is equal to the lead of \code{y}, and you will have as explanatory variables the lead of \code{x1}, \code{x1} and the lag of \code{x1}. See the examples in function \code{\link{l}} for more details.
+You can provide several leads/lags/differences at once: e.g. if your formula is equal to
+\code{f(y) ~ l(x, -1:1)}, it means that the dependent variable is equal to the lead of \code{y},
+and you will have as explanatory variables the lead of \code{x1}, \code{x1} and the lag of \code{x1}.
+See the examples in function \code{\link{l}} for more details.
 }
 
 \section{Interactions}{
 
 
-You can interact a numeric variable with a "factor-like" variable by using \code{i(factor_var, continuous_var, ref)}, where \code{continuous_var} will be interacted with each value of \code{factor_var} and the argument \code{ref} is a value of \code{factor_var} taken as a reference (optional).
+You can interact a numeric variable with a "factor-like" variable by using
+\code{i(factor_var, continuous_var, ref)}, where \code{continuous_var} will be interacted with
+each value of \code{factor_var} and the argument \code{ref} is a value of \code{factor_var}
+taken as a reference (optional).
 
-Using this specific way to create interactions leads to a different display of the interacted values in \code{\link{etable}}. See examples.
+Using this specific way to create interactions leads to a different display of the
+interacted values in \code{\link{etable}}. See examples.
 
-It is important to note that \emph{if you do not care about the standard-errors of the interactions}, then you can add interactions in the fixed-effects part of the formula, it will be incomparably faster (using the syntax \code{factor_var[continuous_var]}, as explained in the section \dQuote{Varying slopes}).
+It is important to note that \emph{if you do not care about the standard-errors of
+the interactions}, then you can add interactions in the fixed-effects part of the formula,
+it will be incomparably faster (using the syntax \code{factor_var[continuous_var]}, as explained
+in the section \dQuote{Varying slopes}).
 
 The function \code{\link{i}} has in fact more arguments, please see details in its associated help page.
 }
@@ -222,54 +396,103 @@ The function \code{\link{i}} has in fact more arguments, please see details in i
 \section{On standard-errors}{
 
 
-Standard-errors can be computed in different ways, you can use the arguments \code{se} and \code{ssc} in \code{\link{summary.fixest}} to define how to compute them. By default, in the presence of fixed-effects, standard-errors are automatically clustered.
+Standard-errors can be computed in different ways, you can use the arguments \code{se} and \code{ssc}
+in \code{\link{summary.fixest}} to define how to compute them. By default, in the presence
+of fixed-effects, standard-errors are automatically clustered.
 
-The following vignette: \href{https://lrberge.github.io/fixest/articles/standard_errors.html}{On standard-errors} describes in details how the standard-errors are computed in \code{fixest} and how you can replicate standard-errors from other software.
+The following vignette: \href{https://lrberge.github.io/fixest/articles/standard_errors.html}{On standard-errors} describes in details how the standard-errors are computed in
+\code{fixest} and how you can replicate standard-errors from other software.
 
-You can use the functions \code{\link{setFixest_vcov}} and \code{\link[=ssc]{setFixest_ssc}} to permanently set the way the standard-errors are computed.
+You can use the functions \code{\link{setFixest_vcov}} and \code{\link[=ssc]{setFixest_ssc}} to
+permanently set the way the standard-errors are computed.
 }
 
 \section{Multiple estimations}{
 
 
-Multiple estimations can be performed at once, they just have to be specified in the formula. Multiple estimations yield a \code{fixest_multi} object which is \sQuote{kind of} a list of all the results but includes specific methods to access the results in a handy way. Please have a look at the dedicated vignette: \href{https://lrberge.github.io/fixest/articles/multiple_estimations.html}{Multiple estimations}.
+Multiple estimations can be performed at once, they just have to be specified in the formula.
+Multiple estimations yield a \code{fixest_multi} object which is \sQuote{kind of} a list of
+all the results but includes specific methods to access the results in a handy way.
+Please have a look at the dedicated vignette:
+\href{https://lrberge.github.io/fixest/articles/multiple_estimations.html}{Multiple estimations}.
 
-To include multiple dependent variables, wrap them in \code{c()} (\code{list()} also works). For instance \code{fml = c(y1, y2) ~ x1} would estimate the model \code{fml = y1 ~ x1} and then the model \code{fml = y2 ~ x1}.
+To include multiple dependent variables, wrap them in \code{c()} (\code{list()} also works).
+For instance \code{fml = c(y1, y2) ~ x1} would estimate the model \code{fml = y1 ~ x1} and
+then the model \code{fml = y2 ~ x1}.
 
-To include multiple independent variables, you need to use the stepwise functions. There are 4 stepwise functions: \code{sw}, \code{sw0}, \code{csw}, \code{csw0}, and \code{mvsw}. Of course \code{sw} stands for stepwise, and \code{csw} for cumulative stepwise. Finally \code{mvsw} is a bit special, it stands for multiverse stepwise. Let's explain that.
-Assume you have the following formula: \code{fml = y ~ x1 + sw(x2, x3)}. The stepwise function \code{sw} will estimate the following two models: \code{y ~ x1 + x2} and \code{y ~ x1 + x3}. That is, each element in \code{sw()} is sequentially, and separately, added to the formula. Would have you used \code{sw0} in lieu of \code{sw}, then the model \code{y ~ x1} would also have been estimated. The \code{0} in the name means that the model without any stepwise element also needs to be estimated.
-The prefix \code{c} means cumulative: each stepwise element is added to the next. That is, \code{fml = y ~ x1 + csw(x2, x3)} would lead to the following models \code{y ~ x1 + x2} and \code{y ~ x1 + x2 + x3}. The \code{0} has the same meaning and would also lead to the model without the stepwise elements to be estimated: in other words, \code{fml = y ~ x1 + csw0(x2, x3)} leads to the following three models: \code{y ~ x1}, \code{y ~ x1 + x2} and \code{y ~ x1 + x2 + x3}.
-Finally \code{mvsw} will add, in a stepwise fashion all possible combinations of the variables in its arguments. For example \code{mvsw(x1, x2, x3)} is equivalent to \code{sw0(x1, x2, x3, x1 + x2, x1 + x3, x2 + x3, x1 + x2 + x3)}. The number of models to estimate grows at a factorial rate: so be cautious!
+To include multiple independent variables, you need to use the stepwise functions.
+There are 4 stepwise functions: \code{sw}, \code{sw0}, \code{csw}, \code{csw0}, and \code{mvsw}. Of course \code{sw}
+stands for stepwise, and \code{csw} for cumulative stepwise. Finally \code{mvsw} is a bit special,
+it stands for multiverse stepwise. Let's explain that.
+Assume you have the following formula: \code{fml = y ~ x1 + sw(x2, x3)}.
+The stepwise function \code{sw} will estimate the following two models: \code{y ~ x1 + x2} and
+\code{y ~ x1 + x3}. That is, each element in \code{sw()} is sequentially, and separately,
+added to the formula. Would have you used \code{sw0} in lieu of \code{sw}, then the model
+\code{y ~ x1} would also have been estimated. The \code{0} in the name means that the model
+without any stepwise element also needs to be estimated.
+The prefix \code{c} means cumulative: each stepwise element is added to the next. That is,
+\code{fml = y ~ x1 + csw(x2, x3)} would lead to the following models \code{y ~ x1 + x2} and
+\code{y ~ x1 + x2 + x3}. The \code{0} has the same meaning and would also lead to the model without
+the stepwise elements to be estimated: in other words, \code{fml = y ~ x1 + csw0(x2, x3)}
+leads to the following three models: \code{y ~ x1}, \code{y ~ x1 + x2} and \code{y ~ x1 + x2 + x3}.
+Finally \code{mvsw} will add, in a stepwise fashion all possible combinations of the variables
+in its arguments. For example \code{mvsw(x1, x2, x3)} is equivalent to
+\code{sw0(x1, x2, x3, x1 + x2, x1 + x3, x2 + x3, x1 + x2 + x3)}. The number of models
+to estimate grows at a factorial rate: so be cautious!
 
-Multiple independent variables can be combined with multiple dependent variables, as in \code{fml = c(y1, y2) ~ cw(x1, x2, x3)} which would lead to 6 estimations. Multiple estimations can also be combined to split samples (with the arguments \code{split}, \code{fsplit}).
+Multiple independent variables can be combined with multiple dependent variables, as in
+\code{fml = c(y1, y2) ~ cw(x1, x2, x3)} which would lead to 6 estimations. Multiple
+estimations can also be combined to split samples (with the arguments \code{split}, \code{fsplit}).
 
-You can also add fixed-effects in a stepwise fashion. Note that you cannot perform stepwise estimations on the IV part of the formula (\code{feols} only).
+You can also add fixed-effects in a stepwise fashion. Note that you cannot perform
+stepwise estimations on the IV part of the formula (\code{feols} only).
 
-If NAs are present in the sample, to avoid too many messages, only NA removal concerning the variables common to all estimations is reported.
+If NAs are present in the sample, to avoid too many messages, only NA removal
+concerning the variables common to all estimations is reported.
 
-A note on performance. The feature of multiple estimations has been highly optimized for \code{feols}, in particular in the presence of fixed-effects. It is faster to estimate multiple models using the formula rather than with a loop. For non-\code{feols} models using the formula is roughly similar to using a loop performance-wise.
+A note on performance. The feature of multiple estimations has been highly optimized for
+\code{feols}, in particular in the presence of fixed-effects. It is faster to estimate
+multiple models using the formula rather than with a loop. For non-\code{feols} models using
+the formula is roughly similar to using a loop performance-wise.
 }
 
 \section{Argument sliding}{
 
 
-When the data set has been set up globally using \code{\link{setFixest_estimation}}\code{(data = data_set)}, the argument \code{vcov} can be used implicitly. This means that calls such as \code{feols(y ~ x, "HC1")}, or \code{feols(y ~ x, ~id)}, are valid: i) the data is automatically deduced from the global settings, and ii) the \code{vcov} is deduced to be the second argument.
+When the data set has been set up globally using
+\code{\link{setFixest_estimation}}\code{(data = data_set)}, the argument \code{vcov} can be used implicitly.
+This means that calls such as \code{feols(y ~ x, "HC1")}, or \code{feols(y ~ x, ~id)}, are valid:
+i) the data is automatically deduced from the global settings, and ii) the \code{vcov}
+is deduced to be the second argument.
 }
 
 \section{Piping}{
 
 
-Although the argument 'data' is placed in second position, the data can be piped to the estimation functions. For example, with R >= 4.1, \code{mtcars |> feols(mpg ~ cyl)} works as \code{feols(mpg ~ cyl, mtcars)}.
+Although the argument 'data' is placed in second position, the data can be piped to the
+estimation functions. For example, with R >= 4.1, \code{mtcars |> feols(mpg ~ cyl)} works as
+\code{feols(mpg ~ cyl, mtcars)}.
 }
 
 \section{Tricks to estimate multiple LHS}{
 
 
-To use multiple dependent variables in \code{fixest} estimations, you need to include them in a vector: like in \code{c(y1, y2, y3)}.
+To use multiple dependent variables in \code{fixest} estimations, you need to include them
+in a vector: like in \code{c(y1, y2, y3)}.
 
-First, if names are stored in a vector, they can readily be inserted in a formula to perform multiple estimations using the dot square bracket operator. For instance if \code{my_lhs = c("y1", "y2")}, calling \code{fixest} with, say \code{feols(.[my_lhs] ~ x1, etc)} is equivalent to using \code{feols(c(y1, y2) ~ x1, etc)}. Beware that this is a special feature unique to the \emph{left-hand-side} of \code{fixest} estimations (the default behavior of the DSB operator is to aggregate with sums, see \code{\link{xpd}}).
+First, if names are stored in a vector, they can readily be inserted in a formula to
+perform multiple estimations using the dot square bracket operator. For instance if
+\code{my_lhs = c("y1", "y2")}, calling \code{fixest} with, say \code{feols(.[my_lhs] ~ x1, etc)} is
+equivalent to using \code{feols(c(y1, y2) ~ x1, etc)}. Beware that this is a special feature
+unique to the \emph{left-hand-side} of \code{fixest} estimations (the default behavior of the DSB
+operator is to aggregate with sums, see \code{\link{xpd}}).
 
-Second, you can use a regular expression to grep the left-hand-sides on the fly. When the \code{..("regex")} feature is used naked on the LHS, the variables grepped are inserted into \code{c()}. For example \verb{..("Pe") ~ Sepal.Length, iris} is equivalent to \verb{c(Petal.Length, Petal.Width) ~ Sepal.Length, iris}. Beware that this is a special feature unique to the \emph{left-hand-side} of \code{fixest} estimations (the default behavior of \code{..("regex")} is to aggregate with sums, see \code{\link{xpd}}).
+Second, you can use a regular expression to grep the left-hand-sides on the fly. When the
+\code{..("regex")} feature is used naked on the LHS, the variables grepped are inserted into
+\code{c()}. For example \verb{..("Pe") ~ Sepal.Length, iris} is equivalent to
+\verb{c(Petal.Length, Petal.Width) ~ Sepal.Length, iris}. Beware that this is a
+special feature unique to the \emph{left-hand-side} of \code{fixest} estimations
+(the default behavior of \code{..("regex")} is to aggregate with sums, see \code{\link{xpd}}).
 }
 
 \section{Dot square bracket operator in formulas}{
@@ -355,15 +578,19 @@ points(x, fitted(est2_NL), col = 4, pch = 2)
 
 }
 \references{
-Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (\href{https://github.com/lrberge/fixest/blob/master/_DOCS/FENmlm_paper.pdf}{}).
+Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with
+multiple fixed-effects: the R package FENmlm." CREA Discussion Papers,
+13 (\href{https://github.com/lrberge/fixest/blob/master/_DOCS/FENmlm_paper.pdf}{}).
 
 For models with multiple fixed-effects:
 
-Gaure, Simen, 2013, "OLS with multiple high dimensional category variables", Computational Statistics & Data Analysis 66 pp. 8--18
+Gaure, Simen, 2013, "OLS with multiple high dimensional category variables",
+Computational Statistics & Data Analysis 66 pp. 8--18
 
 On the unconditionnal Negative Binomial model:
 
-Allison, Paul D and Waterman, Richard P, 2002, "Fixed-Effects Negative Binomial Regression Models", Sociological Methodology 32(1) pp. 247--265
+Allison, Paul D and Waterman, Richard P, 2002, "Fixed-Effects Negative
+Binomial Regression Models", Sociological Methodology 32(1) pp. 247--265
 }
 \author{
 Laurent Berge

@@ -1812,7 +1812,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
   if(res$multicol){
     var_collinear = colnames(X)[est$is_excluded]
     if(notes){
-      msg = sma("The variable{s, enum.q, has ? var_collinear} been removed because ",
+      msg = sma("The variable{$s, enum.q, has ? var_collinear} been removed because ",
                 "of collinearity (see $collin.var).", .last = "ws")
       if(IN_MULTI){
         stack_multi_notes(msg)
@@ -2211,48 +2211,81 @@ feols.fit = function(y, X, fixef_df, vcov, offset, split, fsplit, split.keep, sp
 #' @inheritSection feols Tricks to estimate multiple LHS
 #' @inheritSection xpd Dot square bracket operator in formulas
 #'
-#' @param family Family to be used for the estimation. Defaults to `gaussian()`. See [`family`] for details of family functions.
-#' @param start Starting values for the coefficients. Can be: i) a numeric of length 1 (e.g. `start = 0`), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients). Default is missing.
-#' @param etastart Numeric vector of the same length as the data. Starting values for the linear predictor. Default is missing.
-#' @param mustart Numeric vector of the same length as the data. Starting values for the vector of means. Default is missing.
-#' @param fixef.tol Precision used to obtain the fixed-effects. Defaults to `1e-6`. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations.
+#' @param family Family to be used for the estimation. Defaults to `gaussian()`. 
+#' See [`family`] for details of family functions.
+#' @param start Starting values for the coefficients. Can be: i) a numeric of length 1 
+#' (e.g. `start = 0`), ii) a numeric vector of the exact same length as the number of variables, 
+#' or iii) a named vector of any length (the names will be used to initialize the 
+#' appropriate coefficients). Default is missing.
+#' @param etastart Numeric vector of the same length as the data. Starting values for the 
+#' linear predictor. Default is missing.
+#' @param mustart Numeric vector of the same length as the data. Starting values for the 
+#' vector of means. Default is missing.
+#' @param fixef.tol Precision used to obtain the fixed-effects. Defaults to `1e-6`. 
+#' It corresponds to the maximum absolute difference allowed between 
+#' two coefficients of successive iterations.
 #' @param glm.iter Number of iterations of the glm algorithm. Default is 25.
 #' @param glm.tol Tolerance level for the glm algorithm. Default is `1e-8`.
-#' @param verbose Integer. Higher values give more information. In particular, it can detail the number of iterations in the demeaning algoritmh (the first number is the left-hand-side, the other numbers are the right-hand-side variables). It can also detail the step-halving algorithm.
-#' @param notes Logical. By default, three notes are displayed: when NAs are removed, when some fixed-effects are removed because of only 0 (or 0/1) outcomes, or when a variable is dropped because of collinearity. To avoid displaying these messages, you can set `notes = FALSE`. You can remove these messages permanently by using `setFixest_notes(FALSE)`.
+#' @param verbose Integer. Higher values give more information. In particular, 
+#' it can detail the number of iterations in the demeaning algoritmh (the first number 
+#' is the left-hand-side, the other numbers are the right-hand-side variables). 
+#' It can also detail the step-halving algorithm.
+#' @param notes Logical. By default, three notes are displayed: when NAs are removed, 
+#' when some fixed-effects are removed because of only 0 (or 0/1) outcomes, or when a 
+#' variable is dropped because of collinearity. To avoid displaying these messages, 
+#' you can set `notes = FALSE`. You can remove these messages permanently 
+#' by using `setFixest_notes(FALSE)`.
 #'
 #' @details
-#' The core of the GLM are the weighted OLS estimations. These estimations are performed with [`feols`]. The method used to demean each variable along the fixed-effects is based on Berge (2018), since this is the same problem to solve as for the Gaussian case in a ML setup.
+#' The core of the GLM are the weighted OLS estimations. These estimations are performed 
+#' with [`feols`]. The method used to demean each variable along the fixed-effects 
+#' is based on Berge (2018), since this is the same problem to solve as for the Gaussian 
+#' case in a ML setup.
 #'
 #' @return
-#' A `fixest` object. Note that `fixest` objects contain many elements and most of them are for internal use, they are presented here only for information. To access them, it is safer to use the user-level methods (e.g. [`vcov.fixest`], [`resid.fixest`], etc) or functions (like for instance [`fitstat`] to access any fit statistic).
+#' A `fixest` object. Note that `fixest` objects contain many elements and most of them 
+#' are for internal use, they are presented here only for information. To access them, 
+#' it is safer to use the user-level methods (e.g. [`vcov.fixest`], [`resid.fixest`], 
+#' etc) or functions (like for instance [`fitstat`] to access any fit statistic).
+#' 
 #' \item{nobs}{The number of observations.}
 #' \item{fml}{The linear formula of the call.}
 #' \item{call}{The call of the function.}
 #' \item{method}{The method used to estimate the model.}
 #' \item{family}{The family used to estimate the model.}
-#' \item{fml_all}{A list containing different parts of the formula. Always contain the linear formula. Then, if relevant: `fixef`: the fixed-effects.}
+#' \item{fml_all}{A list containing different parts of the formula. Always contain the 
+#' linear formula. Then, if relevant: `fixef`: the fixed-effects.}
 #' \item{nparams}{The number of parameters of the model.}
 #' \item{fixef_vars}{The names of each fixed-effect dimension.}
-#' \item{fixef_id}{The list (of length the number of fixed-effects) of the fixed-effects identifiers for each observation.}
-#' \item{fixef_sizes}{The size of each fixed-effect (i.e. the number of unique identifierfor each fixed-effect dimension).}
-#' \item{y}{(When relevant.) The dependent variable (used to compute the within-R2 when fixed-effects are present).}
+#' \item{fixef_id}{The list (of length the number of fixed-effects) of the 
+#' fixed-effects identifiers for each observation.}
+#' \item{fixef_sizes}{The size of each fixed-effect (i.e. the number of unique identifier for 
+#' each fixed-effect dimension).}
+#' \item{y}{(When relevant.) The dependent variable (used to compute the within-R2 
+#' when fixed-effects are present).}
 #' \item{convStatus}{Logical, convergence status of the IRWLS algorithm.}
 #' \item{irls_weights}{The weights of the last iteration of the IRWLS algorithm.}
-#' \item{obs_selection}{(When relevant.) List containing vectors of integers. It represents the sequential selection of observation vis a vis the original data set.}
-#' \item{fixef_removed}{(When relevant.) In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the list (for each fixed-effect dimension) of the fixed-effect identifiers that were removed.}
+#' \item{obs_selection}{(When relevant.) List containing vectors of integers. It represents 
+#' the sequential selection of observation vis a vis the original data set.}
+#' \item{fixef_removed}{(When relevant.) In the case there were fixed-effects and some 
+#' observations were removed because of only 0/1 outcome within a fixed-effect, it gives the 
+#' list (for each fixed-effect dimension) of the fixed-effect identifiers that were removed.}
 #' \item{coefficients}{The named vector of estimated coefficients.}
-#' \item{coeftable}{The table of the coefficients with their standard errors, z-values and p-values.}
+#' \item{coeftable}{The table of the coefficients with their standard errors, 
+#' z-values and p-values.}
 #' \item{loglik}{The loglikelihood.}
 #' \item{deviance}{Deviance of the fitted model.}
 #' \item{iterations}{Number of iterations of the algorithm.}
 #' \item{ll_null}{Log-likelihood of the null model (i.e. with the intercept only).}
-#' \item{ssr_null}{Sum of the squared residuals of the null model (containing only with the intercept).}
+#' \item{ssr_null}{Sum of the squared residuals of the null model (containing only 
+#' with the intercept).}
 #' \item{pseudo_r2}{The adjusted pseudo R2.}
-#' \item{fitted.values}{The fitted values are the expected value of the dependent variable for the fitted model: that is \eqn{E(Y|X)}.}
+#' \item{fitted.values}{The fitted values are the expected value of the dependent 
+#' variable for the fitted model: that is \eqn{E(Y|X)}.}
 #' \item{linear.predictors}{The linear predictors.}
 #' \item{residuals}{The residuals (y minus the fitted values).}
-#' \item{sq.cor}{Squared correlation between the dependent variable and the expected predictor (i.e. fitted.values) obtained by the estimation.}
+#' \item{sq.cor}{Squared correlation between the dependent variable and the expected 
+#' predictor (i.e. fitted.values) obtained by the estimation.}
 #' \item{hessian}{The Hessian of the parameters.}
 #' \item{cov.iid}{The variance-covariance matrix of the parameters.}
 #' \item{se}{The standard-error of the parameters.}
@@ -2261,14 +2294,17 @@ feols.fit = function(y, X, fixef_df, vcov, offset, split, fsplit, split.keep, sp
 #' \item{sumFE}{The sum of the fixed-effects coefficients for each observation.}
 #' \item{offset}{(When relevant.) The offset formula.}
 #' \item{weights}{(When relevant.) The weights formula.}
-#' \item{collin.var}{(When relevant.) Vector containing the variables removed because of collinearity.}
+#' \item{collin.var}{(When relevant.) Vector containing the variables removed 
+#' because of collinearity.}
 #' \item{collin.coef}{(When relevant.) Vector of coefficients, where the values of the variables removed because of collinearity are NA.}
 #'
 #'
 #'
 #'
 #' @seealso
-#' See also [`summary.fixest`] to see the results with the appropriate standard-errors, [`fixef.fixest`] to extract the fixed-effects coefficients, and the function [`etable`] to visualize the results of multiple estimations.
+#' See also [`summary.fixest`] to see the results with the appropriate standard-errors, 
+#' [`fixef.fixest`] to extract the fixed-effects coefficients, and the function [`etable`] 
+#' to visualize the results of multiple estimations.
 #' And other estimation methods: [`feols`], [`femlm`], [`fenegbin`], [`feNmlm`].
 #'
 #' @author
@@ -2276,11 +2312,14 @@ feols.fit = function(y, X, fixef_df, vcov, offset, split, fsplit, split.keep, sp
 #'
 #' @references
 #'
-#' Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 ([](https://github.com/lrberge/fixest/blob/master/_DOCS/FENmlm_paper.pdf)).
+#' Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with 
+#' multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 
+#' 13 ([](https://github.com/lrberge/fixest/blob/master/_DOCS/FENmlm_paper.pdf)).
 #'
 #' For models with multiple fixed-effects:
 #'
-#' Gaure, Simen, 2013, "OLS with multiple high dimensional category variables", Computational Statistics & Data Analysis 66 pp. 8--18
+#' Gaure, Simen, 2013, "OLS with multiple high dimensional category variables", 
+#' Computational Statistics & Data Analysis 66 pp. 8--18
 #'
 #'
 #' @examples
@@ -2331,13 +2370,13 @@ feols.fit = function(y, X, fixef_df, vcov, offset, split, fsplit, split.keep, sp
 #'
 #'
 feglm = function(fml, data, family = "gaussian", vcov, offset, weights, subset, split,
-         fsplit, split.keep, split.drop, cluster, se, ssc, panel.id, start = NULL,
-         etastart = NULL, mustart = NULL, fixef, fixef.rm = "perfect",
-         fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10,
-         glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(),
-         lean = FALSE, warn = TRUE, notes = getFixest_notes(), verbose = 0,
-         only.coef = FALSE,
-         combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
+                 fsplit, split.keep, split.drop, cluster, se, ssc, panel.id, start = NULL,
+                 etastart = NULL, mustart = NULL, fixef, fixef.rm = "perfect",
+                 fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10,
+                 glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(),
+                 lean = FALSE, warn = TRUE, notes = getFixest_notes(), verbose = 0,
+                 only.coef = FALSE,
+                 combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
 
   if(missing(weights)) weights = NULL
 
@@ -2347,21 +2386,21 @@ feglm = function(fml, data, family = "gaussian", vcov, offset, weights, subset, 
     set_defaults("fixest_estimation")
     call_env = new.env(parent = parent.frame())
 
-    env = try(fixest_env(fml=fml, data=data, family = family,
-               offset = offset, weights = weights, subset = subset,
-               split = split, fsplit = fsplit,
-               split.keep = split.keep, split.drop = split.drop,
-               vcov = vcov,
-               cluster = cluster, se = se, ssc = ssc,
-               panel.id = panel.id, linear.start = start,
-               etastart=etastart, mustart = mustart, fixef = fixef,
-               fixef.rm = fixef.rm, fixef.tol = fixef.tol,
-               fixef.iter=fixef.iter, collin.tol = collin.tol,
-               glm.iter = glm.iter, glm.tol = glm.tol,
-               nthreads = nthreads, lean = lean, warn = warn, notes = notes,
-               verbose = verbose, combine.quick = combine.quick,
-               mem.clean = mem.clean, only.coef = only.coef, origin = "feglm",
-               mc_origin = match.call(), call_env = call_env, ...), silent = TRUE)
+    env = try(fixest_env(fml = fml, data = data, family = family,
+                         offset = offset, weights = weights, subset = subset,
+                         split = split, fsplit = fsplit,
+                         split.keep = split.keep, split.drop = split.drop,
+                         vcov = vcov,
+                         cluster = cluster, se = se, ssc = ssc,
+                         panel.id = panel.id, linear.start = start,
+                         etastart=etastart, mustart = mustart, fixef = fixef,
+                         fixef.rm = fixef.rm, fixef.tol = fixef.tol,
+                         fixef.iter=fixef.iter, collin.tol = collin.tol,
+                         glm.iter = glm.iter, glm.tol = glm.tol,
+                         nthreads = nthreads, lean = lean, warn = warn, notes = notes,
+                         verbose = verbose, combine.quick = combine.quick,
+                         mem.clean = mem.clean, only.coef = only.coef, origin = "feglm",
+                         mc_origin = match.call(), call_env = call_env, ...), silent = TRUE)
 
   } else if((r <- !is.environment(env)) || !isTRUE(env$fixest_env)){
     stop("Argument 'env' must be an environment created by a fixest estimation. Currently it is not ", ifelse(r, "an", "a 'fixest'"), " environment.")
@@ -2391,12 +2430,13 @@ feglm = function(fml, data, family = "gaussian", vcov, offset, weights, subset, 
 
 #' @rdname feglm
 feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
-           fsplit, split.keep, split.drop, cluster, se, ssc, weights, subset, start = NULL,
-           etastart = NULL, mustart = NULL, fixef.rm = "perfect",
-           fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10,
-           glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(),
-           lean = FALSE, warn = TRUE, notes = getFixest_notes(), mem.clean = FALSE,
-           verbose = 0, only.env = FALSE, only.coef = FALSE, env, ...){
+                     fsplit, split.keep, split.drop, cluster, se, ssc, 
+                     weights, subset, start = NULL,
+                     etastart = NULL, mustart = NULL, fixef.rm = "perfect",
+                     fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10,
+                     glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(),
+                     lean = FALSE, warn = TRUE, notes = getFixest_notes(), mem.clean = FALSE,
+                     verbose = 0, only.env = FALSE, only.coef = FALSE, env, ...){
 
   dots = list(...)
 
@@ -2408,7 +2448,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
     # we extract them from the env
 
     if((r <- !is.environment(env)) || !isTRUE(env$fixest_env)) {
-      stop("Argument 'env' must be an environment created by a fixest estimation. Currently it is not ", ifelse(r, "an", "a 'fixest'"), " environment.")
+      stop("Argument 'env' must be an environment created by a fixest estimation. Currently it is not {&r ; an ; a `fixest`} environment.")
     }
 
     # main variables
@@ -2456,19 +2496,19 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
     call_env = new.env(parent = parent.frame())
 
     env = try(fixest_env(y = y, X = X, fixef_df = fixef_df, family = family,
-               nthreads = nthreads, lean = lean, offset = offset,
-               weights = weights, subset = subset, split = split,
-               fsplit = fsplit,
-               split.keep = split.keep, split.drop = split.drop,
-               vcov = vcov, cluster = cluster,
-               se = se, ssc = ssc, linear.start = start,
-               etastart = etastart, mustart = mustart, fixef.rm = fixef.rm,
-               fixef.tol = fixef.tol, fixef.iter = fixef.iter,
-               collin.tol = collin.tol, glm.iter = glm.iter,
-               glm.tol = glm.tol, notes = notes, mem.clean = mem.clean,
-               only.coef = only.coef,
-               warn = warn, verbose = verbose, origin = "feglm.fit",
-               mc_origin = match.call(), call_env = call_env, ...), silent = TRUE)
+                         nthreads = nthreads, lean = lean, offset = offset,
+                         weights = weights, subset = subset, split = split,
+                         fsplit = fsplit,
+                         split.keep = split.keep, split.drop = split.drop,
+                         vcov = vcov, cluster = cluster,
+                         se = se, ssc = ssc, linear.start = start,
+                         etastart = etastart, mustart = mustart, fixef.rm = fixef.rm,
+                         fixef.tol = fixef.tol, fixef.iter = fixef.iter,
+                         collin.tol = collin.tol, glm.iter = glm.iter,
+                         glm.tol = glm.tol, notes = notes, mem.clean = mem.clean,
+                         only.coef = only.coef,
+                         warn = warn, verbose = verbose, origin = "feglm.fit",
+                         mc_origin = match.call(), call_env = call_env, ...), silent = TRUE)
 
     if("try-error" %in% class(env)){
       stop(format_error_msg(env, "feglm.fit"))
@@ -2761,10 +2801,10 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
     }
 
     wols = feols(y = z, X = X, weights = w, means = wols_means,
-           correct_0w = any_0w, env = env, fixef.tol = fixef.tol * 10**(iter==1),
-           fixef.iter = fixef.iter, collin.tol = collin.tol, nthreads = nthreads,
-           mem.clean = mem.clean, warn = warn,
-           verbose = verbose - 1, fromGLM = TRUE)
+                 correct_0w = any_0w, env = env, fixef.tol = fixef.tol * 10**(iter==1),
+                 fixef.iter = fixef.iter, collin.tol = collin.tol, nthreads = nthreads,
+                 mem.clean = mem.clean, warn = warn,
+                 verbose = verbose - 1, fromGLM = TRUE)
 
     if(isTRUE(wols$NA_model)){
       return(wols)
@@ -2799,7 +2839,11 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
     dev = sum_dev.resids(y, mu, eta, wt = weights)
     dev_evol = dev - devold
 
-    if(verbose >= 1) cat("Iteration: ", sprintf("%02i", iter), " -- Deviance = ", numberFormatNormal(dev), " -- Evol. = ", dev_evol, "\n", sep = "")
+    if(verbose >= 1){
+      cat("Iteration: ", sprintf("%02i", iter), 
+          " -- Deviance = ", numberFormatNormal(dev), 
+          " -- Evol. = ", dev_evol, "\n", sep = "")
+    }
 
     #
     # STEP HALVING
@@ -2841,7 +2885,10 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
             # message
             msg = ifelse(!is.finite(dev), "non-finite deviance", "no valid eta/mu")
 
-            warning_msg = paste0("Divergence at iteration ", iter, ": ", msg, ". Step halving: no valid correction found. Last evaluated coefficients with finite deviance are returned for information purposes.")
+            warning_msg = paste0("Divergence at iteration ", iter, ": ", 
+                                 msg, ". Step halving: no valid correction found. ",
+                                 "Last evaluated coefficients with finite deviance ",
+                                 "are returned for information purposes.")
             div_message = paste0(msg, " despite step-halving")
             wols = wols_old
             do_exit = TRUE
@@ -2861,7 +2908,11 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
         dev = sum_dev.resids(y, mu, eta_new + offset, wt = weights)
         dev_evol = dev - devold
 
-        if(verbose >= 3) cat("Step-halving: iter =", iter_sh, "-- dev:", numberFormatNormal(dev), "-- evol:", numberFormatNormal(dev_evol), "\n")
+        if(verbose >= 3){
+          cat("Step-halving: iter =", iter_sh, 
+              "-- dev:", numberFormatNormal(dev), 
+              "-- evol:", numberFormatNormal(dev_evol), "\n")
+        } 
       }
 
       if(do_exit) break
@@ -2891,7 +2942,8 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
   # Convergence flag
   if(!conv){
     if(iter == glm.iter){
-      warning_msg = paste0("Absence of convergence: Maximum number of iterations reached (", glm.iter, "). Final deviance: ", numberFormatNormal(dev), ".")
+      warning_msg = paste0("Absence of convergence: Maximum number of iterations reached (", 
+                           glm.iter, "). Final deviance: ", numberFormatNormal(dev), ".")
       div_message = "no convergence: Maximum number of iterations reached"
     }
 
@@ -2922,8 +2974,9 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
   if(wols$multicol){
     var_collinear = colnames(X)[wols$is_excluded]
     if(notes){
-      msg = dsb("w!The variable.[*s_, q, ' has'V, 3KO, C?var_collinear] been
-             removed because of collinearity (see $collin.var).")
+      msg = sma("The variable{$s, enum.q, has?var_collinear} been ",
+                "removed because of collinearity (see $collin.var).", 
+                .last = "ws")
       if(IN_MULTI){
         stack_multi_notes(msg)
       } else {
@@ -3116,7 +3169,8 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
       gc()
     }
 
-    model_null = feglm.fit(X = matrix(1, nrow = n, ncol = 1), fixef_df = NULL, env = env, lean_internal = TRUE)
+    model_null = feglm.fit(X = matrix(1, nrow = n, ncol = 1), fixef_df = NULL, 
+                           env = env, lean_internal = TRUE)
     ll_null = model_null$loglik
     fitted_null = model_null$fitted.values
   }
@@ -3176,39 +3230,67 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
 #' @inheritSection feols Tricks to estimate multiple LHS
 #' @inheritSection xpd Dot square bracket operator in formulas
 #'
-#' @param fml A formula representing the relation to be estimated. For example: `fml = z~x+y`. To include fixed-effects, insert them in this formula using a pipe: e.g. `fml = z~x+y|fixef_1+fixef_2`. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in `c()`: ex `c(y1, y2)`. For multiple indep. vars, use the stepwise functions: ex `x1 + csw(x2, x3)`. The formula `fml = c(y1, y2) ~ x1 + cw0(x2, x3)` leads to 6 estimation, see details. Square brackets starting with a dot can be used to call global variables: `y.[i] ~ x.[1:2]` will lead to `y3 ~ x1 + x2` if `i` is equal to 3 in the current environment (see details in [`xpd`]).
-#' @param start Starting values for the coefficients. Can be: i) a numeric of length 1 (e.g. `start = 0`, the default), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients).
+#' @param fml A formula representing the relation to be estimated. For example: `fml = z~x+y`. 
+#' To include fixed-effects, insert them in this formula using a pipe: e.g. 
+#' `fml = z~x+y|fixef_1+fixef_2`. Multiple estimations can be performed at once: 
+#' for multiple dep. vars, wrap them in `c()`: ex `c(y1, y2)`. For multiple indep. 
+#' vars, use the stepwise functions: ex `x1 + csw(x2, x3)`. 
+#' The formula `fml = c(y1, y2) ~ x1 + cw0(x2, x3)` leads to 6 estimation, see details. 
+#' Square brackets starting with a dot can be used to call global variables: 
+#' `y.[i] ~ x.[1:2]` will lead to `y3 ~ x1 + x2` if `i` is equal to 3 in 
+#' the current environment (see details in [`xpd`]).
+#' @param start Starting values for the coefficients. Can be: i) a numeric of length 1 
+#' (e.g. `start = 0`, the default), ii) a numeric vector of the exact same length as the 
+#' number of variables, or iii) a named vector of any length (the names will be 
+#' used to initialize the appropriate coefficients).
 #'
 #' @details
-#' Note that the functions [`feglm`] and [`femlm`] provide the same results when using the same families but differ in that the latter is a direct maximum likelihood optimization (so the two can really have different convergence rates).
+#' Note that the functions [`feglm`] and [`femlm`] provide the same results when using 
+#' the same families but differ in that the latter is a direct maximum likelihood 
+#' optimization (so the two can really have different convergence rates).
 #'
 #' @return
-#' A `fixest` object. Note that `fixest` objects contain many elements and most of them are for internal use, they are presented here only for information. To access them, it is safer to use the user-level methods (e.g. [`vcov.fixest`], [`resid.fixest`], etc) or functions (like for instance [`fitstat`] to access any fit statistic).
+#' A `fixest` object. Note that `fixest` objects contain many elements and most of 
+#' them are for internal use, they are presented here only for information. 
+#' To access them, it is safer to use the user-level methods 
+#' (e.g. [`vcov.fixest`], [`resid.fixest`], etc) or functions (like for instance 
+#' [`fitstat`] to access any fit statistic).
 #' \item{nobs}{The number of observations.}
 #' \item{fml}{The linear formula of the call.}
 #' \item{call}{The call of the function.}
 #' \item{method}{The method used to estimate the model.}
 #' \item{family}{The family used to estimate the model.}
-#' \item{fml_all}{A list containing different parts of the formula. Always contain the linear formula. Then, if relevant: `fixef`: the fixed-effects; `NL`: the non linear part of the formula.}
+#' \item{fml_all}{A list containing different parts of the formula. Always contain the 
+#' linear formula. Then, if relevant: `fixef`: the fixed-effects; 
+#' `NL`: the non linear part of the formula.}
 #' \item{nparams}{The number of parameters of the model.}
 #' \item{fixef_vars}{The names of each fixed-effect dimension.}
-#' \item{fixef_id}{The list (of length the number of fixed-effects) of the fixed-effects identifiers for each observation.}
-#' \item{fixef_sizes}{The size of each fixed-effect (i.e. the number of unique identifierfor each fixed-effect dimension).}
+#' \item{fixef_id}{The list (of length the number of fixed-effects) of the 
+#' fixed-effects identifiers for each observation.}
+#' \item{fixef_sizes}{The size of each fixed-effect (i.e. the number of unique 
+#' identifier for each fixed-effect dimension).}
 #' \item{convStatus}{Logical, convergence status.}
 #' \item{message}{The convergence message from the optimization procedures.}
-#' \item{obs_selection}{(When relevant.) List containing vectors of integers. It represents the sequential selection of observation vis a vis the original data set.}
-#' \item{fixef_removed}{(When relevant.) In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the list (for each fixed-effect dimension) of the fixed-effect identifiers that were removed.}
+#' \item{obs_selection}{(When relevant.) List containing vectors of integers. It represents 
+#' the sequential selection of observation vis a vis the original data set.}
+#' \item{fixef_removed}{(When relevant.) In the case there were fixed-effects and some 
+#' observations were removed because of only 0/1 outcome within a fixed-effect, it gives the 
+#' list (for each fixed-effect dimension) of the fixed-effect identifiers that were removed.}
 #' \item{coefficients}{The named vector of estimated coefficients.}
-#' \item{coeftable}{The table of the coefficients with their standard errors, z-values and p-values.}
+#' \item{coeftable}{The table of the coefficients with their standard errors, z-values 
+#' and p-values.}
 #' \item{loglik}{The log-likelihood.}
 #' \item{iterations}{Number of iterations of the algorithm.}
 #' \item{ll_null}{Log-likelihood of the null model (i.e. with the intercept only).}
 #' \item{ll_fe_only}{Log-likelihood of the model with only the fixed-effects.}
-#' \item{ssr_null}{Sum of the squared residuals of the null model (containing only with the intercept).}
+#' \item{ssr_null}{Sum of the squared residuals of the null model (containing only with 
+#' the intercept).}
 #' \item{pseudo_r2}{The adjusted pseudo R2.}
-#' \item{fitted.values}{The fitted values are the expected value of the dependent variable for the fitted model: that is \eqn{E(Y|X)}.}
+#' \item{fitted.values}{The fitted values are the expected value of the dependent variable 
+#' for the fitted model: that is \eqn{E(Y|X)}.}
 #' \item{residuals}{The residuals (y minus the fitted values).}
-#' \item{sq.cor}{Squared correlation between the dependent variable and the expected predictor (i.e. fitted.values) obtained by the estimation.}
+#' \item{sq.cor}{Squared correlation between the dependent variable and the 
+#' expected predictor (i.e. fitted.values) obtained by the estimation.}
 #' \item{hessian}{The Hessian of the parameters.}
 #' \item{cov.iid}{The variance-covariance matrix of the parameters.}
 #' \item{se}{The standard-error of the parameters.}
@@ -3220,7 +3302,9 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
 #'
 #'
 #' @seealso
-#' See also [`summary.fixest`] to see the results with the appropriate standard-errors, [`fixef.fixest`] to extract the fixed-effects coefficients, and the function [`etable`] to visualize the results of multiple estimations.
+#' See also [`summary.fixest`] to see the results with the appropriate standard-errors, 
+#' [`fixef.fixest`] to extract the fixed-effects coefficients, and the function 
+#' [`etable`] to visualize the results of multiple estimations.
 #' And other estimation methods: [`feols`], [`feglm`], [`fepois`], [`feNmlm`].
 #'
 #' @author
@@ -3228,15 +3312,19 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
 #'
 #' @references
 #'
-#' Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 ([](https://github.com/lrberge/fixest/blob/master/_DOCS/FENmlm_paper.pdf)).
+#' Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with 
+#' multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 
+#' 13 ([](https://github.com/lrberge/fixest/blob/master/_DOCS/FENmlm_paper.pdf)).
 #'
 #' For models with multiple fixed-effects:
 #'
-#' Gaure, Simen, 2013, "OLS with multiple high dimensional category variables", Computational Statistics & Data Analysis 66 pp. 8--18
+#' Gaure, Simen, 2013, "OLS with multiple high dimensional category variables", 
+#' Computational Statistics & Data Analysis 66 pp. 8--18
 #'
 #' On the unconditionnal Negative Binomial model:
 #'
-#' Allison, Paul D and Waterman, Richard P, 2002, "Fixed-Effects Negative Binomial Regression Models", Sociological Methodology 32(1) pp. 247--265
+#' Allison, Paul D and Waterman, Richard P, 2002, "Fixed-Effects Negative 
+#' Binomial Regression Models", Sociological Methodology 32(1) pp. 247--265
 #'
 #' @examples
 #'
@@ -3298,12 +3386,12 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
 #'
 #'
 femlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian"), vcov,
-         start = 0, fixef, fixef.rm = "perfect", offset, subset,
-         split, fsplit, split.keep, split.drop,
-         cluster, se, ssc, panel.id, fixef.tol = 1e-5, fixef.iter = 10000,
-         nthreads = getFixest_nthreads(), lean = FALSE, verbose = 0, warn = TRUE,
-         notes = getFixest_notes(), theta.init, combine.quick, mem.clean = FALSE,
-         only.env = FALSE, only.coef = FALSE, env, ...){
+                 start = 0, fixef, fixef.rm = "perfect", offset, subset,
+                 split, fsplit, split.keep, split.drop,
+                 cluster, se, ssc, panel.id, fixef.tol = 1e-5, fixef.iter = 10000,
+                 nthreads = getFixest_nthreads(), lean = FALSE, verbose = 0, warn = TRUE,
+                 notes = getFixest_notes(), theta.init, combine.quick, mem.clean = FALSE,
+                 only.env = FALSE, only.coef = FALSE, env, ...){
 
   # This is just an alias
 
@@ -3311,17 +3399,17 @@ femlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian")
   call_env_bis = new.env(parent = parent.frame())
 
   res = try(feNmlm(fml = fml, data = data, family = family, fixef = fixef,
-           fixef.rm = fixef.rm, offset = offset, subset = subset,
-           split = split, fsplit = fsplit,
-           split.keep = split.keep, split.drop = split.drop,
-           vcov = vcov, cluster = cluster,
-           se = se, ssc = ssc, panel.id = panel.id, start = start,
-           fixef.tol=fixef.tol, fixef.iter=fixef.iter, nthreads=nthreads,
-           lean = lean, verbose=verbose, warn=warn, notes=notes,
-           theta.init = theta.init, combine.quick = combine.quick,
-           mem.clean = mem.clean, origin = "femlm", mc_origin_bis = match.call(),
-           call_env_bis = call_env_bis, only.env = only.env, only.coef = only.coef,
-           env = env, ...), silent = TRUE)
+                   fixef.rm = fixef.rm, offset = offset, subset = subset,
+                   split = split, fsplit = fsplit,
+                   split.keep = split.keep, split.drop = split.drop,
+                   vcov = vcov, cluster = cluster,
+                   se = se, ssc = ssc, panel.id = panel.id, start = start,
+                   fixef.tol=fixef.tol, fixef.iter=fixef.iter, nthreads=nthreads,
+                   lean = lean, verbose=verbose, warn=warn, notes=notes,
+                   theta.init = theta.init, combine.quick = combine.quick,
+                   mem.clean = mem.clean, origin = "femlm", mc_origin_bis = match.call(),
+                   call_env_bis = call_env_bis, only.env = only.env, only.coef = only.coef,
+                   env = env, ...), silent = TRUE)
 
   if("try-error" %in% class(res)){
     stop(format_error_msg(res, "femlm"))
@@ -3332,11 +3420,12 @@ femlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian")
 
 #' @rdname femlm
 fenegbin = function(fml, data, vcov, theta.init, start = 0, fixef, fixef.rm = "perfect",
-          offset, subset, split, fsplit, split.keep, split.drop,
-          cluster, se, ssc, panel.id,
-          fixef.tol = 1e-5, fixef.iter = 10000, nthreads = getFixest_nthreads(),
-          lean = FALSE, verbose = 0, warn = TRUE, notes = getFixest_notes(),
-          combine.quick, mem.clean = FALSE, only.env = FALSE, only.coef = FALSE, env, ...){
+                    offset, subset, split, fsplit, split.keep, split.drop,
+                    cluster, se, ssc, panel.id,
+                    fixef.tol = 1e-5, fixef.iter = 10000, nthreads = getFixest_nthreads(),
+                    lean = FALSE, verbose = 0, warn = TRUE, notes = getFixest_notes(),
+                    combine.quick, mem.clean = FALSE, 
+                    only.env = FALSE, only.coef = FALSE, env, ...){
 
   # We control for the problematic argument family
   if("family" %in% names(match.call())){
@@ -3348,16 +3437,16 @@ fenegbin = function(fml, data, vcov, theta.init, start = 0, fixef, fixef.rm = "p
   call_env_bis = new.env(parent = parent.frame())
 
   res = try(feNmlm(fml = fml, data=data, family = "negbin", theta.init = theta.init,
-           start = start, fixef = fixef, fixef.rm = fixef.rm, offset = offset,
-           subset = subset, split = split, fsplit = fsplit,
-           split.keep = split.keep, split.drop = split.drop,
-           vcov = vcov, cluster = cluster,
-           se = se, ssc = ssc, panel.id = panel.id, fixef.tol = fixef.tol,
-           fixef.iter = fixef.iter, nthreads = nthreads, lean = lean,
-           verbose = verbose, warn = warn, notes = notes, combine.quick = combine.quick,
-           mem.clean = mem.clean, only.env = only.env, only.coef = only.coef,
-           origin = "fenegbin", mc_origin_bis = match.call(),
-           call_env_bis = call_env_bis, env = env, ...), silent = TRUE)
+                   start = start, fixef = fixef, fixef.rm = fixef.rm, offset = offset,
+                   subset = subset, split = split, fsplit = fsplit,
+                   split.keep = split.keep, split.drop = split.drop,
+                   vcov = vcov, cluster = cluster,
+                   se = se, ssc = ssc, panel.id = panel.id, fixef.tol = fixef.tol,
+                   fixef.iter = fixef.iter, nthreads = nthreads, lean = lean,
+                   verbose = verbose, warn = warn, notes = notes, combine.quick = combine.quick,
+                   mem.clean = mem.clean, only.env = only.env, only.coef = only.coef,
+                   origin = "fenegbin", mc_origin_bis = match.call(),
+                   call_env_bis = call_env_bis, env = env, ...), silent = TRUE)
 
   if("try-error" %in% class(res)){
     stop(format_error_msg(res, "fenegbin"))
@@ -3367,13 +3456,15 @@ fenegbin = function(fml, data, vcov, theta.init, start = 0, fixef, fixef.rm = "p
 }
 
 #' @rdname feglm
-fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit, split.keep, split.drop,
-          cluster, se, ssc, panel.id, start = NULL, etastart = NULL,
-          mustart = NULL, fixef, fixef.rm = "perfect", fixef.tol = 1e-6,
-          fixef.iter = 10000, collin.tol = 1e-10, glm.iter = 25, glm.tol = 1e-8,
-          nthreads = getFixest_nthreads(), lean = FALSE, warn = TRUE, notes = getFixest_notes(),
-          verbose = 0, combine.quick, mem.clean = FALSE, only.env = FALSE,
-          only.coef = FALSE, env, ...){
+fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit, 
+                  split.keep, split.drop,
+                  cluster, se, ssc, panel.id, start = NULL, etastart = NULL,
+                  mustart = NULL, fixef, fixef.rm = "perfect", fixef.tol = 1e-6,
+                  fixef.iter = 10000, collin.tol = 1e-10, glm.iter = 25, glm.tol = 1e-8,
+                  nthreads = getFixest_nthreads(), lean = FALSE, 
+                  warn = TRUE, notes = getFixest_notes(),
+                  verbose = 0, combine.quick, mem.clean = FALSE, only.env = FALSE,
+                  only.coef = FALSE, env, ...){
 
   # We control for the problematic argument family
   if("family" %in% names(match.call())){
@@ -3385,17 +3476,17 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit, split
   call_env_bis = new.env(parent = parent.frame())
 
   res = try(feglm(fml = fml, data = data, family = "poisson", offset = offset,
-          weights = weights, subset = subset, split = split, fsplit = fsplit,
-          split.keep = split.keep, split.drop = split.drop,
-          vcov = vcov, cluster = cluster, se = se, ssc = ssc, panel.id = panel.id,
-          start = start, etastart = etastart, mustart = mustart, fixef = fixef,
-          fixef.rm = fixef.rm, fixef.tol = fixef.tol, fixef.iter = fixef.iter,
-          collin.tol = collin.tol, glm.iter = glm.iter, glm.tol = glm.tol,
-          nthreads = nthreads, lean = lean, warn = warn, notes = notes,
-          verbose = verbose, combine.quick = combine.quick, mem.clean = mem.clean,
-          only.env = only.env, only.coef = only.coef,
-          origin_bis = "fepois", mc_origin_bis = match.call(),
-          call_env_bis = call_env_bis, env = env, ...), silent = TRUE)
+                  weights = weights, subset = subset, split = split, fsplit = fsplit,
+                  split.keep = split.keep, split.drop = split.drop,
+                  vcov = vcov, cluster = cluster, se = se, ssc = ssc, panel.id = panel.id,
+                  start = start, etastart = etastart, mustart = mustart, fixef = fixef,
+                  fixef.rm = fixef.rm, fixef.tol = fixef.tol, fixef.iter = fixef.iter,
+                  collin.tol = collin.tol, glm.iter = glm.iter, glm.tol = glm.tol,
+                  nthreads = nthreads, lean = lean, warn = warn, notes = notes,
+                  verbose = verbose, combine.quick = combine.quick, mem.clean = mem.clean,
+                  only.env = only.env, only.coef = only.coef,
+                  origin_bis = "fepois", mc_origin_bis = match.call(),
+                  call_env_bis = call_env_bis, env = env, ...), silent = TRUE)
 
   if("try-error" %in% class(res)){
     stop(format_error_msg(res, "fepois"))
@@ -3408,7 +3499,10 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit, split
 
 #' Fixed effects nonlinear maximum likelihood models
 #'
-#' This function estimates maximum likelihood models (e.g., Poisson or Logit) with non-linear in parameters right-hand-sides and is efficient to handle any number of fixed effects. If you do not use non-linear in parameters right-hand-side, use [`femlm`] or [`feglm`] instead (their design is simpler).
+#' This function estimates maximum likelihood models (e.g., Poisson or Logit) with non-linear 
+#' in parameters right-hand-sides and is efficient to handle any number of fixed effects. 
+#' If you do not use non-linear in parameters right-hand-side, use [`femlm`] or [`feglm`] 
+#' instead (their design is simpler).
 #'
 #' @inheritParams summary.fixest
 #' @inheritParams panel
@@ -3421,84 +3515,231 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit, split
 #' @inheritSection feols Tricks to estimate multiple LHS
 #' @inheritSection xpd Dot square bracket operator in formulas
 #'
-#' @param fml A formula. This formula gives the linear formula to be estimated (it is similar to a `lm` formula), for example: `fml = z~x+y`. To include fixed-effects variables, insert them in this formula using a pipe (e.g. `fml = z~x+y|fixef_1+fixef_2`). To include a non-linear in parameters element, you must use the argment `NL.fml`. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in `c()`: ex `c(y1, y2)`. For multiple indep. vars, use the stepwise functions: ex `x1 + csw(x2, x3)`. This leads to 6 estimation `fml = c(y1, y2) ~ x1 + cw0(x2, x3)`. See details. Square brackets starting with a dot can be used to call global variables: `y.[i] ~ x.[1:2]` will lead to `y3 ~ x1 + x2` if `i` is equal to 3 in the current environment (see details in [`xpd`]).
-#' @param start Starting values for the coefficients in the linear part (for the non-linear part, use NL.start). Can be: i) a numeric of length 1 (e.g. `start = 0`, the default), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients).
-#' @param NL.fml A formula. If provided, this formula represents the non-linear part of the right hand side (RHS). Note that contrary to the `fml` argument, the coefficients must explicitly appear in this formula. For instance, it can be `~a*log(b*x + c*x^3)`, where `a`, `b`, and `c` are the coefficients to be estimated. Note that only the RHS of the formula is to be provided, and NOT the left hand side.
-#' @param split A one sided formula representing a variable (eg `split = ~var`) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. If you also want to include the estimation for the full sample, use the argument `fsplit` instead. You can use the special operators `%keep%` and `%drop%` to select only a subset of values for which to split the sample. E.g. `split = ~var %keep% c("v1", "v2")` will split the sample only according to the values `v1` and `v2` of the variable `var`; it is equivalent to supplying the argument `split.keep = c("v1", "v2")`. By default there is partial matching on each value, you can trigger a regular expression evaluation by adding a `'@'` first, as in: `~var %drop% "@^v[12]"` which will drop values starting with `"v1"` or `"v2"` (of course you need to know regexes!).
-#' @param fsplit A one sided formula representing a variable (eg `split = ~var`) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. This argument is the same as split but also includes the full sample as the first estimation. You can use the special operators `%keep%` and `%drop%` to select only a subset of values for which to split the sample. E.g. `split = ~var %keep% c("v1", "v2")` will split the sample only according to the values `v1` and `v2` of the variable `var`; it is equivalent to supplying the argument `split.keep = c("v1", "v2")`. By default there is partial matching on each value, you can trigger a regular expression evaluation by adding an `'@'` first, as in: `~var %drop% "@^v[12]"` which will drop values starting with `"v1"` or `"v2"` (of course you need to know regexes!).
-#' @param split.keep A character vector. Only used when `split`, or `fsplit`, is supplied. If provided, then the sample will be split only on the values of `split.keep`. The values in `split.keep` will be partially matched to the values of `split`. To enable regular expressions, you need to add an `'@'` first. For example `split.keep = c("v1", "@other|var")` will keep only the value in `split` partially matched by `"v1"` or the values containing `"other"` or `"var"`.
-#' @param split.drop A character vector. Only used when `split`, or `fsplit`, is supplied. If provided, then the sample will be split only on the values that are not in `split.drop`. The values in `split.drop` will be partially matched to the values of `split`. To enable regular expressions, you need to add an `'@'` first. For example `split.drop = c("v1", "@other|var")` will drop only the value in `split` partially matched by `"v1"` or the values containing `"other"` or `"var"`.
-#' @param data A data.frame containing the necessary variables to run the model. The variables of the non-linear right hand side of the formula are identified with this `data.frame` names. Can also be a matrix.
-#' @param family Character scalar. It should provide the family. The possible values are "poisson" (Poisson model with log-link, the default), "negbin" (Negative Binomial model with log-link), "logit" (LOGIT model with log-link), "gaussian" (Gaussian model).
-#' @param fixef Character vector. The names of variables to be used as fixed-effects. These variables should contain the identifier of each observation (e.g., think of it as a panel identifier). Note that the recommended way to include fixed-effects is to insert them directly in the formula.
-#' @param subset A vector (logical or numeric) or a one-sided formula. If provided, then the estimation will be performed only on the observations defined by this argument.
-#' @param NL.start (For NL models only) A list of starting values for the non-linear parameters. ALL the parameters are to be named and given a staring value. Example: `NL.start=list(a=1,b=5,c=0)`. Though, there is an exception: if all parameters are to be given the same starting value, you can use a numeric scalar.
-#' @param lower (For NL models only) A list. The lower bound for each of the non-linear parameters that requires one. Example: `lower=list(b=0,c=0)`. Beware, if the estimated parameter is at his lower bound, then asymptotic theory cannot be applied and the standard-error of the parameter cannot be estimated because the gradient will not be null. In other words, when at its upper/lower bound, the parameter is considered as 'fixed'.
-#' @param upper (For NL models only) A list. The upper bound for each of the non-linear parameters that requires one. Example: `upper=list(a=10,c=50)`. Beware, if the estimated parameter is at his upper bound, then asymptotic theory cannot be applied and the standard-error of the parameter cannot be estimated because the gradient will not be null. In other words, when at its upper/lower bound, the parameter is considered as 'fixed'.
-#' @param NL.start.init (For NL models only) Numeric scalar. If the argument `NL.start` is not provided, or only partially filled (i.e. there remain non-linear parameters with no starting value), then the starting value of all remaining non-linear parameters is set to `NL.start.init`.
-#' @param offset A formula or a numeric vector. An offset can be added to the estimation. If equal to a formula, it should be of the form (for example) `~0.5*x**2`. This offset is linearly added to the elements of the main formula 'fml'.
-#' @param jacobian.method (For NL models only) Character scalar. Provides the method used to numerically compute the Jacobian of the non-linear part. Can be either `"simple"` or `"Richardson"`. Default is `"simple"`. See the help of [`jacobian`] for more information.
-#' @param useHessian Logical. Should the Hessian be computed in the optimization stage? Default is `TRUE`.
-#' @param hessian.args List of arguments to be passed to function [`genD`]. Defaults is missing. Only used with the presence of `NL.fml`.
-#' @param opt.control List of elements to be passed to the optimization method [`nlminb`]. See the help page of [`nlminb`] for more information.
-#' @param nthreads The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. The default is to use 50% of all threads. You can set permanently the number of threads used within this package using the function [`setFixest_nthreads`].
-#' @param verbose Integer, default is 0. It represents the level of information that should be reported during the optimisation process. If `verbose=0`: nothing is reported. If `verbose=1`: the value of the coefficients and the likelihood are reported. If `verbose=2`: `1` + information on the computing time of the null model, the fixed-effects coefficients and the hessian are reported.
-#' @param theta.init Positive numeric scalar. The starting value of the dispersion parameter if `family="negbin"`. By default, the algorithm uses as a starting value the theta obtained from the model with only the intercept.
-#' @param fixef.rm Can be equal to "perfect" (default), "singleton", "both" or "none". Controls which observations are to be removed. If "perfect", then observations having a fixed-effect with perfect fit (e.g. only 0 outcomes in Poisson estimations) will be removed. If "singleton", all observations for which a fixed-effect appears only once will be removed. The meaning of "both" and "none" is direct.
-#' @param fixef.tol Precision used to obtain the fixed-effects. Defaults to `1e-5`. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations. Argument `fixef.tol` cannot be lower than `10000*.Machine$double.eps`. Note that this parameter is dynamically controlled by the algorithm.
-#' @param fixef.iter Maximum number of iterations in fixed-effects algorithm (only in use for 2+ fixed-effects). Default is 10000.
-#' @param deriv.iter Maximum number of iterations in the algorithm to obtain the derivative of the fixed-effects (only in use for 2+ fixed-effects). Default is 1000.
-#' @param deriv.tol Precision used to obtain the fixed-effects derivatives. Defaults to `1e-4`. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations. Argument `deriv.tol` cannot be lower than `10000*.Machine$double.eps`.
-#' @param warn Logical, default is `TRUE`. Whether warnings should be displayed (concerns warnings relating to convergence state).
-#' @param notes Logical. By default, two notes are displayed: when NAs are removed (to show additional information) and when some observations are removed because of only 0 (or 0/1) outcomes in a fixed-effect setup (in Poisson/Neg. Bin./Logit models). To avoid displaying these messages, you can set `notes = FALSE`. You can remove these messages permanently by using `setFixest_notes(FALSE)`.
-#' @param combine.quick Logical. When you combine different variables to transform them into a single fixed-effects you can do e.g. `y ~ x | paste(var1, var2)`. The algorithm provides a shorthand to do the same operation: `y ~ x | var1^var2`. Because pasting variables is a costly operation, the internal algorithm may use a numerical trick to hasten the process. The cost of doing so is that you lose the labels. If you are interested in getting the value of the fixed-effects coefficients after the estimation, you should use `combine.quick = FALSE`. By default it is equal to `FALSE` if the number of observations is lower than 50,000, and to `TRUE` otherwise.
-#' @param only.env (Advanced users.) Logical, default is `FALSE`. If `TRUE`, then only the environment used to make the estimation is returned.
-#' @param mem.clean Logical, default is `FALSE`. Only to be used if the data set is large compared to the available RAM. If `TRUE` then intermediary objects are removed as much as possible and [`gc`] is run before each substantial C++ section in the internal code to avoid memory issues.
-#' @param lean Logical, default is `FALSE`. If `TRUE` then all large objects are removed from the returned result: this will save memory but will block the possibility to use many methods. It is recommended to use the arguments `se` or `cluster` to obtain the appropriate standard-errors at estimation time, since obtaining different SEs won't be possible afterwards.
-#' @param env (Advanced users.) A `fixest` environment created by a `fixest` estimation with `only.env = TRUE`. Default is missing. If provided, the data from this environment will be used to perform the estimation.
-#' @param only.coef Logical, default is `FALSE`. If `TRUE`, then only the estimated coefficients are returned. Note that the length of the vector returned is always the length of the number of coefficients to be estimated: this means that the variables found to be collinear are returned with an NA value.
+#' @param fml A formula. This formula gives the linear formula to be estimated 
+#' (it is similar to a `lm` formula), for example: `fml = z~x+y`. To include 
+#' fixed-effects variables, insert them in this formula using a pipe 
+#' (e.g. `fml = z~x+y|fixef_1+fixef_2`). To include a non-linear in parameters element, 
+#' you must use the argment `NL.fml`. Multiple estimations can be performed at once: 
+#' for multiple dep. vars, wrap them in `c()`: ex `c(y1, y2)`. For multiple indep. 
+#' vars, use the stepwise functions: ex `x1 + csw(x2, x3)`. This leads to 6 estimation 
+#' `fml = c(y1, y2) ~ x1 + cw0(x2, x3)`. See details. Square brackets starting with a 
+#' dot can be used to call global variables: `y.[i] ~ x.[1:2]` will lead to 
+#' `y3 ~ x1 + x2` if `i` is equal to 3 in the current environment (see details in [`xpd`]).
+#' @param start Starting values for the coefficients in the linear part (for the non-linear 
+#' part, use NL.start). Can be: i) a numeric of length 1 (e.g. `start = 0`, the default), 
+#' ii) a numeric vector of the exact same length as the number of variables, or iii) a 
+#' named vector of any length (the names will be used to initialize the appropriate coefficients).
+#' @param NL.fml A formula. If provided, this formula represents the non-linear part of 
+#' the right hand side (RHS). Note that contrary to the `fml` argument, the 
+#' coefficients must explicitly appear in this formula. For instance, it can be 
+#' `~a*log(b*x + c*x^3)`, where `a`, `b`, and `c` are the coefficients to be estimated. 
+#' Note that only the RHS of the formula is to be provided, and NOT the left hand side.
+#' @param split A one sided formula representing a variable (eg `split = ~var`) or a vector. 
+#' If provided, the sample is split according to the variable and one estimation is performed 
+#' for each value of that variable. If you also want to include the estimation for the 
+#' full sample, use the argument `fsplit` instead. You can use the special operators 
+#' `%keep%` and `%drop%` to select only a subset of values for which to split the 
+#' sample. E.g. `split = ~var %keep% c("v1", "v2")` will split the sample only according 
+#' to the values `v1` and `v2` of the variable `var`; it is equivalent to supplying the 
+#' argument `split.keep = c("v1", "v2")`. By default there is partial matching on each value, 
+#' you can trigger a regular expression evaluation by adding a `'@'` first, 
+#' as in: `~var %drop% "@^v[12]"` which will drop values starting with `"v1"` or 
+#' `"v2"` (of course you need to know regexes!).
+#' @param fsplit A one sided formula representing a variable (eg `split = ~var`) or a vector. 
+#' If provided, the sample is split according to the variable and one estimation is performed 
+#' for each value of that variable. This argument is the same as split but also includes the 
+#' full sample as the first estimation. You can use the special operators `%keep%` and `%drop%` 
+#' to select only a subset of values for which to split the sample. 
+#' E.g. `split = ~var %keep% c("v1", "v2")` will split the sample only according to the 
+#' values `v1` and `v2` of the variable `var`; it is equivalent to supplying the 
+#' argument `split.keep = c("v1", "v2")`. By default there is partial matching on each value, 
+#' you can trigger a regular expression evaluation by adding an `'@'` first, 
+#' as in: `~var %drop% "@^v[12]"` which will drop values starting with `"v1"` 
+#' or `"v2"` (of course you need to know regexes!).
+#' @param split.keep A character vector. Only used when `split`, or `fsplit`, is supplied. 
+#' If provided, then the sample will be split only on the values of `split.keep`. 
+#' The values in `split.keep` will be partially matched to the values of `split`. 
+#' To enable regular expressions, you need to add an `'@'` first. 
+#' For example `split.keep = c("v1", "@other|var")` will keep only the value 
+#' in `split` partially matched by `"v1"` or the values containing `"other"` or `"var"`.
+#' @param split.drop A character vector. Only used when `split`, or `fsplit`, is supplied. 
+#' If provided, then the sample will be split only on the values that are not in `split.drop`. 
+#' The values in `split.drop` will be partially matched to the values of `split`. 
+#' To enable regular expressions, you need to add an `'@'` first. For example 
+#' `split.drop = c("v1", "@other|var")` will drop only the value in `split` partially 
+#' matched by `"v1"` or the values containing `"other"` or `"var"`.
+#' @param data A data.frame containing the necessary variables to run the model. 
+#' The variables of the non-linear right hand side of the formula are identified 
+#' with this `data.frame` names. Can also be a matrix.
+#' @param family Character scalar. It should provide the family. The possible values 
+#' are "poisson" (Poisson model with log-link, the default), "negbin" (Negative Binomial 
+#' model with log-link), "logit" (LOGIT model with log-link), "gaussian" (Gaussian model).
+#' @param fixef Character vector. The names of variables to be used as fixed-effects. 
+#' These variables should contain the identifier of each observation (e.g., think of it 
+#' as a panel identifier). Note that the recommended way to include fixed-effects is to 
+#' insert them directly in the formula.
+#' @param subset A vector (logical or numeric) or a one-sided formula. If provided, 
+#' then the estimation will be performed only on the observations defined by this argument.
+#' @param NL.start (For NL models only) A list of starting values for the non-linear parameters. 
+#' ALL the parameters are to be named and given a staring value. 
+#' Example: `NL.start=list(a=1,b=5,c=0)`. Though, there is an exception: if all 
+#' parameters are to be given the same starting value, you can use a numeric scalar.
+#' @param lower (For NL models only) A list. The lower bound for each of the non-linear 
+#' parameters that requires one. Example: `lower=list(b=0,c=0)`. Beware, if the estimated 
+#' parameter is at his lower bound, then asymptotic theory cannot be applied and the 
+#' standard-error of the parameter cannot be estimated because the gradient will 
+#' not be null. In other words, when at its upper/lower bound, the parameter is 
+#' considered as 'fixed'.
+#' @param upper (For NL models only) A list. The upper bound for each of the non-linear 
+#' parameters that requires one. Example: `upper=list(a=10,c=50)`. Beware, if the 
+#' estimated parameter is at his upper bound, then asymptotic theory cannot be applied 
+#' and the standard-error of the parameter cannot be estimated because the gradient 
+#' will not be null. In other words, when at its upper/lower bound, the parameter 
+#' is considered as 'fixed'.
+#' @param NL.start.init (For NL models only) Numeric scalar. If the argument `NL.start` 
+#' is not provided, or only partially filled (i.e. there remain non-linear parameters 
+#' with no starting value), then the starting value of all remaining non-linear parameters 
+#' is set to `NL.start.init`.
+#' @param offset A formula or a numeric vector. An offset can be added to the estimation. 
+#' If equal to a formula, it should be of the form (for example) `~0.5*x**2`. This 
+#' offset is linearly added to the elements of the main formula 'fml'.
+#' @param jacobian.method (For NL models only) Character scalar. Provides the method 
+#' used to numerically compute the Jacobian of the non-linear part. 
+#' Can be either `"simple"` or `"Richardson"`. Default is `"simple"`. 
+#' See the help of [`jacobian`] for more information.
+#' @param useHessian Logical. Should the Hessian be computed in the optimization stage? 
+#' Default is `TRUE`.
+#' @param hessian.args List of arguments to be passed to function [`genD`]. 
+#' Defaults is missing. Only used with the presence of `NL.fml`.
+#' @param opt.control List of elements to be passed to the optimization method [`nlminb`]. 
+#' See the help page of [`nlminb`] for more information.
+#' @param nthreads The number of threads. Can be: a) an integer lower than, or equal to, 
+#' the maximum number of threads; b) 0: meaning all available threads will be used; 
+#' c) a number strictly between 0 and 1 which represents the fraction of all threads to use. 
+#' The default is to use 50% of all threads. You can set permanently the number 
+#' of threads used within this package using the function [`setFixest_nthreads`].
+#' @param verbose Integer, default is 0. It represents the level of information that 
+#' should be reported during the optimisation process. If `verbose=0`: 
+#' nothing is reported. If `verbose=1`: the value of the coefficients and the 
+#' likelihood are reported. If `verbose=2`: `1` + information on the computing time of 
+#' the null model, the fixed-effects coefficients and the hessian are reported.
+#' @param theta.init Positive numeric scalar. The starting value of the dispersion 
+#' parameter if `family="negbin"`. By default, the algorithm uses as a starting value 
+#' the theta obtained from the model with only the intercept.
+#' @param fixef.rm Can be equal to "perfect" (default), "singleton", "both" or "none". 
+#' Controls which observations are to be removed. If "perfect", then observations 
+#' having a fixed-effect with perfect fit (e.g. only 0 outcomes in Poisson estimations) 
+#' will be removed. If "singleton", all observations for which a fixed-effect appears 
+#' only once will be removed. The meaning of "both" and "none" is direct.
+#' @param fixef.tol Precision used to obtain the fixed-effects. Defaults to `1e-5`. 
+#' It corresponds to the maximum absolute difference allowed between two coefficients 
+#' of successive iterations. Argument `fixef.tol` cannot be lower 
+#' than `10000*.Machine$double.eps`. Note that this parameter is dynamically 
+#' controlled by the algorithm.
+#' @param fixef.iter Maximum number of iterations in fixed-effects algorithm 
+#' (only in use for 2+ fixed-effects). Default is 10000.
+#' @param deriv.iter Maximum number of iterations in the algorithm to obtain the derivative 
+#' of the fixed-effects (only in use for 2+ fixed-effects). Default is 1000.
+#' @param deriv.tol Precision used to obtain the fixed-effects derivatives. Defaults to `1e-4`. 
+#' It corresponds to the maximum absolute difference allowed between two coefficients of 
+#' successive iterations. Argument `deriv.tol` cannot be lower than `10000*.Machine$double.eps`.
+#' @param warn Logical, default is `TRUE`. Whether warnings should be displayed 
+#' (concerns warnings relating to convergence state).
+#' @param notes Logical. By default, two notes are displayed: when NAs are removed 
+#' (to show additional information) and when some observations are removed because 
+#' of only 0 (or 0/1) outcomes in a fixed-effect setup (in Poisson/Neg. Bin./Logit models). 
+#' To avoid displaying these messages, you can set `notes = FALSE`. You can 
+#' remove these messages permanently by using `setFixest_notes(FALSE)`.
+#' @param combine.quick Logical. When you combine different variables to transform them 
+#' into a single fixed-effects you can do e.g. `y ~ x | paste(var1, var2)`. 
+#' The algorithm provides a shorthand to do the same operation: `y ~ x | var1^var2`. 
+#' Because pasting variables is a costly operation, the internal algorithm may use a 
+#' numerical trick to hasten the process. The cost of doing so is that you lose the labels. 
+#' If you are interested in getting the value of the fixed-effects coefficients 
+#' after the estimation, you should use `combine.quick = FALSE`. By default it is 
+#' equal to `FALSE` if the number of observations is lower than 50,000, and to `TRUE` 
+#' otherwise.
+#' @param only.env (Advanced users.) Logical, default is `FALSE`. If `TRUE`, then only 
+#' the environment used to make the estimation is returned.
+#' @param mem.clean Logical, default is `FALSE`. Only to be used if the data set is 
+#' large compared to the available RAM. If `TRUE` then intermediary objects are removed as 
+#' much as possible and [`gc`] is run before each substantial C++ section in the internal 
+#' code to avoid memory issues.
+#' @param lean Logical, default is `FALSE`. If `TRUE` then all large objects are removed 
+#' from the returned result: this will save memory but will block the possibility to 
+#' use many methods. It is recommended to use the arguments `se` or `cluster` to 
+#' obtain the appropriate standard-errors at estimation time, since obtaining different 
+#' SEs won't be possible afterwards.
+#' @param env (Advanced users.) A `fixest` environment created by a `fixest` estimation 
+#' with `only.env = TRUE`. Default is missing. If provided, the data from this environment 
+#' will be used to perform the estimation.
+#' @param only.coef Logical, default is `FALSE`. If `TRUE`, then only the estimated 
+#' coefficients are returned. Note that the length of the vector returned is always 
+#' the length of the number of coefficients to be estimated: this means that the 
+#' variables found to be collinear are returned with an NA value.
 #' @param ... Not currently used.
 #'
 #' @details
-#' This function estimates maximum likelihood models where the conditional expectations are as follows:
+#' This function estimates maximum likelihood models where the conditional expectations 
+#' are as follows:
 #'
 #' Gaussian likelihood:
 #' \deqn{E(Y|X)=X\beta}{E(Y|X) = X*beta}
 #' Poisson and Negative Binomial likelihoods:
 #' \deqn{E(Y|X)=\exp(X\beta)}{E(Y|X) = exp(X*beta)}
-#' where in the Negative Binomial there is the parameter \eqn{\theta}{theta} used to model the variance as \eqn{\mu+\mu^2/\theta}{mu+mu^2/theta}, with \eqn{\mu}{mu} the conditional expectation.
+#' where in the Negative Binomial there is the parameter \eqn{\theta}{theta} used to 
+#' model the variance as \eqn{\mu+\mu^2/\theta}{mu+mu^2/theta}, with \eqn{\mu}{mu} the 
+#' conditional expectation.
 #' Logit likelihood:
 #' \deqn{E(Y|X)=\frac{\exp(X\beta)}{1+\exp(X\beta)}}{E(Y|X) = exp(X*beta) / (1 + exp(X*beta))}
 #'
 #' When there are one or more fixed-effects, the conditional expectation can be written as:
 #' \deqn{E(Y|X) = h(X\beta+\sum_{k}\sum_{m}\gamma_{m}^{k}\times C_{im}^{k}),}
-#' where \eqn{h(.)} is the function corresponding to the likelihood function as shown before. \eqn{C^k} is the matrix associated to fixed-effect dimension \eqn{k} such that \eqn{C^k_{im}} is equal to 1 if observation \eqn{i} is of category \eqn{m} in the fixed-effect dimension \eqn{k} and 0 otherwise.
+#' where \eqn{h(.)} is the function corresponding to the likelihood function as shown before. 
+#' \eqn{C^k} is the matrix associated to fixed-effect dimension \eqn{k} such that \eqn{C^k_{im}} 
+#' is equal to 1 if observation \eqn{i} is of category \eqn{m} in the 
+#' fixed-effect dimension \eqn{k} and 0 otherwise.
 #'
-#' When there are non linear in parameters functions, we can schematically split the set of regressors in two:
+#' When there are non linear in parameters functions, we can schematically split 
+#' the set of regressors in two:
 #' \deqn{f(X,\beta)=X^1\beta^1 + g(X^2,\beta^2)}
-#' with first a linear term and then a non linear part expressed by the function g. That is, we add a non-linear term to the linear terms (which are \eqn{X*beta} and the fixed-effects coefficients). It is always better (more efficient) to put into the argument `NL.fml` only the non-linear in parameter terms, and add all linear terms in the `fml` argument.
+#' with first a linear term and then a non linear part expressed by the function g. That is, 
+#' we add a non-linear term to the linear terms (which are \eqn{X*beta} and 
+#' the fixed-effects coefficients). It is always better (more efficient) to put 
+#' into the argument `NL.fml` only the non-linear in parameter terms, and 
+#' add all linear terms in the `fml` argument.
 #'
-#' To estimate only a non-linear formula without even the intercept, you must exclude the intercept from the linear formula by using, e.g., `fml = z~0`.
+#' To estimate only a non-linear formula without even the intercept, you must 
+#' exclude the intercept from the linear formula by using, e.g., `fml = z~0`.
 #'
-#' The over-dispersion parameter of the Negative Binomial family, theta, is capped at 10,000. If theta reaches this high value, it means that there is no overdispersion.
+#' The over-dispersion parameter of the Negative Binomial family, theta, 
+#' is capped at 10,000. If theta reaches this high value, it means that there is no overdispersion.
 #'
 #' @return
-#' A `fixest` object. Note that `fixest` objects contain many elements and most of them are for internal use, they are presented here only for information. To access them, it is safer to use the user-level methods (e.g. [`vcov.fixest`], [`resid.fixest`], etc) or functions (like for instance [`fitstat`] to access any fit statistic).
+#' A `fixest` object. Note that `fixest` objects contain many elements and most of them 
+#' are for internal use, they are presented here only for information. To access them, 
+#' it is safer to use the user-level methods (e.g. [`vcov.fixest`], [`resid.fixest`], 
+#' etc) or functions (like for instance [`fitstat`] to access any fit statistic).
 #' \item{coefficients}{The named vector of coefficients.}
-#' \item{coeftable}{The table of the coefficients with their standard errors, z-values and p-values.}
+#' \item{coeftable}{The table of the coefficients with their standard errors, 
+#' z-values and p-values.}
 #' \item{loglik}{The loglikelihood.}
 #' \item{iterations}{Number of iterations of the algorithm.}
 #' \item{nobs}{The number of observations.}
 #' \item{nparams}{The number of parameters of the model.}
 #' \item{call}{The call.}
 #' \item{fml}{The linear formula of the call.}
-#' \item{fml_all}{A list containing different parts of the formula. Always contain the linear formula. Then, if relevant: `fixef`: the fixed-effects; `NL`: the non linear part of the formula.}
+#' \item{fml_all}{A list containing different parts of the formula. Always contain 
+#' the linear formula. Then, if relevant: `fixef`: the fixed-effects; `NL`: the non linear 
+#' part of the formula.}
 #' \item{ll_null}{Log-likelihood of the null model (i.e. with the intercept only).}
 #' \item{pseudo_r2}{The adjusted pseudo R2.}
 #' \item{message}{The convergence message from the optimization procedures.}
-#' \item{sq.cor}{Squared correlation between the dependent variable and the expected predictor (i.e. fitted.values) obtained by the estimation.}
+#' \item{sq.cor}{Squared correlation between the dependent variable and the expected 
+#' predictor (i.e. fitted.values) obtained by the estimation.}
 #' \item{hessian}{The Hessian of the parameters.}
-#' \item{fitted.values}{The fitted values are the expected value of the dependent variable for the fitted model: that is \eqn{E(Y|X)}.}
+#' \item{fitted.values}{The fitted values are the expected value of the dependent variable 
+#' for the fitted model: that is \eqn{E(Y|X)}.}
 #' \item{cov.iid}{The variance-covariance matrix of the parameters.}
 #' \item{se}{The standard-error of the parameters.}
 #' \item{scores}{The matrix of the scores (first derivative for each observation).}
@@ -3507,34 +3748,50 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit, split
 #' \item{sumFE}{The sum of the fixed-effects for each observation.}
 #' \item{offset}{The offset formula.}
 #' \item{NL.fml}{The nonlinear formula of the call.}
-#' \item{bounds}{Whether the coefficients were upper or lower bounded. -- This can only be the case when a non-linear formula is included and the arguments 'lower' or 'upper' are provided.}
-#' \item{isBounded}{The logical vector that gives for each coefficient whether it was bounded or not. This can only be the case when a non-linear formula is included and the arguments 'lower' or 'upper' are provided.}
+#' \item{bounds}{Whether the coefficients were upper or lower bounded. -- This can only be 
+#' the case when a non-linear formula is included and the arguments 'lower' or 'upper' 
+#' are provided.}
+#' \item{isBounded}{The logical vector that gives for each coefficient whether it was 
+#' bounded or not. This can only be the case when a non-linear formula is included 
+#' and the arguments 'lower' or 'upper' are provided.}
 #' \item{fixef_vars}{The names of each fixed-effect dimension.}
-#' \item{fixef_id}{The list (of length the number of fixed-effects) of the fixed-effects identifiers for each observation.}
-#' \item{fixef_sizes}{The size of each fixed-effect (i.e. the number of unique identifierfor each fixed-effect dimension).}
-#' \item{obs_selection}{(When relevant.) List containing vectors of integers. It represents the sequential selection of observation vis a vis the original data set.}
-#' \item{fixef_removed}{In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the list (for each fixed-effect dimension) of the fixed-effect identifiers that were removed.}
+#' \item{fixef_id}{The list (of length the number of fixed-effects) of the 
+#' fixed-effects identifiers for each observation.}
+#' \item{fixef_sizes}{The size of each fixed-effect (i.e. the number of unique 
+#' identifier for each fixed-effect dimension).}
+#' \item{obs_selection}{(When relevant.) List containing vectors of integers. It 
+#' represents the sequential selection of observation vis a vis the original data set.}
+#' \item{fixef_removed}{In the case there were fixed-effects and some observations 
+#' were removed because of only 0/1 outcome within a fixed-effect, it gives the 
+#' list (for each fixed-effect dimension) of the fixed-effect identifiers that were removed.}
 #' \item{theta}{In the case of a negative binomial estimation: the overdispersion parameter.}
 #'
 #'  @seealso
-#' See also [`summary.fixest`] to see the results with the appropriate standard-errors, [`fixef.fixest`] to extract the fixed-effects coefficients, and the function [`etable`] to visualize the results of multiple estimations.
+#' See also [`summary.fixest`] to see the results with the appropriate standard-errors, 
+#' [`fixef.fixest`] to extract the fixed-effects coefficients, and the function [`etable`] 
+#' to visualize the results of multiple estimations.
 #'
-#' And other estimation methods: [`feols`], [`femlm`], [`feglm`], [`fepois`][fixest::feglm], [`fenegbin`][fixest::femlm].
+#' And other estimation methods: [`feols`], [`femlm`], [`feglm`], 
+#' [`fepois`][fixest::feglm], [`fenegbin`][fixest::femlm].
 #'
 #' @author
 #' Laurent Berge
 #'
 #' @references
 #'
-#' Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 ([](https://github.com/lrberge/fixest/blob/master/_DOCS/FENmlm_paper.pdf)).
+#' Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with 
+#' multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 
+#' 13 ([](https://github.com/lrberge/fixest/blob/master/_DOCS/FENmlm_paper.pdf)).
 #'
 #' For models with multiple fixed-effects:
 #'
-#' Gaure, Simen, 2013, "OLS with multiple high dimensional category variables", Computational Statistics & Data Analysis 66 pp. 8--18
+#' Gaure, Simen, 2013, "OLS with multiple high dimensional category variables", 
+#' Computational Statistics & Data Analysis 66 pp. 8--18
 #'
 #' On the unconditionnal Negative Binomial model:
 #'
-#' Allison, Paul D and Waterman, Richard P, 2002, "Fixed-Effects Negative Binomial Regression Models", Sociological Methodology 32(1) pp. 247--265
+#' Allison, Paul D and Waterman, Richard P, 2002, "Fixed-Effects Negative 
+#' Binomial Regression Models", Sociological Methodology 32(1) pp. 247--265
 #'
 #' @examples
 #'
@@ -3577,14 +3834,14 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit, split
 #'
 #'
 feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"), NL.fml, vcov,
-          fixef, fixef.rm = "perfect", NL.start, lower, upper, NL.start.init,
-          offset, subset, split, fsplit, split.keep, split.drop,
-          cluster, se, ssc, panel.id,
-          start = 0, jacobian.method="simple", useHessian = TRUE,
-          hessian.args = NULL, opt.control = list(), nthreads = getFixest_nthreads(),
-          lean = FALSE, verbose = 0, theta.init, fixef.tol = 1e-5, fixef.iter = 10000,
-          deriv.tol = 1e-4, deriv.iter = 1000, warn = TRUE, notes = getFixest_notes(),
-          combine.quick, mem.clean = FALSE, only.env = FALSE, only.coef = FALSE, env, ...){
+                  fixef, fixef.rm = "perfect", NL.start, lower, upper, NL.start.init,
+                  offset, subset, split, fsplit, split.keep, split.drop,
+                  cluster, se, ssc, panel.id,
+                  start = 0, jacobian.method="simple", useHessian = TRUE,
+                  hessian.args = NULL, opt.control = list(), nthreads = getFixest_nthreads(),
+                  lean = FALSE, verbose = 0, theta.init, fixef.tol = 1e-5, fixef.iter = 10000,
+                  deriv.tol = 1e-4, deriv.iter = 1000, warn = TRUE, notes = getFixest_notes(),
+                  combine.quick, mem.clean = FALSE, only.env = FALSE, only.coef = FALSE, env, ...){
 
   time_start = proc.time()
 
@@ -3594,21 +3851,23 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
     call_env = new.env(parent = parent.frame())
 
     env = try(fixest_env(fml = fml, data = data, family = family, NL.fml = NL.fml,
-               fixef = fixef, fixef.rm = fixef.rm, NL.start = NL.start,
-               lower = lower, upper = upper, NL.start.init = NL.start.init,
-               offset = offset, subset = subset, split = split, fsplit = fsplit,
-               split.keep = split.keep, split.drop = split.drop,
-               vcov = vcov, cluster = cluster, se = se, ssc = ssc,
-               panel.id = panel.id, linear.start = start, jacobian.method = jacobian.method,
-               useHessian = useHessian, opt.control = opt.control, nthreads = nthreads,
-               lean = lean, verbose = verbose, theta.init = theta.init,
-               fixef.tol = fixef.tol, fixef.iter = fixef.iter, deriv.iter = deriv.iter,
-               warn = warn, notes = notes, combine.quick = combine.quick,
-               mem.clean = mem.clean, only.coef = only.coef, mc_origin = match.call(),
-               call_env = call_env, computeModel0 = TRUE, ...), silent = TRUE)
+                         fixef = fixef, fixef.rm = fixef.rm, NL.start = NL.start,
+                         lower = lower, upper = upper, NL.start.init = NL.start.init,
+                         offset = offset, subset = subset, split = split, fsplit = fsplit,
+                         split.keep = split.keep, split.drop = split.drop,
+                         vcov = vcov, cluster = cluster, se = se, ssc = ssc,
+                         panel.id = panel.id, linear.start = start, 
+                         jacobian.method = jacobian.method,
+                         useHessian = useHessian, opt.control = opt.control, nthreads = nthreads,
+                         lean = lean, verbose = verbose, theta.init = theta.init,
+                         fixef.tol = fixef.tol, fixef.iter = fixef.iter, deriv.iter = deriv.iter,
+                         warn = warn, notes = notes, combine.quick = combine.quick,
+                         mem.clean = mem.clean, only.coef = only.coef, mc_origin = match.call(),
+                         call_env = call_env, computeModel0 = TRUE, ...), silent = TRUE)
 
   } else if((r <- !is.environment(env)) || !isTRUE(env$fixest_env)) {
-    stop("Argument 'env' must be an environment created by a fixest estimation. Currently it is not ", ifelse(r, "an", "a 'fixest'"), " environment.")
+    stopi("Argument 'env' must be an environment created by a fixest estimation. ",
+          "Currently it is not {&r ; an ; a `fixest`} environment.")
   }
 
   check_arg(only.env, "logical scalar")
@@ -3744,13 +4003,16 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
   # Maximizing the likelihood
   #
 
-  opt = try(stats::nlminb(start=start, objective=femlm_ll, env=env, lower=lower, upper=upper, gradient=gradient, hessian=hessian, control=opt.control), silent = TRUE)
+  opt = try(stats::nlminb(start=start, objective=femlm_ll, env=env, lower=lower, 
+                          upper=upper, gradient=gradient, hessian=hessian, 
+                          control=opt.control), silent = TRUE)
 
   if("try-error" %in% class(opt)){
     # We return the coefficients (can be interesting for debugging)
     iter = get("iter", env)
     origin = get("origin", env)
-    warning_msg = paste0("[", origin, "] Optimization failed at iteration ", iter, ". Reason: ", gsub("^[^\n]+\n *(.+\n)", "\\1", opt))
+    warning_msg = paste0("[", origin, "] Optimization failed at iteration ", 
+                         iter, ". Reason: ", gsub("^[^\n]+\n *(.+\n)", "\\1", opt))
     if(IN_MULTI){
       stack_multi_notes(warning_msg)
       return(fixest_NA_results(env))
@@ -3766,7 +4028,8 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
   } else {
     convStatus = TRUE
     warning_msg = ""
-    if(!opt$message %in% c("X-convergence (3)", "relative convergence (4)", "both X-convergence and relative convergence (5)")){
+    if(!opt$message %in% c("X-convergence (3)", "relative convergence (4)", 
+                           "both X-convergence and relative convergence (5)")){
       warning_msg = " The optimization algorithm did not converge, the results are not reliable."
       convStatus = FALSE
     }
@@ -3841,7 +4104,8 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
   var = NULL
   try(var <- solve(hessian_noBounded), silent = TRUE)
   if(is.null(var)){
-    warning_msg = paste(warning_msg, "The information matrix is singular: presence of collinearity.")
+    warning_msg = paste(warning_msg, 
+                        "The information matrix is singular: presence of collinearity.")
     var = hessian_noBounded * NA
     se = diag(var)
   } else {
@@ -3879,7 +4143,8 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
     se_format[isBounded] = boundText
   }
 
-  coeftable = data.frame("Estimate"=coef, "Std. Error"=se_format, "z value"=zvalue, "Pr(>|z|)"=pvalue, stringsAsFactors = FALSE)
+  coeftable = data.frame("Estimate"=coef, "Std. Error"=se_format, "z value"=zvalue,
+                         "Pr(>|z|)"=pvalue, stringsAsFactors = FALSE)
   names(coeftable) = c("Estimate", "Std. Error", "z value",  "Pr(>|z|)")
   row.names(coeftable) = params
 
@@ -4062,26 +4327,45 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 
 #' Estimates a `fixest` estimation from a `fixest` environment
 #'
-#' This is a function advanced users which allows to estimate any `fixest` estimation from a `fixest` environment obtained with `only.env = TRUE` in a `fixest` estimation.
+#' This is a function advanced users which allows to estimate any `fixest` estimation from a 
+#' `fixest` environment obtained with `only.env = TRUE` in a `fixest` estimation.
 #'
-#' @param env An environment obtained from a `fixest` estimation with `only.env = TRUE`. This is intended for advanced users so there is no error handling: any other kind of input will fail with a poor error message.
-#' @param y A vector representing the dependent variable. Should be of the same length as the number of observations in the initial estimation.
-#' @param X A matrix representing the independent variables. Should be of the same dimension as in the initial estimation.
-#' @param weights A vector of weights (i.e. with only positive values). Should be of the same length as the number of observations in the initial estimation. If identical to the scalar 1, this will mean that no weights will be used in the estimation.
-#' @param endo A matrix representing the endogenous regressors in IV estimations. It should be of the same dimension as the original endogenous regressors.
-#' @param inst A matrix representing the instruments in IV estimations. It should be of the same dimension as the original instruments.
+#' @param env An environment obtained from a `fixest` estimation with `only.env = TRUE`. This is
+#'  intended for advanced users so there is no error handling: any other kind of input will 
+#' fail with a poor error message.
+#' @param y A vector representing the dependent variable. Should be of the same length 
+#' as the number of observations in the initial estimation.
+#' @param X A matrix representing the independent variables. Should be of the same dimension 
+#' as in the initial estimation.
+#' @param weights A vector of weights (i.e. with only positive values). Should be of 
+#' the same length as the number of observations in the initial estimation. If identical 
+#' to the scalar 1, this will mean that no weights will be used in the estimation.
+#' @param endo A matrix representing the endogenous regressors in IV estimations. It should 
+#' be of the same dimension as the original endogenous regressors.
+#' @param inst A matrix representing the instruments in IV estimations. It should be of 
+#' the same dimension as the original instruments.
 #'
 #' @return
 #'
-#' It returns the results of a `fixest` estimation: the one that was summoned when obtaining the environment.
+#' It returns the results of a `fixest` estimation: the one that was summoned when 
+#' obtaining the environment.
 #'
 #' @details
 #'
-#' This function has been created for advanced users, mostly to avoid overheads when making simulations with `fixest`.
+#' This function has been created for advanced users, mostly to avoid overheads 
+#' when making simulations with `fixest`.
 #'
-#' How can it help you make simulations? First make a core estimation with `only.env = TRUE`, and usually with `only.coef = TRUE` (to avoid having extra things that take time to compute). Then loop while modifying the appropriate things directly in the environment. Beware that if you make a mistake here (typically giving stuff of the wrong length), then you can make the R session crash because there is no more error-handling! Finally estimate with `est_env(env = core_env)` and store the results.
+#' How can it help you make simulations? First make a core estimation with `only.env = TRUE`, 
+#' and usually with `only.coef = TRUE` (to avoid having extra things that take time to compute). 
+#' Then loop while modifying the appropriate things directly in the environment. Beware that 
+#' if you make a mistake here (typically giving stuff of the wrong length), 
+#' then you can make the R session crash because there is no more error-handling! 
+#' Finally estimate with `est_env(env = core_env)` and store the results.
 #'
-#' Instead of `est_env`, you could use directly `fixest` estimations too, like `feols`, since they accept the `env` argument. The function `est_env` is only here to add a bit of generality to avoid the trouble to the user to write conditions (look at the source, it's just a one liner).
+#' Instead of `est_env`, you could use directly `fixest` estimations too, like `feols`, 
+#' since they accept the `env` argument. The function `est_env` is only here to add a 
+#' bit of generality to avoid the trouble to the user to write conditions 
+#' (look at the source, it's just a one liner).
 #'
 #' Objects of main interest in the environment are:
 #' \describe{
@@ -4092,11 +4376,19 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 #' \item{weights.value}{The vector of weights.}
 #' }
 #'
-#' I strongly discourage changing the dimension of any of these elements, or else crash can occur. However, you can change their values at will (given the dimension stay the same). The only exception is the weights, which tolerates changing its dimension: it can be identical to the scalar `1` (meaning no weights), or to something of the length the number of observations.
+#' I strongly discourage changing the dimension of any of these elements, or else crash can occur. 
+#' However, you can change their values at will (given the dimension stay the same). 
+#' The only exception is the weights, which tolerates changing its dimension: it can 
+#' be identical to the scalar `1` (meaning no weights), or to something of the length the 
+#' number of observations.
 #'
-#' I also discourage changing anything in the fixed-effects (even their value) since this will almost surely lead to a crash.
+#' I also discourage changing anything in the fixed-effects (even their value) 
+#' since this will almost surely lead to a crash.
 #'
-#' Note that this function is mostly useful when the overheads/estimation ratio is high. This means that OLS will benefit the most from this function. For GLM/Max.Lik. estimations, the ratio is small since the overheads is only a tiny portion of the total estimation time. Hence this function will be less useful for these models.
+#' Note that this function is mostly useful when the overheads/estimation ratio is high. 
+#' This means that OLS will benefit the most from this function. For GLM/Max.Lik. estimations, 
+#' the ratio is small since the overheads is only a tiny portion of the total estimation time. 
+#' Hence this function will be less useful for these models.
 #'
 #' @author
 #' Laurent Berge
@@ -4118,13 +4410,13 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 #'
 #'   res_all = vector("list", n_sim)
 #'   for(i in 1:n_sim){
-#'     # # begin: NOT RUN
-#'     # # We could directly assign in the environment:
+#'     ## begin: NOT RUN
+#'     ## We could directly assign in the environment:
 #'     # assign("weights.value", rexp(n_obs, rate = 1), core_env)
 #'     # res_all[[i]] = est_env(env = core_env)
-#'     #   end: NOT RUN
+#'     ##   end: NOT RUN
 #'
-#'     # Instead we can use the argument weights, which does the same
+#'     ## Instead we can use the argument weights, which does the same
 #'     res_all[[i]] = est_env(env = core_env, weights = rexp(n_obs, rate = 1))
 #'   }
 #'
@@ -4195,9 +4487,9 @@ release_multi_notes = function(){
 
   if(length(notes) > 0){
     dict = c("\\$collin\\.var" = "Some variables have been removed because of collinearity (see $collin.var).",
-         "collinear with the fixed-effects" = "All the variables are collinear with the fixed-effects (the estimation is void).",
-         "virtually constant and equal to 0" = "All the variables are virtually constant and equal to 0 (the estimation is void).",
-         "Very high value of theta" = "Very high value of theta, there is no sign of overdispersion, you may consider a Poisson model.")
+             "collinear with the fixed-effects" = "All the variables are collinear with the fixed-effects (the estimation is void).",
+             "virtually constant and equal to 0" = "All the variables are virtually constant and equal to 0 (the estimation is void).",
+             "Very high value of theta" = "Very high value of theta, there is no sign of overdispersion, you may consider a Poisson model.")
 
     for(i in seq_along(dict)){
       d_value = dict[i]
@@ -4238,7 +4530,11 @@ warn_fixef_iter = function(env, stack_multi = FALSE){
   warning_msg = ""
   if(fixef.iter.limit_reached > 0){
     goWarning = TRUE
-    warning_msg = paste0(origin, ": [Getting the fixed-effects] iteration limit reached (", fixef.iter, ").", ifelse(fixef.iter.limit_reached > 1, paste0(" (", fixef.iter.limit_reached, " times.)"), " (Once.)"))
+    warning_msg = paste0(origin, ": [Getting the fixed-effects] iteration limit reached (", 
+                         fixef.iter, ").", 
+                         ifelse(fixef.iter.limit_reached > 1, 
+                                paste0(" (", fixef.iter.limit_reached, " times.)"), 
+                                " (Once.)"))
   }
 
   # For the fixed-effect derivatives
@@ -4247,7 +4543,12 @@ warn_fixef_iter = function(env, stack_multi = FALSE){
 
   if(deriv.iter.limit_reached > 0){
     prefix = ifelse(goWarning, paste0("\n", sprintf("% *s", nchar(origin) + 2, " ")), paste0(origin, ": "))
-    warning_msg = paste0(warning_msg, prefix, "[Getting fixed-effects derivatives] iteration limit reached (", deriv.iter, ").", ifelse(deriv.iter.limit_reached > 1, paste0(" (", deriv.iter.limit_reached, " times.)"), " (Once.)"))
+    warning_msg = paste0(warning_msg, prefix, 
+                         "[Getting fixed-effects derivatives] iteration limit reached ",
+                         "(", deriv.iter, ").", 
+                         ifelse(deriv.iter.limit_reached > 1, 
+                                paste0(" (", deriv.iter.limit_reached, " times.)"), 
+                                " (Once.)"))
     goWarning = TRUE
   }
 
@@ -4270,7 +4571,8 @@ warn_step_halving = function(env, stack_multi = FALSE){
   if(!warn) return(invisible(NULL))
 
   if(nb_sh > 0){
-    msg = paste0("feglm: Step halving due to non-finite deviance (", ifelse(nb_sh > 1, paste0(nb_sh, " times"), "once"), ").")
+    msg = paste0("feglm: Step halving due to non-finite deviance (", 
+                 ifelse(nb_sh > 1, paste0(nb_sh, " times"), "once"), ").")
     if(stack_multi){
       stack_multi_notes(msg)
     } else {
@@ -4295,7 +4597,9 @@ format_error_msg = function(x, origin){
   } else if(grepl("[Oo]bject '.+' not found", x) || grepl("memory|cannot allocate", x)) {
     res = x
   } else {
-     res = paste0(x, "\nThis error was unforeseen by the author of the function ", origin, ". If you think your call to the function is legitimate, could you report?")
+     res = paste0(x, "\nThis error was unforeseen by the author of the function ", 
+                  origin, 
+                  ". If you think your call to the function is legitimate, could you report?")
   }
   res
 }
@@ -4446,7 +4750,7 @@ multi_LHS_RHS = function(env, fun){
 
   # Meta information for fixest_multi
   values = list(lhs = rep(lhs_names, each = n_rhs),
-          rhs = rep(rhs_names, n_lhs))
+                rhs = rep(rhs_names, n_lhs))
 
   # result
   res_multi = setup_multi(res, values)
@@ -4488,7 +4792,7 @@ multi_fixef = function(env, estfun){
 
       # FEs
       fixef_df = error_sender(prepare_df(fixef_terms_full$fe_vars, data, combine.quick),
-                   "Problem evaluating the fixed-effects part of the formula:\n")
+                              "Problem evaluating the fixed-effects part of the formula:\n")
 
       fixef_vars = names(fixef_df)
 
@@ -4498,7 +4802,7 @@ multi_fixef = function(env, estfun){
       if(isSlope){
 
         slope_df = error_sender(prepare_df(fixef_terms_full$slope_vars, data),
-                     "Problem evaluating the variables with varying slopes in the fixed-effects part of the formula:\n")
+                                "Problem evaluating the variables with varying slopes in the fixed-effects part of the formula:\n")
 
         slope_flag = fixef_terms_full$slope_flag
         slope_vars = fixef_terms_full$slope_vars
@@ -4588,7 +4892,12 @@ multi_fixef = function(env, estfun){
 
       # We delay the computation by using isSplit = TRUE and split.full = FALSE
       # Real QUF will be done in the last reshape env
-      info_fe = setup_fixef(fixef_df = fixef_df, lhs = lhs, fixef_vars = fixef_vars, fixef.rm = fixef.rm, family = family, isSplit = TRUE, split.full = FALSE, origin_type = origin_type, isSlope = isSlope, slope_flag = slope_flag, slope_df = slope_df, slope_vars_list = slope_vars_list, nthreads = nthreads)
+      info_fe = setup_fixef(fixef_df = fixef_df, lhs = lhs, fixef_vars = fixef_vars, 
+                            fixef.rm = fixef.rm, family = family, isSplit = TRUE, 
+                            split.full = FALSE, origin_type = origin_type, 
+                            isSlope = isSlope, slope_flag = slope_flag, 
+                            slope_df = slope_df, slope_vars_list = slope_vars_list, 
+                            nthreads = nthreads)
 
       fixef_id        = info_fe$fixef_id
       fixef_names     = info_fe$fixef_names
@@ -4613,7 +4922,9 @@ multi_fixef = function(env, estfun){
       assign("fixef_names", fixef_names, my_env)
       assign("fixef_vars", fixef_vars, my_env)
 
-      assign_fixef_env(env, family, origin_type, fixef_id, fixef_sizes, fixef_table, sum_y_all, slope_flag, slope_variables, slope_vars_list)
+      assign_fixef_env(env, family, origin_type, fixef_id, fixef_sizes, 
+                       fixef_table, sum_y_all, slope_flag, slope_variables, 
+                       slope_vars_list)
 
       #
       # Formatting the fixef stuff from res

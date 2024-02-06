@@ -26,29 +26,63 @@ setFixest_estimation(
 getFixest_estimation()
 }
 \arguments{
-\item{data}{A data.frame containing the necessary variables to run the model. The variables of the non-linear right hand side of the formula are identified with this \code{data.frame} names. Can also be a matrix.}
+\item{data}{A data.frame containing the necessary variables to run the model.
+The variables of the non-linear right hand side of the formula are identified
+with this \code{data.frame} names. Can also be a matrix.}
 
 \item{panel.id}{The panel identifiers. Can either be: i) a one sided formula (e.g. \code{panel.id = ~id+time}), ii) a character vector of length 2 (e.g. \code{panel.id=c('id', 'time')}, or iii) a character scalar of two variables separated by a comma (e.g. \code{panel.id='id,time'}). Note that you can combine variables with \code{^} only inside formulas (see the dedicated section in \code{\link{feols}}).}
 
-\item{fixef.rm}{Can be equal to "perfect" (default), "singleton", "both" or "none". Controls which observations are to be removed. If "perfect", then observations having a fixed-effect with perfect fit (e.g. only 0 outcomes in Poisson estimations) will be removed. If "singleton", all observations for which a fixed-effect appears only once will be removed. The meaning of "both" and "none" is direct.}
+\item{fixef.rm}{Can be equal to "perfect" (default), "singleton", "both" or "none".
+Controls which observations are to be removed. If "perfect", then observations
+having a fixed-effect with perfect fit (e.g. only 0 outcomes in Poisson estimations)
+will be removed. If "singleton", all observations for which a fixed-effect appears
+only once will be removed. The meaning of "both" and "none" is direct.}
 
-\item{fixef.tol}{Precision used to obtain the fixed-effects. Defaults to \code{1e-5}. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations. Argument \code{fixef.tol} cannot be lower than \code{10000*.Machine$double.eps}. Note that this parameter is dynamically controlled by the algorithm.}
+\item{fixef.tol}{Precision used to obtain the fixed-effects. Defaults to \code{1e-5}.
+It corresponds to the maximum absolute difference allowed between two coefficients
+of successive iterations. Argument \code{fixef.tol} cannot be lower
+than \code{10000*.Machine$double.eps}. Note that this parameter is dynamically
+controlled by the algorithm.}
 
-\item{fixef.iter}{Maximum number of iterations in fixed-effects algorithm (only in use for 2+ fixed-effects). Default is 10000.}
+\item{fixef.iter}{Maximum number of iterations in fixed-effects algorithm
+(only in use for 2+ fixed-effects). Default is 10000.}
 
-\item{collin.tol}{Numeric scalar, default is \code{1e-10}. Threshold deciding when variables should be considered collinear and subsequently removed from the estimation. Higher values means more variables will be removed (if there is presence of collinearity). One signal of presence of collinearity is t-stats that are extremely low (for instance when t-stats < 1e-3).}
+\item{collin.tol}{Numeric scalar, default is \code{1e-10}. Threshold deciding when variables should
+be considered collinear and subsequently removed from the estimation. Higher values means more
+variables will be removed (if there is presence of collinearity). One signal of presence of
+collinearity is t-stats that are extremely low (for instance when t-stats < 1e-3).}
 
-\item{lean}{Logical, default is \code{FALSE}. If \code{TRUE} then all large objects are removed from the returned result: this will save memory but will block the possibility to use many methods. It is recommended to use the arguments \code{se} or \code{cluster} to obtain the appropriate standard-errors at estimation time, since obtaining different SEs won't be possible afterwards.}
+\item{lean}{Logical, default is \code{FALSE}. If \code{TRUE} then all large objects are removed
+from the returned result: this will save memory but will block the possibility to
+use many methods. It is recommended to use the arguments \code{se} or \code{cluster} to
+obtain the appropriate standard-errors at estimation time, since obtaining different
+SEs won't be possible afterwards.}
 
-\item{verbose}{Integer. Higher values give more information. In particular, it can detail the number of iterations in the demeaning algorithm (the first number is the left-hand-side, the other numbers are the right-hand-side variables).}
+\item{verbose}{Integer. Higher values give more information. In particular,
+it can detail the number of iterations in the demeaning algorithm
+(the first number is the left-hand-side, the other numbers are the right-hand-side variables).}
 
-\item{warn}{Logical, default is \code{TRUE}. Whether warnings should be displayed (concerns warnings relating to convergence state).}
+\item{warn}{Logical, default is \code{TRUE}. Whether warnings should be displayed
+(concerns warnings relating to convergence state).}
 
-\item{combine.quick}{Logical. When you combine different variables to transform them into a single fixed-effects you can do e.g. \code{y ~ x | paste(var1, var2)}. The algorithm provides a shorthand to do the same operation: \code{y ~ x | var1^var2}. Because pasting variables is a costly operation, the internal algorithm may use a numerical trick to hasten the process. The cost of doing so is that you lose the labels. If you are interested in getting the value of the fixed-effects coefficients after the estimation, you should use \code{combine.quick = FALSE}. By default it is equal to \code{FALSE} if the number of observations is lower than 50,000, and to \code{TRUE} otherwise.}
+\item{combine.quick}{Logical. When you combine different variables to transform them
+into a single fixed-effects you can do e.g. \code{y ~ x | paste(var1, var2)}.
+The algorithm provides a shorthand to do the same operation: \code{y ~ x | var1^var2}.
+Because pasting variables is a costly operation, the internal algorithm may use a
+numerical trick to hasten the process. The cost of doing so is that you lose the labels.
+If you are interested in getting the value of the fixed-effects coefficients
+after the estimation, you should use \code{combine.quick = FALSE}. By default it is
+equal to \code{FALSE} if the number of observations is lower than 50,000, and to \code{TRUE}
+otherwise.}
 
-\item{demeaned}{Logical, default is \code{FALSE}. Only used in the presence of fixed-effects: should the centered variables be returned? If \code{TRUE}, it creates the items \code{y_demeaned} and \code{X_demeaned}.}
+\item{demeaned}{Logical, default is \code{FALSE}. Only used in the presence of fixed-effects: should
+the centered variables be returned? If \code{TRUE}, it creates the items
+\code{y_demeaned} and \code{X_demeaned}.}
 
-\item{mem.clean}{Logical, default is \code{FALSE}. Only to be used if the data set is large compared to the available RAM. If \code{TRUE} then intermediary objects are removed as much as possible and \code{\link{gc}} is run before each substantial C++ section in the internal code to avoid memory issues.}
+\item{mem.clean}{Logical, default is \code{FALSE}. Only to be used if the data set is
+large compared to the available RAM. If \code{TRUE} then intermediary objects are removed as
+much as possible and \code{\link{gc}} is run before each substantial C++ section in the internal
+code to avoid memory issues.}
 
 \item{glm.iter}{Number of iterations of the glm algorithm. Default is 25.}
 

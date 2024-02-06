@@ -62,7 +62,11 @@
 
 \item{vcov_fix}{Logical scalar, default is \code{TRUE}. If the VCOV ends up not being positive definite, whether to "fix" it using an eigenvalue decomposition (a la Cameron, Gelbach & Miller 2011).}
 
-\item{nthreads}{The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. The default is to use 50\% of all threads. You can set permanently the number of threads used within this package using the function \code{\link{setFixest_nthreads}}.}
+\item{nthreads}{The number of threads. Can be: a) an integer lower than, or equal to,
+the maximum number of threads; b) 0: meaning all available threads will be used;
+c) a number strictly between 0 and 1 which represents the fraction of all threads to use.
+The default is to use 50\% of all threads. You can set permanently the number
+of threads used within this package using the function \code{\link{setFixest_nthreads}}.}
 
 \item{...}{Only used if the argument \code{.vocv} is provided and is a function: extra arguments to be passed to that function.}
 }
