@@ -1650,7 +1650,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
 
               author_txt = paste0(author_txt, user_login, ", ", user_rest)
             } else {
-              author_txt = paste0(author_txt, user_all[1], " (login), ", user_all[2], "(user), ", user_all[3], " (effective_user)")
+              author_txt = sma("{author_txt}{user_all[1]} (login), {user_all[2]} (user), ", 
+                               "{user_all[3]} (effective_user)")
             }
           }
 
@@ -2009,7 +2010,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     }
 
     if(missnull(.vcov_args)) .vcov_args = list()
-    check_set_arg(.vcov_args, "list", .message = "The argument '.vcov_args' must be a list of arguments to be passed to the function in '.vcov'.")
+    check_set_arg(.vcov_args, "list", 
+                  .message = "The argument '.vcov_args' must be a list of arguments to be passed to the function in '.vcov'.")
   }
 
   # If vcov is provided, we use summary
@@ -2022,7 +2024,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     if(length(stage) > 1){
       # Multiple for sure
       is_mult = TRUE
-    } else if(1 %in% stage && any(sapply(all_models[qui_iv], function(x) length(x$iv_endo_names) > 1))){
+    } else if(1 %in% stage && any(sapply(all_models[qui_iv], 
+                                         function(x) length(x$iv_endo_names) > 1))){
       # Means we have multiple end, so svl first stages
       is_mult = TRUE
     }
@@ -2196,8 +2199,11 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
   if(is.null(el_names)) el_names = character(length(extralines))
   el_names = uniquify_names(el_names)
   for(i in seq_along(extralines)){
-    check_value(extralines[[i]], "vector | function | os formula | list", .message = paste0("The elements of argument 'extralines' must be vectors of length ", n_models, ", logical scalars, functions, one-sided formulas, or lists."),
-          .value = n_models)
+    check_value(extralines[[i]], "vector | function | os formula | list", 
+                .message = sma("The elements of argument 'extralines' must be vectors of ", 
+                               "length {n_models}, logical scalars, functions, one-sided formulas,",
+                               " or lists."),
+                .value = n_models)
 
     el = extralines[[i]]
     if("formula" %in% class(el)){
@@ -2218,7 +2224,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
 
           n_el = length(el)
           if(n_models %% n_el != 0){
-            stop_up("In 'extralines', the number of elements in the ", n_th(i), " line is not a divisor of the number of models (", n_el, " vs ", n_models, " models).")
+            stop_up("In 'extralines', the number of elements in the {nth ? i} line ",
+                    "is not a divisor of the number of models ({n_el} vs {n_models} models).")
           }
 
           if(IS_EACH){
@@ -2285,12 +2292,14 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     # => do default
     fitstat_all = "."
 
-  } else if(isFALSE(fitstat_all) || (length(fitstat_all) == 1 && (is.na(fitstat_all) || fitstat_all == ""))){
+  } else if(isFALSE(fitstat_all) || (length(fitstat_all) == 1 && 
+                                     (is.na(fitstat_all) || fitstat_all == ""))){
     fitstat_all = NULL
     drop.section = c(drop.section, "stats")
 
   } else if("formula" %in% class(fitstat_all)){
-    check_arg(fitstat_all, "os formula", .message = "Argument 'fitstat' must be a one sided formula (or a character vector) containing valid types from the function fitstat (see details in ?fitstat).")
+    check_arg(fitstat_all, "os formula", 
+              .message = "Argument 'fitstat' must be a one sided formula (or a character vector) containing valid types from the function fitstat (see details in ?fitstat).")
 
     fitstat_all = .xpd(fitstat_all, frame = parent.frame(.up))
 
@@ -2299,7 +2308,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     fitstat_all = unique(fitstat_all)
 
   } else {
-    check_arg(fitstat_all, "character vector no na", .message = "Argument 'fitstat' must be a one sided formula (or a character vector) containing valid types from the function fitstat (see details in ?fitstat).")
+    check_arg(fitstat_all, "character vector no na", 
+              .message = "Argument 'fitstat' must be a one sided formula (or a character vector) containing valid types from the function fitstat (see details in ?fitstat).")
 
   }
 
@@ -2355,7 +2365,10 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
 
   pblm = setdiff(fitstat_all, fitstat_type_allowed)
   if(length(pblm) > 0){
-    stop_up("Argument 'fitstat' must be a one sided formula (or a character vector) containing valid types from the function fitstat (see details in ?fitstat or use fitstat(show_types = TRUE)). The type", enumerate_items(pblm, "s.is.quote"), " not valid.")
+    stop_up("Argument `fitstat` must be a one sided formula (or a character vector) ",
+            "containing valid types from the function fitstat ", 
+            "(see details in `?fitstat` or use `fitstat(show_types = TRUE)`). ",
+            "The type{$s, enum.q, is ? pblm} not valid.")
   }
 
   if(isTex){
@@ -2396,7 +2409,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     # family
     family = x$family
     if(x$method %in% c("femlm", "feNmlm")){
-      fam = switch(family, poisson = "Poisson", negbin = "Neg. Bin.", gaussian = "Gaussian", logit = "Logit")
+      fam = switch(family, poisson = "Poisson", negbin = "Neg. Bin.", 
+                   gaussian = "Gaussian", logit = "Logit")
     } else if(x$method %in% c("feglm", "feglm.fit")){
       if(family$family == "poisson" && family$link == "log"){
         fam = "Poisson"
@@ -2422,7 +2436,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
 
     a = x$coeftable
     if(is.null(a)){
-      a = data.frame(coef = NA_real_, se = NA_real_, tstat = NA_real_, pvale = NA_real_, row.names = "TO_BE_REMOVED")
+      a = data.frame(coef = NA_real_, se = NA_real_, tstat = NA_real_, 
+                     pvalue = NA_real_, row.names = "TO_BE_REMOVED")
     } else if(!is.data.frame(a)){
       class(a) = NULL
       a = as.data.frame(a)
@@ -2520,7 +2535,10 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         slope_format = style$slopes.format
         slope_var_full = c()
         for(i in seq_along(slope_vars_name)){
-          slope_var_full[i] = gsub("__slope__", slope_fe_name[i], gsub("__var__", slope_vars_name[i], slope_format, fixed = TRUE), fixed = TRUE)
+          slope_var_full[i] = gsub("__slope__", slope_fe_name[i], 
+                                   gsub("__var__", slope_vars_name[i], 
+                                        slope_format, fixed = TRUE), 
+                                   fixed = TRUE)
         }
 
       } else {
@@ -2557,7 +2575,9 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
       if(any(tv > 1)){
         value_pblm = names(tv)[tv > 1][1]
         var_pblm = c(gsub(" ", "", row.names(a)))[var == value_pblm]
-        stop("Problematic value for argument 'dict': The variables ", enumerate_items(var_pblm, "quote"), " have all the same alias ('", value_pblm, "') in the same estimation. This is not supported, please provide a separate alias for each.")
+        stop_up("Problematic value for argument 'dict': The variables {enum.q ? var_pblm}",
+                " have all the same alias ({q?value_pblm}) in the same estimation. ",
+                "This is not supported, please provide a separate alias for each.")
       }
 
       # if there are still interactions, we rename them
@@ -2702,7 +2722,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
       se_value = apply(confint(x, level = ci), 1, function(z) paste0("[", fun_format(z[1]), "; ", fun_format(z[2]), "]"))
 
     } else {
-      stop("Wrong value for the argument 'coefstat': ", coefstat, " is not supported.")
+      stop_up("Wrong value for the argument 'coefstat': ", coefstat, " is not supported.")
     }
 
     if(add_signif){
@@ -3037,9 +3057,10 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         } else if(all(is_inconsistent)){
           msg = "all groups lead to inconsistent rows (e.g. the one defined by "
         } else {
-          msg = paste0("some groups lead to inconsistent rows (the ", n_th(i), " one defined by ")
+          msg = sma("some groups lead to inconsistent rows (the {nth?i} one defined by ")
         }
-        warn_up("In 'fixef.group', ", msg, deparse_long(fixef.group[[i]]), ").\nTo create inconsistent rows: use drop.section = 'fixef' combined with the arghument 'extralines'.")
+        warn_up("In 'fixef.group', ", msg, deparse_long(fixef.group[[i]]), 
+                ").\nTo create inconsistent rows: use drop.section = 'fixef' combined with the arghument 'extralines'.")
       }
 
     }
@@ -3047,21 +3068,26 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
   }
 
   res = list(se_type_list = se_type_list, var_list = var_list, coef_list = coef_list,
-         coef_below = coef_below, se.row = se.row, sd_below = sd_below, depvar_list = depvar_list,
-         obs_list = obs_list, convergence_list = convergence_list, fe_names = fe_names,
-         is_fe = is_fe, nb_fe = nb_fe, slope_flag_list = slope_flag_list,
-         slope_names = slope_names, useSummary = useSummary, model_names = model_names,
-         family_list = family_list, fitstat_list = fitstat_list, headers = headers,
-         isHeaders = isHeaders, title = title, convergence = convergence, family = family,
-         keep = keep, drop = drop, order = order, file = file, label = label, se.below = se.below,
-         signif.code = signif.code, fixef_sizes = fixef_sizes, fixef_sizes.simplify = fixef_sizes.simplify,
-         depvar = depvar, useSummary = useSummary, dict = dict, yesNo = yesNo, add_signif = add_signif,
-         float = float, coefstat = coefstat, ci = ci, style = style, notes = notes, group = group,
-         extralines = extralines, placement = placement, drop.section = drop.section,
-         tex_tag = tex_tag, fun_format = fun_format, coef.just = coef.just, meta = meta_txt,
-         tpt = tpt, arraystretch = arraystretch, adjustbox = adjustbox, fontsize = fontsize,
-         tabular = tabular, highlight = highlight, coef.style = coef.style,
-         caption.number = caption.number)
+             coef_below = coef_below, se.row = se.row, sd_below = sd_below, 
+             depvar_list = depvar_list,
+             obs_list = obs_list, convergence_list = convergence_list, fe_names = fe_names,
+             is_fe = is_fe, nb_fe = nb_fe, slope_flag_list = slope_flag_list,
+             slope_names = slope_names, useSummary = useSummary, model_names = model_names,
+             family_list = family_list, fitstat_list = fitstat_list, headers = headers,
+             isHeaders = isHeaders, title = title, convergence = convergence, family = family,
+             keep = keep, drop = drop, order = order, file = file, label = label, 
+             se.below = se.below,
+             signif.code = signif.code, fixef_sizes = fixef_sizes, 
+             fixef_sizes.simplify = fixef_sizes.simplify,
+             depvar = depvar, useSummary = useSummary, dict = dict, yesNo = yesNo, 
+             add_signif = add_signif,
+             float = float, coefstat = coefstat, ci = ci, style = style, 
+             notes = notes, group = group,
+             extralines = extralines, placement = placement, drop.section = drop.section,
+             tex_tag = tex_tag, fun_format = fun_format, coef.just = coef.just, meta = meta_txt,
+             tpt = tpt, arraystretch = arraystretch, adjustbox = adjustbox, fontsize = fontsize,
+             tabular = tabular, highlight = highlight, coef.style = coef.style,
+             caption.number = caption.number)
 
   return(res)
 }
@@ -3128,9 +3154,9 @@ etable_internal_latex = function(info){
 
   # top line
   style$line.top = switch(style$line.top,
-              "simple" = "\\toprule",
-              "double" = "\\tabularnewline \\midrule \\midrule",
-              style$line.top)
+                          "simple" = "\\toprule",
+                          "double" = "\\tabularnewline \\midrule \\midrule",
+                          style$line.top)
 
   if(nchar(style$line.top) > 1){
     style$line.top = paste0(style$line.top, "\n")
@@ -3139,14 +3165,14 @@ etable_internal_latex = function(info){
   # bottom line
   if(style$tablefoot){
     style$line.bottom = switch(style$line.bottom,
-                   "simple" = "\\midrule",
-                   "double" = "\\midrule \\midrule",
-                   style$line.bottom)
+                               "simple" = "\\midrule",
+                               "double" = "\\midrule \\midrule",
+                               style$line.bottom)
   } else {
     style$line.bottom = switch(style$line.bottom,
-                   "simple" = "\\bottomrule",
-                   "double" = "\\midrule \\midrule & \\tabularnewline",
-                   style$line.bottom)
+                               "simple" = "\\bottomrule",
+                               "double" = "\\midrule \\midrule & \\tabularnewline",
+                               style$line.bottom)
   }
 
 
@@ -3206,14 +3232,14 @@ etable_internal_latex = function(info){
   space = if(style$no_border) "@{}" else ""
   if(tabular == "normal"){
     tabular_begin = paste0("\\begin{tabular}{", space, "l",
-                 paste0(rep("c", n_models), collapse = ""), space,
-                 "}\n", style$line.top)
+                           strrep("c", n_models), 
+                           space, "}\n", style$line.top)
 
     tabular_end = "\\end{tabular}\n"
   } else if(tabular == "*"){
     tabular_begin = paste0("\\begin{tabular*}{\\textwidth}{@{\\extracolsep{\\fill}}",
-                 space, "l", paste0(rep("c", n_models), collapse = ""),
-                 space, "}\n", style$line.top)
+                           space, "l", strrep("c", n_models),
+                           space, "}\n", style$line.top)
 
     tabular_end = "\\end{tabular*}\n"
   } else if(tabular == "X"){
@@ -3221,7 +3247,7 @@ etable_internal_latex = function(info){
     all_cols = .dsb("l *.[n_models]{>{\\centering\\arraybackslash}X}")
 
     tabular_begin = paste0("\\begin{tabularx}{\\textwidth}{",
-                 space, all_cols, space, "}\n", style$line.top)
+                           space, all_cols, space, "}\n", style$line.top)
 
     tabular_end = "\\end{tabularx}\n"
   }
@@ -3349,14 +3375,19 @@ etable_internal_latex = function(info){
 
     if((!is.null(keep) || !is.null(drop)) && length(group) == 0){
       if(!is.null(keep) && !any(grepl("^%", keep))){
-        msg = paste0(" In particular, to 'keep' variables using their original names (before dict is applied), use the special character '%' first. E.g. keep = \"%", keep[1], "\"")
+        msg = paste0(" In particular, to 'keep' variables using their original names ", 
+                     "(before dict is applied), use the special character '%' first. ",
+                     "E.g. keep = \"%", keep[1], "\"")
       } else if(!is.null(drop) && !any(grepl("^%", drop))){
-        msg = paste0(" In particular, to 'drop' variables using their original names (before dict is applied), use the special character '%' first. E.g. drop = \"%", drop[1], "\"")
+        msg = paste0(" In particular, to 'drop' variables using their original names ",
+                     "(before dict is applied), use the special character '%' first. ", 
+                     "E.g. drop = \"%", drop[1], "\"")
       } else {
         msg = ""
       }
 
-      stop_up("Not any variable was selected, please reframe your keep/drop arguments.", msg, "\n To drop the coefficients section, use the argument drop.section = 'coef'.")
+      stop_up("Not any variable was selected, please reframe your keep/drop arguments.", 
+              msg, "\n To drop the coefficients section, use the argument drop.section = 'coef'.")
     }
 
     # => we drop the coef section
@@ -3477,15 +3508,20 @@ etable_internal_latex = function(info){
       }
 
       if(any(is_complex)){
-        fe_names_nbItems = paste0(style$fixef_sizes.prefix, fe_names_raw[is_complex], style$fixef_sizes.suffix)
+        fe_names_nbItems = paste0(style$fixef_sizes.prefix, fe_names_raw[is_complex], 
+                                  style$fixef_sizes.suffix)
         all_nb_FEs = cbind(fe_names_nbItems, all_nb_FEs[is_complex, , drop = FALSE])
-        nb_FE_lines = paste0(paste0(apply(all_nb_FEs, 1, paste0, collapse = " & "), collapse="\\\\\n"), "\\\\\n")
+        nb_FE_lines = paste0(paste0(apply(all_nb_FEs, 1, paste0, collapse = " & "), 
+                                    collapse="\\\\\n"), 
+                             "\\\\\n")
       }
 
     }
 
     all_fe = cbind(fe_names, all_fe)
-    FE_lines = paste0(paste0(apply(all_fe, 1, paste0, collapse = " & "), collapse="\\\\\n"), "\\\\\n")
+    FE_lines = paste0(paste0(apply(all_fe, 1, paste0, collapse = " & "), 
+                             collapse="\\\\\n"), 
+                      "\\\\\n")
 
   } else {
     FE_lines = NULL
@@ -3522,7 +3558,9 @@ etable_internal_latex = function(info){
     # Matrix with yes/no information
     all_slopes = matrix(c(slope_flag_list, recursive = TRUE), nrow = length(slope_names))
     all_slopes = cbind(slope_names, all_slopes)
-    slope_lines = paste0(paste0(apply(all_slopes, 1, paste0, collapse = " & "), collapse="\\\\\n"), "\\\\\n")
+    slope_lines = paste0(paste0(apply(all_slopes, 1, paste0, collapse = " & "), 
+                                collapse = "\\\\\n"), 
+                         "\\\\\n")
 
   } else {
     slope_intro = NULL
@@ -3629,14 +3667,17 @@ etable_internal_latex = function(info){
         } else if(coefstat == "tstat"){
           coefstat_sentence = " co-variance matrix, t-stats in parentheses"
         } else {
-          coefstat_sentence = paste0(" co-variance matrix, ", round(ci*100), "\\% confidence intervals in brackets")
+          coefstat_sentence = paste0(" co-variance matrix, ", round(ci*100), 
+                                     "\\% confidence intervals in brackets")
         }
         info_SE_footer = paste0(bottom_line, foot_intro, my_se,
                     coefstat_sentence, "}}\\\\\n")
 
         if(add_signif){
           info_SE_footer = paste0(info_SE_footer, foot_intro, "Signif. Codes: ",
-                      paste(names(signif.code), signif.code, sep=": ", collapse = ", "), "}}\\\\\n")
+                                  paste(names(signif.code), signif.code, sep=": ", 
+                                        collapse = ", "), 
+                                  "}}\\\\\n")
         }
 
       } else {
@@ -3649,15 +3690,17 @@ etable_internal_latex = function(info){
           coefstat_sentence = "Co-variance"
         }
 
-        info_muli_se = paste0(coefstat_sentence, " & ", paste(all_se_type, collapse = " & "), "\\\\\n")
+        info_muli_se = paste0(coefstat_sentence, " & ", 
+                              paste(all_se_type, collapse = " & "), "\\\\\n")
 
         if(add_signif){
           info_SE_footer = paste0(bottom_line, foot_intro, "Signif. Codes: ",
-                      paste(names(signif.code), signif.code,
-                          sep = ": ", collapse = ", "),
-                      "}}\\\\\n")
+                                  paste(names(signif.code), signif.code,
+                                        sep = ": ", collapse = ", "),
+                                  "}}\\\\\n")
         } else {
-          myAmpLine = paste0(paste0(rep(" ", length(depvar_list) + 1), collapse = " & "), "\\tabularnewline\n")
+          myAmpLine = paste0(paste0(rep(" ", length(depvar_list) + 1), 
+                                    collapse = " & "), "\\tabularnewline\n")
           info_SE_footer = paste0(bottom_line, myAmpLine, "\\\\\n")
         }
 
@@ -3717,7 +3760,8 @@ etable_internal_latex = function(info){
         fit = sapply(fitstat_list, function(x) x[[fit_id]])
         if(all(is.na(fit))) next
         fit[is.na(fit)] = ""
-        stat_lines = paste0(stat_lines, fit_names[fit_id], " & ", paste0(fit, collapse = " & "), "\\\\\n")
+        stat_lines = paste0(stat_lines, fit_names[fit_id], " & ", 
+                            paste0(fit, collapse = " & "), "\\\\\n")
       }
     }
   } else {
@@ -3749,9 +3793,8 @@ etable_internal_latex = function(info){
 
         # The note intro is placed right after the } so that you can pass options
         # like [flushleft]
-        info_notes = paste0("\n\\begin{tablenotes}", notes_intro,
-                  notes,
-                  "\n\\end{tablenotes}\n")
+        info_notes = paste0("\n\\begin{tablenotes}", notes_intro, notes,
+                            "\n\\end{tablenotes}\n")
       } else {
         info_notes = paste0("\n", notes_intro, paste0(notes, collapse = "\\\\\n"), "\n")
       }
@@ -3952,12 +3995,12 @@ etable_internal_latex = function(info){
   # meta information: has been computed in results2formattedList
 
   res = c(meta, table_begin, info_tikz, caption, info_center, info_width, info_font, adj_box_begin,
-      tpt_begin, tpt_caption, info_stretch,
-      tag_tabular_before, tabular_begin,
-      headers_top, first_line, headers_mid, model_line, info_family, headers_bottom,
-      coef_stack, stat_stack, info_SE_footer, style$line.bottom,
-      tabular_end, tag_tabular_end,
-      info_notes, tpt_end, adj_box_end, table_end)
+          tpt_begin, tpt_caption, info_stretch,
+          tag_tabular_before, tabular_begin,
+          headers_top, first_line, headers_mid, model_line, info_family, headers_bottom,
+          coef_stack, stat_stack, info_SE_footer, style$line.bottom,
+          tabular_end, tag_tabular_end,
+          info_notes, tpt_end, adj_box_end, table_end)
 
   res = res[nchar(res) > 0]
 
@@ -4051,14 +4094,19 @@ etable_internal_df = function(info){
 
     if((!is.null(keep) || !is.null(drop)) && length(group) == 0){
       if(!is.null(keep) && !any(grepl("^%", keep))){
-        msg = paste0(" In particular, to 'keep' variables using their original names (before dict is applied), use the special character '%' first. E.g. keep = \"%", keep[1], "\"")
+        msg = sma(" In particular, to 'keep' variables using their original names ", 
+                  "(before dict is applied), use the special character '%' first. ", 
+                  "E.g. keep = \"%", keep[1], "\"")
       } else if(!is.null(drop) && !any(grepl("^%", drop))){
-        msg = paste0(" In particular, to 'drop' variables using their original names (before dict is applied), use the special character '%' first. E.g. drop = \"%", drop[1], "\"")
+        msg = sma(" In particular, to 'drop' variables using their original names ", 
+                  "(before dict is applied), use the special character '%' first. ", 
+                  "E.g. drop = \"%", drop[1], "\"")
       } else {
         msg = ""
       }
 
-      stop_up("Not any variable was selected, please reframe your keep/drop arguments.", msg, "\n To drop the coefficients section, use the argument drop.section = 'coef'.")
+      stop_up("Not any variable was selected, please reframe your keep/drop arguments.", msg, 
+              "\n To drop the coefficients section, use the argument drop.section = 'coef'.")
     }
 
     # => we drop the coef section
@@ -4518,21 +4566,21 @@ etable_internal_df = function(info){
 
 #' @rdname etable
 setFixest_etable = function(digits = 4, digits.stats = 5, fitstat,
-              coefstat = c("se", "tstat", "confint"),
-              ci = 0.95, se.below = TRUE, keep, drop, order, dict,
-              float,
-              fixef_sizes = FALSE, fixef_sizes.simplify = TRUE,
-              family, powerBelow = -5,
-              interaction.order = NULL, depvar, style.tex = NULL,
-              style.df = NULL, notes = NULL, group = NULL, extralines = NULL,
-              fixef.group = NULL, placement = "htbp", drop.section = NULL,
-              view = FALSE, markdown = NULL, view.cache = FALSE,
-              page.width = "fit",
-              postprocess.tex = NULL, postprocess.df = NULL,
-              fit_format = "__var__", meta.time = NULL,
-              meta.author = NULL, meta.sys = NULL,
-              meta.call = NULL, meta.comment = NULL,
-              reset = FALSE, save = FALSE){
+                            coefstat = c("se", "tstat", "confint"),
+                            ci = 0.95, se.below = TRUE, keep, drop, order, dict,
+                            float,
+                            fixef_sizes = FALSE, fixef_sizes.simplify = TRUE,
+                            family, powerBelow = -5,
+                            interaction.order = NULL, depvar, style.tex = NULL,
+                            style.df = NULL, notes = NULL, group = NULL, extralines = NULL,
+                            fixef.group = NULL, placement = "htbp", drop.section = NULL,
+                            view = FALSE, markdown = NULL, view.cache = FALSE,
+                            page.width = "fit",
+                            postprocess.tex = NULL, postprocess.df = NULL,
+                            fit_format = "__var__", meta.time = NULL,
+                            meta.author = NULL, meta.sys = NULL,
+                            meta.call = NULL, meta.comment = NULL,
+                            reset = FALSE, save = FALSE){
 
 
   #
@@ -4551,11 +4599,12 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat,
   check_set_arg(coefstat, "match")
   check_arg(ci, "numeric scalar GT{0.5} LT{1}")
 
-  check_arg("logical scalar", se.below, fixef_sizes, fixef_sizes.simplify,
-        float, family, depvar, reset, view)
+  check_arg("logical scalar", 
+            se.below, fixef_sizes, fixef_sizes.simplify,
+            float, family, depvar, reset, view)
 
   check_arg(keep, drop, order, "character vector no na NULL",
-        .message = "The arg. '__ARG__' must be a vector of regular expressions (see help(regex)).")
+            .message = "The arg. '__ARG__' must be a vector of regular expressions (see help(regex)).")
 
   check_arg(interaction.order, "NULL character scalar")
 
@@ -4573,7 +4622,8 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat,
   if(!missing(placement)){
     if(nchar(placement) == 0) stop("Argument 'placement' cannot be the empty string.")
     p_split = strsplit(placement, "")[[1]]
-    check_value(p_split, "strict multi charin(h, t, b, p, H, !)", .message = "Argument 'placement' must be a character string containing only the following characters: 'h', 't', 'b', 'p', 'H', and '!'.")
+    check_value(p_split, "strict multi charin(h, t, b, p, H, !)", 
+                .message = "Argument 'placement' must be a character string containing only the following characters: 'h', 't', 'b', 'p', 'H', and '!'.")
   }
 
   check_set_arg(drop.section, "NULL multi match(fixef, slopes, stats)")
@@ -4818,14 +4868,14 @@ getFixest_etable = function(){
 #'                                       tabular = "*"))
 #'
 style.tex = function(main = "base", depvar.title, model.title, model.format, line.top,
-           line.bottom, var.title, fixef.title, fixef.prefix, fixef.suffix,
-           fixef.where, slopes.title, slopes.format, fixef_sizes.prefix,
-           fixef_sizes.suffix, stats.title, notes.intro,
-           notes.tpt.intro, tablefoot, tablefoot.value,
-           yesNo, tabular = "normal", depvar.style, no_border,
-           caption.after, rules_width, signif.code,
-           tpt, arraystretch, adjustbox = NULL, fontsize,
-           interaction.combine = " $\\times$ ", i.equal = " $=$ "){
+                     line.bottom, var.title, fixef.title, fixef.prefix, fixef.suffix,
+                     fixef.where, slopes.title, slopes.format, fixef_sizes.prefix,
+                     fixef_sizes.suffix, stats.title, notes.intro,
+                     notes.tpt.intro, tablefoot, tablefoot.value,
+                     yesNo, tabular = "normal", depvar.style, no_border,
+                     caption.after, rules_width, signif.code,
+                     tpt, arraystretch, adjustbox = NULL, fontsize,
+                     interaction.combine = " $\\times$ ", i.equal = " $=$ "){
 
   # To implement later:
   # fixef_sizes.where = "obs"
@@ -4840,7 +4890,9 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
   check_set_arg(line.top, line.bottom, "match(simple, double) | character scalar")
 
   check_arg("character scalar", depvar.title, model.title, var.title)
-  check_arg("character scalar", fixef.title, fixef.prefix, fixef.suffix, slopes.title, slopes.format)
+  check_arg("character scalar", 
+            fixef.title, fixef.prefix, fixef.suffix, 
+            slopes.title, slopes.format)
   check_arg("character scalar", fixef_sizes.prefix, fixef_sizes.suffix, stats.title)
   check_arg("character scalar", notes.intro, interaction.combine, i.equal)
   check_arg("character scalar", notes.tpt.intro, depvar.style, caption.after)
@@ -4874,22 +4926,22 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
   if("main" %in% names(mc)){
     if(main == "base"){
       res = list(depvar.title = "Dependent Variable(s):", model.title = "Model:",
-             model.format = "(1)",
-             line.top = "\\tabularnewline \\midrule \\midrule",
-             line.bottom = "double",
-             var.title = "\\midrule\n\\emph{Variables}",
-             fixef.title = "\\midrule\n\\emph{Fixed-effects}", fixef.prefix = "",
-             fixef.suffix = "", fixef.where = "var",
-             slopes.title = "\\midrule\n\\emph{Varying Slopes}",
-             slopes.format = "__var__ (__slope__)",
-             fixef_sizes.prefix = "\\# ", fixef_sizes.suffix = "",
-             stats.title = "\\midrule\n\\emph{Fit statistics}",
-             notes.intro = "\\par \\raggedright \n",
-             notes.tpt.intro = "",
-             tablefoot = TRUE,
-             caption.after = "",
-             tablefoot.value = "default", yesNo = c("Yes", ""),
-             depvar.style = "", no_border = FALSE)
+                 model.format = "(1)",
+                 line.top = "\\tabularnewline \\midrule \\midrule",
+                 line.bottom = "double",
+                 var.title = "\\midrule\n\\emph{Variables}",
+                 fixef.title = "\\midrule\n\\emph{Fixed-effects}", fixef.prefix = "",
+                 fixef.suffix = "", fixef.where = "var",
+                 slopes.title = "\\midrule\n\\emph{Varying Slopes}",
+                 slopes.format = "__var__ (__slope__)",
+                 fixef_sizes.prefix = "\\# ", fixef_sizes.suffix = "",
+                 stats.title = "\\midrule\n\\emph{Fit statistics}",
+                 notes.intro = "\\par \\raggedright \n",
+                 notes.tpt.intro = "",
+                 tablefoot = TRUE,
+                 caption.after = "",
+                 tablefoot.value = "default", yesNo = c("Yes", ""),
+                 depvar.style = "", no_border = FALSE)
 
       if(!missing(tablefoot) && isFALSE(tablefoot)){
         res$tablefoot = FALSE
@@ -4898,17 +4950,17 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
 
     } else {
       res = list(depvar.title = "", model.title = "", model.format = "(1)",
-             line.top = "\\toprule", line.bottom = "\\bottomrule",
-             var.title = "\\midrule",
-             fixef.title = " ", fixef.prefix = "", fixef.suffix = " fixed effects",
-             fixef.where = "stats",
-             slopes.title = "", slopes.format = "__var__ $\\times $ __slope__",
-             fixef_sizes.prefix = "\\# ", fixef_sizes.suffix = "",
-             stats.title = " ", notes.intro = "\\par \\raggedright \n",
-             notes.tpt.intro = "", caption.after = "\\bigskip",
-             tablefoot = FALSE, tablefoot.value = "",
-             yesNo = c("$\\checkmark$", ""), depvar.style = "",
-             no_border = FALSE)
+                 line.top = "\\toprule", line.bottom = "\\bottomrule",
+                 var.title = "\\midrule",
+                 fixef.title = " ", fixef.prefix = "", fixef.suffix = " fixed effects",
+                 fixef.where = "stats",
+                 slopes.title = "", slopes.format = "__var__ $\\times $ __slope__",
+                 fixef_sizes.prefix = "\\# ", fixef_sizes.suffix = "",
+                 stats.title = " ", notes.intro = "\\par \\raggedright \n",
+                 notes.tpt.intro = "", caption.after = "\\bigskip",
+                 tablefoot = FALSE, tablefoot.value = "",
+                 yesNo = c("$\\checkmark$", ""), depvar.style = "",
+                 no_border = FALSE)
 
       if(main == "aer"){
         # just set
@@ -5016,12 +5068,12 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
 #'
 #'
 style.df = function(depvar.title = "Dependent Var.:", fixef.title = "Fixed-Effects:",
-          fixef.line = "-", fixef.prefix = "", fixef.suffix = "",
-          slopes.title = "Varying Slopes:", slopes.line = "-",
-          slopes.format = "__var__ (__slope__)", stats.title = "_",
-          stats.line = "_", yesNo = c("Yes", "No"), headers.sep = TRUE,
-          signif.code = c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10),
-          interaction.combine = " x ", i.equal = " = ", default = FALSE){
+                    fixef.line = "-", fixef.prefix = "", fixef.suffix = "",
+                    slopes.title = "Varying Slopes:", slopes.line = "-",
+                    slopes.format = "__var__ (__slope__)", stats.title = "_",
+                    stats.line = "_", yesNo = c("Yes", "No"), headers.sep = TRUE,
+                    signif.code = c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10),
+                    interaction.combine = " x ", i.equal = " = ", default = FALSE){
 
   # Checking
 
@@ -5146,6 +5198,8 @@ print.etable_tex = function(x, ...){
 #' @rdname etable
 print.etable_df = function(x, ...){
   # Almost equivalent to print.data.frame
+  # we're more flexible with row names since we use the first column as row names 
+  # (and hence allow repetition)
 
   signif.code = attr(x, "signif")
 
@@ -5372,16 +5426,16 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
       # page.width is guaranteed to be of length 2
       w = page.width[1]
       minipage_start = .dsb("\\begin{minipage}{.[page.width[1]]} ",
-                  "\\centering ",
-                  "\\begin{minipage}{.[page.width[2]]}\n ", sep = "\n")
+                            "\\centering ",
+                            "\\begin{minipage}{.[page.width[2]]}\n ", sep = "\n")
 
       minipage_end = "\n\\end{minipage}\n\\end{minipage}"
     }
 
     intro = .dsb0("\\documentclass[varwidth=.[w], border={ 10 5 10 5 }]{standalone}",
-            "\\usepackage[dvipsnames,table]{xcolor}",
-            "\\usepackage{.[/array, booktabs, multirow, helvet, amsmath, amssymb]}",
-            "\\renewcommand{\\familydefault}{\\sfdefault}", vectorize = TRUE)
+                  "\\usepackage[dvipsnames,table]{xcolor}",
+                  "\\usepackage{.[/array, booktabs, multirow, helvet, amsmath, amssymb]}",
+                  "\\renewcommand{\\familydefault}{\\sfdefault}", vectorize = TRUE)
 
     tex_pkg = c()
     tex_pkg = add_pkg("(row|cell)color", x, tex_pkg, "colortbl", fixed = FALSE)
@@ -5395,7 +5449,7 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
       # If tikz is present, we need to run pdflatex twice to make it work properly
       do_rerun = TRUE
       tex_pkg = c(tex_pkg, "\\usepackage{tikz}",
-            "\\usetikzlibrary{matrix, shapes, arrows, fit, tikzmark}")
+                  "\\usetikzlibrary{matrix, shapes, arrows, fit, tikzmark}")
     }
 
     doc_full = c(intro, tex_pkg,
@@ -5430,16 +5484,20 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
     warn_msg = NULL
     ok_cmd_tex = TRUE && DO_CMD
     if(DO_CMD){
-      outcome = suppressWarnings(system2("pdflatex", .dsb("-halt-on-error -interaction=nonstopmode .[draft] etable.tex"),
-                "etable_shell_pdf.log", "etable_shell_pdf.err"))
+      outcome = suppressWarnings(system2("pdflatex", 
+                                         sma("-halt-on-error -interaction=nonstopmode {draft}",
+                                             " etable.tex"),
+                                         "etable_shell_pdf.log", "etable_shell_pdf.err"))
 
       if(outcome == 127){
         ok_cmd_tex = FALSE
       } else if(outcome == 1){
 
         # Sometimes recompiling works!!!
-        outcome = suppressWarnings(system2("pdflatex", .dsb("-halt-on-error -interaction=nonstopmode .[draft] etable.tex"),
-                  "etable_shell_pdf.log", "etable_shell_pdf.err"))
+        outcome = suppressWarnings(system2("pdflatex", 
+                                           sma("-halt-on-error -interaction=nonstopmode ",
+                                               "{draft} etable.tex"),
+                                           "etable_shell_pdf.log", "etable_shell_pdf.err"))
 
         if(outcome == 1){
           warn_msg = "pdflatex: error when compiling -- sorry! Check the log file with log_etable('pdflatex')."
@@ -5449,8 +5507,9 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
     }
 
     if(ok_cmd_tex && do_rerun){
-      outcome = suppressWarnings(system2("pdflatex", "-halt-on-error -interaction=nonstopmode etable.tex",
-                "etable_shell_pdf.log", "etable_shell_pdf.err"))
+      outcome = suppressWarnings(system2("pdflatex", 
+                                         "-halt-on-error -interaction=nonstopmode etable.tex",
+                                         "etable_shell_pdf.log", "etable_shell_pdf.err"))
 
       # No reason for the 2nd run to fail, but I add it anyway just to be safe
       if(outcome == 1){
@@ -5474,9 +5533,10 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
       }
 
       info_compile = try(suppressMessages(tinytex::pdflatex("etable.tex",
-                                  clean = FALSE, min_times = 1 + do_rerun)))
+                                                            clean = FALSE, 
+                                                            min_times = 1 + do_rerun)))
       if(inherits(info_compile, "try-error")){
-        warn_up("pdflatex: error when compiling -- sorry! Check the log file with log_etable('pdflatex').")
+        warn_up("pdflatex: error when compiling -- sorry! Check the log file with `log_etable('pdflatex')`.")
         return(NULL)
       }
 
@@ -5489,14 +5549,15 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
     ok_cmd_magick = TRUE && DO_CMD
     warn_msg = NULL
     if(DO_CMD){
-      outcome = suppressWarnings(system2("magick", .dsb("-density 600 etable.pdf -colorspace RGB .[png_name]"),
-                "etable_shell_magick.log", "etable_shell_magick.err"))
+      outcome = suppressWarnings(system2("magick", 
+                                         sma("-density 600 etable.pdf -colorspace RGB {png_name}"),
+                                         "etable_shell_magick.log", "etable_shell_magick.err"))
 
       if(outcome == 127){
         ok_cmd_magick = FALSE
 
       } else if(outcome == 1){
-        warn_msg = "magick: error when converting pdf to png. Check install of ghostscript? Check the log file with log_etable('magick')."
+        warn_msg = "magick: error when converting pdf to png. Check install of ghostscript? Check the log file with `log_etable('magick')`."
         ok_cmd_magick = FALSE
       }
     }
@@ -5518,8 +5579,9 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
       # and hence rename the file later...
 
       pdftools::pdf_convert("etable.pdf", dpi = 600, verbose = FALSE,
-                  filenames = .dsb(".[png_name]_%d.%s"))
-      old_name = .dsb(".[png_name]_1.png")
+                            filenames = sma("{png_name}_%d.%s"))
+      
+      old_name = sma("{png_name}_1.png")
       file.rename(old_name, png_name)
     }
 
@@ -5530,7 +5592,7 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
   if(view){
     my_viewer = getOption("viewer")
     if(is.null(my_viewer)){
-      warning("To preview the table, we need RStudio's viewer -- which wasn't found.")
+      warning("To preview the table, we need a viewer -- which wasn't found (it sjould work on RStudio and VScode).")
     } else {
       # setting up the html document
 
@@ -5606,7 +5668,7 @@ check_set_path = function(x, type = "", create = TRUE, up = 0){
   if("r" %in% flags){
     msg = if("dir" %in% flags) "directory" else "file"
     stop_up("Argument '", x_dp, "' should be a path to a ", msg,
-        " that exists. \n  Problem: '", path, "' does not exist.")
+            " that exists. \n  Problem: '", path, "' does not exist.")
   }
 
   # Here we're in write
@@ -5637,8 +5699,8 @@ check_set_path = function(x, type = "", create = TRUE, up = 0){
   }
 
   msg = if("dir" %in% flags) "directory" else "file"
-  stop_up("Argument '", x_dp, "' should be a path to a ", msg, ". \n  Problem: '",
-      path_parent, "' does not exist.")
+  stop_up("Argument '", x_dp, "' should be a path to a ", msg, 
+          ". \n  Problem: '", path_parent, "' does not exist.")
 
 }
 
@@ -5745,7 +5807,7 @@ fix_pkgwdown_path = function(){
       qui = which(grepl(pat, text))
       for(i in qui){
         if(!done){
-          message("Fixing pkgdown paths.")
+          message("Fixing pkgdown paths (", gsub(".+/", "", f), ").")
         }
         # ex: line = "<img src = \"../../../Google drive/fixest/fixest/vignettes/images/etable/etable_tex_2021-12-02_1.05477838.png\">"
         line = text[i]
@@ -5796,8 +5858,9 @@ style_apply = function(coef.style, coef_mat, coef_names){
     cs_name = paste0(trimws(names(coef.style)[i]), " ")
 
     if(!grepl(":coef(_se)?:", cs_name)){
-      warn_up("In the argument 'coef.style', the names must contain the ':coef:' (or :coef_se:) string. ",
-          "Problem: this is not the case for the ", n_th(i), " element (equal to '", cs_name, "').")
+      warn_up("In the argument 'coef.style', the names must contain the ",
+              "':coef:' (or :coef_se:) string. ",
+              "PROBLEM: this is not the case for the {nth?i} element (equal to {q?cs_name}).")
     }
 
     is_se = grepl(":coef_se:", cs_name)
@@ -5912,9 +5975,9 @@ highlight_apply = function(highlight, coef_mat, coef_names){
     thick_raw = grep("^thick\\d$", hl_name, value = TRUE)
     thick = if(length(thick_raw) == 0) 6 else as.numeric(sub("thick", "", thick_raw))
     if(thick > 6){
-      stop_up("In the argument 'highlight', the name of the ", n_th(i),
-         " element (equal to '", hl_name, "') is ill formed. ",
-         "The item 'thick' can go only from 1 to 6.")
+      stop_up("In the argument 'highlight', the name of the {nth?i}",
+              " element (equal to {bq?hl_name}) is ill formed. ",
+              "The item 'thick' can go only from 1 to 6.")
     }
 
     sep_raw = grep("^sep\\d+$", hl_name, value = TRUE)
@@ -5927,9 +5990,12 @@ highlight_apply = function(highlight, coef_mat, coef_names){
     is_col = length(color) == 1
 
     if(length(color) > 1){
-      stop_up("In the argument 'highlight', the name of the ", n_th(i),
-         " element (equal to '", hl_name, "') is ill formed. ",
-         "It should be a comma separated list of options, which include: 'rowcol', 'square', 'thickd' (with d from 0 to 6), 'sepd' (d: 0-9), 'se', and 'color!alpha' with 'color' a valid R color and, optionnaly, 'alpha' in 0-100.")
+      stop_up("In the argument 'highlight', the name of the {nth?i}",
+              " element (equal to {q?hl_name}) is ill formed. ",
+              "It should be a comma separated list of options, which include: ",
+              "'rowcol', 'square', 'thickd' (with d from 0 to 6), 'sepd' (d: 0-9), ",
+              "'se', and 'color!alpha' with 'color' a valid R color and, optionnaly, ",
+              "'alpha' in 0-100.")
     }
 
     # conversion of the color
@@ -5951,8 +6017,9 @@ highlight_apply = function(highlight, coef_mat, coef_names){
     }
 
     tex_color = error_sender(col2rgb(color),
-                 "In the argument 'highlight', the color, in the name of the ", n_th(i),
-                 " element (equal to '", color, "'), could not be converted to RGB. ")
+                             "In the argument 'highlight', the color, in the name of the ", 
+                             n_th(i), " element (equal to '", color,
+                             "'), could not be converted to RGB. ")
     tex_color = paste0(as.vector(tex_color), collapse = ", ")
 
     if(tex_color %in% all_colors){
@@ -5961,8 +6028,7 @@ highlight_apply = function(highlight, coef_mat, coef_names){
     } else {
       tag_color = paste0("col", tag_gen())
       all_colors[tag_color] = tex_color
-      tex_preamble = c(tex_preamble,
-               paste0("\\definecolor{", tag_color, "}{RGB}{", tex_color, "}"))
+      tex_preamble = c(tex_preamble, paste0("\\definecolor{", tag_color, "}{RGB}{", tex_color, "}"))
     }
 
     if(is_alpha){
@@ -6031,14 +6097,14 @@ highlight_apply = function(highlight, coef_mat, coef_names){
       tex_preamble = c(tex_preamble, .dsb(
         "
 \\newcommand.[tag_frame_NW][1]{%
-   \\tikz[overlay,remember picture]
+  \\tikz[overlay,remember picture]
     \\node (marker-#1-a) at (0, .3em) {};%
 }
 
 \\newcommand.[tag_frame_SE][1]{%
-   \\tikz[overlay,remember picture]
+  \\tikz[overlay,remember picture]
     \\node (marker-#1-b) at (0, .3em) {};%
-   \\tikz[overlay,remember picture,inner sep=.[sep]pt, .[thickness]]
+  \\tikz[overlay,remember picture,inner sep=.[sep]pt, .[thickness]]
     \\node[draw=.[tag_color],.[rounded]fit=(marker-#1-a.north west) (marker-#1-b.south east)] {};%
 }\n"))
 
@@ -6140,9 +6206,9 @@ coef_location = function(x, coef_names, n_models, arg_name, pool = FALSE){
       xi_split = trimws(strsplit(xi, ";", fixed = TRUE)[[1]])
 
       if(length(xi_split) != 2){
-        stop_up(up = 3, "In the argument '", arg_name, "', the value of the ", n_th(i),
-            " element (equal to '", xi, "') is not valid. ",
-            "It should contain at most one semi-comma.")
+        stop_up(up = 3, "In the argument {bq?arg_name}, the value of the {nth?i}",
+                " element (equal to {q?xi}) is not valid. ",
+                "It should contain at most one semi-comma.")
       }
 
       xi_1 = xi_split[[1]]
@@ -6191,9 +6257,9 @@ coef_pos_parse = function(x, coef_names, n_models, i, arg_name){
 
   x_split = strsplit(x, "@", fixed = TRUE)[[1]]
   if(length(x_split) > 2){
-    stop_up("In the argument '", arg_name, "', the location of the ", n_th(i),
-        " element (equal to '", x, "') is not valid. ",
-        "It should contain at most one '@'.")
+    stop_up("In the argument {bq?arg_name}, the location of the {nth?i}",
+            " element (equal to {q?x}) is not valid. ",
+            "It should contain at most one '@'.")
   }
 
   x_coef = x_split[1]
@@ -6209,16 +6275,17 @@ coef_pos_parse = function(x, coef_names, n_models, i, arg_name){
     # x: 3, 5, 6-8, 10
 
     if(grepl("[^ ,-[[:digit:]]]", x_pos)){
-      stop_up("In the argument '", arg_name, "', the location of the ", n_th(i),
-          " element (equal to '", x, "') contains non valid characters. Please have a look at the help/example.")
+      stop_up("In the argument {bq?arg_name}, the location of the {nth?i}",
+              " element (equal to {q?x}) contains non valid characters. ",
+              "Please have a look at the help/example.")
     }
 
     # new DSB power
     x_txt = paste0("c(", gsub("-", ":", x_pos), ")")
-    x_call = error_sender(str2lang(x_txt), "In argument '", arg_name,
-                "' the position in '", x,
-                "' is not valid. Please have a look at the help/example.",
-                up = 4)
+    x_call = error_sender(str2lang(x_txt), 
+                          "In argument '", arg_name, "' the position in '", x,
+                          "' is not valid. Please have a look at the help/example.",
+                          up = 4)
 
     x_pos = eval(x_call)
   }
@@ -6302,7 +6369,7 @@ pmatch_varname = function(x, coef_names, arg_name){
 
   if(!ok){
     stop_up(up = 5, "In the argument '", arg_name, "', the value '", x,
-        "' does not match any variable name.")
+            "' does not match any variable name.")
   }
 
   qui
@@ -6512,7 +6579,7 @@ format_se_type_latex = function(x, dict = c(), inline = FALSE){
 
   # We add some flexibility: anticipation of more VCOV types
   main_type_dict = c("Clustered" = "Clustered", "Two-way" = "Clustered",
-             "Three-way" = "Clustered", "Four-way" = "Clustered")
+                     "Three-way" = "Clustered", "Four-way" = "Clustered")
 
   if(main_type %in% names(main_type_dict)){
     main_type = main_type_dict[main_type]
@@ -6655,14 +6722,19 @@ extralines_extractor = function(x, name = NULL, tex = FALSE){
   current_vars = attr(terms(x), "term.labels")
 
   if(length(current_vars) > 1 && is_name){
-    stop_up("You cannot give list names in 'extralines' when several values are summoned via a formula. Simply remove the name associated to the formula to make it work (concerns '", name, "').", up = 2)
+    stop_up("You cannot give list names in 'extralines' when several values are ",
+            "summoned via a formula. Simply remove the name associated to the ",
+            "formula to make it work (concerns '", name, "').", up = 2)
   }
 
   valid_keys = c(key_registered, fitstat_type_allowed)
 
   if(!all(current_vars %in% valid_keys)){
     pblm = setdiff(current_vars, valid_keys)
-    stop_up("Argument 'extralines' can be a one-sided formula whose variables refer to the macros registered using the function 'extralines_register' or fit statistics (valid fitstat keywords). Problem: the values", enumerate_items(pblm, "s.were"), " not valid.", up = 2)
+    stop_up("Argument 'extralines' can be a one-sided formula whose variables refer ",
+            "to the macros registered using the function 'extralines_register' or ",
+            "fit statistics (valid fitstat keywords). ",
+            "PROBLEM: the values{$s, enum, were?pblm} not valid.", up = 2)
   }
 
   if(length(current_vars) == 0){
@@ -6836,14 +6908,16 @@ check_set_adjustbox = function(adjustbox, up = 0){
     adjustbox = NULL
   } else if(is.numeric(adjustbox)){
     if(adjustbox > 3){
-      warn_up("When 'adjustbox' is a number, the unit is the text-width. Hence a value of ", fsignif(adjustbox), " may be too large.")
+      warn_up("When 'adjustbox' is a number, the unit is the text-width. ",
+              "Hence a value of {%.2f ? adjustbox} may be too large.")
     }
     adjustbox = paste0("width = ", adjustbox, "\\textwidth, center")
   } else if(grepl("(?i)^[[:digit:]\\.]+ *t(w|h)$", trimws(adjustbox))){
     adj_nbr = gsub("[^[:digit:]\\.]", "", adjustbox)
 
     if(!is_numeric_in_char(adj_nbr)){
-      stop_up("The number in the argument 'adjustbox' (equal to '", adjustbox, "') could not be parsed. Please revise.")
+      stop_up("The number in the argument 'adjustbox' (equal to '", adjustbox, 
+              "') could not be parsed. Please revise.")
     }
 
     adj_unit = if(grepl("(?i)tw", adjustbox)) "\\textwidth" else "\\textheight"
@@ -6898,7 +6972,8 @@ tag_gen = function(){
 check_set_page_width = function(page.width, up = 0){
 
   set_up(up + 1)
-  check_value_plus(page.width, "match(fit, a4, us) | vector(character, numeric) GT{0} len(1, 2) no NA")
+  check_value_plus(page.width, 
+                   "match(fit, a4, us) | vector(character, numeric) GT{0} len(1, 2) no NA")
 
   if(isTRUE(attr(page.width, "no-margin"))){
     # Nothing => already set
@@ -6930,8 +7005,8 @@ check_set_page_width = function(page.width, up = 0){
     unit = .dsb("'[[:alpha:] ]+$'x, w, L?page.width")
     if(!unit %in% c("cm", "mm", "in", "pt", "em", "ex")){
       stop_up("The argument 'page.width' must represent a 'Latex' measure, ex: 12cm. ",
-          "It can be optionally followed by a side margin width, as in '21, 2cm'. ",
-          "Problem: a valid unit could not be found in '", unit,"'.")
+              "It can be optionally followed by a side margin width, as in '21, 2cm'. ",
+              "Problem: a valid unit could not be found in '", unit,"'.")
     }
 
     # Now the numbers
@@ -6939,8 +7014,8 @@ check_set_page_width = function(page.width, up = 0){
     if(!length(numbers) %in% 1:2 || !all(sapply(numbers, is_numeric_in_char))){
 
       stop_up("The argument 'page.width' must represent a 'Latex' measure, ex: 12cm. ",
-          "It can be optionally followed by a side margin width, as in '21, 2cm'. ",
-          "Problem: the current format could not be parsed ('", page.width, "').")
+              "It can be optionally followed by a side margin width, as in '21, 2cm'. ",
+              "Problem: the current format could not be parsed ('", page.width, "').")
     }
 
     if(length(numbers) == 1){
