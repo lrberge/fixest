@@ -29,10 +29,12 @@
 \item{...}{Not currently used.}
 }
 \value{
-If all the models return residuals of the same length, a matrix is returned. Otherwise, a \code{list} is returned.
+If all the models return residuals of the same length, a matrix is returned. Otherwise,
+a \code{list} is returned.
 }
 \description{
-Utility to extract the residuals from multiple \code{fixest} estimations. If possible, all the residuals are coerced into a matrix.
+Utility to extract the residuals from multiple \code{fixest} estimations. If possible,
+all the residuals are coerced into a matrix.
 }
 \examples{
 

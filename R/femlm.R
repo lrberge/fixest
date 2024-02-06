@@ -1,5 +1,5 @@
 
-femlm_only_clusters <- function(env){
+femlm_only_clusters = function(env){
 	# Estimation with only the cluster coefficients
 
 	#
@@ -110,16 +110,16 @@ femlm_only_clusters <- function(env){
 	return(res)
 }
 
-femlm_hessian <- function(coef, env){
+femlm_hessian = function(coef, env){
 	# Computes the hessian
 
 	verbose = get("verbose", env)
 	if(verbose >= 2) ptm = proc.time()
-	params <- get("params", env)
-	names(coef) <- params
-	nonlinear.params <- get("nonlinear.params", env)
-	k <- length(nonlinear.params)
-	isNL <- get("isNL", env)
+	params = get("params", env)
+	names(coef) = params
+	nonlinear.params = get("nonlinear.params", env)
+	k = length(nonlinear.params)
+	isNL = get("isNL", env)
 	hessian.args = get("hessian.args", env)
 	famFuns = get("famFuns", env)
 	family = get("family", env)
@@ -143,7 +143,8 @@ femlm_hessian <- function(coef, env){
 
 	if(isNL){
 		# we get the 2nd derivatives
-		z = numDeriv::genD(evalNLpart, coef[nonlinear.params], env=env, method.args = hessian.args)$D[, -(1:k), drop=FALSE]
+		z = numDeriv::genD(evalNLpart, coef[nonlinear.params], env = env, 
+		                   method.args = hessian.args)$D[, -(1:k), drop = FALSE]
 		ll_dl = famFuns$ll_dl(y, mu, exp_mu, coef=coef, env=env)
 		id_r = rep(1:k, 1:k)
 		id_c = c(sapply(1:k, function(x) 1:x), recursive=TRUE)
@@ -165,7 +166,8 @@ femlm_hessian <- function(coef, env){
 		}
 
 		# calcul des derivees secondes vav de theta
-		h.theta.L = famFuns$hess.thetaL(theta, jacob.mat, y, dxi_dbeta, dxi_dother, ll_d2, ll_dx_dother)
+		h.theta.L = famFuns$hess.thetaL(theta, jacob.mat, y, dxi_dbeta, dxi_dother, 
+		                                ll_d2, ll_dx_dother)
 		hessVar = cbind(hessVar, h.theta.L)
 		h.theta = famFuns$hess_theta_part(theta, y, mu, exp_mu, dxi_dother, ll_dx_dother, ll_d2, env)
 		hessVar = rbind(hessVar, c(h.theta.L, h.theta))
@@ -188,7 +190,7 @@ femlm_hessian <- function(coef, env){
 	- hessVar
 }
 
-femlm_gradient <- function(coef, env){
+femlm_gradient = function(coef, env){
 	# cat("gradient:\n") ; print(as.vector(coef))
 
 	params = get("params", env)
@@ -203,7 +205,7 @@ femlm_gradient <- function(coef, env){
 	exp_mu = mu_both$exp_mu
 
 	# calcul de la jacobienne
-	res <- list() #stocks the results
+	res = list() #stocks the results
 
 	# cat("\tgetting jacobian")
 	# ptm = proc.time()
@@ -225,10 +227,10 @@ femlm_gradient <- function(coef, env){
 	return(-unlist(res[params]))
 }
 
-femlm_scores <- function(coef, env){
+femlm_scores = function(coef, env){
 	# Computes the scores (Jacobian)
 	params = get("params", env)
-	names(coef) <- params
+	names(coef) = params
 	famFuns = get("famFuns", env)
 	family = get("family", env)
 	y = get("lhs", env)
@@ -248,7 +250,7 @@ femlm_scores <- function(coef, env){
 	return(scores)
 }
 
-femlm_ll <- function(coef, env){
+femlm_ll = function(coef, env){
 	# Log likelihood
 
 	# misc funs
@@ -269,7 +271,7 @@ femlm_ll <- function(coef, env){
 	# computing the LL
 	famFuns = get("famFuns", env)
 	family = get("family", env)
-	y <- get("lhs", env)
+	y = get("lhs", env)
 
 	if(anyNA(coef)) stop("Divergence... (some coefs are NA)\nTry option verbose=2 to figure out the problem.")
 
@@ -298,7 +300,9 @@ femlm_ll <- function(coef, env){
 	assign("pastLL", ll, env)
 
 	if(iter == 1) evolutionLL = "--"
-	if(verbose >= 1) cat("LL = ", ll, " (", (proc.time()-ptm)[3], "s)\tevol = ", evolutionLL, "\n", sep = "")
+	if(verbose >= 1){
+	  cat("LL = ", ll, " (", (proc.time()-ptm)[3], "s)\tevol = ", evolutionLL, "\n", sep = "")
+	}
 
 	# To cope with difficult convergence
 	# if(iter > 20 && ll > pastLL && evolutionLL / (0.1 + abs(ll)) < 1e-8){
@@ -320,8 +324,8 @@ evalNLpart = function(coef, env){
 	if(!isNL) return(0)
 
 	envNL = get("envNL", env)
-	nonlinear.params <- get("nonlinear.params", env)
-	nl.call <- get("nl.call", env)
+	nonlinear.params = get("nonlinear.params", env)
+	nl.call = get("nl.call", env)
 	nbSave = get("nbSave", env)
 	nbMaxSave = get("nbMaxSave", env)
 	savedCoef = get("savedCoef", env)
@@ -335,11 +339,12 @@ evalNLpart = function(coef, env){
 
 	if(nbMaxSave == 0){
 		for(var in nonlinear.params) assign(var, coef[var], envNL)
-		y_nl <- eval(nl.call, envir = envNL)
+		y_nl = eval(nl.call, envir = envNL)
 
 		# we check problems
 		if(anyNA(y_nl)){
-			stop("Evaluation of non-linear part returns NAs. The coefficients were: ", paste0(nonlinear.params, " = ", signif(coef[nonlinear.params], 3)), ".")
+			stop("Evaluation of non-linear part returns NAs. The coefficients were: ", 
+			     paste0(nonlinear.params, " = ", signif(coef[nonlinear.params], 3)), ".")
 		}
 
 		return(y_nl)
@@ -359,7 +364,8 @@ evalNLpart = function(coef, env){
 
 	# we check problems
 	if(anyNA(y_nl)){
-		stop("Evaluation of non-linear part returns NAs. The coefficients were: ", paste0(nonlinear.params, " = ", signif(coef[nonlinear.params], 3)), ".")
+		stopi("Evaluation of non-linear part returns NAs. The coefficients were:\n", 
+		      "{'\n'c !  - {nonlinear.params} = {%.3f ? coef[nonlinear.params]}}")
 	}
 
 	if(nbSave < nbMaxSave){
@@ -448,10 +454,14 @@ get_mu = function(coef, env, final = FALSE){
 			# overfitting => now finding the precise cause
 			if(!isNL || (isLinear && max(abs(mu_L)) >= 100)){
 				# we create the matrix with the coefficients to find out the guy
-				mat_L_coef = linear.mat * matrix(coef[linear.params], nrow(linear.mat), length(linear.params), byrow = TRUE)
+				mat_L_coef = linear.mat * matrix(coef[linear.params], 
+				                                 nrow(linear.mat), 
+				                                 length(linear.params), 
+				                                 byrow = TRUE)
 				max_var = apply(abs(mat_L_coef), 2, max)
 				best_suspect = linear.params[which.max(max_var)]
-				stop("in femlm(): Likely presence of a separation problem (coef->Inf). One suspect variable is: ", best_suspect, ".", immediate. = TRUE, call. = FALSE)
+				stopi("in femlm(): Likely presence of a separation problem (coef->Inf). ",
+				     "One suspect variable is: {best_suspect}.")
 			} else {
 				warning("in femlm(): Likely presence of an overfitting problem due to the non-linear part.", immediate. = TRUE, call. = FALSE)
 			}
@@ -527,10 +537,10 @@ get_savedMu = function(coef, env){
 
 get_Jacobian = function(coef, env){
 	# retrieves the Jacobian of the "rhs"
-	params <- get("params", env)
-	names(coef) <- params
-	isNL <- get("isNL", env)
-	isLinear <- get("isLinear", env)
+	params = get("params", env)
+	names(coef) = params
+	isNL = get("isNL", env)
+	isLinear = get("isLinear", env)
 	isGradient = get("isGradient", env)
 
 	if(isNL){
@@ -559,7 +569,7 @@ get_NL_Jacobian = function(coef, env){
 	savedCoef = get("JC_savedCoef", env)
 	savedValue = get("JC_savedValue", env)
 
-	nonlinear.params <- get("nonlinear.params", env)
+	nonlinear.params = get("nonlinear.params", env)
 	coef = coef[nonlinear.params]
 
 	if(nbSave>0) for(i in nbSave:1){
@@ -572,23 +582,24 @@ get_NL_Jacobian = function(coef, env){
 
 	#Si la valeur n'existe pas, on la sauvegarde
 	#on met les valeurs les plus recentes en derniere position
-	isGradient <- get("isGradient", env)
+	isGradient = get("isGradient", env)
 	if(isGradient){
-		call_gradient <- get("call_gradient", env)
+		call_gradient = get("call_gradient", env)
 		#we send the coef in the environment
 		for(var in nonlinear.params) assign(var, coef[var], env)
-		jacob.mat <- eval(call_gradient, envir=env)
-		jacob.mat <- as.matrix(as.data.frame(jacob.mat[nonlinear.params]))
+		jacob.mat = eval(call_gradient, envir=env)
+		jacob.mat = as.matrix(as.data.frame(jacob.mat[nonlinear.params]))
 	} else {
-		jacobian.method <- get("jacobian.method", env)
-		jacob.mat <- numDeriv::jacobian(evalNLpart, coef, env=env, method=jacobian.method)
+		jacobian.method = get("jacobian.method", env)
+		jacob.mat = numDeriv::jacobian(evalNLpart, coef, env=env, method=jacobian.method)
 	}
 
 	#Controls:
 	if(anyNA(jacob.mat)){
-		qui <- which(apply(jacob.mat, 2, function(x) anyNA(x)))
-		variables <- nonlinear.params[qui]
-		stop("ERROR: The Jacobian of the nonlinear part has NA!\nThis concerns the following variables:\n", paste(variables, sep=" ; "))
+		qui = which(apply(jacob.mat, 2, function(x) anyNA(x)))
+		variables = nonlinear.params[qui]
+		stopi("ERROR: The Jacobian of the nonlinear part has NA!\n",
+		      "This concerns the following variables: {enum?variables}.")
 	}
 
 	#Sauvegarde
@@ -621,7 +632,7 @@ get_NL_Jacobian = function(coef, env){
 	return(jacob.mat)
 }
 
-get_model_null <- function(env, theta.init){
+get_model_null = function(env, theta.init){
 	# I have the closed form of the ll0
 	famFuns = get("famFuns", env)
 	family = get("family", env)
@@ -701,17 +712,19 @@ get_model_null <- function(env, theta.init){
 
 		# I set up a limit of 0.05, because when it is too close to 0, convergence isnt great
 
-		opt <- nlminb(start=theta.guess, objective=famFuns$ll0_theta, y=y,
-		              gradient=famFuns$grad0_theta, lower=1e-3, mean_y=mean_y,
-		              invariant=invariant, hessian = famFuns$hess0_theta, env=env)
+		opt = nlminb(start = theta.guess, objective = famFuns$ll0_theta, y = y,
+		             gradient = famFuns$grad0_theta, lower = 1e-3, mean_y = mean_y,
+		             invariant = invariant, hessian = famFuns$hess0_theta, env = env)
 
 		loglik = -opt$objective
 		theta = opt$par
 	}
 
-	if(verbose >= 2) cat("Null model in ", (proc.time()-ptm)[3], "s. ", sep ="")
+	if(verbose >= 2){
+	  cat("Null model in ", (proc.time()-ptm)[3], "s. ", sep ="")
+	}
 
-	return(list(loglik=loglik, constant=constant, theta = theta))
+	return(list(loglik = loglik, constant=constant, theta = theta))
 }
 
 getGradient = function(jacob.mat, y, mu, exp_mu, env, coef, ...){
@@ -1008,7 +1021,10 @@ deriv_xi_other = function(ll_dx_dother, ll_d2, env, coef){
 			init = get("sum_deriv_other", env)
 		}
 
-		dxi_dother <- cpp_partialDerivative_other(iterMax, Q, N, epsDeriv = deriv.tol, ll_d2, ll_dx_dother, init, fixef_id.matrix_cpp, fixef_sizes)
+		dxi_dother = cpp_partialDerivative_other(
+		  iterMax, Q, N, epsDeriv = deriv.tol, ll_d2, ll_dx_dother,
+		  init, fixef_id.matrix_cpp, fixef_sizes
+		)
 
 		# we save the values
 		assign("sum_deriv_other", dxi_dother, env)
@@ -1083,7 +1099,13 @@ conv_single = function(coef, mu_in, env){
 	family_nb = switch(family, poisson=1, negbin=2, logit=3, gaussian=4, lpoisson=5)
 	theta = ifelse(family == "negbin", coef[".theta"], 1)
 
-	mu_new = update_mu_single_cluster(family = family_nb, nb_cluster = fixef_sizes, theta = theta, diffMax_NR = NR.tol, mu_in = mu_in, lhs = lhs, sum_y = sum_y_vector, dum = fixef_id_vector, obsCluster = fixef_order_vector, table = fixef_table_vector, cumtable = fixef_cumtable_vector, nthreads = nthreads)
+	mu_new = update_mu_single_cluster(
+	  family = family_nb, nb_cluster = fixef_sizes, theta = theta, 
+	  diffMax_NR = NR.tol, mu_in = mu_in, lhs = lhs, sum_y = sum_y_vector, 
+	  dum = fixef_id_vector, obsCluster = fixef_order_vector, 
+	  table = fixef_table_vector, cumtable = fixef_cumtable_vector, 
+	  nthreads = nthreads
+	)
 
 	return(mu_new)
 }
@@ -1106,7 +1128,7 @@ conv_seq = function(coef, mu_in, env, iterMax){
 	NR.tol = get("NR.tol", env)
 	family = get("familyConv", env)
 
-	family_nb = switch(family, poisson=1, negbin=2, logit=3, gaussian=4, lpoisson=5)
+	family_nb = switch(family, poisson = 1, negbin = 2, logit = 3, gaussian = 4, lpoisson = 5)
 	theta = ifelse(family == "negbin", coef[".theta"], 1)
 
 	Q = length(fixef_sizes)
@@ -1121,7 +1143,11 @@ conv_seq = function(coef, mu_in, env, iterMax){
 		setup_poisson_fixedcost(env)
 		info = get("fixedCostPoisson", env)
 
-		res = cpp_conv_seq_poi_2(n_i = info$n_i, n_j = info$n_j, n_cells = info$n_cells, index_i = info$index_i, index_j = info$index_j, order = info$order, dum_vector = dum_vector, sum_y_vector = sum_y_vector, iterMax = iterMax, diffMax = fixef.tol, exp_mu_in = mu_in)
+		res = cpp_conv_seq_poi_2(n_i = info$n_i, n_j = info$n_j, n_cells = info$n_cells, 
+		                         index_i = info$index_i, index_j = info$index_j, 
+		                         order = info$order, dum_vector = dum_vector, 
+		                         sum_y_vector = sum_y_vector, iterMax = iterMax, 
+		                         diffMax = fixef.tol, exp_mu_in = mu_in)
 
 	} else if(Q == 2 & family == "gaussian"){
 		# Required variables
@@ -1129,10 +1155,20 @@ conv_seq = function(coef, mu_in, env, iterMax){
 		info = get("fixedCostGaussian", env)
 		invTableCluster_vector = get("fixef_invTable", env)
 
-		res = cpp_conv_seq_gau_2(n_i = info$n_i, n_j = info$n_j, n_cells = info$n_cells, r_mat_row = info$mat_row, r_mat_col = info$mat_col, r_mat_value_Ab = info$mat_value_Ab, r_mat_value_Ba = info$mat_value_Ba, dum_vector = dum_vector, lhs = lhs, invTableCluster_vector = invTableCluster_vector, iterMax = iterMax, diffMax = fixef.tol, mu_in = mu_in)
+		res = cpp_conv_seq_gau_2(n_i = info$n_i, n_j = info$n_j, n_cells = info$n_cells, 
+		                         r_mat_row = info$mat_row, r_mat_col = info$mat_col, 
+		                         r_mat_value_Ab = info$mat_value_Ab, 
+		                         r_mat_value_Ba = info$mat_value_Ba, dum_vector = dum_vector, 
+		                         lhs = lhs, invTableCluster_vector = invTableCluster_vector, 
+		                         iterMax = iterMax, diffMax = fixef.tol, mu_in = mu_in)
 
 	} else {
-		res = cpp_conv_seq_gnl(family = family_nb, iterMax = iterMax, diffMax = fixef.tol, diffMax_NR = NR.tol, theta = theta, lhs = lhs, nb_cluster_all = fixef_sizes, mu_init = mu_in, dum_vector = dum_vector, tableCluster_vector = fixef_table_vector, sum_y_vector = sum_y_vector, cumtable_vector = fixef_cumtable_vector, obsCluster_vector = fixef_order_vector, nthreads = nthreads)
+		res = cpp_conv_seq_gnl(family = family_nb, iterMax = iterMax, diffMax = fixef.tol, 
+		                       diffMax_NR = NR.tol, theta = theta, lhs = lhs, 
+		                       nb_cluster_all = fixef_sizes, mu_init = mu_in, 
+		                       dum_vector = dum_vector, tableCluster_vector = fixef_table_vector, 
+		                       sum_y_vector = sum_y_vector, cumtable_vector = fixef_cumtable_vector, 
+		                       obsCluster_vector = fixef_order_vector, nthreads = nthreads)
 	}
 
 	if(family == "lpoisson"){
@@ -1161,7 +1197,7 @@ conv_acc = function(coef, mu_in, env, iterMax, only2 = FALSE){
 	NR.tol = get("NR.tol", env)
 	family = get("familyConv", env)
 
-	family_nb = switch(family, poisson=1, negbin=2, logit=3, gaussian=4, lpoisson=5)
+	family_nb = switch(family, poisson = 1, negbin = 2, logit = 3, gaussian = 4, lpoisson = 5)
 	theta = ifelse(family == "negbin", coef[".theta"], 1)
 
 	if(only2){
@@ -1189,7 +1225,11 @@ conv_acc = function(coef, mu_in, env, iterMax, only2 = FALSE){
 		setup_poisson_fixedcost(env)
 		info = get("fixedCostPoisson", env)
 
-		res = cpp_conv_acc_poi_2(n_i = info$n_i, n_j = info$n_j, n_cells = info$n_cells, index_i = info$index_i, index_j = info$index_j, order = info$order, dum_vector = dum_vector, sum_y_vector = sum_y_vector, iterMax = iterMax, diffMax = fixef.tol, exp_mu_in = mu_in)
+		res = cpp_conv_acc_poi_2(n_i = info$n_i, n_j = info$n_j, n_cells = info$n_cells, 
+		                         index_i = info$index_i, index_j = info$index_j, 
+		                         order = info$order, dum_vector = dum_vector, 
+		                         sum_y_vector = sum_y_vector, iterMax = iterMax, 
+		                         diffMax = fixef.tol, exp_mu_in = mu_in)
 
 	} else if(Q == 2 & family == "gaussian"){
 		# Required variables
@@ -1197,10 +1237,20 @@ conv_acc = function(coef, mu_in, env, iterMax, only2 = FALSE){
 		info = get("fixedCostGaussian", env)
 		invTableCluster_vector = get("fixef_invTable", env)
 
-		res = cpp_conv_acc_gau_2(n_i = info$n_i, n_j = info$n_j, n_cells = info$n_cells, r_mat_row = info$mat_row, r_mat_col = info$mat_col, r_mat_value_Ab = info$mat_value_Ab, r_mat_value_Ba = info$mat_value_Ba, dum_vector = dum_vector, lhs = lhs, invTableCluster_vector = invTableCluster_vector, iterMax = iterMax, diffMax = fixef.tol, mu_in = mu_in)
+		res = cpp_conv_acc_gau_2(n_i = info$n_i, n_j = info$n_j, n_cells = info$n_cells, 
+		                         r_mat_row = info$mat_row, r_mat_col = info$mat_col, 
+		                         r_mat_value_Ab = info$mat_value_Ab, 
+		                         r_mat_value_Ba = info$mat_value_Ba, dum_vector = dum_vector, 
+		                         lhs = lhs, invTableCluster_vector = invTableCluster_vector, 
+		                         iterMax = iterMax, diffMax = fixef.tol, mu_in = mu_in)
 
 	} else {
-		res = cpp_conv_acc_gnl(family = family_nb, iterMax = iterMax, diffMax = fixef.tol, diffMax_NR = NR.tol, theta = theta, lhs = lhs, nb_cluster_all = fixef_sizes, mu_init = mu_in, dum_vector = dum_vector, tableCluster_vector = fixef_table_vector, sum_y_vector = sum_y_vector, cumtable_vector = fixef_cumtable_vector, obsCluster_vector = fixef_order_vector, nthreads = nthreads)
+		res = cpp_conv_acc_gnl(family = family_nb, iterMax = iterMax, diffMax = fixef.tol, 
+		                       diffMax_NR = NR.tol, theta = theta, lhs = lhs, 
+		                       nb_cluster_all = fixef_sizes, mu_init = mu_in, 
+		                       dum_vector = dum_vector, tableCluster_vector = fixef_table_vector, 
+		                       sum_y_vector = sum_y_vector, cumtable_vector = fixef_cumtable_vector, 
+		                       obsCluster_vector = fixef_order_vector, nthreads = nthreads)
 	}
 
 	if(family == "poisson" && res$any_negative_poisson){
@@ -1208,7 +1258,9 @@ conv_acc = function(coef, mu_in, env, iterMax, only2 = FALSE){
 		assign("familyConv", "lpoisson", env)
 
 		verbose = get("verbose", env)
-		if(verbose >= 3) cat("Switch to log-poisson (to cope with high valued FEs).\n")
+		if(verbose >= 3){
+		  cat("Switch to log-poisson (to cope with high valued FEs).\n")
+		}
 
 		res = conv_acc(coef, mu_in, env, iterMax, only2)
 
@@ -1301,9 +1353,15 @@ dconv_seq = function(dxi_dbeta, jacob.mat, ll_d2, env, iterMax){
 		setup_poisson_fixedcost(env)
 		info = get("fixedCostPoisson", env)
 
-		res <- cpp_derivconv_seq_2(iterMax = iterMax, diffMax = deriv.tol, n_vars = n_vars, nb_cluster_all = nb_cluster_all, n_cells = info$n_cells, index_i = info$index_i, index_j = info$index_j, order = info$order, ll_d2 = ll_d2, jacob_vector = jacob_vector, deriv_init_vector = deriv_init_vector, dum_vector = dum_vector)
+		res = cpp_derivconv_seq_2(iterMax = iterMax, diffMax = deriv.tol, n_vars = n_vars, 
+		                          nb_cluster_all = nb_cluster_all, n_cells = info$n_cells, 
+		                          index_i = info$index_i, index_j = info$index_j, 
+		                          order = info$order, ll_d2 = ll_d2, jacob_vector = jacob_vector, 
+		                          deriv_init_vector = deriv_init_vector, dum_vector = dum_vector)
 	} else {
-		res <- cpp_derivconv_seq_gnl(iterMax = iterMax, diffMax = deriv.tol, n_vars, nb_cluster_all, ll_d2, jacob_vector, deriv_init_vector, dum_vector)
+		res = cpp_derivconv_seq_gnl(iterMax = iterMax, diffMax = deriv.tol, n_vars, 
+		                            nb_cluster_all, ll_d2, jacob_vector, 
+		                            deriv_init_vector, dum_vector)
 	}
 
 	return(list(dxi_dbeta = res$dxi_dbeta, iter = res$iter))
@@ -1331,9 +1389,16 @@ dconv_acc = function(dxi_dbeta, jacob.mat, ll_d2, env, iterMax, only2 = FALSE){
 		setup_poisson_fixedcost(env)
 		info = get("fixedCostPoisson", env)
 
-		res <- cpp_derivconv_acc_2(iterMax = iterMax, diffMax = deriv.tol, n_vars = n_vars, nb_cluster_all = nb_cluster_all, n_cells = info$n_cells, index_i = info$index_i, index_j = info$index_j, order = info$order, ll_d2 = ll_d2, jacob_vector = jacob_vector, deriv_init_vector = deriv_init_vector, dum_vector = dum_vector)
+		res = cpp_derivconv_acc_2(iterMax = iterMax, diffMax = deriv.tol, n_vars = n_vars, 
+		                          nb_cluster_all = nb_cluster_all, n_cells = info$n_cells, 
+		                          index_i = info$index_i, index_j = info$index_j, 
+		                          order = info$order, ll_d2 = ll_d2, jacob_vector = jacob_vector,
+		                          deriv_init_vector = deriv_init_vector, dum_vector = dum_vector)
 	} else {
-		res <- cpp_derivconv_acc_gnl(iterMax = iterMax, diffMax = deriv.tol, n_vars = n_vars, nb_cluster_all = nb_cluster_all, ll_d2 = ll_d2, jacob_vector = jacob_vector, deriv_init_vector = deriv_init_vector, dum_vector = dum_vector)
+		res = cpp_derivconv_acc_gnl(iterMax = iterMax, diffMax = deriv.tol, n_vars = n_vars, 
+		                            nb_cluster_all = nb_cluster_all, ll_d2 = ll_d2, 
+		                            jacob_vector = jacob_vector, 
+		                            deriv_init_vector = deriv_init_vector, dum_vector = dum_vector)
 	}
 
 	return(list(dxi_dbeta = res$dxi_dbeta, iter = res$iter))
@@ -1364,7 +1429,8 @@ setup_poisson_fixedcost = function(env){
 
 	n_cells = get_n_cells(index_i, index_j)
 
-	res = list(n_i = max(dum_A), n_j = max(dum_B), n_cells = n_cells, index_i = index_i, index_j = index_j, order = myOrder - 1L)
+	res = list(n_i = max(dum_A), n_j = max(dum_B), n_cells = n_cells, 
+	           index_i = index_i, index_j = index_j, order = myOrder - 1L)
 
 	assign("fixedCostPoisson", res, env)
 
@@ -1404,7 +1470,9 @@ setup_gaussian_fixedcost = function(env){
 	assign("fixedCostGaussian", res, env)
 
 	verbose = get("verbose", env)
-	if(verbose >= 2) cat("Gaussian fixed-cost setup: ", (proc.time()-ptm)[3], "s\n", sep = "")
+	if(verbose >= 2){
+	  cat("Gaussian fixed-cost setup: ", (proc.time()-ptm)[3], "s\n", sep = "")
+	}
 }
 
 ####

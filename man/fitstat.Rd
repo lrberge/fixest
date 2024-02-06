@@ -17,20 +17,33 @@ fitstat(
 \arguments{
 \item{x}{A \code{fixest} estimation.}
 
-\item{type}{Character vector or one sided formula. The type of fit statistic to be computed. The classic ones are: n, rmse, r2, pr2, f, wald, ivf, ivwald. You have the full list in the details section or use \code{show_types = TRUE}. Further, you can register your own types with \code{\link{fitstat_register}}.}
+\item{type}{Character vector or one sided formula. The type of fit statistic to be computed.
+The classic ones are: n, rmse, r2, pr2, f, wald, ivf, ivwald. You have the full list in
+the details section or use \code{show_types = TRUE}. Further, you can register your own types
+with \code{\link{fitstat_register}}.}
 
-\item{simplify}{Logical, default is \code{FALSE}. By default a list is returned whose names are the selected types. If \code{simplify = TRUE} and only one type is selected, then the element is directly returned (ie will not be nested in a list).}
+\item{simplify}{Logical, default is \code{FALSE}. By default a list is returned whose names are
+the selected types. If \code{simplify = TRUE} and only one type is selected, then the element
+is directly returned (ie will not be nested in a list).}
 
-\item{verbose}{Logical, default is \code{TRUE}. If \code{TRUE}, an object of class \code{fixest_fitstat} is returned (so its associated print method will be triggered). If \code{FALSE} a simple list is returned instead.}
+\item{verbose}{Logical, default is \code{TRUE}. If \code{TRUE}, an object of class \code{fixest_fitstat}
+is returned (so its associated print method will be triggered). If \code{FALSE} a simple list
+is returned instead.}
 
 \item{show_types}{Logical, default is \code{FALSE}. If \code{TRUE}, only prompts all available types.}
 
-\item{frame}{An environment in which to evaluate variables, default is \code{parent.frame()}. Only used if the argument \code{type} is a formula and some values in the formula have to be extended with the dot square bracket operator. Mostly for internal use.}
+\item{frame}{An environment in which to evaluate variables, default is \code{parent.frame()}.
+Only used if the argument \code{type} is a formula and some values in the formula have to be
+extended with the dot square bracket operator. Mostly for internal use.}
 
-\item{...}{Other elements to be passed to other methods and may be used to compute the statistics (for example you can pass on arguments to compute the VCOV when using \code{type = "g"} or \code{type = "wald"}.).}
+\item{...}{Other elements to be passed to other methods and may be used to compute
+the statistics (for example you can pass on arguments to compute the VCOV when using
+\code{type = "g"} or \code{type = "wald"}.).}
 }
 \value{
-By default an object of class \code{fixest_fitstat} is returned. Using \code{verbose = FALSE} returns a simple a list. Finally, if only one type is selected, \code{simplify = TRUE} leads to the selected type to be returned.
+By default an object of class \code{fixest_fitstat} is returned. Using \code{verbose = FALSE}
+returns a simple a list. Finally, if only one type is selected, \code{simplify = TRUE}
+leads to the selected type to be returned.
 }
 \description{
 Computes various fit statistics for \code{fixest} estimations.
@@ -47,20 +60,61 @@ You can register custom fit statistics with the function \code{fitstat_register}
 The types are case sensitive, please use lower case only. The types available are:
 
 \describe{
-\item{\code{n}, \code{ll}, \code{aic}, \code{bic}, \code{rmse}: }{The number of observations, the log-likelihood, the AIC, the BIC and the root mean squared error, respectively.}
+\item{\code{n}, \code{ll}, \code{aic}, \code{bic}, \code{rmse}: }{The number of observations, the log-likelihood,
+the AIC, the BIC and the root mean squared error, respectively.}
 \item{\code{my}: }{Mean of the dependent variable.}
-\item{\code{g}: }{The degrees of freedom used to compute the t-test (it influences the p-values of the coefficients). When the VCOV is clustered, this value is equal to the minimum cluster size, otherwise, it is equal to the sample size minus the number of variables.}
-\item{\code{r2}, \code{ar2}, \code{wr2}, \code{awr2}, \code{pr2}, \code{apr2}, \code{wpr2}, \code{awpr2}: }{All r2 that can be obtained with the function \code{\link{r2}}. The \code{a} stands for 'adjusted', the \code{w} for 'within' and the \code{p} for 'pseudo'. Note that the order of the letters \code{a}, \code{w} and \code{p} does not matter. The pseudo R2s are McFadden's R2s (ratios of log-likelihoods).}
-\item{\code{theta}: }{The over-dispersion parameter in Negative Binomial models. Low values mean high overdispersion.}
-\item{\code{f}, \code{wf}: }{The F-tests of nullity of the coefficients. The \code{w} stands for 'within'. These types return the following values: \code{stat}, \code{p}, \code{df1} and \code{df2}. If you want to display only one of these, use their name after a dot: e.g. \code{f.stat} will give the statistic of the F-test, or \code{wf.p} will give the p-values of the F-test on the projected model (i.e. projected onto the fixed-effects).}
-\item{\code{wald}: }{Wald test of joint nullity of the coefficients. This test always excludes the intercept and the fixed-effects. These type returns the following values: \code{stat}, \code{p}, \code{df1}, \code{df2} and \code{vcov}. The element \code{vcov} reports the way the VCOV matrix was computed since it directly influences this statistic.}
-\item{\code{ivf}, \code{ivf1}, \code{ivf2}, \code{ivfall}: }{These statistics are specific to IV estimations. They report either the IV F-test (namely the Cragg-Donald F statistic in the presence of only one endogenous regressor) of the first stage (\code{ivf} or \code{ivf1}), of the second stage (\code{ivf2}) or of both (\code{ivfall}). The F-test of the first stage is commonly named weak instrument test. The value of \code{ivfall} is only useful in \code{\link{etable}} when both the 1st and 2nd stages are displayed (it leads to the 1st stage F-test(s) to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- otherwise, \code{ivf1} would also be displayed on the 2nd stage estimation). These types return the following values: \code{stat}, \code{p}, \code{df1} and \code{df2}.}
-\item{\code{ivwald}, \code{ivwald1}, \code{ivwald2}, \code{ivwaldall}: }{These statistics are specific to IV estimations. They report either the IV Wald-test of the first stage (\code{ivwald} or \code{ivwald1}), of the second stage (\code{ivwald2}) or of both (\code{ivwaldall}). The Wald-test of the first stage is commonly named weak instrument test. Note that if the estimation was done with a robust VCOV and there is only one endogenous regressor, this is equivalent to the Kleibergen-Paap statistic. The value of \code{ivwaldall} is only useful in \code{\link{etable}} when both the 1st and 2nd stages are displayed (it leads to the 1st stage Wald-test(s) to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- otherwise, \code{ivwald1} would also be displayed on the 2nd stage estimation). These types return the following values: \code{stat}, \code{p}, \code{df1}, \code{df2}, and \code{vcov}.}
+\item{\code{g}: }{The degrees of freedom used to compute the t-test (it influences the p-values
+of the coefficients). When the VCOV is clustered, this value is equal to the minimum
+cluster size, otherwise, it is equal to the sample size minus the number of variables.}
+\item{\code{r2}, \code{ar2}, \code{wr2}, \code{awr2}, \code{pr2}, \code{apr2}, \code{wpr2}, \code{awpr2}: }{All r2 that can be
+obtained with the function \code{\link{r2}}. The \code{a} stands for 'adjusted', the \code{w} for 'within' and
+the \code{p} for 'pseudo'. Note that the order of the letters \code{a}, \code{w} and \code{p} does not matter.
+The pseudo R2s are McFadden's R2s (ratios of log-likelihoods).}
+\item{\code{theta}: }{The over-dispersion parameter in Negative Binomial models. Low values mean
+high overdispersion.}
+\item{\code{f}, \code{wf}: }{The F-tests of nullity of the coefficients. The \code{w} stands for
+'within'. These types return the following values: \code{stat}, \code{p}, \code{df1} and \code{df2}.
+If you want to display only one of these, use their name after a dot: e.g. \code{f.stat}
+will give the statistic of the F-test, or \code{wf.p} will give the p-values of the F-test
+on the projected model (i.e. projected onto the fixed-effects).}
+\item{\code{wald}: }{Wald test of joint nullity of the coefficients. This test always excludes
+the intercept and the fixed-effects. These type returns the following values:
+\code{stat}, \code{p}, \code{df1}, \code{df2} and \code{vcov}. The element \code{vcov} reports the way the VCOV
+matrix was computed since it directly influences this statistic.}
+\item{\code{ivf}, \code{ivf1}, \code{ivf2}, \code{ivfall}: }{These statistics are specific to IV estimations.
+They report either the IV F-test (namely the Cragg-Donald F statistic in the presence
+of only one endogenous regressor) of the first stage (\code{ivf} or \code{ivf1}), of the
+second stage (\code{ivf2}) or of both (\code{ivfall}). The F-test of the first stage is
+commonly named weak instrument test. The value of \code{ivfall} is only useful in \code{\link{etable}}
+when both the 1st and 2nd stages are displayed (it leads to the 1st stage F-test(s)
+to be displayed on the 1st stage estimation(s), and the 2nd stage one on the
+2nd stage estimation -- otherwise, \code{ivf1} would also be displayed on the 2nd stage
+estimation). These types return the following values: \code{stat}, \code{p}, \code{df1} and \code{df2}.}
+\item{\code{ivwald}, \code{ivwald1}, \code{ivwald2}, \code{ivwaldall}: }{These statistics are specific to IV
+estimations. They report either the IV Wald-test of the first stage (\code{ivwald} or \code{ivwald1}),
+of the second stage (\code{ivwald2}) or of both (\code{ivwaldall}). The Wald-test of the first stage
+is commonly named weak instrument test. Note that if the estimation was done with a robust
+VCOV and there is only one endogenous regressor, this is equivalent to the
+Kleibergen-Paap statistic. The value of \code{ivwaldall} is only useful in \code{\link{etable}} when both
+the 1st and 2nd stages are displayed (it leads to the 1st stage Wald-test(s) to be displayed
+on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation --
+otherwise, \code{ivwald1} would also be displayed on the 2nd stage estimation). These types
+return the following values: \code{stat}, \code{p}, \code{df1}, \code{df2}, and \code{vcov}.}
 \item{\code{cd}: }{The Cragg-Donald test for weak instruments.}
 \item{\code{kpr}: }{The Kleibergen-Paap test for weak instruments.}
-\item{\code{wh}: }{This statistic is specific to IV estimations. Wu-Hausman endogeneity test. H0 is the absence of endogeneity of the instrumented variables. It returns the following values: \code{stat}, \code{p}, \code{df1}, \code{df2}.}
-\item{\code{sargan}: }{Sargan test of overidentifying restrictions. H0: the instruments are not correlated with the second stage residuals. It returns the following values: \code{stat}, \code{p}, \code{df}.}
-\item{\code{lr}, \code{wlr}: }{Likelihood ratio and within likelihood ratio tests. It returns the following elements: \code{stat}, \code{p}, \code{df}. Concerning the within-LR test, note that, contrary to estimations with \code{femlm} or \code{feNmlm}, estimations with \code{feglm}/\code{fepois} need to estimate the model with fixed-effects only which may prove time-consuming (depending on your model). Bottom line, if you really need the within-LR and estimate a Poisson model, use \code{femlm} instead of \code{fepois} (the former uses direct ML maximization for which the only FEs model is a by product).}
+\item{\code{wh}: }{This statistic is specific to IV estimations. Wu-Hausman endogeneity test.
+H0 is the absence of endogeneity of the instrumented variables. It returns the following
+values: \code{stat}, \code{p}, \code{df1}, \code{df2}.}
+\item{\code{sargan}: }{Sargan test of overidentifying restrictions. H0: the instruments are
+not correlated with the second stage residuals. It returns the
+following values: \code{stat}, \code{p}, \code{df}.}
+\item{\code{lr}, \code{wlr}: }{Likelihood ratio and within likelihood ratio tests. It returns
+the following elements: \code{stat}, \code{p}, \code{df}. Concerning the within-LR test, note that,
+contrary to estimations with \code{femlm} or \code{feNmlm}, estimations with \code{feglm}/\code{fepois}
+need to estimate the model with fixed-effects only which may prove time-consuming
+(depending on your model). Bottom line, if you really need the within-LR and estimate a
+Poisson model, use \code{femlm} instead of \code{fepois} (the former uses direct ML maximization for
+which the only FEs model is a by product).}
 }
 }
 

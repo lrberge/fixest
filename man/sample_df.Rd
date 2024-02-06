@@ -17,7 +17,8 @@ sample_df(x, n = 10, previous = FALSE)
 A data base (resp vector) with \code{n} rows (resp elements).
 }
 \description{
-This function is useful to check a data set. It gives a random number of rows of the input data set.
+This function is useful to check a data set. It gives a random number of rows of
+the input data set.
 }
 \examples{
 

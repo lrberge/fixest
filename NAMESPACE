@@ -146,19 +146,20 @@ export(fixef)
 importFrom(sandwich, estfun, bread, bwNeweyWest)
 export(estfun, bread)
 
-importFrom(stringmagic, string_magic_alias)
+importFrom(stringmagic, string_magic_alias, cat_magic_alias, message_magic_alias,
+           string_any)
 
 importFrom(stats, cor, dnorm, lm, nlminb, optim,
-			  pnorm, qnorm, as.formula, var, sd, formula,
-			  na.omit, model.frame, "na.pass", poisson, pt, hatvalues,
-			  quasibinomial)
+			     pnorm, qnorm, as.formula, var, sd, formula,
+			     na.omit, model.frame, "na.pass", poisson, pt, hatvalues,
+			     quasibinomial)
 
 # stats methods
 importFrom(stats, model.matrix, sigma, deviance, weights, terms,
-             nobs, AIC, BIC, update, predict, fitted, fitted.values,
-			  resid, residuals, logLik, coef, coefficients, lag,
-			  confint, vcov, binomial, setNames, complete.cases, pchisq, pf,
-			  aggregate, cancor, rnorm, median, qt, .getXlevels, quantile)
+           nobs, AIC, BIC, update, predict, fitted, fitted.values,
+			     resid, residuals, logLik, coef, coefficients, lag,
+			     confint, vcov, binomial, setNames, complete.cases, pchisq, pf,
+			     aggregate, cancor, rnorm, median, qt, .getXlevels, quantile)
 
 importFrom(utils, combn, head, tail, packageVersion, object.size, read.csv,
            write.csv, write.table, capture.output, as.roman)

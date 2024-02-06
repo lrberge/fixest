@@ -24,6 +24,6 @@ This data has been generated from \pkg{R}.
 data(base_stagg)
 }
 \description{
-This data has been generated to illustrate the Sun and Abraham (Journal of Econometrics, forthcoming) method for staggered difference-in-difference. This is a balanced panel of 95 individuals and 10 periods. Half the individuals are treated. For those treated, the treatment date can vary from the second to the last period. The effect of the treatment depends on the time since the treatment: it is first negative and then increasing.
+This data has been generated to illustrate the Sun and Abraham (Journal of Econometrics, 2021) method for staggered difference-in-difference. This is a balanced panel of 95 individuals and 10 periods. Half the individuals are treated. For those treated, the treatment date can vary from the second to the last period. The effect of the treatment depends on the time since the treatment: it is first negative and then increasing.
 }
 \keyword{datasets}

@@ -7,7 +7,8 @@
 \method{as.list}{fixest_multi}(x, ...)
 }
 \arguments{
-\item{x}{A \code{fixest_multi} object, obtained from a \code{fixest} estimation leading to multiple results.}
+\item{x}{A \code{fixest_multi} object, obtained from a \code{fixest} estimation leading to
+multiple results.}
 
 \item{...}{Not currently used.}
 }
@@ -31,5 +32,8 @@ as.list(res)
 
 }
 \seealso{
-The main fixest estimation functions: \code{\link{feols}}, \code{\link[=feglm]{fepois}}, \code{\link[=femlm]{fenegbin}}, \code{\link{feglm}}, \code{\link{feNmlm}}. Tools for mutliple fixest estimations: \code{\link{summary.fixest_multi}}, \code{\link{print.fixest_multi}}, \code{\link{as.list.fixest_multi}}, \code{\link[fixest]{sub-sub-.fixest_multi}}, \code{\link[fixest]{sub-.fixest_multi}}.
+The main fixest estimation functions: \code{\link{feols}}, \code{\link[=feglm]{fepois}},
+\code{\link[=femlm]{fenegbin}}, \code{\link{feglm}}, \code{\link{feNmlm}}. Tools for mutliple fixest
+estimations: \code{\link{summary.fixest_multi}}, \code{\link{print.fixest_multi}}, \code{\link{as.list.fixest_multi}},
+\code{\link[fixest]{sub-sub-.fixest_multi}}, \code{\link[fixest]{sub-.fixest_multi}}.
 }

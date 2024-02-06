@@ -18,190 +18,199 @@
 #' @inherit fitstat examples
 #'
 #' @param x An object resulting from the [`fitstat`] function.
-#' @param na.rm Logical, default is `FALSE`. If `TRUE`, the statistics that are missing are not displayed.
+#' @param na.rm Logical, default is `FALSE`. If `TRUE`, the statistics that are missing 
+#' are not displayed.
 #' @param ... Not currently used.
 #'
 #'
 print.fixest_fitstat = function(x, na.rm = FALSE, ...){
 
-    dots = list(...)
+  dots = list(...)
 
-    # glue = function(x) gsub("( +)(,)", "\\2\\1", paste(x[nchar(x) > 0], collapse = ", "))
-    glue = function(x) paste(x[nchar(x) > 0], collapse = ", ")
+  # below now replaced with sma
+  # glue = function(x) gsub("( +)(,)", "\\2\\1", paste(x[nchar(x) > 0], collapse = ", "))
+  # glue = function(x) paste(x[nchar(x) > 0], collapse = ", ")
 
-    all_types = fitstat(give_types = TRUE)
-    dict_type = all_types$R_alias
+  all_types = fitstat(give_types = TRUE)
+  dict_type = all_types$R_alias
 
-    if(na.rm){
-        IS_NA = sapply(x, function(z) identical(z, NA))
-        x = x[!IS_NA]
-        if(length(x) == 0) return(invisible(NULL))
-    }
+  if(na.rm){
+    IS_NA = sapply(x, function(z) identical(z, NA))
+    x = x[!IS_NA]
+    if(length(x) == 0) return(invisible(NULL))
+  }
 
-    if(isTRUE(dots$group.solo)){
-        # Later integration in print
-        solo = lengths(x) == 1
-        x_solo = unlist(x[solo])
-        n_solo = length(x_solo)
+  if(isTRUE(dots$group.solo)){
+    # Later integration in print
+    solo = lengths(x) == 1
+    x_solo = unlist(x[solo])
+    n_solo = length(x_solo)
 
-        if(n_solo > 1){
-            x_solo_names = names(x[solo])
-            x_solo = unlist(x[solo])
+    if(n_solo > 1){
+      x_solo_names = names(x[solo])
+      x_solo = unlist(x[solo])
 
-            x = x[!solo]
+      x = x[!solo]
 
-            nr = ceiling(n_solo / 2)
-            m = matrix(c(x_solo, NA)[1:(2*nr)], nr, 2, byrow = TRUE)
-            m_alias = matrix(c(unlist(dict_type[x_solo_names]), "")[1:(2*nr)], nr, 2, byrow = TRUE)
+      nr = ceiling(n_solo / 2)
+      m = matrix(c(x_solo, NA)[1:(2*nr)], nr, 2, byrow = TRUE)
+      m_alias = matrix(c(unlist(dict_type[x_solo_names]), "")[1:(2*nr)], nr, 2, byrow = TRUE)
 
-            if(nr > 1 && anyNA(m[nr, ])){
-                m[nr, ] = m[nr, 2:1]
-                m_alias[nr, ] = m_alias[nr, 2:1]
-            }
+      if(nr > 1 && anyNA(m[nr, ])){
+        m[nr, ] = m[nr, 2:1]
+        m_alias[nr, ] = m_alias[nr, 2:1]
+      }
 
-            cols_new = list()
-            for(i in 1:2){
-                col = m[,i]
-                gt1 = abs(col) > 1 & !is.na(col)
-                col_char = numberFormatNormal(col)
-                col_char[gt1] = sfill(col_char[gt1], anchor = ".", na = "")
-                col_char[!gt1] = sfill(col_char[!gt1], anchor = ".", na = "")
-                col_char = sfill(col_char, right = TRUE)
+      cols_new = list()
+      for(i in 1:2){
+        col = m[,i]
+        gt1 = abs(col) > 1 & !is.na(col)
+        col_char = numberFormatNormal(col)
+        col_char[gt1] = sfill(col_char[gt1], anchor = ".", na = "")
+        col_char[!gt1] = sfill(col_char[!gt1], anchor = ".", na = "")
+        col_char = sfill(col_char, right = TRUE)
 
-                # The aliases
-                col_char = paste0(sfill(m_alias[, i]), ": ", col_char)
-                if(anyNA(col)){
-                    col_char[is.na(col)] = sfill("", nchar(col_char[1]))
-                }
-
-                cols_new[[i]] = col_char
-            }
-            mm = do.call(cbind, cols_new)
-
-            cat(apply(mm, 1, paste, collapse = "   "), sep = "\n")
+        # The aliases
+        col_char = paste0(sfill(m_alias[, i]), ": ", col_char)
+        if(anyNA(col)){
+          col_char[is.na(col)] = sfill("", nchar(col_char[1]))
         }
 
-        if(length(x) == 0) return(invisible(NULL))
+        cols_new[[i]] = col_char
+      }
+      mm = do.call(cbind, cols_new)
+
+      cat(apply(mm, 1, paste, collapse = "   "), sep = "\n")
     }
 
-    res = c()
+    if(length(x) == 0) return(invisible(NULL))
+  }
 
-    # Formatting the stats and pvalues
-    is_stat = sapply(x, function(z) "stat" %in% names(z))
-    is_pval = sapply(x, function(z) "p" %in% names(z))
+  res = c()
 
-    if(any(is_stat)){
-        stat_all = sapply(x[is_stat], function(z) z$stat)
-        stat_all = paste0("stat = ", sfill(sfill(numberFormatNormal(stat_all), anchor = "."), right = TRUE))
-        for(i in seq_along(stat_all)){
-            j = which(is_stat)[i]
-            x[[j]]$stat = stat_all[i]
-        }
+  # Formatting the stats and pvalues
+  is_stat = sapply(x, function(z) "stat" %in% names(z))
+  is_pval = sapply(x, function(z) "p" %in% names(z))
+
+  if(any(is_stat)){
+    stat_all = sapply(x[is_stat], function(z) z$stat)
+    stat_all = paste0("stat = ", 
+                      sfill(sfill(numberFormatNormal(stat_all), anchor = "."), right = TRUE))
+    for(i in seq_along(stat_all)){
+      j = which(is_stat)[i]
+      x[[j]]$stat = stat_all[i]
+    }
+  }
+
+  if(any(is_pval)){
+    pval_all = sapply(x[is_pval], function(z) z$p)
+    low = pval_all < 2.2e-16 & !is.na(pval_all)
+    pval_all[low] = 2.2e-16
+    pval_all = paste0("p ", ifelse(low, "< ", "= "), 
+                      sfill(numberFormatNormal(pval_all), right = TRUE))
+
+    for(i in seq_along(pval_all)){
+      j = which(is_pval)[i]
+      x[[j]]$p = pval_all[i]
+    }
+  }
+
+  # formatting for multiple endo regs
+  qui_right = rep(FALSE, length(x))
+
+  same_as = function(x, y) isTRUE(all.equal(x, y, check.attributes = FALSE))
+
+  for(i in seq_along(x)){
+    type = names(x)[i]
+
+    v = x[[i]]
+
+    if(grepl("::", type, fixed = TRUE)){
+      dict = getFixest_dict()
+      rename_fun = function(x) paste0(dict_type[x[1]], ", ", 
+                                      paste(sapply(x[-1], dict_apply, dict = dict), 
+                                            collapse = "::"))
+      test_name = rename_fun(strsplit(type, "::")[[1]])
+      qui_right[i] = TRUE
+    } else {
+      if(type %in% names(dict_type)){
+        test_name = dict_type[type]
+      } else if(!grepl(".", type, fixed = TRUE)) {
+        warning("Current type '", type, "' has no alias.")
+        test_name = type
+      } else {
+        type_split = strsplit(type, ".", fixed = TRUE)[[1]]
+        test_name = paste0(dict_type[type_split[1]], ", ", dict_type[type_split[2]])
+      }
+
     }
 
-    if(any(is_pval)){
-        pval_all = sapply(x[is_pval], function(z) z$p)
-        low = pval_all < 2.2e-16 & !is.na(pval_all)
-        pval_all[low] = 2.2e-16
-        pval_all = paste0("p ", ifelse(low, "< ", "= "), sfill(numberFormatNormal(pval_all), right = TRUE))
+    if(length(v) == 1){
+      # Basic display
+      res[i] = paste0(test_name, "! ", numberFormatNormal(v))
 
-        for(i in seq_along(pval_all)){
-            j = which(is_pval)[i]
-            x[[j]]$p = pval_all[i]
-        }
-    }
+    } else if(type %in% all_types$user_types){
+      # we can have extra values for user defined functions
 
-    # formatting for multiple endo regs
-    qui_right = rep(FALSE, length(x))
+      opts = getOption("fixest_fitstat_user")
+      alias_subtypes = opts[[type]]$alias_subtypes
 
-    same_as = function(x, y) isTRUE(all.equal(x, y, check.attributes = FALSE))
+      arg_list = list()
+      skip_df2 = FALSE
+      for(k in seq_along(v)){
+        subtype = names(v)[k]
 
-    for(i in seq_along(x)){
-        type = names(x)[i]
+        if(subtype == "df2" && skip_df2) next
 
-        v = x[[i]]
+        if(subtype == "stat"){
+          arg_list[[k]] = v$stat
 
-        if(grepl("::", type, fixed = TRUE)){
-            dict = getFixest_dict()
-            rename_fun = function(x) paste0(dict_type[x[1]], ", ", paste(sapply(x[-1], dict_apply, dict = dict), collapse = "::"))
-            test_name = rename_fun(strsplit(type, "::")[[1]])
-            qui_right[i] = TRUE
-        } else {
-            if(type %in% names(dict_type)){
-                test_name = dict_type[type]
-            } else if(!grepl(".", type, fixed = TRUE)) {
-                warning("Current type '", type, "' has no alias.")
-                test_name = type
-            } else {
-                type_split = strsplit(type, ".", fixed = TRUE)[[1]]
-                test_name = paste0(dict_type[type_split[1]], ", ", dict_type[type_split[2]])
-            }
+        } else if(subtype == "p"){
+          arg_list[[k]] = v$p
 
-        }
+        } else if(subtype == "df" && same_as(alias_subtypes["df"], "df")){
+          arg_list[[k]] = paste0("on ", numberFormatNormal(v$df), " DoF")
 
-        if(length(v) == 1){
-            # Basic display
-            res[i] = paste0(test_name, "! ", numberFormatNormal(v))
+        } else if(subtype == "df1" && "df2" %in% names(v) && same_as(alias_subtypes["df1"], "df1")){
+          arg_list[[k]] = paste0("on ", numberFormatNormal(v$df1), " and ", 
+                                 numberFormatNormal(v$df2), " DoF")
+          skip_df2 = TRUE
 
-        } else if(type %in% all_types$user_types){
-            # we can have extra values for user defined functions
-
-            opts = getOption("fixest_fitstat_user")
-            alias_subtypes = opts[[type]]$alias_subtypes
-
-            arg_list = list()
-            skip_df2 = FALSE
-            for(k in seq_along(v)){
-                subtype = names(v)[k]
-
-                if(subtype == "df2" && skip_df2) next
-
-                if(subtype == "stat"){
-                    arg_list[[k]] = v$stat
-
-                } else if(subtype == "p"){
-                    arg_list[[k]] = v$p
-
-                } else if(subtype == "df" && same_as(alias_subtypes["df"], "df")){
-                    arg_list[[k]] = paste0("on ", numberFormatNormal(v$df), " DoF")
-
-                } else if(subtype == "df1" && "df2" %in% names(v) && same_as(alias_subtypes["df1"], "df1")){
-                    arg_list[[k]] = paste0("on ", numberFormatNormal(v$df1), " and ", numberFormatNormal(v$df2), " DoF")
-                    skip_df2 = TRUE
-
-                } else if(subtype == "vcov"){
-                    arg_list[[k]] = paste0(alias_subtypes[subtype], ": ", v$vcov)
-
-                } else {
-                    arg_list[[k]] = paste0(alias_subtypes[subtype], " = ", numberFormatNormal(v[[subtype]]))
-
-                }
-            }
-
-            res[i] = paste0(test_name, "! ", glue(arg_list), ".")
+        } else if(subtype == "vcov"){
+          arg_list[[k]] = paste0(alias_subtypes[subtype], ": ", v$vcov)
 
         } else {
+          arg_list[[k]] = paste0(alias_subtypes[subtype], " = ", numberFormatNormal(v[[subtype]]))
 
-            stat_line = p_line = dof_line = vcov_line = ""
-            if(!is.null(v$stat)) stat_line = v$stat
-            if(!is.null(v$p)) p_line = v$p
-            if(!is.null(v$df)) dof_line = paste0("on ", numberFormatNormal(v$df), " DoF")
-            if(!is.null(v$df1)) dof_line = paste0("on ", numberFormatNormal(v$df1), " and ", numberFormatNormal(v$df2), " DoF")
-            if(!is.null(v$vcov)) vcov_line = paste0("VCOV: ", v$vcov)
-
-            res[i] = paste0(test_name, "! ", glue(c(stat_line, p_line, dof_line, vcov_line)), ".")
         }
-    }
+      }
 
-    if(any(qui_right)){
-        res2fix = strsplit(res[qui_right], "!", fixed = TRUE)
-        left = sapply(res2fix, function(x) x[1])
-        right = sapply(res2fix, function(x) x[2])
-        res_fixed = paste0(sfill(left, right = TRUE), "!", right)
-        res[qui_right] = res_fixed
-    }
+      # res[i] = paste0(test_name, "! ", glue(arg_list), ".")
+      res[i] = sma("{test_name}! {rm, ', 'c ? arg_list}.")
 
-    cat(gsub("!", ":", sfill(res, anchor = "!"), fixed = TRUE), sep = "\n")
+    } else {
+
+      stat_line = p_line = dof_line = vcov_line = ""
+      if(!is.null(v$stat)) stat_line = v$stat
+      if(!is.null(v$p)) p_line = v$p
+      if(!is.null(v$df)) dof_line = paste0("on ", numberFormatNormal(v$df), " DoF")
+      if(!is.null(v$df1)) dof_line = paste0("on ", numberFormatNormal(v$df1), " and ", numberFormatNormal(v$df2), " DoF")
+      if(!is.null(v$vcov)) vcov_line = paste0("VCOV: ", v$vcov)
+
+      # res[i] = paste0(test_name, "! ", glue(c(stat_line, p_line, dof_line, vcov_line)), ".")
+      res[i] = sma("{test_name}! {rm, ', 'c ? c(stat_line, p_line, dof_line, vcov_line)}.")
+    }
+  }
+
+  if(any(qui_right)){
+    res2fix = strsplit(res[qui_right], "!", fixed = TRUE)
+    left = sapply(res2fix, function(x) x[1])
+    right = sapply(res2fix, function(x) x[2])
+    res_fixed = paste0(sfill(left, right = TRUE), "!", right)
+    res[qui_right] = res_fixed
+  }
+
+  cat(gsub("!", ":", sfill(res, anchor = "!"), fixed = TRUE), sep = "\n")
 
 }
 
@@ -214,12 +223,27 @@ print.fixest_fitstat = function(x, na.rm = FALSE, ...){
 #' @inherit fitstat seealso
 #'
 #' @param type A character scalar giving the type-name.
-#' @param fun A function to be applied to a `fixest` estimation. It must return either a scalar, or a list of unitary elements. If the number of elements returned is greater than 1, then each element must be named! If the fit statistic is not valid for a given estimation, a plain `NA` value should be returned.
-#' @param alias A (named) character vector. An alias to be used in lieu of the type name in the display methods (ie when used in [`print.fixest_fitstat`] or [`etable`]). If the function returns several values, i.e. sub-types, you can give an alias to these sub-types. The syntax is `c("type" = "alias", "subtype_i" = "alias_i")`, with "type" (resp. "subtype") the value of the argument `type` resp. (`subtypes`). You can also give an alias encompassing the type and sub-type with the syntax `c("type.subtype_i" = "alias")`.
-#' @param subtypes A character vector giving the name of each element returned by the function `fun`. This is only used when the function returns more than one value. Note that you can use the shortcut "test" when the sub-types are "stat", "p" and "df"; and "test2" when these are "stat", "p", "df1" and "df2".
+#' @param fun A function to be applied to a `fixest` estimation. It must return either a scalar, 
+#' or a list of unitary elements. If the number of elements returned is greater than 1, 
+#' then each element must be named! If the fit statistic is not valid for a given estimation, 
+#' a plain `NA` value should be returned.
+#' @param alias A (named) character vector. An alias to be used in lieu of the type name in 
+#' the display methods (ie when used in [`print.fixest_fitstat`] or [`etable`]). 
+#' If the function returns several values, i.e. sub-types, you can give an alias to 
+#' these sub-types. The syntax is `c("type" = "alias", "subtype_i" = "alias_i")`, 
+#' with "type" (resp. "subtype") the value of the argument `type` resp. (`subtypes`). 
+#' You can also give an alias encompassing the type and sub-type with the syntax 
+#' `c("type.subtype_i" = "alias")`.
+#' @param subtypes A character vector giving the name of each element returned by the 
+#' function `fun`. This is only used when the function returns more than one value. 
+#' Note that you can use the shortcut "test" when the sub-types are "stat", "p" and "df"; 
+#' and "test2" when these are "stat", "p", "df1" and "df2".
 #'
 #' @details
-#' If there are several components to the computed statistics (i.e. the function returns several elements), then using the argument `subtypes`, giving the names of each of these components, is mandatory. This is to ensure that the statistic can be used as any other built-in statistic (and there are too many edge cases impeding automatic deduction).
+#' If there are several components to the computed statistics (i.e. the function returns 
+#' several elements), then using the argument `subtypes`, giving the names of each of 
+#' these components, is mandatory. This is to ensure that the statistic can be used as any 
+#' other built-in statistic (and there are too many edge cases impeding automatic deduction).
 #'
 #' @author Laurent Berge
 #'
@@ -270,139 +294,143 @@ print.fixest_fitstat = function(x, na.rm = FALSE, ...){
 #'
 fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
 
-    check_arg(type, "character scalar mbt")
-    check_arg(fun, "function mbt")
-    check_arg(alias, "NULL character vector no na")
-    check_arg(subtypes, "NULL character vector no na")
+  check_arg(type, "character scalar mbt")
+  check_arg(fun, "function mbt")
+  check_arg(alias, "NULL character vector no na")
+  check_arg(subtypes, "NULL character vector no na")
 
-    # We check the type is not conflicting
-    existing_types = fitstat(give_types = TRUE)$types
+  # We check the type is not conflicting
+  existing_types = fitstat(give_types = TRUE)$types
 
-    opts = getOption("fixest_fitstat_user")
+  opts = getOption("fixest_fitstat_user")
 
-    if(type %in% setdiff(existing_types, names(opts))){
-        stop("The type name '", type, "' is the same as one built-in type. Please choose another one.")
-    }
+  if(type %in% setdiff(existing_types, names(opts))){
+    stopi("The type name {bq?type} is the same as one built-in type. Please choose another one.")
+  }
 
-    # Alias:
-    # - type_name = alias_name          => only the type
-    # - subtype_name = alias_name       => only the subtype
-    # - type.subtype_name = alias_name  => full type name
+  # Alias:
+  # - type_name = alias_name          => only the type
+  # - subtype_name = alias_name       => only the subtype
+  # - type.subtype_name = alias_name  => full type name
 
-    # if alias is a character vector WITHOUT name, then only the type is named
+  # if alias is a character vector WITHOUT name, then only the type is named
 
-    if(identical(subtypes, "test")){
-        subtypes = c("stat", "p", "df")
-    } else if(identical(subtypes, "test2")){
-        subtypes = c("stat", "p", "df1", "df2")
-    }
+  if(identical(subtypes, "test")){
+    subtypes = c("stat", "p", "df")
+  } else if(identical(subtypes, "test2")){
+    subtypes = c("stat", "p", "df1", "df2")
+  }
 
-    IS_SUB = !is.null(subtypes)
+  IS_SUB = !is.null(subtypes)
 
-    if(missnull(alias)){
-        alias = type
-        names(alias) = type
+  if(missnull(alias)){
+    alias = type
+    names(alias) = type
 
-    } else {
-        # Handling all the cases is a bit of a pain
+  } else {
+    # Handling all the cases is a bit of a pain
 
-        if(is.null(names(alias))){
+    if(is.null(names(alias))){
 
-            if(length(alias) == 1){
-                tmp = alias
-                names(tmp) = type
-                alias = tmp
+      if(length(alias) == 1){
+        tmp = alias
+        names(tmp) = type
+        alias = tmp
 
-            } else if(length(alias) == (1 + length(subtypes))){
-                # Implicit naming
-                tmp = alias
-                names(tmp) = c(type, subtypes)
-                alias = tmp
+      } else if(length(alias) == (1 + length(subtypes))){
+        # Implicit naming
+        tmp = alias
+        names(tmp) = c(type, subtypes)
+        alias = tmp
 
-            } else {
-                # We have a problem here, we can't infer implicitly, too arbitrary
-                if(IS_SUB){
-                    check_value(alias, "character scalar", .message = "The alias should be a character scalar.")
-                } else {
-                    stop("To define the aliases, please use a named character vector, with the names being the codes, and the values the aliases. \n",
-                         "E.g.: alias = c(\"", type, "\" = \"alias_1\", \"", subtypes[1], "\" = \"alias_2\").")
-                }
-            }
-
+      } else {
+        # We have a problem here, we can't infer implicitly, too arbitrary
+        if(IS_SUB){
+          check_value(alias, "character scalar", 
+                      .message = "The alias should be a character scalar.")
         } else {
-            alias_names = names(alias)
-
-            is_0 = which(nchar(alias_names) == 0)
-            if(length(is_0) > 0){
-                # checking the problems
-                if(length(is_0) > 1){
-                    stop("In the argument 'alias': only the main type can be implicitly set and should come first (they are several implicitly defined atm). Please explicitly use names for each type/subtype you want.")
-
-                } else if(is_0 != 1){
-                    stop("In the argument 'alias': only the main type can be implicitly set and should come first (it is currenly not first). Please explicitly use names for each type/subtype you want.")
-
-                }
-
-                names(alias)[1] = type
-                alias_names = names(alias)
-            }
-
-            # We check that the names are correct
-            possible_types = type
-            if(IS_SUB){
-                possible_types = c(possible_types, subtypes, paste0(type, ".", subtypes))
-            }
-
-            check_value_plus(alias_names, "multi match", .choices = possible_types, .message = "In argument 'alias', the names should be equal to the type, the subtypes, or of the form 'type.subtype'.")
-            names(alias) = alias_names
+          stopi("To define the aliases, please use a named character vector, ",
+                "with the names being the codes, and the values the aliases. \n",
+                "E.g.: alias = c({Q?type} = \"alias_1\", {Q?subtypes[1]} = \"alias_2\").")
         }
-    }
-
-    # We create the full list of aliases
-    alias_subtypes = NULL
-    if(IS_SUB){
-
-        # subtype aliases => I add some default values if not provided
-
-        default_sub_aliases = setNames(subtypes, subtypes)
-        default_sub_aliases[c("stat", "p")] = c("stat.", "p-value")
-
-        # Note that the names are not kept when NA.. ||
-        alias_subtypes = alias[subtypes] #           ||
-        qui_NA = is.na(alias_subtypes)   #           ||
-        alias_subtypes = alias_subtypes[!qui_NA] #   | = > I need to clean them
-
-        alias_subtypes[subtypes[qui_NA]] = default_sub_aliases[subtypes[qui_NA]]
-
-        # Main aliases
-
-        if(type %in% names(alias)){
-            alias_main = alias[type]
-        } else  {
-            alias_main = setNames(type, type)
-        }
-
-        # The full types
-        full_types = paste0(type, ".", subtypes)
-        alias_full = alias[full_types]
-        qui_NA = is.na(alias_full)
-        alias_full = alias_full[!qui_NA]
-
-        alias_full[full_types[qui_NA]] = paste0(alias_main, ", ", alias_subtypes[subtypes[qui_NA]])
-
-        alias_main = c(alias_main, alias_full)
+      }
 
     } else {
-        alias_main = alias
+      alias_names = names(alias)
+
+      is_0 = which(nchar(alias_names) == 0)
+      if(length(is_0) > 0){
+        # checking the problems
+        if(length(is_0) > 1){
+          stop("In the argument 'alias': only the main type can be implicitly set and should come first (they are several implicitly defined atm). Please explicitly use names for each type/subtype you want.")
+
+        } else if(is_0 != 1){
+          stop("In the argument 'alias': only the main type can be implicitly set and should come first (it is currenly not first). Please explicitly use names for each type/subtype you want.")
+
+        }
+
+        names(alias)[1] = type
+        alias_names = names(alias)
+      }
+
+      # We check that the names are correct
+      possible_types = type
+      if(IS_SUB){
+        possible_types = c(possible_types, subtypes, paste0(type, ".", subtypes))
+      }
+
+      check_set_value(alias_names, "multi match", 
+                      .choices = possible_types, 
+                      .message = "In argument 'alias', the names should be equal to the type, the subtypes, or of the form 'type.subtype'.")
+      names(alias) = alias_names
+    }
+  }
+
+  # We create the full list of aliases
+  alias_subtypes = NULL
+  if(IS_SUB){
+
+    # subtype aliases => I add some default values if not provided
+
+    default_sub_aliases = setNames(subtypes, subtypes)
+    default_sub_aliases[c("stat", "p")] = c("stat.", "p-value")
+
+    # Note that the names are not kept when NA.. ||
+    alias_subtypes = alias[subtypes] #           ||
+    qui_NA = is.na(alias_subtypes)   #           ||
+    alias_subtypes = alias_subtypes[!qui_NA] #   | = > I need to clean them
+
+    alias_subtypes[subtypes[qui_NA]] = default_sub_aliases[subtypes[qui_NA]]
+
+    # Main aliases
+
+    if(type %in% names(alias)){
+      alias_main = alias[type]
+    } else  {
+      alias_main = setNames(type, type)
     }
 
-    res = list(fun = fun, alias = alias_main, alias_subtypes = alias_subtypes)
+    # The full types
+    full_types = paste0(type, ".", subtypes)
+    alias_full = alias[full_types]
+    qui_NA = is.na(alias_full)
+    alias_full = alias_full[!qui_NA]
 
-    opts[[type]] = res
+    alias_full[full_types[qui_NA]] = paste0(alias_main, ", ", alias_subtypes[subtypes[qui_NA]])
 
-    options(fixest_fitstat_user = opts)
+    alias_main = c(alias_main, alias_full)
 
-    invisible(NULL)
+  } else {
+    alias_main = alias
+  }
+
+  res = list(fun = fun, alias = alias_main, alias_subtypes = alias_subtypes)
+
+  opts[[type]] = res
+
+  options(fixest_fitstat_user = opts)
+
+  invisible(NULL)
 }
 
 #' Computes fit statistics of fixest objects
@@ -410,12 +438,23 @@ fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
 #' Computes various fit statistics for `fixest` estimations.
 #'
 #' @param x A `fixest` estimation.
-#' @param type Character vector or one sided formula. The type of fit statistic to be computed. The classic ones are: n, rmse, r2, pr2, f, wald, ivf, ivwald. You have the full list in the details section or use `show_types = TRUE`. Further, you can register your own types with [`fitstat_register`].
-#' @param simplify Logical, default is `FALSE`. By default a list is returned whose names are the selected types. If `simplify = TRUE` and only one type is selected, then the element is directly returned (ie will not be nested in a list).
-#' @param verbose Logical, default is `TRUE`. If `TRUE`, an object of class `fixest_fitstat` is returned (so its associated print method will be triggered). If `FALSE` a simple list is returned instead.
+#' @param type Character vector or one sided formula. The type of fit statistic to be computed. 
+#' The classic ones are: n, rmse, r2, pr2, f, wald, ivf, ivwald. You have the full list in 
+#' the details section or use `show_types = TRUE`. Further, you can register your own types 
+#' with [`fitstat_register`].
+#' @param simplify Logical, default is `FALSE`. By default a list is returned whose names are 
+#' the selected types. If `simplify = TRUE` and only one type is selected, then the element 
+#' is directly returned (ie will not be nested in a list).
+#' @param verbose Logical, default is `TRUE`. If `TRUE`, an object of class `fixest_fitstat` 
+#' is returned (so its associated print method will be triggered). If `FALSE` a simple list 
+#' is returned instead.
 #' @param show_types Logical, default is `FALSE`. If `TRUE`, only prompts all available types.
-#' @param frame An environment in which to evaluate variables, default is `parent.frame()`. Only used if the argument `type` is a formula and some values in the formula have to be extended with the dot square bracket operator. Mostly for internal use.
-#' @param ... Other elements to be passed to other methods and may be used to compute the statistics (for example you can pass on arguments to compute the VCOV when using `type = "g"` or `type = "wald"`.).
+#' @param frame An environment in which to evaluate variables, default is `parent.frame()`. 
+#' Only used if the argument `type` is a formula and some values in the formula have to be 
+#' extended with the dot square bracket operator. Mostly for internal use.
+#' @param ... Other elements to be passed to other methods and may be used to compute 
+#' the statistics (for example you can pass on arguments to compute the VCOV when using 
+#' `type = "g"` or `type = "wald"`.).
 #'
 #' @section Registering your own types:
 #'
@@ -426,27 +465,70 @@ fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
 #' The types are case sensitive, please use lower case only. The types available are:
 #'
 #' \describe{
-#' \item{`n`, `ll`, `aic`, `bic`, `rmse`: }{The number of observations, the log-likelihood, the AIC, the BIC and the root mean squared error, respectively.}
+#' \item{`n`, `ll`, `aic`, `bic`, `rmse`: }{The number of observations, the log-likelihood, 
+#' the AIC, the BIC and the root mean squared error, respectively.}
 #' \item{`my`: }{Mean of the dependent variable.}
-#' \item{`g`: }{The degrees of freedom used to compute the t-test (it influences the p-values of the coefficients). When the VCOV is clustered, this value is equal to the minimum cluster size, otherwise, it is equal to the sample size minus the number of variables.}
-#' \item{`r2`, `ar2`, `wr2`, `awr2`, `pr2`, `apr2`, `wpr2`, `awpr2`: }{All r2 that can be obtained with the function [`r2`]. The `a` stands for 'adjusted', the `w` for 'within' and the `p` for 'pseudo'. Note that the order of the letters `a`, `w` and `p` does not matter. The pseudo R2s are McFadden's R2s (ratios of log-likelihoods).}
-#' \item{`theta`: }{The over-dispersion parameter in Negative Binomial models. Low values mean high overdispersion.}
-#' \item{`f`, `wf`: }{The F-tests of nullity of the coefficients. The `w` stands for 'within'. These types return the following values: `stat`, `p`, `df1` and `df2`. If you want to display only one of these, use their name after a dot: e.g. `f.stat` will give the statistic of the F-test, or `wf.p` will give the p-values of the F-test on the projected model (i.e. projected onto the fixed-effects).}
-#' \item{`wald`: }{Wald test of joint nullity of the coefficients. This test always excludes the intercept and the fixed-effects. These type returns the following values: `stat`, `p`, `df1`, `df2` and `vcov`. The element `vcov` reports the way the VCOV matrix was computed since it directly influences this statistic.}
-#' \item{`ivf`, `ivf1`, `ivf2`, `ivfall`: }{These statistics are specific to IV estimations. They report either the IV F-test (namely the Cragg-Donald F statistic in the presence of only one endogenous regressor) of the first stage (`ivf` or `ivf1`), of the second stage (`ivf2`) or of both (`ivfall`). The F-test of the first stage is commonly named weak instrument test. The value of `ivfall` is only useful in [`etable`] when both the 1st and 2nd stages are displayed (it leads to the 1st stage F-test(s) to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- otherwise, `ivf1` would also be displayed on the 2nd stage estimation). These types return the following values: `stat`, `p`, `df1` and `df2`.}
-#' \item{`ivwald`, `ivwald1`, `ivwald2`, `ivwaldall`: }{These statistics are specific to IV estimations. They report either the IV Wald-test of the first stage (`ivwald` or `ivwald1`), of the second stage (`ivwald2`) or of both (`ivwaldall`). The Wald-test of the first stage is commonly named weak instrument test. Note that if the estimation was done with a robust VCOV and there is only one endogenous regressor, this is equivalent to the Kleibergen-Paap statistic. The value of `ivwaldall` is only useful in [`etable`] when both the 1st and 2nd stages are displayed (it leads to the 1st stage Wald-test(s) to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- otherwise, `ivwald1` would also be displayed on the 2nd stage estimation). These types return the following values: `stat`, `p`, `df1`, `df2`, and `vcov`.}
+#' \item{`g`: }{The degrees of freedom used to compute the t-test (it influences the p-values 
+#' of the coefficients). When the VCOV is clustered, this value is equal to the minimum 
+#' cluster size, otherwise, it is equal to the sample size minus the number of variables.}
+#' \item{`r2`, `ar2`, `wr2`, `awr2`, `pr2`, `apr2`, `wpr2`, `awpr2`: }{All r2 that can be 
+#' obtained with the function [`r2`]. The `a` stands for 'adjusted', the `w` for 'within' and 
+#' the `p` for 'pseudo'. Note that the order of the letters `a`, `w` and `p` does not matter. 
+#' The pseudo R2s are McFadden's R2s (ratios of log-likelihoods).}
+#' \item{`theta`: }{The over-dispersion parameter in Negative Binomial models. Low values mean 
+#' high overdispersion.}
+#' \item{`f`, `wf`: }{The F-tests of nullity of the coefficients. The `w` stands for 
+#' 'within'. These types return the following values: `stat`, `p`, `df1` and `df2`. 
+#' If you want to display only one of these, use their name after a dot: e.g. `f.stat` 
+#' will give the statistic of the F-test, or `wf.p` will give the p-values of the F-test 
+#' on the projected model (i.e. projected onto the fixed-effects).}
+#' \item{`wald`: }{Wald test of joint nullity of the coefficients. This test always excludes 
+#' the intercept and the fixed-effects. These type returns the following values: 
+#' `stat`, `p`, `df1`, `df2` and `vcov`. The element `vcov` reports the way the VCOV 
+#' matrix was computed since it directly influences this statistic.}
+#' \item{`ivf`, `ivf1`, `ivf2`, `ivfall`: }{These statistics are specific to IV estimations. 
+#' They report either the IV F-test (namely the Cragg-Donald F statistic in the presence 
+#' of only one endogenous regressor) of the first stage (`ivf` or `ivf1`), of the 
+#' second stage (`ivf2`) or of both (`ivfall`). The F-test of the first stage is 
+#' commonly named weak instrument test. The value of `ivfall` is only useful in [`etable`] 
+#' when both the 1st and 2nd stages are displayed (it leads to the 1st stage F-test(s) 
+#' to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 
+#' 2nd stage estimation -- otherwise, `ivf1` would also be displayed on the 2nd stage 
+#' estimation). These types return the following values: `stat`, `p`, `df1` and `df2`.}
+#' \item{`ivwald`, `ivwald1`, `ivwald2`, `ivwaldall`: }{These statistics are specific to IV 
+#' estimations. They report either the IV Wald-test of the first stage (`ivwald` or `ivwald1`), 
+#' of the second stage (`ivwald2`) or of both (`ivwaldall`). The Wald-test of the first stage 
+#' is commonly named weak instrument test. Note that if the estimation was done with a robust 
+#' VCOV and there is only one endogenous regressor, this is equivalent to the 
+#' Kleibergen-Paap statistic. The value of `ivwaldall` is only useful in [`etable`] when both 
+#' the 1st and 2nd stages are displayed (it leads to the 1st stage Wald-test(s) to be displayed 
+#' on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- 
+#' otherwise, `ivwald1` would also be displayed on the 2nd stage estimation). These types 
+#' return the following values: `stat`, `p`, `df1`, `df2`, and `vcov`.}
 #' \item{`cd`: }{The Cragg-Donald test for weak instruments.}
 #' \item{`kpr`: }{The Kleibergen-Paap test for weak instruments.}
-#' \item{`wh`: }{This statistic is specific to IV estimations. Wu-Hausman endogeneity test. H0 is the absence of endogeneity of the instrumented variables. It returns the following values: `stat`, `p`, `df1`, `df2`.}
-#' \item{`sargan`: }{Sargan test of overidentifying restrictions. H0: the instruments are not correlated with the second stage residuals. It returns the following values: `stat`, `p`, `df`.}
-#' \item{`lr`, `wlr`: }{Likelihood ratio and within likelihood ratio tests. It returns the following elements: `stat`, `p`, `df`. Concerning the within-LR test, note that, contrary to estimations with `femlm` or `feNmlm`, estimations with `feglm`/`fepois` need to estimate the model with fixed-effects only which may prove time-consuming (depending on your model). Bottom line, if you really need the within-LR and estimate a Poisson model, use `femlm` instead of `fepois` (the former uses direct ML maximization for which the only FEs model is a by product).}
+#' \item{`wh`: }{This statistic is specific to IV estimations. Wu-Hausman endogeneity test. 
+#' H0 is the absence of endogeneity of the instrumented variables. It returns the following 
+#' values: `stat`, `p`, `df1`, `df2`.}
+#' \item{`sargan`: }{Sargan test of overidentifying restrictions. H0: the instruments are 
+#' not correlated with the second stage residuals. It returns the 
+#' following values: `stat`, `p`, `df`.}
+#' \item{`lr`, `wlr`: }{Likelihood ratio and within likelihood ratio tests. It returns 
+#' the following elements: `stat`, `p`, `df`. Concerning the within-LR test, note that, 
+#' contrary to estimations with `femlm` or `feNmlm`, estimations with `feglm`/`fepois` 
+#' need to estimate the model with fixed-effects only which may prove time-consuming 
+#' (depending on your model). Bottom line, if you really need the within-LR and estimate a 
+#' Poisson model, use `femlm` instead of `fepois` (the former uses direct ML maximization for 
+#' which the only FEs model is a by product).}
 #' }
 #'
 #'
 #'
 #'
 #' @return
-#' By default an object of class `fixest_fitstat` is returned. Using `verbose = FALSE` returns a simple a list. Finally, if only one type is selected, `simplify = TRUE` leads to the selected type to be returned.
+#' By default an object of class `fixest_fitstat` is returned. Using `verbose = FALSE` 
+#' returns a simple a list. Finally, if only one type is selected, `simplify = TRUE` 
+#' leads to the selected type to be returned.
 #'
 #' @examples
 #'
@@ -484,503 +566,529 @@ fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
 #'
 #'
 fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE,
-                   frame = parent.frame(), ...){
+           frame = parent.frame(), ...){
 
-    r2_types = c("sq.cor", "cor2", "r2", "ar2", "pr2", "apr2", "par2", "wr2",
-                 "war2", "awr2", "wpr2", "pwr2", "wapr2", "wpar2", "awpr2",
-                 "apwr2", "pawr2", "pwar2")
+  r2_types = c("sq.cor", "cor2", "r2", "ar2", "pr2", "apr2", "par2", "wr2",
+               "war2", "awr2", "wpr2", "pwr2", "wapr2", "wpar2", "awpr2",
+               "apwr2", "pawr2", "pwar2")
 
-    opts = getOption("fixest_fitstat_user")
-    user_types = names(opts)
+  opts = getOption("fixest_fitstat_user")
+  user_types = names(opts)
 
-    dots = list(...)
+  dots = list(...)
 
-    if(isTRUE(dots$give_types) || isTRUE(show_types)){
+  if(isTRUE(dots$give_types) || isTRUE(show_types)){
 
-        # Compound types => types yielding several values
+    # Compound types => types yielding several values
 
-        # F-test etc
-        comp_types = c("f", "wf", "ivf", "ivf1", "ivf2", "ivfall", "wald", "ivwald",
-                       "ivwald1", "ivwald2", "ivwaldall", "wh", "sargan", "lr",
-                       "wlr", "kpr", "cd")
+    # F-test etc
+    comp_types = c("f", "wf", "ivf", "ivf1", "ivf2", "ivfall", "wald", "ivwald",
+                   "ivwald1", "ivwald2", "ivwaldall", "wh", "sargan", "lr",
+                   "wlr", "kpr", "cd")
 
-        full_comp_types = paste(comp_types, rep(c("stat", "p"), each = length(comp_types)), sep = ".")
+    full_comp_types = paste(comp_types, rep(c("stat", "p"), each = length(comp_types)), sep = ".")
 
-        comp_alias = c(f = "F-test", wf = "F-test (projected)", ivfall = "F-test (IV only)", ivf1 = "F-test (1st stage)", ivf2 = "F-test (2nd stage)", wald = "Wald (joint nullity)", ivwaldall = "Wald (IV only)", ivwald1 = "Wald (1st stage)", ivwald2 = "Wald (2nd stage)", wh = "Wu-Hausman", sargan = "Sargan", lr = "LR", wlr = "LR (within)", df1 = "DoF (first)", df2 = "DoF (second)", df = "DoF", kpr = "Kleibergen-Paap", cd = "Cragg-Donald")
-        my_names = paste(names(comp_alias), rep(c("stat", "p"), each = length(comp_alias)), sep = ".")
-        full_comp_alias = setNames(paste0(comp_alias, ", ", rep(c("stat.", "p-value"), each = length(comp_alias))), my_names)
+    comp_alias = c(f = "F-test", wf = "F-test (projected)", ivfall = "F-test (IV only)", 
+                   ivf1 = "F-test (1st stage)", ivf2 = "F-test (2nd stage)", 
+                   wald = "Wald (joint nullity)", ivwaldall = "Wald (IV only)", 
+                   ivwald1 = "Wald (1st stage)", ivwald2 = "Wald (2nd stage)", 
+                   wh = "Wu-Hausman", sargan = "Sargan", lr = "LR", wlr = "LR (within)", 
+                   df1 = "DoF (first)", df2 = "DoF (second)", df = "DoF", 
+                   kpr = "Kleibergen-Paap", cd = "Cragg-Donald")
+    
+    my_names = paste(names(comp_alias), rep(c("stat", "p"), each = length(comp_alias)), sep = ".")
+    full_comp_alias = setNames(paste0(comp_alias, ", ", 
+                                      rep(c("stat.", "p-value"), 
+                                          each = length(comp_alias))), my_names)
 
 
-        # Having some trouble with aggregation post lapply due to names....
-        # I have a vectorized solution but it's really ugly => loop is clearer
-        user_alias = c()
-        for(i in seq_along(opts)){
-            user_alias = c(user_alias, opts[[i]]$alias)
-        }
-
-        user_types = names(user_alias)
-
-        # "Regular" types
-        valid_types = c("n", "ll", "aic", "bic", "rmse", "g", "my", "theta", r2_types, comp_types, full_comp_types, user_types)
-
-        tex_alias = c(n = "Observations", ll = "Log-Likelihood", aic = "AIC", bic = "BIC", my = "Dependent variable mean", g = "Size of the 'effective' sample", rmse = "RMSE", theta = "Over-dispersion", sq.cor = "Squared Correlation", cor2 = "Squared Correlation", r2="R$^2$", ar2="Adjusted R$^2$", pr2="Pseudo R$^2$", apr2="Adjusted Pseudo R$^2$", wr2="Within R$^2$", war2="Within Adjusted R$^2$", wpr2="Within Pseudo R$^2$", wapr2="Whithin Adjusted Pseudo R$^2$", comp_alias, full_comp_alias, user_alias)
-
-        R_alias = c(n = "Observations", ll = "Log-Likelihood", aic = "AIC", bic = "BIC", my = "Dep. Var. mean", g = "G", rmse = "RMSE", theta = "Over-dispersion", sq.cor = "Squared Cor.", cor2 = "Squared Cor.", r2="R2", ar2="Adj. R2", pr2="Pseudo R2", apr2="Adj. Pseudo R2", wr2="Within R2", war2="Within Adj. R2", wpr2="Within Pseudo R2", wapr2="Whithin Adj. Pseudo R2", comp_alias, full_comp_alias, user_alias)
-
-        # add r2 type alias
-        type_alias = c(ivf = "ivf1", ivf.stat = "ivf1.stat", ivf.p = "ivf1.p", ivwald = "ivwald1", ivwald.stat = "ivwald1", ivwald.p = "ivwald1.p", par2 = "apr2", awr2 = "war2", pwr2 = "wpr2", wpar2 = "wapr2", pwar2 = "wapr2", pawr2 = "wapr2", apwr2 = "wapr2", awpr2 = "wapr2", sq.cor = "cor2")
-
-        if(show_types){
-            cat("Available types:\n", paste(valid_types, collapse = ", "), "\n")
-            return(invisible(NULL))
-        }
-
-        res = list(types = valid_types, tex_alias = tex_alias, R_alias = R_alias, type_alias = type_alias, user_types = user_types)
-        return(res)
+    # Having some trouble with aggregation post lapply due to names....
+    # I have a vectorized solution but it's really ugly => loop is clearer
+    user_alias = c()
+    for(i in seq_along(opts)){
+      user_alias = c(user_alias, opts[[i]]$alias)
     }
 
-    check_arg(x, "class(fixest) mbt")
-    check_set_arg(type, "character vector no na | os formula")
-    check_arg(simplify, verbose, "logical scalar")
+    user_types = names(user_alias)
 
-    if("formula" %in% class(type)){
-        type = .xpd(type, frame = frame)
+    # "Regular" types
+    valid_types = c("n", "ll", "aic", "bic", "rmse", "g", "my", "theta", r2_types, 
+                    comp_types, full_comp_types, user_types)
 
-        type = gsub(" ", "", strsplit(deparse_long(type[[2]]), "+", fixed = TRUE)[[1]])
+    tex_alias = c(n = "Observations", ll = "Log-Likelihood", aic = "AIC", bic = "BIC", 
+                  my = "Dependent variable mean", g = "Size of the 'effective' sample", 
+                  rmse = "RMSE", theta = "Over-dispersion", sq.cor = "Squared Correlation", 
+                  cor2 = "Squared Correlation", r2 = "R$^2$", ar2 = "Adjusted R$^2$", 
+                  pr2 = "Pseudo R$^2$", apr2 = "Adjusted Pseudo R$^2$", 
+                  wr2 = "Within R$^2$", war2 = "Within Adjusted R$^2$", 
+                  wpr2 = "Within Pseudo R$^2$", wapr2 = "Whithin Adjusted Pseudo R$^2$", 
+                  comp_alias, full_comp_alias, user_alias)
+
+    R_alias = c(n = "Observations", ll = "Log-Likelihood", aic = "AIC", bic = "BIC", 
+                my = "Dep. Var. mean", g = "G", rmse = "RMSE", theta = "Over-dispersion", 
+                sq.cor = "Squared Cor.", cor2 = "Squared Cor.", r2 = "R2", ar2 = "Adj. R2", 
+                pr2 = "Pseudo R2", apr2 = "Adj. Pseudo R2", wr2 = "Within R2", 
+                war2 = "Within Adj. R2", wpr2 = "Within Pseudo R2", 
+                wapr2 = "Whithin Adj. Pseudo R2", comp_alias, full_comp_alias, user_alias)
+
+    # add r2 type alias
+    type_alias = c(ivf = "ivf1", ivf.stat = "ivf1.stat", ivf.p = "ivf1.p", ivwald = "ivwald1", 
+                   ivwald.stat = "ivwald1", ivwald.p = "ivwald1.p", par2 = "apr2", 
+                   awr2 = "war2", pwr2 = "wpr2", wpar2 = "wapr2", pwar2 = "wapr2", 
+                   pawr2 = "wapr2", apwr2 = "wapr2", awpr2 = "wapr2", sq.cor = "cor2")
+
+    if(show_types){
+      cat("Available types:\n", paste(valid_types, collapse = ", "), "\n")
+      return(invisible(NULL))
     }
-    type = tolower(type)
 
-    # To update
-    if(!isTRUE(x$summary) || any(c("se", "cluster", "ssc") %in% names(dots))){
-        x = summary(x, ...)
+    res = list(types = valid_types, tex_alias = tex_alias, R_alias = R_alias, 
+               type_alias = type_alias, user_types = user_types)
+    return(res)
+  }
+
+  check_arg(x, "class(fixest) mbt")
+  check_set_arg(type, "character vector no na | os formula")
+  check_arg(simplify, verbose, "logical scalar")
+
+  if("formula" %in% class(type)){
+    type = .xpd(type, frame = frame)
+
+    type = gsub(" ", "", strsplit(deparse_long(type[[2]]), "+", fixed = TRUE)[[1]])
+  }
+  type = tolower(type)
+
+  # To update
+  if(!isTRUE(x$summary) || any(c("se", "cluster", "ssc") %in% names(dots))){
+    x = summary(x, ...)
+  }
+
+  IS_ETABLE = isTRUE(dots$etable)
+  set_value = function(vec, value){
+    if(length(vec) == 1) return(vec)
+
+    if(value != ""){
+
+      if(!value %in% names(vec)){
+        stop_up("'", value, "' is not a valid component of the statistic '", root, "'. Only the following are valid: ", enumerate_items(names(vec), "quote"), ".")
+      }
+
+      return(vec[[value]])
+    } else if(IS_ETABLE){
+      return(vec[1])
+    } else {
+      return(vec)
     }
+  }
 
-    IS_ETABLE = isTRUE(dots$etable)
-    set_value = function(vec, value){
-        if(length(vec) == 1) return(vec)
+  res_all = list()
+  type_all = type
 
-        if(value != ""){
+  for(i in seq_along(type_all)){
+    type = type_all[i]
 
-            if(!value %in% names(vec)){
-                stop_up("'", value, "' is not a valid component of the statistic '", root, "'. Only the following are valid: ", enumerate_items(names(vec), "quote"), ".")
-            }
+    # Big if
+    if(type == "n"){
+      res_all[[type]] = x$nobs
 
-            return(vec[[value]])
-        } else if(IS_ETABLE){
-            return(vec[1])
+    } else if(type == "ll"){
+      res_all[[type]] = logLik(x)
+
+    } else if(type == "aic"){
+      res_all[[type]] = AIC(x)
+
+    } else if(type == "bic"){
+      res_all[[type]] = BIC(x)
+
+    } else if(type == "rmse"){
+      res_all[[type]] = if(!is.null(x$ssr)) sqrt(x$ssr / x$nobs) else sqrt(cpp_ssq(resid(x)) / x$nobs)
+
+    } else if(type == "g"){
+      my_vcov = x$cov.scaled
+
+      G = attr(my_vcov, "G")
+      if(is.null(G)) G = x$nobs - x$nparams
+
+      res_all[[type]] = G
+
+    } else if(type == "my"){
+      res_all[[type]] = mean(model.matrix(x, type = "lhs"))
+
+    } else if(type == "theta"){
+      isNegbin = x$method == "fenegbin" || (x$method_type == "feNmlm" && x$family == "negbin")
+      if(isNegbin){
+        theta = x$coefficients[".theta"]
+        names(theta) = "Overdispersion"
+      } else {
+        theta = NA
+      }
+
+      res_all[[type]] = theta
+
+    } else if(type %in% r2_types){
+      res_all[[type]] = r2(x, type)
+
+    } else {
+
+      #
+      # Types for which root.value is allowed
+      #
+
+      if(grepl(".", type, fixed = TRUE)){
+        root = gsub("\\..+", "", type)
+        value = gsub(".+\\.", "", type)
+      } else {
+        root = type
+        value = ""
+      }
+
+      # We need to normalize the types
+      from_to = c("ivwald" = "ivwald1", "ivf" = "ivf1")
+      if(root %in% names(from_to)){
+        type = gsub(root, from_to[root], type, fixed = TRUE)
+        root = from_to[root]
+      }
+
+      if(root == "f"){
+        if(!is.null(x$ssr)){
+          df1 = degrees_freedom(x, "k") - 1
+          df2 = degrees_freedom(x, "t")
+
+          if(isTRUE(x$iv) && x$iv_stage == 2){
+            # We need to compute the SSR
+            w = 1
+            if(!is.null(x$weights)) w = x$weights
+            ssr = cpp_ssq(x$iv_residuals, w)
+          } else {
+            ssr = x$ssr
+          }
+
+          stat = ((x$ssr_null - ssr) / df1) / (ssr / df2)
+          p = pf(stat, df1, df2, lower.tail = FALSE)
+          vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
+          res_all[[type]] = set_value(vec, value)
+
         } else {
-            return(vec)
+          res_all[[type]] = NA
         }
-    }
+      } else if(root == "wf"){
+        df1 = length(x$coefficients)
 
-    res_all = list()
-    type_all = type
-
-    for(i in seq_along(type_all)){
-        type = type_all[i]
-
-        # Big if
-        if(type == "n"){
-            res_all[[type]] = x$nobs
-
-        } else if(type == "ll"){
-            res_all[[type]] = logLik(x)
-
-        } else if(type == "aic"){
-            res_all[[type]] = AIC(x)
-
-        } else if(type == "bic"){
-            res_all[[type]] = BIC(x)
-
-        } else if(type == "rmse"){
-            res_all[[type]] = if(!is.null(x$ssr)) sqrt(x$ssr / x$nobs) else sqrt(cpp_ssq(resid(x)) / x$nobs)
-
-        } else if(type == "g"){
-            my_vcov = x$cov.scaled
-
-            G = attr(my_vcov, "G")
-            if(is.null(G)) G = x$nobs - x$nparams
-
-            res_all[[type]] = G
-
-        } else if(type == "my"){
-            res_all[[type]] = mean(model.matrix(x, type = "lhs"))
-
-        } else if(type == "theta"){
-            isNegbin = x$method == "fenegbin" || (x$method_type == "feNmlm" && x$family == "negbin")
-            if(isNegbin){
-                theta = x$coefficients[".theta"]
-                names(theta) = "Overdispersion"
-            } else {
-                theta = NA
-            }
-
-            res_all[[type]] = theta
-
-        } else if(type %in% r2_types){
-            res_all[[type]] = r2(x, type)
+        if(!is.null(x$ssr_fe_only) && df1 > 0){
+          df2 = x$nobs - x$nparams
+          stat = ((x$ssr_fe_only - x$ssr) / df1) / (x$ssr / df2)
+          p = pf(stat, df1, df2, lower.tail = FALSE)
+          vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
+          res_all[[type]] = set_value(vec, value)
 
         } else {
-
-            #
-            # Types for which root.value is allowed
-            #
-
-            if(grepl(".", type, fixed = TRUE)){
-                root = gsub("\\..+", "", type)
-                value = gsub(".+\\.", "", type)
-            } else {
-                root = type
-                value = ""
-            }
-
-            # We need to normalize the types
-            from_to = c("ivwald" = "ivwald1", "ivf" = "ivf1")
-            if(root %in% names(from_to)){
-                type = gsub(root, from_to[root], type, fixed = TRUE)
-                root = from_to[root]
-            }
-
-            if(root == "f"){
-                if(!is.null(x$ssr)){
-                    df1 = degrees_freedom(x, "k") - 1
-                    df2 = degrees_freedom(x, "t")
-
-                    if(isTRUE(x$iv) && x$iv_stage == 2){
-                        # We need to compute the SSR
-                        w = 1
-                        if(!is.null(x$weights)) w = x$weights
-                        ssr = cpp_ssq(x$iv_residuals, w)
-                    } else {
-                        ssr = x$ssr
-                    }
-
-                    stat = ((x$ssr_null - ssr) / df1) / (ssr / df2)
-                    p = pf(stat, df1, df2, lower.tail = FALSE)
-                    vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
-                    res_all[[type]] = set_value(vec, value)
-
-                } else {
-                    res_all[[type]] = NA
-                }
-            } else if(root == "wf"){
-                df1 = length(x$coefficients)
-
-                if(!is.null(x$ssr_fe_only) && df1 > 0){
-                    df2 = x$nobs - x$nparams
-                    stat = ((x$ssr_fe_only - x$ssr) / df1) / (x$ssr / df2)
-                    p = pf(stat, df1, df2, lower.tail = FALSE)
-                    vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
-                    res_all[[type]] = set_value(vec, value)
-
-                } else {
-                    res_all[[type]] = NA
-                }
-
-
-            } else if(root == "ivfall"){
-                if(isTRUE(x$iv)){
-                    if(x$iv_stage == 1){
-                        df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd)
-                        df2 = degrees_freedom(x, "resid")
-
-                        stat = ((x$ssr_no_inst - x$ssr) / df1) / (x$ssr / df2)
-                        p = pf(stat, df1, df2, lower.tail = FALSE)
-                        vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
-                        res_all[[type]] = set_value(vec, value)
-
-                    } else {
-                        # f stat for the second stage
-
-                        df1 = degrees_freedom(x, vars = x$iv_endo_names_fit)
-                        df2 = degrees_freedom(x, "resid")
-
-                        w = 1
-                        if(!is.null(x$weights)) w = x$weights
-                        ssr = cpp_ssq(x$iv_residuals, w)
-
-                        stat = ((x$ssr_no_endo - ssr) / df1) / (ssr / df2)
-                        p = pf(stat, df1, df2, lower.tail = FALSE)
-                        vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
-                        res_all[[type]] = set_value(vec, value)
-                    }
-
-                } else {
-                    res_all[[type]] = NA
-                }
-
-            } else if(root == "ivf1"){
-
-                if(isTRUE(x$iv)){
-                    df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd, stage = 1)
-                    df2 = degrees_freedom(x, "resid", stage = 1)
-
-                    if(x$iv_stage == 1){
-
-                        stat = ((x$ssr_no_inst - x$ssr) / df1) / (x$ssr / df2)
-                        p = pf(stat, df1, df2, lower.tail = FALSE)
-                        vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
-                        res_all[[type]] = set_value(vec, value)
-
-                    } else {
-                        x_first = x$iv_first_stage
-
-                        for(endo in names(x_first)){
-                            stat = ((x_first[[endo]]$ssr_no_inst - x_first[[endo]]$ssr) / df1) / (x_first[[endo]]$ssr / df2)
-                            p = pf(stat, df1, df2, lower.tail = FALSE)
-                            vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
-                            res_all[[paste0(type, "::", endo)]] = set_value(vec, value)
-                        }
-                    }
-
-                } else {
-                    res_all[[type]] = NA
-                }
-
-            } else if(root == "ivf2"){
-                if(isTRUE(x$iv) && x$iv_stage == 2){
-                    # f stat for the second stage
-
-                    df1 = degrees_freedom(x, vars = x$iv_endo_names_fit)
-                    df2 = degrees_freedom(x, "resid")
-
-                    w = 1
-                    if(!is.null(x$weights)) w = x$weights
-                    ssr = cpp_ssq(x$iv_residuals, w)
-
-                    stat = ((x$ssr_no_endo - ssr) / df1) / (ssr / df2)
-                    p = pf(stat, df1, df2, lower.tail = FALSE)
-                    vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
-                    res_all[[type]] = set_value(vec, value)
-
-                } else {
-                    res_all[[type]] = NA
-                }
-
-            } else if(root == "kpr"){
-                if(isTRUE(x$iv) && x$iv_stage == 2){
-                    # The KP rank test is computed in a specific function
-
-                    vec = kp_stat(x)
-                    res_all[[type]] = set_value(vec, value)
-
-                } else {
-                    res_all[[type]] = NA
-                }
-
-            } else if(root == "cd"){
-                if(isTRUE(x$iv) && x$iv_stage == 2){
-                    # The KP rank test is computed in a specific function
-
-                    vec = cd_stat(x)
-                    res_all[[type]] = set_value(vec, value)
-
-                } else {
-                    res_all[[type]] = NA
-                }
-
-            } else if(root == "wald"){
-                # Joint nullity of the coefficients
-                # if FE => on the projected model only
-
-                qui = !names(x$coefficients) %in% "(Intercept)"
-                my_coef = x$coefficients[qui]
-                df1 = length(my_coef)
-
-                if(df1 > 0){
-                    df2 = degrees_freedom(x, "resid")
-
-                    # The VCOV is always full rank in here
-                    stat = .wald(x, names(my_coef))
-                    p = pf(stat, df1, df2, lower.tail = FALSE)
-                    vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
-                    res_all[[type]] = set_value(vec, value)
-
-                } else {
-                    # Only fixef
-                    res_all[[type]] = NA
-                }
-
-            } else if(root == "ivwaldall"){
-
-                if(isTRUE(x$iv)){
-                    if(x$iv_stage == 1){
-
-                        df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd)
-                        df2 = degrees_freedom(x, "resid")
-
-                        stat = .wald(x, x$iv_inst_names_xpd)
-
-                        p = pf(stat, df1, df2, lower.tail = FALSE)
-                        vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
-                        res_all[[type]] = set_value(vec, value)
-
-                    } else {
-                        # wald stat for the second stage
-
-                        df1 = degrees_freedom(x, vars = x$iv_endo_names_fit)
-                        df2 = degrees_freedom(x, "resid")
-
-                        stat = .wald(x, x$iv_endo_names_fit)
-
-                        p = pf(stat, df1, df2, lower.tail = FALSE)
-                        vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
-                        res_all[[type]] = set_value(vec, value)
-                    }
-
-                } else {
-                    res_all[[type]] = NA
-                }
-
-            } else if(root %in% "ivwald1"){
-
-                if(isTRUE(x$iv)){
-                    df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd, stage = 1)
-                    df2 = degrees_freedom(x, "resid", stage = 1)
-
-
-                    if(x$iv_stage == 1){
-
-                        stat = .wald(x, x$iv_inst_names_xpd)
-
-                        p = pf(stat, df1, df2, lower.tail = FALSE)
-                        vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
-                        res_all[[type]] = set_value(vec, value)
-
-                    } else {
-                        x_first = x$iv_first_stage
-                        inst = x$iv_inst_names_xpd
-
-                        for(endo in names(x_first)){
-
-                            my_x_first = x_first[[endo]]
-
-                            if(is.null(my_x_first$cov.scaled)){
-                                # We compute the VCOV like for the second stage
-                                flags = x$summary_flags
-                                if(is.null(flags) || !is.null(dots$se) || !is.null(dots$cluster)){
-                                    my_x_first = summary(my_x_first, ...)
-                                } else {
-                                    my_x_first = summary(my_x_first, vcov = flags$vcov, ssc = flags$ssc, ...)
-                                }
-                            }
-
-                            stat = .wald(my_x_first, inst)
-
-                            p = pf(stat, df1, df2, lower.tail = FALSE)
-                            vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
-                            res_all[[paste0(type, "::", endo)]] = set_value(vec, value)
-                        }
-                    }
-
-                } else {
-                    res_all[[type]] = NA
-                }
-
-            } else if(root == "ivwald2"){
-                if(isTRUE(x$iv) && x$iv_stage == 2){
-                    # wald stat for the second stage
-
-                    df1 = degrees_freedom(x, vars = x$iv_endo_names_fit)
-                    df2 = degrees_freedom(x, "resid")
-
-                    stat = .wald(x, x$iv_endo_names_fit)
-
-                    p = pf(stat, df1, df2, lower.tail = FALSE)
-                    vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
-                    res_all[[type]] = set_value(vec, value)
-
-                } else {
-                    res_all[[type]] = NA
-                }
-
-            } else if(root == "wh"){
-                if(isTRUE(x$iv) && x$iv_stage == 2){
-                    # Wu Hausman stat for the second stage
-                    vec = x$iv_wh
-                    res_all[[type]] = set_value(vec, value)
-
-                } else {
-                    res_all[[type]] = NA
-                }
-
-            } else if(root == "sargan"){
-                if(!is.null(x$iv_sargan)){
-                    # Wu Hausman stat for the second stage
-                    vec = x$iv_sargan
-                    res_all[[type]] = set_value(vec, value)
-
-                } else {
-                    res_all[[type]] = NA
-                }
-
-            } else if(root == "lr"){
-                if(!is.null(x$ll_null)){
-
-                    stat = 2 * (x$loglik - x$ll_null)
-                    df = x$nparams
-                    p = pchisq(stat, df, lower.tail = FALSE)
-
-                    vec = list(stat = stat, p = p, df = df)
-                    res_all[[type]] = set_value(vec, value)
-
-                } else {
-                    res_all[[type]] = NA
-                }
-
-            } else if(root == "wlr"){
-                if(!is.null(x$ll_fe_only) || (x$method_type == "feglm" && !is.null(x$fixef_id))){
-
-                    if(x$method_type == "feglm"){
-                        # estimation of the FE only model
-
-                        newdata = cbind(data.frame(y = x$y), as.data.frame(x$fixef_id))
-                        if(!is.null(x$fixef_terms)){
-                            newdata = cbind(newdata, as.data.frame(x$slope_variables))
-                        }
-                        new_fml = merge_fml(y ~ 1, x$fml_all$fixef)
-                        res_fe = feglm(fml = new_fml, data = newdata, glm.tol = 1e-2, fixef.tol = 1e-3, family = x$family$family, weights = x$weights, offset = x$offset)
-
-                        ll_fe_only = logLik(res_fe)
-                    } else {
-                        ll_fe_only = x$ll_fe_only
-                    }
-
-                    stat = 2 * (x$loglik - ll_fe_only)
-                    df = length(x$coefficients)
-                    p = pchisq(stat, df, lower.tail = FALSE)
-
-                    vec = list(stat = stat, p = p, df = df)
-                    res_all[[type]] = set_value(vec, value)
-
-                } else {
-                    res_all[[type]] = NA
-                }
-
-            } else if(root %in% user_types){
-
-                res_all[[type]] = set_value(opts[[root]]$fun(x), value)
-
-            } else {
-                stop("The type '", type, "' is not supported, see details of ?fitstat, or use fitstat(show_types = TRUE) to get the names of all supported tests.")
-            }
+          res_all[[type]] = NA
         }
 
+
+      } else if(root == "ivfall"){
+        if(isTRUE(x$iv)){
+          if(x$iv_stage == 1){
+            df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd)
+            df2 = degrees_freedom(x, "resid")
+
+            stat = ((x$ssr_no_inst - x$ssr) / df1) / (x$ssr / df2)
+            p = pf(stat, df1, df2, lower.tail = FALSE)
+            vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
+            res_all[[type]] = set_value(vec, value)
+
+          } else {
+            # f stat for the second stage
+
+            df1 = degrees_freedom(x, vars = x$iv_endo_names_fit)
+            df2 = degrees_freedom(x, "resid")
+
+            w = 1
+            if(!is.null(x$weights)) w = x$weights
+            ssr = cpp_ssq(x$iv_residuals, w)
+
+            stat = ((x$ssr_no_endo - ssr) / df1) / (ssr / df2)
+            p = pf(stat, df1, df2, lower.tail = FALSE)
+            vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
+            res_all[[type]] = set_value(vec, value)
+          }
+
+        } else {
+          res_all[[type]] = NA
+        }
+
+      } else if(root == "ivf1"){
+
+        if(isTRUE(x$iv)){
+          df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd, stage = 1)
+          df2 = degrees_freedom(x, "resid", stage = 1)
+
+          if(x$iv_stage == 1){
+
+            stat = ((x$ssr_no_inst - x$ssr) / df1) / (x$ssr / df2)
+            p = pf(stat, df1, df2, lower.tail = FALSE)
+            vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
+            res_all[[type]] = set_value(vec, value)
+
+          } else {
+            x_first = x$iv_first_stage
+
+            for(endo in names(x_first)){
+              stat = ((x_first[[endo]]$ssr_no_inst - x_first[[endo]]$ssr) / df1) / (x_first[[endo]]$ssr / df2)
+              p = pf(stat, df1, df2, lower.tail = FALSE)
+              vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
+              res_all[[paste0(type, "::", endo)]] = set_value(vec, value)
+            }
+          }
+
+        } else {
+          res_all[[type]] = NA
+        }
+
+      } else if(root == "ivf2"){
+        if(isTRUE(x$iv) && x$iv_stage == 2){
+          # f stat for the second stage
+
+          df1 = degrees_freedom(x, vars = x$iv_endo_names_fit)
+          df2 = degrees_freedom(x, "resid")
+
+          w = 1
+          if(!is.null(x$weights)) w = x$weights
+          ssr = cpp_ssq(x$iv_residuals, w)
+
+          stat = ((x$ssr_no_endo - ssr) / df1) / (ssr / df2)
+          p = pf(stat, df1, df2, lower.tail = FALSE)
+          vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
+          res_all[[type]] = set_value(vec, value)
+
+        } else {
+          res_all[[type]] = NA
+        }
+
+      } else if(root == "kpr"){
+        if(isTRUE(x$iv) && x$iv_stage == 2){
+          # The KP rank test is computed in a specific function
+
+          vec = kp_stat(x)
+          res_all[[type]] = set_value(vec, value)
+
+        } else {
+          res_all[[type]] = NA
+        }
+
+      } else if(root == "cd"){
+        if(isTRUE(x$iv) && x$iv_stage == 2){
+          # The KP rank test is computed in a specific function
+
+          vec = cd_stat(x)
+          res_all[[type]] = set_value(vec, value)
+
+        } else {
+          res_all[[type]] = NA
+        }
+
+      } else if(root == "wald"){
+        # Joint nullity of the coefficients
+        # if FE => on the projected model only
+
+        qui = !names(x$coefficients) %in% "(Intercept)"
+        my_coef = x$coefficients[qui]
+        df1 = length(my_coef)
+
+        if(df1 > 0){
+          df2 = degrees_freedom(x, "resid")
+
+          # The VCOV is always full rank in here
+          stat = .wald(x, names(my_coef))
+          p = pf(stat, df1, df2, lower.tail = FALSE)
+          vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
+          res_all[[type]] = set_value(vec, value)
+
+        } else {
+          # Only fixef
+          res_all[[type]] = NA
+        }
+
+      } else if(root == "ivwaldall"){
+
+        if(isTRUE(x$iv)){
+          if(x$iv_stage == 1){
+
+            df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd)
+            df2 = degrees_freedom(x, "resid")
+
+            stat = .wald(x, x$iv_inst_names_xpd)
+
+            p = pf(stat, df1, df2, lower.tail = FALSE)
+            vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
+            res_all[[type]] = set_value(vec, value)
+
+          } else {
+            # wald stat for the second stage
+
+            df1 = degrees_freedom(x, vars = x$iv_endo_names_fit)
+            df2 = degrees_freedom(x, "resid")
+
+            stat = .wald(x, x$iv_endo_names_fit)
+
+            p = pf(stat, df1, df2, lower.tail = FALSE)
+            vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
+            res_all[[type]] = set_value(vec, value)
+          }
+
+        } else {
+          res_all[[type]] = NA
+        }
+
+      } else if(root %in% "ivwald1"){
+
+        if(isTRUE(x$iv)){
+          df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd, stage = 1)
+          df2 = degrees_freedom(x, "resid", stage = 1)
+
+
+          if(x$iv_stage == 1){
+
+            stat = .wald(x, x$iv_inst_names_xpd)
+
+            p = pf(stat, df1, df2, lower.tail = FALSE)
+            vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
+            res_all[[type]] = set_value(vec, value)
+
+          } else {
+            x_first = x$iv_first_stage
+            inst = x$iv_inst_names_xpd
+
+            for(endo in names(x_first)){
+
+              my_x_first = x_first[[endo]]
+
+              if(is.null(my_x_first$cov.scaled)){
+                # We compute the VCOV like for the second stage
+                flags = x$summary_flags
+                if(is.null(flags) || !is.null(dots$se) || !is.null(dots$cluster)){
+                  my_x_first = summary(my_x_first, ...)
+                } else {
+                  my_x_first = summary(my_x_first, vcov = flags$vcov, ssc = flags$ssc, ...)
+                }
+              }
+
+              stat = .wald(my_x_first, inst)
+
+              p = pf(stat, df1, df2, lower.tail = FALSE)
+              vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
+              res_all[[paste0(type, "::", endo)]] = set_value(vec, value)
+            }
+          }
+
+        } else {
+          res_all[[type]] = NA
+        }
+
+      } else if(root == "ivwald2"){
+        if(isTRUE(x$iv) && x$iv_stage == 2){
+          # wald stat for the second stage
+
+          df1 = degrees_freedom(x, vars = x$iv_endo_names_fit)
+          df2 = degrees_freedom(x, "resid")
+
+          stat = .wald(x, x$iv_endo_names_fit)
+
+          p = pf(stat, df1, df2, lower.tail = FALSE)
+          vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
+          res_all[[type]] = set_value(vec, value)
+
+        } else {
+          res_all[[type]] = NA
+        }
+
+      } else if(root == "wh"){
+        if(isTRUE(x$iv) && x$iv_stage == 2){
+          # Wu Hausman stat for the second stage
+          vec = x$iv_wh
+          res_all[[type]] = set_value(vec, value)
+
+        } else {
+          res_all[[type]] = NA
+        }
+
+      } else if(root == "sargan"){
+        if(!is.null(x$iv_sargan)){
+          # Wu Hausman stat for the second stage
+          vec = x$iv_sargan
+          res_all[[type]] = set_value(vec, value)
+
+        } else {
+          res_all[[type]] = NA
+        }
+
+      } else if(root == "lr"){
+        if(!is.null(x$ll_null)){
+
+          stat = 2 * (x$loglik - x$ll_null)
+          df = x$nparams
+          p = pchisq(stat, df, lower.tail = FALSE)
+
+          vec = list(stat = stat, p = p, df = df)
+          res_all[[type]] = set_value(vec, value)
+
+        } else {
+          res_all[[type]] = NA
+        }
+
+      } else if(root == "wlr"){
+        if(!is.null(x$ll_fe_only) || (x$method_type == "feglm" && !is.null(x$fixef_id))){
+
+          if(x$method_type == "feglm"){
+            # estimation of the FE only model
+
+            newdata = cbind(data.frame(y = x$y), as.data.frame(x$fixef_id))
+            if(!is.null(x$fixef_terms)){
+              newdata = cbind(newdata, as.data.frame(x$slope_variables))
+            }
+            new_fml = merge_fml(y ~ 1, x$fml_all$fixef)
+            res_fe = feglm(fml = new_fml, data = newdata, glm.tol = 1e-2, fixef.tol = 1e-3, family = x$family$family, weights = x$weights, offset = x$offset)
+
+            ll_fe_only = logLik(res_fe)
+          } else {
+            ll_fe_only = x$ll_fe_only
+          }
+
+          stat = 2 * (x$loglik - ll_fe_only)
+          df = length(x$coefficients)
+          p = pchisq(stat, df, lower.tail = FALSE)
+
+          vec = list(stat = stat, p = p, df = df)
+          res_all[[type]] = set_value(vec, value)
+
+        } else {
+          res_all[[type]] = NA
+        }
+
+      } else if(root %in% user_types){
+
+        res_all[[type]] = set_value(opts[[root]]$fun(x), value)
+
+      } else {
+        stop("The type '", type, "' is not supported, see details of ?fitstat, or use fitstat(show_types = TRUE) to get the names of all supported tests.")
+      }
     }
 
-    if(simplify){
-        verbose = FALSE
-    }
+  }
 
-    if(verbose){
-        class(res_all) = "fixest_fitstat"
-    }
+  if(simplify){
+    verbose = FALSE
+  }
 
-    if(length(type_all) == 1 && simplify){
-        return(res_all[[1]])
-    }
+  if(verbose){
+    class(res_all) = "fixest_fitstat"
+  }
 
-    res_all
+  if(length(type_all) == 1 && simplify){
+    return(res_all[[1]])
+  }
+
+  res_all
 }
 
 
@@ -992,14 +1100,19 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
 #' @inheritParams summary.fixest
 #' @inheritParams etable
 #'
-#' @param print Logical, default is `TRUE`. If `TRUE`, then a verbose description of the test is prompted on the R console. Otherwise only a named vector containing the test statistics is returned.
+#' @param print Logical, default is `TRUE`. If `TRUE`, then a verbose description of the test 
+#' is prompted on the R console. Otherwise only a named vector containing the test statistics 
+#' is returned.
 #' @param ... Any other element to be passed to [`summary.fixest`].
 #'
 #' @details
-#' The type of VCOV matrix plays a crucial role in this test. Use the arguments `se` and `cluster` to change the type of VCOV for the test.
+#' The type of VCOV matrix plays a crucial role in this test. Use the arguments `se` and 
+#' `cluster` to change the type of VCOV for the test.
 #'
 #' @return
-#' A named vector containing the following elements is returned: `stat`, `p`, `df1`, and `df2`. They correspond to the test statistic, the p-value, the first and second degrees of freedoms.
+#' A named vector containing the following elements is returned: `stat`, `p`, `df1`, 
+#' and `df2`. They correspond to the test statistic, the p-value, the first and 
+#' second degrees of freedoms.
 #'
 #' If no valid coefficient is found, the value `NA` is returned.
 #'
@@ -1038,90 +1151,90 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
 #'
 #'
 wald = function(x, keep = NULL, drop = NULL, print = TRUE, vcov, se, cluster, ...){
-    # LATER:
-    # - keep can be a list
-    #   * list("fit_" = 1, "x5$")
-    #   * regex = restriction. No "=" => 0
+  # LATER:
+  # - keep can be a list
+  #   * list("fit_" = 1, "x5$")
+  #   * regex = restriction. No "=" => 0
 
-    check_arg(x, "class(fixest)")
-    check_arg(keep, drop, "NULL character vector no na")
+  check_arg(x, "class(fixest)")
+  check_arg(keep, drop, "NULL character vector no na")
 
-    if(isTRUE(x$onlyFixef)) return(NA)
+  if(isTRUE(x$onlyFixef)) return(NA)
 
-    dots = list(...)
-    if(!isTRUE(x$summary)|| !missing(vcov) || !missing(se) || !missing(cluster) || ...length() > 0){
-        x = summary(x, vcov = vcov, se = se, cluster = cluster, ...)
-    }
+  dots = list(...)
+  if(!isTRUE(x$summary)|| !missing(vcov) || !missing(se) || !missing(cluster) || ...length() > 0){
+    x = summary(x, vcov = vcov, se = se, cluster = cluster, ...)
+  }
 
-    if(missing(keep) && missing(drop)){
-        drop = "\\(Intercept\\)"
-    }
+  if(missing(keep) && missing(drop)){
+    drop = "\\(Intercept\\)"
+  }
 
-    coef_name = names(x$coefficients)
-    coef_name = keep_apply(coef_name, keep)
-    coef_name = drop_apply(coef_name, drop)
+  coef_name = names(x$coefficients)
+  coef_name = keep_apply(coef_name, keep)
+  coef_name = drop_apply(coef_name, drop)
 
-    if(length(coef_name) == 0) return(NA)
+  if(length(coef_name) == 0) return(NA)
 
-    qui = names(x$coefficients) %in% coef_name
-    my_coef = x$coefficients[qui]
-    df1 = length(my_coef)
+  qui = names(x$coefficients) %in% coef_name
+  my_coef = x$coefficients[qui]
+  df1 = length(my_coef)
 
-    df2 = x$nobs - x$nparams
+  df2 = x$nobs - x$nparams
 
-    # The VCOV is always full rank in here
-    stat = drop(my_coef %*% solve(x$cov.scaled[qui, qui]) %*% my_coef) / df1
-    p = pf(stat, df1, df2, lower.tail = FALSE)
-    vcov = attr(x$cov.scaled, "type")
-    vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = vcov)
+  # The VCOV is always full rank in here
+  stat = drop(my_coef %*% solve(x$cov.scaled[qui, qui]) %*% my_coef) / df1
+  p = pf(stat, df1, df2, lower.tail = FALSE)
+  vcov = attr(x$cov.scaled, "type")
+  vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = vcov)
 
-    if(print){
-        cat("Wald test, H0: ", ifsingle(coef_name, "", "joint "), "nullity of ", enumerate_items(coef_name), "\n", sep  ="")
-        cat(" stat = ", numberFormatNormal(stat),
-            ", p-value ", ifelse(p < 2.2e-16, "< 2.2e-16", paste0("= ", numberFormatNormal(p))),
-            ", on ", numberFormatNormal(df1), " and ", numberFormatNormal(df2), " DoF, ",
-            "VCOV: ", vcov, ".", sep = "")
+  if(print){
+    cat("Wald test, H0: ", ifsingle(coef_name, "", "joint "), "nullity of ", enumerate_items(coef_name), "\n", sep  ="")
+    cat(" stat = ", numberFormatNormal(stat),
+      ", p-value ", ifelse(p < 2.2e-16, "< 2.2e-16", paste0("= ", numberFormatNormal(p))),
+      ", on ", numberFormatNormal(df1), " and ", numberFormatNormal(df2), " DoF, ",
+      "VCOV: ", vcov, ".", sep = "")
 
-        return(invisible(vec))
-    } else {
-        return(vec)
-    }
+    return(invisible(vec))
+  } else {
+    return(vec)
+  }
 }
 
 fitstat_validate = function(x, vector = FALSE){
-    check_value(x, "NA | os formula | charin(FALSE) | character vector no na", .arg_name = "fitstat", .up = 1)
+  check_value(x, "NA | os formula | charin(FALSE) | character vector no na", .arg_name = "fitstat", .up = 1)
 
-    if("formula" %in% class(x)){
-        x = attr(terms(update(~ DEFAULT, x)), "term.labels")
-    } else if (length(x) == 1 && (isFALSE(x) || is.na(x))){
-        x = c()
-    }
+  if("formula" %in% class(x)){
+    x = attr(terms(update(~ DEFAULT, x)), "term.labels")
+  } else if (length(x) == 1 && (isFALSE(x) || is.na(x))){
+    x = c()
+  }
 
-    # checking the types
-    fitstat_fun_types = fitstat(give_types = TRUE)
-    fitstat_type_allowed = fitstat_fun_types$types
-    x = unique(x)
-    type_alias = fitstat_fun_types$type_alias
+  # checking the types
+  fitstat_fun_types = fitstat(give_types = TRUE)
+  fitstat_type_allowed = fitstat_fun_types$types
+  x = unique(x)
+  type_alias = fitstat_fun_types$type_alias
 
-    if(any(x %in% names(type_alias))){
-        i = intersect(x, names(type_alias))
-        x[x %in% i] = type_alias[x[x %in% i]]
-    }
+  if(any(x %in% names(type_alias))){
+    i = intersect(x, names(type_alias))
+    x[x %in% i] = type_alias[x[x %in% i]]
+  }
 
-    pblm = setdiff(x, c(fitstat_type_allowed, "DEFAULT"))
-    if(length(pblm) > 0){
-        stop_up("In fitstat, argument 'x' must be a one sided formula (or a character vector) containing valid types from the function fitstat (see details in ?fitstat or use fitstat(show_types = TRUE)). The type", enumerate_items(pblm, "s.is.quote"), " not valid.")
-    }
+  pblm = setdiff(x, c(fitstat_type_allowed, "DEFAULT"))
+  if(length(pblm) > 0){
+    stop_up("In fitstat, argument `x` must be a one sided formula (or a character vector) containing valid types from the function fitstat (see details in ?fitstat or use fitstat(`show_types = TRUE`)). The type{$s, enum.q, is?pblm} not valid.")
+  }
 
-    if(length(x) == 0){
-        x = NA
-    } else if(vector){
-        x = gsub("DEFAULT", ".", x, fixed = TRUE)
-    } else {
-        x = as.formula(paste("~", paste(gsub("DEFAULT", ".", x), collapse = "+")))
-    }
+  if(length(x) == 0){
+    x = NA
+  } else if(vector){
+    x = gsub("DEFAULT", ".", x, fixed = TRUE)
+  } else {
+    x = as.formula(paste("~", paste(gsub("DEFAULT", ".", x), collapse = "+")))
+  }
 
-    x
+  x
 }
 
 
@@ -1130,18 +1243,30 @@ fitstat_validate = function(x, vector = FALSE){
 #' Reports different R2s for `fixest` estimations (e.g. [`feglm`] or [`feols`]).
 #'
 #' @param x A `fixest` object, e.g. obtained with function [`feglm`] or [`feols`].
-#' @param type A character vector representing the R2 to compute. The R2 codes are of the form: "wapr2" with letters "w" (within), "a" (adjusted) and "p" (pseudo) possibly missing. E.g. to get the regular R2: use `type = "r2"`, the within adjusted R2: use `type = "war2"`, the pseudo R2: use `type = "pr2"`, etc. Use `"cor2"` for the squared correlation. By default, all R2s are computed.
-#' @param full_names Logical scalar, default is `FALSE`. If `TRUE` then names of the vector in output will have full names instead of keywords (e.g. `Squared Correlation` instead of `cor2`, etc).
+#' @param type A character vector representing the R2 to compute. The R2 codes are of the form: 
+#' "wapr2" with letters "w" (within), "a" (adjusted) and "p" (pseudo) possibly missing. 
+#' E.g. to get the regular R2: use `type = "r2"`, the within adjusted R2: use `type = "war2"`, 
+#' the pseudo R2: use `type = "pr2"`, etc. Use `"cor2"` for the squared correlation. 
+#' By default, all R2s are computed.
+#' @param full_names Logical scalar, default is `FALSE`. If `TRUE` then names of the vector 
+#' in output will have full names instead of keywords (e.g. `Squared Correlation` 
+#' instead of `cor2`, etc).
 #'
 #' @details
 #'
 #' The pseudo R2s are the McFaddens R2s, that is the ratio of log-likelihoods.
 #'
-#' For R2s with no theoretical justification, like e.g. regular R2s for maximum likelihood models -- or within R2s for models without fixed-effects, NA is returned. The single measure to possibly compare all kinds of models is the squared correlation between the dependent variable and the expected predictor.
+#' For R2s with no theoretical justification, like e.g. regular R2s for maximum likelihood 
+#' models -- or within R2s for models without fixed-effects, NA is returned. 
+#' The single measure to possibly compare all kinds of models is the squared 
+#' correlation between the dependent variable and the expected predictor.
 #'
-#' The pseudo-R2 is also returned in the OLS case, it corresponds to the pseudo-R2 of the equivalent GLM model with a Gaussian family.
+#' The pseudo-R2 is also returned in the OLS case, it corresponds to the 
+#' pseudo-R2 of the equivalent GLM model with a Gaussian family.
 #'
-#' For the adjusted within-R2s, the adjustment factor is `(n - nb_fe) / (n - nb_fe - K)` with `n` the number of observations, `nb_fe` the number of fixed-effects and `K` the number of variables.
+#' For the adjusted within-R2s, the adjustment factor is `(n - nb_fe) / (n - nb_fe - K)` 
+#' with `n` the number of observations, `nb_fe` the number of fixed-effects and `K` 
+#' the number of variables.
 #'
 #' @return
 #' Returns a named vector.
@@ -1155,7 +1280,7 @@ fitstat_validate = function(x, vector = FALSE){
 #' data(trade)
 #'
 #' # We estimate the effect of distance on trade (with 3 fixed-effects)
-#' est = feols(log(Euros) ~ log(dist_km)|Origin+Destination+Product, trade)
+#' est = feols(log(Euros) ~ log(dist_km) | Origin + Destination + Product, trade)
 #'
 #' # Squared correlation:
 #' r2(est, "cor2")
@@ -1176,134 +1301,144 @@ fitstat_validate = function(x, vector = FALSE){
 #' r2(est, c("cor2", "r2", "pr2", "war2"), full_names = TRUE)
 #'
 r2 = function(x, type = "all", full_names = FALSE){
-    # p: pseudo
-    # w: within
-    # a: adjusted
+  # p: pseudo
+  # w: within
+  # a: adjusted
 
-    check_arg(full_names, "logical scalar")
+  check_arg(full_names, "logical scalar")
 
-    if(!"fixest" %in% class(x)){
-        stop("Only 'fixest' objects are supported.")
+  if(!"fixest" %in% class(x)){
+    stop("Only 'fixest' objects are supported.")
+  }
+
+  check_arg(type, "character vector no na", 
+            .message = "Argument 'type' must be a character vector (e.g. type = c(\"cor2\", \"r2\", \"pr2\")). (a: adjused, p: pseudo, w: within.)")
+
+  # type_allowed next => ("count", "acount") ?
+  dict_names = c("cor2" = "Squared Correlation", "r2" = "R2", "ar2" = "Adjusted R2", 
+                 "pr2" = "Pseudo R2", "apr2" = "Adjusted Pseudo R2", "wr2" = "Within R2", 
+                 "war2" = "Adjusted Within R2", "wpr2" = "Within Pseudo R2", 
+                 "wapr2" = "Adjusted Within Pseudo R2")
+  
+  type_allowed = c("cor2", "r2", "ar2", "pr2", "apr2", "wr2", "war2", "wpr2", "wapr2")
+  types_alias = c(par2 = "apr2", awr2 = "war2", pwr2 = "wpr2", wpar2 = "wapr2", 
+                  pwar2 = "wapr2", pawr2 = "wapr2", apwr2 = "wapr2", awpr2 = "wapr2", 
+                  sq.cor = "cor2")
+  
+  if("all" %in% type){
+    type_all = type_allowed
+  } else {
+    type_all = tolower(type)
+    pblm = setdiff(type_all, c(type_allowed, names(types_alias)))
+    if(length(pblm) > 0){
+      stopi("The r2 type{$s, enum.q, is ? pblm} not valid.")
+    }
+  }
+
+  type_all = dict_apply(type_all, types_alias)
+
+  is_ols = x$method_type == "feols"
+  isFixef = "fixef_vars" %in% names(x)
+  n = nobs(x)
+
+  res = rep(NA, length(type_all))
+  for(i in seq_along(type_all)){
+    myType = type_all[i]
+
+    if(myType == "cor2"){
+      res[i] = x$sq.cor
+      next
     }
 
-    check_arg(type, "character vector no na", .message = "Argument 'type' must be a character vector (e.g. type = c(\"cor2\", \"r2\", \"pr2\")). (a: adjused, p: pseudo, w: within.)")
+    if(!grepl("p", myType) && !is_ols){
+      # non pseudo R2 not valid for non ols
+      next
+    }
 
-    # type_allowed next => ("count", "acount") ?
-    dict_names = c("cor2" = "Squared Correlation", "r2" = "R2", "ar2" = "Adjusted R2", "pr2" = "Pseudo R2", "apr2" = "Adjusted Pseudo R2", "wr2" = "Within R2", "war2" = "Adjusted Within R2", "wpr2" = "Within Pseudo R2", "wapr2" = "Adjusted Within Pseudo R2")
-    type_allowed = c("cor2", "r2", "ar2", "pr2", "apr2", "wr2", "war2", "wpr2", "wapr2")
-    types_alias = c(par2 = "apr2", awr2 = "war2", pwr2 = "wpr2", wpar2 = "wapr2", pwar2 = "wapr2", pawr2 = "wapr2", apwr2 = "wapr2", awpr2 = "wapr2", sq.cor = "cor2")
-    if("all" %in% type){
-        type_all = type_allowed
+    if(grepl("w", myType) && !isFixef){
+      # within R2 not valid for models without FE
+      next
+    }
+
+    adj = grepl("a", myType)
+    pseudo = grepl("p", myType)
+    within = grepl("w", myType) && isFixef
+    ifNullNA = function(x) ifelse(is.null(x), NA, x)
+    if(within && isFixef){
+
+      if(isTRUE(x$onlyFixef)) next
+
+      if(is.null(x$ssr_fe_only) && !is.null(x$fixef_vars)){
+        # This is the case of feglm where there were no fe_only model estimated
+        # => we need to compute the FE model first
+
+        # 2019-11-26: now self contained call (no need for outer frame evaluation)
+
+        if(isTRUE(x$lean)){
+          stop("Within R2s are not available for 'lean' fixest objects. Please reestimate with 'lean = FALSE'.")
+        }
+
+        # constructing the data
+        newdata = cbind(data.frame(y = x$y), as.data.frame(x$fixef_id))
+        if(!is.null(x$fixef_terms)){
+          newdata = cbind(newdata, as.data.frame(x$slope_variables))
+        }
+        # Fe/slope only formula
+        new_fml = merge_fml(y ~ 1, x$fml_all$fixef)
+
+        # x$family$family is also normal
+        res_fe = feglm(fml = new_fml, data = newdata, glm.tol = 1e-2, 
+                       fixef.tol = 1e-3, family = x$family$family, 
+                       weights = x$weights, offset = x$offset)
+
+        x$ssr_fe_only = cpp_ssq(res_fe$residuals)
+        x$ll_fe_only = logLik(res_fe)
+      }
+
+      # within
+      df_k = ifelse(adj, length(coef(x)), 0)
+      if(pseudo){
+        ll_fe_only = ifNullNA(x$ll_fe_only)
+        ll = logLik(x)
+        res[i] = 1 - (ll - df_k) / ll_fe_only
+      } else {
+        ssr_fe_only = ifNullNA(x$ssr_fe_only)
+        nb_fe = x$nparams - length(coef(x))
+        res[i] = 1 - x$ssr / ssr_fe_only * (n - nb_fe) / (n - nb_fe - df_k)
+      }
     } else {
-        type_all = tolower(type)
-        pblm = setdiff(type_all, c(type_allowed, names(types_alias)))
-        if(length(pblm) > 0){
-            stop("The r2 type", enumerate_items(pblm, "quote.s.is"), " not valid.")
-        }
-    }
 
-    type_all = dict_apply(type_all, types_alias)
+      if(x$nparams == 1 && string_any(names(x$coefficients), "f/(Intercept)")){
+        res[i] = NA
 
-    is_ols = x$method_type == "feols"
-    isFixef = "fixef_vars" %in% names(x)
-    n = nobs(x)
-
-    res = rep(NA, length(type_all))
-    for(i in seq_along(type_all)){
-        myType = type_all[i]
-
-        if(myType == "cor2"){
-            res[i] = x$sq.cor
-            next
-        }
-
-        if(!grepl("p", myType) && !is_ols){
-            # non pseudo R2 not valid for non ols
-            next
-        }
-
-        if(grepl("w", myType) && !isFixef){
-            # within R2 not valid for models without FE
-            next
-        }
-
-        adj = grepl("a", myType)
-        pseudo = grepl("p", myType)
-        within = grepl("w", myType) && isFixef
-        ifNullNA = function(x) ifelse(is.null(x), NA, x)
-        if(within && isFixef){
-
-            if(isTRUE(x$onlyFixef)) next
-
-            if(is.null(x$ssr_fe_only) && !is.null(x$fixef_vars)){
-                # This is the case of feglm where there were no fe_only model estimated
-                # => we need to compute the FE model first
-
-                # 2019-11-26: now self contained call (no need for outer frame evaluation)
-
-                if(isTRUE(x$lean)){
-                    stop("Within R2s are not available for 'lean' fixest objects. Please reestimate with 'lean = FALSE'.")
-                }
-
-                # constructing the data
-                newdata = cbind(data.frame(y = x$y), as.data.frame(x$fixef_id))
-                if(!is.null(x$fixef_terms)){
-                    newdata = cbind(newdata, as.data.frame(x$slope_variables))
-                }
-                # Fe/slope only formula
-                new_fml = merge_fml(y ~ 1, x$fml_all$fixef)
-
-                # x$family$family is also normal
-                res_fe = feglm(fml = new_fml, data = newdata, glm.tol = 1e-2, fixef.tol = 1e-3, family = x$family$family, weights = x$weights, offset = x$offset)
-
-                x$ssr_fe_only = cpp_ssq(res_fe$residuals)
-                x$ll_fe_only = logLik(res_fe)
-            }
-
-            # within
-            df_k = ifelse(adj, length(coef(x)), 0)
-            if(pseudo){
-                ll_fe_only = ifNullNA(x$ll_fe_only)
-                ll = logLik(x)
-                res[i] = 1 - (ll - df_k) / ll_fe_only
-            } else {
-                ssr_fe_only = ifNullNA(x$ssr_fe_only)
-                nb_fe = x$nparams - length(coef(x))
-                res[i] = 1 - x$ssr / ssr_fe_only * (n - nb_fe) / (n - nb_fe - df_k)
-            }
+      } else {
+        df_k = ifelse(adj, x$nparams, 1 - pseudo)
+        if(pseudo){
+          ll_null = x$ll_null
+          ll = logLik(x)
+          if(adj){
+            res[i] = 1 - (ll - x$nparams + 1) / ll_null
+          } else {
+            res[i] = 1 - ll / ll_null
+          }
         } else {
-
-            if(x$nparams == 1 && any(grepl("(Intercept)", names(x$coefficients), fixed = TRUE))){
-                res[i] = NA
-
-            } else {
-                df_k = ifelse(adj, x$nparams, 1 - pseudo)
-                if(pseudo){
-                    ll_null = x$ll_null
-                    ll = logLik(x)
-                    if(adj){
-                        res[i] = 1 - (ll - x$nparams + 1) / ll_null
-                    } else {
-                        res[i] = 1 - ll / ll_null
-                    }
-                } else {
-                    ssr_null = x$ssr_null
-                    df.intercept = 1 * (isFixef || any(grepl("(Intercept)", names(x$coefficients), fixed = TRUE)))
-                    res[i] = 1 - x$ssr / ssr_null * (n - df.intercept) / (n - df_k)
-                }
-            }
-
+          ssr_null = x$ssr_null
+          df.intercept = 1 * (isFixef || string_any(names(x$coefficients), "f/(Intercept)"))
+          res[i] = 1 - x$ssr / ssr_null * (n - df.intercept) / (n - df_k)
         }
+      }
+
     }
+  }
 
-    if(full_names){
-        names(res) = dict_apply(type_all, dict_names)
-    } else {
-        names(res) = type_all
-    }
+  if(full_names){
+    names(res) = dict_apply(type_all, dict_names)
+  } else {
+    names(res) = type_all
+  }
 
 
-    res
+  res
 }
 
 
@@ -1314,11 +1449,22 @@ r2 = function(x, type = "all", full_names = FALSE){
 #' @inheritParams vcov.fixest
 #'
 #' @param x A `fixest` estimation.
-#' @param type Character scalar, equal to "k", "resid", "t". If "k", then the number of regressors is returned. If "resid", then it is the "residuals degree of freedom", i.e. the number of observations minus the number of regressors. If "t", it is the degrees of freedom used in the t-test. Note that these values are affected by how the VCOV of `x` is computed, in particular when the VCOV is clustered.
-#' @param vars A vector of variable names, of the regressors. This is optional. If provided, then `type` is set to 1 by default and the number of regressors contained in `vars` is returned. This is only useful in the presence of collinearity and we want a subset of the regressors only. (Mostly for internal use.)
+#' @param type Character scalar, equal to "k", "resid", "t". If "k", then the number of 
+#' regressors is returned. If "resid", then it is the "residuals degree of freedom", i.e. 
+#' the number of observations minus the number of regressors. If "t", it is the degrees of 
+#' freedom used in the t-test. Note that these values are affected by how the VCOV of `x` 
+#' is computed, in particular when the VCOV is clustered.
+#' @param vars A vector of variable names, of the regressors. This is optional. If provided, 
+#' then `type` is set to 1 by default and the number of regressors contained in `vars` 
+#' is returned. This is only useful in the presence of collinearity and we want a subset of 
+#' the regressors only. (Mostly for internal use.)
 #' @param stage Either 1 or 2. Only concerns IV regressions, which stage to look at.
 #'
-#' The type of VCOV can have an influence on the degrees of freedom. In particular, when the VCOV is clustered, the DoF returned will be in accordance with the way the small sample correction was performed when computing the VCOV. That type of value is in general not what we have in mind when we think of "degrees of freedom". To obtain the ones that are more intuitive, please use `degrees_freedom_iid` instead.
+#' The type of VCOV can have an influence on the degrees of freedom. In particular, when the 
+#' VCOV is clustered, the DoF returned will be in accordance with the way the small 
+#' sample correction was performed when computing the VCOV. That type of value is in general 
+#' not what we have in mind when we think of "degrees of freedom". To obtain the ones that are 
+#' more intuitive, please use `degrees_freedom_iid` instead.
 #'
 #'
 #' @examples
@@ -1348,55 +1494,55 @@ r2 = function(x, type = "all", full_names = FALSE){
 #'
 #'
 degrees_freedom = function(x, type, vars = NULL, vcov = NULL, se = NULL, cluster = NULL, ssc = NULL, stage = 2){
-    check_arg(x, "class(fixest) mbt")
-    check_set_arg(type, "match(k, resid, t)")
-    check_arg(stage, "integer scalar GE{1} LE{2}")
-    check_arg(vars, "character vector no na")
+  check_arg(x, "class(fixest) mbt")
+  check_set_arg(type, "match(k, resid, t)")
+  check_arg(stage, "integer scalar GE{1} LE{2}")
+  check_arg(vars, "character vector no na")
 
-    if(stage == 1 && isTRUE(x$iv) && x$iv_stage == 2){
-        x = x$iv_first_stage[[1]]
+  if(stage == 1 && isTRUE(x$iv) && x$iv_stage == 2){
+    x = x$iv_first_stage[[1]]
+  }
+
+  if(!missnull(vars)){
+    if(!missing(type) && type != "k"){
+      warning("The argument 'type' is ignored when the argument 'vars' is present. Type 'k' is returned.")
     }
 
-    if(!missnull(vars)){
-        if(!missing(type) && type != "k"){
-            warning("The argument 'type' is ignored when the argument 'vars' is present. Type 'k' is returned.")
-        }
+    vars_keep = intersect(vars, names(x$coefficients))
+    return(length(vars_keep))
+  }
 
-        vars_keep = intersect(vars, names(x$coefficients))
-        return(length(vars_keep))
-    }
+  if(missing(type)){
+    stop("The argument 'type' is required but is currently missing.")
+  }
 
-    if(missing(type)){
-        stop("The argument 'type' is required but is currently missing.")
-    }
+  if(!isTRUE(x$summary) || !missnull(vcov) || !missnull(se) || !missnull(cluster) || !missnull(ssc)){
+    x = summary(x, vcov = vcov, se = se, cluster = cluster, ssc = ssc)
+  }
 
-    if(!isTRUE(x$summary) || !missnull(vcov) || !missnull(se) || !missnull(cluster) || !missnull(ssc)){
-        x = summary(x, vcov = vcov, se = se, cluster = cluster, ssc = ssc)
-    }
+  vcov = x$cov.scaled
 
-    vcov = x$cov.scaled
+  if(is.null(vcov)){
+    dof.K = x$nparams
+    df.t = nobs(x) - dof.K
+  } else {
+    # From v0.10.0 onward, "dt.t" is always provided!
+    df.t = attr(vcov, "df.t")
+    dof.K = attr(vcov, "dof.K")
+  }
 
-    if(is.null(vcov)){
-        dof.K = x$nparams
-        df.t = nobs(x) - dof.K
-    } else {
-        # From v0.10.0 onward, "dt.t" is always provided!
-        df.t = attr(vcov, "df.t")
-        dof.K = attr(vcov, "dof.K")
-    }
+  res = switch(type,
+         "k" = dof.K,
+         "resid" = max(nobs(x) - dof.K, 1),
+         "t" = df.t)
 
-    res = switch(type,
-                 "k" = dof.K,
-                 "resid" = max(nobs(x) - dof.K, 1),
-                 "t" = df.t)
-
-    res
+  res
 }
 
 
 #' @describeIn degrees_freedom Gets the degrees of freedom of a `fixest` estimation
 degrees_freedom_iid = function(x, type){
-    degrees_freedom(x, type, vcov = "iid")
+  degrees_freedom(x, type, vcov = "iid")
 }
 
 ####
@@ -1404,203 +1550,203 @@ degrees_freedom_iid = function(x, type){
 ####
 
 .wald = function(x, var){
-    # x: fixest estimation
+  # x: fixest estimation
 
-    coef = x$coefficients
+  coef = x$coefficients
 
-    vcov = x$cov.scaled
-    if(is.null(vcov)){
-        # => INTERNAL ERROR
-        stop("INTERNAL ERROR: .wald should be applied only to objects with a VCOV already computed. Could you report the error to the maintainer of fixest?")
-    }
+  vcov = x$cov.scaled
+  if(is.null(vcov)){
+    # => INTERNAL ERROR
+    stop("INTERNAL ERROR: .wald should be applied only to objects with a VCOV already computed. Could you report the error to the maintainer of fixest?")
+  }
 
-    var_keep = intersect(var, names(coef))
+  var_keep = intersect(var, names(coef))
 
-    if(length(var_keep) == 0){
-        # All vars removed bc of collin => stat = 0
-        return(0)
-    }
+  if(length(var_keep) == 0){
+    # All vars removed bc of collin => stat = 0
+    return(0)
+  }
 
-    # To handle errors (rare but can happen)
-    if(any(diag(vcov) < 1e-10)){
-        vcov = mat_posdef_fix(vcov)
-    }
+  # To handle errors (rare but can happen)
+  if(any(diag(vcov) < 1e-10)){
+    vcov = mat_posdef_fix(vcov)
+  }
 
-    chol_decomp = cpp_cholesky(vcov[var_keep, var_keep, drop = FALSE])
-    vcov_inv = chol_decomp$XtX_inv
+  chol_decomp = cpp_cholesky(vcov[var_keep, var_keep, drop = FALSE])
+  vcov_inv = chol_decomp$XtX_inv
 
-    if(isTRUE(chol_decomp$all_removed)){
-        # Can happen for indicators + clustering at the same level
-        return(1e6)
-    }
+  if(isTRUE(chol_decomp$all_removed)){
+    # Can happen for indicators + clustering at the same level
+    return(1e6)
+  }
 
-    if(any(chol_decomp$id_excl)){
-        var_keep = var_keep[!chol_decomp$id_excl]
-    }
+  if(any(chol_decomp$id_excl)){
+    var_keep = var_keep[!chol_decomp$id_excl]
+  }
 
-    my_coef = coef[var_keep]
+  my_coef = coef[var_keep]
 
-    stat = drop(my_coef %*% vcov_inv %*% my_coef) / length(my_coef)
+  stat = drop(my_coef %*% vcov_inv %*% my_coef) / length(my_coef)
 
-    stat
+  stat
 }
 
 
 kp_stat = function(x){
-    # internal function => x must be a fixest object
-    #
-    # The code here is a translation of the ranktest.jl function from the Vcov.jl package
-    # from @matthieugomez (see https://github.com/matthieugomez/Vcov.jl)
-    #
+  # internal function => x must be a fixest object
+  #
+  # The code here is a translation of the ranktest.jl function from the Vcov.jl package
+  # from @matthieugomez (see https://github.com/matthieugomez/Vcov.jl)
+  #
 
 
-    if(!isTRUE(x$iv) || !x$iv_stage == 2) return(NA)
+  if(!isTRUE(x$iv) || !x$iv_stage == 2) return(NA)
 
-    # Necessary data
+  # Necessary data
 
-    X_proj = as.matrix(resid(summary(x, stage = 1)))
+  X_proj = as.matrix(resid(summary(x, stage = 1)))
 
-    # while the projection of X has already been computed, we need to do it
-    # for Z => that's a pain in the neck
-    # computational cost is much lower is I include the KP computation at
-    # estimation time.... since here we do the job twice... we'll see
+  # while the projection of X has already been computed, we need to do it
+  # for Z => that's a pain in the neck
+  # computational cost is much lower if I include the KP computation at
+  # estimation time.... since here we do the job twice... we'll see
 
-    Z = model.matrix(x, type = "iv.inst")
-    Z_proj = proj_on_U(x, Z)
+  Z = model.matrix(x, type = "iv.inst")
+  Z_proj = proj_on_U(x, Z)
 
-    k = n_endo = ncol(X_proj)
-    l = n_inst = ncol(Z)
+  k = n_endo = ncol(X_proj)
+  l = n_inst = ncol(Z)
 
-    # We assume l >= k
-    q = min(k, l) - 1
+  # We assume l >= k
+  q = min(k, l) - 1
 
-    # Let's go
+  # Let's go
 
-    if(n_endo == 1){
-        PI = t(coef(summary(x, stage = 1)))
-    } else {
-        PI = coef(summary(x, stage = 1))
-    }
-    PI = PI[, colnames(PI) %in% x$iv_inst_names_xpd, drop = FALSE]
+  if(n_endo == 1){
+    PI = t(coef(summary(x, stage = 1)))
+  } else {
+    PI = coef(summary(x, stage = 1))
+  }
+  PI = PI[, colnames(PI) %in% x$iv_inst_names_xpd, drop = FALSE]
 
-    Fmat = chol(crossprod(Z_proj))
-    Gmat = chol(crossprod(X_proj))
-    theta = Fmat %*% t(solve(t(Gmat)) %*% PI)
-    # theta: n_inst x n_endo
+  Fmat = chol(crossprod(Z_proj))
+  Gmat = chol(crossprod(X_proj))
+  theta = Fmat %*% t(solve(t(Gmat)) %*% PI)
+  # theta: n_inst x n_endo
 
-    if(n_inst == n_endo){
-        svd_decomp = svd(theta)
-        u = svd_decomp$u
-        vt = t(svd_decomp$v)
-    } else {
-        # we need full decomp => un optimized decomp
-        svd_decomp = mat_svd(theta)
-        u = svd_decomp$u
-        vt = svd_decomp$vt
-    }
+  if(n_inst == n_endo){
+    svd_decomp = svd(theta)
+    u = svd_decomp$u
+    vt = t(svd_decomp$v)
+  } else {
+    # we need full decomp => un optimized decomp
+    svd_decomp = mat_svd(theta)
+    u = svd_decomp$u
+    vt = svd_decomp$vt
+  }
 
-    u_sub = u[k:l, k:l, drop = FALSE]
-    vt_sub = vt[k, k]
+  u_sub = u[k:l, k:l, drop = FALSE]
+  vt_sub = vt[k, k]
 
-    vt_k = vt[1:k, k, drop = FALSE]
+  vt_k = vt[1:k, k, drop = FALSE]
 
-    ssign = function(x) if(x == 0) 1 else sign(x)
+  ssign = function(x) if(x == 0) 1 else sign(x)
 
-    # There may be more sign problems here
-    if(k == l){
-        a_qq = ssign(u_sub[1]) * u[1:l, k:l, drop = FALSE]
-        b_qq = ssign(vt_sub[1]) * t(vt_k)
-    } else {
-        a_qq = u[1:l, k:l] %*% (solve(u_sub) %*% mat_sqrt(u_sub %*% t(u_sub)))
-        b_qq = mat_sqrt(vt_sub %*% t(vt_sub)) %*% (solve(t(vt_sub)) %*% t(vt_k))
-    }
+  # There may be more sign problems here
+  if(k == l){
+    a_qq = ssign(u_sub[1]) * u[1:l, k:l, drop = FALSE]
+    b_qq = ssign(vt_sub[1]) * t(vt_k)
+  } else {
+    a_qq = u[1:l, k:l] %*% (solve(u_sub) %*% mat_sqrt(u_sub %*% t(u_sub)))
+    b_qq = mat_sqrt(vt_sub %*% t(vt_sub)) %*% (solve(t(vt_sub)) %*% t(vt_k))
+  }
 
-    # kronecker
-    kronv = kronecker(b_qq, t(a_qq))
-    lambda = kronv %*% c(theta)
+  # kronecker
+  kronv = kronecker(b_qq, t(a_qq))
+  lambda = kronv %*% c(theta)
 
-    # There is need to compute the vcov specifically for this case
-    # We do it the same way as it was for x
+  # There is need to compute the vcov specifically for this case
+  # We do it the same way as it was for x
 
-    VCOV_TYPE = attr(x$cov.scaled, "type")
+  VCOV_TYPE = attr(x$cov.scaled, "type")
 
-    if(identical(VCOV_TYPE, "IID")){
-        vlab = chol(tcrossprod(kronv) / nrow(X_proj))
+  if(identical(VCOV_TYPE, "IID")){
+    vlab = chol(tcrossprod(kronv) / nrow(X_proj))
 
-    } else {
-        K = t(kronecker(Gmat, Fmat))
+  } else {
+    K = t(kronecker(Gmat, Fmat))
 
-        my_scores = do.call(cbind, lapply(1:ncol(X_proj), function(i) Z_proj * X_proj[, i]))
+    my_scores = do.call(cbind, lapply(1:ncol(X_proj), function(i) Z_proj * X_proj[, i]))
 
-        x_new = x
-        x_new$scores = my_scores
+    x_new = x
+    x_new$scores = my_scores
 
-        vcov = x$summary_flags$vcov
-        ssc = x$summary_flags$ssc
+    vcov = x$summary_flags$vcov
+    ssc = x$summary_flags$ssc
 
-        meat = vcov(x_new, vcov = vcov, ssc = ssc, sandwich = FALSE)
-        vhat = solve(K, t(solve(K, meat)))
+    meat = vcov(x_new, vcov = vcov, ssc = ssc, sandwich = FALSE)
+    vhat = solve(K, t(solve(K, meat)))
 
-        # DOF correction now
-        n = nobs(x) - identical(VCOV_TYPE, "cluster")
-        df_resid = degrees_freedom(x, "resid", stage = 1)
-        vhat = vhat * n / df_resid
+    # DOF correction now
+    n = nobs(x) - identical(VCOV_TYPE, "cluster")
+    df_resid = degrees_freedom(x, "resid", stage = 1)
+    vhat = vhat * n / df_resid
 
-        vlab = kronv %*% vhat %*% t(kronv)
-    }
+    vlab = kronv %*% vhat %*% t(kronv)
+  }
 
-    r_kp = t(lambda) %*% solve(vlab, lambda)
-    # cat("KP r:\n") ; print(r_kp)
+  r_kp = t(lambda) %*% solve(vlab, lambda)
+  # cat("KP r:\n") ; print(r_kp)
 
-    # Now the results
-    kp_df = n_inst - n_endo + 1
-    kp_f = r_kp / n_inst
-    kp_p = pchisq(kp_f, kp_df, lower.tail = FALSE)
+  # Now the results
+  kp_df = n_inst - n_endo + 1
+  kp_f = r_kp / n_inst
+  kp_p = pchisq(kp_f, kp_df, lower.tail = FALSE)
 
-    list(stat = kp_f, p = kp_p, df = kp_df)
+  list(stat = kp_f, p = kp_p, df = kp_df)
 }
 
 cd_stat = function(x){
-    # internal function
-    # x: fixest object
-    #
+  # internal function
+  # x: fixest object
+  #
 
-    if(!isTRUE(x$iv) || !x$iv_stage == 2) return(NA)
+  if(!isTRUE(x$iv) || !x$iv_stage == 2) return(NA)
 
-    # Necessary data
-    X = model.matrix(x, type = "iv.endo")
-    X_proj = proj_on_U(x, X)
+  # Necessary data
+  X = model.matrix(x, type = "iv.endo")
+  X_proj = proj_on_U(x, X)
 
-    Z = model.matrix(x, type = "iv.inst")
-    Z_proj = proj_on_U(x, Z)
+  Z = model.matrix(x, type = "iv.inst")
+  Z_proj = proj_on_U(x, Z)
 
-    n = nobs(x)
-    n_endo = NCOL(X_proj)
-    n_inst = NCOL(Z_proj)
+  n = nobs(x)
+  n_endo = NCOL(X_proj)
+  n_inst = NCOL(Z_proj)
 
-    # The stat
-    if(FALSE){
-        # => just use the canonical correlation, it's faster
+  # The stat
+  if(FALSE){
+    # => just use the canonical correlation, it's faster
 
-        df_resid = degrees_freedom(x, resid, stage = 1)
-        V = resid(summary(x, stage = 1))
+    df_resid = degrees_freedom(x, resid, stage = 1)
+    V = resid(summary(x, stage = 1))
 
-        P_Z_proj = Z_proj %*% solve(crossprod(Z_proj)) %*% t(Z_proj)
+    P_Z_proj = Z_proj %*% solve(crossprod(Z_proj)) %*% t(Z_proj)
 
-        SIGMA_vv_hat = (t(X) %*% V) / df_resid
+    SIGMA_vv_hat = (t(X) %*% V) / df_resid
 
-        inv_sqrt_SIGMA_vv_hat = solve(mat_sqrt(SIGMA_vv_hat))
+    inv_sqrt_SIGMA_vv_hat = solve(mat_sqrt(SIGMA_vv_hat))
 
-        G = (t(inv_sqrt_SIGMA_vv_hat) %*% t(X_proj) %*% P_Z_proj %*% X_proj %*% inv_sqrt_SIGMA_vv_hat) / n_inst
+    G = (t(inv_sqrt_SIGMA_vv_hat) %*% t(X_proj) %*% P_Z_proj %*% X_proj %*% inv_sqrt_SIGMA_vv_hat) / n_inst
 
-        cd = min(eigen(G)$values)
+    cd = min(eigen(G)$values)
 
-    } else {
-        cc = min(cancor(X_proj, Z_proj)$cor)
-        cd = ((n - n_endo - n_inst - 1) / n_inst) / ((1 - cc^2) / cc^2)
-    }
+  } else {
+    cc = min(cancor(X_proj, Z_proj)$cor)
+    cd = ((n - n_endo - n_inst - 1) / n_inst) / ((1 - cc^2) / cc^2)
+  }
 
-    cd
+  cd
 }
 
 
@@ -1609,36 +1755,36 @@ cd_stat = function(x){
 ####
 
 mat_sqrt = function(A){
-    e = eigen(A)
-    # e$vectors %*% diag(x = sqrt(e$values), nrow = nrow(A)) %*% t(e$vectors)
-    ev = pmax(e$values, 1e-10)
-    M = e$vectors %*% diag(x = ev**.25, nrow = nrow(A))
-    tcrossprod(M)
+  e = eigen(A)
+  # e$vectors %*% diag(x = sqrt(e$values), nrow = nrow(A)) %*% t(e$vectors)
+  ev = pmax(e$values, 1e-10)
+  M = e$vectors %*% diag(x = ev**.25, nrow = nrow(A))
+  tcrossprod(M)
 }
 
 
 mat_svd = function(A){
-    # From https://rpubs.com/aaronsc32/singular-value-decomposition-r
-    # https://math.stackexchange.com/questions/2359992/how-to-resolve-the-sign-issue-in-a-svd-problem
+  # From https://rpubs.com/aaronsc32/singular-value-decomposition-r
+  # https://math.stackexchange.com/questions/2359992/how-to-resolve-the-sign-issue-in-a-svd-problem
 
-    ATA = crossprod(A)
-    ATA.e = eigen(ATA)
-    v = ATA.e$vectors
+  ATA = crossprod(A)
+  ATA.e = eigen(ATA)
+  v = ATA.e$vectors
 
-    AAT = tcrossprod(A)
-    AAT.e = eigen(AAT)
-    u = AAT.e$vectors
-    r = sqrt(ATA.e$values)
+  AAT = tcrossprod(A)
+  AAT.e = eigen(AAT)
+  u = AAT.e$vectors
+  r = sqrt(ATA.e$values)
 
-    # we want the last diag element of vt to be positive
-    vt = t(v)
-    k = nrow(vt)
-    if(nrow(u) == k && vt[k, k] < 0){
-        vt[k, ] = - vt[k, ]
-        u[, k] = - u[, k]
-    }
+  # we want the last diag element of vt to be positive
+  vt = t(v)
+  k = nrow(vt)
+  if(nrow(u) == k && vt[k, k] < 0){
+    vt[k, ] = - vt[k, ]
+    u[, k] = - u[, k]
+  }
 
-    list(u = u, vt = vt, d = r)
+  list(u = u, vt = vt, d = r)
 }
 
 
@@ -1646,52 +1792,52 @@ mat_svd = function(A){
 
 
 proj_on_U = function(x, Z){
-    # Projects some variables (either the endo or the inst) on the
-    # exogenous variables (U)
-    #
-    # x: a fixest IV estimation
-    #
-    # I write Z in the arguments, but it can be any matrix (like X)
-    #
+  # Projects some variables (either the endo or the inst) on the
+  # exogenous variables (U)
+  #
+  # x: a fixest IV estimation
+  #
+  # I write Z in the arguments, but it can be any matrix (like X)
+  #
 
-    U = model.matrix(x, type = "iv.exo")
-    is_U = !is.null(U)
+  U = model.matrix(x, type = "iv.exo")
+  is_U = !is.null(U)
 
-    if(!is.null(x$fixef_vars)){
-        # we need to center the variables
-        # Of course, if there are varying slopes, that's a pain in the neck
+  if(!is.null(x$fixef_vars)){
+    # we need to center the variables
+    # Of course, if there are varying slopes, that's a pain in the neck
 
-        if(!is.null(x$slope_flag)){
-            Z_dm = demean(Z, x$fixef_id[order(x$fixef_sizes, decreasing = TRUE)],
-                          slope.vars = x$slope_variables_reordered,
-                          slope.flag = x$slope_flag_reordered)
+    if(!is.null(x$slope_flag)){
+      Z_dm = demean(Z, x$fixef_id[order(x$fixef_sizes, decreasing = TRUE)],
+                    slope.vars = x$slope_variables_reordered,
+                    slope.flag = x$slope_flag_reordered)
 
-            if(is_U){
-                U_dm = demean(U, x$fixef_id[order(x$fixef_sizes, decreasing = TRUE)],
-                              slope.vars = x$slope_variables_reordered,
-                              slope.flag = x$slope_flag_reordered)
-            }
+      if(is_U){
+        U_dm = demean(U, x$fixef_id[order(x$fixef_sizes, decreasing = TRUE)],
+                      slope.vars = x$slope_variables_reordered,
+                      slope.flag = x$slope_flag_reordered)
+      }
 
-        } else {
-            Z_dm = demean(Z, x$fixef_id)
-            if(is_U){
-                U_dm = demean(U, x$fixef_id)
-            }
-        }
-
-        if(is_U){
-            Z_proj = resid(feols.fit(Z_dm, U_dm))
-        } else {
-            Z_proj = Z_dm
-        }
-
-    } else if(is_U){
-        Z_proj = resid(feols.fit(Z, U))
     } else {
-        Z_proj = Z
+      Z_dm = demean(Z, x$fixef_id)
+      if(is_U){
+        U_dm = demean(U, x$fixef_id)
+      }
     }
 
-    Z_proj
+    if(is_U){
+      Z_proj = resid(feols.fit(Z_dm, U_dm))
+    } else {
+      Z_proj = Z_dm
+    }
+
+  } else if(is_U){
+    Z_proj = resid(feols.fit(Z, U))
+  } else {
+    Z_proj = Z
+  }
+
+  Z_proj
 }
 
 

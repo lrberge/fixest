@@ -9,7 +9,8 @@
 \arguments{
 \item{x}{An object resulting from the \code{\link{fitstat}} function.}
 
-\item{na.rm}{Logical, default is \code{FALSE}. If \code{TRUE}, the statistics that are missing are not displayed.}
+\item{na.rm}{Logical, default is \code{FALSE}. If \code{TRUE}, the statistics that are missing
+are not displayed.}
 
 \item{...}{Not currently used.}
 }

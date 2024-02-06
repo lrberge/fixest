@@ -58,9 +58,11 @@ does not contain \dQuote{Intercept} goes first).  See details.}
 
 \item{collin}{Logical, default is \code{FALSE}. Whether the coefficients removed because of collinearity should be also returned as \code{NA}. It cannot be used when coefficients aggregation is also used.}
 
-\item{long}{Logical, default is \code{FALSE}. Whether the results should be displayed in a long format.}
+\item{long}{Logical, default is \code{FALSE}. Whether the results should be displayed
+in a long format.}
 
-\item{na.rm}{Logical, default is \code{TRUE}. Only applies when \code{long = TRUE}: whether to remove the coefficients with \code{NA} values.}
+\item{na.rm}{Logical, default is \code{TRUE}. Only applies when \code{long = TRUE}: whether to remove
+the coefficients with \code{NA} values.}
 
 \item{...}{Not currently used.}
 }

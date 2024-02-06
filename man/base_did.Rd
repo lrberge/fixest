@@ -5,7 +5,8 @@
 \alias{base_did}
 \title{Sample data for difference in difference}
 \format{
-\code{base_did} is a data frame with 1,040 observations and 6 variables named \code{y}, \code{x1}, \code{id}, \code{period}, \code{post} and \code{treat}.
+\code{base_did} is a data frame with 1,040 observations and 6 variables named
+\code{y}, \code{x1}, \code{id}, \code{period}, \code{post} and \code{treat}.
 
 \describe{
 \item{y}{The dependent variable affected by the treatment.}
@@ -24,6 +25,9 @@ This data has been generated from \pkg{R}.
 data(base_did)
 }
 \description{
-This data has been generated to illustrate the use of difference in difference functions in package \pkg{fixest}. This is a balanced panel of 104 individuals and 10 periods. About half the individuals are treated, the treatment having a positive effect on the dependent variable \code{y} after the 5th period. The effect of the treatment on \code{y} is gradual.
+This data has been generated to illustrate the use of difference in difference functions in
+package \pkg{fixest}. This is a balanced panel of 104 individuals and 10 periods.
+About half the individuals are treated, the treatment having a positive effect on
+the dependent variable \code{y} after the 5th period. The effect of the treatment on \code{y} is gradual.
 }
 \keyword{datasets}

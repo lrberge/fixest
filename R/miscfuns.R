@@ -1283,7 +1283,7 @@ i = function(factor_var, var, ref, keep, bin, ref2, keep2, bin2, ...){
       if(grepl("^i\\.", var_name)){
         var_name = gsub("^i\\.", "", var_name)
         var = str2lang(var_name)
-        check_value_plus(var, "evalset vector", .data = parent.frame(), .arg_name = "var")
+        check_set_value(var, "evalset vector", .data = parent.frame(), .arg_name = "var")
         IS_INTER_FACTOR = TRUE
       } else {
         check_value(var, "vector", .arg_name = "var")
@@ -4821,7 +4821,7 @@ items_to_drop = function(items, x, varname, keep = FALSE, argname,
           my_x = items[qui_ok]
           my_x = my_x[!is.na(my_x)]
         } else {
-          check_value_plus(my_x, "match", .choices = unique(items), .message = paste0("The argument `", argname, "` should contain values of the variable `", varname, "`."))
+          check_set_value(my_x, "match", .choices = unique(items), .message = paste0("The argument `", argname, "` should contain values of the variable `", varname, "`."))
         }
 
         all_x = c(all_x, my_x)
@@ -5455,6 +5455,10 @@ fixest_CI_factor = function(x, level, vcov = NULL, df.t = NULL){
 
 
 sma = string_magic_alias(.check = FALSE)
+
+cma = cat_magic_alias(.check = FALSE)
+
+mma = message_magic_alias(.check = FALSE)
 
 escape_regex = function(x){
   # escape special characters in regular expressions => to make it as "fixed"
@@ -6491,7 +6495,7 @@ check_set_types = function(x, types, msg){
     x = attr(terms(x), "term.labels")
   }
 
-  check_value_plus(x, "multi match", .choices = types, .arg_name = arg_name, .up = 1)
+  check_set_value(x, "multi match", .choices = types, .arg_name = arg_name, .up = 1)
 
   x
 }

@@ -261,7 +261,15 @@ give a list of \code{fixest} objects.}
 
 \item{stage}{Can be equal to \code{2} (default), \code{1}, \code{1:2} or \code{2:1}. Only used if the object is an IV estimation: defines the stage to which \code{summary} should be applied. If \code{stage = 1} and there are multiple endogenous regressors or if \code{stage} is of length 2, then an object of class \code{fixest_multi} is returned.}
 
-\item{agg}{A character scalar describing the variable names to be aggregated, it is pattern-based. For \code{\link{sunab}} estimations, the following keywords work: "att", "period", "cohort" and \code{FALSE} (to have full disaggregation). All variables that match the pattern will be aggregated. It must be of the form \code{"(root)"}, the parentheses must be there and the resulting variable name will be \code{"root"}. You can add another root with parentheses: \code{"(root1)regex(root2)"}, in which case the resulting name is \code{"root1::root2"}. To name the resulting variable differently you can pass a named vector: \code{c("name" = "pattern")} or \code{c("name" = "pattern(root2)")}. It's a bit intricate sorry, please see the examples.}
+\item{agg}{A character scalar describing the variable names to be aggregated,
+it is pattern-based. For \code{\link{sunab}} estimations, the following keywords work: "att",
+"period", "cohort" and \code{FALSE} (to have full disaggregation). All variables that
+match the pattern will be aggregated. It must be of the form \code{"(root)"}, the parentheses
+must be there and the resulting variable name will be \code{"root"}. You can add another
+root with parentheses: \code{"(root1)regex(root2)"}, in which case the resulting
+name is \code{"root1::root2"}. To name the resulting variable differently you can pass
+a named vector: \code{c("name" = "pattern")} or \code{c("name" = "pattern(root2)")}. It's a
+bit intricate sorry, please see the examples.}
 
 \item{se}{Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "iid"}. Note that this argument is deprecated, you should use \code{vcov} instead.}
 

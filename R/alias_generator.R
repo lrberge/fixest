@@ -16,17 +16,17 @@
 
 
 create_aliases = function(){
-    # This function is triggered only at loading time
-    # BUT ONLY FOR ME, THE DEVELOPPER!!!!!
-    # The function knows it's "me" with the system environment variable fixest_ROOT
+  # This function is triggered only at loading time
+  # BUT ONLY FOR ME, THE DEVELOPPER!!!!!
+  # The function knows it's "me" with the system environment variable fixest_ROOT
 
-    if(!isTRUE(renvir_get("fixest_ROOT"))) return(NULL)
-    # we check we're in the right directory (otherwise there can be prblms with Rmakdown)
-    if(!isTRUE(file.exists("./R/alias_VCOV.R"))) return(NULL)
+  if(!isTRUE(renvir_get("fixest_ROOT"))) return(NULL)
+  # we check we're in the right directory (otherwise there can be prblms with Rmakdown)
+  if(!isTRUE(file.exists("./R/alias_VCOV.R"))) return(NULL)
 
-    gen_etable_aliases()
-    gen_iplot()
-    gen_vcov_aliases()
+  gen_etable_aliases()
+  gen_iplot()
+  gen_vcov_aliases()
 
 }
 

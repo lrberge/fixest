@@ -33,10 +33,13 @@
 \item{...}{Not currently used.}
 }
 \value{
-It returns a data frame whose first columns indicate which model has been estimated. The last three columns indicate the coefficient name, and the lower and upper confidence intervals.
+It returns a data frame whose first columns indicate which model has been estimated.
+The last three columns indicate the coefficient name, and the lower and upper
+confidence intervals.
 }
 \description{
-Computes the confidence intervals of parameter estimates for \code{fixest}'s multiple estimation objects (aka \code{fixest_multi}).
+Computes the confidence intervals of parameter estimates for \code{fixest}'s multiple
+estimation objects (aka \code{fixest_multi}).
 }
 \examples{
 

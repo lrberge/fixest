@@ -1567,7 +1567,7 @@ vcov_conley = function(x, lat = NULL, lon = NULL, cutoff = NULL, pixel = 0,
                 .prefix = "In vcov.fixest, Conley VCOV cannot be computed: the argument 'pixel'")
 
     # distance
-    check_value_plus(distance, "match(triangular, spherical)")
+    check_set_value(distance, "match(triangular, spherical)")
 
     # recreating the call
     vcov = .xpd(lhs = "conley", rhs = c(lat, lon))
@@ -2053,7 +2053,7 @@ vcov_conley_internal = function(bread, scores, vars, sandwich, nthreads,
                 .prefix = "In vcov.fixest, Conley VCOV cannot be computed: the argument 'pixel'")
 
     # distance
-    check_value_plus(distance, "match(triangular, spherical)")
+    check_set_value(distance, "match(triangular, spherical)")
     distance = switch(distance,
                       spherical = 1,
                       triangular = 2)
@@ -2152,7 +2152,7 @@ oldargs_to_vcov = function(se, cluster, vcov, .vcov = NULL){
         all_vcov_names = all_vcov_names[nchar(all_vcov_names) > 0]
 
         if(missnull(se)) se = "cluster"
-        check_value_plus(se, "match", .choices = all_vcov_names, .prefix = "Argument 'se' (which has been replaced by arg. 'vcov')")
+        check_set_value(se, "match", .choices = all_vcov_names, .prefix = "Argument 'se' (which has been replaced by arg. 'vcov')")
 
         if(missnull(cluster)){
             vcov = se

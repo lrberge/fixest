@@ -7,12 +7,17 @@
 models(x, simplify = FALSE)
 }
 \arguments{
-\item{x}{A \code{fixest_multi} object, obtained from a \code{fixest} estimation leading to multiple results.}
+\item{x}{A \code{fixest_multi} object, obtained from a \code{fixest} estimation leading to
+multiple results.}
 
-\item{simplify}{Logical, default is \code{FALSE}. The default behavior is to display all the meta information, even if they are identical across models. By using \code{simplify = TRUE}, only the information with some variation is kept.}
+\item{simplify}{Logical, default is \code{FALSE}. The default behavior is to display all the meta
+information, even if they are identical across models. By using \code{simplify = TRUE}, only the
+information with some variation is kept.}
 }
 \value{
-It returns a \code{data.frame} whose first column (named \code{id}) is the index of the models and the other columns contain the information specific to each model (e.g. which sample, which RHS,  which dependent variable, etc).
+It returns a \code{data.frame} whose first column (named \code{id}) is the index of the models and
+the other columns contain the information specific to each model (e.g. which sample,
+which RHS,  which dependent variable, etc).
 }
 \description{
 Extracts the meta information on all the models contained in a \code{fixest_multi} estimation.

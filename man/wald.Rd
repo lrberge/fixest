@@ -27,7 +27,9 @@ display only \code{x1} to \code{x9}, then you could use \verb{drop = "x[[:digit:
 is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable
 that does not contain \dQuote{Intercept} is dropped). See details.}
 
-\item{print}{Logical, default is \code{TRUE}. If \code{TRUE}, then a verbose description of the test is prompted on the R console. Otherwise only a named vector containing the test statistics is returned.}
+\item{print}{Logical, default is \code{TRUE}. If \code{TRUE}, then a verbose description of the test
+is prompted on the R console. Otherwise only a named vector containing the test statistics
+is returned.}
 
 \item{vcov}{Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: \code{vcov_type ~ variables}. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from \code{\link{vcov_cluster}}, \code{\link[=vcov_hac]{vcov_NW}}, \code{\link[=vcov_hac]{NW}}, \code{\link[=vcov_hac]{vcov_DK}}, \code{\link[=vcov_hac]{DK}}, \code{\link{vcov_conley}} and \code{\link[=vcov_conley]{conley}}. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the \code{vcov} documentation in the \href{https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1}{vignette}.}
 
@@ -38,7 +40,9 @@ that does not contain \dQuote{Intercept} is dropped). See details.}
 \item{...}{Any other element to be passed to \code{\link{summary.fixest}}.}
 }
 \value{
-A named vector containing the following elements is returned: \code{stat}, \code{p}, \code{df1}, and \code{df2}. They correspond to the test statistic, the p-value, the first and second degrees of freedoms.
+A named vector containing the following elements is returned: \code{stat}, \code{p}, \code{df1},
+and \code{df2}. They correspond to the test statistic, the p-value, the first and
+second degrees of freedoms.
 
 If no valid coefficient is found, the value \code{NA} is returned.
 }
@@ -46,7 +50,8 @@ If no valid coefficient is found, the value \code{NA} is returned.
 Wald test used to test the joint nullity of a set of coefficients.
 }
 \details{
-The type of VCOV matrix plays a crucial role in this test. Use the arguments \code{se} and \code{cluster} to change the type of VCOV for the test.
+The type of VCOV matrix plays a crucial role in this test. Use the arguments \code{se} and
+\code{cluster} to change the type of VCOV for the test.
 }
 \examples{
 

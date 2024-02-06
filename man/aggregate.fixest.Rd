@@ -9,11 +9,22 @@
 \arguments{
 \item{x}{A \code{fixest} object.}
 
-\item{agg}{A character scalar describing the variable names to be aggregated, it is pattern-based. For \code{\link{sunab}} estimations, the following keywords work: "att", "period", "cohort" and \code{FALSE} (to have full disaggregation). All variables that match the pattern will be aggregated. It must be of the form \code{"(root)"}, the parentheses must be there and the resulting variable name will be \code{"root"}. You can add another root with parentheses: \code{"(root1)regex(root2)"}, in which case the resulting name is \code{"root1::root2"}. To name the resulting variable differently you can pass a named vector: \code{c("name" = "pattern")} or \code{c("name" = "pattern(root2)")}. It's a bit intricate sorry, please see the examples.}
+\item{agg}{A character scalar describing the variable names to be aggregated,
+it is pattern-based. For \code{\link{sunab}} estimations, the following keywords work: "att",
+"period", "cohort" and \code{FALSE} (to have full disaggregation). All variables that
+match the pattern will be aggregated. It must be of the form \code{"(root)"}, the parentheses
+must be there and the resulting variable name will be \code{"root"}. You can add another
+root with parentheses: \code{"(root1)regex(root2)"}, in which case the resulting
+name is \code{"root1::root2"}. To name the resulting variable differently you can pass
+a named vector: \code{c("name" = "pattern")} or \code{c("name" = "pattern(root2)")}. It's a
+bit intricate sorry, please see the examples.}
 
-\item{full}{Logical scalar, defaults to \code{FALSE}. If \code{TRUE}, then all coefficients are returned, not only the aggregated coefficients.}
+\item{full}{Logical scalar, defaults to \code{FALSE}. If \code{TRUE}, then all coefficients
+are returned, not only the aggregated coefficients.}
 
-\item{use_weights}{Logical, default is \code{TRUE}. If the estimation was weighted, whether the aggregation should take into account the weights. Basically if the weights reflected frequency it should be \code{TRUE}.}
+\item{use_weights}{Logical, default is \code{TRUE}. If the estimation was weighted,
+whether the aggregation should take into account the weights. Basically if the
+weights reflected frequency it should be \code{TRUE}.}
 
 \item{...}{Arguments to be passed to \code{\link{summary.fixest}}.}
 }
@@ -21,12 +32,19 @@
 It returns a matrix representing a table of coefficients.
 }
 \description{
-Simple tool that aggregates the value of CATT coefficients in staggered difference-in-difference setups (see details).
+Simple tool that aggregates the value of CATT coefficients in staggered
+difference-in-difference setups (see details).
 }
 \details{
-This is a function helping to replicate the estimator from Sun and Abraham (2020). You first need to perform an estimation with cohort and relative periods dummies (typically using the function \code{\link{i}}), this leads to estimators of the cohort average treatment effect on the treated (CATT). Then you can use this function to retrieve the average treatment effect on each relative period, or for any other way you wish to aggregate the CATT.
+This is a function helping to replicate the estimator from Sun and Abraham (2021).
+You first need to perform an estimation with cohort and relative periods dummies
+(typically using the function \code{\link{i}}), this leads to estimators of the cohort
+average treatment effect on the treated (CATT). Then you can use this function to
+retrieve the average treatment effect on each relative period, or for any other way
+you wish to aggregate the CATT.
 
-Note that contrary to the SA article, here the cohort share in the sample is considered to be a perfect measure for the cohort share in the population.
+Note that contrary to the SA article, here the cohort share in the sample is
+considered to be a perfect measure for the cohort share in the population.
 }
 \examples{
 
@@ -78,7 +96,8 @@ aggregate(res_cohort, c("cohort" = "::[^-].*year_treated::([[:digit:]]+)"))
 
 }
 \references{
-Liyang Sun and Sarah Abraham, forthcoming, "Estimating Dynamic Treatment Effects in Event Studies with Heterogeneous Treatment Effects". Journal of Econometrics.
+Liyang Sun and Sarah Abraham, 2021, "Estimating Dynamic Treatment Effects in
+Event Studies with Heterogeneous Treatment Effects". Journal of Econometrics.
 }
 \author{
 Laurent Berge

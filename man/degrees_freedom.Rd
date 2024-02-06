@@ -21,9 +21,16 @@ degrees_freedom_iid(x, type)
 \arguments{
 \item{x}{A \code{fixest} estimation.}
 
-\item{type}{Character scalar, equal to "k", "resid", "t". If "k", then the number of regressors is returned. If "resid", then it is the "residuals degree of freedom", i.e. the number of observations minus the number of regressors. If "t", it is the degrees of freedom used in the t-test. Note that these values are affected by how the VCOV of \code{x} is computed, in particular when the VCOV is clustered.}
+\item{type}{Character scalar, equal to "k", "resid", "t". If "k", then the number of
+regressors is returned. If "resid", then it is the "residuals degree of freedom", i.e.
+the number of observations minus the number of regressors. If "t", it is the degrees of
+freedom used in the t-test. Note that these values are affected by how the VCOV of \code{x}
+is computed, in particular when the VCOV is clustered.}
 
-\item{vars}{A vector of variable names, of the regressors. This is optional. If provided, then \code{type} is set to 1 by default and the number of regressors contained in \code{vars} is returned. This is only useful in the presence of collinearity and we want a subset of the regressors only. (Mostly for internal use.)}
+\item{vars}{A vector of variable names, of the regressors. This is optional. If provided,
+then \code{type} is set to 1 by default and the number of regressors contained in \code{vars}
+is returned. This is only useful in the presence of collinearity and we want a subset of
+the regressors only. (Mostly for internal use.)}
 
 \item{vcov}{Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: \code{vcov_type ~ variables}. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from \code{\link{vcov_cluster}}, \code{\link[=vcov_hac]{vcov_NW}}, \code{\link[=vcov_hac]{NW}}, \code{\link[=vcov_hac]{vcov_DK}}, \code{\link[=vcov_hac]{DK}}, \code{\link{vcov_conley}} and \code{\link[=vcov_conley]{conley}}. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the \code{vcov} documentation in the \href{https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1}{vignette}.}
 
@@ -35,7 +42,11 @@ degrees_freedom_iid(x, type)
 
 \item{stage}{Either 1 or 2. Only concerns IV regressions, which stage to look at.
 
-The type of VCOV can have an influence on the degrees of freedom. In particular, when the VCOV is clustered, the DoF returned will be in accordance with the way the small sample correction was performed when computing the VCOV. That type of value is in general not what we have in mind when we think of "degrees of freedom". To obtain the ones that are more intuitive, please use \code{degrees_freedom_iid} instead.}
+The type of VCOV can have an influence on the degrees of freedom. In particular, when the
+VCOV is clustered, the DoF returned will be in accordance with the way the small
+sample correction was performed when computing the VCOV. That type of value is in general
+not what we have in mind when we think of "degrees of freedom". To obtain the ones that are
+more intuitive, please use \code{degrees_freedom_iid} instead.}
 }
 \description{
 Simple utility to extract the degrees of freedom from a \code{fixest} estimation.

@@ -1563,7 +1563,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
       meta_vars = all.vars(meta, functions = TRUE)
       meta_vars = meta_vars[grepl("[[:alpha:]]{2,}", meta_vars)]
 
-      check_value_plus(meta_vars, "multi match(time, date, sys, author, comment, call)",
+      check_set_value(meta_vars, "multi match(time, date, sys, author, comment, call)",
                .message = paste0("The argument 'meta' must be a one-sided formula composed of the following variables: \n",
                "  time, date, author, sys, call or comment."))
 
@@ -6972,7 +6972,7 @@ tag_gen = function(){
 check_set_page_width = function(page.width, up = 0){
 
   set_up(up + 1)
-  check_value_plus(page.width, 
+  check_set_value(page.width, 
                    "match(fit, a4, us) | vector(character, numeric) GT{0} len(1, 2) no NA")
 
   if(isTRUE(attr(page.width, "no-margin"))){

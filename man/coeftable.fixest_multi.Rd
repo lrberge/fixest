@@ -80,21 +80,32 @@ years, then the months you could use: \code{order = c("x", "year")}. If the firs
 exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that
 does not contain \dQuote{Intercept} goes first).  See details.}
 
-\item{long}{Logical scalar, default is \code{FALSE}. If \code{TRUE}, then all the information is stacked, with two columns containing the information: \code{"param"} and \code{"value"}. The column \code{param} contains the values \code{coef}/\code{se}/\code{tstat}/\code{pvalue}.}
+\item{long}{Logical scalar, default is \code{FALSE}. If \code{TRUE}, then all the information
+is stacked, with two columns containing the information: \code{"param"} and \code{"value"}.
+The column \code{param} contains the values \code{coef}/\code{se}/\code{tstat}/\code{pvalue}.}
 
-\item{wide}{A logical scalar, default is \code{FALSE}. If \code{TRUE}, then a list is returned: the elements of the list are coef/se/tstat/pvalue. Each element of the list is a wide table with a column per coefficient.}
+\item{wide}{A logical scalar, default is \code{FALSE}. If \code{TRUE}, then a list is returned:
+the elements of the list are coef/se/tstat/pvalue. Each element of the list is a wide
+table with a column per coefficient.}
 
 \item{...}{Other arguments to be passed to \code{\link{summary.fixest}}.}
 }
 \value{
-It returns a \code{data.frame} containing the coefficients tables (or just the se/pvalue/tstat) along with the information on which model was estimated.
+It returns a \code{data.frame} containing the coefficients tables (or just the se/pvalue/tstat)
+along with the information on which model was estimated.
 
-If \code{wide = TRUE}, then a list is returned. The elements of the list are coef/se/tstat/pvalue. Each element of the list is a wide table with a column per coefficient.
+If \code{wide = TRUE}, then a list is returned. The elements of the list are
+coef/se/tstat/pvalue. Each element of the list is a wide table with a column per coefficient.
 
-If \code{long = TRUE}, then all the information is stacked. This removes the 4 columns containing the coefficient estimates to the p-values, and replace them with two new columns: \code{"param"} and \code{"value"}. The column \code{param} contains the values \code{coef}/\code{se}/\code{tstat}/\code{pvalue}, and the column \code{values} the associated numerical information.
+If \code{long = TRUE}, then all the information is stacked. This removes the 4 columns
+containing the coefficient estimates to the p-values, and replace them with two
+new columns: \code{"param"} and \code{"value"}. The column \code{param} contains the
+values \code{coef}/\code{se}/\code{tstat}/\code{pvalue}, and the column \code{values} the
+associated numerical information.
 }
 \description{
-Series of methods to extract the coefficients table or its sub-components from a \code{fixest_multi} objects (i.e. the outcome of multiple estimations).
+Series of methods to extract the coefficients table or its sub-components from a
+\code{fixest_multi} objects (i.e. the outcome of multiple estimations).
 }
 \section{Functions}{
 \itemize{
@@ -108,7 +119,7 @@ Series of methods to extract the coefficients table or its sub-components from a
 \examples{
 
 base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
-est_multi = feols(y~ csw(x.[,1:3]), base, split = ~species)
+est_multi = feols(y ~ csw(x.[,1:3]), base, split = ~species)
 
 # we get all the coefficient tables at once
 coeftable(est_multi)

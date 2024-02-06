@@ -206,7 +206,7 @@ run_test = function(chunk, from){
         n_chunks = length(qui)
 
         if(!missing(from)){
-            check_value_plus(from, "match | integer scalar no na", .choices = chunk_names)
+            check_set_value(from, "match | integer scalar no na", .choices = chunk_names)
 
             if(is.numeric(from)){
                 if(any(from > n_chunks)){
@@ -218,7 +218,7 @@ run_test = function(chunk, from){
             }
 
         } else {
-            check_value_plus(chunk, "multi match | integer vector no na", .choices = chunk_names)
+            check_set_value(chunk, "multi match | integer vector no na", .choices = chunk_names)
 
             if(is.numeric(chunk)){
                 if(any(chunk > n_chunks)){
