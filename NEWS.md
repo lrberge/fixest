@@ -4,10 +4,15 @@
 ## Bugs
 
 - fix bug when the covariance matrix was *very* ill-defined. Thanks to Gianluca Russo.
+- pass correctly `nthreads` to `summary` when the VCOV is provided at estimation time. Thanks to @arcruz0, #379.
  
 ## Improvements
 
 - functions `vcov` gains the argument `vcov_fix` to monitor whether to fix the covariance matrix with an eigenvalue decomposition (previously this was always turned on).
+
+## Documentation
+
+- fix typos and display issues thanks to: @statzhero, @eyayaw, @etiennebacher, @raffaem.
 
 # fixest 0.11.2
 
