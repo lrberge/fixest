@@ -35,9 +35,9 @@
 #include <math.h>
 #include <vector>
 #ifdef _OPENMP
-    #include <omp.h>
+	#include <omp.h>
 #else
-    #define omp_get_thread_num() 0
+	#define omp_get_thread_num() 0
 #endif
 
 // [[Rcpp::plugins(openmp)]]
@@ -48,15 +48,15 @@ using std::vector;
 // Stopping / continuing criteria
 // Functions used inside all loops
 inline bool continue_criterion(double a, double b, double diffMax){
-    // continuing criterion of the algorithm
-    double diff = fabs(a - b);
-    return ( (diff > diffMax) && (diff/(0.1 + fabs(a)) > diffMax) );
+	// continuing criterion of the algorithm
+	double diff = fabs(a - b);
+	return ( (diff > diffMax) && (diff/(0.1 + fabs(a)) > diffMax) );
 }
 
 inline bool stopping_criterion(double a, double b, double diffMax){
-    // stopping criterion of the algorithm
-    double diff = fabs(a - b);
-    return ( (diff < diffMax) || (diff/(0.1 + fabs(a)) < diffMax) );
+	// stopping criterion of the algorithm
+	double diff = fabs(a - b);
+	return ( (diff < diffMax) || (diff/(0.1 + fabs(a)) < diffMax) );
 }
 
 // List of objects that will be used to
@@ -93,9 +93,9 @@ bool update_X_IronsTuck(int nb_coef_no_K, vector<double> &X,
                         vector<double> &delta_GX, vector<double> &delta2_X){
 
 	for(int i=0 ; i<nb_coef_no_K ; ++i){
-	    double GX_tmp = GX[i];
-	    delta_GX[i] = GGX[i] - GX_tmp;
-	    delta2_X[i] = delta_GX[i] - GX_tmp + X[i];
+		double GX_tmp = GX[i];
+		delta_GX[i] = GGX[i] - GX_tmp;
+		delta2_X[i] = delta_GX[i] - GX_tmp + X[i];
 		// delta_GX[i] = GGX[i] - GX[i];
 		// delta2_X[i] = delta_GX[i] - GX[i] + X[i];
 	}
@@ -103,9 +103,9 @@ bool update_X_IronsTuck(int nb_coef_no_K, vector<double> &X,
 	// delta_GX %*% delta2_X and crossprod(delta2_X)
 	double vprod = 0, ssq = 0;
 	for(int i=0 ; i<nb_coef_no_K ; ++i){
-	    double delta2_X_tmp = delta2_X[i];
-	    vprod += delta_GX[i] * delta2_X_tmp;
-	    ssq += delta2_X_tmp * delta2_X_tmp;
+		double delta2_X_tmp = delta2_X[i];
+		vprod += delta_GX[i] * delta2_X_tmp;
+		ssq += delta2_X_tmp * delta2_X_tmp;
 		// vprod += delta_GX[i] * delta2_X[i];
 		// ssq += delta2_X[i] * delta2_X[i];
 	}
@@ -254,7 +254,7 @@ void CCC_negbin(int nthreads, int nb_cluster, double theta, double diffMax_NR,
 
 	// Rprintf("inf: %f -- sup: %f -- middle: %f\n", borne_inf[0], borne_sup[0], (borne_inf[0] + borne_sup[0])/2);
 
-    #pragma omp parallel for num_threads(nthreads)
+	#pragma omp parallel for num_threads(nthreads)
 	for(int m=0 ; m<nb_cluster ; ++m){
 		// we loop over each cluster
 
@@ -2022,13 +2022,13 @@ List cpp_conv_seq_gau_2(int n_i, int n_j, int n_cells,
 	// }
 
 	for(int obs=0 ; obs<n_obs ; ++obs){
-	    double resid_tmp = resid[obs];
-	    int d_i = dum_i[obs];
-	    int d_j = dum_j[obs];
+		double resid_tmp = resid[obs];
+		int d_i = dum_i[obs];
+		int d_j = dum_j[obs];
 
-	    const_a[d_i] += resid_tmp * invTable_i[d_i];
+		const_a[d_i] += resid_tmp * invTable_i[d_i];
 
-	    const_b[d_j] += resid_tmp * invTable_j[d_j];
+		const_b[d_j] += resid_tmp * invTable_j[d_j];
 	}
 
 
@@ -2139,7 +2139,7 @@ List cpp_conv_seq_gau_2(int n_i, int n_j, int n_cells,
 
 // [[Rcpp::export]]
 List cpp_derivconv_seq_gnl(int iterMax, double diffMax, int n_vars, SEXP nb_cluster_all, SEXP ll_d2,
-                                    SEXP jacob_vector, SEXP deriv_init_vector, SEXP dum_vector){
+                           SEXP jacob_vector, SEXP deriv_init_vector, SEXP dum_vector){
 
 	int n_obs = Rf_length(ll_d2);
 	int K = Rf_length(nb_cluster_all);
@@ -2417,7 +2417,7 @@ void computeDerivCoef(vector<double*> &pcoef_origin, vector<double*> &pcoef_dest
 
 // [[Rcpp::export]]
 List cpp_derivconv_acc_gnl(int iterMax, double diffMax, int n_vars, SEXP nb_cluster_all, SEXP ll_d2,
-                                    SEXP jacob_vector, SEXP deriv_init_vector, SEXP dum_vector){
+                           SEXP jacob_vector, SEXP deriv_init_vector, SEXP dum_vector){
 
 
 	int n_obs = Rf_length(ll_d2);
@@ -2670,8 +2670,8 @@ void computeDerivCoef_2(vector<double> &alpha_origin, vector<double> &alpha_dest
 
 // [[Rcpp::export]]
 List cpp_derivconv_acc_2(int iterMax, double diffMax, int n_vars, SEXP nb_cluster_all,
-                                  int n_cells, SEXP index_i, SEXP index_j, SEXP ll_d2, SEXP order,
-                                  SEXP jacob_vector, SEXP deriv_init_vector, SEXP dum_vector){
+                         int n_cells, SEXP index_i, SEXP index_j, SEXP ll_d2, SEXP order,
+                         SEXP jacob_vector, SEXP deriv_init_vector, SEXP dum_vector){
 
 	int n_obs = Rf_length(ll_d2);
 
