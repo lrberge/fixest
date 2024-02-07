@@ -400,7 +400,7 @@ run_tests = function(chunk, from = 1, source = FALSE){
       if(is.character(from)){
         from = check_set_options(from, chunk_names, "test_fun")[1]
       } else {
-        check_numeric(from, scalar = TRUE, integer = TRUE)
+        stopifnot(length(from) == 1, is.numeric(from), from %% 1 == 0)
       }
 
       if(is.numeric(from)){
@@ -416,7 +416,7 @@ run_tests = function(chunk, from = 1, source = FALSE){
       if(is.character(chunk)){
         chunk = check_set_options(chunk, chunk_names, "test_fun")
       } else {
-        check_numeric(chunk, scalar = TRUE, integer = TRUE)
+        stopifnot(length(chunk) == 1, is.numeric(chunk), chunk %% 1 == 0)
       }
 
       if(is.numeric(chunk)){
@@ -557,8 +557,8 @@ check_set_options = function(x, options, op = NULL, free = FALSE, case = FALSE){
     
     if(is.na(pm) && !free){
       # absence of a match
-      it_stop_up("The option `", v, "` is not valid for the current operation.\n",
-              "FYI the option available are ", enum(options), ".")
+      stop("The option `", v, "` is not valid for the current operation.\n",
+           "FYI the option available are ", paste(options, collapse = ", "), ".")
     }
 
     if(!is.na(pm)){
