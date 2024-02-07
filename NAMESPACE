@@ -32,7 +32,7 @@ export(xpd)
 # multiple estimations
 export(models)
 # utilities
-export(to_integer, demean, obs)
+export(to_integer, demean, obs, fixest_date)
 export(as.dict)
 # setters & getters
 exportPattern("^(s|g)etFixest")
