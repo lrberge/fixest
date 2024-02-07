@@ -390,7 +390,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #' (a la Cameron, Gelbach & Miller 2011).
 #' @param n Integer, default is 1000. Number of coefficients to display when the print method 
 #' is used.
-#' @param ... Only used if the argument `.vocv` is provided and is a function: extra arguments 
+#' @param ... Only used if the argument `.vcov` is provided and is a function: extra arguments 
 #' to be passed to that function.
 #'
 #' @section Compatibility with \pkg{sandwich} package:
@@ -505,7 +505,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #' # Compatibility with sandwich
 #' #
 #'
-#' # You can use the VOCVs from sandwich by using the argument .vcov:
+#' # You can use the VCOVs from sandwich by using the argument .vcov:
 #' library(sandwich)
 #' summary(est_pois, .vcov = vcovCL, cluster = trade[, c("Destination", "Product")])
 #'
