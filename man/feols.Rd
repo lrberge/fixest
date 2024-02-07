@@ -284,7 +284,8 @@ to use the user-level methods (e.g. \code{\link{vcov.fixest}}, \code{\link{resid
 \item{fml}{The linear formula of the call.}
 \item{call}{The call of the function.}
 \item{method}{The method used to estimate the model.}
-\item{family}{The family used to estimate the model.}
+\item{data}{The original data set used when calling the function. Only available when
+the estimation was called with \code{data.save = TRUE}}
 \item{fml_all}{A list containing different parts of the formula. Always contain the linear formula. Then depending on the cases: \code{fixef}: the fixed-effects, \code{iv}: the IV part of the formula.}
 \item{fixef_vars}{The names of each fixed-effect dimension.}
 \item{fixef_id}{The list (of length the number of fixed-effects) of the fixed-effects identifiers for each observation.}

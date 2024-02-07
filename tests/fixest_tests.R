@@ -2267,7 +2267,7 @@ test(cpp_escape_markup("\\$this_is **not** an\\^equation\\$. But $this&one, \\$,
 
 
 ####
-#### data.save ####
+#### data.save and fixest_data ####
 ####
 
 chunk("save data")
@@ -2287,12 +2287,22 @@ test(se_target, se(est, vcov = ~fe))
 
 test(se(est_noSave, vcov = ~fe), "err")
 
+# fixest data
 
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+base$y[1:5] = NA
 
+est = feols(y ~ x1 + x2, base)
 
+test(dim(fixest_data(est)), dim(base))
 
+test(nrow(fixest_data(est, "esti")), 145)
 
+est_mult = feols(y ~ x1 + x2, base, split = ~species)
 
+test(dim(fixest_data(est_mult)), dim(base))
+
+test(nrow(fixest_data(est_mult, "esti")), 45)
 
 
 

@@ -3174,6 +3174,60 @@ rep.fixest_list = function(x, times = 1, each = 1, vcov, ...){
 }
 
 
+
+#' Retrieves the data set used for a `fixest` estimation
+#' 
+#' Retrieves the original data set used to estimate a `fixest` or `fixest_multi` model. 
+#' Note that this is the original data set and not the data used for the estimation (i.e. it can have more rows).
+#' 
+#' @param x An object of class `fixest` or `fixest_multi`. For example obtained from [`feols`] or [`feglm`].
+#' @param sample Either "original" (default) or "estimation". If equal to "original", 
+#' it matches the original data set. If equal to "estimation", the rows of the data set
+#' returned matches the observations used for the estimation. 
+#' 
+#' @return 
+#' It returns a data.frame equal to the original data set used for the estimation, when the function was called.
+#' 
+#' If `sample = "estimation"`, only the lines used for the estimation are returned.
+#' 
+#' In case of a `fixest_multi` object, it returns the data set of the first estimation object. 
+#' So in that case it does not make sense to use `sample = "estimation"` since 
+#' the samples may be inconsistents across the different estimations.
+#' 
+#' @examples 
+#' 
+#' base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+#' base$y[1:5] = NA
+#' 
+#' est = feols(y ~ x1 + x2, base)
+#' 
+#' # the original data set
+#' head(fixest_data(est))
+#' 
+#' # the data set, with only the lines used for the estimation
+#' head(fixest_data(est, sample = "est"))
+#' 
+#' 
+fixest_data = function(x, sample = "original"){
+  check_arg(x, "class(fixest, fixest_multi) mbt")
+  check_set_arg(sample, "match(original, estimation)")
+  
+  if(inherits(x, "fixest_multi")){
+    x = x[[1]]
+  }
+  
+  res = fetch_data(x, prefix = "In `fixest_data()`, ")
+  
+  if(sample == "estimation"){
+    res = res[obs(x), , drop = FALSE]
+  }
+  
+  return(res)
+}
+
+
+
+
 #### ------------- ####
 #### Internal Funs ####
 ####
@@ -4646,31 +4700,15 @@ fetch_data = function(x, prefix = "", suffix = ""){
   }
 
   # => Error message
-
-  if(nchar(prefix) == 0){
-    msg = "W"
-  } else {
-    s = ifelse(grepl(" $", prefix), "", " ")
-    if(grepl("\\. *$", prefix)){
-      msg = paste0(prefix, s, "W")
-    } else {
-      msg = paste0(prefix, s, "w")
-    }
-  }
-
-  if(nchar(prefix) == 0){
-    msg = "W"
-  } else if(grepl("\\. *$", prefix)){
-    msg = paste0(gsub(" +$", "", prefix), " W")
-  } else {
-    msg = paste0(gsub(prefix, " +$", ""), " w")
-  }
+  
+  begin = sma(prefix, " we", .last = "ws, upper.sentence")
 
   if(nchar(suffix) > 0){
-     suffix = gsub("^ +", "", suffix)
+    suffix = gsub("^ +", "", suffix)
   }
 
-  stop_up(msg, "e fetch the data in the enviroment where the estimation was made, but the data does not seem to be there any more (btw it was `", charShorten(deparse(x$call$data)[1], 15), "`). ", suffix)
+  data_name = charShorten(deparse(x$call$data)[1], 15)
+  stop_up(begin, " fetch the data in the enviroment where the estimation was made, but the data does not seem to be there any more (btw it was {bq ? data_name}). ", suffix)
 
 
 }
@@ -7445,16 +7483,16 @@ getFixest_fml = function(){
 #'
 #'
 setFixest_estimation = function(data = NULL, panel.id = NULL, fixef.rm = "perfect",
-                fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10,
-                lean = FALSE, verbose = 0, warn = TRUE, combine.quick = NULL,
-                demeaned = FALSE, mem.clean = FALSE, glm.iter = 25,
-                glm.tol = 1e-8, reset = FALSE){
+                                fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10,
+                                lean = FALSE, verbose = 0, warn = TRUE, combine.quick = NULL,
+                                demeaned = FALSE, mem.clean = FALSE, glm.iter = 25,
+                                glm.tol = 1e-8, data.save = FALSE, reset = FALSE){
 
   check_set_arg(fixef.rm, "match(none, perfect, singleton, both)")
   check_arg(fixef.tol, collin.tol, glm.tol, "numeric scalar GT{0}")
   check_arg(fixef.iter, glm.iter, "integer scalar GE{1}")
   check_arg(verbose, "integer scalar GE{0}")
-  check_arg(lean, warn, demeaned, mem.clean, reset, "logical scalar")
+  check_arg(lean, warn, demeaned, mem.clean, reset, data.save, "logical scalar")
   check_arg(combine.quick, "NULL logical scalar")
   check_arg(panel.id, "NULL character vector len(,2) no na | os formula")
 

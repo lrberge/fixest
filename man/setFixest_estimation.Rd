@@ -20,6 +20,7 @@ setFixest_estimation(
   mem.clean = FALSE,
   glm.iter = 25,
   glm.tol = 1e-08,
+  data.save = FALSE,
   reset = FALSE
 )
 
@@ -91,6 +92,13 @@ code to avoid memory issues.}
 \item{glm.iter}{Number of iterations of the glm algorithm. Default is 25.}
 
 \item{glm.tol}{Tolerance level for the glm algorithm. Default is \code{1e-8}.}
+
+\item{data.save}{Logical scalar, default is \code{FALSE}. If \code{TRUE}, the data used for
+the estimation is saved within the returned object. Hence later calls to predict(),
+vcov(), etc..., will be consistent even if the original data has been modified
+in the meantime.
+This is especially useful for estimations within loops, where the data changes
+at each iteration, such that postprocessing can be done outside the loop without issue.}
 
 \item{reset}{Logical scalar, default is \code{FALSE}. Whether to reset all values.}
 }

@@ -326,6 +326,8 @@ for the fitted model: that is \eqn{E(Y|X)}.}
 \item{se}{The standard-error of the parameters.}
 \item{scores}{The matrix of the scores (first derivative for each observation).}
 \item{family}{The ML family that was used for the estimation.}
+\item{data}{The original data set used when calling the function. Only available when
+the estimation was called with \code{data.save = TRUE}}
 \item{residuals}{The difference between the dependent variable and the expected predictor.}
 \item{sumFE}{The sum of the fixed-effects for each observation.}
 \item{offset}{The offset formula.}

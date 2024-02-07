@@ -240,7 +240,8 @@
 #' \item{fml}{The linear formula of the call.}
 #' \item{call}{The call of the function.}
 #' \item{method}{The method used to estimate the model.}
-#' \item{family}{The family used to estimate the model.}
+#' \item{data}{The original data set used when calling the function. Only available when
+#' the estimation was called with `data.save = TRUE`}
 #' \item{fml_all}{A list containing different parts of the formula. Always contain the linear formula. Then depending on the cases: `fixef`: the fixed-effects, `iv`: the IV part of the formula.}
 #' \item{fixef_vars}{The names of each fixed-effect dimension.}
 #' \item{fixef_id}{The list (of length the number of fixed-effects) of the fixed-effects identifiers for each observation.}
@@ -2254,6 +2255,8 @@ feols.fit = function(y, X, fixef_df, vcov, offset, split, fsplit, split.keep, sp
 #' \item{call}{The call of the function.}
 #' \item{method}{The method used to estimate the model.}
 #' \item{family}{The family used to estimate the model.}
+#' \item{data}{The original data set used when calling the function. Only available when
+#' the estimation was called with `data.save = TRUE`}
 #' \item{fml_all}{A list containing different parts of the formula. Always contain the 
 #' linear formula. Then, if relevant: `fixef`: the fixed-effects.}
 #' \item{nparams}{The number of parameters of the model.}
@@ -3262,6 +3265,8 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
 #' \item{call}{The call of the function.}
 #' \item{method}{The method used to estimate the model.}
 #' \item{family}{The family used to estimate the model.}
+#' \item{data}{The original data set used when calling the function. Only available when
+#' the estimation was called with `data.save = TRUE`}
 #' \item{fml_all}{A list containing different parts of the formula. Always contain the 
 #' linear formula. Then, if relevant: `fixef`: the fixed-effects; 
 #' `NL`: the non linear part of the formula.}
@@ -3754,6 +3759,8 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
 #' \item{se}{The standard-error of the parameters.}
 #' \item{scores}{The matrix of the scores (first derivative for each observation).}
 #' \item{family}{The ML family that was used for the estimation.}
+#' \item{data}{The original data set used when calling the function. Only available when
+#' the estimation was called with `data.save = TRUE`}
 #' \item{residuals}{The difference between the dependent variable and the expected predictor.}
 #' \item{sumFE}{The sum of the fixed-effects for each observation.}
 #' \item{offset}{The offset formula.}

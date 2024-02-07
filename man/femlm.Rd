@@ -280,6 +280,8 @@ To access them, it is safer to use the user-level methods
 \item{call}{The call of the function.}
 \item{method}{The method used to estimate the model.}
 \item{family}{The family used to estimate the model.}
+\item{data}{The original data set used when calling the function. Only available when
+the estimation was called with \code{data.save = TRUE}}
 \item{fml_all}{A list containing different parts of the formula. Always contain the
 linear formula. Then, if relevant: \code{fixef}: the fixed-effects;
 \code{NL}: the non linear part of the formula.}
