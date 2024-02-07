@@ -2388,7 +2388,8 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
       # Extracting the information
       terms_fixef = fixef_terms(.xpd(rhs = X[[3L]]))
       # We add the intercept only for only slope models, otherwise this would be void since the result would be always 0
-      X = fixest_model_matrix(.xpd(lhs = quote(y), rhs = X[[2L]]), data, fake_intercept = any(terms_fixef$slope_flag >= 0))
+      X = fixest_model_matrix(.xpd(lhs = quote(y), rhs = X[[2L]]), data, 
+                              fake_intercept = any(terms_fixef$slope_flag >= 0))
       var_names = dimnames(X)[[2]]
 
       lX = FALSE # Needed for the rest of the code to work
@@ -3821,6 +3822,15 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
   #  the factors are well created
 
   # fml = ~a*b+c+i(x1)+Temp:i(x2)+i(x3)/Wind
+  
+  if(!identical(class(data), "data.frame")){
+    # when this function is called from within the estimations, 
+    # data is always a pure DF
+    #
+    # to avoid bugs when this function is called from elsewhere, we 
+    # ensure the data is always a pure DF
+    class(data) = "data.frame"
+  }
 
   if(length(fml) == 3) fml = fml[c(1, 3)]
 
@@ -4225,8 +4235,10 @@ fixef_terms = function(fml, stepwise = FALSE, origin_type = "feols"){
   res
 }
 
-prepare_df = function(vars, base, fastCombine = NA){
+prepare_df = function(vars, data, fastCombine = NA){
   # vars: vector of variables to evaluate
+  # data: a data.frame#
+  # note that this is an internal function and the data should be checked beforehand
 
   # we drop NAs and make it unique
   vars = unique(vars[!is.na(vars)])
@@ -4246,11 +4258,15 @@ prepare_df = function(vars, base, fastCombine = NA){
 
   all_vars = cpp_colon_to_star(vars)
 
-  if(all(all_vars %in% names(base))){
-    res = base[, all_vars, drop = FALSE]
+  if(all(all_vars %in% names(data))){
+    # we ensure the data is a pure DF 
+    if(!identical(class(data), "data.frame")){
+      class(data) = "data.frame"
+    }
+    res = data[, all_vars, drop = FALSE]
   } else {
     all_vars_call = str2lang(paste0("list(", paste0(all_vars, collapse = ", "), ")"))
-    data_list = try(eval(all_vars_call, base))
+    data_list = try(eval(all_vars_call, data))
 
     # if error: we send it back to the main function
     if("try-error" %in% class(data_list)){
@@ -4327,7 +4343,7 @@ rename_hat = function(x){
   x
 }
 
-prepare_cluster_mat = function(fml, base, fastCombine){
+prepare_cluster_mat = function(fml, data, fastCombine){
   # prepares the data.frame of the cluster variables
 
   fml_char = as.character(fml[2])
@@ -4338,16 +4354,20 @@ prepare_cluster_mat = function(fml, base, fastCombine){
     changeNames = TRUE
   }
 
-  t = terms(fml, data = base)
+  t = terms(fml, data = data)
 
   all_var_names = attr(t, "term.labels")
   all_vars = gsub(":", "*", all_var_names)
 
-  if(all(all_vars %in% names(base))){
-    res = base[, all_vars, drop = FALSE]
+  if(all(all_vars %in% names(data))){
+    # we ensure the data is a pure DF 
+    if(!identical(class(data), "data.frame")){
+      class(data) = "data.frame"
+    }
+    res = data[, all_vars, drop = FALSE]
   } else {
     all_vars_call = str2lang(paste0("list(", paste0(all_vars, collapse = ", "), ")"))
-    data_list = eval(all_vars_call, base)
+    data_list = eval(all_vars_call, data)
     names(data_list) = all_var_names
     data_list$stringsAsFactors = FALSE
 

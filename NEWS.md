@@ -10,7 +10,10 @@
 ## Bugs
 
 - fix bug when the covariance matrix was *very* ill-defined. Thanks to Gianluca Russo.
+
 - pass correctly `nthreads` to `summary` when the VCOV is provided at estimation time. Thanks to @arcruz0, #379.
+
+- fix bug in the function `demean` when a formula is passed as argument and the data was in the form of a `data.table`. Reported by Patrick Baylis, with help from Kyle Butts, #433
  
 ## Improvements
 

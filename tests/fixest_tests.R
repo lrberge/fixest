@@ -1724,10 +1724,7 @@ X_demean = demean(X_int, fe, as.matrix = TRUE)
 test(is.matrix(X_demean), TRUE)
 
 X_demean = demean(as.matrix(X_int), fe, as.matrix = FALSE)
-test(!is.matrix(X_demean), TRUE)
-
-# fml
-X_demean = demean(ln_dist ~ Origin + Destination, data = base)
+test(is.matrix(X_demean), FALSE)
 
 # slopes
 X_dm_slopes = demean(ln_dist ~ Origin + Destination[ln_euros], data = base)
@@ -1735,6 +1732,12 @@ X_dm_slopes_bis = demean(base$ln_dist, fe, slope.vars = base$ln_euros, slope.fla
 
 test(X_dm_slopes[[1]], X_dm_slopes_bis)
 
+# with data table + formula call
+trade_dt = as.data.table(trade)
+trade_dt$ln_dist = log(trade_dt$dist_km)
+
+dist_dm_dt = demean(ln_dist ~ Origin + Destination, data = trade_dt)
+dist_dm_df = demean(ln_dist ~ Origin + Destination, data = base)
 
 ####
 #### hatvalues ####
