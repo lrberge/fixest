@@ -160,7 +160,7 @@ collinearity = function(x, verbose){
       verbose = TRUE
     }
   }
-  if(verbose) ccat = cat
+  if(verbose) ccat = catma
 
   #
   # 0) Data preparation (FE/slopes)
@@ -213,10 +213,10 @@ collinearity = function(x, verbose){
 
 
   #
-  # I) collinearity with clusters
+  # I) collinearity with FEs
   #
 
-  ccat("Checking Collinearity: ")
+  ccat("Checking Collinearity: \n")
 
   #
   # Variables are constant or equal to 0
@@ -228,8 +228,7 @@ collinearity = function(x, verbose){
       if(any(constant_id[-1])){
         # var_problem = colnames(linear_mat_noIntercept)[is_const]
         var_problem = colnames(linear_mat_noIntercept)[constant_id[-1]]
-        message = paste0("Variable", enumerate_items(var_problem, "s.is.quote"), 
-                         " constant, thus collinear with the fixed-effects.")
+        message = sma("Variable{$s, enum.q, is ? var_problem} constant, thus collinear with the fixed-effects.")
         print(message)
         return(invisible(message))
       }
@@ -240,7 +239,7 @@ collinearity = function(x, verbose){
 
       if(isIntercept && any(constant_id[-1])){
         var_problem = colnames(linear_mat_noIntercept)[constant_id[-1]]
-        message = paste0("Variable", enumerate_items(var_problem, "s.is.quote"), " constant, thus collinear with the intercept.")
+        message = sma("Variable{$s, enum.q, is ? var_problem} constant, thus collinear with the intercept.")
         print(message)
         return(invisible(message))
       }
@@ -248,7 +247,7 @@ collinearity = function(x, verbose){
       if(any(constant_value == 0)){
         # constant and equal to 0
         var_problem = colnames(linear.matrix)[first_row == 0 & constant_id]
-        message = paste0("Variable", enumerate_items(var_problem, "s.is.quote"), " constant and equal to 0.")
+        message = sma("Variable{$s, enum.q, is ? var_problem} constant and equal to 0.")
 
         print(message)
         return(invisible(message))
@@ -257,7 +256,7 @@ collinearity = function(x, verbose){
   }
 
   if(isFE && isLinear){
-    ccat("simple with fixed-effects:")
+    ccat("- simple with fixed-effects:")
     # We project each variable onto the cluster subspace
 
     cluster = fe_id
@@ -279,8 +278,7 @@ collinearity = function(x, verbose){
         ccat("\n")
         varnames = colnames(linear_mat_noIntercept)
         collin_var = varnames[max_residuals < 1e-6]
-        message = paste0("Variable", enumerate_items(collin_var, "s.is.quote"), 
-                         " collinear with fixed-effects `", names(cluster)[q], "`.")
+        message = sma("Variable{$s, enum.q, is ? collin_var} collinear with fixed-effects `", names(cluster)[q], "`.")
 
         print(message)
         return(invisible(message))
@@ -288,11 +286,11 @@ collinearity = function(x, verbose){
       }
 
     }
-    ccat("OK")
+    ccat("OK\n")
   }
 
   if(isSlope && isLinear){
-    ccat("simple with variables with varying slopes:")
+    ccat("- simple with variables with varying slopes:")
 
     for(q in 1:Q_slope){
       ccat(".")
@@ -313,9 +311,7 @@ collinearity = function(x, verbose){
         varnames = colnames(linear_mat_noIntercept)
         collin_var = varnames[max_residuals < 1e-6]
 
-        message = paste0("Variable", enumerate_items(collin_var, "s.is.quote"), 
-                         " collinear with variable with varying slope `", 
-                         slope_vars[q], "` (on `", slope_fe[q], "`).")
+        message = sma("Variable{$s, enum.q, is ? collin_var} collinear with variable with varying slope `", slope_vars[q], "` (on `", slope_fe[q], "`).")
 
         print(message)
         return(invisible(message))
@@ -323,7 +319,7 @@ collinearity = function(x, verbose){
       }
 
     }
-    ccat("OK")
+    ccat("OK\n")
   }
 
   #
@@ -350,12 +346,13 @@ collinearity = function(x, verbose){
   for(v in varmiss) linbase[[v]] = data[[v]]
 
   if(isLinear && length(linearVars) >= 2){
-    ccat(ifelse(Q >= 1, ", ", " "), "multiple:")
+    ccat("- multiple:")
     for(v in linearVars){
       ccat(".")
 
       i = which(colnames(mat_base) == v)
-      res = ols_fit(y = mat_base[, i], X = mat_base[, -i, drop = FALSE], w = 1, collin.tol = 1e-10,  nthreads = 1)
+      res = ols_fit(y = mat_base[, i], X = mat_base[, -i, drop = FALSE], 
+                    w = 1, collin.tol = 1e-10, nthreads = 1)
 
       max_residuals = max(abs(res$residuals))
 
@@ -370,7 +367,7 @@ collinearity = function(x, verbose){
         return(invisible(message))
       }
     }
-    ccat("OK")
+    ccat("OK\n")
   }
 
   #
@@ -379,21 +376,21 @@ collinearity = function(x, verbose){
 
   # linearVars = setdiff(colnames(linear.matrix), "(Intercept)")
   if(isLinear && length(linearVars) >= 2 && isFixef){
-    ccat(", multiple with cluster")
+    ccat("- multiple with fixed-effects")
 
     dum_names = names(x$fixef_id)
     n_clust = length(dum_names)
-    new_dum_names = paste0("__DUM_", 1:n_clust)
+    new_dum_names = paste0("DUM_", 1:n_clust)
     for(i in 1:n_clust){
-      linbase[[paste0("__DUM_", i)]] = x$fixef_id[[i]]
+      linbase[[paste0("DUM_", i)]] = x$fixef_id[[i]]
     }
-
+    
     for(v in linearVars){
       ccat(".")
       fml2estimate = as.formula(paste0(v, "~", paste0(setdiff(linearVars, v), collapse = "+")))
 
       for(id_cluster in 1:n_clust){
-
+        
         res = feols(fml2estimate, linbase, fixef = new_dum_names[id_cluster], warn = FALSE)
 
         max_residuals = max(abs(res$residuals))
@@ -409,7 +406,7 @@ collinearity = function(x, verbose){
         }
       }
     }
-    ccat("OK")
+    ccat("OK\n")
   }
 
   #
@@ -420,7 +417,7 @@ collinearity = function(x, verbose){
     NL_vars = all.vars(NL_fml)
     varNotHere = setdiff(NL_vars, c(names(coef), names(data)))
     if(length(varNotHere) > 0){
-      stop("Some variables used to estimate the model (in the non-linear formula) are missing from the original data: ", paste0(varNotHere, collapse = ", "), ".")
+      stopi("Some variables used to estimate the model (in the non-linear formula) are missing from the original data: {enum.q ? varNotHere}.")
     }
 
     var2send = intersect(NL_vars, names(data))
@@ -436,7 +433,7 @@ collinearity = function(x, verbose){
       # we add the constant
       coef["CONSTANT"] = 1
       data$CONSTANT = 1
-      linear.matrix = model.matrix(update(linear_fml, ~.-1+CONSTANT), data)
+      linear.matrix = model.matrix(update(linear_fml, ~ . -1 + CONSTANT), data)
     }
 
     coef_name = names(coef)
@@ -490,7 +487,8 @@ collinearity = function(x, verbose){
         # offset with the new value
         offset = as.formula(paste0("~", coef[var] + 1, "*", var))
 
-        res = feNmlm(fml, data = data, family = "gaussian", NL.fml = NL_fml, NL.start = as.list(coef), offset = offset)
+        res = feNmlm(fml, data = data, family = "gaussian", NL.fml = NL_fml, 
+                     NL.start = as.list(coef), offset = offset)
 
       } else {
         # NL case:
@@ -510,7 +508,8 @@ collinearity = function(x, verbose){
           # there is no more parameter to estimate => offset
           res = femlm(fml, data = data, family = "gaussian", offset = NL_fml_new)
         } else {
-          res = feNmlm(fml, data = data, family = "gaussian", NL.fml = NL_fml_new, NL.start = as.list(coef))
+          res = feNmlm(fml, data = data, family = "gaussian", NL.fml = NL_fml_new, 
+                       NL.start = as.list(coef))
         }
 
       }
@@ -527,10 +526,9 @@ collinearity = function(x, verbose){
       }
 
     }
-    ccat("OK")
+    ccat("OK\n")
   }
 
-  ccat("\n")
   message = "No visible collinearity problem. (Doesn't mean there's none!)"
   print(message)
   return(invisible(message))

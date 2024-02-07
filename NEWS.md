@@ -16,6 +16,8 @@
 - fix bug in the function `demean` when a formula is passed as argument and the data was in the form of a `data.table`. Reported by Patrick Baylis, with help from Kyle Butts, #433
 
 - fix bug when an `offset` was used in the context of multiple outcomes. Reported by @etiennebacher, #405
+
+- fix bug in the `collinearity` function. Reported by @grlju, #412
  
 ## Improvements
 
