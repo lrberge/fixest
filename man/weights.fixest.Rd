@@ -12,7 +12,8 @@
 \item{...}{Not currently used.}
 }
 \value{
-Returns a vector of the same length as the number of observations in the original data set. Ignored observations due to NA or perfect fit are re-introduced and their weights set to NA.
+Returns a vector of the same length as the number of observations in the original data set.
+Ignored observations due to NA or perfect fit are re-introduced and their weights set to NA.
 }
 \description{
 Simply extracts the weights used to estimate a \code{fixest} model.

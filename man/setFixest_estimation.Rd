@@ -30,7 +30,11 @@ getFixest_estimation()
 The variables of the non-linear right hand side of the formula are identified
 with this \code{data.frame} names. Can also be a matrix.}
 
-\item{panel.id}{The panel identifiers. Can either be: i) a one sided formula (e.g. \code{panel.id = ~id+time}), ii) a character vector of length 2 (e.g. \code{panel.id=c('id', 'time')}, or iii) a character scalar of two variables separated by a comma (e.g. \code{panel.id='id,time'}). Note that you can combine variables with \code{^} only inside formulas (see the dedicated section in \code{\link{feols}}).}
+\item{panel.id}{The panel identifiers. Can either be: i) a one sided formula
+(e.g. \code{panel.id = ~id+time}), ii) a character vector of length 2
+(e.g. \code{panel.id=c('id', 'time')}, or iii) a character scalar of two variables
+separated by a comma (e.g. \code{panel.id='id,time'}). Note that you can combine variables
+with \code{^} only inside formulas (see the dedicated section in \code{\link{feols}}).}
 
 \item{fixef.rm}{Can be equal to "perfect" (default), "singleton", "both" or "none".
 Controls which observations are to be removed. If "perfect", then observations

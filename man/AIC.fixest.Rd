@@ -11,7 +11,8 @@
 
 \item{...}{Optionally, more fitted objects.}
 
-\item{k}{A numeric, the penalty per parameter to be used; the default k = 2 is the classical AIC (i.e. \code{AIC=-2*LL+k*nparams}).}
+\item{k}{A numeric, the penalty per parameter to be used; the default k = 2 is the
+classical AIC (i.e. \code{AIC=-2*LL+k*nparams}).}
 }
 \value{
 It return a numeric vector, with length the same as the number of objects taken as arguments.
@@ -39,7 +40,8 @@ BIC(res1, res2)
 
 }
 \seealso{
-See also the main estimation functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}. Other statictics methods: \code{\link{BIC.fixest}}, \code{\link{logLik.fixest}}, \code{\link{nobs.fixest}}.
+See also the main estimation functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}.
+Other statictics methods: \code{\link{BIC.fixest}}, \code{\link{logLik.fixest}}, \code{\link{nobs.fixest}}.
 }
 \author{
 Laurent Berge

@@ -12,23 +12,32 @@
 \arguments{
 \item{object}{A \code{fixest} object. Obtained using the functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}.}
 
-\item{type}{Character either equal to \code{"response"} (default) or \code{"link"}. If \code{type="response"}, then the output is at the level of the response variable, i.e. it is the expected predictor \eqn{E(Y|X)}. If \code{"link"}, then the output is at the level of the explanatory variables, i.e. the linear predictor \eqn{X\cdot \beta}.}
+\item{type}{Character either equal to \code{"response"} (default) or \code{"link"}.
+If \code{type="response"}, then the output is at the level of the response variable, i.e.
+it is the expected predictor \eqn{E(Y|X)}. If \code{"link"}, then the output is at
+the level of the explanatory variables, i.e. the linear predictor \eqn{X\cdot \beta}.}
 
-\item{na.rm}{Logical, default is \code{TRUE}. If \code{FALSE} the number of observation returned will be the number of observations in the original data set, otherwise it will be the number of observations used in the estimation.}
+\item{na.rm}{Logical, default is \code{TRUE}. If \code{FALSE} the number of observation returned
+will be the number of observations in the original data set, otherwise it will be the
+number of observations used in the estimation.}
 
 \item{...}{Not currently used.}
 }
 \value{
 It returns a numeric vector of length the number of observations used to estimate the model.
 
-If \code{type = "response"}, the value returned is the expected predictor, i.e. the expected value of the dependent variable for the fitted model: \eqn{E(Y|X)}.
-If \code{type = "link"}, the value returned is the linear predictor of the fitted model, that is \eqn{X\cdot \beta} (remind that \eqn{E(Y|X) = f(X\cdot \beta)}).
+If \code{type = "response"}, the value returned is the expected predictor, i.e. the
+expected value of the dependent variable for the fitted model: \eqn{E(Y|X)}.
+If \code{type = "link"}, the value returned is the linear predictor of the fitted model,
+that is \eqn{X\cdot \beta} (remind that \eqn{E(Y|X) = f(X\cdot \beta)}).
 }
 \description{
-This function extracts the fitted values from a model estimated with \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}. The fitted values that are returned are the \emph{expected predictor}.
+This function extracts the fitted values from a model estimated with \code{\link{femlm}},
+\code{\link{feols}} or \code{\link{feglm}}. The fitted values that are returned are the \emph{expected predictor}.
 }
 \details{
-This function returns the \emph{expected predictor} of a \code{fixest} fit. The likelihood functions are detailed in \code{\link{femlm}} help page.
+This function returns the \emph{expected predictor} of a \code{fixest} fit. The likelihood functions
+are detailed in \code{\link{femlm}} help page.
 }
 \examples{
 
@@ -52,7 +61,8 @@ points(iris$Sepal.Length, y_fitted_gaussian, col = 2, pch = 2)
 
 }
 \seealso{
-See also the main estimation functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}. \code{\link{resid.fixest}}, \code{\link{predict.fixest}}, \code{\link{summary.fixest}}, \code{\link{vcov.fixest}}, \code{\link{fixef.fixest}}.
+See also the main estimation functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}.
+\code{\link{resid.fixest}}, \code{\link{predict.fixest}}, \code{\link{summary.fixest}}, \code{\link{vcov.fixest}}, \code{\link{fixef.fixest}}.
 }
 \author{
 Laurent Berge

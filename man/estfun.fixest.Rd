@@ -12,7 +12,8 @@
 \item{...}{Not currently used.}
 }
 \value{
-Returns a matrix of the same number of rows as the number of observations used for the estimation, and the same number of columns as there were variables.
+Returns a matrix of the same number of rows as the number of observations used for
+the estimation, and the same number of columns as there were variables.
 }
 \description{
 Extracts the scores from a fixest estimation.

@@ -9,20 +9,28 @@
 \arguments{
 \item{x}{A \code{fixest_panel} object, created with the function \code{\link{panel}}.}
 
-\item{i}{Row subselection. Allows \code{\link[data.table:data.table]{data.table::data.table}} style selection (provided the data is also a data.table).}
+\item{i}{Row subselection. Allows \code{\link[data.table:data.table]{data.table::data.table}} style selection (provided the
+data is also a data.table).}
 
-\item{j}{Variable selection. Allows \code{\link[data.table:data.table]{data.table::data.table}} style selection/variable creation (provided the data is also a data.table).}
+\item{j}{Variable selection. Allows \code{\link[data.table:data.table]{data.table::data.table}} style selection/variable
+creation (provided the data is also a data.table).}
 
-\item{...}{Other arguments to be passed to \verb{[.data.frame} or \code{\link[data.table:data.table]{data.table::data.table}} (or whatever the class of the initial data).}
+\item{...}{Other arguments to be passed to \verb{[.data.frame} or \code{\link[data.table:data.table]{data.table::data.table}}
+(or whatever the class of the initial data).}
 }
 \value{
-It returns a \code{fixest_panel} data base, with the attributes allowing to create lags/leads properly bookkeeped.
+It returns a \code{fixest_panel} data base, with the attributes allowing to create
+lags/leads properly bookkeeped.
 }
 \description{
-Subselection from a \code{fixest_panel} which has been created with the function \code{\link{panel}}. Also allows to create lag/lead variables with functions \code{\link{l}}/\code{\link[=l]{f}} if the \code{fixest_panel} is also a \code{\link[data.table:data.table]{data.table::data.table}}.
+Subselection from a \code{fixest_panel} which has been created with the function \code{\link{panel}}.
+Also allows to create lag/lead variables with functions \code{\link{l}}/\code{\link[=l]{f}} if
+the \code{fixest_panel} is also a \code{\link[data.table:data.table]{data.table::data.table}}.
 }
 \details{
-If the original data was also a data.table, some calls to \verb{[.fixest_panel} may dissolve the \code{fixest_panel} object and return a regular data.table. This is the case for subselections with additional arguments. If so, a note is displayed on the console.
+If the original data was also a data.table, some calls to \verb{[.fixest_panel} may dissolve
+the \code{fixest_panel} object and return a regular data.table. This is the case for
+subselections with additional arguments. If so, a note is displayed on the console.
 }
 \examples{
 
@@ -57,7 +65,10 @@ if(require("data.table")){
 
 }
 \seealso{
-Alternatively, the function \code{\link{panel}} changes a \code{data.frame} into a panel from which the functions \code{l} and \code{f} (creating leads and lags) can be called. Otherwise you can set the panel 'live' during the estimation using the argument \code{panel.id} (see for example in the function \code{\link{feols}}).
+Alternatively, the function \code{\link{panel}} changes a \code{data.frame} into a panel from which the
+functions \code{l} and \code{f} (creating leads and lags) can be called. Otherwise you can set the
+panel 'live' during the estimation using the argument \code{panel.id} (see for example in
+the function \code{\link{feols}}).
 }
 \author{
 Laurent Berge

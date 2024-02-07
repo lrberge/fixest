@@ -17,23 +17,32 @@ setFixest_vcov(
 getFixest_vcov()
 }
 \arguments{
-\item{no_FE}{Character scalar equal to either: \code{"iid"} (default), or \code{"hetero"}. The type of standard-errors to use by default for estimations without fixed-effects.}
+\item{no_FE}{Character scalar equal to either: \code{"iid"} (default), or \code{"hetero"}. The type
+of standard-errors to use by default for estimations without fixed-effects.}
 
-\item{one_FE}{Character scalar equal to either: \code{"iid"}, \code{"hetero"}, or \code{"cluster"} (default). The type of standard-errors to use by default for estimations with \emph{one} fixed-effect.}
+\item{one_FE}{Character scalar equal to either: \code{"iid"}, \code{"hetero"}, or \code{"cluster"} (default).
+The type of standard-errors to use by default for estimations with \emph{one} fixed-effect.}
 
-\item{two_FE}{Character scalar equal to either: \code{"iid"}, \code{"hetero"}, \code{"cluster"} (default), or \code{"twoway"}. The type of standard-errors to use by default for estimations with \emph{two or more} fixed-effects.}
+\item{two_FE}{Character scalar equal to either: \code{"iid"}, \code{"hetero"}, \code{"cluster"} (default), or
+\code{"twoway"}. The type of standard-errors to use by default for estimations with \emph{two or more}
+fixed-effects.}
 
-\item{panel}{Character scalar equal to either: \code{"iid"}, \code{"hetero"}, \code{"cluster"} (default), or \code{"driscoll_kraaay"}. The type of standard-errors to use by default for estimations with the argument \code{panel.id} set up. Note that panel has precedence over the presence of fixed-effects.}
+\item{panel}{Character scalar equal to either: \code{"iid"}, \code{"hetero"}, \code{"cluster"} (default), or
+\code{"driscoll_kraaay"}. The type of standard-errors to use by default for estimations with the
+argument \code{panel.id} set up. Note that panel has precedence over the presence of fixed-effects.}
 
-\item{all}{Character scalar equal to either: \code{"iid"}, or \code{"hetero"}. By default is is NULL. If provided, it sets all the SEs to that value.}
+\item{all}{Character scalar equal to either: \code{"iid"}, or \code{"hetero"}. By default is is NULL. If
+provided, it sets all the SEs to that value.}
 
 \item{reset}{Logical, default is \code{FALSE}. Whether to reset to the default values.}
 }
 \value{
-The function \code{getFixest_vcov()} returns a list with three elements containing the default for estimations i) without, ii) with one, or iii) with two or more fixed-effects.
+The function \code{getFixest_vcov()} returns a list with three elements containing the default for
+estimations i) without, ii) with one, or iii) with two or more fixed-effects.
 }
 \description{
-This functions defines or extracts the default type of standard-errors to computed in \code{fixest} \code{\link[=summary.fixest]{summary}}, and \code{\link[=vcov.fixest]{vcov}}.
+This functions defines or extracts the default type of standard-errors to computed in
+\code{fixest} \code{\link[=summary.fixest]{summary}}, and \code{\link[=vcov.fixest]{vcov}}.
 }
 \examples{
 

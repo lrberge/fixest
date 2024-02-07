@@ -34,7 +34,10 @@ class(new_base) ; dim(new_base)
 
 }
 \seealso{
-Alternatively, the function \code{\link{panel}} changes a \code{data.frame} into a panel from which the functions \code{l} and \code{f} (creating leads and lags) can be called. Otherwise you can set the panel 'live' during the estimation using the argument \code{panel.id} (see for example in the function \code{\link{feols}}).
+Alternatively, the function \code{\link{panel}} changes a \code{data.frame} into a panel from which the
+functions \code{l} and \code{f} (creating leads and lags) can be called. Otherwise you can set the panel
+'live' during the estimation using the argument \code{panel.id} (see for example in the function
+\code{\link{feols}}).
 }
 \author{
 Laurent Berge

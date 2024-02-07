@@ -12,7 +12,8 @@
 \item{...}{Not currently used.}
 }
 \value{
-An object of class \code{c("terms", "formula")} which contains the terms representation of a symbolic model.
+An object of class \code{c("terms", "formula")} which contains the terms representation of a
+symbolic model.
 }
 \description{
 This function extracts the terms of a \code{fixest} estimation, excluding the fixed-effects part.

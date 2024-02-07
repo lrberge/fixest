@@ -58,9 +58,20 @@
 \item{vcov}{A function to be used to compute the standard-errors of each fixest object. You can
 pass extra arguments to this function using the argument \code{.vcov_args}. See the example.}
 
-\item{ssc}{An object of class \code{ssc.type} obtained with the function \code{\link{ssc}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link{ssc}} for this argument. The arguments and defaults of the function \code{\link{ssc}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "min"}, \code{t.df = "min"}, \verb{fixef.force_exact=FALSE)}. See the help of the function \code{\link{ssc}} for details.}
+\item{ssc}{An object of class \code{ssc.type} obtained with the function \code{\link{ssc}}. Represents
+how the degree of freedom correction should be done.You must use the function \code{\link{ssc}}
+for this argument. The arguments and defaults of the function \code{\link{ssc}} are:
+\code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "min"},
+\code{t.df = "min"}, \verb{fixef.force_exact=FALSE)}. See the help of the function \code{\link{ssc}} for details.}
 
-\item{cluster}{Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \verb{cluster = base[, c("var1, "var2")]}, \verb{cluster = c("var1, "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [resp. 2nd] cluster).}
+\item{cluster}{Tells how to cluster the standard-errors (if clustering is requested). Can
+be either a list of vectors, a character vector of variable names, a formula or an
+integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained
+in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments
+are valid and do the same thing: \verb{cluster = base[, c("var1, "var2")]},
+\verb{cluster = c("var1, "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as
+clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank
+with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [resp. 2nd] cluster).}
 
 \item{keep}{Character vector. This element is used to display only a subset of variables. This
 should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}} help for more info). Each
@@ -88,17 +99,27 @@ years, then the months you could use: \code{order = c("x", "year")}. If the firs
 exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that
 does not contain \dQuote{Intercept} goes first).  See details.}
 
-\item{list}{Logical, default is \code{FALSE}. If \code{TRUE}, then a nested list is returned, the first layer is accessed with the coefficients names; the second layer with the following values: \code{coef}, \code{se}, \code{tstat}, \code{pvalue}. Note that the variable \code{"(Intercept)"} is renamed into \code{"constant"}.}
+\item{list}{Logical, default is \code{FALSE}. If \code{TRUE}, then a nested list is returned, the
+first layer is accessed with the coefficients names; the second layer with the
+following values: \code{coef}, \code{se}, \code{tstat}, \code{pvalue}. Note that the variable \code{"(Intercept)"}
+is renamed into \code{"constant"}.}
 
 \item{...}{Other arguments to be passed to \code{\link{summary.fixest}}.}
 }
 \value{
-Returns a table of coefficients, with in rows the variables and four columns: the estimate, the standard-error, the t-statistic and the p-value.
+Returns a table of coefficients, with in rows the variables and four columns: the estimate,
+the standard-error, the t-statistic and the p-value.
 
-If \code{list = TRUE} then a nested list is returned, the first layer is accessed with the coefficients names; the second layer with the following values: \code{coef}, \code{se}, \code{tstat}, \code{pvalue}. For example, with \code{res = coeftable(est, list = TRUE)} you can access the SE of the coefficient \code{x1} with \code{res$x1$se}; and its coefficient with \code{res$x1$coef}, etc.
+If \code{list = TRUE} then a nested list is returned, the first layer is accessed with
+the coefficients names; the second layer with the following values:
+\code{coef}, \code{se}, \code{tstat}, \code{pvalue}. For example, with \code{res = coeftable(est, list = TRUE)}
+you can access the SE of the coefficient \code{x1} with \code{res$x1$se}; and its
+coefficient with \code{res$x1$coef}, etc.
 }
 \description{
-Set of functions to directly extract some commonly used statistics, like the p-value or the table of coefficients, from estimations. This was first implemented for \code{fixest} estimations, but has some support for other models.
+Set of functions to directly extract some commonly used statistics, like the p-value or
+the table of coefficients, from estimations. This was first implemented for
+\code{fixest} estimations, but has some support for other models.
 }
 \details{
 This set of tiny functions is primarily constructed for \code{fixest} estimations.

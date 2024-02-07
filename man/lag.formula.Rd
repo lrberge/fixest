@@ -26,17 +26,33 @@ lag_fml(
 )
 }
 \arguments{
-\item{x}{A formula of the type \code{var ~ id + time} where \code{var} is the variable to be lagged, \code{id} is a variable representing the panel id, and \code{time} is the time variable of the panel.}
+\item{x}{A formula of the type \code{var ~ id + time} where \code{var} is the variable to be lagged,
+\code{id} is a variable representing the panel id, and \code{time} is the time variable of the panel.}
 
-\item{k}{An integer giving the number of lags. Default is 1. For leads, just use a negative number.}
+\item{k}{An integer giving the number of lags. Default is 1. For leads,
+just use a negative number.}
 
-\item{data}{Optional, the data.frame in which to evaluate the formula. If not provided, variables will be fetched in the current environment.}
+\item{data}{Optional, the data.frame in which to evaluate the formula. If not provided,
+variables will be fetched in the current environment.}
 
-\item{time.step}{The method to compute the lags, default is \code{NULL} (which means automatically set). Can be equal to: \code{"unitary"}, \code{"consecutive"}, \code{"within.consecutive"}, or to a number. If \code{"unitary"}, then the largest common divisor between consecutive time periods is used (typically if the time variable represents years, it will be 1). This method can apply only to integer (or convertible to integer) variables. If \code{"consecutive"}, then the time variable can be of any type: two successive time periods represent a lag of 1. If \code{"witihn.consecutive"} then \strong{within a given id}, two successive time periods represent a lag of 1. Finally, if the time variable is numeric, you can provide your own numeric time step.}
+\item{time.step}{The method to compute the lags, default is \code{NULL} (which means
+automatically set). Can be equal to: \code{"unitary"}, \code{"consecutive"}, \code{"within.consecutive"},
+or to a number. If \code{"unitary"}, then the largest common divisor between consecutive
+time periods is used (typically if the time variable represents years, it will be 1).
+This method can apply only to integer (or convertible to integer) variables.
+If \code{"consecutive"}, then the time variable can be of any type: two successive
+time periods represent a lag of 1. If \code{"witihn.consecutive"} then \strong{within a given id},
+two successive time periods represent a lag of 1. Finally, if the time variable is numeric,
+you can provide your own numeric time step.}
 
-\item{fill}{Scalar. How to fill the observations without defined lead/lag values. Default is \code{NA}.}
+\item{fill}{Scalar. How to fill the observations without defined lead/lag values.
+Default is \code{NA}.}
 
-\item{duplicate.method}{If several observations have the same id and time values, then the notion of lag is not defined for them. If \code{duplicate.method = "none"} (default) and duplicate values are found, this leads to an error. You can use \code{duplicate.method = "first"} so that the first occurrence of identical id/time observations will be used as lag.}
+\item{duplicate.method}{If several observations have the same id and time values,
+then the notion of lag is not defined for them. If \code{duplicate.method = "none"} (default)
+and duplicate values are found, this leads to an error. You can use
+\code{duplicate.method = "first"} so that the first occurrence of identical id/time
+observations will be used as lag.}
 
 \item{...}{Not currently used.}
 }
@@ -113,7 +129,10 @@ if(require("data.table")){
 
 }
 \seealso{
-Alternatively, the function \code{\link{panel}} changes a \code{data.frame} into a panel from which the functions \code{l} and \code{f} (creating leads and lags) can be called. Otherwise you can set the panel 'live' during the estimation using the argument \code{panel.id} (see for example in the function \code{\link{feols}}).
+Alternatively, the function \code{\link{panel}} changes a \code{data.frame} into a panel from which
+the functions \code{l} and \code{f} (creating leads and lags) can be called. Otherwise you can set
+the panel 'live' during the estimation using the argument \code{panel.id} (see for example in
+the function \code{\link{feols}}).
 }
 \author{
 Laurent Berge

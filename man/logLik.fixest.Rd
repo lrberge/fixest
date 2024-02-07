@@ -18,7 +18,8 @@ It returns a numeric scalar.
 This function extracts the log-likelihood from a \code{fixest} estimation.
 }
 \details{
-This function extracts the log-likelihood based on the model fit. You can have more information on the likelihoods in the details of the function \code{\link{femlm}}.
+This function extracts the log-likelihood based on the model fit. You can have more
+information on the likelihoods in the details of the function \code{\link{femlm}}.
 }
 \examples{
 
@@ -32,7 +33,8 @@ logLik(res)
 
 }
 \seealso{
-See also the main estimation functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}. Other statistics functions: \code{\link{AIC.fixest}}, \code{\link{BIC.fixest}}.
+See also the main estimation functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}. Other
+statistics functions: \code{\link{AIC.fixest}}, \code{\link{BIC.fixest}}.
 }
 \author{
 Laurent Berge

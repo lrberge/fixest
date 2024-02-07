@@ -48,7 +48,8 @@ does not contain \dQuote{Intercept} goes first).  See details.}
 This function returns a named numeric vector.
 }
 \description{
-This function extracts the coefficients obtained from a model estimated with \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}.
+This function extracts the coefficients obtained from a model estimated with
+\code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}.
 }
 \details{
 The coefficients are the ones that have been found to maximize the log-likelihood of the specified model. More information can be found on the models from the estimations help pages: \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}.

@@ -17,9 +17,11 @@
 \arguments{
 \item{object}{A \code{fixest} estimation (e.g. obtained using \code{\link{feols}} or \code{\link{feglm}}).}
 
-\item{notes}{Logical. Whether to display a note when the fixed-effects coefficients are not regular.}
+\item{notes}{Logical. Whether to display a note when the fixed-effects coefficients are
+not regular.}
 
-\item{sorted}{Logical, default is \code{TRUE}. Whether to order the fixed-effects by their names. If \code{FALSE}, then the order used in the demeaning algorithm is used.}
+\item{sorted}{Logical, default is \code{TRUE}. Whether to order the fixed-effects by their names.
+If \code{FALSE}, then the order used in the demeaning algorithm is used.}
 
 \item{nthreads}{The number of threads. Can be: a) an integer lower than, or equal to,
 the maximum number of threads; b) 0: meaning all available threads will be used;
@@ -41,13 +43,20 @@ controlled by the algorithm.}
 \value{
 A list containing the vectors of the fixed effects.
 
-If there is more than 1 fixed-effect, then the attribute \dQuote{references} is created. This is a vector of length the number of fixed-effects, each element contains the number of coefficients set as references. By construction, the elements of the first fixed-effect dimension are never set as references. In the presence of regular fixed-effects, there should be Q-1 references (with Q the number of fixed-effects).
+If there is more than 1 fixed-effect, then the attribute \dQuote{references} is created.
+This is a vector of length the number of fixed-effects, each element contains the number
+of coefficients set as references. By construction, the elements of the first
+fixed-effect dimension are never set as references. In the presence of regular
+fixed-effects, there should be Q-1 references (with Q the number of fixed-effects).
 }
 \description{
-This function retrieves the fixed effects from a \code{fixest} estimation. It is useful only when there are one or more fixed-effect dimensions.
+This function retrieves the fixed effects from a \code{fixest} estimation. It is useful only
+when there are one or more fixed-effect dimensions.
 }
 \details{
-If the fixed-effect coefficients are not regular, then several reference points need to be set: this means that the fixed-effects coefficients cannot be directly interpreted. If this is the case, then a warning is raised.
+If the fixed-effect coefficients are not regular, then several reference points need to
+be set: this means that the fixed-effects coefficients cannot be directly interpreted.
+If this is the case, then a warning is raised.
 }
 \examples{
 
@@ -70,7 +79,10 @@ plot(fe_trade)
 
 }
 \seealso{
-\code{\link{plot.fixest.fixef}}. See also the main estimation functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}. Use \code{\link{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link{fixef.fixest}} to extract the fixed-effect coefficients, and the function \code{\link{etable}} to visualize the results of multiple estimations.
+\code{\link{plot.fixest.fixef}}. See also the main estimation functions \code{\link{femlm}}, \code{\link{feols}}
+or \code{\link{feglm}}. Use \code{\link{summary.fixest}} to see the results with the appropriate
+standard-errors, \code{\link{fixef.fixest}} to extract the fixed-effect coefficients, and
+the function \code{\link{etable}} to visualize the results of multiple estimations.
 }
 \author{
 Laurent Berge

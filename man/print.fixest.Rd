@@ -14,12 +14,10 @@ getFixest_print()
 }
 \arguments{
 \item{x}{A \code{fixest} object. Obtained using the methods
-\code{\link{femlm}}, \code{\link{feols}} or
-\code{\link{feglm}}.}
+\code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}.}
 
 \item{n}{Integer, number of coefficients to display. By default, only the
-first 8 coefficients are displayed if \code{x} does not come from
-\code{\link{summary.fixest}}.}
+first 8 coefficients are displayed if \code{x} does not come from  \code{\link{summary.fixest}}.}
 
 \item{type}{Either \code{"table"} (default) to display the coefficients table
 or \code{"coef"} to display only the coefficients.}

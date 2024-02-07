@@ -25,39 +25,58 @@ driscoll_kraay(lag = NULL)
 \arguments{
 \item{x}{A \code{fixest} object.}
 
-\item{time}{A character scalar or a one sided formula giving the name of the variable representing the time.}
+\item{time}{A character scalar or a one sided formula giving the name of the
+variable representing the time.}
 
-\item{lag}{An integer scalar, default is \code{NULL}. If \code{NULL}, then the default lag is equal to \code{n_t^0.25} with \code{n_t} the number of time periods (as of Newey and West 1987) for panel Newey-West and Driscoll-Kraay. The default for the time series Newey-West is computed via \code{\link[sandwich:NeweyWest]{bwNeweyWest}} which implements the Newey and West 1994 method.}
+\item{lag}{An integer scalar, default is \code{NULL}. If \code{NULL}, then the default lag is equal to
+\code{n_t^0.25} with \code{n_t} the number of time periods (as of Newey and West 1987) for panel
+Newey-West and Driscoll-Kraay. The default for the time series Newey-West is computed via
+\code{\link[sandwich:NeweyWest]{bwNeweyWest}} which implements the Newey and West 1994 method.}
 
-\item{ssc}{An object returned by the function \code{\link{ssc}}. It specifies how to perform the small sample correction.}
+\item{ssc}{An object returned by the function \code{\link{ssc}}. It specifies how to perform the small
+sample correction.}
 
-\item{vcov_fix}{Logical scalar, default is \code{TRUE}. If the VCOV ends up not being positive definite, whether to "fix" it using an eigenvalue decomposition (a la Cameron, Gelbach & Miller 2011).}
+\item{vcov_fix}{Logical scalar, default is \code{TRUE}. If the VCOV ends up not being
+positive definite, whether to "fix" it using an eigenvalue decomposition
+(a la Cameron, Gelbach & Miller 2011).}
 
-\item{unit}{A character scalar or a one sided formula giving the name of the variable representing the units of the panel.}
+\item{unit}{A character scalar or a one sided formula giving the name of the
+variable representing the units of the panel.}
 }
 \value{
 If the first argument is a \code{fixest} object, then a VCOV is returned (i.e. a symmetric matrix).
 
-If the first argument is not a \code{fixest} object, then a) implicitly the arguments are shifted to the left (i.e. \code{vcov_DK(~year)} is equivalent to \code{vcov_DK(time = ~year)}) and b) a VCOV-\emph{request} is returned and NOT a VCOV. That VCOV-request can then be used in the argument \code{vcov} of various \code{fixest} functions (e.g. \code{\link{vcov.fixest}} or even in the estimation calls).
+If the first argument is not a \code{fixest} object, then a) implicitly the arguments are shifted to
+the left (i.e. \code{vcov_DK(~year)} is equivalent to \code{vcov_DK(time = ~year)}) and b) a
+VCOV-\emph{request} is returned and NOT a VCOV. That VCOV-request can then be used in the argument
+\code{vcov} of various \code{fixest} functions (e.g. \code{\link{vcov.fixest}} or even in the estimation calls).
 }
 \description{
-Set of functions to compute the VCOVs robust to different forms correlation in panel or time series settings.
+Set of functions to compute the VCOVs robust to different forms correlation in panel or
+time series settings.
 }
 \details{
-There are currently three VCOV types: Newey-West applied to time series, Newey-West applied to a panel setting (when the argument 'unit' is not missing), and Driscoll-Kraay.
+There are currently three VCOV types: Newey-West applied to time series, Newey-West applied to
+a panel setting (when the argument 'unit' is not missing), and Driscoll-Kraay.
 
-The functions on this page without the prefix "vcov_" do not compute VCOVs directly but are meant to be used in the argument \code{vcov} of \code{fixest} functions (e.g. in \code{\link{vcov.fixest}} or even in the estimation calls).
+The functions on this page without the prefix "vcov_" do not compute VCOVs directly but
+are meant to be used in the argument \code{vcov} of \code{fixest} functions (e.g. in \code{\link{vcov.fixest}}
+or even in the estimation calls).
 
-Note that for Driscoll-Kraay VCOVs, to ensure its properties the number of periods should be long enough (a minimum of 20 periods or so).
+Note that for Driscoll-Kraay VCOVs, to ensure its properties the number of periods should
+be long enough (a minimum of 20 periods or so).
 }
 \section{Lag selection}{
 
 
 The default lag selection depends on whether the VCOV applies to a panel or a time series.
 
-For panels, i.e. panel Newey-West or Driscoll-Kraay VCOV, the default lag is \code{n_t^0.25} with \code{n_t} the number of time periods. This is based on Newey and West 1987.
+For panels, i.e. panel Newey-West or Driscoll-Kraay VCOV, the default lag is \code{n_t^0.25} with
+\code{n_t} the number of time periods. This is based on Newey and West 1987.
 
-For time series Newey-West, the default lag is found thanks to the \code{\link[sandwich:NeweyWest]{bwNeweyWest}} function from the \code{sandwich} package. It is based on Newey and West 1994.
+For time series Newey-West, the default lag is found thanks to the
+\code{\link[sandwich:NeweyWest]{bwNeweyWest}} function from the \code{sandwich} package. It is based on
+Newey and West 1994.
 }
 
 \examples{
@@ -90,9 +109,12 @@ vcov_NW(est, lag = 2)
 
 }
 \references{
-Newey WK, West KD (1987). "A Simple, Positive Semi-Definite, Heteroskedasticity and Autocorrelation Consistent Covariance Matrix." \emph{Econometrica}, 55(3), 703-708. doi:10.2307/1913610.
+Newey WK, West KD (1987). "A Simple, Positive Semi-Definite, Heteroskedasticity and
+Autocorrelation Consistent Covariance Matrix." \emph{Econometrica}, 55(3), 703-708. doi:10.2307/1913610.
 
-Driscoll JC, Kraay AC (1998). "Consistent Covariance Matrix Estimation with Spatially Dependent Panel Data." \emph{The Review of Economics and Statistics}, 80(4), 549-560. doi:10.1162/003465398557825.
+Driscoll JC, Kraay AC (1998). "Consistent Covariance Matrix Estimation with Spatially Dependent
+Panel Data." \emph{The Review of Economics and Statistics}, 80(4), 549-560. doi:10.1162/003465398557825.
 
-Millo G (2017). "Robust Standard Error Estimators for Panel Models: A Unifying Approach" \emph{Journal of Statistical Software}, 82(3). doi:10.18637/jss.v082.i03.
+Millo G (2017). "Robust Standard Error Estimators for Panel Models: A Unifying Approach"
+\emph{Journal of Statistical Software}, 82(3). doi:10.18637/jss.v082.i03.
 }

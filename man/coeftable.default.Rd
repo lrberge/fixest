@@ -19,7 +19,8 @@
 \method{se}{matrix}(object, keep, drop, order, ...)
 }
 \arguments{
-\item{object}{The result of an estimation (a fitted model object). Note that this function is made to work with \code{fixest} objects so it may not work for the specific model you provide.}
+\item{object}{The result of an estimation (a fitted model object). Note that this function
+is made to work with \code{fixest} objects so it may not work for the specific model you provide.}
 
 \item{keep}{Character vector. This element is used to display only a subset of variables. This
 should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}} help for more info). Each
@@ -49,9 +50,15 @@ does not contain \dQuote{Intercept} goes first).  See details.}
 
 \item{...}{Other arguments that will be passed to \code{summary}.
 
-First the method summary is applied if needed, then the coefficients table is extracted from its output.
+First the method summary is applied if needed, then the coefficients table is extracted from
+its output.
 
-The default method is very naive and hopes that the resulting coefficients table contained in the summary of the fitted model is well formed: this assumption is very often wrong. Anyway, there is no development intended since the coeftable/se/pvalue/tstat series of methods is only intended to work well with \code{fixest} objects. To extract the coefficients table from fitted models in a general way, it's better to use \href{https://broom.tidymodels.org/}{tidy from broom}.}
+The default method is very naive and hopes that the resulting coefficients table
+contained in the summary of the fitted model is well formed: this assumption is very
+often wrong. Anyway, there is no development intended since the coeftable/se/pvalue/tstat
+series of methods is only intended to work well with \code{fixest} objects. To extract
+the coefficients table from fitted models in a general way, it's better to
+use \href{https://broom.tidymodels.org/}{tidy from broom}.}
 }
 \value{
 Returns a matrix (\code{coeftable}) or vectors.

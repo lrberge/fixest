@@ -38,17 +38,46 @@
 \arguments{
 \item{object}{A \code{fixest} object. Obtained using the functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}.}
 
-\item{vcov}{Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: \code{vcov_type ~ variables}. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from \code{\link{vcov_cluster}}, \code{\link[=vcov_hac]{vcov_NW}}, \code{\link[=vcov_hac]{NW}}, \code{\link[=vcov_hac]{vcov_DK}}, \code{\link[=vcov_hac]{DK}}, \code{\link{vcov_conley}} and \code{\link[=vcov_conley]{conley}}. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the \code{vcov} documentation in the \href{https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1}{vignette}.}
+\item{vcov}{Versatile argument to specify the VCOV. In general, it is either a character
+scalar equal to a VCOV type, either a formula of the form: \code{vcov_type ~ variables}. The
+VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway",
+"NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts
+object from \code{\link{vcov_cluster}}, \code{\link[=vcov_hac]{vcov_NW}}, \code{\link[=vcov_hac]{NW}},
+\code{\link[=vcov_hac]{vcov_DK}}, \code{\link[=vcov_hac]{DK}}, \code{\link{vcov_conley}} and
+\code{\link[=vcov_conley]{conley}}. It also accepts covariance matrices computed externally.
+Finally it accepts functions to compute the covariances. See the \code{vcov} documentation
+in the \href{https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1}{vignette}.}
 
-\item{cluster}{Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1", "var2")]}, \code{cluster = c("var1", "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as fixed-effects in the estimation, you can leave it blank with \code{vcov = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [resp. 2nd] fixed-effect). You can interact two variables using \code{^} with the following syntax: \code{cluster = ~var1^var2} or \code{cluster = "var1^var2"}.}
+\item{cluster}{Tells how to cluster the standard-errors (if clustering is requested).
+Can be either a list of vectors, a character vector of variable names, a formula or
+an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2}
+contained in the data.frame \code{base} used for the estimation. All the following
+\code{cluster} arguments are valid and do the same thing:
+\code{cluster = base[, c("var1", "var2")]}, \code{cluster = c("var1", "var2")}, \code{cluster = ~var1+var2}.
+If the two variables were used as fixed-effects in the estimation, you can leave it
+blank with \code{vcov = "twoway"} (assuming \code{var1} [resp. \code{var2}] was
+the 1st [resp. 2nd] fixed-effect). You can interact two variables using \code{^} with
+the following syntax: \code{cluster = ~var1^var2} or \code{cluster = "var1^var2"}.}
 
-\item{ssc}{An object of class \code{ssc.type} obtained with the function \code{\link{ssc}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link{ssc}} for this argument. The arguments and defaults of the function \code{\link{ssc}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "min"}, \code{t.df = "min"}, \verb{fixef.force_exact=FALSE)}. See the help of the function \code{\link{ssc}} for details.}
+\item{ssc}{An object of class \code{ssc.type} obtained with the function \code{\link{ssc}}. Represents
+how the degree of freedom correction should be done.You must use the function \code{\link{ssc}}
+for this argument. The arguments and defaults of the function \code{\link{ssc}} are:
+\code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "min"},
+\code{t.df = "min"}, \verb{fixef.force_exact=FALSE)}. See the help of the function \code{\link{ssc}} for details.}
 
-\item{.vcov}{A user provided covariance matrix or a function computing this matrix. If a matrix, it must be a square matrix of the same number of rows as the number of variables estimated. If a function, it must return the previously mentioned matrix.}
+\item{.vcov}{A user provided covariance matrix or a function computing this matrix. If a
+matrix, it must be a square matrix of the same number of rows as the number
+of variables estimated. If a function, it must return the previously mentioned matrix.}
 
-\item{stage}{Can be equal to \code{2} (default), \code{1}, \code{1:2} or \code{2:1}. Only used if the object is an IV estimation: defines the stage to which \code{summary} should be applied. If \code{stage = 1} and there are multiple endogenous regressors or if \code{stage} is of length 2, then an object of class \code{fixest_multi} is returned.}
+\item{stage}{Can be equal to \code{2} (default), \code{1}, \code{1:2} or \code{2:1}. Only used if the object
+is an IV estimation: defines the stage to which \code{summary} should be applied. If \code{stage = 1}
+and there are multiple endogenous regressors or if \code{stage} is of length 2, then an
+object of class \code{fixest_multi} is returned.}
 
-\item{lean}{Logical, default is \code{FALSE}. Used to reduce the (memory) size of the summary object. If \code{TRUE}, then all objects of length N (the number of observations) are removed from the result. Note that some \code{fixest} methods may consequently not work when applied to the summary.}
+\item{lean}{Logical, default is \code{FALSE}. Used to reduce the (memory) size of the summary object.
+If \code{TRUE}, then all objects of length N (the number of observations) are removed
+from the result. Note that some \code{fixest} methods may consequently not work when applied
+to the summary.}
 
 \item{agg}{A character scalar describing the variable names to be aggregated,
 it is pattern-based. For \code{\link{sunab}} estimations, the following keywords work: "att",
@@ -60,15 +89,28 @@ name is \code{"root1::root2"}. To name the resulting variable differently you ca
 a named vector: \code{c("name" = "pattern")} or \code{c("name" = "pattern(root2)")}. It's a
 bit intricate sorry, please see the examples.}
 
-\item{forceCovariance}{(Advanced users.) Logical, default is \code{FALSE}. In the peculiar case where the obtained Hessian is not invertible (usually because of collinearity of some variables), use this option to force the covariance matrix, by using a generalized inverse of the Hessian. This can be useful to spot where possible problems come from.}
+\item{forceCovariance}{(Advanced users.) Logical, default is \code{FALSE}. In the peculiar case
+where the obtained Hessian is not invertible (usually because of collinearity of
+some variables), use this option to force the covariance matrix, by using a generalized
+inverse of the Hessian. This can be useful to spot where possible problems come from.}
 
-\item{se}{Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "iid"}. Note that this argument is deprecated, you should use \code{vcov} instead.}
+\item{se}{Character scalar. Which kind of standard error should be computed:
+\dQuote{standard}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway}
+or \dQuote{fourway}? By default if there are clusters in the estimation:
+\code{se = "cluster"}, otherwise \code{se = "iid"}. Note that this argument is deprecated,
+you should use \code{vcov} instead.}
 
-\item{keepBounded}{(Advanced users -- \code{feNmlm} with non-linear part and bounded coefficients only.) Logical, default is \code{FALSE}. If \code{TRUE}, then the bounded coefficients (if any) are treated as unrestricted coefficients and their S.E. is computed (otherwise it is not).}
+\item{keepBounded}{(Advanced users -- \code{feNmlm} with non-linear part and bounded
+coefficients only.) Logical, default is \code{FALSE}. If \code{TRUE}, then the bounded coefficients
+(if any) are treated as unrestricted coefficients and their S.E. is computed (otherwise
+it is not).}
 
-\item{n}{Integer, default is 1000. Number of coefficients to display when the print method is used.}
+\item{n}{Integer, default is 1000. Number of coefficients to display when the print method
+is used.}
 
-\item{vcov_fix}{Logical scalar, default is \code{TRUE}. If the VCOV ends up not being positive definite, whether to "fix" it using an eigenvalue decomposition (a la Cameron, Gelbach & Miller 2011).}
+\item{vcov_fix}{Logical scalar, default is \code{TRUE}. If the VCOV ends up not being
+positive definite, whether to "fix" it using an eigenvalue decomposition
+(a la Cameron, Gelbach & Miller 2011).}
 
 \item{nthreads}{The number of threads. Can be: a) an integer lower than, or equal to,
 the maximum number of threads; b) 0: meaning all available threads will be used;
@@ -76,7 +118,8 @@ c) a number strictly between 0 and 1 which represents the fraction of all thread
 The default is to use 50\% of all threads. You can set permanently the number
 of threads used within this package using the function \code{\link{setFixest_nthreads}}.}
 
-\item{...}{Only used if the argument \code{.vocv} is provided and is a function: extra arguments to be passed to that function.}
+\item{...}{Only used if the argument \code{.vocv} is provided and is a function: extra arguments
+to be passed to that function.}
 }
 \value{
 It returns a \code{fixest} object with:
@@ -85,12 +128,18 @@ It returns a \code{fixest} object with:
 \item{coeftable}{The table of coefficients with the new standard errors.}
 }
 \description{
-This function is similar to \code{print.fixest}. It provides the table of coefficients along with other information on the fit of the estimation. It can compute different types of standard errors. The new variance covariance matrix is an object returned.
+This function is similar to \code{print.fixest}. It provides the table of coefficients along with
+other information on the fit of the estimation. It can compute different types of standard
+errors. The new variance covariance matrix is an object returned.
 }
 \section{Compatibility with \pkg{sandwich} package}{
 
-The VCOVs from \code{sandwich} can be used with \code{feols}, \code{feglm} and \code{fepois} estimations. If you want to have a \code{sandwich} VCOV when using \code{summary.fixest}, you can use the argument \code{vcov} to specify the VCOV function to use (see examples).
-Note that if you do so and you use a formula in the \code{cluster} argument, an innocuous warning can pop up if you used several non-numeric fixed-effects in the estimation (this is due to the function \code{\link{expand.model.frame}} used in \code{sandwich}).
+The VCOVs from \code{sandwich} can be used with \code{feols}, \code{feglm} and \code{fepois} estimations.
+If you want to have a \code{sandwich} VCOV when using \code{summary.fixest}, you can use
+the argument \code{vcov} to specify the VCOV function to use (see examples).
+Note that if you do so and you use a formula in the \code{cluster} argument, an innocuous
+warning can pop up if you used several non-numeric fixed-effects in the estimation
+(this is due to the function \code{\link{expand.model.frame}} used in \code{sandwich}).
 }
 
 \examples{
@@ -190,7 +239,9 @@ summary(est_pois, .vcov = vcovCL, cluster = trade[, c("Destination", "Product")]
 
 }
 \seealso{
-See also the main estimation functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}. Use \code{\link{fixef.fixest}} to extract the fixed-effects coefficients, and the function \code{\link{etable}} to visualize the results of multiple estimations.
+See also the main estimation functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}.
+Use \code{\link{fixef.fixest}} to extract the fixed-effects coefficients, and the function \code{\link{etable}}
+to visualize the results of multiple estimations.
 }
 \author{
 Laurent Berge

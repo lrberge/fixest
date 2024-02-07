@@ -21,19 +21,51 @@
 \arguments{
 \item{object}{A \code{fixest} object. Obtained using the functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}.}
 
-\item{vcov}{Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: \code{vcov_type ~ variables}. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from \code{\link{vcov_cluster}}, \code{\link[=vcov_hac]{vcov_NW}}, \code{\link[=vcov_hac]{NW}}, \code{\link[=vcov_hac]{vcov_DK}}, \code{\link[=vcov_hac]{DK}}, \code{\link{vcov_conley}} and \code{\link[=vcov_conley]{conley}}. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the \code{vcov} documentation in the \href{https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1}{vignette}.}
+\item{vcov}{Versatile argument to specify the VCOV. In general, it is either a character
+scalar equal to a VCOV type, either a formula of the form: \code{vcov_type ~ variables}. The
+VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway",
+"NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts
+object from \code{\link{vcov_cluster}}, \code{\link[=vcov_hac]{vcov_NW}}, \code{\link[=vcov_hac]{NW}},
+\code{\link[=vcov_hac]{vcov_DK}}, \code{\link[=vcov_hac]{DK}}, \code{\link{vcov_conley}} and
+\code{\link[=vcov_conley]{conley}}. It also accepts covariance matrices computed externally.
+Finally it accepts functions to compute the covariances. See the \code{vcov} documentation
+in the \href{https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1}{vignette}.}
 
-\item{se}{Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "iid"}. Note that this argument is deprecated, you should use \code{vcov} instead.}
+\item{se}{Character scalar. Which kind of standard error should be computed:
+\dQuote{standard}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway}
+or \dQuote{fourway}? By default if there are clusters in the estimation:
+\code{se = "cluster"}, otherwise \code{se = "iid"}. Note that this argument is deprecated,
+you should use \code{vcov} instead.}
 
-\item{cluster}{Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1", "var2")]}, \code{cluster = c("var1", "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as fixed-effects in the estimation, you can leave it blank with \code{vcov = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [resp. 2nd] fixed-effect). You can interact two variables using \code{^} with the following syntax: \code{cluster = ~var1^var2} or \code{cluster = "var1^var2"}.}
+\item{cluster}{Tells how to cluster the standard-errors (if clustering is requested).
+Can be either a list of vectors, a character vector of variable names, a formula or
+an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2}
+contained in the data.frame \code{base} used for the estimation. All the following
+\code{cluster} arguments are valid and do the same thing:
+\code{cluster = base[, c("var1", "var2")]}, \code{cluster = c("var1", "var2")}, \code{cluster = ~var1+var2}.
+If the two variables were used as fixed-effects in the estimation, you can leave it
+blank with \code{vcov = "twoway"} (assuming \code{var1} [resp. \code{var2}] was
+the 1st [resp. 2nd] fixed-effect). You can interact two variables using \code{^} with
+the following syntax: \code{cluster = ~var1^var2} or \code{cluster = "var1^var2"}.}
 
-\item{ssc}{An object of class \code{ssc.type} obtained with the function \code{\link{ssc}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link{ssc}} for this argument. The arguments and defaults of the function \code{\link{ssc}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "min"}, \code{t.df = "min"}, \verb{fixef.force_exact=FALSE)}. See the help of the function \code{\link{ssc}} for details.}
+\item{ssc}{An object of class \code{ssc.type} obtained with the function \code{\link{ssc}}. Represents
+how the degree of freedom correction should be done.You must use the function \code{\link{ssc}}
+for this argument. The arguments and defaults of the function \code{\link{ssc}} are:
+\code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "min"},
+\code{t.df = "min"}, \verb{fixef.force_exact=FALSE)}. See the help of the function \code{\link{ssc}} for details.}
 
-\item{attr}{Logical, defaults to \code{FALSE}. Whether to include the attributes describing how the VCOV was computed.}
+\item{attr}{Logical, defaults to \code{FALSE}. Whether to include the attributes describing how
+the VCOV was computed.}
 
-\item{forceCovariance}{(Advanced users.) Logical, default is \code{FALSE}. In the peculiar case where the obtained Hessian is not invertible (usually because of collinearity of some variables), use this option to force the covariance matrix, by using a generalized inverse of the Hessian. This can be useful to spot where possible problems come from.}
+\item{forceCovariance}{(Advanced users.) Logical, default is \code{FALSE}. In the peculiar case
+where the obtained Hessian is not invertible (usually because of collinearity of
+some variables), use this option to force the covariance matrix, by using a generalized
+inverse of the Hessian. This can be useful to spot where possible problems come from.}
 
-\item{keepBounded}{(Advanced users -- \code{feNmlm} with non-linear part and bounded coefficients only.) Logical, default is \code{FALSE}. If \code{TRUE}, then the bounded coefficients (if any) are treated as unrestricted coefficients and their S.E. is computed (otherwise it is not).}
+\item{keepBounded}{(Advanced users -- \code{feNmlm} with non-linear part and bounded
+coefficients only.) Logical, default is \code{FALSE}. If \code{TRUE}, then the bounded coefficients
+(if any) are treated as unrestricted coefficients and their S.E. is computed (otherwise
+it is not).}
 
 \item{nthreads}{The number of threads. Can be: a) an integer lower than, or equal to,
 the maximum number of threads; b) 0: meaning all available threads will be used;
@@ -41,21 +73,28 @@ c) a number strictly between 0 and 1 which represents the fraction of all thread
 The default is to use 50\% of all threads. You can set permanently the number
 of threads used within this package using the function \code{\link{setFixest_nthreads}}.}
 
-\item{vcov_fix}{Logical scalar, default is \code{TRUE}. If the VCOV ends up not being positive definite, whether to "fix" it using an eigenvalue decomposition (a la Cameron, Gelbach & Miller 2011).}
+\item{vcov_fix}{Logical scalar, default is \code{TRUE}. If the VCOV ends up not being
+positive definite, whether to "fix" it using an eigenvalue decomposition
+(a la Cameron, Gelbach & Miller 2011).}
 
 \item{...}{Other arguments to be passed to \code{\link{summary.fixest}}.
 
 The computation of the VCOV matrix is first done in \code{\link{summary.fixest}}.}
 }
 \value{
-It returns a \eqn{K\times K} square matrix where \eqn{K} is the number of variables of the fitted model.
-If \code{attr = TRUE}, this matrix has an attribute \dQuote{type} specifying how this variance/covariance matrix has been computed.
+It returns a \eqn{K\times K} square matrix where \eqn{K} is the number of variables
+of the fitted model.
+If \code{attr = TRUE}, this matrix has an attribute \dQuote{type} specifying how this
+variance/covariance matrix has been computed.
 }
 \description{
-This function extracts the variance-covariance of estimated parameters from a model estimated with \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}.
+This function extracts the variance-covariance of estimated parameters from a model
+estimated with \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}.
 }
 \details{
-For an explanation on how the standard-errors are computed and what is the exact meaning of the arguments, please have a look at the dedicated vignette: \href{https://lrberge.github.io/fixest/articles/standard_errors.html}{On standard-errors}.
+For an explanation on how the standard-errors are computed and what is the exact meaning of
+the arguments, please have a look at the dedicated vignette:
+\href{https://lrberge.github.io/fixest/articles/standard_errors.html}{On standard-errors}.
 }
 \examples{
 
@@ -212,9 +251,11 @@ se(vcov(est, DK ~ period + ssc(adj = FALSE)))
 
 }
 \seealso{
-You can also compute VCOVs with the following functions: \code{\link{vcov_cluster}}, \code{\link{vcov_hac}}, \code{\link{vcov_conley}}.
+You can also compute VCOVs with the following functions: \code{\link{vcov_cluster}},
+\code{\link{vcov_hac}}, \code{\link{vcov_conley}}.
 
-See also the main estimation functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}. \code{\link{summary.fixest}}, \code{\link{confint.fixest}}, \code{\link{resid.fixest}}, \code{\link{predict.fixest}}, \code{\link{fixef.fixest}}.
+See also the main estimation functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}.
+\code{\link{summary.fixest}}, \code{\link{confint.fixest}}, \code{\link{resid.fixest}}, \code{\link{predict.fixest}}, \code{\link{fixef.fixest}}.
 }
 \author{
 Laurent Berge
