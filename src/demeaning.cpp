@@ -1147,8 +1147,8 @@ struct PARAM_DEMEAN{
 
 
 bool dm_update_X_IronsTuck(int nb_coef_no_Q, vector<double> &X,
-               const vector<double> &GX, const vector<double> &GGX,
-               vector<double> &delta_GX, vector<double> &delta2_X){
+                           const vector<double> &GX, const vector<double> &GGX,
+                           vector<double> &delta_GX, vector<double> &delta2_X){
 
   for(int i=0 ; i<nb_coef_no_Q ; ++i){
     double GX_tmp = GX[i];
@@ -1443,7 +1443,7 @@ void demean_acc_2(int v, int iterMax, PARAM_DEMEAN *args){
 }
 
 void compute_fe_gnl(double *p_fe_coef_origin, double *p_fe_coef_destination,
-          double *p_sum_other_means, double *p_sum_in_out, PARAM_DEMEAN *args){
+                    double *p_sum_other_means, double *p_sum_in_out, PARAM_DEMEAN *args){
   // update of the cluster coefficients
   // first we update mu, then we update the cluster coefficicents
 
