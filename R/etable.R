@@ -1240,6 +1240,9 @@ gen_etable_aliases = function(){
   #
   # esttable
   #
+  
+  esttable_def = "esttable = function("
+  coll = paste0(", \n", strrep(" ", nchar(esttable_def)))
 
   qui_df = !arg_name %in% c("tex", "title", "label", "float", "style.tex",
                             "notes", "placement", "postprocess.tex",
@@ -1247,38 +1250,42 @@ gen_etable_aliases = function(){
                             "meta.call", "meta.comment", "tpt", "arraystretch",
                             "adjustbox", "fontsize", "view", "tabular", "markdown")
 
-  esttable_args = paste0(arg_name[qui_df], " = ", arg_default[qui_df], collapse = ", ")
+  esttable_args = paste0(arg_name[qui_df], " = ", arg_default[qui_df], collapse = coll)
   esttable_args = gsub(" = ,", ",", esttable_args)
 
-  etable_call = paste0(arg_name[qui_df][-1], " = ", arg_name[qui_df][-1], collapse = ", ")
+  coll_bis = paste0(", \n", strrep(" ", nchar("  etable(")))
+  etable_call = paste0(arg_name[qui_df][-1], " = ", arg_name[qui_df][-1], collapse = coll_bis)
 
-  esttable_fun = paste0("esttable = function(", esttable_args, "){\n\n",
-                        "\tetable(..., ", etable_call, ", tex = FALSE, .up = 2)\n}")
+  esttable_fun = paste0(esttable_def, esttable_args, "){\n\n",
+                        "  etable(...", coll_bis, etable_call, coll_bis, 
+                        "tex = FALSE", coll_bis, ".up = 2)\n}")
 
   esttable_rox = "#' @describeIn etable Exports the results of multiple `fixest` estimations in a Latex table."
 
   #
   # esttex
   #
+  
+  esttex_def = "esttex = function("
+  coll = paste0(", \n", strrep(" ", nchar(esttex_def)))
 
   qui_tex = !arg_name %in% c("tex", "style.df", "postprocess.df", "coef.just")
 
-  esttex_args = paste0(arg_name[qui_tex], " = ", arg_default[qui_tex], collapse = ", ")
+  esttex_args = paste0(arg_name[qui_tex], " = ", arg_default[qui_tex], collapse = coll)
   esttex_args = gsub(" = ,", ",", esttex_args)
 
-  etable_call = paste0(arg_name[qui_tex][-1], " = ", arg_name[qui_tex][-1], collapse = ", ")
+  etable_call = paste0(arg_name[qui_tex][-1], " = ", arg_name[qui_tex][-1], collapse = coll_bis)
 
-  esttex_fun = paste0("esttex = function(", esttex_args, "){\n\n",
-                      "\tetable(..., ", etable_call, ", tex = TRUE, .up = 2)\n}")
+  esttex_fun = paste0(esttex_def, esttex_args, "){\n\n",
+                      "  etable(...", coll_bis, etable_call, coll_bis,
+                      "tex = TRUE", coll_bis, ".up = 2)\n}")
 
   esttex_rox = "#' @describeIn etable Exports the results of multiple `fixest` estimations in a Latex table."
-
-
-
+  
   # Writing the functions
-  intro = c("# Do not edit by hand\n# => aliases to the function etable\n\n\n")
+  intro = c("# Do not edit by hand\n# => aliases to the function etable")
 
-  s = "\n\n\n\n"
+  s = "\n\n\n"
   text = c(intro, s, esttable_rox, esttable_fun, s, esttex_rox, esttex_fun, s)
 
   update_file("./R/alias_etable.R", text)
