@@ -2266,11 +2266,26 @@ test(cpp_escape_markup("\\$this_is **not** an\\^equation\\$. But $this&one, \\$,
      "\\$this\\_is \\textbf{not} an\\^equation\\$. But $this&one, \\$, * is *$ \\textit{is}.")
 
 
+####
+#### data.save ####
+####
 
+chunk("save data")
 
+base_small = data.frame(x = iris$Sepal.Length,
+                        y = iris$Sepal.Width,
+                        fe = iris$Species)
 
+est_save = feols(y ~ x, base_small, data.save = TRUE)
+est_noSave = feols(y ~ x, base_small)
 
+se_target = se(est_noSave, vcov = ~fe)
 
+rm(base_small)
+
+test(se_target, se(est, vcov = ~fe))
+
+test(se(est_noSave, vcov = ~fe), "err")
 
 
 

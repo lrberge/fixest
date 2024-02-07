@@ -4586,15 +4586,22 @@ set_defaults = function(opts_name){
 fetch_data = function(x, prefix = "", suffix = ""){
   # x: fixest estimation
   # We try different strategies:
+  # 0) the data has been saved at estimation time with `data.save = TRUE`
   # 1) using the environment where the estimation was done
   # 2) the "parent.frame()" defined as the frame on top of ALL fixest functions
   # 3) the global environment, if it wasn't in 1)
 
   # Maybe I should keep only 1) => is there a reason to add the others?
 
-  # 1) safest
+  # 0) and 1) safest
   # 2) less safe but OK => note ???
   # 3) kind of dangerous => warning() ???
+  
+  # 0) Data is within the fixest object
+  
+  if(!is.null(x$data)){
+    return(x$data)
+  }
 
   if(is.null(x$call$data)) return(NULL)
 
@@ -4663,7 +4670,7 @@ fetch_data = function(x, prefix = "", suffix = ""){
      suffix = gsub("^ +", "", suffix)
   }
 
-  stop_up(msg, "e fetch the data in the enviroment where the estimation was made, but the data does not seem to be there any more (btw it was ", charShorten(deparse(x$call$data)[1], 15), "). ", suffix)
+  stop_up(msg, "e fetch the data in the enviroment where the estimation was made, but the data does not seem to be there any more (btw it was `", charShorten(deparse(x$call$data)[1], 15), "`). ", suffix)
 
 
 }
@@ -5768,10 +5775,10 @@ charShorten = function(x, width, keep.digits = FALSE){
 
   if(n > width && width > 3){
     if(keep.digits){
-      trailing_digits = dsb("'\\d+$'X ? x")
+      trailing_digits = sma("{'\\d+$'X ? x}")
       n_d = nchar(trailing_digits)
       if(length(n_d) == 1 && n_d > 0){
-        res = dsb(".[`max(width - n_d - 2, 3)`k ? x]...[trailing_digits]")
+        res = sma("{`max(width - n_d - 2, 3)`k ? x}..{trailing_digits}")
         return(res)
       }
     }

@@ -35,6 +35,7 @@ femlm(
   mem.clean = FALSE,
   only.env = FALSE,
   only.coef = FALSE,
+  data.save = FALSE,
   env,
   ...
 )
@@ -68,6 +69,7 @@ fenegbin(
   mem.clean = FALSE,
   only.env = FALSE,
   only.coef = FALSE,
+  data.save = FALSE,
   env,
   ...
 )
@@ -253,6 +255,13 @@ the environment used to make the estimation is returned.}
 coefficients are returned. Note that the length of the vector returned is always
 the length of the number of coefficients to be estimated: this means that the
 variables found to be collinear are returned with an NA value.}
+
+\item{data.save}{Logical scalar, default is \code{FALSE}. If \code{TRUE}, the data used for
+the estimation is saved within the returned object. Hence later calls to predict(),
+vcov(), etc..., will be consistent even if the original data has been modified
+in the meantime.
+This is especially useful for estimations within loops, where the data changes
+at each iteration, such that postprocessing can be done outside the loop without issue.}
 
 \item{env}{(Advanced users.) A \code{fixest} environment created by a \code{fixest} estimation
 with \code{only.env = TRUE}. Default is missing. If provided, the data from this environment

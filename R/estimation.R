@@ -495,13 +495,14 @@
 #'
 #'
 #'
-feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.keep, split.drop,
-         cluster, se,
-         ssc, panel.id, fixef, fixef.rm = "none", fixef.tol = 1e-6,
-         fixef.iter = 10000, collin.tol = 1e-10, nthreads = getFixest_nthreads(),
-         lean = FALSE, verbose = 0, warn = TRUE, notes = getFixest_notes(),
-         only.coef = FALSE,
-         combine.quick, demeaned = FALSE, mem.clean = FALSE, only.env = FALSE, env, ...){
+feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.keep, 
+                 split.drop, cluster, se,
+                 ssc, panel.id, fixef, fixef.rm = "none", fixef.tol = 1e-6,
+                 fixef.iter = 10000, collin.tol = 1e-10, nthreads = getFixest_nthreads(),
+                 lean = FALSE, verbose = 0, warn = TRUE, notes = getFixest_notes(),
+                 only.coef = FALSE, data.save = FALSE,
+                 combine.quick, demeaned = FALSE, mem.clean = FALSE, 
+                 only.env = FALSE, env, ...){
 
   dots = list(...)
 
@@ -549,7 +550,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
                 fixef.tol = fixef.tol, fixef.iter = fixef.iter, 
                 collin.tol = collin.tol,
                 nthreads = nthreads, lean = lean, verbose = verbose, warn = warn,
-                notes = notes, only.coef = only.coef, 
+                notes = notes, only.coef = only.coef, data.save = data.save,
                 combine.quick = combine.quick, demeaned = demeaned,
                 mem.clean = mem.clean, origin = "feols", mc_origin = match.call(),
                 call_env = call_env, ...), silent = TRUE)
@@ -2375,7 +2376,7 @@ feglm = function(fml, data, family = "gaussian", vcov, offset, weights, subset, 
                  fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10,
                  glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(),
                  lean = FALSE, warn = TRUE, notes = getFixest_notes(), verbose = 0,
-                 only.coef = FALSE,
+                 only.coef = FALSE, data.save = FALSE,
                  combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
 
   if(missing(weights)) weights = NULL
@@ -2399,7 +2400,8 @@ feglm = function(fml, data, family = "gaussian", vcov, offset, weights, subset, 
                          glm.iter = glm.iter, glm.tol = glm.tol,
                          nthreads = nthreads, lean = lean, warn = warn, notes = notes,
                          verbose = verbose, combine.quick = combine.quick,
-                         mem.clean = mem.clean, only.coef = only.coef, origin = "feglm",
+                         mem.clean = mem.clean, only.coef = only.coef, data.save = data.save,
+                         origin = "feglm", 
                          mc_origin = match.call(), call_env = call_env, ...), silent = TRUE)
 
   } else if((r <- !is.environment(env)) || !isTRUE(env$fixest_env)){
@@ -3391,7 +3393,7 @@ femlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian")
                  cluster, se, ssc, panel.id, fixef.tol = 1e-5, fixef.iter = 10000,
                  nthreads = getFixest_nthreads(), lean = FALSE, verbose = 0, warn = TRUE,
                  notes = getFixest_notes(), theta.init, combine.quick, mem.clean = FALSE,
-                 only.env = FALSE, only.coef = FALSE, env, ...){
+                 only.env = FALSE, only.coef = FALSE, data.save = FALSE, env, ...){
 
   # This is just an alias
 
@@ -3404,11 +3406,12 @@ femlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian")
                    split.keep = split.keep, split.drop = split.drop,
                    vcov = vcov, cluster = cluster,
                    se = se, ssc = ssc, panel.id = panel.id, start = start,
-                   fixef.tol=fixef.tol, fixef.iter=fixef.iter, nthreads=nthreads,
-                   lean = lean, verbose=verbose, warn=warn, notes=notes,
+                   fixef.tol=fixef.tol, fixef.iter = fixef.iter, nthreads = nthreads,
+                   lean = lean, verbose = verbose, warn = warn, notes = notes,
                    theta.init = theta.init, combine.quick = combine.quick,
                    mem.clean = mem.clean, origin = "femlm", mc_origin_bis = match.call(),
-                   call_env_bis = call_env_bis, only.env = only.env, only.coef = only.coef,
+                   call_env_bis = call_env_bis, only.env = only.env, 
+                   only.coef = only.coef, data.save = data.save,
                    env = env, ...), silent = TRUE)
 
   if("try-error" %in% class(res)){
@@ -3425,7 +3428,7 @@ fenegbin = function(fml, data, vcov, theta.init, start = 0, fixef, fixef.rm = "p
                     fixef.tol = 1e-5, fixef.iter = 10000, nthreads = getFixest_nthreads(),
                     lean = FALSE, verbose = 0, warn = TRUE, notes = getFixest_notes(),
                     combine.quick, mem.clean = FALSE, 
-                    only.env = FALSE, only.coef = FALSE, env, ...){
+                    only.env = FALSE, only.coef = FALSE, data.save = FALSE, env, ...){
 
   # We control for the problematic argument family
   if("family" %in% names(match.call())){
@@ -3444,7 +3447,8 @@ fenegbin = function(fml, data, vcov, theta.init, start = 0, fixef, fixef.rm = "p
                    se = se, ssc = ssc, panel.id = panel.id, fixef.tol = fixef.tol,
                    fixef.iter = fixef.iter, nthreads = nthreads, lean = lean,
                    verbose = verbose, warn = warn, notes = notes, combine.quick = combine.quick,
-                   mem.clean = mem.clean, only.env = only.env, only.coef = only.coef,
+                   mem.clean = mem.clean, only.env = only.env, 
+                   only.coef = only.coef, data.save = data.save,
                    origin = "fenegbin", mc_origin_bis = match.call(),
                    call_env_bis = call_env_bis, env = env, ...), silent = TRUE)
 
@@ -3464,7 +3468,7 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
                   nthreads = getFixest_nthreads(), lean = FALSE, 
                   warn = TRUE, notes = getFixest_notes(),
                   verbose = 0, combine.quick, mem.clean = FALSE, only.env = FALSE,
-                  only.coef = FALSE, env, ...){
+                  only.coef = FALSE, data.save = FALSE, env, ...){
 
   # We control for the problematic argument family
   if("family" %in% names(match.call())){
@@ -3484,7 +3488,7 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
                   collin.tol = collin.tol, glm.iter = glm.iter, glm.tol = glm.tol,
                   nthreads = nthreads, lean = lean, warn = warn, notes = notes,
                   verbose = verbose, combine.quick = combine.quick, mem.clean = mem.clean,
-                  only.env = only.env, only.coef = only.coef,
+                  only.env = only.env, only.coef = only.coef, data.save = data.save,
                   origin_bis = "fepois", mc_origin_bis = match.call(),
                   call_env_bis = call_env_bis, env = env, ...), silent = TRUE)
 
@@ -3677,6 +3681,12 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
 #' coefficients are returned. Note that the length of the vector returned is always 
 #' the length of the number of coefficients to be estimated: this means that the 
 #' variables found to be collinear are returned with an NA value.
+#' @param data.save Logical scalar, default is `FALSE`. If `TRUE`, the data used for 
+#' the estimation is saved within the returned object. Hence later calls to predict(), 
+#' vcov(), etc..., will be consistent even if the original data has been modified 
+#' in the meantime. 
+#' This is especially useful for estimations within loops, where the data changes 
+#' at each iteration, such that postprocessing can be done outside the loop without issue.
 #' @param ... Not currently used.
 #'
 #' @details
@@ -3841,7 +3851,8 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
                   hessian.args = NULL, opt.control = list(), nthreads = getFixest_nthreads(),
                   lean = FALSE, verbose = 0, theta.init, fixef.tol = 1e-5, fixef.iter = 10000,
                   deriv.tol = 1e-4, deriv.iter = 1000, warn = TRUE, notes = getFixest_notes(),
-                  combine.quick, mem.clean = FALSE, only.env = FALSE, only.coef = FALSE, env, ...){
+                  combine.quick, mem.clean = FALSE, only.env = FALSE, 
+                  only.coef = FALSE, data.save = FALSE, env, ...){
 
   time_start = proc.time()
 
@@ -3862,7 +3873,8 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
                          lean = lean, verbose = verbose, theta.init = theta.init,
                          fixef.tol = fixef.tol, fixef.iter = fixef.iter, deriv.iter = deriv.iter,
                          warn = warn, notes = notes, combine.quick = combine.quick,
-                         mem.clean = mem.clean, only.coef = only.coef, mc_origin = match.call(),
+                         mem.clean = mem.clean, only.coef = only.coef, data.save = data.save,
+                         mc_origin = match.call(),
                          call_env = call_env, computeModel0 = TRUE, ...), silent = TRUE)
 
   } else if((r <- !is.environment(env)) || !isTRUE(env$fixest_env)) {

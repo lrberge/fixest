@@ -11,7 +11,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
                       fixef, NL.start, lower, upper, NL.start.init, offset = NULL,
                       subset = NULL, split = NULL, fsplit = NULL,
                       split.keep = NULL, split.drop = NULL,
-                      linear.start = 0,
+                      linear.start = 0, data.save = FALSE,
                       jacobian.method = "simple", useHessian = TRUE, hessian.args = NULL,
                       opt.control = list(), vcov = NULL, cluster, se, ssc, y, X, fixef_df,
                       panel.id, fixef.rm = "perfect", nthreads = getFixest_nthreads(),
@@ -68,7 +68,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
   #
   # Arguments control
   main_args = c("fml", "data", "panel.id", "offset", "subset", "split", "fsplit", "split.keep",
-                "split.drop", "vcov",
+                "split.drop", "vcov", "data.save",
                 "cluster", "se", "ssc", "fixef.rm", "fixef.tol", "fixef.iter", "fixef",
                 "nthreads", "lean", "verbose", "warn", "notes", "combine.quick",
                 "start", "only.env", "mem.clean", "only.coef")
@@ -85,8 +85,9 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
   common_args = c(main_args, internal_args, deprec_old_new)
 
   # FIT methods
-  feglm.fit_args = c(setdiff(common_args, c("fml", "data")), feglm_args, "y", "X", "fixef_df")
-  feols.fit_args = c(setdiff(common_args, c("fml", "data")), feols_args, "y", "X", "fixef_df")
+  fit_base_args = c(setdiff(common_args, c("fml", "data", "data.save")), "y", "X", "fixef_df")
+  feglm.fit_args = c(fit_base_args, feglm_args)
+  feols.fit_args = c(fit_base_args, feols_args)
 
   args = names(mc_origin)
   args = args[nchar(args) > 0]
@@ -111,7 +112,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
   args_invalid = setdiff(args, valid_args)
   if(length(args_invalid) > 0){
     if(warn){
-      warni("{'15|...'keep ? deparse(mc_origin)[1]}: {$enum, is ? args_invalid} not {$(a ;)}valid argument{$s} for function {origin}()")
+      warni("{'15|...'k ? deparse(mc_origin)[1]}: {$enum, is ? args_invalid} not {$(a ;)}valid argument{$s} for function {origin}()")
     }
   }
 
@@ -249,7 +250,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
     assign("family_funs", family_funs, env)
   }
 
-  check_arg(demeaned, notes, warn, mem.clean, only.coef, "logical scalar")
+  check_arg("logical scalar", demeaned, notes, warn, mem.clean, only.coef, data.save)
 
   check_set_arg(fixef.rm, "match(singleton, perfect, both, none)")
 
@@ -3071,6 +3072,10 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
 
   res = list(nobs = nobs, nobs_origin = nobs_origin, fml = fml_linear, call = mc_origin,
              call_env = call_env, method = origin, method_type = origin_type)
+  
+  if(data.save){
+    res$data = data
+  }
 
   fml_all = list()
   fml_all$linear = fml_linear

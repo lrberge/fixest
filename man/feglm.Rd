@@ -38,6 +38,7 @@ feglm(
   notes = getFixest_notes(),
   verbose = 0,
   only.coef = FALSE,
+  data.save = FALSE,
   combine.quick,
   mem.clean = FALSE,
   only.env = FALSE,
@@ -116,6 +117,7 @@ fepois(
   mem.clean = FALSE,
   only.env = FALSE,
   only.coef = FALSE,
+  data.save = FALSE,
   env,
   ...
 )
@@ -294,6 +296,13 @@ It can also detail the step-halving algorithm.}
 coefficients are returned. Note that the length of the vector returned is always
 the length of the number of coefficients to be estimated: this means that the
 variables found to be collinear are returned with an NA value.}
+
+\item{data.save}{Logical scalar, default is \code{FALSE}. If \code{TRUE}, the data used for
+the estimation is saved within the returned object. Hence later calls to predict(),
+vcov(), etc..., will be consistent even if the original data has been modified
+in the meantime.
+This is especially useful for estimations within loops, where the data changes
+at each iteration, such that postprocessing can be done outside the loop without issue.}
 
 \item{combine.quick}{Logical. When you combine different variables to transform them
 into a single fixed-effects you can do e.g. \code{y ~ x | paste(var1, var2)}.
