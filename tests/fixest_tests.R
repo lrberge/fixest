@@ -2273,8 +2273,8 @@ test(cpp_escape_markup("\\$this_is **not** an\\^equation\\$. But $this&one, \\$,
 chunk("save data")
 
 base_small = data.frame(x = iris$Sepal.Length,
-            y = iris$Sepal.Width,
-            fe = iris$Species)
+                        y = iris$Sepal.Width,
+                        fe = iris$Species)
 
 est_save = feols(y ~ x, base_small, data.save = TRUE)
 est_noSave = feols(y ~ x, base_small)
