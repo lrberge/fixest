@@ -2283,7 +2283,7 @@ se_target = se(est_noSave, vcov = ~fe)
 
 rm(base_small)
 
-test(se_target, se(est, vcov = ~fe))
+test(se_target, se(est_save, vcov = ~fe))
 
 test(se(est_noSave, vcov = ~fe), "err")
 
