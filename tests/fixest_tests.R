@@ -16,11 +16,11 @@ vcovClust = fixest:::vcovClust
 setFixest_notes(FALSE)
 
 if(fixest:::is_r_check()){
-    if(requireNamespace("data.table", quietly = TRUE)){
-        library(data.table)
-        data.table::setDTthreads(1)
-    }
-    setFixest_nthreads(1)
+  if(requireNamespace("data.table", quietly = TRUE)){
+    library(data.table)
+    data.table::setDTthreads(1)
+  }
+  setFixest_nthreads(1)
 }
 
 ####
@@ -53,119 +53,119 @@ base$y_int_null = base$y_int
 base$y_int_null[base$fe_3 %in% 1:5] = 0
 
 for(model in c("ols", "pois", "logit", "negbin", "Gamma")){
-    cat("Model: ", format(model, width = 6), sep = "")
-    for(use_weights in c(FALSE, TRUE)){
-        my_weight = NULL
-        if(use_weights) my_weight = base$w
+  cat("Model: ", format(model, width = 6), sep = "")
+  for(use_weights in c(FALSE, TRUE)){
+    my_weight = NULL
+    if(use_weights) my_weight = base$w
 
-        for(use_offset in c(FALSE, TRUE)){
-            my_offset = NULL
-            if(use_offset) my_offset = base$offset_value
+    for(use_offset in c(FALSE, TRUE)){
+      my_offset = NULL
+      if(use_offset) my_offset = base$offset_value
 
-            for(id_fe in 0:9){
+      for(id_fe in 0:9){
 
-                cat(".")
+        cat(".")
 
-                tol = switch(model, "negbin" = 1e-2, "logit" = 3e-5, 1e-5)
+        tol = switch(model, "negbin" = 1e-2, "logit" = 3e-5, 1e-5)
 
-                # Setting up the formula to accommodate FEs
-                if(id_fe == 0){
-                    fml_fixest = fml_stats = y ~ x1
-                } else if(id_fe == 1){
-                    fml_fixest = y ~ x1 | species
-                    fml_stats = y ~ x1 + factor(species)
-                } else if(id_fe == 2){
-                    fml_fixest = y ~ x1 | species + fe_2
-                    fml_stats = y ~ x1 + factor(species) + factor(fe_2)
-                } else if(id_fe == 3){
-                    # varying slope
-                    fml_fixest = y ~ x1 | species[[x2]]
-                    fml_stats = y ~ x1 + x2:species
-                } else if(id_fe == 4){
-                    # varying slope -- 1 VS, 1 FE
-                    fml_fixest = y ~ x1 | species[[x2]] + fe_2
-                    fml_stats = y ~ x1 + x2:species + factor(fe_2)
-                } else if(id_fe == 5){
-                    # varying slope -- 2 VS
-                    fml_fixest = y ~ x1 | species[x2]
-                    fml_stats = y ~ x1 + x2:species + species
-                } else if(id_fe == 6){
-                    # varying slope -- 2 VS bis
-                    fml_fixest = y ~ x1 | species[[x2]] + fe_2[[x3]]
-                    fml_stats = y ~ x1 + x2:species + x3:factor(fe_2)
-                } else if(id_fe == 7){
-                    # Combined clusters
-                    fml_fixest = y ~ x1 + x2 | species^fe_2
-                    fml_stats = y ~ x1 + x2 + paste(species, fe_2)
-                } else if(id_fe == 8){
-                    fml_fixest = y ~ x1 | species[x2] + fe_2[x3] + fe_3
-                    fml_stats = y ~ x1 + species + i(species, x2) + factor(fe_2) + i(fe_2, x3) + factor(fe_3)
-                } else if(id_fe == 9){
-                    fml_fixest = y ~ x1 | species + fe_2[x2,x3] + fe_3
-                    fml_stats = y ~ x1 + species + factor(fe_2) + i(fe_2, x2) + i(fe_2, x3) + factor(fe_3)
-                }
-
-                # ad hoc modifications of the formula
-                if(model == "logit"){
-                    fml_fixest = xpd(y_01 ~ ..rhs, ..rhs = fml_fixest[[3]])
-                    fml_stats = xpd(y_01 ~ ..rhs, ..rhs = fml_stats[[3]])
-
-                    # The estimations are OK, conv differences out of my control
-                    if(id_fe %in% 8:9) tol = 0.5
-
-                } else if(model == "pois"){
-                    fml_fixest = xpd(y_int_null ~ ..rhs, ..rhs = fml_fixest[[3]])
-                    fml_stats = xpd(y_int_null ~ ..rhs, ..rhs = fml_stats[[3]])
-
-                } else if(model %in% c("negbin", "Gamma")){
-                    fml_fixest = xpd(y_int ~ ..rhs, ..rhs = fml_fixest[[3]])
-                    fml_stats = xpd(y_int ~ ..rhs, ..rhs = fml_stats[[3]])
-                }
-
-                adj = 1
-                if(model == "ols"){
-                    res = feols(fml_fixest, base, weights = my_weight, offset = my_offset)
-                    res_bis = lm(fml_stats, base, weights = my_weight, offset = my_offset)
-
-                } else if(model %in% c("pois", "logit", "Gamma")){
-                    adj = 0
-                    if(model == "Gamma" && use_offset) next
-
-                    my_family = switch(model, pois = poisson(), logit = binomial(), Gamma = Gamma())
-
-                    res = feglm(fml_fixest, base, family = my_family, weights = my_weight, offset = my_offset)
-
-                    if(!is.null(res$obs_selection$obsRemoved)){
-                        qui = res$obs_selection$obsRemoved
-
-                        # I MUST do that.... => subset does not work...
-                        base_tmp = base[qui, ]
-                        base_tmp$my_offset = my_offset[qui]
-                        base_tmp$my_weight = my_weight[qui]
-                        res_bis = glm(fml_stats, base_tmp, family = my_family, weights = my_weight, offset = my_offset)
-                    } else {
-                        res_bis = glm(fml_stats, data = base, family = my_family, weights = my_weight, offset = my_offset)
-                    }
-
-                } else if(model == "negbin"){
-                    # no offset in glm.nb + no VS in fenegbin + no weights in fenegbin
-                    if(use_weights || use_offset || id_fe > 2) next
-
-                    res = fenegbin(fml_fixest, base, notes = FALSE)
-                    res_bis = MASS::glm.nb(fml_stats, base)
-
-                }
-
-                test(coef(res)["x1"], coef(res_bis)["x1"], "~", tol)
-                test(se(res, se = "st", ssc = ssc(adj = adj))["x1"], se(res_bis)["x1"], "~", tol)
-                test(pvalue(res, se = "st", ssc = ssc(adj = adj))["x1"], pvalue(res_bis)["x1"], "~", tol*10**(model == "negbin"))
-                # cat("Model: ", model, ", FE: ", id_fe, ", weight: ", use_weights,  ", offset: ", use_offset, "\n", sep="")
-
-            }
-            cat("|")
+        # Setting up the formula to accommodate FEs
+        if(id_fe == 0){
+          fml_fixest = fml_stats = y ~ x1
+        } else if(id_fe == 1){
+          fml_fixest = y ~ x1 | species
+          fml_stats = y ~ x1 + factor(species)
+        } else if(id_fe == 2){
+          fml_fixest = y ~ x1 | species + fe_2
+          fml_stats = y ~ x1 + factor(species) + factor(fe_2)
+        } else if(id_fe == 3){
+          # varying slope
+          fml_fixest = y ~ x1 | species[[x2]]
+          fml_stats = y ~ x1 + x2:species
+        } else if(id_fe == 4){
+          # varying slope -- 1 VS, 1 FE
+          fml_fixest = y ~ x1 | species[[x2]] + fe_2
+          fml_stats = y ~ x1 + x2:species + factor(fe_2)
+        } else if(id_fe == 5){
+          # varying slope -- 2 VS
+          fml_fixest = y ~ x1 | species[x2]
+          fml_stats = y ~ x1 + x2:species + species
+        } else if(id_fe == 6){
+          # varying slope -- 2 VS bis
+          fml_fixest = y ~ x1 | species[[x2]] + fe_2[[x3]]
+          fml_stats = y ~ x1 + x2:species + x3:factor(fe_2)
+        } else if(id_fe == 7){
+          # Combined clusters
+          fml_fixest = y ~ x1 + x2 | species^fe_2
+          fml_stats = y ~ x1 + x2 + paste(species, fe_2)
+        } else if(id_fe == 8){
+          fml_fixest = y ~ x1 | species[x2] + fe_2[x3] + fe_3
+          fml_stats = y ~ x1 + species + i(species, x2) + factor(fe_2) + i(fe_2, x3) + factor(fe_3)
+        } else if(id_fe == 9){
+          fml_fixest = y ~ x1 | species + fe_2[x2,x3] + fe_3
+          fml_stats = y ~ x1 + species + factor(fe_2) + i(fe_2, x2) + i(fe_2, x3) + factor(fe_3)
         }
+
+        # ad hoc modifications of the formula
+        if(model == "logit"){
+          fml_fixest = xpd(y_01 ~ ..rhs, ..rhs = fml_fixest[[3]])
+          fml_stats = xpd(y_01 ~ ..rhs, ..rhs = fml_stats[[3]])
+
+          # The estimations are OK, conv differences out of my control
+          if(id_fe %in% 8:9) tol = 0.5
+
+        } else if(model == "pois"){
+          fml_fixest = xpd(y_int_null ~ ..rhs, ..rhs = fml_fixest[[3]])
+          fml_stats = xpd(y_int_null ~ ..rhs, ..rhs = fml_stats[[3]])
+
+        } else if(model %in% c("negbin", "Gamma")){
+          fml_fixest = xpd(y_int ~ ..rhs, ..rhs = fml_fixest[[3]])
+          fml_stats = xpd(y_int ~ ..rhs, ..rhs = fml_stats[[3]])
+        }
+
+        adj = 1
+        if(model == "ols"){
+          res = feols(fml_fixest, base, weights = my_weight, offset = my_offset)
+          res_bis = lm(fml_stats, base, weights = my_weight, offset = my_offset)
+
+        } else if(model %in% c("pois", "logit", "Gamma")){
+          adj = 0
+          if(model == "Gamma" && use_offset) next
+
+          my_family = switch(model, pois = poisson(), logit = binomial(), Gamma = Gamma())
+
+          res = feglm(fml_fixest, base, family = my_family, weights = my_weight, offset = my_offset)
+
+          if(!is.null(res$obs_selection$obsRemoved)){
+            qui = res$obs_selection$obsRemoved
+
+            # I MUST do that.... => subset does not work...
+            base_tmp = base[qui, ]
+            base_tmp$my_offset = my_offset[qui]
+            base_tmp$my_weight = my_weight[qui]
+            res_bis = glm(fml_stats, base_tmp, family = my_family, weights = my_weight, offset = my_offset)
+          } else {
+            res_bis = glm(fml_stats, data = base, family = my_family, weights = my_weight, offset = my_offset)
+          }
+
+        } else if(model == "negbin"){
+          # no offset in glm.nb + no VS in fenegbin + no weights in fenegbin
+          if(use_weights || use_offset || id_fe > 2) next
+
+          res = fenegbin(fml_fixest, base, notes = FALSE)
+          res_bis = MASS::glm.nb(fml_stats, base)
+
+        }
+
+        test(coef(res)["x1"], coef(res_bis)["x1"], "~", tol)
+        test(se(res, se = "st", ssc = ssc(adj = adj))["x1"], se(res_bis)["x1"], "~", tol)
+        test(pvalue(res, se = "st", ssc = ssc(adj = adj))["x1"], pvalue(res_bis)["x1"], "~", tol*10**(model == "negbin"))
+        # cat("Model: ", model, ", FE: ", id_fe, ", weight: ", use_weights,  ", offset: ", use_offset, "\n", sep="")
+
+      }
+      cat("|")
     }
-    cat("\n")
+  }
+  cat("\n")
 }
 
 ####
@@ -209,19 +209,19 @@ res = feols(y ~ x1 | fe1[x2] + fe2[x2], base)
 
 # Should work when warn = FALSE or multiple est
 for(i in 1:2){
-    fun = switch(i, "1" = feols, "2" = feglm)
+  fun = switch(i, "1" = feols, "2" = feglm)
 
-    res = feols(y ~ x_cst | fe1, base, warn = FALSE)
-    res         # => no error
-    etable(res) # => no error
+  res = feols(y ~ x_cst | fe1, base, warn = FALSE)
+  res         # => no error
+  etable(res) # => no error
 
-    # error when warn = TRUE
-    test(feols(y ~ x_cst | fe1, base), "err")
+  # error when warn = TRUE
+  test(feols(y ~ x_cst | fe1, base), "err")
 
-    # multiple est => no error
-    res = feols(c(y, x1) ~ x_cst | fe1, base)
-    res         # => no error
-    etable(res) # => no error
+  # multiple est => no error
+  res = feols(c(y, x1) ~ x_cst | fe1, base)
+  res         # => no error
+  etable(res) # => no error
 }
 
 
@@ -312,39 +312,39 @@ base$y_int = as.integer(base$y)
 base$w = as.vector(unclass(base$species) - 0.95)
 
 for(useWeights in c(FALSE, TRUE)){
-    for(model in c("ols", "pois")){
-        for(use_fe in c(FALSE, TRUE)){
-            cat(".")
+  for(model in c("ols", "pois")){
+    for(use_fe in c(FALSE, TRUE)){
+      cat(".")
 
-            my_weight = NULL
-            if(useWeights) my_weight = base$w
+      my_weight = NULL
+      if(useWeights) my_weight = base$w
 
-            adj = 1
-            if(model == "ols"){
-                if(!use_fe){
-                    res = feols(y ~ x1 + constant, base, weights = my_weight)
-                    res_bis = lm(y ~ x1 + constant, base, weights = my_weight)
-                } else {
-                    res = feols(y ~ x1 + constant | species, base, weights = my_weight)
-                    res_bis = lm(y ~ x1 + constant + species, base, weights = my_weight)
-                }
-            } else {
-                if(!use_fe){
-                    res = fepois(y_int ~ x1 + constant, base, weights = my_weight)
-                    res_bis = glm(y_int ~ x1 + constant, base, weights = my_weight, family = poisson)
-                } else {
-                    res = fepois(y_int ~ x1 + constant | species, base, weights = my_weight)
-                    res_bis = glm(y_int ~ x1 + constant + species, base, weights = my_weight, family = poisson)
-                }
-                adj = 0
-            }
-
-            test(coef(res)["x1"], coef(res_bis)["x1"], "~")
-            test(se(res, se = "st", ssc = ssc(adj=adj))["x1"], se(res_bis)["x1"], "~")
-            # cat("Weight: ", useWeights, ", model: ", model, ", FE: ", use_fe, "\n", sep="")
-
+      adj = 1
+      if(model == "ols"){
+        if(!use_fe){
+          res = feols(y ~ x1 + constant, base, weights = my_weight)
+          res_bis = lm(y ~ x1 + constant, base, weights = my_weight)
+        } else {
+          res = feols(y ~ x1 + constant | species, base, weights = my_weight)
+          res_bis = lm(y ~ x1 + constant + species, base, weights = my_weight)
         }
+      } else {
+        if(!use_fe){
+          res = fepois(y_int ~ x1 + constant, base, weights = my_weight)
+          res_bis = glm(y_int ~ x1 + constant, base, weights = my_weight, family = poisson)
+        } else {
+          res = fepois(y_int ~ x1 + constant | species, base, weights = my_weight)
+          res_bis = glm(y_int ~ x1 + constant + species, base, weights = my_weight, family = poisson)
+        }
+        adj = 0
+      }
+
+      test(coef(res)["x1"], coef(res_bis)["x1"], "~")
+      test(se(res, se = "st", ssc = ssc(adj=adj))["x1"], se(res_bis)["x1"], "~")
+      # cat("Weight: ", useWeights, ", model: ", model, ", FE: ", use_fe, "\n", sep="")
+
     }
+  }
 }
 cat("\n")
 
@@ -361,8 +361,8 @@ names(base) = c("y", "x1", "x2", "x3", "species")
 tab = c("versicolor" = 5, "setosa" = 0, "virginica" = -5)
 
 fun_nl = function(a, b, spec){
-    res = as.numeric(tab[spec])
-    a*res + b*res^2
+  res = as.numeric(tab[spec])
+  a*res + b*res^2
 }
 
 est_nl = feNmlm(y ~ x1, base, NL.fml = ~fun_nl(a, b, species), NL.start = 1, family = "gaussian")
@@ -436,42 +436,42 @@ cat("done.\nEstimations...")
 # Poisson
 
 for(depvar in c("y", "y_na", "y_0")){
-    for(p in c("period", "period_txt", "period_date")){
+  for(p in c("period", "period_txt", "period_date")){
 
-        base$per = base[[p]]
+    base$per = base[[p]]
 
-        cat(".")
+    cat(".")
 
-        base$y_dep = base[[depvar]]
-        pdat = panel(base, ~ id + period)
+    base$y_dep = base[[depvar]]
+    pdat = panel(base, ~ id + period)
 
-        if(depvar == "y_0"){
-            estfun = fepois
-        } else {
-            estfun = feols
-        }
-
-        est_raw  = estfun(y_dep ~ x1 + x1_lag + x1_lead, base)
-        est      = estfun(y_dep ~ x1 + l(x1) + f(x1), base, panel.id = "id,per")
-        est_pdat = estfun(y_dep ~ x1 + l(x1, 1) + f(x1, 1), pdat)
-        test(coef(est_raw), coef(est))
-        test(coef(est_raw), coef(est_pdat))
-
-        # Now diff
-        est_raw  = estfun(y_dep ~ x1 + x1_diff, base)
-        est      = estfun(y_dep ~ x1 + d(x1), base, panel.id = "id,per")
-        est_pdat = estfun(y_dep ~ x1 + d(x1, 1), pdat)
-        test(coef(est_raw), coef(est))
-        test(coef(est_raw), coef(est_pdat))
-
-        # Now we just check that calls to l/f works without checking coefs
-
-        est = estfun(y_dep ~ x1 + l(x1) + f(x1), base, panel.id = "id,per")
-        est = estfun(y_dep ~ l(x1, -1:1) + f(x1, 2), base, panel.id = c("id", "per"))
-        est = estfun(y_dep ~ l(x1, -1:1, fill = 1), base, panel.id = ~ id + per)
-        if(depvar == "y") test(est$nobs, n)
-        est = estfun(f(y_dep) ~ f(x1, -1:1), base, panel.id = ~ id + per)
+    if(depvar == "y_0"){
+      estfun = fepois
+    } else {
+      estfun = feols
     }
+
+    est_raw  = estfun(y_dep ~ x1 + x1_lag + x1_lead, base)
+    est      = estfun(y_dep ~ x1 + l(x1) + f(x1), base, panel.id = "id,per")
+    est_pdat = estfun(y_dep ~ x1 + l(x1, 1) + f(x1, 1), pdat)
+    test(coef(est_raw), coef(est))
+    test(coef(est_raw), coef(est_pdat))
+
+    # Now diff
+    est_raw  = estfun(y_dep ~ x1 + x1_diff, base)
+    est      = estfun(y_dep ~ x1 + d(x1), base, panel.id = "id,per")
+    est_pdat = estfun(y_dep ~ x1 + d(x1, 1), pdat)
+    test(coef(est_raw), coef(est))
+    test(coef(est_raw), coef(est_pdat))
+
+    # Now we just check that calls to l/f works without checking coefs
+
+    est = estfun(y_dep ~ x1 + l(x1) + f(x1), base, panel.id = "id,per")
+    est = estfun(y_dep ~ l(x1, -1:1) + f(x1, 2), base, panel.id = c("id", "per"))
+    est = estfun(y_dep ~ l(x1, -1:1, fill = 1), base, panel.id = ~ id + per)
+    if(depvar == "y") test(est$nobs, n)
+    est = estfun(f(y_dep) ~ f(x1, -1:1), base, panel.id = ~ id + per)
+  }
 }
 
 cat("done.\n\n")
@@ -486,8 +486,8 @@ cat("data.table...")
 library(data.table)
 
 base_dt = data.table(id = c("A", "A", "B", "B"),
-                     time = c(1, 2, 1, 3),
-                     x = c(5, 6, 7, 8))
+           time = c(1, 2, 1, 3),
+           x = c(5, 6, 7, 8))
 
 base_dt = panel(base_dt, ~id + time)
 
@@ -495,9 +495,9 @@ base_dt[, x_l := l(x)]
 test(base_dt$x_l, c(NA, 5, NA, NA))
 
 lag_creator = function(dt) {
-    dt2 = panel(dt, ~id + time)
-    dt2[, x_l := l(x)]
-    return(dt2)
+  dt2 = panel(dt, ~id + time)
+  dt2[, x_l := l(x)]
+  return(dt2)
 }
 
 base_bis = lag_creator(base_dt)
@@ -523,7 +523,7 @@ est_pdat = feols(y ~ x1 | fe, pdat)
 est_panel = feols(y ~ x1 | fe, base_panel, panel.id = ~id+period)
 
 test(attr(vcov(est_pdat, attr = TRUE), "type"),
-     attr(vcov(est_panel, attr = TRUE), "type"))
+   attr(vcov(est_panel, attr = TRUE), "type"))
 
 ####
 #### ... subset ####
@@ -548,45 +548,45 @@ test(feols(fml, base, subset = c(TRUE, TRUE, FALSE)), "err")
 
 # Valid use
 for(id_fun in 1:6){
-    estfun = switch(as.character(id_fun),
-                    "1" = feols,
-                    "2" = feglm,
-                    "3" = fepois,
-                    "4" = femlm,
-                    "5" = fenegbin,
-                    "6" = feNmlm)
+  estfun = switch(as.character(id_fun),
+          "1" = feols,
+          "2" = feglm,
+          "3" = fepois,
+          "4" = femlm,
+          "5" = fenegbin,
+          "6" = feNmlm)
 
-    for(id_fe in 1:5){
+  for(id_fe in 1:5){
 
-        cat(".")
+    cat(".")
 
-        fml = switch(as.character(id_fe),
-                     "1" = y ~ x1 + x2,
-                     "2" = y ~ x1 + x2 | species,
-                     "3" = y ~ x1 + x2 | fe_bis,
-                     "4" = y ~ x1 + x2 + i(fe_bis),
-                     "5" = y ~ x1 + x2 | fe_bis[x3])
+    fml = switch(as.character(id_fe),
+           "1" = y ~ x1 + x2,
+           "2" = y ~ x1 + x2 | species,
+           "3" = y ~ x1 + x2 | fe_bis,
+           "4" = y ~ x1 + x2 + i(fe_bis),
+           "5" = y ~ x1 + x2 | fe_bis[x3])
 
-        if(id_fe == 5 && id_fun %in% 4:6) next
+    if(id_fe == 5 && id_fun %in% 4:6) next
 
-        if(id_fun == 6){
-            res_sub_a = estfun(fml, base, subset = ~species == "setosa", NL.fml = ~ a*x4, NL.start = 0)
-            res_sub_b = estfun(fml, base, subset = base$species == "setosa", NL.fml = ~ a*x4, NL.start = 0)
-            res_sub_c = estfun(fml, base, subset = which(base$species == "setosa"), NL.fml = ~ a*x4, NL.start = 0)
-            res       = estfun(fml, base[base$species == "setosa", ], NL.fml = ~ a*x4, NL.start = 0)
-        } else {
-            res_sub_a = estfun(fml, base, subset = ~species == "setosa")
-            res_sub_b = estfun(fml, base, subset = base$species == "setosa")
-            res_sub_c = estfun(fml, base, subset = which(base$species == "setosa"))
-            res       = estfun(fml, base[base$species == "setosa", ])
-        }
-
-        test(coef(res_sub_a), coef(res))
-        test(coef(res_sub_b), coef(res))
-        test(coef(res_sub_c), coef(res))
-        test(se(res_sub_c, cluster = "fe_bis"), se(res, cluster = "fe_bis"))
+    if(id_fun == 6){
+      res_sub_a = estfun(fml, base, subset = ~species == "setosa", NL.fml = ~ a*x4, NL.start = 0)
+      res_sub_b = estfun(fml, base, subset = base$species == "setosa", NL.fml = ~ a*x4, NL.start = 0)
+      res_sub_c = estfun(fml, base, subset = which(base$species == "setosa"), NL.fml = ~ a*x4, NL.start = 0)
+      res       = estfun(fml, base[base$species == "setosa", ], NL.fml = ~ a*x4, NL.start = 0)
+    } else {
+      res_sub_a = estfun(fml, base, subset = ~species == "setosa")
+      res_sub_b = estfun(fml, base, subset = base$species == "setosa")
+      res_sub_c = estfun(fml, base, subset = which(base$species == "setosa"))
+      res       = estfun(fml, base[base$species == "setosa", ])
     }
-    cat("|")
+
+    test(coef(res_sub_a), coef(res))
+    test(coef(res_sub_b), coef(res))
+    test(coef(res_sub_c), coef(res))
+    test(se(res_sub_c, cluster = "fe_bis"), se(res, cluster = "fe_bis"))
+  }
+  cat("|")
 }
 cat("\n")
 
@@ -621,12 +621,12 @@ test(length(est), 2)
 
 # with bin
 est = feols(y ~ x.[1:2], base,
-            split = ~bin(x3, c("cut::5", "saint emilion", "pessac leognan",
-                               "margaux", "saint julien", "entre deux mers")) %keep% c("saint e", "pe"))
+      split = ~bin(x3, c("cut::5", "saint emilion", "pessac leognan",
+                 "margaux", "saint julien", "entre deux mers")) %keep% c("saint e", "pe"))
 test(length(est), 2)
 
 est = feols(y ~ x.[1:2], base,
-            split = ~bin(x3, c("cut::5", "saint emilion", "pessac leognan", NA)) %drop% "@\\d")
+      split = ~bin(x3, c("cut::5", "saint emilion", "pessac leognan", NA)) %drop% "@\\d")
 test(length(est), 2)
 
 # with argument
@@ -662,57 +662,57 @@ base$fe3 = rep(letters[1:10], 15)
 
 
 for(id_fun in 1:5){
-    estfun = switch(as.character(id_fun),
-                    "1" = feols,
-                    "2" = feglm,
-                    "3" = fepois,
-                    "4" = femlm,
-                    "5" = feNmlm)
+  estfun = switch(as.character(id_fun),
+          "1" = feols,
+          "2" = feglm,
+          "3" = fepois,
+          "4" = femlm,
+          "5" = feNmlm)
 
-    # Following weird bug ASAN on CRAN I cannot replicate, check 4/5 not performed on non Windows
-    if(Sys.info()["sysname"] != "Windows"){
-        if(id_fun %in% 4:5) next
+  # Following weird bug ASAN on CRAN I cannot replicate, check 4/5 not performed on non Windows
+  if(Sys.info()["sysname"] != "Windows"){
+    if(id_fun %in% 4:5) next
+  }
+
+
+  est_multi = estfun(c(y1, y2) ~ x1 + sw(x2, x3), base, split = ~species)
+
+  k = 1
+  for(s in c("setosa", "versicolor", "virginica")){
+    for(lhs in c("y1", "y2")){
+      for(rhs in c("x2", "x3")){
+        res = estfun(.[lhs] ~ x1 + .[rhs], base[base$species == s, ], notes = FALSE)
+
+        test(coef(est_multi[[k]]), coef(res))
+        test(se(est_multi[[k]], cluster = "fe3"), se(res, cluster = "fe3"))
+        k = k + 1
+      }
     }
+  }
 
+  cat("__")
 
-    est_multi = estfun(c(y1, y2) ~ x1 + sw(x2, x3), base, split = ~species)
-
-    k = 1
-    for(s in c("setosa", "versicolor", "virginica")){
-        for(lhs in c("y1", "y2")){
-            for(rhs in c("x2", "x3")){
-                res = estfun(.[lhs] ~ x1 + .[rhs], base[base$species == s, ], notes = FALSE)
-
-                test(coef(est_multi[[k]]), coef(res))
-                test(se(est_multi[[k]], cluster = "fe3"), se(res, cluster = "fe3"))
-                k = k + 1
-            }
+  est_multi = estfun(c(y1, y2) ~ x1 + csw0(x2, x3) + x4 | species + fe2, base, fsplit = ~species)
+  k = 1
+  all_rhs = c("", "x2", "x3")
+  for(s in c("all", "setosa", "versicolor", "virginica")){
+    for(lhs in c("y1", "y2")){
+      for(n_rhs in 1:3){
+        if(s == "all"){
+          res = estfun(xpd(..lhs ~ x1 + ..rhs + x4 | species + fe2, ..lhs = lhs, ..rhs = all_rhs[1:n_rhs]), base, notes = FALSE)
+        } else {
+          res = estfun(xpd(..lhs ~ x1 + ..rhs + x4 | species + fe2, ..lhs = lhs, ..rhs = all_rhs[1:n_rhs]), base[base$species == s, ], notes = FALSE)
         }
+
+        vname = names(coef(res))
+        test(coef(est_multi[[k]])[vname], coef(res), "~" , 1e-6)
+        test(se(est_multi[[k]], cluster = "fe3")[vname], se(res, cluster = "fe3"), "~" , 1e-6)
+        k = k + 1
+      }
     }
+  }
 
-    cat("__")
-
-    est_multi = estfun(c(y1, y2) ~ x1 + csw0(x2, x3) + x4 | species + fe2, base, fsplit = ~species)
-    k = 1
-    all_rhs = c("", "x2", "x3")
-    for(s in c("all", "setosa", "versicolor", "virginica")){
-        for(lhs in c("y1", "y2")){
-            for(n_rhs in 1:3){
-                if(s == "all"){
-                    res = estfun(xpd(..lhs ~ x1 + ..rhs + x4 | species + fe2, ..lhs = lhs, ..rhs = all_rhs[1:n_rhs]), base, notes = FALSE)
-                } else {
-                    res = estfun(xpd(..lhs ~ x1 + ..rhs + x4 | species + fe2, ..lhs = lhs, ..rhs = all_rhs[1:n_rhs]), base[base$species == s, ], notes = FALSE)
-                }
-
-                vname = names(coef(res))
-                test(coef(est_multi[[k]])[vname], coef(res), "~" , 1e-6)
-                test(se(est_multi[[k]], cluster = "fe3")[vname], se(res, cluster = "fe3"), "~" , 1e-6)
-                k = k + 1
-            }
-        }
-    }
-
-    cat("|")
+  cat("|")
 }
 cat("\n")
 
@@ -771,13 +771,13 @@ test(coef(est_mult_no_exo[[2]]), coef(est_no_exo_y2))
 # proper ordering
 est_multi = feols(c(y1, y2) ~ sw0(x1) | sw0(fe2), base, split = ~species)
 test(names(models(est_multi[fixef = TRUE, sample = FALSE])),
-     dsb("/id, fixef, lhs, rhs, sample.var, sample"))
+   dsb("/id, fixef, lhs, rhs, sample.var, sample"))
 
 test(names(models(est_multi[fixef = "fe2", sample = "seto"])),
-     dsb("/id, fixef, sample.var, sample, lhs, rhs"))
+   dsb("/id, fixef, sample.var, sample, lhs, rhs"))
 
 test(names(models(est_multi[fixef = "fe2", sample = "seto", reorder = FALSE])),
-     dsb("/id, sample.var, sample, fixef, lhs, rhs"))
+   dsb("/id, sample.var, sample, fixef, lhs, rhs"))
 
 # NA models
 base$y_0 = base$x1 ** 2 + rnorm(150)
@@ -793,14 +793,14 @@ base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
 
 dep_all = list(dsb("/y, x1, x2"), ~y + x1 + x2)
 for(dep in dep_all){
-    m = feols(.[dep] ~ x3, base)
-    test(length(m), 3)
+  m = feols(.[dep] ~ x3, base)
+  test(length(m), 3)
 
-    m = feols(x3 ~ .[dep], base)
-    test(length(m$coefficients), 4)
+  m = feols(x3 ~ .[dep], base)
+  test(length(m$coefficients), 4)
 
-    m = feols(x3 ~ csw(.[,dep]), base)
-    test(length(m), 3)
+  m = feols(x3 ~ csw(.[,dep]), base)
+  test(length(m), 3)
 }
 
 
@@ -844,7 +844,7 @@ sum_2nd = summary(res_2nd, .vcov = res_2nd$cov.iid / res_2nd$sigma2 * sigma2_iv)
 # We only check that on Windows => avoids super odd bug in fedora devel
 # The worst is that I just can't debug it.... so that's the way it's done.
 if(Sys.info()["sysname"] == "Windows"){
-    test(se(sum_2nd), se(est_iv))
+  test(se(sum_2nd), se(est_iv))
 }
 
 
@@ -896,26 +896,26 @@ xmat = base[, 2:3]
 fe = base$species
 
 for(use_fe in c(TRUE, FALSE)){
-    all_vcov = dsb("/iid, hetero")
+  all_vcov = dsb("/iid, hetero")
+  if(use_fe){
+    setFixest_fml(..fe = ~ 1 | species)
+    all_vcov = c(all_vcov, "cluster")
+  } else {
+    setFixest_fml(..fe = ~ 1)
+  }
+
+  for(v in all_vcov){
+
     if(use_fe){
-        setFixest_fml(..fe = ~ 1 | species)
-        all_vcov = c(all_vcov, "cluster")
+      est_fit = feols.fit(ymat, xmat, fe, vcov = v)
     } else {
-        setFixest_fml(..fe = ~ 1)
+      est_fit = feols.fit(ymat, cbind(1, xmat), vcov = v)
     }
 
-    for(v in all_vcov){
+    est = feols(y ~ x1 + x2 + ..fe, base, vcov = v)
 
-        if(use_fe){
-            est_fit = feols.fit(ymat, xmat, fe, vcov = v)
-        } else {
-            est_fit = feols.fit(ymat, cbind(1, xmat), vcov = v)
-        }
-
-        est = feols(y ~ x1 + x2 + ..fe, base, vcov = v)
-
-        test(vcov(est), vcov(est_fit))
-    }
+    test(vcov(est), vcov(est_fit))
+  }
 }
 
 
@@ -1038,15 +1038,15 @@ VCOV_raw = est$cov.iid / ((n - 1) / (n - est$nparams))
 
 # standard
 for(k_val in c("none", "nested", "full")){
-    for(adj in c(FALSE, TRUE)){
+  for(adj in c(FALSE, TRUE)){
 
-        K = switch(k_val, none = 1, nested = 8, full = 8)
-        my_adj = ifelse(adj, (n - 1) / (n - K), 1)
+    K = switch(k_val, none = 1, nested = 8, full = 8)
+    my_adj = ifelse(adj, (n - 1) / (n - K), 1)
 
-        test(vcov(est, se = "standard", ssc = ssc(adj = adj, fixef.K = k_val)), VCOV_raw * my_adj)
+    test(vcov(est, se = "standard", ssc = ssc(adj = adj, fixef.K = k_val)), VCOV_raw * my_adj)
 
-        # cat("adj = ", adj, " ; fixef.K = ", k_val, "\n", sep = "")
-    }
+    # cat("adj = ", adj, " ; fixef.K = ", k_val, "\n", sep = "")
+  }
 }
 
 # Clustered, fe1
@@ -1055,28 +1055,28 @@ H = vcovClust(est$fixef_id$fe1, VCOV_raw, scores = est$scores, adj = FALSE)
 n = nobs(est)
 
 for(tdf in c("conventional", "min")){
-    for(k_val in c("none", "nested", "full")){
-        for(c_adj in c(FALSE, TRUE)){
-            for(adj in c(FALSE, TRUE)){
+  for(k_val in c("none", "nested", "full")){
+    for(c_adj in c(FALSE, TRUE)){
+      for(adj in c(FALSE, TRUE)){
 
-                K = switch(k_val, none = 1, nested = 6, full = 8)
-                cluster_factor = ifelse(c_adj, 3/2, 1)
-                df = ifelse(tdf == "min", 2, 20 - K)
-                my_adj = ifelse(adj, (n - 1) / (n - K), 1)
+        K = switch(k_val, none = 1, nested = 6, full = 8)
+        cluster_factor = ifelse(c_adj, 3/2, 1)
+        df = ifelse(tdf == "min", 2, 20 - K)
+        my_adj = ifelse(adj, (n - 1) / (n - K), 1)
 
-                V = H * cluster_factor
+        V = H * cluster_factor
 
-                # test SE
-                test(vcov(est, se = "cluster", ssc = ssc(adj = adj, fixef.K = k_val, cluster.adj = c_adj)), V * my_adj)
+        # test SE
+        test(vcov(est, se = "cluster", ssc = ssc(adj = adj, fixef.K = k_val, cluster.adj = c_adj)), V * my_adj)
 
-                # test pvalue
-                my_tstat = tstat(est, se = "cluster", ssc = ssc(adj = adj, fixef.K = k_val, cluster.adj = c_adj))
-                test(pvalue(est, se = "cluster", ssc = ssc(adj = adj, fixef.K = k_val, cluster.adj = c_adj, t.df = tdf)), 2*pt(-abs(my_tstat), df))
+        # test pvalue
+        my_tstat = tstat(est, se = "cluster", ssc = ssc(adj = adj, fixef.K = k_val, cluster.adj = c_adj))
+        test(pvalue(est, se = "cluster", ssc = ssc(adj = adj, fixef.K = k_val, cluster.adj = c_adj, t.df = tdf)), 2*pt(-abs(my_tstat), df))
 
-                # cat("adj = ", adj, " ; fixef.K = ", k_val, " ; cluster.adj = ", c_adj, " t.df = ", tdf, "\n", sep = "")
-            }
-        }
+        # cat("adj = ", adj, " ; fixef.K = ", k_val, " ; cluster.adj = ", c_adj, " t.df = ", tdf, "\n", sep = "")
+      }
     }
+  }
 }
 
 
@@ -1090,40 +1090,40 @@ M_i + M_t - M_it
 vcov(est, se = "two", ssc = ssc(adj = FALSE, cluster.adj = FALSE))
 
 for(cdf in c("conventional", "min")){
-    for(tdf in c("conventional", "min")){
-        for(k_val in c("none", "nested", "full")){
-            for(c_adj in c(FALSE, TRUE)){
-                for(adj in c(FALSE, TRUE)){
+  for(tdf in c("conventional", "min")){
+    for(k_val in c("none", "nested", "full")){
+      for(c_adj in c(FALSE, TRUE)){
+        for(adj in c(FALSE, TRUE)){
 
-                    K = switch(k_val, none = 1, nested = 2, full = 8)
+          K = switch(k_val, none = 1, nested = 2, full = 8)
 
-                    if(c_adj){
-                        if(cdf == "min"){
-                            V = (M_i + M_t - M_it) * 3/2
-                        } else {
-                            V = M_i  * 3/2 + M_t * 5/4 - M_it * 6/5
-                        }
-                    } else {
-                        V = M_i + M_t - M_it
-                    }
-
-                    df = ifelse(tdf == "min", 2, 20 - K)
-                    my_adj = ifelse(adj, (n - 1) / (n - K), 1)
-
-                    # test SE
-                    test(vcov(est, se = "two", ssc = ssc(adj = adj, fixef.K = k_val, cluster.adj = c_adj, cluster.df = cdf)),
-                         V * my_adj)
-
-                    # test pvalue
-                    my_tstat = tstat(est, se = "two", ssc = ssc(adj = adj, fixef.K = k_val, cluster.adj = c_adj, cluster.df = cdf))
-                    test(pvalue(est, se = "two", ssc = ssc(adj = adj, fixef.K = k_val, cluster.adj = c_adj, cluster.df = cdf, t.df = tdf)),
-                         2*pt(-abs(my_tstat), df))
-
-                    # cat("adj = ", adj, " ; fixef.K = ", k_val, " ; cluster.adj = ", c_adj, " t.df = ", tdf, "\n", sep = "")
-                }
+          if(c_adj){
+            if(cdf == "min"){
+              V = (M_i + M_t - M_it) * 3/2
+            } else {
+              V = M_i  * 3/2 + M_t * 5/4 - M_it * 6/5
             }
+          } else {
+            V = M_i + M_t - M_it
+          }
+
+          df = ifelse(tdf == "min", 2, 20 - K)
+          my_adj = ifelse(adj, (n - 1) / (n - K), 1)
+
+          # test SE
+          test(vcov(est, se = "two", ssc = ssc(adj = adj, fixef.K = k_val, cluster.adj = c_adj, cluster.df = cdf)),
+             V * my_adj)
+
+          # test pvalue
+          my_tstat = tstat(est, se = "two", ssc = ssc(adj = adj, fixef.K = k_val, cluster.adj = c_adj, cluster.df = cdf))
+          test(pvalue(est, se = "two", ssc = ssc(adj = adj, fixef.K = k_val, cluster.adj = c_adj, cluster.df = cdf, t.df = tdf)),
+             2*pt(-abs(my_tstat), df))
+
+          # cat("adj = ", adj, " ; fixef.K = ", k_val, " ; cluster.adj = ", c_adj, " t.df = ", tdf, "\n", sep = "")
         }
+      }
     }
+  }
 }
 
 
@@ -1408,44 +1408,44 @@ base$y_int = as.integer(base$y) + 1
 # OLS + GLM + FENMLM
 
 for(method in c("ols", "feglm", "femlm", "fenegbin")){
-    cat("Method: ", format(method, width = 8))
-    for(do_weight in c(FALSE, TRUE)){
-        cat(".")
+  cat("Method: ", format(method, width = 8))
+  for(do_weight in c(FALSE, TRUE)){
+    cat(".")
 
-        if(do_weight){
-            w = unclass(as.factor(base$species))
-        } else {
-            w = NULL
-        }
-
-        if(method == "ols"){
-            m = feols(y_int ~ x1 | species, base, weights = w)
-            mm = lm(y_int ~ x1 + species, base, weights = w)
-
-        } else if(method == "feglm"){
-            m = feglm(y_int ~ x1 | species, base, weights = w, family = "poisson")
-            mm = glm(y_int ~ x1 + species, base, weights = w, family = poisson())
-
-        } else if(method == "femlm"){
-            if(!is.null(w)) next
-            m = femlm(y_int ~ x1 | species, base)
-            mm = glm(y_int ~ x1 + species, base, family = poisson())
-
-        } else if(method == "fenegbin"){
-            if(!is.null(w)) next
-            m = fenegbin(y_int ~ x1 | species, base, notes = FALSE)
-            mm = MASS::glm.nb(y_int ~ x1 + species, base)
-        }
-
-        tol = ifelse(method == "fenegbin", 1e-2, 1e-6)
-
-        test(resid(m, "r"), resid(mm, "resp"), "~", tol = tol)
-        test(resid(m, "d"), resid(mm, "d"), "~", tol = tol)
-        test(resid(m, "p"), resid(mm, "pearson"), "~", tol = tol)
-
-        test(deviance(m), deviance(mm), "~", tol = tol)
+    if(do_weight){
+      w = unclass(as.factor(base$species))
+    } else {
+      w = NULL
     }
-    cat("\n")
+
+    if(method == "ols"){
+      m = feols(y_int ~ x1 | species, base, weights = w)
+      mm = lm(y_int ~ x1 + species, base, weights = w)
+
+    } else if(method == "feglm"){
+      m = feglm(y_int ~ x1 | species, base, weights = w, family = "poisson")
+      mm = glm(y_int ~ x1 + species, base, weights = w, family = poisson())
+
+    } else if(method == "femlm"){
+      if(!is.null(w)) next
+      m = femlm(y_int ~ x1 | species, base)
+      mm = glm(y_int ~ x1 + species, base, family = poisson())
+
+    } else if(method == "fenegbin"){
+      if(!is.null(w)) next
+      m = fenegbin(y_int ~ x1 | species, base, notes = FALSE)
+      mm = MASS::glm.nb(y_int ~ x1 + species, base)
+    }
+
+    tol = ifelse(method == "fenegbin", 1e-2, 1e-6)
+
+    test(resid(m, "r"), resid(mm, "resp"), "~", tol = tol)
+    test(resid(m, "d"), resid(mm, "d"), "~", tol = tol)
+    test(resid(m, "p"), resid(mm, "pearson"), "~", tol = tol)
+
+    test(deviance(m), deviance(mm), "~", tol = tol)
+  }
+  cat("\n")
 }
 cat("\n")
 
@@ -1464,9 +1464,9 @@ base$fe_bis = sample(10, 150, TRUE)
 base$fe_ter = sample(15, 150, TRUE)
 
 get_coef = function(all_coef, x){
-    res = all_coef[grepl(x, names(all_coef), perl = TRUE)]
-    names(res) = gsub(x, "", names(res), perl = TRUE)
-    res
+  res = all_coef[grepl(x, names(all_coef), perl = TRUE)]
+  names(res) = gsub(x, "", names(res), perl = TRUE)
+  res
 }
 
 #
@@ -1653,24 +1653,24 @@ my_cuts = c("cut::3", "cut::2]5]", "cut::q1]q2]q3]", "cut::p20]p50]p70]p90]", "c
 
 for(type in 1:2){
 
-    x = switch(type, "1" = plen, "2" = years)
+  x = switch(type, "1" = plen, "2" = years)
 
-    for(cut in my_cuts){
+  for(cut in my_cuts){
 
-        my_bin = bin(x, cut)
-        bin_char = as.character(my_bin)
+    my_bin = bin(x, cut)
+    bin_char = as.character(my_bin)
 
-        if(grepl("[", bin_char[1], fixed = TRUE)){
-            all_min = as.numeric(gsub("(^\\[)|(;.+)", "", bin_char))
-            all_max = as.numeric(gsub(".+; |\\]", "", bin_char))
-        } else {
-            all_min = as.numeric(gsub("-.+", "", bin_char))
-            all_max = as.numeric(gsub(".+-", "", bin_char))
-        }
-
-        test(all(x >= all_min), TRUE)
-        test(all(x <= all_max), TRUE)
+    if(grepl("[", bin_char[1], fixed = TRUE)){
+      all_min = as.numeric(gsub("(^\\[)|(;.+)", "", bin_char))
+      all_max = as.numeric(gsub(".+; |\\]", "", bin_char))
+    } else {
+      all_min = as.numeric(gsub("-.+", "", bin_char))
+      all_max = as.numeric(gsub(".+-", "", bin_char))
     }
+
+    test(all(x >= all_min), TRUE)
+    test(all(x <= all_max), TRUE)
+  }
 }
 
 
@@ -1846,21 +1846,21 @@ deparse_long = function(x) deparse(x, width.cutoff = 500)
 
 fml = xpd(y ~ x.[1:5] + z.[2:3])
 test(deparse_long(fml),
-     "y ~ x1 + x2 + x3 + x4 + x5 + z2 + z3")
+   "y ~ x1 + x2 + x3 + x4 + x5 + z2 + z3")
 
 var = "a"
 fml = xpd(y ~ x.[var])
 test(deparse_long(fml),
-     "y ~ xa")
+   "y ~ xa")
 
 vars = letters[1:5]
 fml = xpd(y ~ x.[vars] | fe1[[e, f]] + fe2[g])
 test(deparse_long(fml),
-     "y ~ xa + xb + xc + xd + xe | fe1[[e, f]] + fe2[g]")
+   "y ~ xa + xb + xc + xd + xe | fe1[[e, f]] + fe2[g]")
 
 fml = xpd(y ~ ..x, ..x = "x.[vars]_sq")
 test(deparse_long(fml),
-     "y ~ xa_sq + xb_sq + xc_sq + xd_sq + xe_sq")
+   "y ~ xa_sq + xb_sq + xc_sq + xd_sq + xe_sq")
 
 # Now we check it works in estimations
 
@@ -1869,7 +1869,7 @@ base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
 i = 1:2
 fml = formula(feols(y ~ x.[i] | species[x3], base))
 test(deparse_long(fml),
-     "y ~ x1 + x2 | species + species[[x3]]")
+   "y ~ x1 + x2 | species + species[[x3]]")
 
 
 ####
@@ -1925,7 +1925,7 @@ test(predict(res), predict(res, base))
 
 # Handling NAs properly
 base_NA = data.frame(a = 1:5, b = c(3:6, NA),
-                     c = as.factor(c("a", "b", "a", "b", "a")))
+           c = as.factor(c("a", "b", "a", "b", "a")))
 
 res = feols(a ~ b + c, base_NA)
 
@@ -1986,7 +1986,7 @@ est_singleF_lm = lm(y ~ x1 + species, base)
 new_data = data.frame(x1 = 12:13, species = factor("setosa"))
 
 test(predict(est_singleF, newdata = new_data),
-     predict(est_singleF_lm, newdata = new_data))
+   predict(est_singleF_lm, newdata = new_data))
 
 #
 # SE of prediction
@@ -1998,10 +1998,10 @@ b = feols(y ~ x1 + species, base)
 test(predict(a, se.fit = TRUE)$se.fit, predict(b, se.fit = TRUE)$se.fit)
 
 test(predict(a, se.fit = TRUE, interval = "con")$fit[, 2],
-     predict(b, se.fit = TRUE, interval = "con")$ci_low)
+   predict(b, se.fit = TRUE, interval = "con")$ci_low)
 
 test(suppressWarnings(predict(a, se.fit = TRUE, interval = "pre")$fit[, 2]),
-     predict(b, se.fit = TRUE, interval = "pre")$ci_low)
+   predict(b, se.fit = TRUE, interval = "pre")$ci_low)
 
 # With weights
 base$my_w = seq(0.01, 1, length.out = 150)
@@ -2011,10 +2011,10 @@ bw = feols(y ~ x1 + species, base, weights = ~my_w)
 test(predict(aw, se.fit = TRUE)$se.fit, predict(bw, se.fit = TRUE)$se.fit)
 
 test(predict(aw, se.fit = TRUE, interval = "con")$fit[, 2],
-     predict(bw, se.fit = TRUE, interval = "con")$ci_low)
+   predict(bw, se.fit = TRUE, interval = "con")$ci_low)
 
 test(suppressWarnings(predict(aw, se.fit = TRUE, interval = "pre")$fit[, 2]),
-     predict(bw, se.fit = TRUE, interval = "pre")$ci_low)
+   predict(bw, se.fit = TRUE, interval = "pre")$ci_low)
 
 
 #
@@ -2243,27 +2243,27 @@ cpp_escape_markup = fixest:::cpp_escape_markup
 
 # MD markup
 test(cpp_escape_markup("**bonjour** *les* ***gens * \\***heureux***"),
-     "\\textbf{bonjour} \\textit{les} \\textbf{\\textit{gens * ***heureux}}")
+   "\\textbf{bonjour} \\textit{les} \\textbf{\\textit{gens * ***heureux}}")
 
 # Escaping + markup in equations
 test(cpp_escape_markup("$x_5*3^2$ est **different** de x_5*3^2"),
-     "$x_5*3^2$ est \\textbf{different} de x\\_5*3\\^2")
+   "$x_5*3^2$ est \\textbf{different} de x\\_5*3\\^2")
 
 # single $ escaping + # %
 test(cpp_escape_markup("Rule #1: this $ should be escaped! this % too!"),
-     "Rule \\#1: this \\$ should be escaped! this \\% too!")
+   "Rule \\#1: this \\$ should be escaped! this \\% too!")
 
 # dirty $ => user mistake
 test(cpp_escape_markup("$there$ are *too many $ here*!"),
-     "$there$ are \\textit{too many \\$ here}!")
+   "$there$ are \\textit{too many \\$ here}!")
 
 # random, stacking
 test(cpp_escape_markup("#%_&^*hi$*$ *there**"),
-     "\\#\\%\\_\\&\\^\\textit{hi$*$ }there**")
+   "\\#\\%\\_\\&\\^\\textit{hi$*$ }there**")
 
 # values already escaped
 test(cpp_escape_markup("\\$this_is **not** an\\^equation\\$. But $this&one, \\$, * is *$ *is*."),
-     "\\$this\\_is \\textbf{not} an\\^equation\\$. But $this&one, \\$, * is *$ \\textit{is}.")
+   "\\$this\\_is \\textbf{not} an\\^equation\\$. But $this&one, \\$, * is *$ \\textit{is}.")
 
 
 ####
@@ -2273,8 +2273,8 @@ test(cpp_escape_markup("\\$this_is **not** an\\^equation\\$. But $this&one, \\$,
 chunk("save data")
 
 base_small = data.frame(x = iris$Sepal.Length,
-                        y = iris$Sepal.Width,
-                        fe = iris$Species)
+            y = iris$Sepal.Width,
+            fe = iris$Species)
 
 est_save = feols(y ~ x, base_small, data.save = TRUE)
 est_noSave = feols(y ~ x, base_small)
