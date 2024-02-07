@@ -3193,7 +3193,7 @@ rep.fixest_list = function(x, times = 1, each = 1, vcov, ...){
 #' 
 #' In case of a `fixest_multi` object, it returns the data set of the first estimation object. 
 #' So in that case it does not make sense to use `sample = "estimation"` since 
-#' the samples may be inconsistents across the different estimations.
+#' the samples may be inconsistent across the different estimations.
 #' 
 #' @examples 
 #' 

@@ -20,7 +20,7 @@ If \code{sample = "estimation"}, only the lines used for the estimation are retu
 
 In case of a \code{fixest_multi} object, it returns the data set of the first estimation object.
 So in that case it does not make sense to use \code{sample = "estimation"} since
-the samples may be inconsistents across the different estimations.
+the samples may be inconsistent across the different estimations.
 }
 \description{
 Retrieves the original data set used to estimate a \code{fixest} or \code{fixest_multi} model.
