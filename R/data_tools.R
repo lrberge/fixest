@@ -1396,9 +1396,9 @@ len_unique = function(x, nthreads = getFixest_nthreads()){
 fdim = function(x){
   if(!missing(x)){
     if(!is.null(dim(x))) {
-      cma("{n?nrow(x)} row{#s} and {n?ncol(x)} column{#s}")
+      catma("{n?nrow(x)} row{#s} and {n?ncol(x)} column{#s}")
     } else if (!is.null(length(x))) {
-      cma("{len?x} obs")
+      catma("{len?x} obs")
     }
   }
 }

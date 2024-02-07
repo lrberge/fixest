@@ -21,11 +21,9 @@
 #' @method print fixest
 #'
 #' @param x A `fixest` object. Obtained using the methods
-#'   [`femlm`], [`feols`] or
-#'   [`feglm`].
+#'   [`femlm`], [`feols`] or [`feglm`].
 #' @param n Integer, number of coefficients to display. By default, only the
-#'   first 8 coefficients are displayed if `x` does not come from
-#'   [`summary.fixest`].
+#'   first 8 coefficients are displayed if `x` does not come from  [`summary.fixest`].
 #' @param type Either `"table"` (default) to display the coefficients table
 #'   or `"coef"` to display only the coefficients.
 #' @param fitstat A formula or a character vector representing which fit
@@ -191,6 +189,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
                       logit = "Logit", gaussian = "Gaussian")
     msg = ifelse(is.null(x$call$NL.fml), "", "Non-linear ")
     half_line = paste0(msg, "ML estimation, family = ", family_format[x$family])
+    
   } else if(x$method %in% c("feglm", "feglm.fit")) {
     fam_call = x$call$family
     if(is.null(names(fam_call))){
@@ -212,13 +211,13 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
                      "Endo.: {', 'c ? get_vars(x$iv_endo_fml)}, ",
                      "Instr.: {', 'c ? x$iv_inst_names}\n")
     second_line = sma("{Nth.upper ? x$iv_stage} stage: Dep. Var.: ", as.character(x$fml)[[2]], "\n")
-    cma(first_line, second_line)
+    catma(first_line, second_line)
   } else {
     cat(half_line, ", Dep. Var.: ", as.character(x$fml)[[2]], "\n", sep="")
   }
 
 
-  cat("Observations:", addCommas(x$nobs), "\n")
+  catma("Observations: {n ? x$nobs}\n")
 
   extra_info = c("subset", "sample", "offset", "weights")
   for(i in seq_along(extra_info)){
@@ -227,10 +226,10 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
       xtra = x$model_info[[extra_info[i]]]
 
       if(length(xtra) == 1){
-        cma("{upper.first ? nm}: {xtra\n}")
+        catma("{upper.first ? nm}: {xtra\n}")
       } else {
         if(xtra$value != "Full sample"){
-          cat(dsb(".[u?nm] (.[xtra$var]): .[xtra$value]\n"))
+          catma("{upper.first ? nm} ({xtra$var}): {xtra$value}\n")
         }
       }
     }
@@ -241,13 +240,15 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
     fixef_vars = terms_full$fixef_vars
 
     if(length(fixef_vars) > 0){
-      cat("Fixed-effects: ", paste0(fixef_vars, ": ", addCommas(x$fixef_sizes[fixef_vars]), collapse=",  "), "\n", sep = "")
+      catma("Fixed-effects: {',  'c ! {fixef_vars}: {n ? x$fixef_sizes[fixef_vars]}}\n")
     }
 
-    cat("Varying slopes: ", paste0(terms_full$slope_vars, " (", terms_full$slope_fe, ": ", addCommas(x$fixef_sizes[terms_full$slope_fe]), ")", collapse = ",  "), "\n", sep = "")
+    catma("Varying slopes: {',  'c ! {terms_full$slope_vars} ({terms_full$slope_fe}): {n ? x$fixef_sizes[terms_full$slope_fe]}}\n")
 
   } else {
-    if(!is.null(x$fixef_sizes)) cat("Fixed-effects: ", paste0(x$fixef_vars, ": ", addCommas(x$fixef_sizes), collapse = ",  "), "\n", sep = "")
+    if(!is.null(x$fixef_sizes)){
+      catma("Fixed-effects: {',  'c ! {fixef_vars}: {n ? x$fixef_sizes}}\n")
+    } 
   }
 
 
@@ -316,7 +317,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
       iter_format = paste0("lhs: ", iter_format)
     } else {
       n_iter = length(iter_format)
-      iter_format = paste0("lhs: ", iter_format[n_iter], ", rhs: ", paste0(head(iter_format, min(n_iter - 1, n)), collapse = ", "))
+      iter_format = sma("lhs: {iter_format[n_iter]}, rhs: {', 'c ? head(iter_format, min(n_iter - 1, n))}")
     }
     cat("# Evaluations:", iter_format, "--", x$message, "\n")
   }
@@ -327,29 +328,78 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 
 #' Summary of a `fixest` object. Computes different types of standard errors.
 #'
-#' This function is similar to `print.fixest`. It provides the table of coefficients along with other information on the fit of the estimation. It can compute different types of standard errors. The new variance covariance matrix is an object returned.
+#' This function is similar to `print.fixest`. It provides the table of coefficients along with 
+#' other information on the fit of the estimation. It can compute different types of standard 
+#' errors. The new variance covariance matrix is an object returned.
 #'
 #' @inheritParams feNmlm
 #' @inheritParams aggregate.fixest
 #'
 #' @method summary fixest
-#' @param vcov Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: `vcov_type ~ variables`. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from [`vcov_cluster`], [`vcov_NW`][fixest::vcov_hac], [`NW`][fixest::vcov_hac], [`vcov_DK`][fixest::vcov_hac], [`DK`][fixest::vcov_hac], [`vcov_conley`] and [`conley`][fixest::vcov_conley]. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the `vcov` documentation in the [vignette](https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1).
-#' @param se Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: `se = "cluster"`, otherwise `se = "iid"`. Note that this argument is deprecated, you should use `vcov` instead.
-#' @param cluster Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over `var1` and `var2` contained in the data.frame `base` used for the estimation. All the following `cluster` arguments are valid and do the same thing: `cluster = base[, c("var1", "var2")]`, `cluster = c("var1", "var2")`, `cluster = ~var1+var2`. If the two variables were used as fixed-effects in the estimation, you can leave it blank with `vcov = "twoway"` (assuming `var1` \[resp. `var2`\] was the 1st \[resp. 2nd\] fixed-effect). You can interact two variables using `^` with the following syntax: `cluster = ~var1^var2` or `cluster = "var1^var2"`.
-#' @param stage Can be equal to `2` (default), `1`, `1:2` or `2:1`. Only used if the object is an IV estimation: defines the stage to which `summary` should be applied. If `stage = 1` and there are multiple endogenous regressors or if `stage` is of length 2, then an object of class `fixest_multi` is returned.
+#' @param vcov Versatile argument to specify the VCOV. In general, it is either a character 
+#' scalar equal to a VCOV type, either a formula of the form: `vcov_type ~ variables`. The 
+#' VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", 
+#' "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts 
+#' object from [`vcov_cluster`], [`vcov_NW`][fixest::vcov_hac], [`NW`][fixest::vcov_hac], 
+#' [`vcov_DK`][fixest::vcov_hac], [`DK`][fixest::vcov_hac], [`vcov_conley`] and 
+#' [`conley`][fixest::vcov_conley]. It also accepts covariance matrices computed externally. 
+#' Finally it accepts functions to compute the covariances. See the `vcov` documentation 
+#' in the [vignette](https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1).
+#' @param se Character scalar. Which kind of standard error should be computed: 
+#' \dQuote{standard}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} 
+#' or \dQuote{fourway}? By default if there are clusters in the estimation: 
+#' `se = "cluster"`, otherwise `se = "iid"`. Note that this argument is deprecated, 
+#' you should use `vcov` instead.
+#' @param cluster Tells how to cluster the standard-errors (if clustering is requested). 
+#' Can be either a list of vectors, a character vector of variable names, a formula or 
+#' an integer vector. Assume we want to perform 2-way clustering over `var1` and `var2` 
+#' contained in the data.frame `base` used for the estimation. All the following 
+#' `cluster` arguments are valid and do the same thing: 
+#' `cluster = base[, c("var1", "var2")]`, `cluster = c("var1", "var2")`, `cluster = ~var1+var2`. 
+#' If the two variables were used as fixed-effects in the estimation, you can leave it 
+#' blank with `vcov = "twoway"` (assuming `var1` \[resp. `var2`\] was 
+#' the 1st \[resp. 2nd\] fixed-effect). You can interact two variables using `^` with 
+#' the following syntax: `cluster = ~var1^var2` or `cluster = "var1^var2"`.
+#' @param stage Can be equal to `2` (default), `1`, `1:2` or `2:1`. Only used if the object 
+#' is an IV estimation: defines the stage to which `summary` should be applied. If `stage = 1` 
+#' and there are multiple endogenous regressors or if `stage` is of length 2, then an 
+#' object of class `fixest_multi` is returned.
 #' @param object A `fixest` object. Obtained using the functions [`femlm`], [`feols`] or [`feglm`].
-#' @param ssc An object of class `ssc.type` obtained with the function [`ssc`]. Represents how the degree of freedom correction should be done.You must use the function [`ssc`] for this argument. The arguments and defaults of the function [`ssc`] are: `adj = TRUE`, `fixef.K="nested"`, `cluster.adj = TRUE`, `cluster.df = "min"`, `t.df = "min"`, `fixef.force_exact=FALSE)`. See the help of the function [`ssc`] for details.
-#' @param .vcov A user provided covariance matrix or a function computing this matrix. If a matrix, it must be a square matrix of the same number of rows as the number of variables estimated. If a function, it must return the previously mentioned matrix.
-#' @param lean Logical, default is `FALSE`. Used to reduce the (memory) size of the summary object. If `TRUE`, then all objects of length N (the number of observations) are removed from the result. Note that some `fixest` methods may consequently not work when applied to the summary.
-#' @param forceCovariance (Advanced users.) Logical, default is `FALSE`. In the peculiar case where the obtained Hessian is not invertible (usually because of collinearity of some variables), use this option to force the covariance matrix, by using a generalized inverse of the Hessian. This can be useful to spot where possible problems come from.
-#' @param keepBounded (Advanced users -- `feNmlm` with non-linear part and bounded coefficients only.) Logical, default is `FALSE`. If `TRUE`, then the bounded coefficients (if any) are treated as unrestricted coefficients and their S.E. is computed (otherwise it is not).
-#' @param vcov_fix Logical scalar, default is `TRUE`. If the VCOV ends up not being positive definite, whether to "fix" it using an eigenvalue decomposition (a la Cameron, Gelbach & Miller 2011).
-#' @param n Integer, default is 1000. Number of coefficients to display when the print method is used.
-#' @param ... Only used if the argument `.vocv` is provided and is a function: extra arguments to be passed to that function.
+#' @param ssc An object of class `ssc.type` obtained with the function [`ssc`]. Represents 
+#' how the degree of freedom correction should be done.You must use the function [`ssc`] 
+#' for this argument. The arguments and defaults of the function [`ssc`] are: 
+#' `adj = TRUE`, `fixef.K="nested"`, `cluster.adj = TRUE`, `cluster.df = "min"`, 
+#' `t.df = "min"`, `fixef.force_exact=FALSE)`. See the help of the function [`ssc`] for details.
+#' @param .vcov A user provided covariance matrix or a function computing this matrix. If a 
+#' matrix, it must be a square matrix of the same number of rows as the number 
+#' of variables estimated. If a function, it must return the previously mentioned matrix.
+#' @param lean Logical, default is `FALSE`. Used to reduce the (memory) size of the summary object.
+#'  If `TRUE`, then all objects of length N (the number of observations) are removed 
+#' from the result. Note that some `fixest` methods may consequently not work when applied 
+#' to the summary.
+#' @param forceCovariance (Advanced users.) Logical, default is `FALSE`. In the peculiar case 
+#' where the obtained Hessian is not invertible (usually because of collinearity of 
+#' some variables), use this option to force the covariance matrix, by using a generalized 
+#' inverse of the Hessian. This can be useful to spot where possible problems come from.
+#' @param keepBounded (Advanced users -- `feNmlm` with non-linear part and bounded 
+#' coefficients only.) Logical, default is `FALSE`. If `TRUE`, then the bounded coefficients 
+#' (if any) are treated as unrestricted coefficients and their S.E. is computed (otherwise 
+#' it is not).
+#' @param vcov_fix Logical scalar, default is `TRUE`. If the VCOV ends up not being 
+#' positive definite, whether to "fix" it using an eigenvalue decomposition 
+#' (a la Cameron, Gelbach & Miller 2011).
+#' @param n Integer, default is 1000. Number of coefficients to display when the print method 
+#' is used.
+#' @param ... Only used if the argument `.vocv` is provided and is a function: extra arguments 
+#' to be passed to that function.
 #'
 #' @section Compatibility with \pkg{sandwich} package:
-#' The VCOVs from `sandwich` can be used with `feols`, `feglm` and `fepois` estimations. If you want to have a `sandwich` VCOV when using `summary.fixest`, you can use the argument `vcov` to specify the VCOV function to use (see examples).
-#' Note that if you do so and you use a formula in the `cluster` argument, an innocuous warning can pop up if you used several non-numeric fixed-effects in the estimation (this is due to the function [`expand.model.frame`] used in `sandwich`).
+#' The VCOVs from `sandwich` can be used with `feols`, `feglm` and `fepois` estimations. 
+#' If you want to have a `sandwich` VCOV when using `summary.fixest`, you can use 
+#' the argument `vcov` to specify the VCOV function to use (see examples).
+#' Note that if you do so and you use a formula in the `cluster` argument, an innocuous 
+#' warning can pop up if you used several non-numeric fixed-effects in the estimation 
+#' (this is due to the function [`expand.model.frame`] used in `sandwich`).
 #'
 #' @return
 #' It returns a `fixest` object with:
@@ -358,7 +408,9 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #' \item{coeftable}{The table of coefficients with the new standard errors.}
 #'
 #' @seealso
-#' See also the main estimation functions [`femlm`], [`feols`] or [`feglm`]. Use [`fixef.fixest`] to extract the fixed-effects coefficients, and the function [`etable`] to visualize the results of multiple estimations.
+#' See also the main estimation functions [`femlm`], [`feols`] or [`feglm`]. 
+#' Use [`fixef.fixest`] to extract the fixed-effects coefficients, and the function [`etable`] 
+#' to visualize the results of multiple estimations.
 #'
 #' @author
 #' Laurent Berge
@@ -459,9 +511,9 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #'
 #'
 summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov = NULL,
-              stage = NULL, lean = FALSE, agg = NULL, forceCovariance = FALSE,
-              se = NULL, keepBounded = FALSE, n = 1000, vcov_fix = TRUE,
-              nthreads = getFixest_nthreads(), ...){
+                          stage = NULL, lean = FALSE, agg = NULL, forceCovariance = FALSE,
+                          se = NULL, keepBounded = FALSE, n = 1000, vcov_fix = TRUE,
+                          nthreads = getFixest_nthreads(), ...){
 
   # computes the clustered SEs and returns the modified vcov and coeftable
   # NOTA: if the object is already a summary
@@ -541,19 +593,20 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov
       if(stage[s] == 1){
         for(i in seq_along(object$iv_first_stage)){
           res[[length(res) + 1]] = summary(object$iv_first_stage[[i]],
-                           vcov = vcov, ssc = ssc, lean = lean,
-                           forceCovariance = forceCovariance,
-                           vcov_fix = vcov_fix,
-                           n = n, nthreads = nthreads, iv = TRUE)
+                                           vcov = vcov, ssc = ssc, lean = lean,
+                                           forceCovariance = forceCovariance,
+                                           vcov_fix = vcov_fix,
+                                           n = n, nthreads = nthreads, iv = TRUE)
 
-          stage_names[length(stage_names) + 1] = paste0("First stage: ", names(object$iv_first_stage)[i])
+          stage_names[length(stage_names) + 1] = paste0("First stage: ", 
+                                                        names(object$iv_first_stage)[i])
         }
 
       } else {
         # We keep the information on clustering => matters for wald tests of 1st stage
         my_res = summary(object, vcov = vcov, ssc = ssc, lean = lean,
-                 forceCovariance = forceCovariance, vcov_fix = vcov_fix,
-                 n = n, nthreads = nthreads, iv = TRUE)
+                         forceCovariance = forceCovariance, vcov_fix = vcov_fix,
+                         n = n, nthreads = nthreads, iv = TRUE)
 
         res[[length(res) + 1]] = my_res
         stage_names[length(stage_names) + 1] = "Second stage"
@@ -594,9 +647,9 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov
 
   } else {
     vcov = vcov.fixest(object, vcov = vcov, ssc = ssc, forceCovariance = forceCovariance,
-               vcov_fix = vcov_fix,
-               keepBounded = keepBounded, nthreads = nthreads,
-               attr = TRUE, se = se, cluster = cluster, ...)
+                       vcov_fix = vcov_fix,
+                       keepBounded = keepBounded, nthreads = nthreads,
+                       attr = TRUE, se = se, cluster = cluster, ...)
   }
 
   # NOTA:
@@ -633,7 +686,7 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov
 
   # modifs of the table
   coeftable = cbind("Estimate" = object$coefficients, "Std. Error" = se_format,
-            "t value" = zvalue, "Pr(>|t|)" = pvalue)
+                    "t value" = zvalue, "Pr(>|t|)" = pvalue)
   if(object$method != "feols"){
     colnames(coeftable) = colnames(object$coeftable)
   }
@@ -646,9 +699,9 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov
 
   if(lean){
     var2clean = c("fixef_id", "residuals", "fitted.values", "scores", "sumFE",
-            "slope_variables_reordered", "y", "weights", "irls_weights",
-            "obs_selection", "iv_residuals", "fitted.values_demean",
-            "working_residuals", "linear.predictors")
+                  "slope_variables_reordered", "y", "weights", "irls_weights",
+                  "obs_selection", "iv_residuals", "fitted.values_demean",
+                  "working_residuals", "linear.predictors")
 
     object[var2clean] = NULL
 
@@ -702,13 +755,15 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov
 
 
 #' @rdname summary.fixest
-summary.fixest_list = function(object, se, cluster, ssc = getFixest_ssc(), .vcov, stage = 2, lean = FALSE, n, ...){
+summary.fixest_list = function(object, se, cluster, ssc = getFixest_ssc(), .vcov, 
+                               stage = 2, lean = FALSE, n, ...){
 
   dots = list(...)
 
   res = list()
   for(i in seq_along(object)){
-    my_res = summary(object[[i]], se = se, cluster = cluster, ssc = ssc, .vcov = .vcov, stage = stage, lean = lean, n = n)
+    my_res = summary(object[[i]], se = se, cluster = cluster, ssc = ssc, 
+                     .vcov = .vcov, stage = stage, lean = lean, n = n)
 
     # we unroll in case of IV
     if("fixest_multi" %in% class(my_res)){
@@ -728,16 +783,22 @@ summary.fixest_list = function(object, se, cluster, ssc = getFixest_ssc(), .vcov
 
 #' Summary method for fixed-effects coefficients
 #'
-#' This function summarizes the main characteristics of the fixed-effects coefficients. It shows the number of fixed-effects that have been set as references and the first elements of the fixed-effects.
+#' This function summarizes the main characteristics of the fixed-effects coefficients. 
+#' It shows the number of fixed-effects that have been set as references and the first 
+#' elements of the fixed-effects.
 #'
 #' @method summary fixest.fixef
 #'
 #' @param object An object returned by the function [`fixef.fixest`].
-#' @param n Positive integer, defaults to 5. The `n` first fixed-effects for each fixed-effect dimension are reported.
+#' @param n Positive integer, defaults to 5. The `n` first fixed-effects for each 
+#' fixed-effect dimension are reported.
 #' @param ... Not currently used.
 #'
 #' @return
-#' It prints the number of fixed-effect coefficients per fixed-effect dimension, as well as the number of fixed-effects used as references for each dimension, and the mean and variance of the fixed-effect coefficients. Finally, it reports the first 5 (arg. `n`) elements of each fixed-effect.
+#' It prints the number of fixed-effect coefficients per fixed-effect dimension, as well as 
+#' the number of fixed-effects used as references for each dimension, and the mean and variance 
+#' of the fixed-effect coefficients. Finally, it reports the first 5 (arg. `n`) elements of 
+#' each fixed-effect.
 #'
 #' @author
 #' Laurent Berge
@@ -792,7 +853,10 @@ summary.fixest.fixef = function(object, n = 5, ...){
     }
     res = as.data.frame(rbind(nb_per_cluster, nb_ref, mean_per_cluster, sd_per_cluster))
 
-    row_1 = paste0("Number of ", switch(info, "11" = "fixed-effects/slopes", "10"="fixed-effects", "1"="slopes"))
+    row_1 = paste0("Number of ", switch(info, 
+                                        "11" = "fixed-effects/slopes", 
+                                        "10"="fixed-effects", 
+                                        "1"="slopes"))
 
     rownames(res) = c(row_1, "Number of references", "Mean", "Standard-deviation")
 
@@ -805,17 +869,21 @@ summary.fixest.fixef = function(object, n = 5, ...){
 
   # The message
 
-  my_title = paste0(switch(info, "11" = "Fixed-effects/Slope", "10"="Fixed_effects", "1"="Slope"), " coefficients\n")
+  my_title = paste0(switch(info, 
+                           "11" = "Fixed-effects/Slope", 
+                           "10"="Fixed_effects", 
+                           "1"="Slope"), 
+                    " coefficients\n")
   cat(my_title)
   if(Q == 1){
     x1 = object[[1]]
     if(slope_flag){
-      cat("Number of slope coefficients for variable ", slope, " (slope: ", fe, ") is ", length(x1), ".\n", sep = "")
+      catma("Number of slope coefficients for variable {slope} (slope: {fe}) is {len ? x1}.\n")
     } else {
-      cat("Number of fixed-effects for variable ", fixef_names, " is ", length(x1), ".\n", sep = "")
+      catma("Number of fixed-effects for variable {fixef_names} is {len ? x1}.\n")
     }
 
-    cat("\tMean = ", signif(mean(x1), 3), "\tVariance = ", signif(var(x1), 3), "\n", sep = "")
+    catma("\tMean = ", signif(mean(x1), 3), "\tVariance = ", signif(var(x1), 3), "\n")
   } else {
     print(res)
   }
@@ -831,7 +899,7 @@ summary.fixest.fixef = function(object, n = 5, ...){
 
     n_cluster = length(object[[i]])
     if(n_cluster > n){
-      m_char[["   "]] = paste0("... ", addCommas(n_cluster - n), " remaining")
+      m_char[["   "]] = sma("... {n ? n_cluster - n} remaining")
     }
 
     print(m_char)
@@ -847,24 +915,36 @@ summary.fixest.fixef = function(object, n = 5, ...){
 
 #' Extract the Fixed-Effects from a `fixest` estimation.
 #'
-#' This function retrieves the fixed effects from a `fixest` estimation. It is useful only when there are one or more fixed-effect dimensions.
+#' This function retrieves the fixed effects from a `fixest` estimation. It is useful only 
+#' when there are one or more fixed-effect dimensions.
 #'
 #' @inheritParams feNmlm
 #'
 #' @param object A `fixest` estimation (e.g. obtained using [`feols`] or [`feglm`]).
-#' @param notes Logical. Whether to display a note when the fixed-effects coefficients are not regular.
-#' @param sorted Logical, default is `TRUE`. Whether to order the fixed-effects by their names. If `FALSE`, then the order used in the demeaning algorithm is used.
+#' @param notes Logical. Whether to display a note when the fixed-effects coefficients are 
+#' not regular.
+#' @param sorted Logical, default is `TRUE`. Whether to order the fixed-effects by their names. 
+#' If `FALSE`, then the order used in the demeaning algorithm is used.
 #'
 #' @details
-#' If the fixed-effect coefficients are not regular, then several reference points need to be set: this means that the fixed-effects coefficients cannot be directly interpreted. If this is the case, then a warning is raised.
+#' If the fixed-effect coefficients are not regular, then several reference points need to 
+#' be set: this means that the fixed-effects coefficients cannot be directly interpreted. 
+#' If this is the case, then a warning is raised.
 #'
 #' @return
 #' A list containing the vectors of the fixed effects.
 #'
-#' If there is more than 1 fixed-effect, then the attribute \dQuote{references} is created. This is a vector of length the number of fixed-effects, each element contains the number of coefficients set as references. By construction, the elements of the first fixed-effect dimension are never set as references. In the presence of regular fixed-effects, there should be Q-1 references (with Q the number of fixed-effects).
+#' If there is more than 1 fixed-effect, then the attribute \dQuote{references} is created. 
+#' This is a vector of length the number of fixed-effects, each element contains the number 
+#' of coefficients set as references. By construction, the elements of the first 
+#' fixed-effect dimension are never set as references. In the presence of regular 
+#' fixed-effects, there should be Q-1 references (with Q the number of fixed-effects).
 #'
 #' @seealso
-#' [`plot.fixest.fixef`]. See also the main estimation functions [`femlm`], [`feols`] or [`feglm`]. Use [`summary.fixest`] to see the results with the appropriate standard-errors, [`fixef.fixest`] to extract the fixed-effect coefficients, and the function [`etable`] to visualize the results of multiple estimations.
+#' [`plot.fixest.fixef`]. See also the main estimation functions [`femlm`], [`feols`] 
+#' or [`feglm`]. Use [`summary.fixest`] to see the results with the appropriate 
+#' standard-errors, [`fixef.fixest`] to extract the fixed-effect coefficients, and 
+#' the function [`etable`] to visualize the results of multiple estimations.
 #'
 #' @author
 #' Laurent Berge
@@ -889,8 +969,9 @@ summary.fixest.fixef = function(object, n = 5, ...){
 #' # Plotting them:
 #' plot(fe_trade)
 #'
-fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE, nthreads = getFixest_nthreads(),
-            fixef.tol = 1e-5, fixef.iter = 10000, ...){
+fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE, 
+                        nthreads = getFixest_nthreads(), 
+                        fixef.tol = 1e-5, fixef.iter = 10000, ...){
 
   # object is a fixest object
   # This function retrieves the dummies
@@ -968,10 +1049,10 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE, nthrea
     table_id_I = as.integer(unlist(lapply(fe_id_list, table), use.names = FALSE))
 
     S_demean = cpp_demean(y = S, X_raw = 0, r_weights = 0, iterMax = as.integer(fixef.iter),
-                diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
-                fe_id_list = fe_id_list, table_id_I = table_id_I,
-                slope_flag_Q = slope_flag, slope_vars_list = slope_variables,
-                r_init = 0, nthreads = nthreads, save_fixef = TRUE)
+                          diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
+                          fe_id_list = fe_id_list, table_id_I = table_id_I,
+                          slope_flag_Q = slope_flag, slope_vars_list = slope_variables,
+                          r_init = 0, nthreads = nthreads, save_fixef = TRUE)
 
     fixef_coef = S_demean$fixef_coef
 
@@ -1003,7 +1084,8 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE, nthrea
         }
 
         for(j in 0:(nb - 1 - adj)){
-          fixef_values[[i + j + adj]] = fixef_coef[seq(start + j, by = nb, length.out = fixef_sizes[q])]
+          fixef_values[[i + j + adj]] = fixef_coef[seq(start + j, by = nb, 
+                                                       length.out = fixef_sizes[q])]
         }
         i = i + nb
         start = start + fixef_sizes[q] * nb
@@ -1063,7 +1145,8 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE, nthrea
 
         # if no associated FE => we check only 0 values
         if(slope_flag[fe_name] < 0){
-          nb_ref[i] = cpp_constant_dum(fixef_sizes[fe_name], var_sorted, my_dum[my_order], only_0 = TRUE)
+          nb_ref[i] = cpp_constant_dum(fixef_sizes[fe_name], var_sorted, my_dum[my_order], 
+                                       only_0 = TRUE)
         } else {
           nb_ref[i] = cpp_constant_dum(fixef_sizes[fe_name], var_sorted, my_dum[my_order])
         }
@@ -1121,10 +1204,10 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE, nthrea
         slope_variables = list()
 
         S_demean = cpp_demean(y = S, X_raw = 0, r_weights = 0, iterMax = as.integer(fixef.iter),
-                    diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
-                    fe_id_list = fe_id_list, table_id_I = table_id_I,
-                    slope_flag_Q = slope_flag, slope_vars_list = slope_variables,
-                    r_init = 0, nthreads = nthreads, save_fixef = TRUE)
+                              diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
+                              fe_id_list = fe_id_list, table_id_I = table_id_I,
+                              slope_flag_Q = slope_flag, slope_vars_list = slope_variables,
+                              r_init = 0, nthreads = nthreads, save_fixef = TRUE)
 
         fixef_coef = S_demean$fixef_coef
 
@@ -1196,9 +1279,11 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE, nthrea
 
 #' Functions exported from \pkg{nlme} to implement \pkg{fixest} methods
 #'
-#' The package \pkg{fixest} uses the `fixef` method from \pkg{nlme}. Unfortunately, re-exporting this method is required in order not to attach package \pkg{nlme}.
+#' The package \pkg{fixest} uses the `fixef` method from \pkg{nlme}. Unfortunately, 
+#' re-exporting this method is required in order not to attach package \pkg{nlme}.
 #'
-#' * Here is the help from package \pkg{nlme}: [`fixef`][nlme::fixed.effects]. The help from package \pkg{fixest} is here: [`fixef.fixest`].
+#' * Here is the help from package \pkg{nlme}: [`fixef`][nlme::fixed.effects]. The 
+#' help from package \pkg{fixest} is here: [`fixef.fixest`].
 #'
 #' @note
 #' I could find this workaround thanks to the package \pkg{plm}.
@@ -1216,7 +1301,9 @@ NULL
 
 #' Displaying the most notable fixed-effects
 #'
-#' This function plots the 5 fixed-effects with the highest and lowest values, for each of the fixed-effect dimension. It takes as an argument the fixed-effects obtained from the function [`fixef.fixest`] after an estimation using [`femlm`], [`feols`] or [`feglm`].
+#' This function plots the 5 fixed-effects with the highest and lowest values, for 
+#' each of the fixed-effect dimension. It takes as an argument the fixed-effects obtained 
+#' from the function [`fixef.fixest`] after an estimation using [`femlm`], [`feols`] or [`feglm`].
 #'
 #' @method plot fixest.fixef
 #'
@@ -1224,12 +1311,18 @@ NULL
 #' @param n The number of fixed-effects to be drawn. Defaults to 5.
 #' @param ... Not currently used.
 #'
-#' Note that the fixed-effect coefficients might NOT be interpretable. This function is useful only for fully regular panels.
+#' Note that the fixed-effect coefficients might NOT be interpretable. This function is 
+#' useful only for fully regular panels.
 #'
-#' If the data are not regular in the fixed-effect coefficients, this means that several \sQuote{reference points} are set to obtain the fixed-effects, thereby impeding their interpretation. In this case a warning is raised.
+#' If the data are not regular in the fixed-effect coefficients, this means that several 
+#' \sQuote{reference points} are set to obtain the fixed-effects, thereby 
+#' impeding their interpretation. In this case a warning is raised.
 #'
 #' @seealso
-#' [`fixef.fixest`] to extract clouster coefficients. See also the main estimation function [`femlm`], [`feols`] or [`feglm`]. Use [`summary.fixest`] to see the results with the appropriate standard-errors, the function [`etable`] to visualize the results of multiple estimations.
+#' [`fixef.fixest`] to extract clouster coefficients. See also the main 
+#' estimation function [`femlm`], [`feols`] or [`feglm`]. Use [`summary.fixest`] to see 
+#' the results with the appropriate standard-errors, the function [`etable`] to 
+#' visualize the results of multiple estimations.
 #'
 #' @author
 #' Laurent Berge
@@ -1334,12 +1427,19 @@ tstat = function(object, ...){
 #'
 #' @method coeftable default
 #'
-#' @param object The result of an estimation (a fitted model object). Note that this function is made to work with `fixest` objects so it may not work for the specific model you provide.
+#' @param object The result of an estimation (a fitted model object). Note that this function 
+#' is made to work with `fixest` objects so it may not work for the specific model you provide.
 #' @param ... Other arguments that will be passed to `summary`.
 #'
-#' First the method summary is applied if needed, then the coefficients table is extracted from its output.
+#' First the method summary is applied if needed, then the coefficients table is extracted from 
+#' its output.
 #'
-#' The default method is very naive and hopes that the resulting coefficients table contained in the summary of the fitted model is well formed: this assumption is very often wrong. Anyway, there is no development intended since the coeftable/se/pvalue/tstat series of methods is only intended to work well with `fixest` objects. To extract the coefficients table from fitted models in a general way, it's better to use [tidy from broom](https://broom.tidymodels.org/).
+#' The default method is very naive and hopes that the resulting coefficients table 
+#' contained in the summary of the fitted model is well formed: this assumption is very 
+#' often wrong. Anyway, there is no development intended since the coeftable/se/pvalue/tstat 
+#' series of methods is only intended to work well with `fixest` objects. To extract 
+#' the coefficients table from fitted models in a general way, it's better to 
+#' use [tidy from broom](https://broom.tidymodels.org/).
 #'
 #' @return
 #' Returns a matrix (`coeftable`) or vectors.
@@ -1506,24 +1606,41 @@ se.matrix = function(object, keep, drop, order, ...){
 
 #' Obtain various statistics from an estimation
 #'
-#' Set of functions to directly extract some commonly used statistics, like the p-value or the table of coefficients, from estimations. This was first implemented for `fixest` estimations, but has some support for other models.
+#' Set of functions to directly extract some commonly used statistics, like the p-value or 
+#' the table of coefficients, from estimations. This was first implemented for 
+#' `fixest` estimations, but has some support for other models.
 #'
 #' @inheritParams etable
 #'
 #' @method coeftable fixest
 #'
 #' @param object A `fixest` object. For example an estimation obtained from [`feols`].
-#' @param cluster Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over `var1` and `var2` contained in the data.frame `base` used for the estimation. All the following `cluster` arguments are valid and do the same thing: `cluster = base[, c("var1, "var2")]`, `cluster = c("var1, "var2")`, `cluster = ~var1+var2`. If the two variables were used as clusters in the estimation, you could further use `cluster = 1:2` or leave it blank with `se = "twoway"` (assuming `var1` \[resp. `var2`\] was the 1st \[resp. 2nd\] cluster).
-#' @param list Logical, default is `FALSE`. If `TRUE`, then a nested list is returned, the first layer is accessed with the coefficients names; the second layer with the following values: `coef`, `se`, `tstat`, `pvalue`. Note that the variable `"(Intercept)"` is renamed into `"constant"`.
+#' @param cluster Tells how to cluster the standard-errors (if clustering is requested). Can 
+#' be either a list of vectors, a character vector of variable names, a formula or an 
+#' integer vector. Assume we want to perform 2-way clustering over `var1` and `var2` contained 
+#' in the data.frame `base` used for the estimation. All the following `cluster` arguments 
+#' are valid and do the same thing: `cluster = base[, c("var1, "var2")]`, 
+#' `cluster = c("var1, "var2")`, `cluster = ~var1+var2`. If the two variables were used as 
+#' clusters in the estimation, you could further use `cluster = 1:2` or leave it blank 
+#' with `se = "twoway"` (assuming `var1` \[resp. `var2`\] was the 1st \[resp. 2nd\] cluster).
+#' @param list Logical, default is `FALSE`. If `TRUE`, then a nested list is returned, the 
+#' first layer is accessed with the coefficients names; the second layer with the 
+#' following values: `coef`, `se`, `tstat`, `pvalue`. Note that the variable `"(Intercept)"` 
+#' is renamed into `"constant"`.
 #' @param ... Other arguments to be passed to [`summary.fixest`].
 #'
 #' @details
 #' This set of tiny functions is primarily constructed for `fixest` estimations.
 #'
 #' @return
-#' Returns a table of coefficients, with in rows the variables and four columns: the estimate, the standard-error, the t-statistic and the p-value.
+#' Returns a table of coefficients, with in rows the variables and four columns: the estimate, 
+#' the standard-error, the t-statistic and the p-value.
 #'
-#' If `list = TRUE` then a nested list is returned, the first layer is accessed with the coefficients names; the second layer with the following values: `coef`, `se`, `tstat`, `pvalue`. For example, with `res = coeftable(est, list = TRUE)` you can access the SE of the coefficient `x1` with `res$x1$se`; and its coefficient with `res$x1$coef`, etc.
+#' If `list = TRUE` then a nested list is returned, the first layer is accessed with 
+#' the coefficients names; the second layer with the following values: 
+#' `coef`, `se`, `tstat`, `pvalue`. For example, with `res = coeftable(est, list = TRUE)` 
+#' you can access the SE of the coefficient `x1` with `res$x1$se`; and its 
+#' coefficient with `res$x1$coef`, etc.
 #'
 #' @examples
 #'
@@ -1588,7 +1705,7 @@ se.matrix = function(object, keep, drop, order, ...){
 #'
 #'
 coeftable.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
-              keep = NULL, drop = NULL, order = NULL, list = FALSE, ...){
+                            keep = NULL, drop = NULL, order = NULL, list = FALSE, ...){
   # We don't explicitly refer to the other arguments
 
   check_arg(keep, drop, order, "NULL character vector no na")
@@ -1632,12 +1749,12 @@ coeftable.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
 
 #' @describeIn coeftable.fixest Extracts the standard-error of an estimation
 se.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
-           keep = NULL, drop = NULL, order = NULL, ...){
+                     keep = NULL, drop = NULL, order = NULL, ...){
 
   check_arg(keep, drop, order, "NULL character vector no na")
 
   mat = coeftable(object, vcov = vcov, ssc = ssc, cluster = cluster,
-          keep = keep, drop = drop, order = order, ...)
+                  keep = keep, drop = drop, order = order, ...)
 
   if(is.null(mat)){
     return(NULL)
@@ -1651,12 +1768,12 @@ se.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
 
 #' @describeIn coeftable.fixest Extracts the t-statistics of an estimation
 tstat.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
-            keep = NULL, drop = NULL, order = NULL, ...){
+                        keep = NULL, drop = NULL, order = NULL, ...){
 
   check_arg(keep, drop, order, "NULL character vector no na")
 
   mat = coeftable(object, vcov = vcov, ssc = ssc, cluster = cluster,
-          keep = keep, drop = drop, order = order, ...)
+                  keep = keep, drop = drop, order = order, ...)
 
   if(is.null(mat)){
     return(NULL)
@@ -1670,12 +1787,12 @@ tstat.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
 
 #' @describeIn coeftable.fixest Extracts the p-value of an estimation
 pvalue.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
-             keep = NULL, drop = NULL, order = NULL, ...){
+                         keep = NULL, drop = NULL, order = NULL, ...){
 
   check_arg(keep, drop, order, "NULL character vector no na")
 
   mat = coeftable(object, vcov = vcov, ssc = ssc, cluster = cluster,
-          keep = keep, drop = drop, order = order, ...)
+                  keep = keep, drop = drop, order = order, ...)
 
   if(is.null(mat)){
     return(NULL)
@@ -1696,14 +1813,18 @@ pvalue.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
 
 #' Extracts the number of observations form a `fixest` object
 #'
-#' This function simply extracts the number of observations form a `fixest` object, obtained using the functions [`femlm`], [`feols`] or [`feglm`].
+#' This function simply extracts the number of observations form a `fixest` object, 
+#' obtained using the functions [`femlm`], [`feols`] or [`feglm`].
 #'
 #' @inheritParams summary.fixest
 #'
 #' @param ... Not currently used.
 #'
 #' @seealso
-#' See also the main estimation functions [`femlm`], [`feols`] or [`feglm`]. Use [`summary.fixest`] to see the results with the appropriate standard-errors, [`fixef.fixest`] to extract the fixed-effects coefficients, and the function [`etable`] to visualize the results of multiple estimations.
+#' See also the main estimation functions [`femlm`], [`feols`] or [`feglm`]. 
+#' Use [`summary.fixest`] to see the results with the appropriate standard-errors, 
+#' [`fixef.fixest`] to extract the fixed-effects coefficients, and the function [`etable`] 
+#' to visualize the results of multiple estimations.
 #'
 #' @author
 #' Laurent Berge
@@ -1732,7 +1853,8 @@ nobs.fixest = function(object, ...){
 #' @inheritParams nobs.fixest
 #'
 #' @param ... Optionally, more fitted objects.
-#' @param k A numeric, the penalty per parameter to be used; the default k = 2 is the classical AIC (i.e. `AIC=-2*LL+k*nparams`).
+#' @param k A numeric, the penalty per parameter to be used; the default k = 2 is the 
+#' classical AIC (i.e. `AIC=-2*LL+k*nparams`).
 #'
 #' @details
 #' The AIC is computed as:
@@ -1745,7 +1867,8 @@ nobs.fixest = function(object, ...){
 #' It return a numeric vector, with length the same as the number of objects taken as arguments.
 #'
 #' @seealso
-#' See also the main estimation functions [`femlm`], [`feols`] or [`feglm`]. Other statictics methods: [`BIC.fixest`], [`logLik.fixest`], [`nobs.fixest`].
+#' See also the main estimation functions [`femlm`], [`feols`] or [`feglm`]. 
+#' Other statictics methods: [`BIC.fixest`], [`logLik.fixest`], [`nobs.fixest`].
 #'
 #' @author
 #' Laurent Berge
@@ -1847,13 +1970,15 @@ BIC.fixest = function(object, ...){
 #' @param ... Not currently used.
 #'
 #' @details
-#' This function extracts the log-likelihood based on the model fit. You can have more information on the likelihoods in the details of the function [`femlm`].
+#' This function extracts the log-likelihood based on the model fit. You can have more 
+#' information on the likelihoods in the details of the function [`femlm`].
 #'
 #' @return
 #' It returns a numeric scalar.
 #'
 #' @seealso
-#' See also the main estimation functions [`femlm`], [`feols`] or [`feglm`]. Other statistics functions: [`AIC.fixest`], [`BIC.fixest`].
+#' See also the main estimation functions [`femlm`], [`feols`] or [`feglm`]. Other 
+#' statistics functions: [`AIC.fixest`], [`BIC.fixest`].
 #'
 #' @author
 #' Laurent Berge
@@ -1887,7 +2012,8 @@ logLik.fixest = function(object, ...){
 
 #' Extracts the coefficients from a `fixest` estimation
 #'
-#' This function extracts the coefficients obtained from a model estimated with [`femlm`], [`feols`] or [`feglm`].
+#' This function extracts the coefficients obtained from a model estimated with 
+#' [`femlm`], [`feols`] or [`feglm`].
 #'
 #' @inheritParams nobs.fixest
 #' @inheritParams etable
@@ -1970,7 +2096,7 @@ coef.fixest = coefficients.fixest = function(object, keep, drop, order,
       PN = eval(mc_DM$parameterNames, parent.frame())
 
       check_value(PN, "character vector no na len(data)", .data = res,
-            .arg_name = "parameterNames", .up = 1)
+                  .arg_name = "parameterNames", .up = 1)
 
       names(res) = PN
     }
@@ -1980,33 +2106,43 @@ coef.fixest = coefficients.fixest = function(object, keep, drop, order,
 }
 
 #' @rdname coef.fixest
-coefficients.fixest <- coef.fixest
+coefficients.fixest = coef.fixest
 
 
 #' Extracts fitted values from a `fixest` fit
 #'
-#' This function extracts the fitted values from a model estimated with [`femlm`], [`feols`] or [`feglm`]. The fitted values that are returned are the *expected predictor*.
+#' This function extracts the fitted values from a model estimated with [`femlm`], 
+#' [`feols`] or [`feglm`]. The fitted values that are returned are the *expected predictor*.
 #'
 #' @inheritParams nobs.fixest
 #'
-#' @param type Character either equal to `"response"` (default) or `"link"`. If `type="response"`, then the output is at the level of the response variable, i.e. it is the expected predictor \eqn{E(Y|X)}. If `"link"`, then the output is at the level of the explanatory variables, i.e. the linear predictor \eqn{X\cdot \beta}.
-#' @param na.rm Logical, default is `TRUE`. If `FALSE` the number of observation returned will be the number of observations in the original data set, otherwise it will be the number of observations used in the estimation.
+#' @param type Character either equal to `"response"` (default) or `"link"`. 
+#' If `type="response"`, then the output is at the level of the response variable, i.e. 
+#' it is the expected predictor \eqn{E(Y|X)}. If `"link"`, then the output is at 
+#' the level of the explanatory variables, i.e. the linear predictor \eqn{X\cdot \beta}.
+#' @param na.rm Logical, default is `TRUE`. If `FALSE` the number of observation returned 
+#' will be the number of observations in the original data set, otherwise it will be the 
+#' number of observations used in the estimation.
 #' @param ... Not currently used.
 #'
 #' @details
-#' This function returns the *expected predictor* of a `fixest` fit. The likelihood functions are detailed in [`femlm`] help page.
+#' This function returns the *expected predictor* of a `fixest` fit. The likelihood functions 
+#' are detailed in [`femlm`] help page.
 #'
 #' @return
 #' It returns a numeric vector of length the number of observations used to estimate the model.
 #'
-#' If `type = "response"`, the value returned is the expected predictor, i.e. the expected value of the dependent variable for the fitted model: \eqn{E(Y|X)}.
-#' If `type = "link"`, the value returned is the linear predictor of the fitted model, that is \eqn{X\cdot \beta} (remind that \eqn{E(Y|X) = f(X\cdot \beta)}).
+#' If `type = "response"`, the value returned is the expected predictor, i.e. the 
+#' expected value of the dependent variable for the fitted model: \eqn{E(Y|X)}.
+#' If `type = "link"`, the value returned is the linear predictor of the fitted model, 
+#' that is \eqn{X\cdot \beta} (remind that \eqn{E(Y|X) = f(X\cdot \beta)}).
 #'
 #' @author
 #' Laurent Berge
 #'
 #' @seealso
-#' See also the main estimation functions [`femlm`], [`feols`] or [`feglm`]. [`resid.fixest`], [`predict.fixest`], [`summary.fixest`], [`vcov.fixest`], [`fixef.fixest`].
+#' See also the main estimation functions [`femlm`], [`feols`] or [`feglm`]. 
+#' [`resid.fixest`], [`predict.fixest`], [`summary.fixest`], [`vcov.fixest`], [`fixef.fixest`].
 #'
 #' @examples
 #'
@@ -2028,7 +2164,8 @@ coefficients.fixest <- coef.fixest
 #' points(iris$Sepal.Length, y_fitted_gaussian, col = 2, pch = 2)
 #'
 #'
-fitted.fixest = fitted.values.fixest = function(object, type = c("response", "link"), na.rm = TRUE, ...){
+fitted.fixest = fitted.values.fixest = function(object, type = c("response", "link"), 
+                                                na.rm = TRUE, ...){
 
   # Checking the arguments
   if(is_user_level_call()){
@@ -2046,10 +2183,10 @@ fitted.fixest = fitted.values.fixest = function(object, type = c("response", "li
   } else if(object$method_type == "feNmlm"){
     family = object$family
     famFuns = switch(family,
-             poisson = ml_poisson(),
-             negbin = ml_negbin(),
-             logit = ml_logit(),
-             gaussian = ml_gaussian())
+                     poisson = ml_poisson(),
+                     negbin = ml_negbin(),
+                     logit = ml_logit(),
+                     gaussian = ml_gaussian())
 
     res = famFuns$linearFromExpected(fit)
   } else {
@@ -2067,21 +2204,27 @@ fitted.fixest = fitted.values.fixest = function(object, type = c("response", "li
 
 #' @rdname fitted.fixest
 #' @method fitted.values fixest
-fitted.values.fixest <- fitted.fixest
+fitted.values.fixest = fitted.fixest
 
 #' Extracts residuals from a `fixest` object
 #'
-#' This function extracts residuals from a fitted model estimated with [`femlm`], [`feols`] or [`feglm`].
+#' This function extracts residuals from a fitted model estimated with [`femlm`], 
+#' [`feols`] or [`feglm`].
 #'
 #' @inheritParams nobs.fixest
 #'
-#' @param type A character scalar, either `"response"` (default), `"deviance"`, `"pearson"`, or `"working"`. Note that the `"working"` corresponds to the residuals from the weighted least square and only applies to [`feglm`] models.
-#' @param na.rm Logical, default is `TRUE`. Whether to remove the observations with NAs from the original data set. If `FALSE`, then the vector returned is always of the same length as the original data set.
+#' @param type A character scalar, either `"response"` (default), `"deviance"`, 
+#' `"pearson"`, or `"working"`. Note that the `"working"` corresponds to the residuals 
+#' from the weighted least square and only applies to [`feglm`] models.
+#' @param na.rm Logical, default is `TRUE`. Whether to remove the observations with NAs 
+#' from the original data set. If `FALSE`, then the vector returned is always of the same 
+#' length as the original data set.
 #' @param ... Not currently used.
 #'
 #'
 #' @return
-#' It returns a numeric vector of the length the number of observations used for the estimation (if `na.rm = TRUE`) or of the length of the original data set (if `na.rm = FALSE`).
+#' It returns a numeric vector of the length the number of observations used for the estimation 
+#' (if `na.rm = TRUE`) or of the length of the original data set (if `na.rm = FALSE`).
 #'
 #' @author
 #' Laurent Berge
@@ -2116,7 +2259,9 @@ resid.fixest = residuals.fixest = function(object, type = c("response", "devianc
 
   if(method %in% c("feols", "feols.fit") || (method %in% c("feNmlm", "femlm") && family == "gaussian")){
 
-    if(type == "working") stop("Type 'working' only applies to models fitted via feglm (thus is not valid for feols).")
+    if(type == "working"){
+      stop("Type 'working' only applies to models fitted via feglm (thus is not valid for feols).")
+    } 
 
     if(type %in% c("deviance", "pearson") && !is.null(w)){
       res = r * sqrt(w)
@@ -2152,7 +2297,9 @@ resid.fixest = residuals.fixest = function(object, type = c("response", "devianc
 
   } else {
 
-    if(type == "working") stop("Type 'working' only applies to models fitted via feglm (thus is not valid for ", method, ").")
+    if(type == "working"){
+      stop("Type 'working' only applies to models fitted via feglm (thus is not valid for ", method, ").")
+    }
 
     if(type == "response"){
       res = r
@@ -2214,31 +2361,52 @@ resid.fixest = residuals.fixest = function(object, type = c("response", "devianc
 }
 
 #' @rdname resid.fixest
-residuals.fixest <- resid.fixest
+residuals.fixest = resid.fixest
 
 #' Predict method for `fixest` fits
 #'
-#' This function obtains prediction from a fitted model estimated with [`femlm`], [`feols`] or [`feglm`].
+#' This function obtains prediction from a fitted model estimated with [`femlm`], 
+#' [`feols`] or [`feglm`].
 #'
 #' @inheritParams nobs.fixest
 #' @inheritParams fitted.fixest
 #' @inheritParams summary.fixest
 #'
-#' @param newdata A data.frame containing the variables used to make the prediction. If not provided, the fitted expected (or linear if `type = "link"`) predictors are returned.
-#' @param sample Either "estimation" (default) or "original". This argument is only used when arg. 'newdata' is missing, and is ignored otherwise. If equal to "estimation", the vector returned matches the sample used for the estimation. If equal to "original", it matches the original data set (the observations not used for the estimation being filled with NAs).
-#' @param se.fit Logical, default is `FALSE`. If `TRUE`, the standard-error of the predicted value is computed and returned in a column named `se.fit`. This feature is only available for OLS models not containing fixed-effects.
-#' @param interval Either "none" (default), "confidence" or "prediction". What type of confidence interval to compute. Note that this feature is only available for OLS models not containing fixed-effects (GLM/ML models are not covered).
-#' @param level A numeric scalar in between 0.5 and 1, defaults to 0.95. Only used when the argument 'interval' is requested, it corresponds to the width of the confidence interval.
-#' @param fixef Logical scalar, default is `FALSE`. If `TRUE`, a data.frame is returned, with each column representing the fixed-effects coefficients for each observation in `newdata` -- with as many columns as fixed-effects. Note that when there are variables with varying slopes, the slope coefficients are returned (i.e. they are not multiplied by the variable).
-#' @param vs.coef Logical scalar, default is `FALSE`. Only used when `fixef = TRUE` and when variables with varying slopes are present. If `TRUE`, the coefficients of the variables with varying slopes are returned instead of the coefficient multiplied by the value of the variables (default).
+#' @param newdata A data.frame containing the variables used to make the prediction. 
+#' If not provided, the fitted expected (or linear if `type = "link"`) predictors are returned.
+#' @param sample Either "estimation" (default) or "original". This argument is only used 
+#' when arg. 'newdata' is missing, and is ignored otherwise. If equal to "estimation", 
+#' the vector returned matches the sample used for the estimation. If equal to "original", 
+#' it matches the original data set (the observations not used for the estimation being filled 
+#' with NAs).
+#' @param se.fit Logical, default is `FALSE`. If `TRUE`, the standard-error of the predicted 
+#' value is computed and returned in a column named `se.fit`. This feature is only available 
+#' for OLS models not containing fixed-effects.
+#' @param interval Either "none" (default), "confidence" or "prediction". What type of 
+#' confidence interval to compute. Note that this feature is only available for OLS models 
+#' not containing fixed-effects (GLM/ML models are not covered).
+#' @param level A numeric scalar in between 0.5 and 1, defaults to 0.95. Only used when 
+#' the argument 'interval' is requested, it corresponds to the width of the confidence interval.
+#' @param fixef Logical scalar, default is `FALSE`. If `TRUE`, a data.frame is returned, 
+#' with each column representing the fixed-effects coefficients for each observation in 
+#' `newdata` -- with as many columns as fixed-effects. Note that when there are variables 
+#' with varying slopes, the slope coefficients are returned (i.e. they are not multiplied 
+#' by the variable).
+#' @param vs.coef Logical scalar, default is `FALSE`. Only used when `fixef = TRUE` and 
+#' when variables with varying slopes are present. If `TRUE`, the coefficients of the 
+#' variables with varying slopes are returned instead of the coefficient multiplied by the 
+#' value of the variables (default).
 #' @param ... Not currently used.
 #'
 #'
 #' @return
 #' It returns a numeric vector of length equal to the number of observations in argument `newdata`.
-#' If `newdata` is missing, it returns a vector of the same length as the estimation sample, except if `sample = "original"`, in which case the length of the vector will match the one of the original data set (which can, but also cannot, be the estimation sample).
+#' If `newdata` is missing, it returns a vector of the same length as the estimation sample, 
+#' except if `sample = "original"`, in which case the length of the vector will match the one 
+#' of the original data set (which can, but also cannot, be the estimation sample).
 #' If `fixef = TRUE`, a `data.frame` is returned.
-#' If `se.fit = TRUE` or `interval != "none"`, the object returned is a data.frame with the following columns: `fit`, `se.fit`, and, if CIs are requested, `ci_low` and `ci_high`.
+#' If `se.fit = TRUE` or `interval != "none"`, the object returned is a data.frame 
+#' with the following columns: `fit`, `se.fit`, and, if CIs are requested, `ci_low` and `ci_high`.
 #'
 #'
 #' @author
@@ -2313,9 +2481,9 @@ residuals.fixest <- resid.fixest
 #'
 #'
 predict.fixest = function(object, newdata, type = c("response", "link"), se.fit = FALSE,
-              interval = "none", level = 0.95, fixef = FALSE,
-              vs.coef = FALSE, sample = c("estimation", "original"),
-              vcov = NULL, ssc = NULL, ...){
+                          interval = "none", level = 0.95, fixef = FALSE,
+                          vs.coef = FALSE, sample = c("estimation", "original"),
+                          vcov = NULL, ssc = NULL, ...){
 
   # Checking the arguments
   if(is_user_level_call()){
@@ -2394,7 +2562,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
   }
 
   # We deconstruct it in four steps:
-  # 1) cluster
+  # 1) fixed-effects
   # 2) linear
   # 3) non-linear
   # 4) offset
@@ -2582,21 +2750,22 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
       names(coef) = gsub("^fit_", "", names(coef))
       linear.varnames = c(linear.varnames, all_vars_with_i_prefix(object$fml_all$iv[[2]]))
       iv_fml = object$fml_all$iv
-      rhs_fml = .xpd(..lhs ~ ..endo + ..rhs, ..lhs = rhs_fml[[2]], ..endo = iv_fml[[2]], ..rhs = rhs_fml[[3]])
+      rhs_fml = .xpd(..lhs ~ ..endo + ..rhs, 
+                     ..lhs = rhs_fml[[2]], 
+                     ..endo = iv_fml[[2]], 
+                     ..rhs = rhs_fml[[3]])
     }
 
     varNotHere = setdiff(linear.varnames, names(newdata))
     if(length(varNotHere) > 0){
-      stop("The variable", enumerate_items(varNotHere, "s.quote"),
-         " used to estimate the model (in fml) ", ifsingle(varNotHere, "is", "are"),
-         " missing in the data.frame given by the argument 'newdata'.")
+      stopi("The variable{$s, enum.q ? varNotHere} used to estimate the model (in fml) {$are} missing in the data.frame given by the argument 'newdata'.")
     }
 
     # we create the matrix
     matrix_linear = error_sender(fixest_model_matrix_extra(object = object, newdata = newdata,
-                                 original_data = FALSE, fml = rhs_fml,
-                                 i_noref = TRUE),
-                   "Error when creating the linear matrix: ")
+                                                           original_data = FALSE, fml = rhs_fml,
+                                                           i_noref = TRUE),
+                                 "Error when creating the linear matrix: ")
 
     # Checking the levels created with i()
     mm_info_new = attr(matrix_linear, "model_matrix_info")
@@ -2610,8 +2779,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
         if("coef_names_full" %in% names(mm_i)){
           pblm = setdiff(mm_new_i$coef_names_full, mm_i$coef_names_full)
           if(length(pblm) > 0){
-            stop(dsb("In i(), predictions cannot be done for values that were not present at estimation time.",
-                 " It concerns the value.[*s_, 3KO, C?pblm]."))
+            stopi("In i(), predictions cannot be done for values that were not present at estimation time. It concerns the value{$s, enum ? pblm}.")
           }
         }
       }
@@ -2632,7 +2800,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
     NL_vars = all.vars(NL_fml)
     varNotHere = setdiff(NL_vars, c(names(coef), names(newdata)))
     if(length(varNotHere) > 0){
-      stop("Some variables used to estimate the model (in the non-linear formula) are missing from argument 'newdata': ", enumerate_items(varNotHere), ".")
+      stopi("Some variables used to estimate the model (in the non-linear formula) are missing from argument 'newdata': {enum.q ? varNotHere}.")
     }
 
     var2send = intersect(NL_vars, names(newdata))
@@ -2671,7 +2839,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
         offset_fml = eval(offset)
         varNotHere = setdiff(all.vars(offset_fml), names(newdata))
         if(length(varNotHere) > 0){
-          stop("In the offset, the variable", enumerate_items(varNotHere, "s.is"), " not present in 'newdata'.")
+          stopi("In the offset, the variable{$s, enum.bq, is ? varNotHere} not present in 'newdata'.")
         }
 
         value_offset = eval(offset_fml[[length(offset_fml)]], newdata)
@@ -2691,10 +2859,10 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
     # Now the expected predictor
     family = object$family
     famFuns = switch(family,
-             poisson = ml_poisson(),
-             negbin = ml_negbin(),
-             logit = ml_logit(),
-             gaussian = ml_gaussian())
+                     poisson = ml_poisson(),
+                     negbin = ml_negbin(),
+                     logit = ml_logit(),
+                     gaussian = ml_gaussian())
 
     if(family == "gaussian"){
       exp_value = 0
@@ -2764,17 +2932,22 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
 
 #' Confidence interval for parameters estimated with `fixest`
 #'
-#' This function computes the confidence interval of parameter estimates obtained from a model estimated with [`femlm`], [`feols`] or [`feglm`].
+#' This function computes the confidence interval of parameter estimates obtained from a 
+#' model estimated with [`femlm`], [`feols`] or [`feglm`].
 #'
 #' @inheritParams nobs.fixest
 #' @inheritParams vcov.fixest
 #'
-#' @param parm The parameters for which to compute the confidence interval (either an integer vector OR a character vector with the parameter name). If missing, all parameters are used.
+#' @param parm The parameters for which to compute the confidence interval (either an 
+#' integer vector OR a character vector with the parameter name). If missing, all 
+#' parameters are used.
 #' @param level The confidence level. Default is 0.95.
-#' @param coef.col Logical, default is `FALSE`. If `TRUE` the column `coefficient` is inserted in the first position containing the coefficient names.
+#' @param coef.col Logical, default is `FALSE`. If `TRUE` the column `coefficient` is 
+#' inserted in the first position containing the coefficient names.
 #'
 #' @return
-#' Returns a data.frame with two columns giving respectively the lower and upper bound of the confidence interval. There is as many rows as parameters.
+#' Returns a data.frame with two columns giving respectively the lower and upper bound 
+#' of the confidence interval. There is as many rows as parameters.
 #'
 #' @author
 #' Laurent Berge
@@ -2796,12 +2969,12 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
 #'
 #'
 confint.fixest = function(object, parm, level = 0.95, vcov, se, cluster,
-              ssc = NULL, coef.col = FALSE, ...){
+                          ssc = NULL, coef.col = FALSE, ...){
 
   # Checking the arguments
   if(is_user_level_call()){
     validate_dots(suggest_args = c("parm", "level", "se", "cluster"),
-            valid_args = c("forceCovariance", "keepBounded"))
+                  valid_args = c("forceCovariance", "keepBounded"))
   }
 
   # Control
@@ -2848,7 +3021,7 @@ confint.fixest = function(object, parm, level = 0.95, vcov, se, cluster,
   } else if(is.character(parm)){
     parm_pblm = setdiff(parm, all_params)
     if(length(parm_pblm) > 0 && !IS_INTERNAL){
-      stop("some parameters of 'parm' have no estimated coefficient: ", paste0(parm_pblm, collapse=", "), ".")
+      stopi("some parameters of 'parm' have no estimated coefficient: {enum.bq ? parm_pblm}.")
     }
 
     parm_use = intersect(parm, all_params)
@@ -2884,14 +3057,20 @@ confint.fixest = function(object, parm, level = 0.95, vcov, se, cluster,
 
 #' Updates a `fixest` estimation
 #'
-#' Updates and re-estimates a `fixest` model (estimated with [`femlm`], [`feols`] or [`feglm`]). This function updates the formulas and use previous starting values to estimate a new `fixest` model. The data is obtained from the original `call`.
+#' Updates and re-estimates a `fixest` model (estimated with [`femlm`], [`feols`] or [`feglm`]). 
+#' This function updates the formulas and use previous starting values to estimate a new 
+#' `fixest` model. The data is obtained from the original `call`.
 #'
 #' @method update fixest
 #'
 #' @inheritParams nobs.fixest
 #'
-#' @param fml.update Changes to be made to the original argument `fml`. See more information on [`update.formula`][stats::update.formula]. You can add/withdraw both variables and fixed-effects. E.g. `. ~ . + x2 | . + z2` would add the variable `x2` and the cluster `z2` to the former estimation.
-#' @param nframes (Advanced users.) Defaults to 1. Number of frames up the stack where to perform the evaluation of the updated call. By default, this is the parent frame.
+#' @param fml.update Changes to be made to the original argument `fml`. See more information 
+#' on [`update.formula`][stats::update.formula]. You can add/withdraw both variables 
+#' and fixed-effects. E.g. `. ~ . + x2 | . + z2` would add the variable `x2` and the 
+#' fixed-effect `z2` to the former estimation.
+#' @param nframes (Advanced users.) Defaults to 1. Number of frames up the stack where 
+#' to perform the evaluation of the updated call. By default, this is the parent frame.
 #' @param evaluate Logical, default is `TRUE`. If `FALSE`, only the updated call is returned.
 #' @param ... Other arguments to be passed to the functions [`femlm`], [`feols`] or [`feglm`].
 #'
@@ -3098,18 +3277,26 @@ update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
 
 #' Extract the formula of a `fixest` fit
 #'
-#' This function extracts the formula from a `fixest` estimation (obtained with [`femlm`], [`feols`] or [`feglm`]). If the estimation was done with fixed-effects, they are added in the formula after a pipe (\dQuote{|}). If the estimation was done with a non linear in parameters part, then this will be added in the formula in between `I()`.
+#' This function extracts the formula from a `fixest` estimation (obtained with [`femlm`], 
+#' [`feols`] or [`feglm`]). If the estimation was done with fixed-effects, they are added 
+#' in the formula after a pipe (\dQuote{|}). If the estimation was done with a non 
+#' linear in parameters part, then this will be added in the formula in between `I()`.
 #'
 #'
-#' @param x An object of class `fixest`. Typically the result of a [`femlm`], [`feols`] or [`feglm`] estimation.
-#' @param type A character scalar. Default is `type = "full"` which gives back a formula containing the linear part of the model along with the fixed-effects (if any) and the IV part (if any). If `type = "linear"` then only the linear formula is returned. If `type = "NL"` then only the non linear in parameters part is returned.
+#' @param x An object of class `fixest`. Typically the result of a [`femlm`], [`feols`] 
+#' or [`feglm`] estimation.
+#' @param type A character scalar. Default is `type = "full"` which gives back a formula 
+#' containing the linear part of the model along with the fixed-effects (if any) and the 
+#' IV part (if any). If `type = "linear"` then only the linear formula is returned. 
+#' If `type = "NL"` then only the non linear in parameters part is returned.
 #' @param ... Not currently used.
 #'
 #' @return
 #' It returns a formula.
 #'
 #' @seealso
-#' See also the main estimation functions [`femlm`], [`feols`] or [`feglm`]. [`model.matrix.fixest`], [`update.fixest`], [`summary.fixest`], [`vcov.fixest`].
+#' See also the main estimation functions [`femlm`], [`feols`] or [`feglm`]. 
+#' [`model.matrix.fixest`], [`update.fixest`], [`summary.fixest`], [`vcov.fixest`].
 #'
 #' @author
 #' Laurent Berge
@@ -3173,23 +3360,36 @@ formula.fixest = function(x, type = c("full", "linear", "iv", "NL"), ...){
 
 #' Design matrix of a `fixest` object
 #'
-#' This function creates the left-hand-side or the right-hand-side(s) of a [`femlm`], [`feols`] or [`feglm`] estimation.
+#' This function creates the left-hand-side or the right-hand-side(s) of a [`femlm`], 
+#' [`feols`] or [`feglm`] estimation.
 #'
 #' @method model.matrix fixest
 #'
 #' @inheritParams nobs.fixest
 #'
-#' @param data If missing (default) then the original data is obtained by evaluating the `call`. Otherwise, it should be a `data.frame`.
-#' @param type Character vector or one sided formula, default is "rhs". Contains the type of matrix/data.frame to be returned. Possible values are: "lhs", "rhs", "fixef", "iv.rhs1" (1st stage RHS), "iv.rhs2" (2nd stage RHS), "iv.endo" (endogenous vars.), "iv.exo" (exogenous vars), "iv.inst" (instruments).
+#' @param data If missing (default) then the original data is obtained by evaluating 
+#' the `call`. Otherwise, it should be a `data.frame`.
+#' @param type Character vector or one sided formula, default is "rhs". Contains the type of 
+#' matrix/data.frame to be returned. Possible values are: "lhs", "rhs", "fixef", "iv.rhs1" 
+#' (1st stage RHS), "iv.rhs2" (2nd stage RHS), "iv.endo" (endogenous vars.), "iv.exo" 
+#' (exogenous vars), "iv.inst" (instruments).
 #' @param na.rm Default is `TRUE`. Should observations with NAs be removed from the matrix?
-#' @param subset Logical or character vector. Default is `FALSE`. If `TRUE`, then the matrix created will be restricted only to the variables contained in the argument `data`, which can then contain a subset of the variables used in the estimation. If a character vector, then only the variables matching the elements of the vector via regular expressions will be created.
+#' @param subset Logical or character vector. Default is `FALSE`. If `TRUE`, then the 
+#' matrix created will be restricted only to the variables contained in the argument `data`, 
+#' which can then contain a subset of the variables used in the estimation. If a 
+#' character vector, then only the variables matching the elements of the vector via 
+#' regular expressions will be created.
 #' @param as.matrix Logical scalar, default is `FALSE`. Whether to coerce the result to a matrix.
 #' @param as.df Logical scalar, default is `FALSE`. Whether to coerce the result to a data.frame.
-#' @param collin.rm Logical scalar, default is `TRUE`. Whether to remove variables that were found to be collinear during the estimation. Beware: it does not perform a collinearity check.
+#' @param collin.rm Logical scalar, default is `TRUE`. Whether to remove variables that were 
+#' found to be collinear during the estimation. Beware: it does not perform a 
+#' collinearity check.
 #' @param ... Not currently used.
 #'
 #' @return
-#' It returns either a vector, a matrix or a data.frame. It returns a vector for the dependent variable ("lhs"), a data.frame for the fixed-effects ("fixef") and a matrix for any other type.
+#' It returns either a vector, a matrix or a data.frame. It returns a vector for the 
+#' dependent variable ("lhs"), a data.frame for the fixed-effects ("fixef") and a matrix 
+#' for any other type.
 #'
 #' @seealso
 #' See also the main estimation functions [`femlm`], [`feols`] or [`feglm`]. [`formula.fixest`], [`update.fixest`], [`summary.fixest`], [`vcov.fixest`].
@@ -3217,7 +3417,7 @@ formula.fixest = function(x, type = c("full", "linear", "iv", "NL"), ...){
 #'
 #'
 model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset = FALSE,
-                 as.matrix = FALSE, as.df = FALSE, collin.rm = TRUE, ...){
+                               as.matrix = FALSE, as.df = FALSE, collin.rm = TRUE, ...){
   # We evaluate the formula with the past call
   # type: lhs, rhs, fixef, iv.endo, iv.inst, iv.rhs1, iv.rhs2
   # if fixef => return a DF
@@ -3240,14 +3440,15 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
   }
 
 
-  type = check_set_types(type, c("lhs", "rhs", "fixef", "iv.endo", "iv.inst", "iv.exo", "iv.rhs1", "iv.rhs2"))
+  type = check_set_types(type, c("lhs", "rhs", "fixef", "iv.endo", "iv.inst", "iv.exo", 
+                                 "iv.rhs1", "iv.rhs2"))
 
   if(isTRUE(object$is_fit)){
     stop("model.matrix method not available for fixest estimations obtained from fit methods.")
   }
 
   if(any(grepl("^iv", type)) && !isTRUE(object$iv)){
-    stop("The type", enumerate_items(grep("^iv", type, value = TRUE), "s.is"), " only valid for IV estimations.")
+    stopi("The type{$s, enum.Q, is ! {'^iv'get ? type}} only valid for IV estimations.")
   }
 
   check_arg(subset, "logical scalar | character vector no na")
@@ -3291,7 +3492,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 
     namesLHS = all.vars(fml_linear[[2]])
     if(length(pblm <- setdiff(namesLHS, names(data)))){
-      stop("In 'model.matrix', to create the LHS, the variable", enumerate_items(pblm, "s.is.quote"), " not in the data set.")
+      stop("In 'model.matrix', to create the LHS, the variable{$s, enum.bq, is ? pblm} not in the data set.")
     }
 
     lhs_text = deparse_long(fml_linear[[2]])
@@ -3307,7 +3508,10 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
     fml = fml_linear
     if(isTRUE(object$iv)){
       fml_iv = object$fml_all$iv
-      fml = .xpd(..lhs ~ ..endo + ..rhs, ..lhs = fml[[2]], ..endo = fml_iv[[2]], ..rhs = fml[[3]])
+      fml = .xpd(..lhs ~ ..endo + ..rhs, 
+                 ..lhs = fml[[2]], 
+                 ..endo = fml_iv[[2]], 
+                 ..rhs = fml[[3]])
     }
 
     linear.mat = error_sender(fixest_model_matrix_extra(
@@ -3365,7 +3569,10 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
   if("iv.endo" %in% type){
     fml = object$iv_endo_fml
 
-    endo.mat = error_sender(fixest_model_matrix_extra(object = object, newdata = data, original_data = original_data, fml = fml, fake_intercept = TRUE), "In 'model.matrix', the endogenous variables could not be evaluated: ")
+    endo.mat = error_sender(fixest_model_matrix_extra(object = object, newdata = data, 
+                                                      original_data = original_data, fml = fml,
+                                                      fake_intercept = TRUE), 
+                            "In 'model.matrix', the endogenous variables could not be evaluated: ")
 
     if(collin.rm){
       qui = which(colnames(endo.mat) %in% object$collin.var)
@@ -3382,7 +3589,10 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
   if("iv.inst" %in% type){
     fml = object$fml_all$iv
 
-    inst.mat = error_sender(fixest_model_matrix_extra(object = object, newdata = data, original_data = original_data, fml = fml, fake_intercept = TRUE), "In 'model.matrix', the instruments could not be evaluated: ")
+    inst.mat = error_sender(fixest_model_matrix_extra(object = object, newdata = data, 
+                                                      original_data = original_data, fml = fml, 
+                                                      fake_intercept = TRUE), 
+                            "In 'model.matrix', the instruments could not be evaluated: ")
 
     if(collin.rm){
       qui = which(colnames(inst.mat) %in% object$collin.var)
@@ -3401,7 +3611,9 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
     fake_intercept = !is.null(object$fixef_vars) && !(!is.null(object$slope_flag) && all(object$slope_flag < 0))
     fml = object$fml_all$linear
 
-    exo.mat = error_sender(fixest_model_matrix_extra(object = object, newdata = data, original_data = original_data, fml = fml, fake_intercept = fake_intercept), "In 'model.matrix', the instruments could not be evaluated: ")
+    exo.mat = error_sender(fixest_model_matrix_extra(object = object, newdata = data, 
+                                                     original_data = original_data, fml = fml, fake_intercept = fake_intercept), 
+                           "In 'model.matrix', the instruments could not be evaluated: ")
 
     if(is.atomic(exo.mat) && length(exo.mat) == 1){
       # This is the intercept only
@@ -3436,13 +3648,20 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
     fml = object$fml
     if(object$iv_stage == 2){
       fml_iv = object$fml_all$iv
-      fml = .xpd(..lhs ~ ..inst + ..rhs, ..lhs = fml[[2]], ..inst = fml_iv[[3]], ..rhs = fml[[3]])
+      fml = .xpd(..lhs ~ ..inst + ..rhs, 
+                 ..lhs = fml[[2]], 
+                 ..inst = fml_iv[[3]], 
+                 ..rhs = fml[[3]])
     }
 
     fake_intercept = !is.null(object$fixef_vars) && !(!is.null(object$slope_flag) && all(object$slope_flag < 0))
     # iv_rhs1 = error_sender(fixest_model_matrix(fml, data, fake_intercept = fake_intercept),
     #                        "In 'model.matrix', the RHS of the 1st stage could not be evaluated: ")
-    iv_rhs1 = error_sender(fixest_model_matrix_extra(object = object, newdata = data, original_data = original_data, fml = fml, fake_intercept = fake_intercept, subset = subset), "In 'model.matrix', the RHS of the 1st stage could not be evaluated: ")
+    iv_rhs1 = error_sender(fixest_model_matrix_extra(object = object, newdata = data, 
+                                                     original_data = original_data, fml = fml, 
+                                                     fake_intercept = fake_intercept, 
+                                                     subset = subset), 
+                           "In 'model.matrix', the RHS of the 1st stage could not be evaluated: ")
 
     if(collin.rm){
       qui = which(colnames(iv_rhs1) %in% object$collin.var)
@@ -3479,12 +3698,19 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
     # II) we create the variables
 
     fml = object$fml
-    fml = .xpd(..lhs ~ ..fit + ..rhs, ..lhs = fml[[2]], ..fit = fit_vars, ..rhs = fml[[3]])
+    fml = .xpd(..lhs ~ ..fit + ..rhs, 
+               ..lhs = fml[[2]], 
+               ..fit = fit_vars, 
+               ..rhs = fml[[3]])
 
     fake_intercept = !is.null(object$fixef_vars) && !(!is.null(object$slope_flag) && all(object$slope_flag < 0))
     # iv_rhs2 = error_sender(fixest_model_matrix(fml, data, fake_intercept = fake_intercept),
     #                        "In 'model.matrix', the RHS of the 2nd stage could not be evaluated: ")
-    iv_rhs2 = error_sender(fixest_model_matrix_extra(object = object, newdata = data, original_data = original_data, fml = fml, fake_intercept = fake_intercept, subset = subset), "In 'model.matrix', the RHS of the 2nd stage could not be evaluated: ")
+    iv_rhs2 = error_sender(fixest_model_matrix_extra(object = object, newdata = data, 
+                                                     original_data = original_data, fml = fml, 
+                                                     fake_intercept = fake_intercept, 
+                                                     subset = subset), 
+                           "In 'model.matrix', the RHS of the 2nd stage could not be evaluated: ")
 
     if(collin.rm){
       qui = which(colnames(iv_rhs2) %in% object$collin.var)
@@ -3598,7 +3824,8 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 #' @param ... Not currently used.
 #'
 #' @return
-#' An object of class `c("terms", "formula")` which contains the terms representation of a symbolic model.
+#' An object of class `c("terms", "formula")` which contains the terms representation of a 
+#' symbolic model.
 #'
 #'
 #' @examples
@@ -3624,7 +3851,8 @@ terms.fixest = function(x, ...){
 #' @param ... Not currently used.
 #'
 #' @return
-#' Returns a vector of the same length as the number of observations in the original data set. Ignored observations due to NA or perfect fit are re-introduced and their weights set to NA.
+#' Returns a vector of the same length as the number of observations in the original data set. 
+#' Ignored observations due to NA or perfect fit are re-introduced and their weights set to NA.
 #'
 #' @seealso
 #' [`feols`], [`fepois`][fixest::feglm], [`feglm`], [`fenegbin`][fixest::femlm], [`feNmlm`].
@@ -3743,15 +3971,20 @@ deviance.fixest = function(object, ...){
 
 #' Hat values for `fixest` objects
 #'
-#' Computes the hat values for [`feols`] or [`feglm`] estimations. Only works when there are no fixed-effects.
+#' Computes the hat values for [`feols`] or [`feglm`] estimations. Only works when 
+#' there are no fixed-effects.
 #'
 #' @param model A fixest object. For instance from feols or feglm.
 #' @param ... Not currently used.
 #'
 #' @details
-#' Hat values are not available for [`fenegbin`][fixest::femlm], [`femlm`] and [`feNmlm`] estimations.
+#' Hat values are not available for [`fenegbin`][fixest::femlm], [`femlm`] 
+#' and [`feNmlm`] estimations.
 #'
-#' When there are fixed-effects, the hat values of the reduced form are different from the hat values of the full model. And we cannot get costlessly the hat values of the full model from the reduced form. It would require to reestimate the model with the fixed-effects as regular variables.
+#' When there are fixed-effects, the hat values of the reduced form are different from the 
+#' hat values of the full model. And we cannot get costlessly the hat values of the full model 
+#' from the reduced form. It would require to reestimate the model with the 
+#' fixed-effects as regular variables.
 #'
 #' @return
 #' Returns a vector of the same length as the number of observations used in the estimation.
@@ -3817,7 +4050,8 @@ hatvalues.fixest = function(model, ...){
 #' @param ... Not currently used.
 #'
 #' @return
-#' Returns a matrix of the same number of rows as the number of observations used for the estimation, and the same number of columns as there were variables.
+#' Returns a matrix of the same number of rows as the number of observations used for 
+#' the estimation, and the same number of columns as there were variables.
 #'
 #' @examples
 #'
@@ -3839,9 +4073,12 @@ estfun.fixest = function(x, ...){
 
 #' Functions exported from \pkg{sandwich} to implement \pkg{fixest} methods
 #'
-#' The package \pkg{fixest} does not use `estfun` or `bread` from \pkg{sandwich}, but these methods have been implemented to allow users to leverage the variances from \pkg{sandwich}.
+#' The package \pkg{fixest} does not use `estfun` or `bread` from \pkg{sandwich}, but these 
+#' methods have been implemented to allow users to leverage the variances from \pkg{sandwich}.
 #'
-#' * Here is the help from package \pkg{sandwich}: [`estfun`][sandwich::estfun] and [`bread`][sandwich::bread]. The help from package \pkg{fixest} is here: [`estfun.fixest`] and [`bread.fixest`].
+#' * Here is the help from package \pkg{sandwich}: [`estfun`][sandwich::estfun] 
+#' and [`bread`][sandwich::bread]. The help from package \pkg{fixest} is 
+#' here: [`estfun.fixest`] and [`bread.fixest`].
 #'
 #'
 #' @name sandwich_reexported
