@@ -15,223 +15,223 @@
 
 
 panel_setup = function(data, panel.id, time.step = NULL, duplicate.method = "none",
-                       DATA_MISSING = FALSE, from_fixest = FALSE){
-    # Function to setup the panel.
-    # Used in lag.formula, panel, and fixest_env (with argument panel.id and panel.args)
-    # DATA_MISSING: arg used in lag.formula
+             DATA_MISSING = FALSE, from_fixest = FALSE){
+  # Function to setup the panel.
+  # Used in lag.formula, panel, and fixest_env (with argument panel.id and panel.args)
+  # DATA_MISSING: arg used in lag.formula
 
-    set_up(1)
-    check_set_arg(duplicate.method, "match(none, first)")
+  set_up(1)
+  check_set_arg(duplicate.method, "match(none, first)")
 
-    check_arg(panel.id, "character vector len(,2) no na | formula", .message = "The argument 'panel.id' must be either: i) a one sided formula (e.g. ~id+time), ii) a character vector of length 2 (e.g. c('id', 'time'), or iii) a character scalar of two variables separated by a comma (e.g. 'id,time').")
+  check_arg(panel.id, "character vector len(,2) no na | formula", .message = "The argument 'panel.id' must be either: i) a one sided formula (e.g. ~id+time), ii) a character vector of length 2 (e.g. c('id', 'time'), or iii) a character scalar of two variables separated by a comma (e.g. 'id,time').")
 
-    if("formula" %in% class(panel.id)){
-        tm = terms_hat(panel.id)
-        var_id_time = attr(tm, "term.labels")
-        if(length(var_id_time) != 2){
-            stop_up("The formula of the argument 'panel.id' must contain exactly two variables in the right hand side (currently there ", plural(var_id_time, "is"), " ", length(var_id_time), ").")
-        }
-
-        all_vars = all.vars(tm)
-    } else if(length(panel.id) == 2){
-        all_vars = var_id_time = panel.id
-
-    } else if(length(panel.id) == 1){
-        var_id_time = gsub("(^ +| +$)", "", strsplit(panel.id, ",")[[1]])
-        all_vars = var_id_time = var_id_time[nchar(var_id_time) > 0]
-        if(length(var_id_time) != 2){
-            stop_up("The argument 'panel.id' must be either: i) a one sided formula (e.g. ~id+time), ii) a character vector of length 2 (e.g. c('id', 'time'), or iii) a character scalar of two variables separated by a comma (e.g. 'id,time'). Currently it is neither of the three.")
-        }
+  if("formula" %in% class(panel.id)){
+    tm = terms_hat(panel.id)
+    var_id_time = attr(tm, "term.labels")
+    if(length(var_id_time) != 2){
+      stop_up("The formula of the argument 'panel.id' must contain exactly two variables in the right hand side (currently there ", plural(var_id_time, "is"), " ", length(var_id_time), ").")
     }
 
+    all_vars = all.vars(tm)
+  } else if(length(panel.id) == 2){
+    all_vars = var_id_time = panel.id
 
-    if(DATA_MISSING){
-        if(!all(all_vars %in% ls(parent.frame(2)))){
-            pblm = setdiff(all_vars, ls(parent.frame(2)))
-            stop_up("In the argument 'panel.id', the variable", enumerate_items(pblm, "s.is.past.quote"), " not found in the environment.")
-        }
-        id = eval(str2lang(var_id_time[1]), parent.frame(2))
-        time = eval(str2lang(var_id_time[2]), parent.frame(2))
+  } else if(length(panel.id) == 1){
+    var_id_time = gsub("(^ +| +$)", "", strsplit(panel.id, ",")[[1]])
+    all_vars = var_id_time = var_id_time[nchar(var_id_time) > 0]
+    if(length(var_id_time) != 2){
+      stop_up("The argument 'panel.id' must be either: i) a one sided formula (e.g. ~id+time), ii) a character vector of length 2 (e.g. c('id', 'time'), or iii) a character scalar of two variables separated by a comma (e.g. 'id,time'). Currently it is neither of the three.")
+    }
+  }
+
+
+  if(DATA_MISSING){
+    if(!all(all_vars %in% ls(parent.frame(2)))){
+      pblm = setdiff(all_vars, ls(parent.frame(2)))
+      stop_up("In the argument 'panel.id', the variable", enumerate_items(pblm, "s.is.past.quote"), " not found in the environment.")
+    }
+    id = eval(str2lang(var_id_time[1]), parent.frame(2))
+    time = eval(str2lang(var_id_time[2]), parent.frame(2))
+  } else {
+    if(!all(all_vars %in% names(data))){
+      pblm = setdiff(all_vars, names(data))
+      stop_up("In the argument 'panel.id', the variable", enumerate_items(pblm, "s.is.quote"), " not in the data set.")
+    }
+    id = eval(str2lang(var_id_time[1]), data)
+    time = eval(str2lang(var_id_time[2]), data)
+  }
+
+  panel.id = as.formula(paste0("~", var_id_time[1], "+", var_id_time[2]))
+
+  # copy for later (in duplicates)
+  id_origin = id
+  time_origin = time
+
+  is_na = is.na(id) | is.na(time)
+  na_flag = FALSE
+  if(any(is_na)){
+    na_flag = TRUE
+    id = id[!is_na]
+    time = time[!is_na]
+  }
+
+  # time.step
+  if(is.null(time.step)){
+
+    if(is.numeric(time)){
+      time.step = "unitary"
     } else {
-        if(!all(all_vars %in% names(data))){
-            pblm = setdiff(all_vars, names(data))
-            stop_up("In the argument 'panel.id', the variable", enumerate_items(pblm, "s.is.quote"), " not in the data set.")
-        }
-        id = eval(str2lang(var_id_time[1]), data)
-        time = eval(str2lang(var_id_time[2]), data)
-    }
+      time.step = "consecutive"
 
-    panel.id = as.formula(paste0("~", var_id_time[1], "+", var_id_time[2]))
-
-    # copy for later (in duplicates)
-    id_origin = id
-    time_origin = time
-
-    is_na = is.na(id) | is.na(time)
-    na_flag = FALSE
-    if(any(is_na)){
-        na_flag = TRUE
-        id = id[!is_na]
-        time = time[!is_na]
-    }
-
-    # time.step
-    if(is.null(time.step)){
-
-        if(is.numeric(time)){
-            time.step = "unitary"
+      if(any(grepl("(?i)date", class(time)))){
+        time_new = tryCatch(as.numeric(time), warning = function(x) x)
+        if(!is.numeric(time_new)){
+          warning("When setting the panel: the time variable is a 'date' but could not be converted to numeric. Its character counterpart is used => please check it makes sense.")
+          time = as.character(time)
         } else {
-            time.step = "consecutive"
-
-            if(any(grepl("(?i)date", class(time)))){
-                time_new = tryCatch(as.numeric(time), warning = function(x) x)
-                if(!is.numeric(time_new)){
-                    warning("When setting the panel: the time variable is a 'date' but could not be converted to numeric. Its character counterpart is used => please check it makes sense.")
-                    time = as.character(time)
-                } else {
-                    time = time_new
-                }
-            }
-
+          time = time_new
         }
+      }
 
-    } else {
-        check_set_arg(time.step, "numeric scalar GT{0} | match(unitary, consecutive, within.consecutive)")
     }
 
+  } else {
+    check_set_arg(time.step, "numeric scalar GT{0} | match(unitary, consecutive, within.consecutive)")
+  }
 
-    # unitary time.step: conversion to numeric before quf
-    if(time.step == "unitary") {
-        time_conversion = FALSE
-        if(!is.numeric(time)){
-            time_conversion = TRUE
 
-            time_new = tryCatch(as.numeric(time), warning = function(x) x)
+  # unitary time.step: conversion to numeric before quf
+  if(time.step == "unitary") {
+    time_conversion = FALSE
+    if(!is.numeric(time)){
+      time_conversion = TRUE
 
-            if(!is.numeric(time_new)){
-                if(from_fixest){
-                    stop_up("The time variable must be numeric or at least convertible to numeric. So far the conversion has failed (time variable's class is currently ", enumerate_items(class(time)), "). Alternatively, you can have more options to set up the panel using the function panel().")
-                } else {
-                    stop_up("To use the 'unitary' time.step, the time variable must be numeric or at least convertible to numeric. So far the conversion has failed (time variable's class is currently ", enumerate_items(class(time)), ").")
-                }
-            }
+      time_new = tryCatch(as.numeric(time), warning = function(x) x)
 
-            time = time_new
-        }
-
-        if(any(time %% 1 != 0)){
-            if(from_fixest){
-                stop_up("The time variable", ifelse(time_conversion, " (which has been converted to numeric)", ""), " must be made of integers. So far this is not the case. Alternatively, you can have more options to set up the panel using the function panel().")
-            } else {
-                stop_up("To use the 'unitary' time.step, the time variable", ifelse(time_conversion, " (which has been converted to numeric)", ""), " must be made of integers. So far this is not the case. Alternatively, you can give a number in time.step.")
-            }
-        }
-
-    } else if(!is.character(time.step)){
-        if(!is.numeric(time)){
-            stop_up("If 'time.step' is a number, then the time variable must also be numeric (this is not the case: its class is currently ", enumerate_items(class(time)), ").")
-        }
-    }
-
-    # Computation quf
-    id = quickUnclassFactor(id)
-    time_full = quickUnclassFactor(time, addItem = TRUE, sorted = TRUE)
-
-    #
-    # WIP: define this unitary time step!!!! not straightforward at all!
-    # what to do with the ones that don't fit the unit???
-    # example: time = c(1, 3, 6, 11) => smallest unit is 2, but it does not divide the others
-
-    # NOTA: "time" is not used as a CPP index: so we don't care that it goes from 1 to K
-    #       or from 0 to K-1. We only care that the numbers are consecutive
-
-    # Releveling the time ID depending on the time.step
-    if(time.step %in% c("consecutive", "within.consecutive")){
-        # for within.consecutive, we deal with it after sorting
-        time = time_full$x
-
-    } else if(time.step == "unitary"){
-        time_unik = time_full$items
-
-        if(length(time_unik) == 1){
-            my_step = 1
-            time = rep(0, length(time_full$x))
-
+      if(!is.numeric(time_new)){
+        if(from_fixest){
+          stop_up("The time variable must be numeric or at least convertible to numeric. So far the conversion has failed (time variable's class is currently ", enumerate_items(class(time)), "). Alternatively, you can have more options to set up the panel using the function panel().")
         } else {
-            all_steps = unique(diff(time_unik))
-            my_step = cpp_pgcd(all_steps)
-
-            # we rescale time_unik
-            time_unik_new = (time_unik - min(time_unik)) / my_step
-            time = time_unik_new[time_full$x]
-
-            if(my_step != 1){
-                message("NOTE: unitary time step taken: ", my_step, ".")
-            }
+          stop_up("To use the 'unitary' time.step, the time variable must be numeric or at least convertible to numeric. So far the conversion has failed (time variable's class is currently ", enumerate_items(class(time)), ").")
         }
+      }
+
+      time = time_new
+    }
+
+    if(any(time %% 1 != 0)){
+      if(from_fixest){
+        stop_up("The time variable", ifelse(time_conversion, " (which has been converted to numeric)", ""), " must be made of integers. So far this is not the case. Alternatively, you can have more options to set up the panel using the function panel().")
+      } else {
+        stop_up("To use the 'unitary' time.step, the time variable", ifelse(time_conversion, " (which has been converted to numeric)", ""), " must be made of integers. So far this is not the case. Alternatively, you can give a number in time.step.")
+      }
+    }
+
+  } else if(!is.character(time.step)){
+    if(!is.numeric(time)){
+      stop_up("If 'time.step' is a number, then the time variable must also be numeric (this is not the case: its class is currently ", enumerate_items(class(time)), ").")
+    }
+  }
+
+  # Computation quf
+  id = quickUnclassFactor(id)
+  time_full = quickUnclassFactor(time, addItem = TRUE, sorted = TRUE)
+
+  #
+  # WIP: define this unitary time step!!!! not straightforward at all!
+  # what to do with the ones that don't fit the unit???
+  # example: time = c(1, 3, 6, 11) => smallest unit is 2, but it does not divide the others
+
+  # NOTA: "time" is not used as a CPP index: so we don't care that it goes from 1 to K
+  #       or from 0 to K-1. We only care that the numbers are consecutive
+
+  # Releveling the time ID depending on the time.step
+  if(time.step %in% c("consecutive", "within.consecutive")){
+    # for within.consecutive, we deal with it after sorting
+    time = time_full$x
+
+  } else if(time.step == "unitary"){
+    time_unik = time_full$items
+
+    if(length(time_unik) == 1){
+      my_step = 1
+      time = rep(0, length(time_full$x))
 
     } else {
-        time_unik = time_full$items
+      all_steps = unique(diff(time_unik))
+      my_step = cpp_pgcd(all_steps)
 
-        # consistency check
-        all_steps = diff(time_unik)
-        if(any(all_steps %% time.step != 0)){
-            obs_pblm = which(all_steps %% time.step != 0)
+      # we rescale time_unik
+      time_unik_new = (time_unik - min(time_unik)) / my_step
+      time = time_unik_new[time_full$x]
 
-            stop_up("If 'time.step' is a number, then it must be an exact divisor of all the difference between two consecutive time periods. This is currently not the case: ", time.step, " is not a divisor of ", all_steps[obs_pblm][1], " (the difference btw the time periods ", time_unik[obs_pblm[1] + 1], " and ", time_unik[obs_pblm[1]], ").")
-        }
-
-        # we rescale time_unik // checks done beforehand
-        time_unik_new = (time_unik - min(time_unik)) / time.step
-        time = time_unik_new[time_full$x]
+      if(my_step != 1){
+        message("NOTE: unitary time step taken: ", my_step, ".")
+      }
     }
 
-    # Here time is always integer: we convert it if necessary (hasten 'order' calls)
-    time = as.integer(time)
+  } else {
+    time_unik = time_full$items
 
-    order_it = order(id, time)
-    order_inv = order(order_it)
+    # consistency check
+    all_steps = diff(time_unik)
+    if(any(all_steps %% time.step != 0)){
+      obs_pblm = which(all_steps %% time.step != 0)
 
-    id_sorted = id[order_it]
-    time_sorted = time[order_it]
-
-    if(time.step == "within.consecutive"){
-        time_sorted = 1:length(time_sorted)
+      stop_up("If 'time.step' is a number, then it must be an exact divisor of all the difference between two consecutive time periods. This is currently not the case: ", time.step, " is not a divisor of ", all_steps[obs_pblm][1], " (the difference btw the time periods ", time_unik[obs_pblm[1] + 1], " and ", time_unik[obs_pblm[1]], ").")
     }
 
-    # We check for duplicate rows => lag not defined for them
-    if(duplicate.method == "none"){
-        dup_info = cpp_find_duplicates(id_sorted, time_sorted)
-        if(dup_info$n_dup > 0){
+    # we rescale time_unik // checks done beforehand
+    time_unik_new = (time_unik - min(time_unik)) / time.step
+    time = time_unik_new[time_full$x]
+  }
 
-            if(na_flag){
-                obs_ok = which(!is_na)
-            } else {
-                obs_ok = 1:length(id)
-            }
+  # Here time is always integer: we convert it if necessary (hasten 'order' calls)
+  time = as.integer(time)
 
-            obs_pblm = obs_ok[order_inv[dup_info$obs]]
-            id_dup = id_origin[obs_pblm]
-            time_dup = time_origin[obs_pblm]
+  order_it = order(id, time)
+  order_inv = order(order_it)
 
-            stop_up("The panel identifiers contain duplicate values: this is not allowed since lag/leads are not defined for them. For example (id, time) = (", id_dup, ", ", time_dup, ") appears ", n_times(dup_info$n_dup), ". Please provide data without duplicates -- or you can also use duplicate.method = 'first' (see Details).")
-        }
+  id_sorted = id[order_it]
+  time_sorted = time[order_it]
+
+  if(time.step == "within.consecutive"){
+    time_sorted = 1:length(time_sorted)
+  }
+
+  # We check for duplicate rows => lag not defined for them
+  if(duplicate.method == "none"){
+    dup_info = cpp_find_duplicates(id_sorted, time_sorted)
+    if(dup_info$n_dup > 0){
+
+      if(na_flag){
+        obs_ok = which(!is_na)
+      } else {
+        obs_ok = 1:length(id)
+      }
+
+      obs_pblm = obs_ok[order_inv[dup_info$obs]]
+      id_dup = id_origin[obs_pblm]
+      time_dup = time_origin[obs_pblm]
+
+      stop_up("The panel identifiers contain duplicate values: this is not allowed since lag/leads are not defined for them. For example (id, time) = (", id_dup, ", ", time_dup, ") appears ", n_times(dup_info$n_dup), ". Please provide data without duplicates -- or you can also use duplicate.method = 'first' (see Details).")
     }
+  }
 
-    res = list(order_it = order_it, order_inv = order_inv, id_sorted = id_sorted, time_sorted = time_sorted, na_flag = na_flag, panel.id = panel.id)
-    if(na_flag) res$is_na = is_na
-    res
+  res = list(order_it = order_it, order_inv = order_inv, id_sorted = id_sorted, time_sorted = time_sorted, na_flag = na_flag, panel.id = panel.id)
+  if(na_flag) res$is_na = is_na
+  res
 }
 
 
 #' @describeIn l Forwards a variable (inverse of lagging) in a `fixest` estimation
 f = function(x, lead = 1, fill = NA){
-    l(x, -lead, fill)
+  l(x, -lead, fill)
 }
 
 #' @describeIn l Creates differences (i.e. x - lag(x)) in a `fixest` estimation
 d = function(x, lag = 1, fill = NA){
-    x - l(x, lag, fill)
+  x - l(x, lag, fill)
 }
 
 
@@ -281,208 +281,208 @@ d = function(x, lag = 1, fill = NA){
 #'
 l = function(x, lag = 1, fill = NA){
 
-    value = x
+  value = x
 
-    sys_calls = rev(sys.calls())
+  sys_calls = rev(sys.calls())
 
-    # To improve => you don't wanna check all frames, only the relevant ones
-    from_fixest = FALSE
-    for(where in 1:min(22, sys.nframe())){
-        if(exists("panel__meta__info", parent.frame(where))){
-            from_fixest = TRUE
-            meta_info = get("panel__meta__info", parent.frame(where))
-            break
+  # To improve => you don't wanna check all frames, only the relevant ones
+  from_fixest = FALSE
+  for(where in 1:min(22, sys.nframe())){
+    if(exists("panel__meta__info", parent.frame(where))){
+      from_fixest = TRUE
+      meta_info = get("panel__meta__info", parent.frame(where))
+      break
+    }
+  }
+
+  if(from_fixest == FALSE){
+    # Using l/f within data.table
+
+    fl_authorized = getOption("fixest_fl_authorized")
+
+    if(fl_authorized){
+      # Further control
+      check_arg(lag, "integer scalar", .message = "When creating lags (or leads) within a data.table with l() (or f()), the argument 'lag' must be a single integer.")
+
+      check_arg(fill, "NA | scalar")
+
+      if(!is.na(fill)){
+
+        if(is.numeric(value) && !is.numeric(fill)){
+          mc = match.call()
+          stop("Argument 'fill' must be of the same type as ", deparse_long(mc$x), ", which is numeric.")
         }
-    }
 
-    if(from_fixest == FALSE){
-        # Using l/f within data.table
-
-        fl_authorized = getOption("fixest_fl_authorized")
-
-        if(fl_authorized){
-            # Further control
-            check_arg(lag, "integer scalar", .message = "When creating lags (or leads) within a data.table with l() (or f()), the argument 'lag' must be a single integer.")
-
-            check_arg(fill, "NA | scalar")
-
-            if(!is.na(fill)){
-
-                if(is.numeric(value) && !is.numeric(fill)){
-                    mc = match.call()
-                    stop("Argument 'fill' must be of the same type as ", deparse_long(mc$x), ", which is numeric.")
-                }
-
-                if(!is.numeric(value) && is.numeric(fill)){
-                    mc = match.call()
-                    stop("Argument 'fill' must be of the same type as ", deparse_long(mc$x), ", which is not numeric while 'fill' is.")
-                }
-                # I could go further in checking but it's enough
-            }
-
-            # we fetch the panel information
-            i = 2
-            sysEval = sys.parent(i)
-            while(sysEval != 0 && !grepl("[.data.table", deparse(sys.call(sysEval)[[1]])[1], fixed = TRUE)){
-                i = i + 1
-                sysEval = sys.parent(i)
-            }
-
-            if(sysEval == 0){
-                options(fixest_fl_authorized = FALSE)
-                stop("Unknown error when trying to create a lag (or lead) with function l() (or f()) within data.table. This is a 'fixest' error, may be worth reporting if needed.")
-            }
-
-            # Bug #76
-            # I don't understand why but the frame numbers got messed up when
-            # variables are created within a function
-
-            var = sys.call(sysEval)$x
-
-            m = NULL
-            up = 0
-            while(is.null(m) && sys.parent(i + up) != 0){
-                try(m <- eval(var, parent.frame(i + up)), silent = TRUE)
-                up = up + 1
-            }
-
-            if(sys.parent(i + up - 1) == 0){
-                stop("We tried to lag a variable but the data set could not be fetched. This is an internal error to 'fixest'. It could be interesting to report this bug.")
-            }
-
-            if(!"fixest_panel" %in% class(m)){
-                stop("You can use l() or f() only when the data set is of class 'fixest_panel', you can use function panel() to set it.")
-            }
-
-            meta_info = attr(m, "panel_info")
-        } else {
-            stop("Function l() (or f()) is only callable within 'fixest' estimations or within a variable creation with data.table (i.e. using ':=') where the data set is a 'fixest_panel' (obtained from panel()). Alternatively, you can use lag.formula().")
+        if(!is.numeric(value) && is.numeric(fill)){
+          mc = match.call()
+          stop("Argument 'fill' must be of the same type as ", deparse_long(mc$x), ", which is not numeric while 'fill' is.")
         }
-    }
+        # I could go further in checking but it's enough
+      }
 
-    # we get the observation id!
+      # we fetch the panel information
+      i = 2
+      sysEval = sys.parent(i)
+      while(sysEval != 0 && !grepl("[.data.table", deparse(sys.call(sysEval)[[1]])[1], fixed = TRUE)){
+        i = i + 1
+        sysEval = sys.parent(i)
+      }
 
-    if(length(meta_info$id_sorted) != length(meta_info$time_sorted)){
-        stop("Internal error: lengths of the individuals and the time vectors are different.")
-    }
+      if(sysEval == 0){
+        options(fixest_fl_authorized = FALSE)
+        stop("Unknown error when trying to create a lag (or lead) with function l() (or f()) within data.table. This is a 'fixest' error, may be worth reporting if needed.")
+      }
 
-    obs_lagged = cpp_lag_obs(id = meta_info$id_sorted, time = meta_info$time_sorted, nlag = lag)
+      # Bug #76
+      # I don't understand why but the frame numbers got messed up when
+      # variables are created within a function
 
-    # the lagged value => beware of NAs in IDs!
-    if(meta_info$na_flag){
-        value_sorted = (value[!meta_info$is_na])[meta_info$order_it]
+      var = sys.call(sysEval)$x
+
+      m = NULL
+      up = 0
+      while(is.null(m) && sys.parent(i + up) != 0){
+        try(m <- eval(var, parent.frame(i + up)), silent = TRUE)
+        up = up + 1
+      }
+
+      if(sys.parent(i + up - 1) == 0){
+        stop("We tried to lag a variable but the data set could not be fetched. This is an internal error to 'fixest'. It could be interesting to report this bug.")
+      }
+
+      if(!"fixest_panel" %in% class(m)){
+        stop("You can use l() or f() only when the data set is of class 'fixest_panel', you can use function panel() to set it.")
+      }
+
+      meta_info = attr(m, "panel_info")
     } else {
-        value_sorted = value[meta_info$order_it]
+      stop("Function l() (or f()) is only callable within 'fixest' estimations or within a variable creation with data.table (i.e. using ':=') where the data set is a 'fixest_panel' (obtained from panel()). Alternatively, you can use lag.formula().")
     }
+  }
 
-    value_lagged = value_sorted[obs_lagged]
+  # we get the observation id!
 
-    if(!is.na(fill)){
-        qui_na = is.na(obs_lagged)
-        value_lagged[qui_na] = fill
-    }
+  if(length(meta_info$id_sorted) != length(meta_info$time_sorted)){
+    stop("Internal error: lengths of the individuals and the time vectors are different.")
+  }
 
-    if(meta_info$na_flag == FALSE){
-        res = value_lagged[meta_info$order_inv]
-    } else{
-        res = rep(NA, length(value))
-        res[!meta_info$is_na] = value_lagged[meta_info$order_inv]
-    }
+  obs_lagged = cpp_lag_obs(id = meta_info$id_sorted, time = meta_info$time_sorted, nlag = lag)
 
-    res
+  # the lagged value => beware of NAs in IDs!
+  if(meta_info$na_flag){
+    value_sorted = (value[!meta_info$is_na])[meta_info$order_it]
+  } else {
+    value_sorted = value[meta_info$order_it]
+  }
+
+  value_lagged = value_sorted[obs_lagged]
+
+  if(!is.na(fill)){
+    qui_na = is.na(obs_lagged)
+    value_lagged[qui_na] = fill
+  }
+
+  if(meta_info$na_flag == FALSE){
+    res = value_lagged[meta_info$order_inv]
+  } else{
+    res = rep(NA, length(value))
+    res[!meta_info$is_na] = value_lagged[meta_info$order_inv]
+  }
+
+  res
 }
 
 
 l__expand = function(x, k = 1, fill){
 
-    mc = match.call()
+  mc = match.call()
 
-    if(missing(x)) stop("Argument 'x' cannot be missing.")
-    check_arg(k, "integer vector no na")
-    check_arg(fill, "NA | numeric scalar")
+  if(missing(x)) stop("Argument 'x' cannot be missing.")
+  check_arg(k, "integer vector no na")
+  check_arg(fill, "NA | numeric scalar")
 
-    mc_new = mc
+  mc_new = mc
 
-    res = c()
-    for(i in 1:length(k)){
+  res = c()
+  for(i in 1:length(k)){
 
-        if(k[i] == 0){
-            res[i] = deparse_long(mc_new$x)
-        } else {
-            if(k[i] < 0){
-                mc_new[[1]] = as.name("f")
-                mc_new$k = as.numeric(-k[i])
-            } else {
-                mc_new[[1]] = as.name("l")
-                mc_new$k = as.numeric(k[i])
-            }
+    if(k[i] == 0){
+      res[i] = deparse_long(mc_new$x)
+    } else {
+      if(k[i] < 0){
+        mc_new[[1]] = as.name("f")
+        mc_new$k = as.numeric(-k[i])
+      } else {
+        mc_new[[1]] = as.name("l")
+        mc_new$k = as.numeric(k[i])
+      }
 
-            res[i] = gsub("x = |k = ", "", deparse_long(mc_new))
-        }
+      res[i] = gsub("x = |k = ", "", deparse_long(mc_new))
     }
+  }
 
-    res
+  res
 }
 
 # same as l_expand, but opposite sign
 f__expand = function(x, k = 1, fill){
 
-    mc = match.call()
+  mc = match.call()
 
-    if(missing(x)) stop("Argument 'x' cannot be missing.")
-    check_arg(k, "integer vector no na")
-    check_arg(fill, "NA | numeric scalar")
+  if(missing(x)) stop("Argument 'x' cannot be missing.")
+  check_arg(k, "integer vector no na")
+  check_arg(fill, "NA | numeric scalar")
 
-    mc_new = mc
+  mc_new = mc
 
-    res = c()
-    for(i in 1:length(k)){
+  res = c()
+  for(i in 1:length(k)){
 
-        if(k[i] == 0){
-            res[i] = deparse_long(mc_new$x)
-        } else {
-            if(k[i] < 0){
-                mc_new[[1]] = as.name("l")
-                mc_new$k = as.numeric(-k[i])
-            } else {
-                mc_new[[1]] = as.name("f")
-                mc_new$k = as.numeric(k[i])
-            }
+    if(k[i] == 0){
+      res[i] = deparse_long(mc_new$x)
+    } else {
+      if(k[i] < 0){
+        mc_new[[1]] = as.name("l")
+        mc_new$k = as.numeric(-k[i])
+      } else {
+        mc_new[[1]] = as.name("f")
+        mc_new$k = as.numeric(k[i])
+      }
 
-            res[i] = gsub("x = |k = ", "", deparse_long(mc_new))
-        }
+      res[i] = gsub("x = |k = ", "", deparse_long(mc_new))
     }
+  }
 
 
-    res
+  res
 }
 
 # The diff operator
 d__expand = function(x, k = 1, fill){
 
-    mc = match.call()
+  mc = match.call()
 
-    if(missing(x)) stop("Argument 'x' cannot be missing.")
-    check_arg(k, "integer vector no na")
-    check_arg(fill, "NA | numeric scalar")
+  if(missing(x)) stop("Argument 'x' cannot be missing.")
+  check_arg(k, "integer vector no na")
+  check_arg(fill, "NA | numeric scalar")
 
-    mc_new = mc
+  mc_new = mc
 
-    res = c()
-    for(i in 1:length(k)){
+  res = c()
+  for(i in 1:length(k)){
 
-        if(k[i] == 0){
-            res[i] = deparse_long(mc_new$x)
-        } else {
-            mc_new[[1]] = as.name("d")
-            mc_new$k = as.numeric(k[i])
+    if(k[i] == 0){
+      res[i] = deparse_long(mc_new$x)
+    } else {
+      mc_new[[1]] = as.name("d")
+      mc_new$k = as.numeric(k[i])
 
-            res[i] = gsub("x = |k = ", "", deparse_long(mc_new))
-        }
+      res[i] = gsub("x = |k = ", "", deparse_long(mc_new))
     }
+  }
 
 
-    res
+  res
 }
 
 
@@ -569,97 +569,97 @@ d__expand = function(x, k = 1, fill){
 #'
 #'
 lag.formula = function(x, k = 1, data, time.step = NULL, fill = NA,
-                       duplicate.method = c("none", "first"), ...){
-    # Arguments:
-    # time.step: default: "consecutive", other option: "unitary" (where you find the most common step and use it -- if the data is numeric), other option: a number, of course the time must be numeric
+             duplicate.method = c("none", "first"), ...){
+  # Arguments:
+  # time.step: default: "consecutive", other option: "unitary" (where you find the most common step and use it -- if the data is numeric), other option: a number, of course the time must be numeric
 
-    # LATER:
-    # - add duplicate.method = "sum" // although it is not super useful in my opinion (but maybe other users disagree)
-    # - several lags => matrix? I donno...
+  # LATER:
+  # - add duplicate.method = "sum" // although it is not super useful in my opinion (but maybe other users disagree)
+  # - several lags => matrix? I donno...
 
-    # IMPORTANT TO BE DONE:
-    # - check argument 'fill' in here (not in panel_setup)
+  # IMPORTANT TO BE DONE:
+  # - check argument 'fill' in here (not in panel_setup)
 
-    validate_dots(suggest_args = c("k", "data", "time.step", "fill"))
+  validate_dots(suggest_args = c("k", "data", "time.step", "fill"))
 
-    # Controls
-    check_set_arg(duplicate.method, "match")
-    check_arg(data, "data.frame | matrix")
-    check_arg(k, "integer scalar")
+  # Controls
+  check_set_arg(duplicate.method, "match")
+  check_arg(data, "data.frame | matrix")
+  check_arg(k, "integer scalar")
 
-    if(!missing(data)){
-        DATA_MISSING = FALSE
-        if(is.matrix(data)){
-            if(is.null(colnames(data))){
-                stop("The variables of 'data' have no name (data is a matrix without column names).")
-            }
-            data = as.data.frame(data)
-        } else if("data.table" %in% class(data)){
-            data = as.data.frame(data)
-        }
-        existing_vars = names(data)
-    } else {
-        DATA_MISSING = TRUE
-        existing_vars = ls(parent.frame())
+  if(!missing(data)){
+    DATA_MISSING = FALSE
+    if(is.matrix(data)){
+      if(is.null(colnames(data))){
+        stop("The variables of 'data' have no name (data is a matrix without column names).")
+      }
+      data = as.data.frame(data)
+    } else if("data.table" %in% class(data)){
+      data = as.data.frame(data)
+    }
+    existing_vars = names(data)
+  } else {
+    DATA_MISSING = TRUE
+    existing_vars = ls(parent.frame())
+  }
+
+  vars = all.vars(x)
+  qui_pblm = setdiff(vars, existing_vars)
+  if(length(qui_pblm) > 0){
+    stop("In the formula the variable", enumerate_items(qui_pblm, "s.is.quote"),
+       " not in the ", ifelse(DATA_MISSING, "environment. Add argument data?", "data."))
+  }
+
+
+  # LHS
+  fml = x
+  if(DATA_MISSING){
+    value = eval(fml[[2]], parent.frame())
+  } else {
+    value = eval(fml[[2]], data)
+  }
+
+  # checking argument fill
+  check_arg(fill, "NA | scalar")
+  if(!is.na(fill)){
+    if(is.numeric(value) && !is.numeric(fill)){
+      stop("Argument 'fill' must be of the same type as ", deparse_long(fml[[2]]), ", which is numeric.")
     }
 
-    vars = all.vars(x)
-    qui_pblm = setdiff(vars, existing_vars)
-    if(length(qui_pblm) > 0){
-        stop("In the formula the variable", enumerate_items(qui_pblm, "s.is.quote"),
-             " not in the ", ifelse(DATA_MISSING, "environment. Add argument data?", "data."))
+    if(!is.numeric(value) && is.numeric(fill)){
+      stop("Argument 'fill' must be of the same type as ", deparse_long(fml[[2]]), ", which is not numeric while 'fill' is.")
     }
+    # I could go further in checking but it's enough
+  }
 
+  meta_info = panel_setup(data, panel.id = x, time.step = time.step,
+              duplicate.method = duplicate.method, DATA_MISSING = DATA_MISSING)
 
-    # LHS
-    fml = x
-    if(DATA_MISSING){
-        value = eval(fml[[2]], parent.frame())
-    } else {
-        value = eval(fml[[2]], data)
-    }
+  # we get the observation id!
+  obs_lagged = cpp_lag_obs(id = meta_info$id_sorted, time = meta_info$time_sorted, nlag = k)
 
-    # checking argument fill
-    check_arg(fill, "NA | scalar")
-    if(!is.na(fill)){
-        if(is.numeric(value) && !is.numeric(fill)){
-            stop("Argument 'fill' must be of the same type as ", deparse_long(fml[[2]]), ", which is numeric.")
-        }
+  # the lagged value => beware of NAs in IDs!
+  if(meta_info$na_flag){
+    value_sorted = (value[!meta_info$is_na])[meta_info$order_it]
+  } else {
+    value_sorted = value[meta_info$order_it]
+  }
 
-        if(!is.numeric(value) && is.numeric(fill)){
-            stop("Argument 'fill' must be of the same type as ", deparse_long(fml[[2]]), ", which is not numeric while 'fill' is.")
-        }
-        # I could go further in checking but it's enough
-    }
+  value_lagged = value_sorted[obs_lagged]
 
-    meta_info = panel_setup(data, panel.id = x, time.step = time.step,
-                            duplicate.method = duplicate.method, DATA_MISSING = DATA_MISSING)
+  if(!is.na(fill)){
+    qui_na = is.na(obs_lagged)
+    value_lagged[qui_na] = fill
+  }
 
-    # we get the observation id!
-    obs_lagged = cpp_lag_obs(id = meta_info$id_sorted, time = meta_info$time_sorted, nlag = k)
+  if(meta_info$na_flag == FALSE){
+    res = value_lagged[meta_info$order_inv]
+  } else{
+    res = rep(NA, length(value))
+    res[!meta_info$is_na] = value_lagged[meta_info$order_inv]
+  }
 
-    # the lagged value => beware of NAs in IDs!
-    if(meta_info$na_flag){
-        value_sorted = (value[!meta_info$is_na])[meta_info$order_it]
-    } else {
-        value_sorted = value[meta_info$order_it]
-    }
-
-    value_lagged = value_sorted[obs_lagged]
-
-    if(!is.na(fill)){
-        qui_na = is.na(obs_lagged)
-        value_lagged[qui_na] = fill
-    }
-
-    if(meta_info$na_flag == FALSE){
-        res = value_lagged[meta_info$order_inv]
-    } else{
-        res = rep(NA, length(value))
-        res[!meta_info$is_na] = value_lagged[meta_info$order_inv]
-    }
-
-    res
+  res
 }
 
 #' @describeIn lag.formula Lags a variable using a formula syntax
@@ -730,33 +730,33 @@ lag_fml = lag.formula
 #'
 panel = function(data, panel.id, time.step = NULL, duplicate.method = c("none", "first")){
 
-    if(missing(data)){
-        stop("You must provide the argument 'data'.")
-    } else if(!"data.frame" %in% class(data)){
-        stop("Argument 'data' must be a data.frame.")
-    }
+  if(missing(data)){
+    stop("You must provide the argument 'data'.")
+  } else if(!"data.frame" %in% class(data)){
+    stop("Argument 'data' must be a data.frame.")
+  }
 
-    check_set_arg(duplicate.method, "match")
+  check_set_arg(duplicate.method, "match")
 
-    mc = match.call()
+  mc = match.call()
 
-    meta_info = panel_setup(data, panel.id = panel.id, time.step = time.step,
-                            duplicate.method = duplicate.method)
-    meta_info$call = mc
+  meta_info = panel_setup(data, panel.id = panel.id, time.step = time.step,
+              duplicate.method = duplicate.method)
+  meta_info$call = mc
 
-    # R makes a shallow copy of data => need to do it differently with DT
+  # R makes a shallow copy of data => need to do it differently with DT
 
-    if("data.table" %in% class(data) && requireNamespace("data.table", quietly=TRUE)){
-        res = data.table::copy(data)
-        data.table::setattr(res, "panel_info", meta_info)
-        data.table::setattr(res, "class", c("fixest_panel", "data.table", "data.frame"))
-    } else {
-        res = data
-        attr(res, "panel_info") = meta_info
-        class(res) = unique(c("fixest_panel", class(res)))
-    }
+  if("data.table" %in% class(data) && requireNamespace("data.table", quietly=TRUE)){
+    res = data.table::copy(data)
+    data.table::setattr(res, "panel_info", meta_info)
+    data.table::setattr(res, "class", c("fixest_panel", "data.table", "data.frame"))
+  } else {
+    res = data
+    attr(res, "panel_info") = meta_info
+    class(res) = unique(c("fixest_panel", class(res)))
+  }
 
-    res
+  res
 }
 
 
@@ -794,17 +794,17 @@ panel = function(data, panel.id, time.step = NULL, duplicate.method = c("none", 
 #'
 unpanel = function(x){
 
-    if("data.table" %in% class(x) && requireNamespace("data.table", quietly=TRUE)){
-        data.table::setattr(x, "panel_info", NULL)
-        data.table::setattr(x, "class", setdiff(class(x), "fixest_panel"))
+  if("data.table" %in% class(x) && requireNamespace("data.table", quietly=TRUE)){
+    data.table::setattr(x, "panel_info", NULL)
+    data.table::setattr(x, "class", setdiff(class(x), "fixest_panel"))
 
-        return(invisible(x))
-    } else {
-        attr(x, "panel_info") = NULL
-        class(x) = setdiff(class(x), "fixest_panel")
-    }
+    return(invisible(x))
+  } else {
+    attr(x, "panel_info") = NULL
+    class(x) = setdiff(class(x), "fixest_panel")
+  }
 
-    x
+  x
 }
 
 
@@ -861,339 +861,339 @@ unpanel = function(x){
 #'
 #'
 "[.fixest_panel" = function(x, i, j, ...){
-    # we need to perform proper bookkeeping
+  # we need to perform proper bookkeeping
 
-    info = attr(x, "panel_info")
-    mc = match.call()
+  info = attr(x, "panel_info")
+  mc = match.call()
 
-    IS_DT = FALSE
-    if("data.table" %in% class(x) && requireNamespace("data.table", quietly=TRUE)){
-        IS_DT = TRUE
-        # data.table is really hard to handle....
-        # Not very elegant... but that's life!
+  IS_DT = FALSE
+  if("data.table" %in% class(x) && requireNamespace("data.table", quietly=TRUE)){
+    IS_DT = TRUE
+    # data.table is really hard to handle....
+    # Not very elegant... but that's life!
 
-        # When modifications are too risky, I dissolve the panel
+    # When modifications are too risky, I dissolve the panel
 
-        mc_new = mc
-        mc_new[[1]] = as.name('[')
+    mc_new = mc
+    mc_new[[1]] = as.name('[')
 
-        if(grepl(":=", deparse(mc$j)[1])){
-            # Variable creation is OK
+    if(grepl(":=", deparse(mc$j)[1])){
+      # Variable creation is OK
 
-            jvalue = mc$j
-            jtext = deparse_long(jvalue)
-            # we check if f() or l() is used
-            if(grepl("[^\\._[:alnum:]](l|f|d)\\(", jtext)){
-                # We authorize it but only in 'simple' variable creation
-                if(any(!names(mc) %in% c("", "x", "j"))){
-                    # We don't allow i either
-                    stop("When creating lags (resp. leads or diffs) with the function l() (resp. f() or d()) within a data.table, only the argument 'j' is allowed.\nExample: 'data[, x_lag := l(x)]' is OK, while 'data[x>0, x_lag := l(x)]' is NOT ok.")
-                }
-                options(fixest_fl_authorized = TRUE)
-                on.exit(options(fixest_fl_authorized = FALSE))
-            }
-
-            # I have to do it that way... really not elegant...
-            mc_new[[1]] = as.name('[.data.table')
-            my_frame = parent.frame()
-            assign("[.data.table", asNamespace("data.table")[["[.data.table"]], my_frame)
-            eval(mc_new, my_frame)
-
-            return(invisible(TRUE))
-        } else {
-
-            x_dt = data.table::copy(x)
-            data.table::setattr(x_dt, "class", setdiff(class(x), "fixest_panel"))
-            mc_new$x = as.name('x_dt')
-
-            res = eval(mc_new)
-
-            if(any(!names(mc) %in% c("", "x", "i"))) {
-                # If any argument other than i is used => we dissolve the fixest panel
-                message("NOTE: The fixest panel is dissolved.")
-                return(res)
-            } else {
-                data.table::setattr(res, "class", c("fixest_panel", class(res)))
-            }
-
+      jvalue = mc$j
+      jtext = deparse_long(jvalue)
+      # we check if f() or l() is used
+      if(grepl("[^\\._[:alnum:]](l|f|d)\\(", jtext)){
+        # We authorize it but only in 'simple' variable creation
+        if(any(!names(mc) %in% c("", "x", "j"))){
+          # We don't allow i either
+          stop("When creating lags (resp. leads or diffs) with the function l() (resp. f() or d()) within a data.table, only the argument 'j' is allowed.\nExample: 'data[, x_lag := l(x)]' is OK, while 'data[x>0, x_lag := l(x)]' is NOT ok.")
         }
+        options(fixest_fl_authorized = TRUE)
+        on.exit(options(fixest_fl_authorized = FALSE))
+      }
+
+      # I have to do it that way... really not elegant...
+      mc_new[[1]] = as.name('[.data.table')
+      my_frame = parent.frame()
+      assign("[.data.table", asNamespace("data.table")[["[.data.table"]], my_frame)
+      eval(mc_new, my_frame)
+
+      return(invisible(TRUE))
     } else {
-        res = "[.data.frame"(x, i, j, ...)
+
+      x_dt = data.table::copy(x)
+      data.table::setattr(x_dt, "class", setdiff(class(x), "fixest_panel"))
+      mc_new$x = as.name('x_dt')
+
+      res = eval(mc_new)
+
+      if(any(!names(mc) %in% c("", "x", "i"))) {
+        # If any argument other than i is used => we dissolve the fixest panel
+        message("NOTE: The fixest panel is dissolved.")
+        return(res)
+      } else {
+        data.table::setattr(res, "class", c("fixest_panel", class(res)))
+      }
+
+    }
+  } else {
+    res = "[.data.frame"(x, i, j, ...)
+  }
+
+  if(!missing(i)){
+    if(IS_DT){
+      # data.table is quite a pain in the neck to handle...
+
+      data.table::set(x_dt, j = "x__ID__x", value = 1:nrow(x_dt))
+      select = eval(str2lang(paste0("x_dt[", deparse_long(mc_new$i), "]")))$x__ID__x
+
+    } else {
+      select = i
     }
 
-    if(!missing(i)){
-        if(IS_DT){
-            # data.table is quite a pain in the neck to handle...
+    # we modify the indexes
+    id = info$id_sorted[info$order_inv]
+    time = info$time_sorted[info$order_inv]
 
-            data.table::set(x_dt, j = "x__ID__x", value = 1:nrow(x_dt))
-            select = eval(str2lang(paste0("x_dt[", deparse_long(mc_new$i), "]")))$x__ID__x
-
-        } else {
-            select = i
-        }
-
-        # we modify the indexes
-        id = info$id_sorted[info$order_inv]
-        time = info$time_sorted[info$order_inv]
-
-        if(info$na_flag == FALSE){
-            id = id[select]
-            time = time[select]
-        } else{
-            # We don't forget to add the NAs!
-            id_tmp = time_tmp = rep(NA, info$is_na)
-            id_tmp[!info$is_na] = id
-            time_tmp[!info$is_na] = time
-            id = id_tmp[select]
-            time = time_tmp[select]
-        }
-
-        is_na = is.na(id) | is.na(time)
-        na_flag = FALSE
-        if(any(is_na)){
-            na_flag = TRUE
-            id = id[!is_na]
-            time = time[!is_na]
-        }
-
-        order_it = order(id, time)
-        order_inv = order(order_it)
-
-        new_info = list(order_it = order_it, order_inv=order_inv,
-                        id_sorted=id[order_it], time_sorted=time[order_it],
-                        na_flag = na_flag, panel.id = info$panel.id, call = info$call)
-
-        if(na_flag) new_info$is_na = is_na
-        attr(res, "panel_info") = new_info
+    if(info$na_flag == FALSE){
+      id = id[select]
+      time = time[select]
+    } else{
+      # We don't forget to add the NAs!
+      id_tmp = time_tmp = rep(NA, info$is_na)
+      id_tmp[!info$is_na] = id
+      time_tmp[!info$is_na] = time
+      id = id_tmp[select]
+      time = time_tmp[select]
     }
 
-    # if(is.null(dim(res))){
-    #     class(res) = "fixest_panel_vector"
-    # }
+    is_na = is.na(id) | is.na(time)
+    na_flag = FALSE
+    if(any(is_na)){
+      na_flag = TRUE
+      id = id[!is_na]
+      time = time[!is_na]
+    }
 
-    return(res)
+    order_it = order(id, time)
+    order_inv = order(order_it)
+
+    new_info = list(order_it = order_it, order_inv=order_inv,
+            id_sorted=id[order_it], time_sorted=time[order_it],
+            na_flag = na_flag, panel.id = info$panel.id, call = info$call)
+
+    if(na_flag) new_info$is_na = is_na
+    attr(res, "panel_info") = new_info
+  }
+
+  # if(is.null(dim(res))){
+  #     class(res) = "fixest_panel_vector"
+  # }
+
+  return(res)
 }
 
 terms_hat = function(fml, fastCombine = TRUE, n_unik = FALSE){
 
+  fml_char = as.character(fml)[length(fml)]
+
+  # %^%: hat operator, in n_unik
+  # + distribution
+  if(n_unik){
+
+    any_hat = grepl("^", fml_char, fixed = TRUE)
+    if(any_hat){
+      fml_char = gsub("%^%", "*", fml_char, fixed = TRUE)
+      fml_char = gsub("\\^(?=[^[:digit:]])", ":", fml_char, perl = TRUE)
+    }
+
+    vars = get_vars(.xpd(rhs = fml_char))
+
+    # distribution:
+    #   (a + b)[cond] => a[cond] + b[cond]
+    is_paren = grepl("^\\(", vars)
+    while(any(is_paren)){
+
+      i = which(is_paren)[1]
+      info_paren = extract_fun(paste0("PAREN", vars[i]), "PAREN")
+      vars_in_paren = get_vars(.xpd(rhs = gsub("^PAREN\\(|\\)$", "", info_paren$fun)))
+
+      new_vars = paste0(vars_in_paren, info_paren$after)
+
+      vars = insert(vars[-i], new_vars, i)
+      is_paren = grepl("^\\(", vars)
+    }
+
+    vars = gsub(":", "^", vars, fixed = TRUE)
+
+    fml = .xpd(rhs = vars)
     fml_char = as.character(fml)[length(fml)]
-
-    # %^%: hat operator, in n_unik
-    # + distribution
-    if(n_unik){
-
-        any_hat = grepl("^", fml_char, fixed = TRUE)
-        if(any_hat){
-            fml_char = gsub("%^%", "*", fml_char, fixed = TRUE)
-            fml_char = gsub("\\^(?=[^[:digit:]])", ":", fml_char, perl = TRUE)
-        }
-
-        vars = get_vars(.xpd(rhs = fml_char))
-
-        # distribution:
-        #   (a + b)[cond] => a[cond] + b[cond]
-        is_paren = grepl("^\\(", vars)
-        while(any(is_paren)){
-
-            i = which(is_paren)[1]
-            info_paren = extract_fun(paste0("PAREN", vars[i]), "PAREN")
-            vars_in_paren = get_vars(.xpd(rhs = gsub("^PAREN\\(|\\)$", "", info_paren$fun)))
-
-            new_vars = paste0(vars_in_paren, info_paren$after)
-
-            vars = insert(vars[-i], new_vars, i)
-            is_paren = grepl("^\\(", vars)
-        }
-
-        vars = gsub(":", "^", vars, fixed = TRUE)
-
-        fml = .xpd(rhs = vars)
-        fml_char = as.character(fml)[length(fml)]
-    }
+  }
 
 
-    if(grepl("^", fml_char, fixed = TRUE)){
-        # special indicator to combine factors
-        fml = fml_combine(fml_char, fastCombine)
-    }
+  if(grepl("^", fml_char, fixed = TRUE)){
+    # special indicator to combine factors
+    fml = fml_combine(fml_char, fastCombine)
+  }
 
-    t = terms(fml)
+  t = terms(fml)
 
-    t
+  t
 }
 
 check_lag = function(fml){
-    fml_txt = deparse_long(fml)
-    grepl("(^|[^\\._[:alnum:]])(l|f|d)\\(", fml_txt)
+  fml_txt = deparse_long(fml)
+  grepl("(^|[^\\._[:alnum:]])(l|f|d)\\(", fml_txt)
 }
 
 
 expand_lags_internal = function(x){
-    # x: a vector of terms: x = attr(terms(fml), "term.labels")
+  # x: a vector of terms: x = attr(terms(fml), "term.labels")
 
-    res = x
+  res = x
 
-    if(any(grepl("\\b(l|f|d)\\(", x))){
-        # Means lagging required
+  if(any(grepl("\\b(l|f|d)\\(", x))){
+    # Means lagging required
 
-        term_all_expand = gsub("^(l|f|d)\\(", "\\1__expand(", x)
-        term_all_expand = gsub("([^\\._[:alnum:]])(l|f|d)\\(", "\\1\\2__expand(", term_all_expand)
+    term_all_expand = gsub("^(l|f|d)\\(", "\\1__expand(", x)
+    term_all_expand = gsub("([^\\._[:alnum:]])(l|f|d)\\(", "\\1\\2__expand(", term_all_expand)
 
-        qui_expand = which(grepl("__expand", term_all_expand))
+    qui_expand = which(grepl("__expand", term_all_expand))
 
-        if(length(qui_expand) > 0){
-            terms_all_list = as.list(x)
+    if(length(qui_expand) > 0){
+      terms_all_list = as.list(x)
 
-            # we select only the first function
-            find_closing = function(x){
-                x_split = strsplit(x, "")[[1]]
-                open = x_split == "("
-                close = x_split == ")"
-                which.max(cumsum(open) > 0 & (cumsum(open) - cumsum(close)) == 0)
-            }
+      # we select only the first function
+      find_closing = function(x){
+        x_split = strsplit(x, "")[[1]]
+        open = x_split == "("
+        close = x_split == ")"
+        which.max(cumsum(open) > 0 & (cumsum(open) - cumsum(close)) == 0)
+      }
 
-            for(k in qui_expand){
+      for(k in qui_expand){
 
-                terms_split = strsplit(term_all_expand[k], "(l|f|d)__expand")[[1]]
-                terms_split_bis = strsplit(term_all_expand[k], "__expand")[[1]]
-                key = substr(terms_split_bis, nchar(terms_split_bis), nchar(terms_split_bis))
+        terms_split = strsplit(term_all_expand[k], "(l|f|d)__expand")[[1]]
+        terms_split_bis = strsplit(term_all_expand[k], "__expand")[[1]]
+        key = substr(terms_split_bis, nchar(terms_split_bis), nchar(terms_split_bis))
 
-                is_in_par = grepl("\\([^\\(]*$", terms_split[1])
+        is_in_par = grepl("\\([^\\(]*$", terms_split[1])
 
-                slice = terms_split[1]
-                for(i in 1:(length(terms_split) - 1)){
+        slice = terms_split[1]
+        for(i in 1:(length(terms_split) - 1)){
 
-                    val = terms_split[i + 1]
+          val = terms_split[i + 1]
 
-                    end = find_closing(val)
-                    if(end == nchar(val)){
-                        quoi = eval(str2lang(paste0(key[i], "__expand", val)))
-                        end_text = ""
+          end = find_closing(val)
+          if(end == nchar(val)){
+            quoi = eval(str2lang(paste0(key[i], "__expand", val)))
+            end_text = ""
 
-                    } else {
-                        what = paste0(key[i], "__expand", substr(val, 1, end))
-                        end_text = substr(val, end + 1, nchar(val))
-                        quoi = eval(str2lang(what))
-                    }
+          } else {
+            what = paste0(key[i], "__expand", substr(val, 1, end))
+            end_text = substr(val, end + 1, nchar(val))
+            quoi = eval(str2lang(what))
+          }
 
-                    if(is_in_par){
-                        # We make the sum when found in a parenthesis
-                        quoi = paste0(paste(quoi, collapse = " + "), end_text)
-                    } else {
-                        # otherwise we duplicate
-                        quoi = paste0(quoi, end_text)
-                    }
+          if(is_in_par){
+            # We make the sum when found in a parenthesis
+            quoi = paste0(paste(quoi, collapse = " + "), end_text)
+          } else {
+            # otherwise we duplicate
+            quoi = paste0(quoi, end_text)
+          }
 
-                    slice = paste0(rep(slice, each = length(quoi)), quoi)
+          slice = paste0(rep(slice, each = length(quoi)), quoi)
 
-                }
-
-                terms_all_list[[k]] = slice
-
-            }
-
-            res = unlist(terms_all_list)
         }
 
+        terms_all_list[[k]] = slice
+
+      }
+
+      res = unlist(terms_all_list)
     }
 
-    res
+  }
+
+  res
 }
 
 
 expand_lags = function(fml){
-    # fml = f(y, 1:2) ~ x1 + sw(x2, l(x3, 1:2)) | fe1 + fe2 | c(u1, l(u2)) ~ l(z, 1:3) + z2
+  # fml = f(y, 1:2) ~ x1 + sw(x2, l(x3, 1:2)) | fe1 + fe2 | c(u1, l(u2)) ~ l(z, 1:3) + z2
 
-    fml_parts = fml_split(fml, raw = TRUE)
-    n_parts = length(fml_parts)
+  fml_parts = fml_split(fml, raw = TRUE)
+  n_parts = length(fml_parts)
 
-    # We tolerate multiple LHS and expansion
-    lhs_text = fml_split(fml, 1, text = TRUE, split.lhs = TRUE)
-    if(grepl("^(c|(c?(stepwise|sw)0?)|list)\\(", lhs_text)){
-        lhs_text2eval = gsub("^(c|(c?(stepwise|sw)0?|list))\\(", "stepwise(", lhs_text)
-        lhs_names = eval(str2lang(lhs_text2eval))
-    } else {
-        lhs_names = lhs_text
+  # We tolerate multiple LHS and expansion
+  lhs_text = fml_split(fml, 1, text = TRUE, split.lhs = TRUE)
+  if(grepl("^(c|(c?(stepwise|sw)0?)|list)\\(", lhs_text)){
+    lhs_text2eval = gsub("^(c|(c?(stepwise|sw)0?|list))\\(", "stepwise(", lhs_text)
+    lhs_names = eval(str2lang(lhs_text2eval))
+  } else {
+    lhs_names = lhs_text
+  }
+
+  lhs_all = expand_lags_internal(lhs_names)
+  if(length(lhs_all) > 1){
+    lhs_fml = paste("c(", paste(lhs_all, collapse = "+"), ")")
+  } else {
+    lhs_fml = lhs_all
+  }
+
+  rhs_terms = attr(terms(fml_parts[[1]]), "term.labels")
+  rhs_fml = paste(expand_lags_internal(rhs_terms), collapse = "+")
+
+  iv_fml = fixef_fml = ""
+
+  if(n_parts > 1){
+
+    is_fe = !is_fml_inside(fml_parts[[2]])
+    if(is_fe){
+      fixef_terms = attr(terms(fml_maker(fml_parts[[2]])), "term.labels")
+      fixef_fml = paste("|", paste(expand_lags_internal(fixef_terms), collapse = "+"))
     }
 
-    lhs_all = expand_lags_internal(lhs_names)
-    if(length(lhs_all) > 1){
-        lhs_fml = paste("c(", paste(lhs_all, collapse = "+"), ")")
-    } else {
-        lhs_fml = lhs_all
+    if(n_parts == 3 || !is_fe){
+      iv_tmp = fml_maker(fml_parts[[n_parts]])
+
+      # iv LHS
+      iv_text = fml_split(iv_tmp, 1, text = TRUE, split.lhs = TRUE)
+      if(grepl("^(c|(c?(stepwise|sw)0?)|list)\\(", iv_text)){
+        iv_text2eval = gsub("^(c|(c?(stepwise|sw)0?|list))\\(", "stepwise(", iv_text)
+        iv_names = eval(str2lang(gsub("^list\\(", "stepwise(", iv_text2eval)))
+      } else {
+        iv_names = iv_text
+      }
+
+      iv_all = expand_lags_internal(iv_names)
+      if(length(iv_all) > 1){
+        iv_left = paste("c(", paste(iv_all, collapse = "+"), ")")
+      } else {
+        iv_left = iv_all
+      }
+
+      # iv RHS
+      iv_right_terms = attr(terms(iv_tmp), "term.labels")
+      iv_right = paste(expand_lags_internal(iv_right_terms), collapse = "+")
+
+      iv_fml = paste("|", iv_left, "~", iv_right)
     }
-
-    rhs_terms = attr(terms(fml_parts[[1]]), "term.labels")
-    rhs_fml = paste(expand_lags_internal(rhs_terms), collapse = "+")
-
-    iv_fml = fixef_fml = ""
-
-    if(n_parts > 1){
-
-        is_fe = !is_fml_inside(fml_parts[[2]])
-        if(is_fe){
-            fixef_terms = attr(terms(fml_maker(fml_parts[[2]])), "term.labels")
-            fixef_fml = paste("|", paste(expand_lags_internal(fixef_terms), collapse = "+"))
-        }
-
-        if(n_parts == 3 || !is_fe){
-            iv_tmp = fml_maker(fml_parts[[n_parts]])
-
-            # iv LHS
-            iv_text = fml_split(iv_tmp, 1, text = TRUE, split.lhs = TRUE)
-            if(grepl("^(c|(c?(stepwise|sw)0?)|list)\\(", iv_text)){
-                iv_text2eval = gsub("^(c|(c?(stepwise|sw)0?|list))\\(", "stepwise(", iv_text)
-                iv_names = eval(str2lang(gsub("^list\\(", "stepwise(", iv_text2eval)))
-            } else {
-                iv_names = iv_text
-            }
-
-            iv_all = expand_lags_internal(iv_names)
-            if(length(iv_all) > 1){
-                iv_left = paste("c(", paste(iv_all, collapse = "+"), ")")
-            } else {
-                iv_left = iv_all
-            }
-
-            # iv RHS
-            iv_right_terms = attr(terms(iv_tmp), "term.labels")
-            iv_right = paste(expand_lags_internal(iv_right_terms), collapse = "+")
-
-            iv_fml = paste("|", iv_left, "~", iv_right)
-        }
-    }
+  }
 
 
-    as.formula(paste0(lhs_fml, "~", rhs_fml, fixef_fml, iv_fml))
+  as.formula(paste0(lhs_fml, "~", rhs_fml, fixef_fml, iv_fml))
 }
 
 
 
 set_panel_meta_info = function(object, newdata){
-    # We set the variable panel__meta__info with the current data set
+  # We set the variable panel__meta__info with the current data set
 
-    panel__meta__info = NULL
+  panel__meta__info = NULL
 
-    fml_full = formula(object, type = "full")
-    if(check_lag(fml_full)){
-        if(!is.null(object$panel.info)){
-            if(is.null(attr(newdata, "panel_info"))){
-                # We try to recreate the panel
-                if(any(!names(object$panel.info) %in% c("", "data", "panel.id"))){
-                    # This was NOT a standard panel creation
-                    stop("The estimation contained lags/leads and the original data was a 'fixest_panel' while the new data is not. Please set the new data as a panel first with the function panel(). NOTA: the original call to panel was:\n", deparse_long(object$panel.info))
-                } else {
-                    panel__meta__info = panel_setup(newdata, object$panel.id, from_fixest = TRUE)
-                }
-            } else {
-                panel__meta__info = attr(newdata, "panel_info")
-            }
+  fml_full = formula(object, type = "full")
+  if(check_lag(fml_full)){
+    if(!is.null(object$panel.info)){
+      if(is.null(attr(newdata, "panel_info"))){
+        # We try to recreate the panel
+        if(any(!names(object$panel.info) %in% c("", "data", "panel.id"))){
+          # This was NOT a standard panel creation
+          stop("The estimation contained lags/leads and the original data was a 'fixest_panel' while the new data is not. Please set the new data as a panel first with the function panel(). NOTA: the original call to panel was:\n", deparse_long(object$panel.info))
         } else {
-            panel__meta__info = panel_setup(newdata, object$panel.id, from_fixest = TRUE)
+          panel__meta__info = panel_setup(newdata, object$panel.id, from_fixest = TRUE)
         }
+      } else {
+        panel__meta__info = attr(newdata, "panel_info")
+      }
+    } else {
+      panel__meta__info = panel_setup(newdata, object$panel.id, from_fixest = TRUE)
     }
+  }
 
-    panel__meta__info
+  panel__meta__info
 }
 
 
