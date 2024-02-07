@@ -4,6 +4,7 @@
 ## New features
 
 - all estimation functions gain the argument `data.save`. If `TRUE`, the data set used for the estimation is saved in the returned object. This ensures the consistency of post-processing (like fit statistics, predict, etc) even if the original data has been modified in the meantime. Suggestion by Vincent Arel-Bundock, #340
+
 - new function `fixest_data` to access the original data set used at estimation-time. Suggestion by Kyle Butts, #465
 
 ## Bugs
