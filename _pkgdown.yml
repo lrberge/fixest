@@ -46,6 +46,7 @@ reference:
       contents:
         - summary.fixest
         - obs
+        - fixest_data
         - coeftable
         - coeftable.default
         - coeftable.fixest
