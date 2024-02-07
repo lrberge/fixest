@@ -1,8 +1,8 @@
 
 
-#***************************#
+#---------------------------#
 #### ===== POISSON ===== ####
-#***************************#
+#___________________________#
 
 ml_poisson = function(){
 	# Cette fonction renvoie une famille de fonctions
@@ -44,12 +44,14 @@ ml_poisson = function(){
 		log(sum_y) - log(mu_dum)
 	}
 
-	return(list(ll=ll, expected.predictor=expected.predictor, ll_dl=ll_dl, ll_d2=ll_d2, closedFormDummies=closedFormDummies, linearFromExpected=linearFromExpected))
+	return(list(ll = ll, expected.predictor = expected.predictor, ll_dl = ll_dl, 
+	            ll_d2 = ll_d2, closedFormDummies = closedFormDummies, 
+	            linearFromExpected = linearFromExpected))
 }
 
-#************************#
+#------------------------#
 #### ===== LOGIT ==== ####
-#************************#
+#------------------------#
 
 
 ml_logit = function(){
@@ -86,7 +88,9 @@ ml_logit = function(){
 		sum_y / (n_group-sum_y) / exp_mu
 	}
 
-	return(list(ll=ll, expected.predictor=expected.predictor, ll_dl=ll_dl, ll_d2=ll_d2, guessDummy=guessDummy, guessExpDummy=guessExpDummy, linearFromExpected=linearFromExpected))
+	return(list(ll = ll, expected.predictor = expected.predictor, ll_dl = ll_dl, 
+	            ll_d2 = ll_d2, guessDummy = guessDummy, 
+	            guessExpDummy = guessExpDummy, linearFromExpected = linearFromExpected))
 }
 
 
@@ -206,13 +210,19 @@ ml_negbin = function(){
 		- as.matrix(hess.theta)
 	}
 
-	return(list(ll=ll, expected.predictor=expected.predictor, linearFromExpected=linearFromExpected, ll0_theta=ll0_theta, grad0_theta=grad0_theta, hess0_theta=hess0_theta, hess.theta=hess.theta, hess.thetaL=hess.thetaL, hess_theta_part=hess_theta_part, grad.theta=grad.theta, scores.theta=scores.theta, ll_dl=ll_dl, ll_d2=ll_d2, guessDummy=guessDummy, ll_dx_dother=ll_dx_dother, guessExpDummy=guessExpDummy))
+	return(list(ll = ll, expected.predictor = expected.predictor, 
+	            linearFromExpected = linearFromExpected, ll0_theta = ll0_theta, 
+	            grad0_theta = grad0_theta, hess0_theta = hess0_theta, hess.theta = hess.theta, 
+	            hess.thetaL = hess.thetaL, hess_theta_part = hess_theta_part, 
+	            grad.theta = grad.theta, scores.theta = scores.theta, ll_dl = ll_dl, 
+	            ll_d2 = ll_d2, guessDummy = guessDummy, ll_dx_dother = ll_dx_dother, 
+	            guessExpDummy = guessExpDummy))
 }
 
 
-#***************************#
+#---------------------------#
 #### ===== GAUSSIAN ==== ####
-#***************************#
+#---------------------------#
 
 
 ml_gaussian = function(){
@@ -249,6 +259,8 @@ ml_gaussian = function(){
 		(sum_y - cpp_tapply_vsum(length(tableCluster), mu, dum)) / tableCluster
 	}
 
-	return(list(ll=ll, expected.predictor=expected.predictor, linearFromExpected=linearFromExpected, ll_dl=ll_dl, ll_d2=ll_d2, closedFormDummies=closedFormDummies))
+	return(list(ll = ll, expected.predictor = expected.predictor, 
+	            linearFromExpected = linearFromExpected, ll_dl = ll_dl, 
+	            ll_d2 = ll_d2, closedFormDummies = closedFormDummies))
 }
 
