@@ -118,7 +118,7 @@ c) a number strictly between 0 and 1 which represents the fraction of all thread
 The default is to use 50\% of all threads. You can set permanently the number
 of threads used within this package using the function \code{\link{setFixest_nthreads}}.}
 
-\item{...}{Only used if the argument \code{.vocv} is provided and is a function: extra arguments
+\item{...}{Only used if the argument \code{.vcov} is provided and is a function: extra arguments
 to be passed to that function.}
 }
 \value{
@@ -232,7 +232,7 @@ summary(est_geo, "conley")
 # Compatibility with sandwich
 #
 
-# You can use the VOCVs from sandwich by using the argument .vcov:
+# You can use the VCOVs from sandwich by using the argument .vcov:
 library(sandwich)
 summary(est_pois, .vcov = vcovCL, cluster = trade[, c("Destination", "Product")])
 

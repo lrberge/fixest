@@ -2802,6 +2802,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
   } else {
     assign("linear.mat", 1, env)
   }
+  
   assign("offset.value", offset.value, env)
   assign("weights.value", weights.value, env)
   assign("lhs", lhs, env)

@@ -585,7 +585,14 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
     offset = get("offset.value", env)
     isOffset = length(offset) > 1
     if(isOffset){
-      y = y - offset
+      if(is.list(y)){
+        # multiple outcomes
+        for(i in seq_along(y)){
+          y[[i]] = y[[i]] - offset
+        }
+      } else {
+        y = y - offset
+      }      
     }
 
     # weights
@@ -4755,10 +4762,12 @@ multi_LHS_RHS = function(env, fun){
       my_fml = .xpd(lhs = lhs_names[i], rhs = multi_rhs_fml_full[[j]])
 
       if(any(is_na_current)){
-        my_env = reshape_env(env, which(!is_na_current), lhs = lhs[[i]], rhs = my_rhs, fml_linear = my_fml)
+        my_env = reshape_env(env, which(!is_na_current), lhs = lhs[[i]], 
+                             rhs = my_rhs, fml_linear = my_fml)
       } else {
         # We still need to check the RHS (only 0/1)
-        my_env = reshape_env(env, lhs = lhs[[i]], rhs = my_rhs, fml_linear = my_fml, check_lhs = TRUE)
+        my_env = reshape_env(env, lhs = lhs[[i]], rhs = my_rhs, 
+                             fml_linear = my_fml, check_lhs = TRUE)
       }
 
       my_res = fun(env = my_env)

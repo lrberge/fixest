@@ -663,11 +663,11 @@ base$fe3 = rep(letters[1:10], 15)
 
 for(id_fun in 1:5){
   estfun = switch(as.character(id_fun),
-          "1" = feols,
-          "2" = feglm,
-          "3" = fepois,
-          "4" = femlm,
-          "5" = feNmlm)
+                  "1" = feols,
+                  "2" = feglm,
+                  "3" = fepois,
+                  "4" = femlm,
+                  "5" = feNmlm)
 
   # Following weird bug ASAN on CRAN I cannot replicate, check 4/5 not performed on non Windows
   if(Sys.info()["sysname"] != "Windows"){
@@ -802,6 +802,18 @@ for(dep in dep_all){
   m = feols(x3 ~ csw(.[,dep]), base)
   test(length(m), 3)
 }
+
+# offset in multiple outcomes // no error test
+
+offset_single_ols = feols(am ~ hp, offset = ~ log(qsec), data = mtcars)
+offset_mult_ols = feols(c(mpg, am) ~ hp, offset = ~ log(qsec), data = mtcars)
+
+test(coef(offset_mult_ols[[2]]), coef(offset_single_ols))
+
+offset_single_glm = feglm(am ~ hp, offset = ~ log(qsec), data = mtcars)
+offset_mult_glm = feglm(c(mpg, am) ~ hp, offset = ~ log(qsec), data = mtcars)
+
+test(coef(offset_mult_glm[[2]]), coef(offset_single_glm))
 
 
 

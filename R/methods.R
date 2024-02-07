@@ -226,7 +226,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
       xtra = x$model_info[[extra_info[i]]]
 
       if(length(xtra) == 1){
-        catma("{upper.first ? nm}: {xtra\n}")
+        catma("{upper.first ? nm}: {xtra}\n")
       } else {
         if(xtra$value != "Full sample"){
           catma("{upper.first ? nm} ({xtra$var}): {xtra$value}\n")
