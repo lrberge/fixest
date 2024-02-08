@@ -9,7 +9,7 @@
 #'
 #' Aggregates the results of multiple estimations and displays them in the form of either a Latex 
 #' table or a `data.frame`. Note that you will need the `booktabs` package for the Latex table to 
-#' render properly.
+#' render properly. See [`setFixest_etable`] to set the default values, and [`style.tex`] to customize Latex output.
 #'
 #' @inheritParams summary.fixest
 #' @inheritParams setFixest_nthreads
