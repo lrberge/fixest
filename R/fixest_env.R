@@ -581,9 +581,12 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
       ok = TRUE
       for(i in 1:n_pblm){
         var = var_pblm[i]
-        if(exists(var, envir = call_env, mode = "numeric")){
-          if(length(var) < 5){
-            var_pblm_dp = deparse_long(eval(str2lang(var), call_env))
+        # assumption of numeric value is too strong, 
+        # see https://github.com/lrberge/fixest/issues/426
+        if(exists(var, envir = call_env)){
+          var_value = eval(str2lang(var), call_env)
+          if(is.atomic(var_value) && length(var_value) < 5){
+            var_pblm_dp = deparse_long(var_value)
             type[i] = "scalar"
           } else {
             ok = FALSE
@@ -628,7 +631,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
           check_fml = function(x) !is.null(x) &&
             grepl("~", deparse_long(x), fixed = TRUE)
           my_funs$i = function(factor_var, var, ref, keep, bin = NULL,
-                     ref2, keep2, bin2 = NULL, ...){
+                               ref2, keep2, bin2 = NULL, ...){
 
             # returns TRUE / FALSE
             mc = match.call()

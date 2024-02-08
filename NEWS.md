@@ -20,10 +20,14 @@
 - fix bug when an `offset` was used in the context of multiple outcomes. Reported by @etiennebacher, #405
 
 - fix bug in the `collinearity` function. Reported by @grlju, #412
+
+- fix bug which allowed the estimation of models with variables from the environment while it shouldn't
  
 ## Improvements
 
 - functions `vcov` gains the argument `vcov_fix` to monitor whether to fix the covariance matrix with an eigenvalue decomposition (previously this was always turned on).
+
+- in estimations, the algorithm now allows to use scalars from the environment which are non numeric. Thanks to @kennchua and @kylebutts, #426
 
 ## Documentation
 

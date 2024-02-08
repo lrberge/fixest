@@ -297,13 +297,31 @@ res = feglm.fit(base$y_log, base[, 2:4], family = "poisson")
 res_bis = feglm(y_log ~ -1 + x1 + x2 + x3, base, family = "poisson")
 test(coef(res), coef(res_bis))
 
+####
+#### global variables ####
+####
+
+chunk("globals")
+
+est_reg = function(df, yvar, xvar, refgrp) {
+  feols(.[yvar] ~ i(.[xvar], ref = refgrp), data = df)
+}
+
+(est = est_reg(iris, "Sepal.Length", "Species", ref = "setosa"))
+
+# checking when it should not work
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+
+z = base$x1
+test(feols(y ~ z, base), "err")
+
 
 
 ####
 #### ... Collinearity ####
 ####
 
-cat("COLLINEARITY\n\n")
+chunk("COLLINEARITY")
 
 base = iris
 names(base) = c("y", "x1", "x2", "x3", "species")
