@@ -494,7 +494,10 @@
 #'  the `data.frame` is printed and returned invisibly.
 #'
 #' @seealso
-#' See also the main estimation functions [`femlm`], [`feols`] or [`feglm`]. Use [`summary.fixest`] 
+#' For styling the table: [`setFixest_etable`], [`style.tex`], [`style.df`].
+#' 
+#' See also the main estimation functions [`femlm`], [`feols`] or [`feglm`]. 
+#' Use [`summary.fixest`] 
 #' to see the results with the appropriate standard-errors, [`fixef.fixest`] to extract the 
 #' fixed-effects coefficients.
 #'

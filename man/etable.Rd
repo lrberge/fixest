@@ -706,7 +706,7 @@ the \code{data.frame} is printed and returned invisibly.
 \description{
 Aggregates the results of multiple estimations and displays them in the form of either a Latex
 table or a \code{data.frame}. Note that you will need the \code{booktabs} package for the Latex table to
-render properly.
+render properly. See \code{\link{setFixest_etable}} to set the default values, and \code{\link{style.tex}} to customize Latex output.
 }
 \details{
 The function \code{esttex} is equivalent to the function \code{etable} with argument \code{tex = TRUE}.
@@ -1168,7 +1168,10 @@ etable(est, dict = dict, tex = TRUE, notes = c("note 1", "source 1"))
 
 }
 \seealso{
-See also the main estimation functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}. Use \code{\link{summary.fixest}}
+For styling the table: \code{\link{setFixest_etable}}, \code{\link{style.tex}}, \code{\link{style.df}}.
+
+See also the main estimation functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}.
+Use \code{\link{summary.fixest}}
 to see the results with the appropriate standard-errors, \code{\link{fixef.fixest}} to extract the
 fixed-effects coefficients.
 }

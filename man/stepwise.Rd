@@ -6,6 +6,7 @@
 \alias{csw}
 \alias{sw0}
 \alias{csw0}
+\alias{mvsw}
 \title{Stepwise estimation tools}
 \usage{
 sw(...)
@@ -15,16 +16,18 @@ csw(...)
 sw0(...)
 
 csw0(...)
+
+mvsw(...)
 }
 \arguments{
 \item{...}{Represents formula variables to be added in a stepwise fashion to an estimation.}
 }
 \description{
-Functions to perform stepwise estimations.
+Functions to perform stepwise estimations in \code{fixest} models.
 }
 \details{
 To include multiple independent variables, you need to use the stepwise functions.
-There are 4 stepwise functions: sw, sw0, csw, csw0. Let's explain that.
+There are 5 stepwise functions: sw, sw0, csw, csw0. Let's explain that.
 
 Assume you have the following formula: \code{fml = y ~ x1 + sw(x2, x3)}. The stepwise
 function \code{sw} will estimate the following two models: \code{y ~ x1 + x2} and \code{y ~ x1 + x3}.
