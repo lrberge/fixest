@@ -4037,6 +4037,31 @@ hatvalues.fixest = function(model, ...){
   res
 }
 
+
+
+#' Residual degrees-of-freedom for `fixest` objects
+#' 
+#' Returns the residual degrees of freedom for a fitted `fixest` object
+#' 
+#' 
+#' @param object A `fixest` estimation, e.g. from [`feols`] or [`feglm`].
+#' @param ... Not currently used
+#' 
+#' @return 
+#' It returns an integer scalar giving the residuals degrees of freedom of the estimation.
+#' 
+#' @seealso 
+#' The function [`degrees_freedom`] in `fixest`.
+#' 
+#' @examples 
+#' 
+#' est = feols(mpg ~ hp, mtcars)
+#' df.residual(est)
+#' 
+df.residual.fixest = function(object, ...){
+  degrees_freedom_iid(object, type = "resid")
+}
+
 ####
 #### sandwich ####
 ####

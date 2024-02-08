@@ -7,6 +7,8 @@
 
 - new function `fixest_data` to access the original data set used at estimation-time. Suggestion by Kyle Butts, #465
 
+- new method `df.residual.fixest`. Thanks to @rferrali, #455
+
 ## Bugs
 
 - fix bug when the covariance matrix was *very* ill-defined. Thanks to Gianluca Russo.

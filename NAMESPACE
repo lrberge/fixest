@@ -118,6 +118,7 @@ S3method(deviance, fixest)
 S3method(sigma, fixest)
 S3method(weights, fixest)
 S3method(hatvalues, fixest)
+S3method(df.residual, fixest)
 
 # Stats methods => fixest_multi
 S3method(coef, fixest_multi)
