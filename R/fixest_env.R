@@ -4000,14 +4000,14 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
 
 #' Stepwise estimation tools
 #'
-#' Functions to perform stepwise estimations.
+#' Functions to perform stepwise estimations in `fixest` models.
 #'
 #' @param ... Represents formula variables to be added in a stepwise fashion to an estimation.
 #'
 #' @details
 #'
 #' To include multiple independent variables, you need to use the stepwise functions. 
-#' There are 4 stepwise functions: sw, sw0, csw, csw0. Let's explain that.
+#' There are 5 stepwise functions: `sw`, `sw0`, `csw`, `csw0` and `mvsw`. Let's explain that.
 #'
 #' Assume you have the following formula: `fml = y ~ x1 + sw(x2, x3)`. The stepwise 
 #' function `sw` will estimate the following two models: `y ~ x1 + x2` and `y ~ x1 + x3`. 
@@ -4022,12 +4022,16 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
 #' without the stepwise elements to be estimated: in other words, 
 #' `fml = y ~ x1 + csw0(x2, x3)` leads to the following three models: `y ~ x1`, 
 #' `y ~ x1 + x2` and `y ~ x1 + x2 + x3`.
-#'
+#' 
+#' The last stepwise function, `mvsw`, refers to 'multiverse' stepwise. It will estimate 
+#' as many models as there are unique combinations of stepwise variables. For example
+#' `fml = y ~ x1 + mvsw(x2, x3)` will estimate `y ~ x1`, `y ~ x1 + x2`, `y ~ x1 + x3`,
+#' `y ~ x1 + x2 + x3`. Beware that the number of estimations grows pretty fast (`2^n`, 
+#' with `n` the number of stewise variables)!
 #'
 #' @examples
 #'
-#' base = iris
-#' names(base) = c("y", "x1", "x2", "x3", "species")
+#' base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
 #'
 #' # Regular stepwise
 #' feols(y ~ sw(x1, x2, x3), base)
@@ -4037,6 +4041,9 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
 #'
 #' # Using the 0
 #' feols(y ~ x1 + x2 + sw0(x3), base)
+#' 
+#' # Multiverse stepwise
+#' feols(y ~ x1 + mvsw(x2, x3), base)
 #'
 #' @name stepwise
 NULL
@@ -4085,19 +4092,6 @@ csw0 = sw0 = function(...){
   res
 }
 
-# To add a proper documentation:
-
-#' @rdname stepwise
-sw = sw
-
-#' @rdname stepwise
-csw = csw
-
-#' @rdname stepwise
-sw0 = sw0
-
-#' @rdname stepwise
-csw0 = csw0
 
 mvsw = function(...){
   # It returns a stepwise function
@@ -4127,6 +4121,22 @@ mvsw = function(...){
   res
 }
 
+# To add a proper documentation:
+
+#' @rdname stepwise
+sw = sw
+
+#' @rdname stepwise
+csw = csw
+
+#' @rdname stepwise
+sw0 = sw0
+
+#' @rdname stepwise
+csw0 = csw0
+
+#' @rdname stepwise
+mvsw = mvsw
 
 extract_stepwise = function(fml, tms, all_vars = TRUE){
   # fml = y ~ sw(x1, x2)

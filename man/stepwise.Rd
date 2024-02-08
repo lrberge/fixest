@@ -27,7 +27,7 @@ Functions to perform stepwise estimations in \code{fixest} models.
 }
 \details{
 To include multiple independent variables, you need to use the stepwise functions.
-There are 5 stepwise functions: sw, sw0, csw, csw0. Let's explain that.
+There are 5 stepwise functions: \code{sw}, \code{sw0}, \code{csw}, \code{csw0} and \code{mvsw}. Let's explain that.
 
 Assume you have the following formula: \code{fml = y ~ x1 + sw(x2, x3)}. The stepwise
 function \code{sw} will estimate the following two models: \code{y ~ x1 + x2} and \code{y ~ x1 + x3}.
@@ -42,11 +42,16 @@ and \code{y ~ x1 + x2 + x3}. The \code{0} has the same meaning and would also le
 without the stepwise elements to be estimated: in other words,
 \code{fml = y ~ x1 + csw0(x2, x3)} leads to the following three models: \code{y ~ x1},
 \code{y ~ x1 + x2} and \code{y ~ x1 + x2 + x3}.
+
+The last stepwise function, \code{mvsw}, refers to 'multiverse' stepwise. It will estimate
+as many models as there are unique combinations of stepwise variables. For example
+\code{fml = y ~ x1 + mvsw(x2, x3)} will estimate \code{y ~ x1}, \code{y ~ x1 + x2}, \code{y ~ x1 + x3},
+\code{y ~ x1 + x2 + x3}. Beware that the number of estimations grows pretty fast (\code{2^n},
+with \code{n} the number of stewise variables)!
 }
 \examples{
 
-base = iris
-names(base) = c("y", "x1", "x2", "x3", "species")
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
 
 # Regular stepwise
 feols(y ~ sw(x1, x2, x3), base)
@@ -56,5 +61,8 @@ feols(y ~ csw(x1, x2, x3), base)
 
 # Using the 0
 feols(y ~ x1 + x2 + sw0(x3), base)
+
+# Multiverse stepwise
+feols(y ~ x1 + mvsw(x2, x3), base)
 
 }

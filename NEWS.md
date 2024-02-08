@@ -29,6 +29,8 @@
 
 - fix typos and display issues thanks to: @statzhero, @eyayaw, @etiennebacher, @raffaem.
 
+- add missing documentation of `mvsw`, thanks to @grantmcdermott, #425
+
 # fixest 0.11.2
 
 ## Bugs
