@@ -207,9 +207,9 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 
   if(isTRUE(x$iv)){
     glue = function(...) paste(..., collapse = ", ")
-    first_line = sma("TSLS estimation, Dep. Var.: {as.character(x$fml)[[2]]}\n",
-                     "   Endo.: {', 'c ? get_vars(x$iv_endo_fml)}\n",
-                     "   Instr.: {', 'c ? x$iv_inst_names}\n")
+    first_line = sma("TSLS estimation - Dep. Var.: {as.character(x$fml)[[2]]}\n",
+                     "                  Endo.    : {', 'c ? get_vars(x$iv_endo_fml)}\n",
+                     "                  Instr.   : {', 'c ? x$iv_inst_names}\n")
     second_line = sma("{Nth.upper ? x$iv_stage} stage: Dep. Var.: ", as.character(x$fml)[[2]], "\n")
     catma(first_line, second_line)
   } else {
