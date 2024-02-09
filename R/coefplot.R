@@ -1577,8 +1577,8 @@ coefplot = function(object, ..., style = NULL, sd, ci_low, ci_high, df.t = NULL,
 
 
 coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
-             keep, drop, order, ci_level = 0.95, df.t = NULL, ref = "auto",
-             only.i = TRUE, sep, as.multiple = FALSE){
+                         keep, drop, order, ci_level = 0.95, df.t = NULL, ref = "auto",
+                         only.i = TRUE, sep, as.multiple = FALSE){
 
   # get the default for:
   # dict, ci.level, ref
