@@ -156,7 +156,7 @@ class sMat{
   sMat() = delete;
 
 public:
-  sMat(SEXP);
+  sMat(SEXP, bool);
 
   int nrow(){return n;};
   int ncol(){return K;};
@@ -165,7 +165,7 @@ public:
   double operator()(int, int);
 };
 
-sMat::sMat(SEXP x){
+sMat::sMat(SEXP x, bool single_obs = false){
 
   if(TYPEOF(x) == VECSXP){
     // x can be a list of either vectors or matrices
@@ -231,7 +231,7 @@ sMat::sMat(SEXP x){
       K = pdim[1];
     }
 
-    if(n == 1 && K == 1){
+    if(!single_obs && (n == 1 && K == 1)){
       // => absence of data
       n = 0;
       K = 0;
@@ -1797,8 +1797,8 @@ void stayIdleCheckingInterrupt(bool *stopnow, vector<int> &jobdone, int n_vars, 
 // Loop over demean_single
 // [[Rcpp::export]]
 List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax, SEXP r_nb_id_Q,
-           SEXP fe_id_list, SEXP table_id_I, SEXP slope_flag_Q, SEXP slope_vars_list,
-           SEXP r_init, int nthreads, bool save_fixef = false){
+                SEXP fe_id_list, SEXP table_id_I, SEXP slope_flag_Q, SEXP slope_vars_list,
+                SEXP r_init, int nthreads, bool save_fixef = false){
   // main fun that calls demean_single
   // preformats all the information needed on the fixed-effects
   // y: the dependent variable
@@ -1827,6 +1827,20 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
     n_obs = m_X.nrow();
   }
   bool useX = n_vars_X > 0;
+  
+  if(n_obs == 0 || n_obs == 1){
+    // The data set is of length 1!!!!
+    n_obs = 1;
+    
+    m_y = sMat(y, true);
+    n_vars_y = m_y.ncol();
+    useY = true;
+    
+    m_X = sMat(X_raw, true);
+    n_vars_X = m_X.ncol();
+    useX = n_vars_X > 0;
+    
+  }
 
   int n_vars = n_vars_y + n_vars_X;
 
@@ -1836,7 +1850,8 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
   bool saveInit = ((isInit || init[0] != 0) && Q > 1) || init[0] == 666;
 
   // Creating the object containing all information on the FEs
-  FEClass FE_info(n_obs, Q, r_weights, fe_id_list, r_nb_id_Q, table_id_I, slope_flag_Q, slope_vars_list);
+  FEClass FE_info(n_obs, Q, r_weights, fe_id_list, r_nb_id_Q, table_id_I, slope_flag_Q, 
+                  slope_vars_list);
   int nb_coef_T = FE_info.nb_coef_T;
 
   // output vector: (Note that if the means are provided, we use that vector and will modify it in place)
@@ -1969,7 +1984,6 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
   }
 
   res["X_demean"] = X_demean;
-
 
 
   if(is_y_list && useY){

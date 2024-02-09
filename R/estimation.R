@@ -1594,6 +1594,9 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
   #
 
   onlyFixef = length(X) == 1 || ncol(X) == 0
+  if(length(y) == 1){
+    onlyFixef = is.null(dim(X)) || ncol(X) == 0
+  }
 
   if(fromGLM){
     res = list(coefficients = NA)
@@ -1671,7 +1674,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 
         res$convStatus = FALSE
 
-        res$message = paste0("tol: ", signif_plus(fixef.tol), ", iter: ", max(res$iterations))
+        res$message = paste0("tol: ", fsignif(fixef.tol), ", iter: ", max(res$iterations))
 
         if(fromGLM){
           res$warn_varying_slope = msg
@@ -1719,7 +1722,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
   if(mem.clean){
     gc()
   }
-
+  
   if(!onlyFixef){
 
     est = ols_fit(y_demean, X_demean, weights, correct_0w, collin.tol, nthreads,
@@ -1739,13 +1742,9 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
       all_vars = colnames(X)
 
       if(isFixef){
-        msg = paste0(ifsingle(all_vars, "The only variable ", "All variables"), 
-                     enumerate_items(all_vars, "quote.is", nmax = 3), 
-                     " collinear with the fixed effects. In such circumstances, the estimation is void.")
+        msg = sma("{$(The only variable;All variables)}, {enum.q.3 ? all_vars}, {$are} collinear with the fixed effects. In such circumstances, the estimation is void.")
       } else {
-        msg =  paste0(ifsingle(all_vars, "The only variable ", "All variables"), 
-                      enumerate_items(all_vars, "quote.is", nmax = 3), 
-                      " virtually constant and equal to 0. In such circumstances, the estimation is void.")
+        msg = sma("{$(The only variable;All variables)}, {enum.q.3 ? all_vars}, {$are} virtually constant and equal to 0. In such circumstances, the estimation is void.")
       }
 
       if(IN_MULTI || !warn){
@@ -1761,7 +1760,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
         return(fixest_NA_results(env))
 
       } else {
-        stop_up(msg, up = fromGLM)
+        stop_up(msg, up = 1 * fromGLM)
       }
 
 

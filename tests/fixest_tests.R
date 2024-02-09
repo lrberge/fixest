@@ -256,6 +256,11 @@ test(feols(y ~ x1 | factor(fe1^fe2), base), "err")
 
 res = feols(y ~ x1 | bin(x2, "bin::1")^fe1 + fe1^fe2, base)
 
+# 1 obs (after FE removal) estimation
+base = data.frame(y = c(1, 0), fe = c(1, 2), x = c(1, 0))
+test(fepois(y ~ x | fe, base), "err")
+# no error
+res = fepois(y ~ 1 | fe, base)
 
 
 

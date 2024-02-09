@@ -22,6 +22,8 @@
 - fix bug in the `collinearity` function. Reported by @grlju, #412
 
 - fix bug which allowed the estimation of models with variables from the environment while it shouldn't
+
+- fix bug in the demeaning code when the data set in input is of length 1. Reported by @da-zar with help of @etiennebacher, #283
  
 ## Improvements
 
