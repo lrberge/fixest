@@ -844,6 +844,8 @@ lhs = c("mpg", "wt")
 est_lhs = feols(.[lhs] ~ disp | hp ~ qsec, data = mtcars)
 test(length(est_lhs), 2)
 
+est_lhs = feols(..("mpg|wt") ~ disp | hp ~ qsec, data = mtcars)
+test(length(est_lhs), 2)
 
 
 ####
