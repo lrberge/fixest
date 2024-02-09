@@ -838,6 +838,11 @@ offset_mult_glm = feglm(c(mpg, am) ~ hp, offset = ~ log(qsec), data = mtcars)
 
 test(coef(offset_mult_glm[[2]]), coef(offset_single_glm))
 
+# LHS expansion with IVs
+
+lhs = c("mpg", "wt")
+est_lhs = feols(.[lhs] ~ disp | hp ~ qsec, data = mtcars)
+test(length(est_lhs), 2)
 
 
 

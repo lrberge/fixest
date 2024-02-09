@@ -26,6 +26,8 @@
 - fix bug in the demeaning code when the data set in input is of length 1. Reported by @da-zar with help of @etiennebacher, #283
 
 - fix bug in `predict` when the `offset` was placed in a formula and not passed as a regular argument. Reported by @jl-flores, #309
+
+- fix bug in TSLS estimations when the formula contained multiple LHS to be expanded with the dot square bracket operator. Reported by @svraka, #395
  
 ## Improvements
 

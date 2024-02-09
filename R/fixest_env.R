@@ -462,13 +462,18 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
     fml = formula(fml) # we regularize the formula to check it
 
     # We apply expand for macros => we return fml_no_xpd
-    if(length(getFixest_fml()) > 0 || any(c("..", "[", "regex", "mvsw") %in% all.vars(fml, functions = TRUE)) ||
-       any(grepl("[[:alnum:]]\\.\\.$", all.vars(fml)))){
+    if(length(getFixest_fml()) > 0 || 
+         any(c("..", "[", "regex", "mvsw") %in% all.vars(fml, functions = TRUE)) ||
+         any(grepl("[[:alnum:]]\\.\\.$", all.vars(fml)))){
 
       fml_no_xpd = fml
 
       # Special beavior .[y] for multiple LHSs
       lhs_fml = fml[[2]]
+      is_iv_fml = lhs_fml[[1]] == "~"
+      if(is_iv_fml){
+        lhs_fml = lhs_fml[[2]]
+      }
 
       if(length(lhs_fml) == 1){
         # nothing
@@ -481,7 +486,12 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
         my_dsb[[4]] = lhs_fml[[3]]
 
         new_lhs_fml[[2]] = my_dsb
-        fml[[2]] = new_lhs_fml
+        
+        if(is_iv_fml){
+          fml[[2]][[2]] = new_lhs_fml
+        } else {
+          fml[[2]] = new_lhs_fml
+        }        
 
       } else if(as.character(lhs_fml[[1]])[1] %in% c("..", "regex") &&
             length(lhs_fml) == 2 && is.character(lhs_fml[[2]])){
@@ -506,7 +516,12 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
         new_lhs_txt = paste0("c(", paste0(vars, collapse = ", "), ")")
         new_lhs_fml = error_sender(str2lang(new_lhs_txt), 
                                    "In the LHS, the expansion of the regex leads to the following invalid expression: '", new_lhs_txt, "'.")
-        fml[[2]] = new_lhs_fml
+        
+        if(is_iv_fml){
+          fml[[2]][[2]] = new_lhs_fml
+        } else {
+          fml[[2]] = new_lhs_fml
+        }  
       }
 
       # Expansion
@@ -3990,7 +4005,9 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
     }
 
     new_fml_linear = .xpd(..y ~ ..inst + ..rhs,
-               ..y = fml_iv_endo, ..rhs = fml_linear[[3]], ..inst = fml_iv[[3]])
+                          ..y = fml_iv_endo, 
+                          ..rhs = fml_linear[[3]], 
+                          ..inst = fml_iv[[3]])
     res$fml = res$fml_all$linear = new_fml_linear
     res$fml_all$iv = NULL
   }
