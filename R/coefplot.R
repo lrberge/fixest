@@ -1598,6 +1598,9 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
   multiple_est = FALSE
   NO_NAMES = FALSE
   is_iplot = only.i
+  
+  set_up(1 + is_iplot)
+  
   AXIS_AS_NUM = FALSE
   if(is_internal == FALSE && ((is.list(object) && class(object)[1] == "list") || "fixest_multi" %in% class(object))){
     # This is a list of estimations
@@ -1633,7 +1636,7 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
         prms = try(eval(mc), silent = TRUE)
 
         if("try-error" %in% class(prms)){
-          stop("The ", n_th(i), " element of 'object' raises and error:\n", prms)
+          stop_up("The {nth ? i} element of 'object' raises and error:\n", prms)
         }
 
         # Some meta variables
@@ -1774,11 +1777,11 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
         names(estimate) = rownames(object)
 
       } else {
-        stop("Argument 'object' is a matrix but it should contain 4 columns (the two first ones should be reporting the estimate and the standard-error). Either provide an appropriate matrix or give directly the vector of estimated coefficients in arg. estimate.")
+        stop_up("Argument 'object' is a matrix but it should contain 4 columns (the two first ones should be reporting the estimate and the standard-error). Either provide an appropriate matrix or give directly the vector of estimated coefficients in arg. estimate.")
       }
       
     } else if(length(object[1]) > 1 || !is.null(dim(object)) || !is.numeric(object)){
-      stop("Argument 'object' must be either: i) an estimation object, ii) a matrix of coefficients table, or iii) a numeric vector of the point estimates. Currently it is neither of the three.")
+      stop_up("Argument 'object' must be either: i) an estimation object, ii) a matrix of coefficients table, or iii) a numeric vector of the point estimates. Currently it is neither of the three.")
     } else {
       # it's a numeric vector
       estimate = object
@@ -1787,7 +1790,7 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
     n = length(estimate)
 
     if(missing(sd)){
-      if(missing(ci_low) || missing(ci_high)) stop("If 'sd' is not provided, you must provide the arguments 'ci_low' and 'ci_high'.")
+      if(missing(ci_low) || missing(ci_high)) stop_up("If 'sd' is not provided, you must provide the arguments 'ci_low' and 'ci_high'.")
 
       varlist$ci = NULL
     } else {
@@ -1839,13 +1842,13 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
     xlab_suggest = NULL
     if(is_iplot){
       if(is.null(names(estimate))){
-        stop("'iplot' must be used only with fixest objects containing variables created with i(). Currently it does not seem to be the case.")
+        stop_up("'iplot' must be used only with fixest objects containing variables created with i(). Currently it does not seem to be the case.")
       }
 
       all_vars = names(estimate)
 
       if(!any(grepl("::", all_vars))){
-        stop("'iplot' must be used only with fixest objects containing variables created with i(). Currently it does not seem to be the case.")
+        stop_up("'iplot' must be used only with fixest objects containing variables created with i(). Currently it does not seem to be the case.")
       }
 
       # Four cases:
@@ -1945,18 +1948,18 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
 
         if(i_running == 0){
           if(length(mm_info) == 0){
-            stop("In iplot(), no variable created with i() found (it works only with that kind of variables)")
+            stop_up("In iplot(), no variable created with i() found (it works only with that kind of variables)")
           }
 
           if(ANY_TWO_FACTORS){
-            stop("In iplot(), no valid variable created with i() found. Note that it does not work when i() interacts two factors.")
+            stop_up("In iplot(), no valid variable created with i() found. Note that it does not work when i() interacts two factors.")
           }
 
-          stop("In iplot(), no valid variable created with i() found. Note that if there are interactions, they should be created with something of the form i(factor_var, num_var), otherwise the support is limited.")
+          stop_up("In iplot(), no valid variable created with i() found. Note that if there are interactions, they should be created with something of the form i(factor_var, num_var), otherwise the support is limited.")
 
         }
 
-        stop("In iplot(), the value of 'i.select' (=", i.select, ") exceeds the number of valid i() variables found (=", i_running, "). Please give a lower number.")
+        stop_up("In iplot(), the value of 'i.select' (=", i.select, ") exceeds the number of valid i() variables found (=", i_running, "). Please give a lower number.")
       }
 
       # "keep" here works differently => new arg. i.select?
@@ -2044,7 +2047,9 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
 
     # setting the names of the estimate
     if(!missing(x)){
-      if(length(x) != n) stop("Argument 'x' must have the same length as the number of coefficients (currently ", length(x), " vs ", n, ").")
+      if(length(x) != n){
+        stop_up("Argument 'x' must have the same length as the number of coefficients (currently {len ? x} vs {n ? n}).")
+      }
 
       if(!is.numeric(x)){
         names(estimate) = x
@@ -2063,7 +2068,7 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
         if(!is.numeric(ref) || length(ref) > 1){
           check_arg(ref, "numeric scalar")
           if(is.logical(ref)){
-            stop("In this context, argument 'ref' must be a numeric scalar.")
+            stop_up("In this context, argument 'ref' must be a numeric scalar.")
           }
         } else {
           names(ref) = "reference"
@@ -2084,7 +2089,7 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
 
         if(!isScalar(ref, int = TRUE)){
           reason = ifelse(length(ref) == 1, " an integer", " of length 1")
-          stop("Argument 'ref' must be either: a single character, either a list or a named integer vector of length 1. The integer gives the position of the reference among the coefficients. Currently this is not ", reason, ".")
+          stop_up("Argument 'ref' must be either: a single character, either a list or a named integer vector of length 1. The integer gives the position of the reference among the coefficients. Currently this is not ", reason, ".")
         }
       }
 
@@ -2135,8 +2140,15 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
       all_vars = keep_apply(all_vars, keep)
 
       if(length(all_vars) == 0){
-        msg = if(is_iplot) " Didn't you mean to use 'i.select'?" else ""
-        stop("Argument 'keep' has removed all variables!", msg)
+        msg = ""
+        if(is_iplot){
+          msg = sma(" Didn't you mean to use 'i.select'? ",
+                    "\nAlso note that in `iplot`, the variables names are the **values** that should be in the x-axis.",
+                    "\nFYI, valid x-axis values are: {bq, '5|etc'K, ', 'c ? valid_vars}.",
+                    valid_vars = unique(prms$estimate_names))
+        }
+        
+        stop_up("Argument 'keep' has removed all variables!", msg)
       }
 
       prms = prms[prms$estimate_names %in% all_vars,]
@@ -2146,7 +2158,7 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
       all_vars = drop_apply(all_vars, drop)
 
       if(length(all_vars) == 0){
-        stop("Argument 'drop' has removed all variables!")
+        stop_up("Argument 'drop' has removed all variables!")
       }
 
       prms = prms[prms$estimate_names %in% all_vars,]
@@ -2429,6 +2441,8 @@ gen_iplot = function(){
 ####
 #### Default setting ####
 ####
+
+
 
 #' Sets the defaults of coefplot
 #'

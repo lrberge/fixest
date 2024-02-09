@@ -31,6 +31,8 @@
 
 - in estimations, the algorithm now allows to use scalars from the environment which are non numeric. Thanks to @kennchua and @kylebutts, #426
 
+- improve error messages in iplot. 
+
 ## Documentation
 
 - fix typos and display issues thanks to: @statzhero, @eyayaw, @etiennebacher, @raffaem.
