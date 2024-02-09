@@ -1354,6 +1354,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
       }
 
       offset = .xpd(rhs = offset_values)
+      mc_origin$offset = offset
     }
 
     if(length(linear.varnames) > 0 || attr(fml_terms, "intercept") == 1){

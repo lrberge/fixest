@@ -2828,7 +2828,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
   offset = object$call$offset
   if(!is.null(offset)){
     # evaluation of the offset
-
+    
     if(is.numeric(offset)){
       # simple numeric offset
       value_offset = offset

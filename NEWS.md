@@ -24,6 +24,8 @@
 - fix bug which allowed the estimation of models with variables from the environment while it shouldn't
 
 - fix bug in the demeaning code when the data set in input is of length 1. Reported by @da-zar with help of @etiennebacher, #283
+
+- fix bug in `predict` when the `offset` was placed in a formula and not passed as a regular argument. Reported by @jl-flores, #309
  
 ## Improvements
 

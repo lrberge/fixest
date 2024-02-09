@@ -994,6 +994,9 @@ o1 = feols(y ~ x1 + offset(x2) + offset(x3^2 + 3), base)
 o2 = feols(y ~ x1, base, offset = ~x2 + x3^2 + 3)
 test(coef(o1), coef(o2))
 
+test(predict(o1, newdata = head(base)), 
+     predict(o2, newdata = head(base)))
+
 # error
 test(feols(y ~ x1 + offset(x2), base, offset = ~x3), "err")
 
