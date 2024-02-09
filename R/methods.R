@@ -213,7 +213,9 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
     second_line = sma("{Nth.upper ? x$iv_stage} stage: Dep. Var.: ", as.character(x$fml)[[2]], "\n")
     catma(first_line, second_line)
   } else {
-    cat(half_line, ", Dep. Var.: ", as.character(x$fml)[[2]], "\n", sep="")
+    depvar_name = as.character(x$fml)[[2]]
+    sep_value = if(nchar(half_line) + nchar(depvar_name) <= 60) ", " else "\n"
+    cat(half_line, sep_value, "Dep. Var.: ", depvar_name, "\n", sep="")
   }
 
 
