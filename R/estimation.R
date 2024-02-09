@@ -1742,9 +1742,9 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
       all_vars = colnames(X)
 
       if(isFixef){
-        msg = sma("{$(The only variable;All variables)}, {enum.q.3 ? all_vars}, {$are} collinear with the fixed effects. In such circumstances, the estimation is void.")
+        msg = sma("{$(The only variable;All variables)}, {enum.q.3 ? all_vars}, {$are} collinear with the fixed effects. Without doubt, your model is misspecified.")
       } else {
-        msg = sma("{$(The only variable;All variables)}, {enum.q.3 ? all_vars}, {$are} virtually constant and equal to 0. In such circumstances, the estimation is void.")
+        msg = sma("{$(The only variable;All variables)}, {enum.q.3 ? all_vars}, {$are} virtually constant and equal to 0. Without doubt, your model is misspecified.")
       }
 
       if(IN_MULTI || !warn){
