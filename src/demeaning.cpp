@@ -1726,7 +1726,7 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args){
 }
 
 void demean_single_gnl(int v, PARAM_DEMEAN* args){
-  // v: variable identifier to demean
+  // v: integer identifying the variable to demean
 
   // Algorithm to quickly get the means
   // Q >= 3 => acceleration for 15 iter
@@ -1742,15 +1742,18 @@ void demean_single_gnl(int v, PARAM_DEMEAN* args){
     // demean_acc_gnl(v, iterMax, args);
   } else {
     // 15 iterations
-    bool conv = demean_acc_gnl(v, 15, args);
+    bool conv = demean_acc_gnl(v, 50, args);
 
-    if(conv == false && iterMax > 15){
+    if(conv == false && iterMax > 50){
       // 2 convergence
-      demean_acc_2(v, iterMax / 2 - 15, args);
+      int iter_max_new = iterMax / 2 - 50;
+      if(iter_max_new <= 0) iter_max_new = 1;
+      demean_acc_2(v, iter_max_new, args);
 
       if(Q > 2){
         // re-acceleration
-        demean_acc_gnl(v, iterMax / 2, args);
+        int iter_previous = args->p_iterations_all[v];
+        demean_acc_gnl(v, iterMax - iter_previous, args);
       }
     }
   }
