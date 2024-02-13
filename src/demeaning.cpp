@@ -1344,12 +1344,24 @@ void demean_acc_2(int v, int iterMax, PARAM_DEMEAN *args){
 
     ++iter;
     
-    int n_new_algo = 50;
+    int n_new_algo = 5;
     int version = 1;
     if(iter >= n_new_algo){
       // we add a few iterations before the acceleration
       if(version == 0){
         FE_info.compute_fe_coef_2(p_GX, p_Y, p_coef_beta, p_sum_in_out);
+        FE_info.compute_fe_coef_2(p_Y, p_GY, p_coef_beta, p_sum_in_out);
+        FE_info.compute_fe_coef_2(p_GY, p_Y, p_coef_beta, p_sum_in_out);
+        FE_info.compute_fe_coef_2(p_Y, p_GY, p_coef_beta, p_sum_in_out);
+        FE_info.compute_fe_coef_2(p_GY, p_Y, p_coef_beta, p_sum_in_out);
+        FE_info.compute_fe_coef_2(p_Y, p_GY, p_coef_beta, p_sum_in_out);
+        FE_info.compute_fe_coef_2(p_GY, p_GX, p_coef_beta, p_sum_in_out);
+        
+        FE_info.compute_fe_coef_2(p_GX, p_Y, p_coef_beta, p_sum_in_out);
+        FE_info.compute_fe_coef_2(p_Y, p_GY, p_coef_beta, p_sum_in_out);
+        FE_info.compute_fe_coef_2(p_GY, p_Y, p_coef_beta, p_sum_in_out);
+        FE_info.compute_fe_coef_2(p_Y, p_GY, p_coef_beta, p_sum_in_out);
+        FE_info.compute_fe_coef_2(p_GY, p_Y, p_coef_beta, p_sum_in_out);
         FE_info.compute_fe_coef_2(p_Y, p_GY, p_coef_beta, p_sum_in_out);
         FE_info.compute_fe_coef_2(p_GY, p_Y, p_coef_beta, p_sum_in_out);
         FE_info.compute_fe_coef_2(p_Y, p_GGX, p_coef_beta, p_sum_in_out);
@@ -1363,6 +1375,13 @@ void demean_acc_2(int v, int iterMax, PARAM_DEMEAN *args){
         FE_info.compute_fe_coef_2(p_X, p_GX, p_coef_beta, p_sum_in_out);
         
         FE_info.compute_fe_coef_2(p_GX, p_GGX, p_coef_beta, p_sum_in_out);
+      } else if(version == 3){
+        FE_info.compute_fe_coef_2(p_GX, p_Y, p_coef_beta, p_sum_in_out);
+        FE_info.compute_fe_coef_2(p_Y, p_GX, p_coef_beta, p_sum_in_out);
+        
+        FE_info.compute_fe_coef_2(p_GX, p_Y, p_coef_beta, p_sum_in_out);
+        FE_info.compute_fe_coef_2(p_Y, p_GY, p_coef_beta, p_sum_in_out);
+        FE_info.compute_fe_coef_2(p_GY, p_GGX, p_coef_beta, p_sum_in_out);
       }
     } else {
       // GGX -- origin: GX, destination: GGX
@@ -1373,15 +1392,11 @@ void demean_acc_2(int v, int iterMax, PARAM_DEMEAN *args){
     numconv = dm_update_X_IronsTuck(n_a, X, GX, GGX, delta_GX, delta2_X);
     if(numconv) break;
     
-    if(iter >= n_new_algo){
-      FE_info.compute_fe_coef_2(p_X, p_Y, p_coef_beta, p_sum_in_out);
-      FE_info.compute_fe_coef_2(p_Y, p_GY, p_coef_beta, p_sum_in_out);
-      FE_info.compute_fe_coef_2(p_GY, p_Y, p_coef_beta, p_sum_in_out);
-      FE_info.compute_fe_coef_2(p_Y, p_GX, p_coef_beta, p_sum_in_out);
-    } else {
-      // GX -- origin: X, destination: GX
-      FE_info.compute_fe_coef_2(p_X, p_GX, p_coef_beta, p_sum_in_out);
-    }
+    // X => outcome of the function
+    // FE_info.compute_fe_coef_2(p_X, p_Y, p_coef_beta, p_sum_in_out);
+    // FE_info.compute_fe_coef_2(p_Y, p_X, p_coef_beta, p_sum_in_out);
+    
+    FE_info.compute_fe_coef_2(p_X, p_GX, p_coef_beta, p_sum_in_out);
 
     keepGoing = false;
     for(int i=0 ; i<n_a ; ++i){
