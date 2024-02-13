@@ -3270,8 +3270,17 @@ update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
   call_clear$fml = as.call(fml_new)
 
   if(!evaluate) return(call_clear)
-
-  res = eval(call_clear, parent.frame(nframes))
+  
+  # Data: if the data has been saved AND isn't provided in input, the new estimation
+  # will be within the saved data set
+  
+  if(!is.null(object$data) && !"data" %in% dot_names){
+    prms = list(DATA_SAVED = object$data)
+    call_clear[["data"]] = quote(DATA_SAVED)
+    res = eval(call_clear, prms, parent.frame(nframes))
+  } else {
+    res = eval(call_clear, parent.frame(nframes))
+  }
 
   res
 }
