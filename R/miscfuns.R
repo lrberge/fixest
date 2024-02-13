@@ -2679,10 +2679,9 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
             id_current = id_current + n_vs
           }
         }
-
-        # slope.flag must be reordered afterwards
-        slope.flag = slope.flag[new_order]
       }
+      # slope.flag must be reordered afterwards
+      slope.flag = slope.flag[new_order]
     }
   }
 
