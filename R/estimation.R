@@ -1632,7 +1632,8 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
       gc()
     }
     
-    filename = ifelse(length(fixef_sizes) == 2, "data_1e6_FE2.RData", "data_1e6_FE3.RData")
+    # filename = ifelse(length(fixef_sizes) == 2, "data_1e6_FE2.RData", "data_1e6_FE3.RData")
+    filename = "data_issue_323.RData"
     save(y, X, weights, fixef.iter, fixef.tol, fixef_sizes, fixef_id_list, 
          fixef_table_vector, slope_flag, slope_vars, init, nthreads, 
          file = sma("./../_DEVELOPMENT/improve-convergence/{filename}"))
@@ -2884,7 +2885,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
       while(!is.finite(dev) || dev_evol > 0 || !valideta(eta_new) || !validmu(mu)){
 
         if(iter == 1 && (is.finite(dev) && valideta(eta_new) && validmu(mu)) && iter_sh >= 2){
-          # BEWARE FIRST ITERATION:
+# BEWARE FIRST ITERATION:
           # at first iteration, the deviance can be higher than the init, and SH may not help
           # we need to make sure we get out of SH before it's messed up
           break

@@ -1012,7 +1012,8 @@ void FEClass::add_wfe_coef_to_mu_internal(int q, double *fe_coef_C, double *out_
 
 }
 
-void FEClass::add_2_fe_coef_to_mu(double *fe_coef_a, double *fe_coef_b, double *in_out_C, double *out_N, bool update_beta = true){
+void FEClass::add_2_fe_coef_to_mu(double *fe_coef_a, double *fe_coef_b, double *in_out_C, 
+                                  double *out_N, bool update_beta = true){
   // We add the value of the FE coefficients to each observation
 
 
@@ -1555,16 +1556,6 @@ void compute_fe_gnl(double *p_fe_coef_origin, double *p_fe_coef_destination,
 
   // We update each cluster coefficient, starting from Q (the smallest one)
 
-  // std::fill_n(p_sum_other_means, n_obs, 0);
-  // // we start with Q-1
-  // for(int q=0 ; q<(Q-1) ; ++q){
-  //   FE_info.add_wfe_coef_to_mu(q, p_fe_coef_origin, p_sum_other_means);
-  // }
-
-  // Rcout << "Head of sum_other_means: ";
-  // for(int i=0 ; i<10 ; ++i) Rcout << p_sum_other_means[i] << ", ";
-  // Rcout << "\n";
-
   for(int q=Q-1 ; q>=0 ; q--){
     
     // STEP 1: we compute the sum of the other coef values
@@ -1588,27 +1579,6 @@ void compute_fe_gnl(double *p_fe_coef_origin, double *p_fe_coef_destination,
 
     // if(int q == 0){
     // 	Rprintf("p_fe_coef_destination: %.3f, %.3f, %.3f, %.3f\n", my_fe_coef[0], my_fe_coef[1], my_fe_coef[2], my_fe_coef[3]);
-    // }
-
-
-    // updating the value of p_sum_other_means (only if necessary)
-    // if(q != 0){
-
-    //   // We recompute it from scratch (only way -- otherwise precision problems arise)
-    //   std::fill_n(p_sum_other_means, n_obs, 0);
-
-    //   double *my_fe_coef;
-    //   for(int h=0 ; h<Q ; h++){
-    //     if(h == q-1) continue;
-
-    //     if(h < q-1){
-    //       my_fe_coef = p_fe_coef_origin;
-    //     } else {
-    //       my_fe_coef = p_fe_coef_destination;
-    //     }
-
-    //     FE_info.add_wfe_coef_to_mu(h, my_fe_coef, p_sum_other_means);
-    //   }
     // }
     
   }
@@ -1930,15 +1900,10 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
   double *output = p_output[v];
 
   // temp var:
-  vector<double> sum_other_means_or_second_coef;
-  if(two_fe_algo){
-    // this will contain the value of the second FE coefficients
-    sum_other_means_or_second_coef.resize(FE_info.nb_coef_Q[1]);
-  } else {
-    // this contains the N-vector of the partial sum of the FE values 
-    sum_other_means_or_second_coef.resize(n_obs);
-  }
-  double *p_sum_other_means = sum_other_means_or_second_coef.data();
+  int size_other_means = two_fe_algo ? FE_info.nb_coef_Q[1] : n_obs;
+  // vector<double> sum_other_means_or_second_coef(size_other_means);
+  // double *p_sum_other_means = sum_other_means_or_second_coef.data();
+  double *p_sum_other_means = new double[size_other_means];
 
   // conditional sum of input minus output
   vector<double> sum_input_output(nb_coef_all, 0);
@@ -2057,17 +2022,11 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
 
     iter++;
     
-    if(iter >= 500){
+    if(false && iter >= 10 && iter < 20){
       // we run several passes of the no acc algo before running the acceleration
       compute_fe(Q, p_GX, p_GGX, p_sum_other_means, p_sum_in_out, args);
       compute_fe(Q, p_GGX, p_X, p_sum_other_means, p_sum_in_out, args);
       compute_fe(Q, p_X, p_GX, p_sum_other_means, p_sum_in_out, args);
-      
-      if(iter > 100){
-        compute_fe(Q, p_GX, p_GGX, p_sum_other_means, p_sum_in_out, args);
-        compute_fe(Q, p_GGX, p_X, p_sum_other_means, p_sum_in_out, args);
-        compute_fe(Q, p_X, p_GX, p_sum_other_means, p_sum_in_out, args);
-      }
     }
 
     // GGX -- origin: GX, destination: GGX
@@ -2076,9 +2035,11 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
     // X ; update of the cluster coefficient
     numconv = dm_update_X_IronsTuck(nb_coef_no_Q, X, GX, GGX, delta_GX, delta2_X);
     if(numconv) break;
-    std::memcpy(p_Y, p_X, nb_coef_T * sizeof(double));
-    compute_fe(Q, p_Y, p_X, p_sum_other_means, p_sum_in_out, args);
     
+    if(iter >= 20){
+      std::memcpy(p_Y, p_X, nb_coef_T * sizeof(double));
+      compute_fe(Q, p_Y, p_X, p_sum_other_means, p_sum_in_out, args);
+    }    
 
     // GX -- origin: X, destination: GX
     compute_fe(Q, p_X, p_GX, p_sum_other_means, p_sum_in_out, args);
@@ -2091,7 +2052,7 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
       }
     }
     
-    if(iter % 5 == 0){
+    if(iter % 4 == 0){
       ++major_acc;
       if(major_acc == 1){
         std::memcpy(p_Y, p_GX, nb_coef_T * sizeof(double));
@@ -2099,7 +2060,8 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
         std::memcpy(p_GY, p_GX, nb_coef_T * sizeof(double));
       } else {
         std::memcpy(p_GGY, p_GX, nb_coef_T * sizeof(double));
-        dm_update_X_IronsTuck(nb_coef_no_Q, Y, GY, GGY, delta_GX, delta2_X);
+        numconv = dm_update_X_IronsTuck(nb_coef_no_Q, Y, GY, GGY, delta_GX, delta2_X);
+        if(numconv) break;
         compute_fe(Q, p_Y, p_GX, p_sum_other_means, p_sum_in_out, args);
         major_acc = 0;
       }
@@ -2116,7 +2078,7 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
     // }
 
     // Other stopping criterion: change to SSR very small
-    if(iter % 50 == 0){
+    if(iter % 40 == 0){
 
       // mu_current is the vector of means
       vector<double> mu_current(n_obs, 0);
@@ -2130,35 +2092,22 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
         }
       }
       
+      double ssr_old = ssr;
 
-      // init ssr if iter == 50 / otherwise, comparison
-      if(iter == 50){
-
-        ssr = 0;
-        double resid;
-        for(int i=0 ; i<n_obs ; ++i){
-          resid = input[i] - mu_current[i];
-          ssr += resid*resid;
-        }
-
-      } else {
-        double ssr_old = ssr;
-
-        // we compute the new SSR
-        ssr = 0;
-        double resid;
-        for(int i=0 ; i<n_obs ; ++i){
-          resid = input[i] - mu_current[i];
-          ssr += resid*resid;
-        }
-
-        // if(isMaster) Rprintf("iter %i -- SSR = %.0f (diff = %.0f)\n", iter, ssr, ssr_old - ssr);
-
-        if(stopping_crit(ssr_old, ssr, diffMax)){
-          break;
-        }
-
+      // we compute the new SSR
+      ssr = 0;
+      double resid;
+      for(int i=0 ; i<n_obs ; ++i){
+        resid = input[i] - mu_current[i];
+        ssr += resid*resid;
       }
+
+      // if(isMaster) Rprintf("iter %i -- SSR = %.0f (diff = %.0f)\n", iter, ssr, ssr_old - ssr);
+
+      if(stopping_crit(ssr_old, ssr, diffMax)){
+        break;
+      }
+      
     }
 
 
@@ -2195,6 +2144,9 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
   }
 
   bool conv = iter == iterMax ? false : true;
+  
+  // cleanup 
+  delete[] p_sum_other_means;
 
   return(conv);
 }
@@ -2215,19 +2167,18 @@ void demean_single_gnl(int v, PARAM_DEMEAN* args){
     demean_acc_gnl(v, iterMax, args);
   } else {
     // 15 iterations
-    bool conv = demean_acc_gnl(v, 5000, args);
+    int iter_warmup = 15;
+    bool conv = demean_acc_gnl(v, iter_warmup, args);
 
-    if(conv == false && iterMax > 5000){
-      // 2 convergence
-      int iter_max_new = iterMax / 2 - 50;
+    if(conv == false && iterMax > iter_warmup){
+      // convergence for the first 2 FEs
+      int iter_max_new = iterMax / 2 - iter_warmup;
       if(iter_max_new <= 0) iter_max_new = 1;
       demean_acc_gnl(v, iter_max_new, args, true);
 
-      if(Q > 2){
-        // re-acceleration
-        int iter_previous = args->p_iterations_all[v];
-        demean_acc_gnl(v, iterMax - iter_previous, args);
-      }
+      // re-acceleration
+      int iter_previous = args->p_iterations_all[v];
+      demean_acc_gnl(v, iterMax - iter_previous, args);
     }
   }
 
