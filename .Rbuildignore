@@ -1,19 +1,17 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\.Renviron$
+
 ^docs$
-^_BENCHMARK$
-^_Code snippets$
 ^vignettes/images$
 ^vignettes/etable_new_features.Rmd
 ^vignettes/.+html$
 ^inst/NEWS\.Rd$
 ^ONGOING_ISSUES\.md$
-^_pkgdown\.yml$
 ^pkgdown$
 ^.github$
 ^check$
-^_AUTO_BENCHMARK$
 ^CONTRIBUTORS\.md$
 ^.vscode
-^_DOCS$
+
+^_

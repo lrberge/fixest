@@ -1631,6 +1631,12 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
       # cpp_demean is the most mem intensive bit
       gc()
     }
+    
+    filename = ifelse(length(fixef_sizes) == 2, "data_1e6_FE2.RData", "data_1e6_FE3.RData")
+    save(y, X, weights, fixef.iter, fixef.tol, fixef_sizes, fixef_id_list, 
+         fixef_table_vector, slope_flag, slope_vars, init, nthreads, 
+         file = sma("./../_DEVELOPMENT/improve-convergence/{filename}"))
+    stop("data saved")
 
     vars_demean = cpp_demean(y, X, weights, iterMax = fixef.iter,
                              diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
