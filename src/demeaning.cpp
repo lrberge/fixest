@@ -1095,6 +1095,11 @@ struct PARAM_DEMEAN{
   int nb_coef_T;
   int iterMax;
   double diffMax;
+  
+  int algo_extraProj;
+  int algo_iter_warmup;
+  int algo_iter_projAfterAcc;
+  int algo_iter_majorAcc;
 
   // iterations
   int *p_iterations_all;
@@ -1273,6 +1278,11 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
   
   // fe_info
   FEClass &FE_info = *(args->p_FE_info);
+  
+  // algo info
+  const int n_extraProj = args->algo_extraProj;
+  const int iter_projAfterAcc = args->algo_iter_projAfterAcc;
+  const int iter_majorAcc = args->algo_iter_majorAcc;
 
   int n_obs = args->n_obs;
   int nb_coef_T = args->nb_coef_T;
@@ -1385,20 +1395,29 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
     }
 
     iter++;
+    
+    for(int rep=0 ; rep<n_extraProj ; ++rep){
+      // simple projections, at the request of the user
+      // may be useful to hasten convergence on special cases
+      // default is 0
+      compute_fe(Q, p_GX, p_GGX, p_sum_other_means, p_sum_in_out, args);
+      compute_fe(Q, p_GGX, p_X, p_sum_other_means, p_sum_in_out, args);
+      compute_fe(Q, p_X, p_GX, p_sum_other_means, p_sum_in_out, args);
+    }
 
-    // GGX -- origin: GX, destination: GGX
+    // origin: GX, destination: GGX
     compute_fe(Q, p_GX, p_GGX, p_sum_other_means, p_sum_in_out, args);
 
-    // X ; update of the cluster coefficient
+    // X: outcome of the acceleration
     numconv = dm_update_X_IronsTuck(nb_coef_no_Q, X, GX, GGX, delta_GX, delta2_X);
     if(numconv) break;
     
-    if(iter >= 20){
+    if(iter >= iter_projAfterAcc){
       std::memcpy(p_Y, p_X, nb_coef_T * sizeof(double));
       compute_fe(Q, p_Y, p_X, p_sum_other_means, p_sum_in_out, args);
     }    
 
-    // GX -- origin: X, destination: GX
+    // origin: X, destination: GX
     compute_fe(Q, p_X, p_GX, p_sum_other_means, p_sum_in_out, args);
 
     keepGoing = false;
@@ -1409,7 +1428,7 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
       }
     }
     
-    if(iter % 4 == 0){
+    if(iter % iter_majorAcc == 0){
       ++major_acc;
       if(major_acc == 1){
         std::memcpy(p_Y, p_GX, nb_coef_T * sizeof(double));
@@ -1462,7 +1481,7 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
   //
 
   double *p_beta_final = nullptr;
-  if(Q == 2){
+  if(two_fe_algo){
     // we end with a last iteration
     double *p_alpha_final = p_GX;
     p_beta_final = p_sum_other_means;
@@ -1473,8 +1492,7 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
     for(int q=0 ; q<Q ; ++q){
       FE_info.add_fe_coef_to_mu(q, p_GX, output);
     }
-  }
-  
+  }  
 
   // keeping track of iterations
   int *iterations_all = args->p_iterations_all;
@@ -1512,14 +1530,21 @@ void demean_single_gnl(int v, PARAM_DEMEAN* args){
 
   // data
   int iterMax = args->iterMax;
+  
+  // Note that the historical default was 15 iterations (still the case on 2024-02-14)
+  int iter_warmup = args->algo_iter_warmup;
   int Q = args->Q;
 
   if(Q == 2){
     demean_acc_gnl(v, iterMax, args);
   } else {
-    // 15 iterations
-    int iter_warmup = 15;
-    bool conv = demean_acc_gnl(v, iter_warmup, args);
+    bool conv = false;
+    
+    // iter_warmup <= 0 means no warmup and we start directly with 2FE algo
+    if(iter_warmup > 0){
+      conv = demean_acc_gnl(v, iter_warmup, args);
+      iter_warmup = 0;
+    }
 
     if(conv == false && iterMax > iter_warmup){
       // convergence for the first 2 FEs
@@ -1575,7 +1600,9 @@ void stayIdleCheckingInterrupt(bool *stopnow, vector<int> &jobdone, int n_vars, 
 // [[Rcpp::export]]
 List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax, SEXP r_nb_id_Q,
                 SEXP fe_id_list, SEXP table_id_I, SEXP slope_flag_Q, SEXP slope_vars_list,
-                SEXP r_init, int nthreads, bool save_fixef = false){
+                SEXP r_init, int nthreads, 
+                int algo_extraProj, int algo_iter_warmup, int algo_iter_projAfterAcc, 
+                int algo_iter_majorAcc, bool save_fixef = false){
   // main fun that calls demean_single
   // preformats all the information needed on the fixed-effects
   // y: the dependent variable
@@ -1686,6 +1713,11 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
   args.p_input = p_input;
   args.p_output = p_output;
   args.p_iterations_all = p_iterations_all;
+  args.algo_extraProj = algo_extraProj;
+  args.algo_iter_warmup = algo_iter_warmup;
+  args.algo_iter_projAfterAcc = algo_iter_projAfterAcc;
+  // negative number or 0 means never
+  args.algo_iter_majorAcc = algo_iter_majorAcc <= 0 ? 1000000 : algo_iter_majorAcc;
 
   // save FE_info
   args.p_FE_info = &FE_info;

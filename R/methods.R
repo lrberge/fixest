@@ -1002,6 +1002,8 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE,
 
   family = object$family
   fixef_names = object$fixef_vars
+  
+  fixef_algo = object$fixef_algo
 
   fixef_id = object$fixef_id
 
@@ -1054,7 +1056,12 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE,
                           diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
                           fe_id_list = fe_id_list, table_id_I = table_id_I,
                           slope_flag_Q = slope_flag, slope_vars_list = slope_variables,
-                          r_init = 0, nthreads = nthreads, save_fixef = TRUE)
+                          r_init = 0, nthreads = nthreads, 
+                          algo_extraProj = fixef_algo$extraProj, 
+                          algo_iter_warmup = fixef_algo$iter_warmup, 
+                          algo_iter_projAfterAcc = fixef_algo$iter_projAfterAcc, 
+                          algo_iter_majorAcc = fixef_algo$iter_majorAcc, 
+                          save_fixef = TRUE)
 
     fixef_coef = S_demean$fixef_coef
 
@@ -1209,7 +1216,12 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE,
                               diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
                               fe_id_list = fe_id_list, table_id_I = table_id_I,
                               slope_flag_Q = slope_flag, slope_vars_list = slope_variables,
-                              r_init = 0, nthreads = nthreads, save_fixef = TRUE)
+                              r_init = 0, nthreads = nthreads, 
+                              algo_extraProj = fixef_algo$extraProj, 
+                              algo_iter_warmup = fixef_algo$iter_warmup, 
+                              algo_iter_projAfterAcc = fixef_algo$iter_projAfterAcc, 
+                              algo_iter_majorAcc = fixef_algo$iter_majorAcc, 
+                              save_fixef = TRUE)
 
         fixef_coef = S_demean$fixef_coef
 

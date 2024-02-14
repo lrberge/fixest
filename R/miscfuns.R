@@ -2289,8 +2289,10 @@ xpd = function(fml, ..., add = NULL, lhs, rhs, data = NULL, frame = parent.frame
 #'
 demean = function(X, f, slope.vars, slope.flag, data, weights,
                   nthreads = getFixest_nthreads(), notes = getFixest_notes(),
-                  iter = 2000, tol = 1e-6, fixef.reorder = TRUE, na.rm = TRUE,
-                  as.matrix = is.atomic(X),
+                  iter = 2000, tol = 1e-6, fixef.reorder = TRUE, 
+                  fixef.algo.extraProj = 0, fixef.algo.iter_warmup = 15,
+                  fixef.algo.iter_projAfterAcc = 20, fixef.algo.iter_majorAcc = 4,
+                  na.rm = TRUE, as.matrix = is.atomic(X),
                   im_confident = FALSE, ...) {
 
 
@@ -2323,6 +2325,8 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
     check_arg(iter, "integer scalar GE{1}")
     check_arg(tol, "numeric scalar GT{0}")
     check_arg(notes, "logical scalar")
+    check_arg("integer scalar", fixef.algo.extraProj, fixef.algo.iter_warmup,
+              fixef.algo.iter_projAfterAcc, fixef.algo.iter_majorAcc)
 
     validate_dots(valid_args = "fe_info", stop = TRUE)
     dots = list(...)
@@ -2342,6 +2346,25 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
       if(!"fixef_vars" %in% names(X)){
         stop("To apply demeaning, the estimation must contain fixed-effects, this is currently not the case.")
       }
+      
+      # controls for the demeaning algorithm
+      if(!is.null(X$fixef_algo)){
+        if(missing(fixef.algo.extraProj)){
+          fixef.algo.extraProj = X$fixef_algo$extraProj
+        }
+        
+        if(missing(fixef.algo.iter_warmup)){
+          fixef.algo.iter_warmup = X$fixef_algo$iter_warmup
+        }
+        
+        if(missing(fixef.algo.iter_projAfterAcc)){
+          fixef.algo.iter_projAfterAcc = X$fixef_algo$iter_projAfterAcc
+        }
+        
+        if(missing(fixef.algo.iter_majorAcc)){
+          fixef.algo.iter_majorAcc = X$fixef_algo$iter_majorAcc
+        }
+      }
 
       # Otherwise => we create data and X: formula
       data = fetch_data(X)
@@ -2349,15 +2372,15 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
       fml_fixef = X$fml_all$fixef
 
       fml_vars = .xpd(~ ..lhs + ..rhs,
-              ..lhs = fml_linear[[2]],
-              ..rhs = fml_linear[[3]])
+                      ..lhs = fml_linear[[2]],
+                      ..rhs = fml_linear[[3]])
 
       if(!is.null(X$fml_all$iv)){
         fml_iv = X$fml_all$iv
         fml_vars = .xpd(~ ..vars + ..iv_lhs + ..iv_rhs,
-                ..vars = fml_vars,
-                ..iv_lhs = fml_iv[[2]],
-                ..iv_rhs = fml_iv[[3]])
+                        ..vars = fml_vars,
+                        ..iv_lhs = fml_iv[[2]],
+                        ..iv_rhs = fml_iv[[3]])
       }
 
       fml = .xpd(lhs = fml_vars, rhs = fml_fixef)
@@ -2625,9 +2648,9 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
   #
 
   quf_info_all = cpppar_quf_table_sum(x = f, y = 0, do_sum_y = FALSE, rm_0 = FALSE,
-                    rm_1 = FALSE, rm_single = FALSE, do_refactor = FALSE,
-                    r_x_sizes = 0, obs2keep = 0, only_slope = slope.flag < 0L,
-                    nthreads = nthreads)
+                                      rm_1 = FALSE, rm_single = FALSE, do_refactor = FALSE,
+                                      r_x_sizes = 0, obs2keep = 0, only_slope = slope.flag < 0L,
+                                      nthreads = nthreads)
 
   # table/sum_y/sizes
   fixef_table = quf_info_all$table
@@ -2704,17 +2727,21 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
   }
 
   vars_demean = cpp_demean(y, X, weights, iterMax = iter,
-                diffMax = tol, r_nb_id_Q = fixef_sizes,
-                fe_id_list = quf_info_all$quf, table_id_I = fixef_table_vector,
-                slope_flag_Q = slope.flag, slope_vars_list = slope.vars,
-                r_init = 0, nthreads = nthreads)
+                           diffMax = tol, r_nb_id_Q = fixef_sizes,
+                           fe_id_list = quf_info_all$quf, table_id_I = fixef_table_vector,
+                           slope_flag_Q = slope.flag, slope_vars_list = slope.vars,
+                           r_init = 0, nthreads = nthreads, 
+                           algo_extraProj = fixef.algo.extraProj, 
+                           algo_iter_warmup = fixef.algo.iter_warmup, 
+                           algo_iter_projAfterAcc = fixef.algo.iter_projAfterAcc, 
+                           algo_iter_majorAcc = fixef.algo.iter_majorAcc)
 
   # Internal call
   if(fe_info){
 
     res = list(y = vars_demean$y_demean, X = vars_demean$X_demean,
-           weights = weights, fixef_id_list = quf_info_all$quf,
-           slope_vars = slope.vars, slope_flag = slope.flag, varnames = colnames(X))
+               weights = weights, fixef_id_list = quf_info_all$quf,
+               slope_vars = slope.vars, slope_flag = slope.flag, varnames = colnames(X))
 
     return(res)
 
