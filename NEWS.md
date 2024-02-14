@@ -3,6 +3,8 @@
 
 ## New features
 
+- **the demeaning algorithm has been reworked!** The code has been condensed and four new parameters have been introduced to control the details of how the algorithm works. The new default values should lead to quicker convergence in general (for difficult cases). The new function `demeaning_algo` gives the user fine control over the internal parameters of the algorithm.
+
 - all estimation functions gain the argument `data.save`. If `TRUE`, the data set used for the estimation is saved in the returned object. This ensures the consistency of post-processing (like fit statistics, predict, etc) even if the original data has been modified in the meantime. Suggestion by Vincent Arel-Bundock, #340
 
 - new function `fixest_data` to access the original data set used at estimation-time. Suggestion by Kyle Butts, #465
@@ -28,6 +30,8 @@
 - fix bug in `predict` when the `offset` was placed in a formula and not passed as a regular argument. Reported by @jl-flores, #309
 
 - fix bug in TSLS estimations when the formula contained multiple LHS to be expanded with the dot square bracket operator. Reported by @svraka, #395
+
+- fix bug leading to the absence of warning when the convergence of the demeaning algorithm failed. Thanks to @ja-ortiz-uniandes, #323
  
 ## Improvements
 

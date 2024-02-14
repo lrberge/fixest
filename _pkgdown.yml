@@ -89,6 +89,7 @@ reference:
         - weights.fixest
         - formula.fixest
         - terms.fixest
+        - df.residual.fixest
     - title: Formula tools
       desc: Tools to manipulate formulas
       contents:
@@ -98,7 +99,7 @@ reference:
       desc: User-level versions of internal tools
       contents:
         - demean
-        - demean_algo
+        - demeaning_algo
         - to_integer
         - bin
         - ref

@@ -215,7 +215,7 @@ of threads used within this package using the function <code><a href="setFixest_
 
 
 <dt>...</dt>
-<dd><p>Only used if the argument <code>.vocv</code> is provided and is a function: extra arguments
+<dd><p>Only used if the argument <code>.vcov</code> is provided and is a function: extra arguments
 to be passed to that function.</p></dd>
 
 </dl></div>
@@ -307,10 +307,10 @@ to visualize the results of multiple estimations.</p></div>
 <span class="r-in"><span><span class="co"># Alternative ways to cluster the SE:</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est_pois</span>, vcov <span class="op">=</span> <span class="va">cluster</span> <span class="op">~</span> <span class="va">Product</span> <span class="op">+</span> <span class="va">Origin</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Poisson estimation, Dep. Var.: Euros</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 38,325 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 38,325</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-effects: Origin: 15,  Destination: 15,  Product: 20</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Clustered (Product &amp; Origin) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  t value  Pr(&gt;|t|)    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  z value  Pr(&gt;|z|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km) -1.52775   0.122773 -12.4437 &lt; 2.2e-16 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
@@ -318,10 +318,10 @@ to visualize the results of multiple estimations.</p></div>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            BIC:  1.427e+12     Squared Cor.: 0.60377 </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est_pois</span>, vcov <span class="op">=</span> <span class="op">~</span><span class="va">Product</span> <span class="op">+</span> <span class="va">Origin</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Poisson estimation, Dep. Var.: Euros</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 38,325 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 38,325</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-effects: Origin: 15,  Destination: 15,  Product: 20</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Clustered (Product &amp; Origin) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  t value  Pr(&gt;|t|)    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  z value  Pr(&gt;|z|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km) -1.52775   0.122773 -12.4437 &lt; 2.2e-16 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
@@ -329,10 +329,10 @@ to visualize the results of multiple estimations.</p></div>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            BIC:  1.427e+12     Squared Cor.: 0.60377 </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est_pois</span>, cluster <span class="op">=</span> <span class="op">~</span><span class="va">Product</span> <span class="op">+</span> <span class="va">Origin</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Poisson estimation, Dep. Var.: Euros</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 38,325 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 38,325</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-effects: Origin: 15,  Destination: 15,  Product: 20</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Clustered (Product &amp; Origin) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  t value  Pr(&gt;|t|)    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  z value  Pr(&gt;|z|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km) -1.52775   0.122773 -12.4437 &lt; 2.2e-16 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
@@ -342,10 +342,10 @@ to visualize the results of multiple estimations.</p></div>
 <span class="r-in"><span><span class="co"># You can interact the clustering variables "live" using the var1 ^ var2 syntax.#'</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est_pois</span>, vcov <span class="op">=</span> <span class="op">~</span><span class="va">Destination</span><span class="op">^</span><span class="va">Product</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Poisson estimation, Dep. Var.: Euros</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 38,325 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 38,325</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-effects: Origin: 15,  Destination: 15,  Product: 20</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Clustered (Destination^Product) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  t value  Pr(&gt;|t|)    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  z value  Pr(&gt;|z|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km) -1.52775   0.072633 -21.0337 &lt; 2.2e-16 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
@@ -365,7 +365,7 @@ to visualize the results of multiple estimations.</p></div>
 <span class="r-in"><span><span class="co"># Use the syntax NW ~ unit + time</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span>, <span class="va">NW</span> <span class="op">~</span> <span class="va">id</span> <span class="op">+</span> <span class="va">period</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: y</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 1,080 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 1,080</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Newey-West (L=1) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std. Error t value   Pr(&gt;|t|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept) 1.988753   0.174111 11.4223 1.1709e-06 ***</span>
@@ -377,7 +377,7 @@ to visualize the results of multiple estimations.</p></div>
 <span class="r-in"><span><span class="co"># Now take a lag of 3:</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span>, <span class="fu"><a href="vcov_hac.html">NW</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span> <span class="op">~</span> <span class="va">id</span> <span class="op">+</span> <span class="va">period</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: y</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 1,080 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 1,080</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Newey-West (L=3) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std. Error t value   Pr(&gt;|t|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept) 1.988753   0.194500 10.2249 2.9725e-06 ***</span>
@@ -391,7 +391,7 @@ to visualize the results of multiple estimations.</p></div>
 <span class="r-in"><span><span class="co"># Use the syntax DK ~ time</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span>, <span class="va">DK</span> <span class="op">~</span> <span class="va">period</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: y</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 1,080 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 1,080</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Driscoll-Kraay (L=1) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept) 1.988753   0.789538  2.51888 3.2829e-02 *  </span>
@@ -403,7 +403,7 @@ to visualize the results of multiple estimations.</p></div>
 <span class="r-in"><span><span class="co"># Now take a lag of 3:</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span>, <span class="fu"><a href="vcov_hac.html">DK</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span> <span class="op">~</span> <span class="va">period</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: y</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 1,080 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 1,080</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Driscoll-Kraay (L=3) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept) 1.988753   0.971486  2.04712 7.0943e-02 .  </span>
@@ -422,7 +422,7 @@ to visualize the results of multiple estimations.</p></div>
 <span class="r-in"><span><span class="co"># Both methods, NM and DK, now work automatically</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est_panel</span>, <span class="st">"NW"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: y</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 1,080 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 1,080</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Newey-West (L=1) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std. Error t value   Pr(&gt;|t|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept) 1.988753   0.174111 11.4223 1.1709e-06 ***</span>
@@ -432,7 +432,7 @@ to visualize the results of multiple estimations.</p></div>
 <span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 4.89686   Adj. R2: 0.262357</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est_panel</span>, <span class="st">"DK"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: y</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 1,080 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 1,080</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Driscoll-Kraay (L=1) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept) 1.988753   0.789538  2.51888 3.2829e-02 *  </span>
@@ -454,7 +454,7 @@ to visualize the results of multiple estimations.</p></div>
 <span class="r-in"><span><span class="co"># with lat/lon the latitude/longitude variable names in the data set</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est_geo</span>, <span class="fu"><a href="vcov_conley.html">conley</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span> <span class="op">~</span> <span class="va">lat</span> <span class="op">+</span> <span class="va">long</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: depth</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 1,000 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 1,000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Conley (100km) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)  881.625   108.9005  8.09569 1.6480e-15 ***</span>
@@ -466,7 +466,7 @@ to visualize the results of multiple estimations.</p></div>
 <span class="r-in"><span><span class="co"># Change the cutoff, and how the distance is computed</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est_geo</span>, <span class="fu"><a href="vcov_conley.html">conley</a></span><span class="op">(</span><span class="fl">200</span>, distance <span class="op">=</span> <span class="st">"spherical"</span><span class="op">)</span> <span class="op">~</span> <span class="va">lat</span> <span class="op">+</span> <span class="va">long</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: depth</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 1,000 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 1,000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Conley (200km) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)  881.625   128.2426  6.87467 1.0937e-11 ***</span>
@@ -484,7 +484,7 @@ to visualize the results of multiple estimations.</p></div>
 <span class="r-in"><span><span class="co"># The following works</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est_geo</span>, <span class="st">"conley"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: depth</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 1,000 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 1,000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Conley (90km) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)  881.625   110.6727  7.96606 4.4465e-15 ***</span>
@@ -499,14 +499,14 @@ to visualize the results of multiple estimations.</p></div>
 <span class="r-in"><span><span class="co"># Compatibility with sandwich</span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># You can use the VOCVs from sandwich by using the argument .vcov:</span></span></span>
+<span class="r-in"><span><span class="co"># You can use the VCOVs from sandwich by using the argument .vcov:</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sandwich.R-Forge.R-project.org/" class="external-link">sandwich</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est_pois</span>, .vcov <span class="op">=</span> <span class="va">vcovCL</span>, cluster <span class="op">=</span> <span class="va">trade</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Destination"</span>, <span class="st">"Product"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Poisson estimation, Dep. Var.: Euros</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 38,325 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 38,325</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed-effects: Origin: 15,  Destination: 15,  Product: 20</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: NULL </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  t value  Pr(&gt;|t|)    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  z value  Pr(&gt;|z|)    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log(dist_km) -1.52775   0.120014 -12.7298 &lt; 2.2e-16 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>

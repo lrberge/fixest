@@ -3319,7 +3319,7 @@ fixest_data = function(x, sample = "original"){
 #' two largest FEs before applying the demeaning over all FEs can improve convergence speed.
 #' This is controlled with the argument `iter_warmup` which gives the number of iterations
 #' over all the FEs to run before going to the 2 FEs demeaning. By default, the deameaning 
-#' over all FEs is run for 15 iterations before switching to the 2 FEs case. #' 
+#' over all FEs is run for 15 iterations before switching to the 2 FEs case.  
 #' 
 #' The above defaults are the outcome of extended empirical applications, and try to strike a 
 #' balance across a majority of cases. Of course you can always get better results by tailoring
