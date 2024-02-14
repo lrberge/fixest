@@ -892,6 +892,12 @@ if(Sys.info()["sysname"] == "Windows"){
   test(se(sum_2nd), se(est_iv))
 }
 
+# check no bug when all exogenous vars are removed bc of collinearity
+df = data.frame(x = rnorm(8), y = rnorm(8),
+                z = rnorm(8), fe = rep(0:1, each = 4))
+
+est_iv = feols(y ~ fe | fe | x ~ z, df)
+est_iv = feols(y ~ sw(fe, fe) | fe | x ~ z, df)
 
 # check no bug
 etable(summary(est_iv, stage = 1:2))

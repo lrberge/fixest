@@ -24,12 +24,12 @@ test = function(x, y, type = "=", tol = 1e-6){
 
   mc = match.call()
   IS_Y = TRUE
-  if(missing(type) && length(y) == 1 && is.character(y) && y %in% c("err", "=", "~")){
+  if(missing(type) && length(y) == 1 && is.character(y) && y %in% c("err", "=", "~", "warn")){
     IS_Y = FALSE
     type = y
   }
 
-  type = switch(type, "error" = "err", type)
+  type = switch(type, "error" = "err", "warning" = "warn", type)
 
   plural_core = function(PLURAL, type, s, verb = FALSE, past = FALSE){
 
@@ -118,8 +118,16 @@ test = function(x, y, type = "=", tol = 1e-6){
     type = "~"
     if(missing(tol)) tol = 1e-12
   }
-
-  if(type == "err"){
+  
+  if(type  == "warn"){
+    # we expect an warning
+    m = tryCatch(x, warning = function(w) structure(conditionMessage(w), class = "try-warning"))
+    if(!"try-warning" %in% class(m)){
+      stop("Expected a warning that did not occur.")
+    } else if(IS_Y && !grepl(tolower(y), tolower(m), fixed = TRUE)){
+      stop("This is a warning, but the messages don't match:\nEXPECTED: \n", y, "\n..ACTUAL: \n", x)
+    }
+  } else if(type == "err"){
     # we expect an error
     m = tryCatch(x, error = function(e) structure(conditionMessage(e), class = "try-error"))
     if(!"try-error" %in% class(m)){

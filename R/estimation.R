@@ -1075,15 +1075,16 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
         if(do_iv){
 
           if(isFixef){
+            
             iv_products = cpp_iv_products(X = X_demean, y = y_demean,
-                            Z = iv.mat_demean, u = iv_lhs_demean,
-                            w = weights, nthreads = nthreads)
+                                          Z = iv.mat_demean, u = iv_lhs_demean,
+                                          w = weights, nthreads = nthreads)
           } else {
             if(!is.matrix(X_all)){
               X_all = as.matrix(X_all)
             }
             iv_products = cpp_iv_products(X = X_all, y = my_lhs, Z = iv.mat,
-                            u = iv_lhs, w = weights, nthreads = nthreads)
+                                          u = iv_lhs, w = weights, nthreads = nthreads)
           }
 
         } else {
@@ -1132,26 +1133,28 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
               }
 
               my_iv_products = list(XtX = XtX,
-                          Xty = Xty,
-                          ZXtZX = iv_products$ZXtZX[qui_iv, qui_iv, drop = FALSE],
-                          ZXtu = lapply(iv_products$ZXtu, function(x) x[qui_iv]))
+                                    Xty = Xty,
+                                    ZXtZX = iv_products$ZXtZX[qui_iv, qui_iv, drop = FALSE],
+                                    ZXtu = lapply(iv_products$ZXtu, function(x) x[qui_iv]))
 
               if(isFixef){
                 my_res = feols(env = current_env, iv_products = my_iv_products,
-                         X_demean = X_demean[ , qui_X, drop = FALSE],
-                         y_demean = y_demean[[ii]],
-                         iv.mat_demean = iv.mat_demean, iv_lhs_demean = iv_lhs_demean)
+                               X_demean = X_demean[ , qui_X, drop = FALSE],
+                               y_demean = y_demean[[ii]],
+                               iv.mat_demean = iv.mat_demean, iv_lhs_demean = iv_lhs_demean)
               } else {
                 my_res = feols(env = current_env, iv_products = my_iv_products)
               }
 
             } else {
               if(isFixef){
-                my_res = feols(env = current_env, xwx = xwx[qui_X, qui_X, drop = FALSE], xwy = xwy[[ii]][qui_X],
-                         X_demean = X_demean[ , qui_X, drop = FALSE],
-                         y_demean = y_demean[[ii]])
+                my_res = feols(env = current_env, xwx = xwx[qui_X, qui_X, drop = FALSE], 
+                               xwy = xwy[[ii]][qui_X],
+                               X_demean = X_demean[ , qui_X, drop = FALSE],
+                               y_demean = y_demean[[ii]])
               } else {
-                my_res = feols(env = current_env, xwx = xwx[qui_X, qui_X, drop = FALSE], xwy = xwy[[ii]][qui_X])
+                my_res = feols(env = current_env, xwx = xwx[qui_X, qui_X, drop = FALSE], 
+                               xwy = xwy[[ii]][qui_X])
               }
             }
 
@@ -1223,7 +1226,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
         iv_lhs_demean = dots$iv_lhs_demean
 
         iv_products = dots$iv_products
-
+        
       } else {
         # fixef information
         fixef_sizes = get("fixef_sizes", env)
@@ -1266,6 +1269,13 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
                                       u = iv_lhs_demean, w = weights, nthreads = nthreads)
 
       }
+      
+      
+      only_0 = cpppar_check_only_0(X_demean, nthreads)
+      no_X_Fstat = FALSE
+      if(all(only_0 == 1)){
+        no_X_Fstat = TRUE
+      }
 
       if(n_vars_X == 0){
         ZX_demean = iv.mat_demean
@@ -1284,13 +1294,13 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 
       for(i in 1:n_endo){
         current_env = reshape_env(env, lhs = iv_lhs[[i]], rhs = ZX, fml_iv_endo = iv_lhs_names[i])
-
+        
         my_res = feols(env = current_env, xwx = ZXtZX, xwy = ZXtu[[i]],
                        X_demean = ZX_demean, y_demean = iv_lhs_demean[[i]],
                        add_fitted_demean = TRUE, iv_call = TRUE, notes = FALSE)
 
         # For the F-stats
-        if(n_vars_X == 0){
+        if(n_vars_X == 0 || no_X_Fstat){
           my_res$ssr_no_inst = cpp_ssq(iv_lhs_demean[[i]], weights)
         } else {
           fit_no_inst = ols_fit(iv_lhs_demean[[i]], X_demean, w = weights, correct_0w = FALSE,
@@ -1353,7 +1363,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
                                resid_1st_stage = resid_s1, iv_call = TRUE, notes = FALSE)
 
       # For the F-stats
-      if(n_vars_X == 0){
+      if(n_vars_X == 0 || no_X_Fstat){
         res_second_stage$ssr_no_endo = cpp_ssq(y_demean, weights)
       } else {
         fit_no_endo = ols_fit(y_demean, X_demean, w = weights, correct_0w = FALSE,

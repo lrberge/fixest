@@ -5,13 +5,13 @@
 
 - **the demeaning algorithm has been reworked!** The code has been condensed and four new parameters have been introduced to control the details of how the algorithm works. The new default values should lead to quicker convergence in general (for difficult cases). The new function `demeaning_algo` gives the user fine control over the internal parameters of the algorithm.
 
-- all estimation functions gain the argument `data.save`. If `TRUE`, the data set used for the estimation is saved in the returned object. This ensures the consistency of post-processing (like fit statistics, predict, etc) even if the original data has been modified in the meantime. Suggestion by Vincent Arel-Bundock, #340
+- all estimation functions gain the argument `data.save`. If `TRUE`, the data set used for the estimation is saved in the returned object. This ensures the consistency of post-processing (like fit statistics, predict, update, etc) even if the original data has been modified in the meantime. Suggestion by Vincent Arel-Bundock, #340
 
 - new function `fixest_data` to access the original data set used at estimation-time. Suggestion by Kyle Butts, #465
 
-- new method `df.residual.fixest`. Thanks to @rferrali, #455
+- new method `df.residual.fixest`. Suggestion by @rferrali, #455
 
-- now the `vcov` method inherits the small sample correction and type of VCOV used in the original estimation. Thanks to @mgoplerud, #356 
+- now the `vcov` method inherits the small sample correction and type of VCOV used in the original estimation. Thanks to @mgoplerud, #356
 
 ## Bugs
 
@@ -34,6 +34,8 @@
 - fix bug in TSLS estimations when the formula contained multiple LHS to be expanded with the dot square bracket operator. Reported by @svraka, #395
 
 - fix bug leading to the absence of warning when the convergence of the demeaning algorithm failed. Thanks to @ja-ortiz-uniandes, #323
+
+- fix bug in IV estimation when all exogenous variables were removed because of collinearity with the fixed-effects. Thanks to @Oravishayrizi, #371
  
 ## Improvements
 
