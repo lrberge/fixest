@@ -2289,9 +2289,7 @@ xpd = function(fml, ..., add = NULL, lhs, rhs, data = NULL, frame = parent.frame
 #'
 demean = function(X, f, slope.vars, slope.flag, data, weights,
                   nthreads = getFixest_nthreads(), notes = getFixest_notes(),
-                  iter = 2000, tol = 1e-6, fixef.reorder = TRUE, 
-                  fixef.algo.extraProj = 0, fixef.algo.iter_warmup = 15,
-                  fixef.algo.iter_projAfterAcc = 20, fixef.algo.iter_majorAcc = 4,
+                  iter = 2000, tol = 1e-6, fixef.algo = NULL,
                   na.rm = TRUE, as.matrix = is.atomic(X),
                   im_confident = FALSE, ...) {
 
@@ -2325,8 +2323,7 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
     check_arg(iter, "integer scalar GE{1}")
     check_arg(tol, "numeric scalar GT{0}")
     check_arg(notes, "logical scalar")
-    check_arg("integer scalar", fixef.algo.extraProj, fixef.algo.iter_warmup,
-              fixef.algo.iter_projAfterAcc, fixef.algo.iter_majorAcc)
+    check_arg("NULL class(demeaning_algo)", fixef.algo)
 
     validate_dots(valid_args = "fe_info", stop = TRUE)
     dots = list(...)
@@ -2348,21 +2345,9 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
       }
       
       # controls for the demeaning algorithm
-      if(!is.null(X$fixef_algo)){
-        if(missing(fixef.algo.extraProj)){
-          fixef.algo.extraProj = X$fixef_algo$extraProj
-        }
-        
-        if(missing(fixef.algo.iter_warmup)){
-          fixef.algo.iter_warmup = X$fixef_algo$iter_warmup
-        }
-        
-        if(missing(fixef.algo.iter_projAfterAcc)){
-          fixef.algo.iter_projAfterAcc = X$fixef_algo$iter_projAfterAcc
-        }
-        
-        if(missing(fixef.algo.iter_majorAcc)){
-          fixef.algo.iter_majorAcc = X$fixef_algo$iter_majorAcc
+      if(!is.null(X$fixef.algo)){
+        if(missnull(fixef.algo)){
+          fixef.algo = X$fixef.algo
         }
       }
 
@@ -2394,6 +2379,10 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
       X = fml
 
       as_matrix = TRUE
+    }
+    
+    if(is.null(fixef.algo)){
+      fixef.algo = demeaning_algo(internal = TRUE)
     }
 
     #
@@ -2641,6 +2630,10 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
       slope.flag = rep(0L, length(unclass(f)))
       # SK: unclass gives extra speed if f is data.frame, and no cost if f is list.
     }
+    
+    if(is.null(fixef.algo)){
+      fixef.algo = demeaning_algo(internal = TRUE)
+    }
   }
 
   #
@@ -2731,10 +2724,10 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
                            fe_id_list = quf_info_all$quf, table_id_I = fixef_table_vector,
                            slope_flag_Q = slope.flag, slope_vars_list = slope.vars,
                            r_init = 0, nthreads = nthreads, 
-                           algo_extraProj = fixef.algo.extraProj, 
-                           algo_iter_warmup = fixef.algo.iter_warmup, 
-                           algo_iter_projAfterAcc = fixef.algo.iter_projAfterAcc, 
-                           algo_iter_majorAcc = fixef.algo.iter_majorAcc)
+                           algo_extraProj = fixef.algo$extraProj, 
+                           algo_iter_warmup = fixef.algo$iter_warmup, 
+                           algo_iter_projAfterAcc = fixef.algo$iter_projAfterAcc, 
+                           algo_iter_majorAcc = fixef.algo$iter_majorAcc)
 
   # Internal call
   if(fe_info){
@@ -3251,7 +3244,22 @@ fixest_data = function(x, sample = "original"){
 }
 
 
-
+demeaning_algo = function(extraProj = 0, iter_warmup = 15, iter_projAfterAcc = 20, 
+                          iter_majorAcc = 4, internal = FALSE){
+  
+  if(internal){
+    return(list(extraProj = extraProj, iter_warmup = iter_warmup, 
+                iter_projAfterAcc = iter_projAfterAcc, iter_majorAcc = iter_majorAcc))
+  }
+  
+  check_arg("integer scalar", extraProj, iter_warmup, iter_projAfterAcc, iter_majorAcc)
+  
+  res = list(extraProj = extraProj, iter_warmup = iter_warmup, 
+             iter_projAfterAcc = iter_projAfterAcc, iter_majorAcc = iter_majorAcc)
+  class(res) = "demeaning_algo"
+  
+  res
+}
 
 #### ------------- ####
 #### Internal Funs ####

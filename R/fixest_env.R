@@ -18,8 +18,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
                       lean = FALSE, verbose = 0, theta.init, fixef.tol = 1e-5,
                       fixef.iter = 10000, collin.tol = 1e-14, deriv.iter = 5000,
                       deriv.tol = 1e-4, glm.iter = 25, glm.tol = 1e-8, etastart, mustart,
-                      fixef.algo.extraProj = 0, fixef.algo.iter_warmup = 15,
-                      fixef.algo.iter_projAfterAcc = 20, fixef.algo.iter_majorAcc = 4,
+                      fixef.algo = NULL,
                       warn = TRUE, notes = getFixest_notes(), combine.quick, demeaned = FALSE,
                       origin_bis, origin = "feNmlm", mc_origin, mc_origin_bis, mc_origin_ter,
                       computeModel0 = FALSE, weights = NULL, only.coef = FALSE,
@@ -78,12 +77,9 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
   femlm_args = c("family", "theta.init", "linear.start", "opt.control", "deriv.tol", "deriv.iter")
   feNmlm_args = c("NL.fml", "NL.start", "lower", "upper", "NL.start.init", 
                   "jacobian.method", "useHessian", "hessian.args")
-  feglm_args = c("family", "weights", "glm.iter", "glm.tol", "etastart", "mustart", "collin.tol", 
-                 "fixef.algo.extraProj", "fixef.algo.iter_warmup", "fixef.algo.iter_projAfterAcc",
-                 "fixef.algo.iter_majorAcc")
-  feols_args = c("weights", "demeaned", "collin.tol", "fixef.algo.extraProj", 
-                 "fixef.algo.iter_warmup", "fixef.algo.iter_projAfterAcc", 
-                 "fixef.algo.iter_majorAcc")
+  feglm_args = c("family", "weights", "glm.iter", "glm.tol", "etastart", "mustart", 
+                 "collin.tol", "fixef.algo")
+  feols_args = c("weights", "demeaned", "collin.tol", "fixef.algo")
   internal_args = c("debug")
 
   deprec_old_new = c()
@@ -258,8 +254,12 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
 
   check_arg("logical scalar", demeaned, notes, warn, mem.clean, only.coef, data.save)
   
-  check_arg("integer scalar", fixef.algo.extraProj, fixef.algo.iter_warmup,
-            fixef.algo.iter_projAfterAcc, fixef.algo.iter_majorAcc)
+  if(origin_type %in% c("feols", "feglm")){
+    check_arg("NULL class(demeaning_algo)", fixef.algo)
+    if(is.null(fixef.algo)){
+      fixef.algo = demeaning_algo(internal = TRUE)
+    }
+  }
 
   check_set_arg(fixef.rm, "match(singleton, perfect, both, none)")
 
@@ -2971,11 +2971,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
   # we always assign the controls for the demeaning algorithm
   # => because in multiple FE estimations, isFixef  = FALSE
   # In any case there is no extra burden
-  fixef_algo = list(extraProj = fixef.algo.extraProj, 
-                    iter_warmup = fixef.algo.iter_warmup,
-                    iter_projAfterAcc = fixef.algo.iter_projAfterAcc, 
-                    iter_majorAcc = fixef.algo.iter_majorAcc)
-  assign("fixef_algo", fixef_algo, env)
+  assign("fixef.algo", fixef.algo, env)
 
 
   #
@@ -3115,7 +3111,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
 
   res = list(nobs = nobs, nobs_origin = nobs_origin, fml = fml_linear, call = mc_origin,
              call_env = call_env, method = origin, method_type = origin_type, 
-             fixef_algo = fixef_algo)
+             fixef.algo = fixef.algo)
   
   if(data.save){
     res$data = data

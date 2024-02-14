@@ -1003,7 +1003,7 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE,
   family = object$family
   fixef_names = object$fixef_vars
   
-  fixef_algo = object$fixef_algo
+  fixef_algo = object$fixef.algo
 
   fixef_id = object$fixef_id
 
