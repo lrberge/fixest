@@ -1461,10 +1461,11 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
   // Updating the output
   //
 
+  double *p_beta_final = nullptr;
   if(Q == 2){
     // we end with a last iteration
     double *p_alpha_final = p_GX;
-    double *p_beta_final = p_sum_other_means;
+    p_beta_final = p_sum_other_means;
 
     FE_info.compute_fe_coef_2(p_alpha_final, p_alpha_final, p_beta_final, p_sum_in_out);
     FE_info.add_2_fe_coef_to_mu(p_alpha_final, p_beta_final, p_sum_in_out, output, false);
@@ -1484,6 +1485,15 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
   if(args->save_fixef){
     for(int m=0 ; m<nb_coef_T ; ++m){
       fixef_values[m] += GX[m];
+    }
+    
+    if(two_fe_algo){
+      // we add the other coefficients
+      int n_coefs_FE1 = nb_coef_T;
+      int n_coefs_FE2 = size_other_means;
+      for(int m=0 ; m<n_coefs_FE2; ++m){
+        fixef_values[n_coefs_FE1 + m] += p_beta_final[m];
+      }
     }
   }
 
