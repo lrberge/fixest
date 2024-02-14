@@ -98,6 +98,7 @@ reference:
       desc: User-level versions of internal tools
       contents:
         - demean
+        - demean_algo
         - to_integer
         - bin
         - ref

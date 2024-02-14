@@ -2289,7 +2289,8 @@ xpd = function(fml, ..., add = NULL, lhs, rhs, data = NULL, frame = parent.frame
 #'
 demean = function(X, f, slope.vars, slope.flag, data, weights,
                   nthreads = getFixest_nthreads(), notes = getFixest_notes(),
-                  iter = 2000, tol = 1e-6, fixef.algo = NULL,
+                  iter = 2000, tol = 1e-6, 
+                  fixef.reorder = TRUE, fixef.algo = NULL,
                   na.rm = TRUE, as.matrix = is.atomic(X),
                   im_confident = FALSE, ...) {
 
@@ -2727,7 +2728,7 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
                            algo_extraProj = fixef.algo$extraProj, 
                            algo_iter_warmup = fixef.algo$iter_warmup, 
                            algo_iter_projAfterAcc = fixef.algo$iter_projAfterAcc, 
-                           algo_iter_majorAcc = fixef.algo$iter_majorAcc)
+                           algo_iter_grandAcc = fixef.algo$iter_grandAcc)
 
   # Internal call
   if(fe_info){
@@ -3264,15 +3265,15 @@ fixest_data = function(x, sample = "original"){
 #' b) demeaning over all FEs until convergence. 
 #' To skip the demeaning over 2 FEs, use a very high value of `iter_warmup`. To go directly
 #' to the demeaning over 2 FEs, se `iter_warmup` to a value lower than or equal to 0.
-#' @param iter_projAfterAcc Integer scalar, default is 20. After `iter_projAfterAcc` iterations
+#' @param iter_projAfterAcc Integer scalar, default is 40. After `iter_projAfterAcc` iterations
 #' of the standard algorithm, a simple projection is performed right after 
 #' the acceleration step. Use very high values to skip this step, or low values to apply this 
 #' procedure right from the start.
-#' @param iter_majorAcc Integer scalar, default is 4. The regular fixed-point algorithm 
+#' @param iter_grandAcc Integer scalar, default is 4. The regular fixed-point algorithm 
 #' applies an acceleration at each iteration. This acceleration is for `f(X)` 
 #' (with `f` the projection). 
 #' This settings controls a grand acceleration, which is instead for `f^k(X)` where
-#' `k` is the value of `iter_majorAcc` and `f^2(X)` is defined as `f(f(X))` 
+#' `k` is the value of `iter_grandAcc` and `f^2(X)` is defined as `f(f(X))` 
 #' (i.e. the function `f` applied `k` times). By default, an additional acceleration 
 #' is performed for `h(X) = f^4(X)` every 8 iterations (2 times 4, equivalent to 
 #' the iterationsthe time to gather `h(X)` and `h(h(X))`).
@@ -3303,14 +3304,14 @@ fixest_data = function(x, sample = "original"){
 #' - the argument `iter_projAfterAcc` controls whether, and when, to apply a simple projection
 #' right after the acceleration step. This projection adds roughly a 33% increase in 
 #' computing time per iteration but can improve the convergence properties and speed. By default
-#' this step starts at iteration 20 (when the convergence rate is already not great).
+#' this step starts at iteration 40 (when the convergence rate is already not great).
 #' 
 #' On top of this, in case of very difficult convergence, a "grand" acceleration is added to 
 #' the algorithm. The regular acceleration is over `f`. Say `g` is the function equivalent to
 #' the application of one regular iteration (which is a combination of one acceleration with 
 #' several projections).
 #' By default the grand acceleration is over `h = g o g o g o g`, otherwise `g` applied four times. 
-#' The grand acceleration is controled with the argument `iter_majorAcc` which corresponds 
+#' The grand acceleration is controled with the argument `iter_grandAcc` which corresponds 
 #' to the number of iterations of the regular algorithm defining `h`.
 #' 
 #' Finally in case of 3+ fixed-effects (FE), the convergence in general takes more iterations.
@@ -3335,18 +3336,18 @@ fixest_data = function(x, sample = "original"){
 #' 
 #' 
 #' 
-demeaning_algo = function(extraProj = 0, iter_warmup = 15, iter_projAfterAcc = 20, 
-                          iter_majorAcc = 4, internal = FALSE){
+demeaning_algo = function(extraProj = 0, iter_warmup = 15, iter_projAfterAcc = 40, 
+                          iter_grandAcc = 4, internal = FALSE){
   
   if(internal){
     return(list(extraProj = extraProj, iter_warmup = iter_warmup, 
-                iter_projAfterAcc = iter_projAfterAcc, iter_majorAcc = iter_majorAcc))
+                iter_projAfterAcc = iter_projAfterAcc, iter_grandAcc = iter_grandAcc))
   }
   
-  check_arg("integer scalar", extraProj, iter_warmup, iter_projAfterAcc, iter_majorAcc)
+  check_arg("integer scalar", extraProj, iter_warmup, iter_projAfterAcc, iter_grandAcc)
   
   res = list(extraProj = extraProj, iter_warmup = iter_warmup, 
-             iter_projAfterAcc = iter_projAfterAcc, iter_majorAcc = iter_majorAcc)
+             iter_projAfterAcc = iter_projAfterAcc, iter_grandAcc = iter_grandAcc)
   class(res) = "demeaning_algo"
   
   res

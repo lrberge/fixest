@@ -1048,7 +1048,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
                                    algo_extraProj = fixef.algo$extraProj, 
                                    algo_iter_warmup = fixef.algo$iter_warmup, 
                                    algo_iter_projAfterAcc = fixef.algo$iter_projAfterAcc, 
-                                   algo_iter_majorAcc = fixef.algo$iter_majorAcc)
+                                   algo_iter_grandAcc = fixef.algo$iter_grandAcc)
 
           X_demean = vars_demean$X_demean
           y_demean = vars_demean$y_demean
@@ -1063,7 +1063,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
                                         algo_extraProj = fixef.algo$extraProj, 
                                         algo_iter_warmup = fixef.algo$iter_warmup, 
                                         algo_iter_projAfterAcc = fixef.algo$iter_projAfterAcc, 
-                                        algo_iter_majorAcc = fixef.algo$iter_majorAcc)
+                                        algo_iter_grandAcc = fixef.algo$iter_grandAcc)
 
             iv.mat_demean = iv_vars_demean$X_demean
             iv_lhs_demean = iv_vars_demean$y_demean
@@ -1243,7 +1243,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
                                  algo_extraProj = fixef.algo$extraProj, 
                                  algo_iter_warmup = fixef.algo$iter_warmup, 
                                  algo_iter_projAfterAcc = fixef.algo$iter_projAfterAcc, 
-                                 algo_iter_majorAcc = fixef.algo$iter_majorAcc)
+                                 algo_iter_grandAcc = fixef.algo$iter_grandAcc)
 
         iv_vars_demean = cpp_demean(iv_lhs, iv.mat, weights, iterMax = fixef.iter,
                                     diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
@@ -1253,7 +1253,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
                                     algo_extraProj = fixef.algo$extraProj, 
                                     algo_iter_warmup = fixef.algo$iter_warmup, 
                                     algo_iter_projAfterAcc = fixef.algo$iter_projAfterAcc, 
-                                    algo_iter_majorAcc = fixef.algo$iter_majorAcc)
+                                    algo_iter_grandAcc = fixef.algo$iter_grandAcc)
 
         X_demean = vars_demean$X_demean
         y_demean = vars_demean$y_demean
@@ -1668,8 +1668,8 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
                              algo_extraProj = fixef.algo$extraProj, 
                              algo_iter_warmup = fixef.algo$iter_warmup, 
                              algo_iter_projAfterAcc = fixef.algo$iter_projAfterAcc, 
-                             algo_iter_majorAcc = fixef.algo$iter_majorAcc)
-
+                             algo_iter_grandAcc = fixef.algo$iter_grandAcc)
+    
     y_demean = vars_demean$y_demean
     if(onlyFixef){
       X_demean = matrix(1, nrow = length(y_demean))
@@ -2512,7 +2512,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
     # other params
     if(missing(fixef.tol)) fixef.tol = get("fixef.tol", env)
     if(missing(fixef.iter)) fixef.iter = get("fixef.iter", env)
-    if(missing(fixef.algo)) fixef.iter = get("fixef.algo", env)
+    if(missing(fixef.algo)) fixef.algo = get("fixef.algo", env)
     if(missing(collin.tol)) collin.tol = get("collin.tol", env)
     if(missing(glm.iter)) glm.iter = get("glm.iter", env)
     if(missing(glm.tol)) glm.tol = get("glm.tol", env)
