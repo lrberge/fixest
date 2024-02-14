@@ -268,7 +268,9 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
     }
     return(vcov)
   }
-
+  
+  # we inherit the vcov/ssc from the summary
+  assign_flags(object$summary_flags, vcov = vcov, ssc = ssc)
 
   # Default behavior vcov:
   suffix = ""

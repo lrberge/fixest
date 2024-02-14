@@ -11,6 +11,8 @@
 
 - new method `df.residual.fixest`. Thanks to @rferrali, #455
 
+- now the `vcov` method inherits the small sample correction and type of VCOV used in the original estimation. Thanks to @mgoplerud, #356 
+
 ## Bugs
 
 - fix bug when the covariance matrix was *very* ill-defined. Thanks to Gianluca Russo.

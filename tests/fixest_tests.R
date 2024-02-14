@@ -918,14 +918,14 @@ test(v1, v1c)
 
 # Only ssc change
 v2 = summary(est, ssc = ssc())$cov.scaled
-v2b = vcov(est, cluster = ~clu, ssc = ssc())
+v2b = vcov(est, ssc = ssc())
 
 test(v2, v2b)
 test(max(abs(v1 - v2)) == 0, FALSE)
 
-# SE change only
+# vcov change only
 v3 = summary(est, se = "hetero")$cov.scaled
-v3b = vcov(est, se = "hetero", ssc = ssc(adj = FALSE))
+v3b = vcov(est, se = "hetero")
 
 test(v3, v3b)
 test(max(abs(v1 - v3)) == 0, FALSE)
