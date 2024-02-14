@@ -1191,6 +1191,15 @@ bool dm_update_X_IronsTuck(int nb_coef_no_Q, vector<double> &X,
   return(res);
 }
 
+double sum_absolute_difference(int n, const double *__restrict x, const double *__restrict y){
+  double res = 0;
+  for(int i=0 ; i<n ; ++i){
+    res += fabs(x[i] - y[i]);
+  }
+  
+  return res;
+}
+
 void compute_fe_gnl(double *p_fe_coef_origin, double *p_fe_coef_destination,
                     double *p_sum_other_means, double *p_sum_in_out, PARAM_DEMEAN *args){
   // update of the cluster coefficients
@@ -1492,6 +1501,21 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
         break;
       }
     }
+    
+    // if(iter == 10){
+    //   // we decide in which case we are in
+    //   compute_fe(Q, p_GX, p_GGY, p_sum_other_means, p_sum_in_out, args);
+    //   double diff_acc = sum_absolute_difference(nb_coef_T, p_GX, p_GGY);
+      
+    //   // we compare the result of the acceleration with the regular projection
+    //   compute_fe(Q, p_GGX, p_Y, p_sum_other_means, p_sum_in_out, args);
+    //   compute_fe(Q, p_Y, p_GY, p_sum_other_means, p_sum_in_out, args);
+      
+    //   double diff_proj = sum_absolute_difference(nb_coef_T, p_Y, p_GY);
+      
+    //   Rcout << "diff acc  = " << diff_acc << "\ndiff proj = " << diff_proj << "\n";
+      
+    // }
     
     if(iter % 4 == 0){
       ++major_acc;
