@@ -2148,7 +2148,8 @@ xpd = function(fml, ..., add = NULL, lhs, rhs, data = NULL, frame = parent.frame
 #' Centers a set of variables around a set of factors
 #'
 #' User-level access to internal demeaning algorithm of `fixest`.
-#'
+#' 
+#' @inheritParams feols
 #' @inheritSection feols Varying slopes
 #'
 #' @param X A matrix, vector, data.frame or a list OR a formula OR a [`feols`] estimation. If equal 

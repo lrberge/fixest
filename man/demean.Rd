@@ -68,6 +68,14 @@ frequencies before feeding them into the algorithm. If \code{FALSE}, the origina
 provided by the user is maintained. In general, reordering leads to faster and more precise
 performance.}
 
+\item{fixef.algo}{\code{NULL} (default) or an object of class \code{demeaning_algo} obtained with
+the function \code{\link{demeaning_algo}}. If \code{NULL}, it falls to the defaults of \code{\link{demeaning_algo}}.
+This arguments controls the settings of the demeaning algorithm.
+Only play with it if the convergence is slow, i.e. look at the slot \verb{$iterations}, and if any is
+over 50, it may be worth playing around with it. Please read the documentation of the
+function \code{\link{demeaning_algo}}. Be aware that there is no clear guidance on how to change the
+settings, it's more a matter of try-and-see.}
+
 \item{na.rm}{Logical, default is \code{TRUE}. If \code{TRUE} and the input data contains any NA value,
 then any observation with NA will be discarded leading to an output with less observations than
 the input. If \code{FALSE}, if NAs are present the output will also be filled with NAs for each NA
