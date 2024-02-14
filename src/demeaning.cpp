@@ -542,11 +542,6 @@ FEClass::FEClass(int n_obs, int Q, SEXP r_weights, SEXP fe_id_list, SEXP r_nb_id
 
     // A) Meta variables => the ones containing the main information
 
-    // slope_vars_list: R list
-    // p_vs_vars.resize(nb_slopes);
-    // for(int v=0 ; v<nb_slopes ; ++v){
-    //     p_vs_vars[v] = REAL(VECTOR_ELT(slope_vars_list, v));
-    // }
     sMat m_slopes(slope_vars_list);
     p_vs_vars.resize(nb_slopes);
     for(int v=0 ; v<nb_slopes ; ++v){
@@ -691,16 +686,10 @@ void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single,
       }
 
     }
-
-    // Rcout << "is_weight:" << is_weight << ", is_single: " << is_single << "\n";
-
-    // Rcout << "Coefs:\n ";
+    
     for(int m=0 ; m<nb_coef ; ++m){
-      // Rcout << my_fe_coef[m] << " ("  << my_SW[m] << "), ";
-
       my_fe_coef[m] /= my_SW[m];
     }
-    // Rcout << "\n\n";
 
   } else {
     // Setting up => computing the raw coefficient of the last column
@@ -805,13 +794,10 @@ void FEClass::compute_fe_coef_2_internal(double *fe_coef_in_out_C, double *fe_co
   int *my_fe_a = p_fe_id[index_a];
   int *my_fe_b = p_fe_id[index_b];
 
-  // int nb_coef_a = nb_coef_Q[index_a];
   int nb_coef_b = nb_coef_Q[index_b];
 
-  // int nb_id_a = nb_id_Q[index_a];
   int nb_id_b = nb_id_Q[index_b];
 
-  // double *my_in_out_a = in_out_C + coef_start_Q[index_a];
   double *my_in_out_b = in_out_C + coef_start_Q[index_b];
 
   const bool is_slope_a = is_slope_Q[index_a];
@@ -861,22 +847,7 @@ void FEClass::compute_fe_coef_2_internal(double *fe_coef_in_out_C, double *fe_co
     double tmp = 0;
 
     for(int i=0 ; i<n_obs ; ++i){
-
-      // if(is_slope_a){
-      //     tmp = 0;
-      //     for(int v=0 ; v<V_a ; ++v){
-      //         if(is_weight){
-      //             tmp += my_vs_coef_a(my_fe_a[i] - 1, v) * VS_mat_a(i, v) * p_weights[i];
-      //         } else {
-      //             tmp += my_vs_coef_a(my_fe_a[i] - 1, v) * VS_mat_a(i, v);
-      //         }
-      //     }
-      //
-      // } else if(is_weight){
-      //     tmp = my_fe_coef_a[my_fe_a[i] - 1] * p_weights[i];
-      // } else {
-      //     tmp = my_fe_coef_a[my_fe_a[i] - 1];
-      // }
+      
       if(is_slope_a){
         tmp = 0;
         for(int v=0 ; v<V_a ; ++v){
@@ -939,23 +910,11 @@ void FEClass::compute_fe_coef_2(double *fe_coef_in_C, double *fe_coef_out_C,
 
   compute_fe_coef_2_internal(fe_coef_in_C, fe_coef_tmp, in_out_C);
 
-  // Rcout << "Coefs IN:\nFirst dim: ";
-  // for(int i=0 ; i<nb_coef_Q[0] ; ++i){
-  //     Rcout << fe_coef_in_C[i] << ", ";
-  // }
-  // Rcout << "\n";
-
   //
   // Step 2: Updating a
   //
 
   compute_fe_coef_2_internal(fe_coef_out_C, fe_coef_tmp, in_out_C, true);
-
-  // Rcout << "Coefs OUT:\nFirst dim: ";
-  // for(int i=0 ; i<nb_coef_Q[0] ; ++i){
-  //     Rcout << fe_coef_out_C[i] << ", ";
-  // }
-  // Rcout << "\n";
 
 }
 
@@ -1191,14 +1150,6 @@ bool dm_update_X_IronsTuck(int nb_coef_no_Q, vector<double> &X,
   return(res);
 }
 
-double sum_absolute_difference(int n, const double *__restrict x, const double *__restrict y){
-  double res = 0;
-  for(int i=0 ; i<n ; ++i){
-    res += fabs(x[i] - y[i]);
-  }
-  
-  return res;
-}
 
 void compute_fe_gnl(double *p_fe_coef_origin, double *p_fe_coef_destination,
                     double *p_sum_other_means, double *p_sum_in_out, PARAM_DEMEAN *args){
@@ -1244,10 +1195,6 @@ void compute_fe_gnl(double *p_fe_coef_origin, double *p_fe_coef_destination,
 
     // STEP 2: computing the FE coef
     FE_info.compute_fe_coef(q, p_fe_coef_destination, p_sum_other_means, p_sum_in_out);
-
-    // if(int q == 0){
-    // 	Rprintf("p_fe_coef_destination: %.3f, %.3f, %.3f, %.3f\n", my_fe_coef[0], my_fe_coef[1], my_fe_coef[2], my_fe_coef[3]);
-    // }
     
   }
 
@@ -1363,31 +1310,16 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
     FE_info.compute_in_out(q, p_sum_in_out, input, output);
   }
 
-  // Rcout << "Sum in out:\n";
-  // int c_next = 0;
-  // int q_current = 0;
-  // for(int c=0 ; c<nb_coef_T ; ++c){
-  //     if(c == c_next){
-  //         if(c != 0) Rcout << "\n";
-  //
-  //         Rcout << "q = " << q_current << ": ";
-  //         c_next += FE_info.nb_coef_Q[q_current];
-  //         q_current++;
-  //     }
-  //
-  //     Rcout << p_sum_in_out[c] << ", ";
-  // }
-  // Rcout << "\n";
-
   // interruption handling
   bool isMaster = omp_get_thread_num() == 0;
   bool *pStopNow = args->stopnow;
   // I overcast to remember the lesson
-  double flop = 4.0*(5 + 12*(Q-1) + 4*(Q-1)*(Q-1))*static_cast<double>(n_obs); // rough estimate nber operation per iter
+  // rough estimate nber operation per iter
+  double flop = 4.0*(5 + 12*(Q-1) + 4*(Q-1)*(Q-1))*static_cast<double>(n_obs); 
   if(two_fe_algo){
     flop = 20.0 * static_cast<double>(n_obs);
   }
-  int iterSecond = ceil(2000000000 / flop / 5); // nber iter per 1/5 second
+  int iterSecond = ceil(2000000000 / flop / 5); // nber iter per 1/5 second at 2GHz
 
   //
   // IT iteration (preparation)
@@ -1429,22 +1361,6 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
   // first iteration
   compute_fe(Q, p_X, p_GX, p_sum_other_means, p_sum_in_out, args);
 
-  // Rcout << "Coef first iter:\n";
-  // c_next = 0;
-  // q_current = 0;
-  // for(int c=0 ; c<nb_coef_T ; ++c){
-  //     if(c == c_next){
-  //         if(c != 0) Rcout << "\n";
-  //
-  //         Rcout << "q = " << q_current << ": ";
-  //         c_next += FE_info.nb_coef_Q[q_current];
-  //         q_current++;
-  //     }
-  //
-  //     Rcout << p_GX[c] << ", ";
-  // }
-  // Rcout << "\n\n\n";
-
   // check whether we should go into the loop
   bool keepGoing = false;
   for(int i=0 ; i<nb_coef_T ; ++i){
@@ -1455,8 +1371,6 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
   }
 
   // For the stopping criterion on total addition
-  // vector<double> mu_last(n_obs, 0);
-  // double input_mean = 0;
   double ssr = 0;
 
   int iter = 0;
@@ -1471,13 +1385,6 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
     }
 
     iter++;
-    
-    if(false && iter >= 10 && iter < 20){
-      // we run several passes of the no acc algo before running the acceleration
-      compute_fe(Q, p_GX, p_GGX, p_sum_other_means, p_sum_in_out, args);
-      compute_fe(Q, p_GGX, p_X, p_sum_other_means, p_sum_in_out, args);
-      compute_fe(Q, p_X, p_GX, p_sum_other_means, p_sum_in_out, args);
-    }
 
     // GGX -- origin: GX, destination: GGX
     compute_fe(Q, p_GX, p_GGX, p_sum_other_means, p_sum_in_out, args);
@@ -1502,21 +1409,6 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
       }
     }
     
-    // if(iter == 10){
-    //   // we decide in which case we are in
-    //   compute_fe(Q, p_GX, p_GGY, p_sum_other_means, p_sum_in_out, args);
-    //   double diff_acc = sum_absolute_difference(nb_coef_T, p_GX, p_GGY);
-      
-    //   // we compare the result of the acceleration with the regular projection
-    //   compute_fe(Q, p_GGX, p_Y, p_sum_other_means, p_sum_in_out, args);
-    //   compute_fe(Q, p_Y, p_GY, p_sum_other_means, p_sum_in_out, args);
-      
-    //   double diff_proj = sum_absolute_difference(nb_coef_T, p_Y, p_GY);
-      
-    //   Rcout << "diff acc  = " << diff_acc << "\ndiff proj = " << diff_proj << "\n";
-      
-    // }
-    
     if(iter % 4 == 0){
       ++major_acc;
       if(major_acc == 1){
@@ -1531,16 +1423,6 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
         major_acc = 0;
       }
     }
-    
-    // double maximum_difference = 0;
-    // for(int i=0 ; i<nb_coef_no_Q ; ++i){
-    //   if(fabs(X[i] - GX[i]) > maximum_difference){
-    //     maximum_difference = X[i] - GX[i];
-    //   }
-    // }
-    // if(isMaster){
-    //   // Rcout << "iter = " << iter << ", max diff = " << maximum_difference << "\n";
-    // }
 
     // Other stopping criterion: change to SSR very small
     if(iter % 40 == 0){
@@ -1566,8 +1448,6 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
         resid = input[i] - mu_current[i];
         ssr += resid*resid;
       }
-
-      // if(isMaster) Rprintf("iter %i -- SSR = %.0f (diff = %.0f)\n", iter, ssr, ssr_old - ssr);
 
       if(stopping_crit(ssr_old, ssr, diffMax)){
         break;
