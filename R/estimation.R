@@ -48,6 +48,13 @@
 #' variables will return a `fixest_multi` object.
 #' @param X Numeric matrix of the regressors.
 #' @param fixef_df Matrix/data.frame of the fixed-effects.
+#' @param fixef.algo `NULL` (default) or an object of class `demeaning_algo` obtained with
+#' the function [`demeaning_algo`]. If `NULL`, it falls to the defaults of [`demeaning_algo`]. 
+#' This arguments controls the settings of the demeaning algorithm.
+#' Only play with it if the convergence is slow, i.e. look at the slot `$iterations`, and if any is
+#' over 50, it may be worth playing around with it. Please read the documentation of the 
+#' function [`demeaning_algo`]. Be aware that there is no clear guidance on how to change the 
+#' settings, it's more a matter of try-and-see.
 #'
 #' @details
 #' The method used to demean each variable along the fixed-effects is based on Berge (2018), since 

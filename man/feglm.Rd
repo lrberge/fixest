@@ -29,6 +29,7 @@ feglm(
   fixef.rm = "perfect",
   fixef.tol = 1e-06,
   fixef.iter = 10000,
+  fixef.algo = NULL,
   collin.tol = 1e-10,
   glm.iter = 25,
   glm.tol = 1e-08,
@@ -68,6 +69,7 @@ feglm.fit(
   fixef.rm = "perfect",
   fixef.tol = 1e-06,
   fixef.iter = 10000,
+  fixef.algo = NULL,
   collin.tol = 1e-10,
   glm.iter = 25,
   glm.tol = 1e-08,
@@ -105,6 +107,7 @@ fepois(
   fixef.rm = "perfect",
   fixef.tol = 1e-06,
   fixef.iter = 10000,
+  fixef.algo = NULL,
   collin.tol = 1e-10,
   glm.iter = 25,
   glm.tol = 1e-08,
@@ -256,6 +259,14 @@ two coefficients of successive iterations.}
 
 \item{fixef.iter}{Maximum number of iterations in fixed-effects algorithm
 (only in use for 2+ fixed-effects). Default is 10000.}
+
+\item{fixef.algo}{\code{NULL} (default) or an object of class \code{demeaning_algo} obtained with
+the function \code{\link{demeaning_algo}}. If \code{NULL}, it falls to the defaults of \code{\link{demeaning_algo}}.
+This arguments controls the settings of the demeaning algorithm.
+Only play with it if the convergence is slow, i.e. look at the slot \verb{$iterations}, and if any is
+over 50, it may be worth playing around with it. Please read the documentation of the
+function \code{\link{demeaning_algo}}. Be aware that there is no clear guidance on how to change the
+settings, it's more a matter of try-and-see.}
 
 \item{collin.tol}{Numeric scalar, default is \code{1e-10}. Threshold deciding when variables should
 be considered collinear and subsequently removed from the estimation. Higher values means more

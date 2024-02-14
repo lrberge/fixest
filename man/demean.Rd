@@ -15,7 +15,7 @@ demean(
   notes = getFixest_notes(),
   iter = 2000,
   tol = 1e-06,
-  fixef.reorder = TRUE,
+  fixef.algo = NULL,
   na.rm = TRUE,
   as.matrix = is.atomic(X),
   im_confident = FALSE,
@@ -62,11 +62,6 @@ equal to \code{getFixest_notes()}.}
 \item{tol}{Stopping criterion of the algorithm. Default is \code{1e-6}. The algorithm stops when the
 maximum absolute increase in the coefficients values is lower than \code{tol}.}
 
-\item{fixef.reorder}{Logical, default is \code{TRUE}. Whether to reorder the fixed-effects by
-frequencies before feeding them into the algorithm. If \code{FALSE}, the original fixed-effects order
-provided by the user is maintained. In general, reordering leads to faster and more precise
-performance.}
-
 \item{na.rm}{Logical, default is \code{TRUE}. If \code{TRUE} and the input data contains any NA value,
 then any observation with NA will be discarded leading to an output with less observations than
 the input. If \code{FALSE}, if NAs are present the output will also be filled with NAs for each NA
@@ -84,6 +79,11 @@ element MUST be consistent. Non compliance to these rules may simply lead your R
 break.}
 
 \item{...}{Not currently used.}
+
+\item{fixef.reorder}{Logical, default is \code{TRUE}. Whether to reorder the fixed-effects by
+frequencies before feeding them into the algorithm. If \code{FALSE}, the original fixed-effects order
+provided by the user is maintained. In general, reordering leads to faster and more precise
+performance.}
 }
 \value{
 It returns a data.frame of the same number of columns as the number of variables to be centered.
