@@ -43,6 +43,8 @@
 
 - improve error messages in iplot. 
 
+- improve speed of the function `fixef.fixest` in the presence of varying slopes. PR of @etiennebacher, #390
+
 ## Documentation
 
 - fix typos and display issues thanks to: @statzhero, @eyayaw, @etiennebacher, @raffaem.
