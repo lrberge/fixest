@@ -633,7 +633,7 @@ FEClass::FEClass(int n_obs, int Q, SEXP r_weights, SEXP fe_id_list, SEXP r_nb_id
 // Overloaded versions
 void FEClass::compute_fe_coef(double *fe_coef_C, sVec &mu_in_N){
   // mu: length n_obs, vector giving sum_in_out
-  // fe_coef: vector receiving the cluster coefficients
+  // fe_coef: vector receiving the fixed-effects coefficients
 
   // single FE version
   compute_fe_coef_internal(0, fe_coef_C, true, mu_in_N, nullptr, nullptr);
@@ -641,7 +641,7 @@ void FEClass::compute_fe_coef(double *fe_coef_C, sVec &mu_in_N){
 
 void FEClass::compute_fe_coef(int q, double *fe_coef_C, double *sum_other_coef_N, double *in_out_C){
   // mu: length n_obs, vector giving sum_in_out
-  // fe_coef: vector receiving the cluster coefficients
+  // fe_coef: vector receiving the fixed-effects coefficients
 
   // multiple FE version
   compute_fe_coef_internal(q, fe_coef_C, false, nullptr, sum_other_coef_N, in_out_C);
@@ -651,13 +651,14 @@ void FEClass::compute_fe_coef(int q, double *fe_coef_C, double *sum_other_coef_N
 void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single, sVec mu_in_N, 
                                        double *sum_other_coef_N, double *in_out_C){
   // mu: length n_obs, vector giving sum_in_out
-  // fe_coef: vector receiving the cluster coefficients
+  // fe_coef: vector receiving the fixed-effects coefficients
 
   int V = nb_vs_Q[q];
   int *my_fe = p_fe_id[q];
   int nb_coef = nb_coef_Q[q];
   int nb_id = nb_id_Q[q];
   const bool is_weight = this->is_weight;
+  const double *const p_weights = this->p_weights;
 
   double *my_fe_coef = fe_coef_C + coef_start_Q[q];
 
@@ -677,7 +678,7 @@ void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single,
 
     } else {
 
-      double *sum_in_out = in_out_C + coef_start_Q[q];
+      const double *sum_in_out = in_out_C + coef_start_Q[q];
 
       // initialize cluster coef
       for(int m=0 ; m<nb_coef ; ++m){
@@ -724,7 +725,7 @@ void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single,
     } else {
 
       // initialization
-      double *sum_in_out = in_out_C + coef_start_Q[q];
+      const double *sum_in_out = in_out_C + coef_start_Q[q];
       for(int m=0 ; m<nb_coef ; ++m){
         my_fe_coef[m] = sum_in_out[m];
       }
@@ -1190,348 +1191,6 @@ bool dm_update_X_IronsTuck(int nb_coef_no_Q, vector<double> &X,
   return(res);
 }
 
-
-
-void demean_single_1(int v, PARAM_DEMEAN* args){
-  // v: variable identifier to demean
-
-  // Q == 1: nothing to say, just compute the closed form
-
-  // loading the data
-  int nb_coef_T = args->nb_coef_T;
-
-  vector<sVec> &p_input = args->p_input;
-  vector<double*> &p_output = args->p_output;
-
-  // fe_info
-  FEClass &FE_info = *(args->p_FE_info);
-
-  // vector of fixed-effects coefficients initialized at 0
-  vector<double> fe_coef(nb_coef_T, 0);
-  double *p_fe_coef = fe_coef.data();
-
-  // interruption handling
-  bool isMaster = omp_get_thread_num() == 0;
-  bool *pStopNow = args->stopnow;
-  if(isMaster){
-    if(pending_interrupt()){
-      *pStopNow = true;
-    }
-  }
-
-  // the input & output
-  sVec &input = p_input[v];
-  double *output = p_output[v];
-
-  // We compute the FEs
-  FE_info.compute_fe_coef(p_fe_coef, input);
-
-  // Output:
-  FE_info.add_fe_coef_to_mu(0, p_fe_coef, output);
-
-  // saving the fixef coefs
-  double *fixef_values = args->fixef_values;
-  if(args->save_fixef){
-    for(int m=0 ; m<nb_coef_T ; ++m){
-      fixef_values[m] = fe_coef[m];
-    }
-  }
-
-
-}
-
-void demean_acc_2(int v, int iterMax, PARAM_DEMEAN *args){
-
-  //
-  // Setting up
-  //
-
-  // loading data
-  int n_obs = args->n_obs;
-  double diffMax = args->diffMax;
-
-  // input output
-  vector<sVec> &p_input = args->p_input;
-  vector<double*> &p_output = args->p_output;
-  sVec &input = p_input[v];
-  double *output = p_output[v];
-
-  // FE info
-  FEClass &FE_info = *(args->p_FE_info);
-
-  // vector of FE coefs => needs not be equal to nb_coef_T (because Q can be higher than 2)
-  int n_a = FE_info.nb_coef_Q[0];
-  int n_b = FE_info.nb_coef_Q[1];
-  int nb_coef_2 = n_a + n_b;
-
-  // conditional sum of input minus output
-  vector<double> sum_input_output(nb_coef_2, 0);
-  double *p_sum_in_out = sum_input_output.data();
-
-  for(int q=0 ; q<2 ; ++q){
-    FE_info.compute_in_out(q, p_sum_in_out, input, output);
-  }
-
-  // Rcout << "Value of in_out:\n";
-  // for(int c=0 ; c<nb_coef_2 ; ++c){
-  //     if(c == n_a) Rcout << "\n";
-  //     Rcout << p_sum_in_out[c] << ", ";
-  //
-  // }
-  // Rcout << "\n";
-
-  // Rprintf("a_tilde: %.3f, %.3f, %.3f, %.3f\n", a_tilde[0], a_tilde[1], a_tilde[2], a_tilde[3]);
-
-  // interruption handling
-  bool isMaster = omp_get_thread_num() == 0;
-  bool *pStopNow = args->stopnow;
-  double flop = 20.0 * static_cast<double>(n_obs); // rough estimate nber operation per iter
-  int iterSecond = ceil(2000000000 / flop / 5); // nber iter per 1/5 second
-
-  //
-  // IT iteration (preparation)
-  //
-
-  vector<double> X(n_a, 0);
-  vector<double> GX(n_a);
-  vector<double> GGX(n_a);
-
-  double *p_X   = X.data();
-  double *p_GX  = GX.data();
-  double *p_GGX = GGX.data();
-
-  vector<double> delta_GX(n_a);
-  vector<double> delta2_X(n_a);
-
-  vector<double> coef_beta(n_b);
-  double *p_coef_beta = coef_beta.data();
-  
-  // temp vectors to improve the convergence
-  vector<double> Y(n_a, 0);
-  vector<double> GY(n_a, 0);
-  vector<double> GGY(n_a, 0);
-
-  double *p_Y   = Y.data();
-  double *p_GY  = GY.data();
-  double *p_GGY  = GGY.data();
-  
-  int major_acc = 0;
-
-  //
-  // the main loop
-  //
-
-  // first iteration => update GX
-  FE_info.compute_fe_coef_2(p_X, p_GX, p_coef_beta, p_sum_in_out);
-
-  // Rcout << "Coefs at first iteration:\na: ";
-  // for(int i=0 ; i<n_a ; ++i){
-  //     Rcout << p_GX[i] << ", ";
-  // }
-  // Rcout << "\nb: ";
-  // for(int i=0 ; i<n_b ; ++i){
-  //     Rcout << p_coef_beta[i] << ", ";
-  // }
-  // Rcout << "\n";
-
-  // For the stopping criterion on total addition
-  // vector<double> mu_last(n_obs, 0);
-  // double input_mean = 0;
-  double ssr = 0;
-
-  bool numconv = false;
-  bool keepGoing = true;
-  int iter = 1;
-  while(!*pStopNow && keepGoing && iter<=iterMax){
-
-    if(isMaster && iter % iterSecond == 0){
-      if(pending_interrupt()){
-        *pStopNow = true;
-        break;
-      }
-    }
-
-    ++iter;
-    
-    int n_new_algo = 5;
-    int version = 1;
-    if(iter >= n_new_algo){
-      // we add a few iterations before the acceleration
-      if(version == 0){
-        FE_info.compute_fe_coef_2(p_GX, p_Y, p_coef_beta, p_sum_in_out);
-        FE_info.compute_fe_coef_2(p_Y, p_GY, p_coef_beta, p_sum_in_out);
-        FE_info.compute_fe_coef_2(p_GY, p_Y, p_coef_beta, p_sum_in_out);
-        FE_info.compute_fe_coef_2(p_Y, p_GY, p_coef_beta, p_sum_in_out);
-        FE_info.compute_fe_coef_2(p_GY, p_Y, p_coef_beta, p_sum_in_out);
-        FE_info.compute_fe_coef_2(p_Y, p_GY, p_coef_beta, p_sum_in_out);
-        FE_info.compute_fe_coef_2(p_GY, p_GX, p_coef_beta, p_sum_in_out);
-        
-        FE_info.compute_fe_coef_2(p_GX, p_Y, p_coef_beta, p_sum_in_out);
-        FE_info.compute_fe_coef_2(p_Y, p_GY, p_coef_beta, p_sum_in_out);
-        FE_info.compute_fe_coef_2(p_GY, p_Y, p_coef_beta, p_sum_in_out);
-        FE_info.compute_fe_coef_2(p_Y, p_GY, p_coef_beta, p_sum_in_out);
-        FE_info.compute_fe_coef_2(p_GY, p_Y, p_coef_beta, p_sum_in_out);
-        FE_info.compute_fe_coef_2(p_Y, p_GY, p_coef_beta, p_sum_in_out);
-        FE_info.compute_fe_coef_2(p_GY, p_Y, p_coef_beta, p_sum_in_out);
-        FE_info.compute_fe_coef_2(p_Y, p_GGX, p_coef_beta, p_sum_in_out);
-      } else if(version == 1){
-        FE_info.compute_fe_coef_2(p_GX, p_GGX, p_coef_beta, p_sum_in_out);
-        FE_info.compute_fe_coef_2(p_GGX, p_X, p_coef_beta, p_sum_in_out);
-        FE_info.compute_fe_coef_2(p_X, p_GX, p_coef_beta, p_sum_in_out);
-        
-        // FE_info.compute_fe_coef_2(p_GX, p_GGX, p_coef_beta, p_sum_in_out);
-        // FE_info.compute_fe_coef_2(p_GGX, p_X, p_coef_beta, p_sum_in_out);
-        // FE_info.compute_fe_coef_2(p_X, p_GX, p_coef_beta, p_sum_in_out);
-        
-        FE_info.compute_fe_coef_2(p_GX, p_GGX, p_coef_beta, p_sum_in_out);
-      } else if(version == 3){
-        FE_info.compute_fe_coef_2(p_GX, p_Y, p_coef_beta, p_sum_in_out);
-        FE_info.compute_fe_coef_2(p_Y, p_GX, p_coef_beta, p_sum_in_out);
-        
-        FE_info.compute_fe_coef_2(p_GX, p_Y, p_coef_beta, p_sum_in_out);
-        FE_info.compute_fe_coef_2(p_Y, p_GY, p_coef_beta, p_sum_in_out);
-        FE_info.compute_fe_coef_2(p_GY, p_GGX, p_coef_beta, p_sum_in_out);
-      }
-    } else {
-      // GGX -- origin: GX, destination: GGX
-      FE_info.compute_fe_coef_2(p_GX, p_GGX, p_coef_beta, p_sum_in_out);
-    }    
-
-    // X ; update of the fixed-effects coefficients
-    numconv = dm_update_X_IronsTuck(n_a, X, GX, GGX, delta_GX, delta2_X);
-    if(numconv) break;
-    
-    // X => outcome of the function
-    // FE_info.compute_fe_coef_2(p_X, p_Y, p_coef_beta, p_sum_in_out);
-    // FE_info.compute_fe_coef_2(p_Y, p_X, p_coef_beta, p_sum_in_out);
-    
-    FE_info.compute_fe_coef_2(p_X, p_GX, p_coef_beta, p_sum_in_out);
-    
-    if(iter % 5 == 0){
-      ++major_acc;
-      if(major_acc == 1){
-        std::memcpy(p_Y, p_GX, n_a * sizeof(double));
-      } else if(major_acc == 2){
-        std::memcpy(p_GY, p_GX, n_a * sizeof(double));
-      } else {
-        std::memcpy(p_GGY, p_GX, n_a * sizeof(double));
-        dm_update_X_IronsTuck(n_a, Y, GY, GGY, delta_GX, delta2_X);
-        FE_info.compute_fe_coef_2(p_Y, p_GX, p_coef_beta, p_sum_in_out);
-        major_acc = 0;
-      }
-    }
-
-    keepGoing = false;
-    for(int i=0 ; i<n_a ; ++i){
-      if(continue_crit(X[i], GX[i], diffMax)){
-        keepGoing = true;
-        break;
-      }
-    }
-    
-    if(isMaster && false){
-      double maximum_difference = 0;
-      for(int i=0 ; i<n_a ; ++i){
-        if(fabs(X[i] - GX[i]) > maximum_difference){
-          maximum_difference = fabs(X[i] - GX[i]);
-        }
-      }
-      
-      Rcout << "iter = " << iter << ", maxDiff = " << maximum_difference << "\n";
-    }
-
-    // Other stopping criterion: change to SSR very small
-    if(iter % 50 == 0){
-
-      vector<double> mu_current(n_obs, 0);
-      double *p_mu = mu_current.data();
-
-      FE_info.add_2_fe_coef_to_mu(p_GX, p_coef_beta, p_sum_in_out, p_mu);
-
-      // init ssr if iter == 50 / otherwise, comparison
-      if(iter == 50){
-        ssr = 0;
-        double resid;
-        for(int i=0 ; i<n_obs ; ++i){
-          resid = input[i] - mu_current[i];
-          ssr += resid*resid;
-        }
-
-      } else {
-        double ssr_old = ssr;
-
-        // we compute the new SSR
-        ssr = 0;
-        double resid;
-        for(int i=0 ; i<n_obs ; ++i){
-          resid = input[i] - mu_current[i];
-          ssr += resid*resid;
-        }
-
-        // if(isMaster) Rprintf("iter %i -- SSR = %.0f (diff = %.0f)\n", iter, ssr, ssr_old - ssr);
-
-        if(stopping_crit(ssr_old, ssr, diffMax)){
-          break;
-        }
-
-      }
-    }
-
-  }
-
-  //
-  // we update the result (output)
-  //
-
-  // we end with a last iteration
-  double *p_alpha_final = p_GX;
-  double *p_beta_final = p_coef_beta;
-
-  FE_info.compute_fe_coef_2(p_alpha_final, p_alpha_final, p_beta_final, p_sum_in_out);
-
-  // Rcout << "Output before:\n";
-  // for(int i=0 ; i<6 ; ++i){
-  //     Rcout << output[i] << ",";
-  // }
-
-  // we update the output
-  FE_info.add_2_fe_coef_to_mu(p_alpha_final, p_beta_final, p_sum_in_out, output, false);
-
-  // Rcout << "\nOutput after:\n";
-  // for(int i=0 ; i<6 ; ++i){
-  //     Rcout << output[i] << ",";
-  // }
-  // Rcout << "\n";
-  //
-  // Rcout << "Final coefs:\na: ";
-  // for(int i=0 ; i<n_a ; ++i){
-  //     Rcout << p_alpha_final[i] << ", ";
-  // }
-  // Rcout << "\nb: ";
-  // for(int i=0 ; i<n_b ; ++i){
-  //     Rcout << p_beta_final[i] << ", ";
-  // }
-  // Rcout << "\n\n";
-
-  // keeping track of iterations
-  int *iterations_all = args->p_iterations_all;
-  iterations_all[v] += iter;
-
-  // saving the fixef coefs
-  double *fixef_values = args->fixef_values;
-  if(args->save_fixef){
-
-    for(int i=0 ; i<n_a ; ++i){
-      fixef_values[i] += p_alpha_final[i];
-    }
-
-    for(int j=0 ; j<n_b ; ++j){
-      fixef_values[n_a + j] += p_beta_final[j];
-    }
-  }
-
-}
-
 void compute_fe_gnl(double *p_fe_coef_origin, double *p_fe_coef_destination,
                     double *p_sum_other_means, double *p_sum_in_out, PARAM_DEMEAN *args){
   // update of the cluster coefficients
@@ -1602,272 +1261,53 @@ void compute_fe(int Q, double *p_fe_coef_origin, double *p_fe_coef_destination,
 }
 
 
-bool demean_acc_gnl_old(int v, int iterMax, PARAM_DEMEAN *args){
+void demean_single_1(int v, PARAM_DEMEAN* args){
+  // v: variable identifier to demean
 
-  //
-  // data
-  //
+  // Q == 1: nothing to say, just compute the closed form
 
-  int n_obs = args->n_obs;
+  // loading the data
   int nb_coef_T = args->nb_coef_T;
-  int Q = args->Q;
-  double diffMax = args->diffMax;
+
+  vector<sVec> &p_input = args->p_input;
+  vector<double*> &p_output = args->p_output;
 
   // fe_info
   FEClass &FE_info = *(args->p_FE_info);
 
-  // input output
-  vector<sVec> &p_input = args->p_input;
-  vector<double*> &p_output = args->p_output;
-  sVec &input = p_input[v];
-  double *output = p_output[v];
-
-  // temp var:
-  vector<double> sum_other_means(n_obs);
-  double *p_sum_other_means = sum_other_means.data();
-
-  // conditional sum of input minus output
-  vector<double> sum_input_output(nb_coef_T, 0);
-  double *p_sum_in_out = sum_input_output.data();
-
-  for(int q=0 ; q<Q ; ++q){
-    FE_info.compute_in_out(q, p_sum_in_out, input, output);
-  }
-
-  // Rcout << "Sum in out:\n";
-  // int c_next = 0;
-  // int q_current = 0;
-  // for(int c=0 ; c<nb_coef_T ; ++c){
-  //     if(c == c_next){
-  //         if(c != 0) Rcout << "\n";
-  //
-  //         Rcout << "q = " << q_current << ": ";
-  //         c_next += FE_info.nb_coef_Q[q_current];
-  //         q_current++;
-  //     }
-  //
-  //     Rcout << p_sum_in_out[c] << ", ";
-  // }
-  // Rcout << "\n";
-
-
+  // vector of fixed-effects coefficients initialized at 0
+  vector<double> fe_coef(nb_coef_T, 0);
+  double *p_fe_coef = fe_coef.data();  
 
   // interruption handling
   bool isMaster = omp_get_thread_num() == 0;
   bool *pStopNow = args->stopnow;
-  // I overcast to remember the lesson
-  double flop = 4.0*(5 + 12*(Q-1) + 4*(Q-1)*(Q-1))*static_cast<double>(n_obs); // rough estimate nber operation per iter
-  int iterSecond = ceil(2000000000 / flop / 5); // nber iter per 1/5 second
-
-  //
-  // IT iteration (preparation)
-  //
-
-  // variables on 1:K
-  vector<double> X(nb_coef_T, 0);
-  vector<double> GX(nb_coef_T);
-  vector<double> GGX(nb_coef_T);
-  // pointers:
-  double *p_X   = X.data();
-  double *p_GX  = GX.data();
-  double *p_GGX = GGX.data();
-
-  // variables on 1:(Q-1)
-  int nb_coef_no_Q = 0;
-  for(int q = 0 ; q<(Q-1) ; ++q){
-    nb_coef_no_Q += FE_info.nb_coef_Q[q];
-  }
-  vector<double> delta_GX(nb_coef_no_Q);
-  vector<double> delta2_X(nb_coef_no_Q);
-  
-  // additional vectors used to save the coefs
-  vector<double> Y(nb_coef_T, 0);
-  vector<double> GY(nb_coef_T);
-  vector<double> GGY(nb_coef_T);
-  // pointers:
-  double *p_Y   = Y.data();
-  double *p_GY  = GY.data();
-  double *p_GGY = GGY.data();
-  
-  int major_acc = 0;
-
-  //
-  // the main loop
-  //
-
-  // first iteration
-  compute_fe_gnl(p_X, p_GX, p_sum_other_means, p_sum_in_out, args);
-
-  // Rcout << "Coef first iter:\n";
-  // c_next = 0;
-  // q_current = 0;
-  // for(int c=0 ; c<nb_coef_T ; ++c){
-  //     if(c == c_next){
-  //         if(c != 0) Rcout << "\n";
-  //
-  //         Rcout << "q = " << q_current << ": ";
-  //         c_next += FE_info.nb_coef_Q[q_current];
-  //         q_current++;
-  //     }
-  //
-  //     Rcout << p_GX[c] << ", ";
-  // }
-  // Rcout << "\n\n\n";
-
-  // check whether we should go into the loop
-  bool keepGoing = false;
-  for(int i=0 ; i<nb_coef_T ; ++i){
-    if(continue_crit(X[i], GX[i], diffMax)){
-      keepGoing = true;
-      break;
+  if(isMaster){
+    if(pending_interrupt()){
+      *pStopNow = true;
     }
   }
 
-  // For the stopping criterion on total addition
-  // vector<double> mu_last(n_obs, 0);
-  // double input_mean = 0;
-  double ssr = 0;
+  // the input & output
+  sVec &input = p_input[v];
+  double *output = p_output[v];
 
-  int iter = 0;
-  bool numconv = false;
-  while(!*pStopNow && keepGoing && iter<iterMax){
+  // We compute the FEs
+  FE_info.compute_fe_coef(p_fe_coef, input);
 
-    if(isMaster && iter % iterSecond == 0){
-      if(pending_interrupt()){
-        *pStopNow = true;
-        break;
-      }
-    }
-
-    iter++;
-    
-    if(iter >= 500){
-      // we run several passes of the no acc algo before running the acceleration
-      compute_fe_gnl(p_GX, p_GGX, p_sum_other_means, p_sum_in_out, args);
-      compute_fe_gnl(p_GGX, p_X, p_sum_other_means, p_sum_in_out, args);
-      compute_fe_gnl(p_X, p_GX, p_sum_other_means, p_sum_in_out, args);
-      
-      if(iter > 100){
-        compute_fe_gnl(p_GX, p_GGX, p_sum_other_means, p_sum_in_out, args);
-        compute_fe_gnl(p_GGX, p_X, p_sum_other_means, p_sum_in_out, args);
-        compute_fe_gnl(p_X, p_GX, p_sum_other_means, p_sum_in_out, args);
-      }
-    }
-
-    // GGX -- origin: GX, destination: GGX
-    compute_fe_gnl(p_GX, p_GGX, p_sum_other_means, p_sum_in_out, args);
-
-    // X ; update of the cluster coefficient
-    numconv = dm_update_X_IronsTuck(nb_coef_no_Q, X, GX, GGX, delta_GX, delta2_X);
-    if(numconv) break;
-    std::memcpy(p_Y, p_X, nb_coef_T * sizeof(double));
-    compute_fe_gnl(p_Y, p_X, p_sum_other_means, p_sum_in_out, args);
-    
-
-    // GX -- origin: X, destination: GX
-    compute_fe_gnl(p_X, p_GX, p_sum_other_means, p_sum_in_out, args);
-
-    keepGoing = false;
-    for(int i=0 ; i<nb_coef_no_Q ; ++i){
-      if(continue_crit(X[i], GX[i], diffMax)){
-        keepGoing = true;
-        break;
-      }
-    }
-    
-    if(iter % 5 == 0){
-      ++major_acc;
-      if(major_acc == 1){
-        std::memcpy(p_Y, p_GX, nb_coef_T * sizeof(double));
-      } else if(major_acc == 2){
-        std::memcpy(p_GY, p_GX, nb_coef_T * sizeof(double));
-      } else {
-        std::memcpy(p_GGY, p_GX, nb_coef_T * sizeof(double));
-        dm_update_X_IronsTuck(nb_coef_no_Q, Y, GY, GGY, delta_GX, delta2_X);
-        compute_fe_gnl(p_Y, p_GX, p_sum_other_means, p_sum_in_out, args);
-        major_acc = 0;
-      }
-    }
-    
-    // double maximum_difference = 0;
-    // for(int i=0 ; i<nb_coef_no_Q ; ++i){
-    //   if(fabs(X[i] - GX[i]) > maximum_difference){
-    //     maximum_difference = X[i] - GX[i];
-    //   }
-    // }
-    // if(isMaster){
-    //   // Rcout << "iter = " << iter << ", max diff = " << maximum_difference << "\n";
-    // }
-
-    // Other stopping criterion: change to SSR very small
-    if(iter % 50 == 0){
-
-      // mu_current is the vector of means
-      vector<double> mu_current(n_obs, 0);
-      double *p_mu = mu_current.data();
-      for(int q=0 ; q<Q ; ++q){
-
-        FE_info.add_fe_coef_to_mu(q, p_GX, p_mu);
-
-      }
-
-      // init ssr if iter == 50 / otherwise, comparison
-      if(iter == 50){
-
-        ssr = 0;
-        double resid;
-        for(int i=0 ; i<n_obs ; ++i){
-          resid = input[i] - mu_current[i];
-          ssr += resid*resid;
-        }
-
-      } else {
-        double ssr_old = ssr;
-
-        // we compute the new SSR
-        ssr = 0;
-        double resid;
-        for(int i=0 ; i<n_obs ; ++i){
-          resid = input[i] - mu_current[i];
-          ssr += resid*resid;
-        }
-
-        // if(isMaster) Rprintf("iter %i -- SSR = %.0f (diff = %.0f)\n", iter, ssr, ssr_old - ssr);
-
-        if(stopping_crit(ssr_old, ssr, diffMax)){
-          break;
-        }
-
-      }
-    }
-
-
-  }
-
-  //
-  // Updating the output
-  //
-
-  for(int q=0 ; q<Q ; ++q){
-    FE_info.add_fe_coef_to_mu(q, p_GX, output);
-  }
-
-  // keeping track of iterations
-  int *iterations_all = args->p_iterations_all;
-  iterations_all[v] += iter;
+  // Output:
+  FE_info.add_fe_coef_to_mu(0, p_fe_coef, output);
 
   // saving the fixef coefs
   double *fixef_values = args->fixef_values;
   if(args->save_fixef){
     for(int m=0 ; m<nb_coef_T ; ++m){
-      fixef_values[m] += GX[m];
+      fixef_values[m] = fe_coef[m];
     }
   }
 
-  bool conv = iter == iterMax ? false : true;
-
-  return(conv);
 }
+
 
 bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false){
 
@@ -1888,6 +1328,8 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
   if(two_fe_algo){
     Q = 2;
     // special case: 2 FEs, below will contain only the size of the first FE
+    //   this is because 2-FE is a special case which allows to avoid creating 
+    //   a N-size vector
     nb_coef_T = FE_info.nb_coef_Q[0];
     // nb_coef_all: only used in in-out
     nb_coef_all = FE_info.nb_coef_Q[0] + FE_info.nb_coef_Q[1];
@@ -1901,9 +1343,8 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
 
   // temp var:
   int size_other_means = two_fe_algo ? FE_info.nb_coef_Q[1] : n_obs;
-  // vector<double> sum_other_means_or_second_coef(size_other_means);
-  // double *p_sum_other_means = sum_other_means_or_second_coef.data();
-  double *p_sum_other_means = new double[size_other_means];
+  vector<double> sum_other_means_or_second_coef(size_other_means);
+  double *p_sum_other_means = sum_other_means_or_second_coef.data();
 
   // conditional sum of input minus output
   vector<double> sum_input_output(nb_coef_all, 0);
@@ -2110,7 +1551,6 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
       
     }
 
-
   }
 
   //
@@ -2144,9 +1584,6 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
   }
 
   bool conv = iter == iterMax ? false : true;
-  
-  // cleanup 
-  delete[] p_sum_other_means;
 
   return(conv);
 }
@@ -2156,7 +1593,7 @@ void demean_single_gnl(int v, PARAM_DEMEAN* args){
 
   // Algorithm to quickly get the means
   // Q >= 3 => acceleration for 15 iter
-  // if no convergence: conv 2 clusters
+  // if no convergence: conv 2 FEs
   // then acceleration again
 
   // data
@@ -2172,17 +1609,16 @@ void demean_single_gnl(int v, PARAM_DEMEAN* args){
 
     if(conv == false && iterMax > iter_warmup){
       // convergence for the first 2 FEs
-      int iter_max_new = iterMax / 2 - iter_warmup;
-      if(iter_max_new <= 0) iter_max_new = 1;
-      demean_acc_gnl(v, iter_max_new, args, true);
-
+      int iter_max_2FE = iterMax / 2 - iter_warmup;
+      if(iter_max_2FE > 0){
+        demean_acc_gnl(v, iter_max_2FE, args, true);
+      }
+      
       // re-acceleration
       int iter_previous = args->p_iterations_all[v];
       demean_acc_gnl(v, iterMax - iter_previous, args);
     }
   }
-
-  // if(args->p_iterations_all[v] > 50) balance_FEs(v, args);
 
   int *jobdone = args->jobdone;
   jobdone[v] = 1;
@@ -2316,7 +1752,7 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
 
   // save fixef option
   if(useX && save_fixef){
-    stop("save_fixef can be used only when there is no Xs.");
+    stop("save_fixef can only be used when there is no Xs.");
   }
 
   vector<double> fixef_values(save_fixef ? nb_coef_T : 1, 0);

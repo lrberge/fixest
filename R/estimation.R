@@ -1633,7 +1633,8 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
     }
     
     # filename = ifelse(length(fixef_sizes) == 2, "data_1e6_FE2.RData", "data_1e6_FE3.RData")
-    filename = "data_issue_323.RData"
+    # filename = "data_issue_323.RData"
+    filename = "data_1e7_FE1.RData"
     save(y, X, weights, fixef.iter, fixef.tol, fixef_sizes, fixef_id_list, 
          fixef_table_vector, slope_flag, slope_vars, init, nthreads, 
          file = sma("./../_DEVELOPMENT/improve-convergence/{filename}"))
