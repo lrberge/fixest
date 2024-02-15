@@ -3824,7 +3824,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
   }
 
   if(check_0 && !"fixef" %in% type){
-    only_0 = cpppar_check_only_0(base::as.matrix(res), nthreads = 1)
+    only_0 = cpp_check_only_0(base::as.matrix(res), nthreads = 1)
     if(all(only_0 == 1)){
       stop("After removing NAs, not a single explanatory variable is different from 0.")
 

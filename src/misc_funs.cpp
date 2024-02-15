@@ -28,39 +28,10 @@ using namespace std;
 // [[Rcpp::plugins(cpp11)]]
 
 // [[Rcpp::export]]
-NumericVector cpp_lgamma(NumericVector x){
-  // simple function to compute lgamma of a vector
-
-  int n = x.length();
-  NumericVector res(n);
-
-  for(int i=0 ; i<n ; i++){
-    res[i] = lgamma(x[i]);
-  }
-
-  return(res);
-}
-
-// [[Rcpp::export]]
-NumericVector cpp_log_a_exp(double a, NumericVector mu, NumericVector exp_mu){
-  // faster this way
-
-  int n = mu.length();
-  NumericVector res(n);
-
-  for(int i=0 ; i<n ; i++){
-    if(mu[i] < 200){
-      res[i] = log(a + exp_mu[i]);
-    } else {
-      res[i] = mu[i];
-    }
-  }
-
-  return(res);
-}
-
-// [[Rcpp::export]]
-NumericVector cpp_partialDerivative_other(int iterMax, int Q, int N, double epsDeriv, NumericVector ll_d2,	NumericVector dx_dother, NumericVector init, IntegerMatrix dumMat, IntegerVector nbCluster){
+NumericVector cpp_partialDerivative_other(int iterMax, int Q, int N, double epsDeriv, 
+                                          NumericVector ll_d2,	NumericVector dx_dother, 
+                                          NumericVector init, IntegerMatrix dumMat, 
+                                          IntegerVector nbCluster){
   // takes in:
   // dumMat: the matrix of dummies (n X c) each obs => cluster // must be in cpp index!!!
   // init: the initialisation of the sum of derivatives vector
@@ -221,7 +192,8 @@ NumericVector cpp_table(int Q, IntegerVector dum){
 //
 
 // [[Rcpp::export]]
-List cpp_get_fe_gnl(int Q, int N, NumericVector sumFE, IntegerMatrix dumMat, IntegerVector cluster_sizes, IntegerVector obsCluster){
+List cpp_get_fe_gnl(int Q, int N, NumericVector sumFE, IntegerMatrix dumMat, 
+                    IntegerVector cluster_sizes, IntegerVector obsCluster){
   // This function returns a list of the cluster coefficients for each cluster
   // dumMat: the matrix of cluster ID for each observation, with cpp index style
   // Q, N: nber of clusters / obs
@@ -922,7 +894,9 @@ double simple_vec_double::operator[](int i){
 
 
 // [[Rcpp::export]]
-NumericVector cpp_factor_matrix(IntegerVector fact, LogicalVector is_na_all, IntegerVector who_is_dropped, SEXP var, CharacterVector col_names){
+NumericVector cpp_factor_matrix(IntegerVector fact, LogicalVector is_na_all, 
+                                IntegerVector who_is_dropped, SEXP var, 
+                                CharacterVector col_names){
   // fact: integer vector from 1 (!) to K, can contain NAs
   // Checking Na is cheap as opposed to populating the matrix, but having an argument avoids creating a new object
 

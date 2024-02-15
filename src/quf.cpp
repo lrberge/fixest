@@ -852,7 +852,7 @@ void quf_refactor_table_sum_single(int n, int *quf_old, int *quf_new, vector<boo
 
 
 // [[Rcpp::export]]
-List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1,
+List cpp_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1,
               bool rm_single, IntegerVector only_slope, int nthreads,
               bool do_refactor, SEXP r_x_sizes, IntegerVector obs2keep){
 

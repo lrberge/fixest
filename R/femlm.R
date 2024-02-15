@@ -139,7 +139,7 @@ femlm_hessian = function(coef, env){
 	} else dxi_dbeta = 0
 
 	# hessVar = crossprod(jacob.mat, jacob.mat * ll_d2)
-	hessVar = cpppar_crossprod(jacob.mat, ll_d2, nthreads)
+	hessVar = cpp_crossprod(jacob.mat, ll_d2, nthreads)
 
 	if(isNL){
 		# we get the 2nd derivatives
@@ -441,7 +441,7 @@ get_mu = function(coef, env, final = FALSE){
 		linear.mat = get("linear.mat", env)
 		nthreads = get("nthreads", env)
 		# mu_L = c(linear.mat %*% coef[linear.params])
-		mu_L = cpppar_xbeta(linear.mat, coef[linear.params], nthreads)
+		mu_L = cpp_xbeta(linear.mat, coef[linear.params], nthreads)
 	} else mu_L = 0
 
 	mu_noDum = muNL + mu_L + offset.value
@@ -732,7 +732,7 @@ getGradient = function(jacob.mat, y, mu, exp_mu, env, coef, ...){
 	nthreads = get("nthreads", env)
 	ll_dl = famFuns$ll_dl(y, mu, exp_mu, coef=coef, env=env)
 
-	cpppar_xwy(jacob.mat, ll_dl, 1, nthreads)
+	cpp_xwy(jacob.mat, ll_dl, 1, nthreads)
 }
 
 getScores = function(jacob.mat, y, mu, exp_mu, env, coef, ...){
@@ -1490,7 +1490,7 @@ rpar_exp = function(x, env){
 		return(exp(x))
 	} else {
 		# parallelized one
-		return(cpppar_exp(x, nthreads))
+		return(cpp_exp(x, nthreads))
 	}
 
 }
@@ -1504,7 +1504,7 @@ rpar_log = function(x, env){
 		return(log(x))
 	} else {
 		# parallelized one
-		return(cpppar_log(x, nthreads))
+		return(cpp_log(x, nthreads))
 	}
 
 }
@@ -1513,13 +1513,8 @@ rpar_lgamma = function(x, env){
 	# fast lgamma
 	nthreads = get("nthreads", env)
 
-	if(nthreads == 1){
-		# lgamma via cpp is faster
-		return(cpp_lgamma(x))
-	} else {
-		# parallelized one
-		return(cpppar_lgamma(x, nthreads))
-	}
+	# note that single core lgamma via cpp is faster than base R (I wonder why)
+	cpp_lgamma(x, nthreads)
 
 }
 
@@ -1531,7 +1526,7 @@ rpar_digamma = function(x, env){
 		return(digamma(x))
 	} else {
 		# parallelized one
-		return(cpppar_digamma(x, nthreads))
+		return(cpp_digamma(x, nthreads))
 	}
 
 }
@@ -1544,7 +1539,7 @@ rpar_trigamma = function(x, env){
 		return(trigamma(x))
 	} else {
 		# parallelized one
-		return(cpppar_trigamma(x, nthreads))
+		return(cpp_trigamma(x, nthreads))
 	}
 
 }
@@ -1553,12 +1548,6 @@ rpar_log_a_exp = function(a, mu, exp_mu, env){
 	# compute log_a_exp in a fast way
 	nthreads = get("nthreads", env)
 
-	if(nthreads == 1){
-		# cpp is faster
-		return(cpp_log_a_exp(a, mu, exp_mu))
-	} else {
-		# parallelized one
-		return(cpppar_log_a_exp(nthreads, a, mu, exp_mu))
-	}
+	cpp_log_a_exp(a, mu, exp_mu, nthreads)
 }
 

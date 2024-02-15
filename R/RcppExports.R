@@ -93,8 +93,8 @@ cpp_sparse_products <- function(X, w, y, correct_0w = FALSE, nthreads = 1L) {
     .Call(`_fixest_cpp_sparse_products`, X, w, y, correct_0w, nthreads)
 }
 
-cpppar_crossprod <- function(X, w, nthreads) {
-    .Call(`_fixest_cpppar_crossprod`, X, w, nthreads)
+cpp_crossprod <- function(X, w, nthreads) {
+    .Call(`_fixest_cpp_crossprod`, X, w, nthreads)
 }
 
 cpp_mat_reconstruct <- function(X, id_excl) {
@@ -111,14 +111,6 @@ cpp_iv_product_completion <- function(XtX, Xty, X, y, U, w, nthreads) {
 
 cpp_iv_resid <- function(resid_2nd, coef, resid_1st, is_int, nthreads) {
     .Call(`_fixest_cpp_iv_resid`, resid_2nd, coef, resid_1st, is_int, nthreads)
-}
-
-cpp_lgamma <- function(x) {
-    .Call(`_fixest_cpp_lgamma`, x)
-}
-
-cpp_log_a_exp <- function(a, mu, exp_mu) {
-    .Call(`_fixest_cpp_log_a_exp`, a, mu, exp_mu)
 }
 
 cpp_partialDerivative_other <- function(iterMax, Q, N, epsDeriv, ll_d2, dx_dother, init, dumMat, nbCluster) {
@@ -221,92 +213,92 @@ cpp_get_nb_threads <- function() {
     .Call(`_fixest_cpp_get_nb_threads`)
 }
 
-cpppar_exp <- function(x, nthreads) {
-    .Call(`_fixest_cpppar_exp`, x, nthreads)
+cpp_exp <- function(x, nthreads) {
+    .Call(`_fixest_cpp_exp`, x, nthreads)
 }
 
-cpppar_log <- function(x, nthreads) {
-    .Call(`_fixest_cpppar_log`, x, nthreads)
+cpp_log <- function(x, nthreads) {
+    .Call(`_fixest_cpp_log`, x, nthreads)
 }
 
-cpppar_log_a_exp <- function(nthreads, a, mu, exp_mu) {
-    .Call(`_fixest_cpppar_log_a_exp`, nthreads, a, mu, exp_mu)
+cpp_log_a_exp <- function(a, mu, exp_mu, nthreads = 1L) {
+    .Call(`_fixest_cpp_log_a_exp`, a, mu, exp_mu, nthreads)
 }
 
-cpppar_lgamma <- function(x, nthreads) {
-    .Call(`_fixest_cpppar_lgamma`, x, nthreads)
+cpp_lgamma <- function(x, nthreads = 1L) {
+    .Call(`_fixest_cpp_lgamma`, x, nthreads)
 }
 
-cpppar_digamma <- function(x, nthreads) {
-    .Call(`_fixest_cpppar_digamma`, x, nthreads)
+cpp_digamma <- function(x, nthreads) {
+    .Call(`_fixest_cpp_digamma`, x, nthreads)
 }
 
-cpppar_trigamma <- function(x, nthreads) {
-    .Call(`_fixest_cpppar_trigamma`, x, nthreads)
+cpp_trigamma <- function(x, nthreads) {
+    .Call(`_fixest_cpp_trigamma`, x, nthreads)
 }
 
-cpppar_poisson_linkinv <- function(x, nthreads) {
-    .Call(`_fixest_cpppar_poisson_linkinv`, x, nthreads)
+cpp_poisson_linkinv <- function(x, nthreads) {
+    .Call(`_fixest_cpp_poisson_linkinv`, x, nthreads)
 }
 
-cpppar_poisson_validmu <- function(x, nthreads) {
-    .Call(`_fixest_cpppar_poisson_validmu`, x, nthreads)
+cpp_poisson_validmu <- function(x, nthreads) {
+    .Call(`_fixest_cpp_poisson_validmu`, x, nthreads)
 }
 
-cpppar_logit_linkfun <- function(x, nthreads) {
-    .Call(`_fixest_cpppar_logit_linkfun`, x, nthreads)
+cpp_logit_linkfun <- function(x, nthreads) {
+    .Call(`_fixest_cpp_logit_linkfun`, x, nthreads)
 }
 
-cpppar_logit_linkinv <- function(x, nthreads) {
-    .Call(`_fixest_cpppar_logit_linkinv`, x, nthreads)
+cpp_logit_linkinv <- function(x, nthreads) {
+    .Call(`_fixest_cpp_logit_linkinv`, x, nthreads)
 }
 
-cpppar_logit_mueta <- function(x, nthreads) {
-    .Call(`_fixest_cpppar_logit_mueta`, x, nthreads)
+cpp_logit_mueta <- function(x, nthreads) {
+    .Call(`_fixest_cpp_logit_mueta`, x, nthreads)
 }
 
-cpppar_logit_devresids <- function(y, mu, wt, nthreads) {
-    .Call(`_fixest_cpppar_logit_devresids`, y, mu, wt, nthreads)
+cpp_logit_devresids <- function(y, mu, wt, nthreads) {
+    .Call(`_fixest_cpp_logit_devresids`, y, mu, wt, nthreads)
 }
 
-cpppar_xwy <- function(X, y, w, nthreads) {
-    .Call(`_fixest_cpppar_xwy`, X, y, w, nthreads)
+cpp_xwy <- function(X, y, w, nthreads) {
+    .Call(`_fixest_cpp_xwy`, X, y, w, nthreads)
 }
 
-cpppar_xbeta <- function(X, beta, nthreads) {
-    .Call(`_fixest_cpppar_xbeta`, X, beta, nthreads)
+cpp_xbeta <- function(X, beta, nthreads) {
+    .Call(`_fixest_cpp_xbeta`, X, beta, nthreads)
 }
 
-cpppar_matprod <- function(x, y, nthreads) {
-    .Call(`_fixest_cpppar_matprod`, x, y, nthreads)
+cpp_matprod <- function(x, y, nthreads) {
+    .Call(`_fixest_cpp_matprod`, x, y, nthreads)
 }
 
-cpppar_which_na_inf_vec <- function(x, nthreads) {
-    .Call(`_fixest_cpppar_which_na_inf_vec`, x, nthreads)
+cpp_which_na_inf_vec <- function(x, nthreads) {
+    .Call(`_fixest_cpp_which_na_inf_vec`, x, nthreads)
 }
 
-cpppar_which_na_inf_mat <- function(mat, nthreads) {
-    .Call(`_fixest_cpppar_which_na_inf_mat`, mat, nthreads)
+cpp_which_na_inf_mat <- function(mat, nthreads) {
+    .Call(`_fixest_cpp_which_na_inf_mat`, mat, nthreads)
 }
 
-cpppar_which_na_inf_df <- function(df, nthreads) {
-    .Call(`_fixest_cpppar_which_na_inf_df`, df, nthreads)
+cpp_which_na_inf_df <- function(df, nthreads) {
+    .Call(`_fixest_cpp_which_na_inf_df`, df, nthreads)
 }
 
-cpppar_cond_means <- function(mat_vars, treat, nthreads = 1L) {
-    .Call(`_fixest_cpppar_cond_means`, mat_vars, treat, nthreads)
+cpp_cond_means <- function(mat_vars, treat, nthreads = 1L) {
+    .Call(`_fixest_cpp_cond_means`, mat_vars, treat, nthreads)
 }
 
-cpppar_check_only_0 <- function(x_mat, nthreads) {
-    .Call(`_fixest_cpppar_check_only_0`, x_mat, nthreads)
+cpp_check_only_0 <- function(x_mat, nthreads) {
+    .Call(`_fixest_cpp_check_only_0`, x_mat, nthreads)
 }
 
 cpp_quf_gnl <- function(x) {
     .Call(`_fixest_cpp_quf_gnl`, x)
 }
 
-cpppar_quf_table_sum <- function(x, y, do_sum_y, rm_0, rm_1, rm_single, only_slope, nthreads, do_refactor, r_x_sizes, obs2keep) {
-    .Call(`_fixest_cpppar_quf_table_sum`, x, y, do_sum_y, rm_0, rm_1, rm_single, only_slope, nthreads, do_refactor, r_x_sizes, obs2keep)
+cpp_quf_table_sum <- function(x, y, do_sum_y, rm_0, rm_1, rm_single, only_slope, nthreads, do_refactor, r_x_sizes, obs2keep) {
+    .Call(`_fixest_cpp_quf_table_sum`, x, y, do_sum_y, rm_0, rm_1, rm_single, only_slope, nthreads, do_refactor, r_x_sizes, obs2keep)
 }
 
 cpp_colon_to_star <- function(Rstr) {

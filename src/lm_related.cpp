@@ -590,7 +590,7 @@ List cpp_sparse_products(NumericMatrix X, NumericVector w, SEXP y, bool correct_
 
 
 // [[Rcpp::export]]
-NumericMatrix cpppar_crossprod(NumericMatrix X, NumericVector w, int nthreads){
+NumericMatrix cpp_crossprod(NumericMatrix X, NumericVector w, int nthreads){
 
   int N = X.nrow();
   int K = X.ncol();

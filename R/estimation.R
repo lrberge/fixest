@@ -785,7 +785,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 
         rhs_current = rhs[[i]]
         rhs_n_vars[i] = ncol(rhs_current)
-        info = cpppar_which_na_inf_mat(rhs_current, nthreads)
+        info = cpp_which_na_inf_mat(rhs_current, nthreads)
 
         is_na_current = info$is_na_inf
         if(multi_rhs_cumul && any_na_rhs){
@@ -1271,7 +1271,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
       }
       
       
-      only_0 = cpppar_check_only_0(X_demean, nthreads)
+      only_0 = cpp_check_only_0(X_demean, nthreads)
       no_X_Fstat = FALSE
       if(all(only_0 == 1)){
         no_X_Fstat = TRUE
@@ -1549,12 +1549,12 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
       resid_2nd = res_second_stage$residuals
 
       if(isFixef){
-        xwy = cpppar_xwy(ZX_demean, resid_2nd, weights, nthreads)
+        xwy = cpp_xwy(ZX_demean, resid_2nd, weights, nthreads)
         fit_sargan = ols_fit(resid_2nd, ZX_demean, w = weights, correct_0w = FALSE, 
                              collin.tol = collin.tol,
                              nthreads = nthreads, xwx = ZXtZX, xwy = xwy)
       } else {
-        xwy = cpppar_xwy(ZX, resid_2nd, weights, nthreads)
+        xwy = cpp_xwy(ZX, resid_2nd, weights, nthreads)
         fit_sargan = ols_fit(resid_2nd, ZX, w = weights, correct_0w = FALSE, 
                              collin.tol = collin.tol,
                              nthreads = nthreads, xwx = ZXtZX, xwy = xwy)
@@ -1923,7 +1923,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 
     # X_beta / fitted / sumFE
     if(isFixef){
-      x_beta = cpppar_xbeta(X, coef, nthreads)
+      x_beta = cpp_xbeta(X, coef, nthreads)
 
       if(!is.null(resid_origin)){
         res$sumFE = y - x_beta - resid_origin
@@ -2078,11 +2078,11 @@ ols_fit = function(y, X, w, correct_0w = FALSE, collin.tol, nthreads, xwx = NULL
 
   if(multicol){
     beta = as.vector(xwx_inv %*% xwy[!is_excluded])
-    fitted.values = cpppar_xbeta(X[, !is_excluded, drop = FALSE], beta, nthreads)
+    fitted.values = cpp_xbeta(X[, !is_excluded, drop = FALSE], beta, nthreads)
   } else {
     # avoids copies
     beta = as.vector(xwx_inv %*% xwy)
-    fitted.values = cpppar_xbeta(X, beta, nthreads)
+    fitted.values = cpp_xbeta(X, beta, nthreads)
   }
 
 
@@ -2685,36 +2685,36 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
 
   # Optimizing poisson/logit
   if(family_equiv == "poisson"){
-    linkfun = function(mu) cpppar_log(mu, nthreads)
-    linkinv = function(eta) cpppar_poisson_linkinv(eta, nthreads)
+    linkfun = function(mu) cpp_log(mu, nthreads)
+    linkinv = function(eta) cpp_poisson_linkinv(eta, nthreads)
 
     y_pos = y[y > 0]
     qui_pos = y > 0
     if(isWeight){
-      constant = sum(weights[qui_pos] * y_pos * cpppar_log(y_pos, nthreads) - weights[qui_pos] * y_pos)
+      constant = sum(weights[qui_pos] * y_pos * cpp_log(y_pos, nthreads) - weights[qui_pos] * y_pos)
       sum_dev.resids = function(y, mu, eta, wt) 2 * (constant - sum(wt[qui_pos] * y_pos * eta[qui_pos]) + sum(wt * mu))
     } else {
-      constant = sum(y_pos * cpppar_log(y_pos, nthreads) - y_pos)
+      constant = sum(y_pos * cpp_log(y_pos, nthreads) - y_pos)
       sum_dev.resids = function(y, mu, eta, wt) 2 * (constant - sum(y_pos * eta[qui_pos]) + sum(mu))
     }
 
     mu.eta = function(mu, eta) mu
-    validmu = function(mu) cpppar_poisson_validmu(mu, nthreads)
+    validmu = function(mu) cpp_poisson_validmu(mu, nthreads)
 
   } else if(family_equiv == "logit"){
     # To avoid annoying warnings
     family$initialize = quasibinomial()$initialize
 
-    linkfun = function(mu) cpppar_logit_linkfun(mu, nthreads)
-    linkinv = function(eta) cpppar_logit_linkinv(eta, nthreads)
+    linkfun = function(mu) cpp_logit_linkfun(mu, nthreads)
+    linkinv = function(eta) cpp_logit_linkinv(eta, nthreads)
     if(isWeight){
-      sum_dev.resids = function(y, mu, eta, wt) sum(cpppar_logit_devresids(y, mu, wt, nthreads))
+      sum_dev.resids = function(y, mu, eta, wt) sum(cpp_logit_devresids(y, mu, wt, nthreads))
     } else {
-      sum_dev.resids = function(y, mu, eta, wt) sum(cpppar_logit_devresids(y, mu, 1, nthreads))
+      sum_dev.resids = function(y, mu, eta, wt) sum(cpp_logit_devresids(y, mu, 1, nthreads))
     }
     sum_dev.resids = sum_dev.resids
 
-    mu.eta = function(mu, eta) cpppar_logit_mueta(eta, nthreads)
+    mu.eta = function(mu, eta) cpp_logit_mueta(eta, nthreads)
   }
 
   #
@@ -2753,7 +2753,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
     #   with fixed-effects
 
     start = get("start", env)
-    offset_fe = offset + cpppar_xbeta(X, start, nthreads)
+    offset_fe = offset + cpp_xbeta(X, start, nthreads)
 
     if(isFixef){
       mustart = 0
@@ -3105,10 +3105,10 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
     # dispersion + scores
     if(family$family %in% c("poisson", "binomial")){
       res$scores = (wols$residuals * res$irls_weights) * wols$X_demean
-      res$hessian = cpppar_crossprod(wols$X_demean, res$irls_weights, nthreads)
+      res$hessian = cpp_crossprod(wols$X_demean, res$irls_weights, nthreads)
     } else {
       res$scores = (weighted_resids / res$dispersion) * wols$X_demean
-      res$hessian = cpppar_crossprod(wols$X_demean, res$irls_weights, nthreads) / res$dispersion
+      res$hessian = cpp_crossprod(wols$X_demean, res$irls_weights, nthreads) / res$dispersion
     }
 
     if(any(diag(res$hessian) < 0)){
@@ -3201,7 +3201,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
         gc()
       }
 
-      res$loglik = sum( (y * eta - mu - cpppar_lgamma(y + 1, nthreads)) * weights)
+      res$loglik = sum( (y * eta - mu - cpp_lgamma(y + 1, nthreads)) * weights)
     } else {
       # lfact is later used in model0 and is costly to compute
       lfact = sum(rpar_lgamma(y + 1, env))
@@ -3242,7 +3242,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
     if(onlyFixef){
       res$sumFE = res$linear.predictors
     } else {
-      res$sumFE = res$linear.predictors - cpppar_xbeta(X, res$coefficients, nthreads)
+      res$sumFE = res$linear.predictors - cpp_xbeta(X, res$coefficients, nthreads)
     }
 
     if(isOffset){
@@ -4806,7 +4806,7 @@ multi_LHS_RHS = function(env, fun){
       if(length(my_rhs) == 1){
         is_na_current = !is.finite(lhs[[i]])
       } else {
-        is_na_current = !is.finite(lhs[[i]]) | cpppar_which_na_inf_mat(my_rhs, nthreads)$is_na_inf
+        is_na_current = !is.finite(lhs[[i]]) | cpp_which_na_inf_mat(my_rhs, nthreads)$is_na_inf
       }
 
       my_fml = .xpd(lhs = lhs_names[i], rhs = multi_rhs_fml_full[[j]])
@@ -4919,7 +4919,7 @@ multi_fixef = function(env, estfun){
           slope_df[[j]] = as.numeric(slope_df[[j]])
         }
 
-        info = cpppar_which_na_inf_df(slope_df, nthreads)
+        info = cpp_which_na_inf_df(slope_df, nthreads)
         if(info$any_na_inf){
           is_NA = is_NA | info$is_na_inf
         }

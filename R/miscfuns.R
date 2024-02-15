@@ -1026,7 +1026,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
   treat_01 = 1 * (treat_var == treat_cases[2])
 
   nthreads = getFixest_nthreads()
-  info = cpppar_cond_means(mat_vars, treat_01, nthreads)
+  info = cpp_cond_means(mat_vars, treat_01, nthreads)
 
   means = info$means
   sds = info$sd
@@ -2642,7 +2642,7 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
   # Unclassing fes
   #
 
-  quf_info_all = cpppar_quf_table_sum(x = f, y = 0, do_sum_y = FALSE, rm_0 = FALSE,
+  quf_info_all = cpp_quf_table_sum(x = f, y = 0, do_sum_y = FALSE, rm_0 = FALSE,
                                       rm_1 = FALSE, rm_single = FALSE, do_refactor = FALSE,
                                       r_x_sizes = 0, obs2keep = 0, only_slope = slope.flag < 0L,
                                       nthreads = nthreads)
@@ -6170,12 +6170,12 @@ which_na_inf = function(x, nthreads){
   is_num = sapply(x, is.numeric)
 
   if(all(is_num)){
-    res = cpppar_which_na_inf_mat(as.matrix(x), nthreads)
+    res = cpp_which_na_inf_mat(as.matrix(x), nthreads)
   } else {
 
     # numeric
     if(any(is_num)){
-      res = cpppar_which_na_inf_mat(as.matrix(x[, is_num, drop = FALSE]), nthreads)
+      res = cpp_which_na_inf_mat(as.matrix(x[, is_num, drop = FALSE]), nthreads)
     } else {
       res = list(any_na_inf = FALSE, any_na = FALSE, any_inf = FALSE, is_na_inf = FALSE)
     }

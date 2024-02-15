@@ -89,7 +89,7 @@ std::vector<int> set_parallel_scheme_bis(int N, int nthreads){
 
 
 // [[Rcpp::export]]
-NumericVector cpppar_exp(NumericVector x, int nthreads){
+NumericVector cpp_exp(NumericVector x, int nthreads){
   // parallel exponentiation using omp
 
   int n = x.length();
@@ -104,7 +104,7 @@ NumericVector cpppar_exp(NumericVector x, int nthreads){
 }
 
 // [[Rcpp::export]]
-NumericVector cpppar_log(NumericVector x, int nthreads){
+NumericVector cpp_log(NumericVector x, int nthreads){
   // parallel exponentiation using omp
 
   int n = x.length();
@@ -119,7 +119,7 @@ NumericVector cpppar_log(NumericVector x, int nthreads){
 }
 
 // [[Rcpp::export]]
-NumericVector cpppar_log_a_exp(int nthreads, double a, NumericVector mu, NumericVector exp_mu){
+NumericVector cpp_log_a_exp(double a, NumericVector mu, NumericVector exp_mu, int nthreads = 1){
   // faster this way
 
   int n = mu.length();
@@ -138,7 +138,7 @@ NumericVector cpppar_log_a_exp(int nthreads, double a, NumericVector mu, Numeric
 }
 
 // [[Rcpp::export]]
-NumericVector cpppar_lgamma(NumericVector x, int nthreads){
+NumericVector cpp_lgamma(NumericVector x, int nthreads = 1){
   // parallel lgamma using omp
 
   int n = x.length();
@@ -153,7 +153,7 @@ NumericVector cpppar_lgamma(NumericVector x, int nthreads){
 }
 
 // [[Rcpp::export]]
-NumericVector cpppar_digamma(NumericVector x, int nthreads){
+NumericVector cpp_digamma(NumericVector x, int nthreads){
   // parallel digamma using omp
 
   int n = x.length();
@@ -168,7 +168,7 @@ NumericVector cpppar_digamma(NumericVector x, int nthreads){
 }
 
 // [[Rcpp::export]]
-NumericVector cpppar_trigamma(NumericVector x, int nthreads){
+NumericVector cpp_trigamma(NumericVector x, int nthreads){
   // parallel trigamma using omp
 
   int n = x.length();
@@ -187,7 +187,7 @@ inline double poisson_linkinv(double x){
 }
 
 // [[Rcpp::export]]
-NumericVector cpppar_poisson_linkinv(NumericVector x, int nthreads){
+NumericVector cpp_poisson_linkinv(NumericVector x, int nthreads){
 
   int n = x.length();
   NumericVector res(n);
@@ -202,7 +202,7 @@ NumericVector cpppar_poisson_linkinv(NumericVector x, int nthreads){
 
 
 // [[Rcpp::export]]
-bool cpppar_poisson_validmu(SEXP x, int nthreads){
+bool cpp_poisson_validmu(SEXP x, int nthreads){
 
   int n = Rf_length(x);
   double *px = REAL(x);
@@ -221,7 +221,7 @@ bool cpppar_poisson_validmu(SEXP x, int nthreads){
 
 
 // [[Rcpp::export]]
-NumericVector cpppar_logit_linkfun(NumericVector x, int nthreads){
+NumericVector cpp_logit_linkfun(NumericVector x, int nthreads){
   // parallel trigamma using omp
 
   int n = x.length();
@@ -241,7 +241,7 @@ inline double logit_linkinv(double x){
 }
 
 // [[Rcpp::export]]
-NumericVector cpppar_logit_linkinv(NumericVector x, int nthreads){
+NumericVector cpp_logit_linkinv(NumericVector x, int nthreads){
   // parallel trigamma using omp
 
   int n = x.length();
@@ -266,7 +266,7 @@ inline double logit_mueta(double x){
 }
 
 // [[Rcpp::export]]
-NumericVector cpppar_logit_mueta(NumericVector x, int nthreads){
+NumericVector cpp_logit_mueta(NumericVector x, int nthreads){
   // parallel trigamma using omp
 
   int n = x.length();
@@ -283,7 +283,7 @@ NumericVector cpppar_logit_mueta(NumericVector x, int nthreads){
 }
 
 // [[Rcpp::export]]
-NumericVector cpppar_logit_devresids(NumericVector y, NumericVector mu, NumericVector wt, int nthreads){
+NumericVector cpp_logit_devresids(NumericVector y, NumericVector mu, NumericVector wt, int nthreads){
 
   int n = mu.length();
   NumericVector res(n);
@@ -308,7 +308,7 @@ NumericVector cpppar_logit_devresids(NumericVector y, NumericVector mu, NumericV
 
 
 // // [[Rcpp::export]]
-// NumericMatrix cpppar_crossprod(NumericMatrix X, NumericVector w, int nthreads){
+// NumericMatrix cpp_crossprod(NumericMatrix X, NumericVector w, int nthreads){
 //
 // 	int N = X.nrow();
 // 	int K = X.ncol();
@@ -367,7 +367,7 @@ NumericVector cpppar_logit_devresids(NumericVector y, NumericVector mu, NumericV
 
 
 // [[Rcpp::export]]
-NumericVector cpppar_xwy(NumericMatrix X, NumericVector y, NumericVector w, int nthreads){
+NumericVector cpp_xwy(NumericMatrix X, NumericVector y, NumericVector w, int nthreads){
 
   int N = X.nrow();
   int K = X.ncol();
@@ -403,7 +403,7 @@ NumericVector cpppar_xwy(NumericMatrix X, NumericVector y, NumericVector w, int 
 
 
 // [[Rcpp::export]]
-NumericVector cpppar_xbeta(NumericMatrix X, NumericVector beta, int nthreads){
+NumericVector cpp_xbeta(NumericMatrix X, NumericVector beta, int nthreads){
 
   int N = X.nrow();
   int K = X.ncol();
@@ -426,7 +426,7 @@ NumericVector cpppar_xbeta(NumericMatrix X, NumericVector beta, int nthreads){
 
 
 // [[Rcpp::export]]
-NumericMatrix cpppar_matprod(NumericMatrix x, NumericMatrix y, int nthreads){
+NumericMatrix cpp_matprod(NumericMatrix x, NumericMatrix y, int nthreads){
   // => simply x %*% y
 
   int N = x.nrow();
@@ -451,7 +451,7 @@ NumericMatrix cpppar_matprod(NumericMatrix x, NumericMatrix y, int nthreads){
 
 
 // [[Rcpp::export]]
-List cpppar_which_na_inf_vec(SEXP x, int nthreads){
+List cpp_which_na_inf_vec(SEXP x, int nthreads){
   /*
     This function takes a vector and looks at whether it contains NA or infinite values
     return: flag for na/inf + logical vector of obs that are na/inf
@@ -516,8 +516,8 @@ List cpppar_which_na_inf_vec(SEXP x, int nthreads){
 }
 
 // [[Rcpp::export]]
-List cpppar_which_na_inf_mat(NumericMatrix mat, int nthreads){
-  // almost identical to cpppar_which_na_inf_vec but for R matrices. Changes:
+List cpp_which_na_inf_mat(NumericMatrix mat, int nthreads){
+  // almost identical to cpp_which_na_inf_vec but for R matrices. Changes:
   // - main argument becomes NumericMatrix
   // - k-for loop within the i-for loop
   /*
@@ -589,8 +589,8 @@ List cpppar_which_na_inf_mat(NumericMatrix mat, int nthreads){
 }
 
 // [[Rcpp::export]]
-List cpppar_which_na_inf_df(SEXP df, int nthreads){
-  // almost identical to cpppar_which_na_inf_vec but for R **numeric** data frames. Changes:
+List cpp_which_na_inf_df(SEXP df, int nthreads){
+  // almost identical to cpp_which_na_inf_vec but for R **numeric** data frames. Changes:
   // - main argument becomes SEXP
   // - k-for loop within the i-for loop
   /*
@@ -670,7 +670,7 @@ List cpppar_which_na_inf_df(SEXP df, int nthreads){
 
 
 // [[Rcpp::export]]
-List cpppar_cond_means(NumericMatrix mat_vars, IntegerVector treat, int nthreads = 1){
+List cpp_cond_means(NumericMatrix mat_vars, IntegerVector treat, int nthreads = 1){
   // conditional means: function did_means
 
   int N = mat_vars.nrow();
@@ -747,7 +747,7 @@ List cpppar_cond_means(NumericMatrix mat_vars, IntegerVector treat, int nthreads
 }
 
 // [[Rcpp::export]]
-IntegerVector cpppar_check_only_0(NumericMatrix x_mat, int nthreads){
+IntegerVector cpp_check_only_0(NumericMatrix x_mat, int nthreads){
   // returns a 0/1 vectors => 1 means only 0
 
   int n = x_mat.nrow();
@@ -774,7 +774,7 @@ IntegerVector cpppar_check_only_0(NumericMatrix x_mat, int nthreads){
 
 
 // // [[Rcpp::export]]
-// List cpppar_scale(SEXP x, int nthreads){
+// List cpp_scale(SEXP x, int nthreads){
 //     // x: List of numeric vectors
 //
 //     int Q = Rf_length(x);

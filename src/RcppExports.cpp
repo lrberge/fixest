@@ -427,16 +427,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// cpppar_crossprod
-NumericMatrix cpppar_crossprod(NumericMatrix X, NumericVector w, int nthreads);
-RcppExport SEXP _fixest_cpppar_crossprod(SEXP XSEXP, SEXP wSEXP, SEXP nthreadsSEXP) {
+// cpp_crossprod
+NumericMatrix cpp_crossprod(NumericMatrix X, NumericVector w, int nthreads);
+RcppExport SEXP _fixest_cpp_crossprod(SEXP XSEXP, SEXP wSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericMatrix >::type X(XSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpppar_crossprod(X, w, nthreads));
+    rcpp_result_gen = Rcpp::wrap(cpp_crossprod(X, w, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -497,30 +497,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type is_int(is_intSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_iv_resid(resid_2nd, coef, resid_1st, is_int, nthreads));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_lgamma
-NumericVector cpp_lgamma(NumericVector x);
-RcppExport SEXP _fixest_cpp_lgamma(SEXP xSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_lgamma(x));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_log_a_exp
-NumericVector cpp_log_a_exp(double a, NumericVector mu, NumericVector exp_mu);
-RcppExport SEXP _fixest_cpp_log_a_exp(SEXP aSEXP, SEXP muSEXP, SEXP exp_muSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type a(aSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type exp_mu(exp_muSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_log_a_exp(a, mu, exp_mu));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -839,143 +815,143 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// cpppar_exp
-NumericVector cpppar_exp(NumericVector x, int nthreads);
-RcppExport SEXP _fixest_cpppar_exp(SEXP xSEXP, SEXP nthreadsSEXP) {
+// cpp_exp
+NumericVector cpp_exp(NumericVector x, int nthreads);
+RcppExport SEXP _fixest_cpp_exp(SEXP xSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpppar_exp(x, nthreads));
+    rcpp_result_gen = Rcpp::wrap(cpp_exp(x, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
-// cpppar_log
-NumericVector cpppar_log(NumericVector x, int nthreads);
-RcppExport SEXP _fixest_cpppar_log(SEXP xSEXP, SEXP nthreadsSEXP) {
+// cpp_log
+NumericVector cpp_log(NumericVector x, int nthreads);
+RcppExport SEXP _fixest_cpp_log(SEXP xSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpppar_log(x, nthreads));
+    rcpp_result_gen = Rcpp::wrap(cpp_log(x, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
-// cpppar_log_a_exp
-NumericVector cpppar_log_a_exp(int nthreads, double a, NumericVector mu, NumericVector exp_mu);
-RcppExport SEXP _fixest_cpppar_log_a_exp(SEXP nthreadsSEXP, SEXP aSEXP, SEXP muSEXP, SEXP exp_muSEXP) {
+// cpp_log_a_exp
+NumericVector cpp_log_a_exp(double a, NumericVector mu, NumericVector exp_mu, int nthreads);
+RcppExport SEXP _fixest_cpp_log_a_exp(SEXP aSEXP, SEXP muSEXP, SEXP exp_muSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
     Rcpp::traits::input_parameter< double >::type a(aSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type mu(muSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type exp_mu(exp_muSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpppar_log_a_exp(nthreads, a, mu, exp_mu));
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_log_a_exp(a, mu, exp_mu, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
-// cpppar_lgamma
-NumericVector cpppar_lgamma(NumericVector x, int nthreads);
-RcppExport SEXP _fixest_cpppar_lgamma(SEXP xSEXP, SEXP nthreadsSEXP) {
+// cpp_lgamma
+NumericVector cpp_lgamma(NumericVector x, int nthreads);
+RcppExport SEXP _fixest_cpp_lgamma(SEXP xSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpppar_lgamma(x, nthreads));
+    rcpp_result_gen = Rcpp::wrap(cpp_lgamma(x, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
-// cpppar_digamma
-NumericVector cpppar_digamma(NumericVector x, int nthreads);
-RcppExport SEXP _fixest_cpppar_digamma(SEXP xSEXP, SEXP nthreadsSEXP) {
+// cpp_digamma
+NumericVector cpp_digamma(NumericVector x, int nthreads);
+RcppExport SEXP _fixest_cpp_digamma(SEXP xSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpppar_digamma(x, nthreads));
+    rcpp_result_gen = Rcpp::wrap(cpp_digamma(x, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
-// cpppar_trigamma
-NumericVector cpppar_trigamma(NumericVector x, int nthreads);
-RcppExport SEXP _fixest_cpppar_trigamma(SEXP xSEXP, SEXP nthreadsSEXP) {
+// cpp_trigamma
+NumericVector cpp_trigamma(NumericVector x, int nthreads);
+RcppExport SEXP _fixest_cpp_trigamma(SEXP xSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpppar_trigamma(x, nthreads));
+    rcpp_result_gen = Rcpp::wrap(cpp_trigamma(x, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
-// cpppar_poisson_linkinv
-NumericVector cpppar_poisson_linkinv(NumericVector x, int nthreads);
-RcppExport SEXP _fixest_cpppar_poisson_linkinv(SEXP xSEXP, SEXP nthreadsSEXP) {
+// cpp_poisson_linkinv
+NumericVector cpp_poisson_linkinv(NumericVector x, int nthreads);
+RcppExport SEXP _fixest_cpp_poisson_linkinv(SEXP xSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpppar_poisson_linkinv(x, nthreads));
+    rcpp_result_gen = Rcpp::wrap(cpp_poisson_linkinv(x, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
-// cpppar_poisson_validmu
-bool cpppar_poisson_validmu(SEXP x, int nthreads);
-RcppExport SEXP _fixest_cpppar_poisson_validmu(SEXP xSEXP, SEXP nthreadsSEXP) {
+// cpp_poisson_validmu
+bool cpp_poisson_validmu(SEXP x, int nthreads);
+RcppExport SEXP _fixest_cpp_poisson_validmu(SEXP xSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpppar_poisson_validmu(x, nthreads));
+    rcpp_result_gen = Rcpp::wrap(cpp_poisson_validmu(x, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
-// cpppar_logit_linkfun
-NumericVector cpppar_logit_linkfun(NumericVector x, int nthreads);
-RcppExport SEXP _fixest_cpppar_logit_linkfun(SEXP xSEXP, SEXP nthreadsSEXP) {
+// cpp_logit_linkfun
+NumericVector cpp_logit_linkfun(NumericVector x, int nthreads);
+RcppExport SEXP _fixest_cpp_logit_linkfun(SEXP xSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpppar_logit_linkfun(x, nthreads));
+    rcpp_result_gen = Rcpp::wrap(cpp_logit_linkfun(x, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
-// cpppar_logit_linkinv
-NumericVector cpppar_logit_linkinv(NumericVector x, int nthreads);
-RcppExport SEXP _fixest_cpppar_logit_linkinv(SEXP xSEXP, SEXP nthreadsSEXP) {
+// cpp_logit_linkinv
+NumericVector cpp_logit_linkinv(NumericVector x, int nthreads);
+RcppExport SEXP _fixest_cpp_logit_linkinv(SEXP xSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpppar_logit_linkinv(x, nthreads));
+    rcpp_result_gen = Rcpp::wrap(cpp_logit_linkinv(x, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
-// cpppar_logit_mueta
-NumericVector cpppar_logit_mueta(NumericVector x, int nthreads);
-RcppExport SEXP _fixest_cpppar_logit_mueta(SEXP xSEXP, SEXP nthreadsSEXP) {
+// cpp_logit_mueta
+NumericVector cpp_logit_mueta(NumericVector x, int nthreads);
+RcppExport SEXP _fixest_cpp_logit_mueta(SEXP xSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpppar_logit_mueta(x, nthreads));
+    rcpp_result_gen = Rcpp::wrap(cpp_logit_mueta(x, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
-// cpppar_logit_devresids
-NumericVector cpppar_logit_devresids(NumericVector y, NumericVector mu, NumericVector wt, int nthreads);
-RcppExport SEXP _fixest_cpppar_logit_devresids(SEXP ySEXP, SEXP muSEXP, SEXP wtSEXP, SEXP nthreadsSEXP) {
+// cpp_logit_devresids
+NumericVector cpp_logit_devresids(NumericVector y, NumericVector mu, NumericVector wt, int nthreads);
+RcppExport SEXP _fixest_cpp_logit_devresids(SEXP ySEXP, SEXP muSEXP, SEXP wtSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -983,13 +959,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type mu(muSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type wt(wtSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpppar_logit_devresids(y, mu, wt, nthreads));
+    rcpp_result_gen = Rcpp::wrap(cpp_logit_devresids(y, mu, wt, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
-// cpppar_xwy
-NumericVector cpppar_xwy(NumericMatrix X, NumericVector y, NumericVector w, int nthreads);
-RcppExport SEXP _fixest_cpppar_xwy(SEXP XSEXP, SEXP ySEXP, SEXP wSEXP, SEXP nthreadsSEXP) {
+// cpp_xwy
+NumericVector cpp_xwy(NumericMatrix X, NumericVector y, NumericVector w, int nthreads);
+RcppExport SEXP _fixest_cpp_xwy(SEXP XSEXP, SEXP ySEXP, SEXP wSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -997,94 +973,94 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
     Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpppar_xwy(X, y, w, nthreads));
+    rcpp_result_gen = Rcpp::wrap(cpp_xwy(X, y, w, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
-// cpppar_xbeta
-NumericVector cpppar_xbeta(NumericMatrix X, NumericVector beta, int nthreads);
-RcppExport SEXP _fixest_cpppar_xbeta(SEXP XSEXP, SEXP betaSEXP, SEXP nthreadsSEXP) {
+// cpp_xbeta
+NumericVector cpp_xbeta(NumericMatrix X, NumericVector beta, int nthreads);
+RcppExport SEXP _fixest_cpp_xbeta(SEXP XSEXP, SEXP betaSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericMatrix >::type X(XSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type beta(betaSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpppar_xbeta(X, beta, nthreads));
+    rcpp_result_gen = Rcpp::wrap(cpp_xbeta(X, beta, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
-// cpppar_matprod
-NumericMatrix cpppar_matprod(NumericMatrix x, NumericMatrix y, int nthreads);
-RcppExport SEXP _fixest_cpppar_matprod(SEXP xSEXP, SEXP ySEXP, SEXP nthreadsSEXP) {
+// cpp_matprod
+NumericMatrix cpp_matprod(NumericMatrix x, NumericMatrix y, int nthreads);
+RcppExport SEXP _fixest_cpp_matprod(SEXP xSEXP, SEXP ySEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type y(ySEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpppar_matprod(x, y, nthreads));
+    rcpp_result_gen = Rcpp::wrap(cpp_matprod(x, y, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
-// cpppar_which_na_inf_vec
-List cpppar_which_na_inf_vec(SEXP x, int nthreads);
-RcppExport SEXP _fixest_cpppar_which_na_inf_vec(SEXP xSEXP, SEXP nthreadsSEXP) {
+// cpp_which_na_inf_vec
+List cpp_which_na_inf_vec(SEXP x, int nthreads);
+RcppExport SEXP _fixest_cpp_which_na_inf_vec(SEXP xSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpppar_which_na_inf_vec(x, nthreads));
+    rcpp_result_gen = Rcpp::wrap(cpp_which_na_inf_vec(x, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
-// cpppar_which_na_inf_mat
-List cpppar_which_na_inf_mat(NumericMatrix mat, int nthreads);
-RcppExport SEXP _fixest_cpppar_which_na_inf_mat(SEXP matSEXP, SEXP nthreadsSEXP) {
+// cpp_which_na_inf_mat
+List cpp_which_na_inf_mat(NumericMatrix mat, int nthreads);
+RcppExport SEXP _fixest_cpp_which_na_inf_mat(SEXP matSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericMatrix >::type mat(matSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpppar_which_na_inf_mat(mat, nthreads));
+    rcpp_result_gen = Rcpp::wrap(cpp_which_na_inf_mat(mat, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
-// cpppar_which_na_inf_df
-List cpppar_which_na_inf_df(SEXP df, int nthreads);
-RcppExport SEXP _fixest_cpppar_which_na_inf_df(SEXP dfSEXP, SEXP nthreadsSEXP) {
+// cpp_which_na_inf_df
+List cpp_which_na_inf_df(SEXP df, int nthreads);
+RcppExport SEXP _fixest_cpp_which_na_inf_df(SEXP dfSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type df(dfSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpppar_which_na_inf_df(df, nthreads));
+    rcpp_result_gen = Rcpp::wrap(cpp_which_na_inf_df(df, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
-// cpppar_cond_means
-List cpppar_cond_means(NumericMatrix mat_vars, IntegerVector treat, int nthreads);
-RcppExport SEXP _fixest_cpppar_cond_means(SEXP mat_varsSEXP, SEXP treatSEXP, SEXP nthreadsSEXP) {
+// cpp_cond_means
+List cpp_cond_means(NumericMatrix mat_vars, IntegerVector treat, int nthreads);
+RcppExport SEXP _fixest_cpp_cond_means(SEXP mat_varsSEXP, SEXP treatSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericMatrix >::type mat_vars(mat_varsSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type treat(treatSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpppar_cond_means(mat_vars, treat, nthreads));
+    rcpp_result_gen = Rcpp::wrap(cpp_cond_means(mat_vars, treat, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
-// cpppar_check_only_0
-IntegerVector cpppar_check_only_0(NumericMatrix x_mat, int nthreads);
-RcppExport SEXP _fixest_cpppar_check_only_0(SEXP x_matSEXP, SEXP nthreadsSEXP) {
+// cpp_check_only_0
+IntegerVector cpp_check_only_0(NumericMatrix x_mat, int nthreads);
+RcppExport SEXP _fixest_cpp_check_only_0(SEXP x_matSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericMatrix >::type x_mat(x_matSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpppar_check_only_0(x_mat, nthreads));
+    rcpp_result_gen = Rcpp::wrap(cpp_check_only_0(x_mat, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1099,9 +1075,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// cpppar_quf_table_sum
-List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1, bool rm_single, IntegerVector only_slope, int nthreads, bool do_refactor, SEXP r_x_sizes, IntegerVector obs2keep);
-RcppExport SEXP _fixest_cpppar_quf_table_sum(SEXP xSEXP, SEXP ySEXP, SEXP do_sum_ySEXP, SEXP rm_0SEXP, SEXP rm_1SEXP, SEXP rm_singleSEXP, SEXP only_slopeSEXP, SEXP nthreadsSEXP, SEXP do_refactorSEXP, SEXP r_x_sizesSEXP, SEXP obs2keepSEXP) {
+// cpp_quf_table_sum
+List cpp_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1, bool rm_single, IntegerVector only_slope, int nthreads, bool do_refactor, SEXP r_x_sizes, IntegerVector obs2keep);
+RcppExport SEXP _fixest_cpp_quf_table_sum(SEXP xSEXP, SEXP ySEXP, SEXP do_sum_ySEXP, SEXP rm_0SEXP, SEXP rm_1SEXP, SEXP rm_singleSEXP, SEXP only_slopeSEXP, SEXP nthreadsSEXP, SEXP do_refactorSEXP, SEXP r_x_sizesSEXP, SEXP obs2keepSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -1116,7 +1092,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type do_refactor(do_refactorSEXP);
     Rcpp::traits::input_parameter< SEXP >::type r_x_sizes(r_x_sizesSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type obs2keep(obs2keepSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpppar_quf_table_sum(x, y, do_sum_y, rm_0, rm_1, rm_single, only_slope, nthreads, do_refactor, r_x_sizes, obs2keep));
+    rcpp_result_gen = Rcpp::wrap(cpp_quf_table_sum(x, y, do_sum_y, rm_0, rm_1, rm_single, only_slope, nthreads, do_refactor, r_x_sizes, obs2keep));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1217,13 +1193,11 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpp_paste_conditional", (DL_FUNC) &_fixest_cpp_paste_conditional, 3},
     {"_fixest_cpp_cholesky", (DL_FUNC) &_fixest_cpp_cholesky, 3},
     {"_fixest_cpp_sparse_products", (DL_FUNC) &_fixest_cpp_sparse_products, 5},
-    {"_fixest_cpppar_crossprod", (DL_FUNC) &_fixest_cpppar_crossprod, 3},
+    {"_fixest_cpp_crossprod", (DL_FUNC) &_fixest_cpp_crossprod, 3},
     {"_fixest_cpp_mat_reconstruct", (DL_FUNC) &_fixest_cpp_mat_reconstruct, 2},
     {"_fixest_cpp_iv_products", (DL_FUNC) &_fixest_cpp_iv_products, 6},
     {"_fixest_cpp_iv_product_completion", (DL_FUNC) &_fixest_cpp_iv_product_completion, 7},
     {"_fixest_cpp_iv_resid", (DL_FUNC) &_fixest_cpp_iv_resid, 5},
-    {"_fixest_cpp_lgamma", (DL_FUNC) &_fixest_cpp_lgamma, 1},
-    {"_fixest_cpp_log_a_exp", (DL_FUNC) &_fixest_cpp_log_a_exp, 3},
     {"_fixest_cpp_partialDerivative_other", (DL_FUNC) &_fixest_cpp_partialDerivative_other, 9},
     {"_fixest_cpp_tapply_sum", (DL_FUNC) &_fixest_cpp_tapply_sum, 3},
     {"_fixest_cpp_tapply_vsum", (DL_FUNC) &_fixest_cpp_tapply_vsum, 3},
@@ -1249,28 +1223,28 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpp_hash_string", (DL_FUNC) &_fixest_cpp_hash_string, 1},
     {"_fixest_cpp_escape_markup", (DL_FUNC) &_fixest_cpp_escape_markup, 1},
     {"_fixest_cpp_get_nb_threads", (DL_FUNC) &_fixest_cpp_get_nb_threads, 0},
-    {"_fixest_cpppar_exp", (DL_FUNC) &_fixest_cpppar_exp, 2},
-    {"_fixest_cpppar_log", (DL_FUNC) &_fixest_cpppar_log, 2},
-    {"_fixest_cpppar_log_a_exp", (DL_FUNC) &_fixest_cpppar_log_a_exp, 4},
-    {"_fixest_cpppar_lgamma", (DL_FUNC) &_fixest_cpppar_lgamma, 2},
-    {"_fixest_cpppar_digamma", (DL_FUNC) &_fixest_cpppar_digamma, 2},
-    {"_fixest_cpppar_trigamma", (DL_FUNC) &_fixest_cpppar_trigamma, 2},
-    {"_fixest_cpppar_poisson_linkinv", (DL_FUNC) &_fixest_cpppar_poisson_linkinv, 2},
-    {"_fixest_cpppar_poisson_validmu", (DL_FUNC) &_fixest_cpppar_poisson_validmu, 2},
-    {"_fixest_cpppar_logit_linkfun", (DL_FUNC) &_fixest_cpppar_logit_linkfun, 2},
-    {"_fixest_cpppar_logit_linkinv", (DL_FUNC) &_fixest_cpppar_logit_linkinv, 2},
-    {"_fixest_cpppar_logit_mueta", (DL_FUNC) &_fixest_cpppar_logit_mueta, 2},
-    {"_fixest_cpppar_logit_devresids", (DL_FUNC) &_fixest_cpppar_logit_devresids, 4},
-    {"_fixest_cpppar_xwy", (DL_FUNC) &_fixest_cpppar_xwy, 4},
-    {"_fixest_cpppar_xbeta", (DL_FUNC) &_fixest_cpppar_xbeta, 3},
-    {"_fixest_cpppar_matprod", (DL_FUNC) &_fixest_cpppar_matprod, 3},
-    {"_fixest_cpppar_which_na_inf_vec", (DL_FUNC) &_fixest_cpppar_which_na_inf_vec, 2},
-    {"_fixest_cpppar_which_na_inf_mat", (DL_FUNC) &_fixest_cpppar_which_na_inf_mat, 2},
-    {"_fixest_cpppar_which_na_inf_df", (DL_FUNC) &_fixest_cpppar_which_na_inf_df, 2},
-    {"_fixest_cpppar_cond_means", (DL_FUNC) &_fixest_cpppar_cond_means, 3},
-    {"_fixest_cpppar_check_only_0", (DL_FUNC) &_fixest_cpppar_check_only_0, 2},
+    {"_fixest_cpp_exp", (DL_FUNC) &_fixest_cpp_exp, 2},
+    {"_fixest_cpp_log", (DL_FUNC) &_fixest_cpp_log, 2},
+    {"_fixest_cpp_log_a_exp", (DL_FUNC) &_fixest_cpp_log_a_exp, 4},
+    {"_fixest_cpp_lgamma", (DL_FUNC) &_fixest_cpp_lgamma, 2},
+    {"_fixest_cpp_digamma", (DL_FUNC) &_fixest_cpp_digamma, 2},
+    {"_fixest_cpp_trigamma", (DL_FUNC) &_fixest_cpp_trigamma, 2},
+    {"_fixest_cpp_poisson_linkinv", (DL_FUNC) &_fixest_cpp_poisson_linkinv, 2},
+    {"_fixest_cpp_poisson_validmu", (DL_FUNC) &_fixest_cpp_poisson_validmu, 2},
+    {"_fixest_cpp_logit_linkfun", (DL_FUNC) &_fixest_cpp_logit_linkfun, 2},
+    {"_fixest_cpp_logit_linkinv", (DL_FUNC) &_fixest_cpp_logit_linkinv, 2},
+    {"_fixest_cpp_logit_mueta", (DL_FUNC) &_fixest_cpp_logit_mueta, 2},
+    {"_fixest_cpp_logit_devresids", (DL_FUNC) &_fixest_cpp_logit_devresids, 4},
+    {"_fixest_cpp_xwy", (DL_FUNC) &_fixest_cpp_xwy, 4},
+    {"_fixest_cpp_xbeta", (DL_FUNC) &_fixest_cpp_xbeta, 3},
+    {"_fixest_cpp_matprod", (DL_FUNC) &_fixest_cpp_matprod, 3},
+    {"_fixest_cpp_which_na_inf_vec", (DL_FUNC) &_fixest_cpp_which_na_inf_vec, 2},
+    {"_fixest_cpp_which_na_inf_mat", (DL_FUNC) &_fixest_cpp_which_na_inf_mat, 2},
+    {"_fixest_cpp_which_na_inf_df", (DL_FUNC) &_fixest_cpp_which_na_inf_df, 2},
+    {"_fixest_cpp_cond_means", (DL_FUNC) &_fixest_cpp_cond_means, 3},
+    {"_fixest_cpp_check_only_0", (DL_FUNC) &_fixest_cpp_check_only_0, 2},
     {"_fixest_cpp_quf_gnl", (DL_FUNC) &_fixest_cpp_quf_gnl, 1},
-    {"_fixest_cpppar_quf_table_sum", (DL_FUNC) &_fixest_cpppar_quf_table_sum, 11},
+    {"_fixest_cpp_quf_table_sum", (DL_FUNC) &_fixest_cpp_quf_table_sum, 11},
     {"_fixest_cpp_colon_to_star", (DL_FUNC) &_fixest_cpp_colon_to_star, 1},
     {"_fixest_cpp_newey_west", (DL_FUNC) &_fixest_cpp_newey_west, 3},
     {"_fixest_cpp_newey_west_panel", (DL_FUNC) &_fixest_cpp_newey_west_panel, 7},

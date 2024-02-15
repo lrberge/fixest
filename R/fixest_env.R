@@ -1229,7 +1229,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
   } else {
 
     lhs_clean = lhs # copy used for NA case
-    info = cpppar_which_na_inf_vec(lhs, nthreads)
+    info = cpp_which_na_inf_vec(lhs, nthreads)
     if(info$any_na_inf){
 
       if(info$any_na) ANY_NA = TRUE
@@ -1471,7 +1471,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
     anyNA_L = FALSE
     isNA_L = FALSE
     if(length(linear_core$left) > 1){
-      info = cpppar_which_na_inf_mat(linear_core$left, nthreads)
+      info = cpp_which_na_inf_mat(linear_core$left, nthreads)
       if(info$any_na_inf){
         anyNA_L = TRUE
         if(info$any_na) ANY_NA = TRUE
@@ -1483,7 +1483,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
     }
 
     if(length(linear_core$right) > 1){
-      info = cpppar_which_na_inf_mat(linear_core$right, nthreads)
+      info = cpp_which_na_inf_mat(linear_core$right, nthreads)
       if(info$any_na_inf){
         anyNA_L = TRUE
         if(info$any_na) ANY_NA = TRUE
@@ -1503,7 +1503,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
 
     linear.params = colnames(linear.mat)
     anyNA_L = FALSE
-    info = cpppar_which_na_inf_mat(linear.mat, nthreads)
+    info = cpp_which_na_inf_mat(linear.mat, nthreads)
     if(info$any_na_inf){
       anyNA_L = TRUE
 
@@ -1655,7 +1655,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
       }
 
       anyNA_offset = FALSE
-      info = cpppar_which_na_inf_vec(offset.value, nthreads)
+      info = cpp_which_na_inf_vec(offset.value, nthreads)
       if(info$any_na_inf){
         anyNA_offset = TRUE
 
@@ -1754,7 +1754,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
       }
 
       anyNA_weights = FALSE
-      info = cpppar_which_na_inf_vec(weights.value, nthreads)
+      info = cpp_which_na_inf_vec(weights.value, nthreads)
       if(info$any_na_inf){
         anyNA_weights = TRUE
 
@@ -1983,7 +1983,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
 
     # NAs
     n_NA_iv = c(0, 0)
-    info = cpppar_which_na_inf_df(iv_lhs, nthreads)
+    info = cpp_which_na_inf_df(iv_lhs, nthreads)
     if(info$any_na_inf){
 
       if(info$any_na) ANY_NA = TRUE
@@ -2011,7 +2011,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
     inst_names = attr(terms(fml_iv), "term.labels")
 
     # NAs
-    info = cpppar_which_na_inf_mat(iv.mat, nthreads)
+    info = cpp_which_na_inf_mat(iv.mat, nthreads)
     if(info$any_na_inf){
 
       if(info$any_na) ANY_NA = TRUE
@@ -2251,7 +2251,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
         slope_df[[i]] = as.numeric(slope_df[[i]])
       }
 
-      info = cpppar_which_na_inf_df(slope_df, nthreads)
+      info = cpp_which_na_inf_df(slope_df, nthreads)
       if(info$any_na_inf){
 
         if(info$any_na) ANY_NA = TRUE
@@ -2624,7 +2624,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
         stopi("The length of {q?arg_name} ({len?starting_values}) differs from the length of the data ({n?nobs}).")
       }
 
-      info = cpppar_which_na_inf_vec(starting_values, nthreads)
+      info = cpp_which_na_inf_vec(starting_values, nthreads)
       if(info$any_na_inf){
         msg = msg_na_inf(info$any_na, info$any_inf)
 
@@ -3326,7 +3326,7 @@ setup_fixef = function(fixef_df, lhs, fixef_vars, fixef.rm, family, isSplit, spl
   # save(quoi, file = "../_PROBLEM/fepois crashes/problem_quf.Rdata")
   # stop()
 
-  quf_info_all = cpppar_quf_table_sum(x = fixef_df, y = lhs, do_sum_y = do_sum_y,
+  quf_info_all = cpp_quf_table_sum(x = fixef_df, y = lhs, do_sum_y = do_sum_y,
                                       rm_0 = rm_0, rm_1 = rm_1, rm_single = rm_single,
                                       only_slope = only_slope, nthreads = nthreads,
                                       do_refactor = isRefactor, r_x_sizes = fixef_sizes, 
@@ -4362,7 +4362,7 @@ select_obs = function(x, index, nthreads = 1, msg = "explanatory variable"){
     if(is.matrix(x)){
       x = x[index, , drop = FALSE]
 
-      only_0 = cpppar_check_only_0(x, nthreads)
+      only_0 = cpp_check_only_0(x, nthreads)
       if(all(only_0 == 1)){
         stop("After removing NAs (or perfect fit fixed-effects), not a single explanatory variable is different from 0.")
 
@@ -4384,7 +4384,7 @@ select_obs = function(x, index, nthreads = 1, msg = "explanatory variable"){
       if(length(x[[i]]) > 1){
         x[[i]] = x[[i]][index, , drop = FALSE]
 
-        only_0 = cpppar_check_only_0(x[[i]], nthreads)
+        only_0 = cpp_check_only_0(x[[i]], nthreads)
         if(all(only_0 == 1)){
           stop("After removing NAs (or perfect fit fixed-effects), not a single ", msg, " is different from 0.")
 

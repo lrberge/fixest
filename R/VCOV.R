@@ -1882,12 +1882,12 @@ vcovClust = function (cluster, myBread, scores, adj = FALSE, do.unclass = TRUE,
   }
 
   if(!sandwich){
-    res = cpppar_crossprod(RightScores, 1, nthreads) * adj_value
+    res = cpp_crossprod(RightScores, 1, nthreads) * adj_value
     return(res)
   }
 
-  xy = cpppar_matprod(RightScores, myBread, nthreads)
-  res = cpppar_crossprod(xy, 1, nthreads) * adj_value
+  xy = cpp_matprod(RightScores, myBread, nthreads)
+  res = cpp_crossprod(xy, 1, nthreads) * adj_value
   res
 }
 
@@ -1899,14 +1899,14 @@ vcov_iid_internal = function(bread, ...){
 vcov_hetero_internal = function(bread, scores, sandwich, ssc, nthreads, ...){
 
   if(!sandwich){
-    vcov_noAdj = cpppar_crossprod(scores, 1, nthreads)
+    vcov_noAdj = cpp_crossprod(scores, 1, nthreads)
   } else {
     # we make a n/(n-1) adjustment to match vcovHC(type = "HC1")
 
     n = nrow(scores)
     adj = ifelse(ssc$cluster.adj, n / (n-1), 1)
 
-    vcov_noAdj = cpppar_crossprod(cpppar_matprod(scores, bread, nthreads), 1, nthreads) * adj
+    vcov_noAdj = cpp_crossprod(cpp_matprod(scores, bread, nthreads), 1, nthreads) * adj
   }
 
   vcov_noAdj
@@ -2399,7 +2399,7 @@ slide_args = function(x, ...){
 
 
 prepare_sandwich = function(bread, meat, nthreads = 1){
-  cpppar_matprod(cpppar_matprod(bread, meat, nthreads), bread, nthreads)
+  cpp_matprod(cpp_matprod(bread, meat, nthreads), bread, nthreads)
 }
 
 check_set_cutoff = function(cutoff){
