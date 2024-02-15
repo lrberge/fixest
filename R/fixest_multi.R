@@ -271,6 +271,8 @@ rep_df = function(x, times = 1, each = 1, ...){
 #### USER LEVEL ####
 ####
 
+
+
 #' Extracts the models tree from a `fixest_multi` object
 #'
 #' Extracts the meta information on all the models contained in a `fixest_multi` estimation.
@@ -311,7 +313,7 @@ models = function(x, simplify = FALSE){
     if(!all(who_keep)){
       # we need to handle the behavior with the .var thing
       names_keep = names(res)[who_keep]
-      pattern = sma("^({'|'c?names_keep})")
+      pattern = sma("^({'|'c ? names_keep})")
 
       res = res[, grepl(pattern, names(res)), drop = FALSE]
     }
@@ -319,6 +321,30 @@ models = function(x, simplify = FALSE){
   }
 
   res
+}
+
+
+n_models = function(x, lhs, rhs, sample, fixef, iv){
+  check_arg("logical scalar", lhs, rhs, sample, fixef, iv)
+  
+  request = c(lhs = lhs, rhs = rhs, sample = sample, fixef = fixest, iv = iv)
+  if(sum(request) == 0){
+    return(length(x))
+  }
+  
+  dimension = names(request)[request]
+  
+  if(length(dimension) > 1){
+    stopi("You can request the number of different models on **only one** dimension. Currently ", 
+          "{$enum.bq, are ? dimension} `TRUE`. Please only set one to `TRUE`.")
+  }  
+  
+  tree = attr(x, "tree")
+  if(!dimension %in% names(tree)){
+    return(1)
+  }
+  
+  
 }
 
 
@@ -605,6 +631,13 @@ print.fixest_multi = function(x, ...){
 
 }
 
+
+####
+#### sub-fixest_multi ####
+####
+
+
+
 #' Extracts one element from a `fixest_multi` object
 #'
 #' Extracts single elements from multiple `fixest` estimations.
@@ -641,7 +674,6 @@ print.fixest_multi = function(x, ...){
 
   `[[.data.frame`(x, i)
 }
-
 
 #' Subsets a fixest_multi object
 #'
@@ -682,6 +714,7 @@ print.fixest_multi = function(x, ...){
 #' should be performed depending on the user input.
 #' @param drop Logical, default is `FALSE`. If the result contains only one estimation, 
 #' then if `drop = TRUE` it will be transformed into a `fixest` object (instead of `fixest_multi`).
+#' Its default value can be modified with the function [`setFixest_multi`].
 #'
 #' @details
 #' The order with we we use the keys matter. Every time a key `sample`, `lhs`, `rhs`, 
@@ -726,6 +759,10 @@ print.fixest_multi = function(x, ...){
   core_args = c("sample", "lhs", "rhs", "fixef", "iv")
   check_arg(reorder, drop, "logical scalar")
   extra_args = c("reorder", "drop")
+  
+  if(missing(drop)){
+    drop = getFixest_multi()$drop
+  }
 
   mc = match.call()
   if(!any(c(core_args, "i", "I") %in% names(mc))){
@@ -757,7 +794,7 @@ print.fixest_multi = function(x, ...){
   if(!use_i && !use_I){
     pblm = setdiff(names(mc)[-(1:2)], args)
     if(length(pblm) > 0){
-      stopi("The ind{$(ex;ices), enum.bq, is ? pblm} not valid for this list of results (the valid one{s, are, enum.bq ? index_n}).")
+      stopi("The ind{$(ex;ices), enum.bq, is ? pblm} not valid for this list of results (the valid one{$s, are, enum.bq ? names(tree_index)}).")
     }
   }
 

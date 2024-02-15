@@ -35,6 +35,7 @@ export(models)
 # utilities
 export(to_integer, demean, obs, fixest_data)
 export(as.dict)
+
 # setters & getters
 exportPattern("^(s|g)etFixest")
 

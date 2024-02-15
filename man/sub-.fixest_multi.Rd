@@ -48,7 +48,8 @@ both cases, but \code{FALSE} leads \code{iv} to become the rightmost key (just t
 should be performed depending on the user input.}
 
 \item{drop}{Logical, default is \code{FALSE}. If the result contains only one estimation,
-then if \code{drop = TRUE} it will be transformed into a \code{fixest} object (instead of \code{fixest_multi}).}
+then if \code{drop = TRUE} it will be transformed into a \code{fixest} object (instead of \code{fixest_multi}).
+Its default value can be modified with the function \code{\link{setFixest_multi}}.}
 }
 \value{
 It returns a \code{fixest_multi} object. If there is only one estimation left in the object, then
