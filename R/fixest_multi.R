@@ -311,7 +311,7 @@ models = function(x, simplify = FALSE){
     if(!all(who_keep)){
       # we need to handle the behavior with the .var thing
       names_keep = names(res)[who_keep]
-      pattern = sma("^({'|'c?names_keep})")
+      pattern = sma("^({'|'c ? names_keep})")
 
       res = res[, grepl(pattern, names(res)), drop = FALSE]
     }
@@ -682,6 +682,7 @@ print.fixest_multi = function(x, ...){
 #' should be performed depending on the user input.
 #' @param drop Logical, default is `FALSE`. If the result contains only one estimation, 
 #' then if `drop = TRUE` it will be transformed into a `fixest` object (instead of `fixest_multi`).
+#' Its default value can be modified with the function [`setFixest_multi`].
 #'
 #' @details
 #' The order with we we use the keys matter. Every time a key `sample`, `lhs`, `rhs`, 
@@ -726,6 +727,10 @@ print.fixest_multi = function(x, ...){
   core_args = c("sample", "lhs", "rhs", "fixef", "iv")
   check_arg(reorder, drop, "logical scalar")
   extra_args = c("reorder", "drop")
+  
+  if(missing(drop)){
+    drop = getFixest_multi()$drop
+  }
 
   mc = match.call()
   if(!any(c(core_args, "i", "I") %in% names(mc))){
