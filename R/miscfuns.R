@@ -67,6 +67,12 @@
 #'
 collinearity = function(x, verbose){
   # x: fixest estimation
+  
+  # todo: 
+  # - input: fomrula + data to check collinearity in any kind of setup
+  # - output: all the sets of problems and not only the first one
+  #           find a way to format the output properly (should be informative)
+  # - arg: focus: to focus on a single variable
 
   if(!inherits(x, "fixest")){
     stop("Argument `x` must be a fixest object.")
@@ -119,7 +125,6 @@ collinearity = function(x, verbose){
   panel__meta__info = set_panel_meta_info(x, data)
 
   if(isLinear || isFixef || "(Intercept)" %in% names(coef)){
-    # linear.matrix = model.matrix(linear_fml, data)
     linear.matrix = fixest_model_matrix(rhs_fml, data)
   }
 
@@ -130,7 +135,7 @@ collinearity = function(x, verbose){
   if(isLinear){
     # We do that to drop interaction variables that should not be there any more
     # if factors with only NA values
-    varkeep = intersect(names(x$coefficients), colnames(linear.matrix))
+    varkeep = intersect(c(names(x$coefficients), x$collin.var), colnames(linear.matrix))
     if(length(varkeep) < ncol(linear.matrix)){
       linear.matrix = linear.matrix[, varkeep, drop = FALSE]
     }
@@ -228,7 +233,7 @@ collinearity = function(x, verbose){
       if(any(constant_id[-1])){
         # var_problem = colnames(linear_mat_noIntercept)[is_const]
         var_problem = colnames(linear_mat_noIntercept)[constant_id[-1]]
-        message = sma("Variable{$s, enum.q, is ? var_problem} constant, thus collinear with the fixed-effects.")
+        message = sma("The Variable{$s, enum.q, is ? var_problem} constant, thus collinear with the fixed-effects.")
         print(message)
         return(invisible(message))
       }
@@ -239,7 +244,7 @@ collinearity = function(x, verbose){
 
       if(isIntercept && any(constant_id[-1])){
         var_problem = colnames(linear_mat_noIntercept)[constant_id[-1]]
-        message = sma("Variable{$s, enum.q, is ? var_problem} constant, thus collinear with the intercept.")
+        message = sma("The variable{$s, enum.q, is ? var_problem} constant, thus collinear with the intercept.")
         print(message)
         return(invisible(message))
       }
@@ -247,7 +252,7 @@ collinearity = function(x, verbose){
       if(any(constant_value == 0)){
         # constant and equal to 0
         var_problem = colnames(linear.matrix)[first_row == 0 & constant_id]
-        message = sma("Variable{$s, enum.q, is ? var_problem} constant and equal to 0.")
+        message = sma("The variable{$s, enum.q, is ? var_problem} constant and equal to 0.")
 
         print(message)
         return(invisible(message))
@@ -278,7 +283,7 @@ collinearity = function(x, verbose){
         ccat("\n")
         varnames = colnames(linear_mat_noIntercept)
         collin_var = varnames[max_residuals < 1e-6]
-        message = sma("Variable{$s, enum.q, is ? collin_var} collinear with fixed-effects `", names(cluster)[q], "`.")
+        message = sma("The variable{$s, enum.q, is ? collin_var} collinear with the fixed-effects `", names(cluster)[q], "`.")
 
         print(message)
         return(invisible(message))
@@ -311,7 +316,7 @@ collinearity = function(x, verbose){
         varnames = colnames(linear_mat_noIntercept)
         collin_var = varnames[max_residuals < 1e-6]
 
-        message = sma("Variable{$s, enum.q, is ? collin_var} collinear with variable with varying slope `", slope_vars[q], "` (on `", slope_fe[q], "`).")
+        message = sma("The variable{$s, enum.q, is ? collin_var} collinear with variables with varying slope `", slope_vars[q], "` (on `", slope_fe[q], "`).")
 
         print(message)
         return(invisible(message))
@@ -361,7 +366,7 @@ collinearity = function(x, verbose){
         coef_lm = res$coefficients
         vars = colnames(mat_base)[-i]
         collin_var = vars[!is.na(coef_lm) & abs(coef_lm) > 1e-6]
-        message = paste0("Variable `", dict_name[v], "` is collinear with variable", enumerate_items(dict_name[collin_var], "s.quote"), ".")
+        message = sma("The variable {bq?dict_name[v]} is collinear with the variable{$s, enum.q ? dict_name[collin_var]}.")
 
         print(message)
         return(invisible(message))
@@ -374,7 +379,6 @@ collinearity = function(x, verbose){
   # II.b) perfect multicollinearity + fixed-effects
   #
 
-  # linearVars = setdiff(colnames(linear.matrix), "(Intercept)")
   if(isLinear && length(linearVars) >= 2 && isFixef){
     ccat("- multiple with fixed-effects")
 
@@ -399,7 +403,7 @@ collinearity = function(x, verbose){
           ccat("\n")
           coef_lm = coef(res)
           collin_var = names(coef_lm)[!is.na(coef_lm) & abs(coef_lm) > 1e-6]
-          message = paste0("Variable `", dict_name[v], "` is collinear with variable", enumerate_items(dict_name[collin_var], "s.quote"), ", together with the fixed-effects ", dum_names[id_cluster], ".")
+          message = sma("The variable {bq?dict_name[v]} is collinear with variable{$s, enum.q ? dict_name[collin_var]}, together with the fixed-effects {bq ? dum_names[id_cluster]}.")
 
           print(message)
           return(invisible(message))
