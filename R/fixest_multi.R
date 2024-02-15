@@ -271,6 +271,8 @@ rep_df = function(x, times = 1, each = 1, ...){
 #### USER LEVEL ####
 ####
 
+
+
 #' Extracts the models tree from a `fixest_multi` object
 #'
 #' Extracts the meta information on all the models contained in a `fixest_multi` estimation.
@@ -698,7 +700,7 @@ print.fixest_multi = function(x, ...){
 #'
 #' @return
 #' It returns a `fixest_multi` object. If there is only one estimation left in the object, then 
-#' the result is simplified into a `fixest` object.
+#' the result is simplified into a `fixest` object only with `drop = TRUE`.
 #'
 #' @examples
 #'
@@ -762,7 +764,7 @@ print.fixest_multi = function(x, ...){
   if(!use_i && !use_I){
     pblm = setdiff(names(mc)[-(1:2)], args)
     if(length(pblm) > 0){
-      stopi("The ind{$(ex;ices), enum.bq, is ? pblm} not valid for this list of results (the valid one{s, are, enum.bq ? index_n}).")
+      stopi("The ind{$(ex;ices), enum.bq, is ? pblm} not valid for this list of results (the valid one{$s, are, enum.bq ? names(tree)}).")
     }
   }
 
