@@ -730,7 +730,7 @@ print.fixest_multi = function(x, ...){
 #'
 #' @return
 #' It returns a `fixest_multi` object. If there is only one estimation left in the object, then 
-#' the result is simplified into a `fixest` object.
+#' the result is simplified into a `fixest` object only with `drop = TRUE`.
 #'
 #' @examples
 #'
