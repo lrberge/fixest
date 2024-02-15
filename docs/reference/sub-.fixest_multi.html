@@ -129,7 +129,8 @@ should be performed depending on the user input.</p></dd>
 
 <dt>drop</dt>
 <dd><p>Logical, default is <code>FALSE</code>. If the result contains only one estimation,
-then if <code>drop = TRUE</code> it will be transformed into a <code>fixest</code> object (instead of <code>fixest_multi</code>).</p></dd>
+then if <code>drop = TRUE</code> it will be transformed into a <code>fixest</code> object (instead of <code>fixest_multi</code>).
+Its default value can be modified with the function <code><a href="setFixest_multi.html">setFixest_multi</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -137,7 +138,7 @@ then if <code>drop = TRUE</code> it will be transformed into a <code>fixest</cod
     
 
 <p>It returns a <code>fixest_multi</code> object. If there is only one estimation left in the object, then
-the result is simplified into a <code>fixest</code> object.</p>
+the result is simplified into a <code>fixest</code> object only with <code>drop = TRUE</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

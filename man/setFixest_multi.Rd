@@ -9,6 +9,10 @@ setFixest_multi(drop = FALSE)
 
 getFixest_multi()
 }
+\arguments{
+\item{drop}{Logical scalar, default is \code{FALSE}. Provides the default value of the argument
+\code{drop} when subsetting \code{fixest_multi} objects.}
+}
 \value{
 The function \code{getFixest_multi()} returns the list of settings.
 }

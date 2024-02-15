@@ -7682,7 +7682,8 @@ getFixest_estimation = function(){
 #' 
 #' Use this function to change the default behavior of `fixest_multi` objects.
 #' 
-#' @inheritParams sub-.fixest_multi
+#' @param drop Logical scalar, default is `FALSE`. Provides the default value of the argument 
+#' `drop` when subsetting `fixest_multi` objects.
 #' 
 #' 
 #' @return 
