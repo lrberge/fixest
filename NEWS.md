@@ -13,6 +13,25 @@
 
 - now the `vcov` method inherits the small sample correction and type of VCOV used in the original estimation. Thanks to @mgoplerud, #356
 
+- new function `n_models` to identify the length of a dimension of a multiple estimation. This facilitates the manipulation of multiple estimations programmatically:
+```R
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+est = feols(y ~ csw(x1, x2, x3), base, fsplit = ~species)
+
+# We can obtain the unique number of RHSs/samples with `n_models`
+n_models(est, rhs = TRUE)
+#> [1] 3
+n_models(est, sample = TRUE)
+#> [1] 4
+
+all_tables = list()
+for(i in 1:n_models(est, sample = TRUE)){
+  all_tables[[i]] = etable(est[sample = i])
+}
+do.call(rbind, all_tables)
+# ... the output is too long to be displayed here
+```
+
 ## Bugs
 
 - fix bug when the covariance matrix was *very* ill-defined. Thanks to Gianluca Russo.
@@ -46,6 +65,8 @@
 - improve error messages in iplot. 
 
 - improve speed of the function `fixef.fixest` in the presence of varying slopes. PR of @etiennebacher, #390
+
+- the subsetting of multiple estimations does not error any more when the index used was not relevant in the multiple estimation (provided its value is equal to 1)
 
 ## Documentation
 

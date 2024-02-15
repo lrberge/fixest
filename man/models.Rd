@@ -39,3 +39,6 @@ models(est_sub, simplify = TRUE)
 
 
 }
+\seealso{
+multiple estimations in \code{\link{feols}}, \code{\link{n_models}}
+}

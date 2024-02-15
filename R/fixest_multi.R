@@ -222,6 +222,16 @@ reshape_multi = function(x, obs, colorder = NULL){
 set_index_multi = function(x, index_names){
   # Function specific to [.fixest_multi => global assignments!!!
   arg = deparse(substitute(x))
+  
+  if(!arg %in% names(index_names)){
+    
+    if(!( identical(x, 1) || identical(x, 0) || identical(x, TRUE) )){
+      stopi("The index {bq?arg} is not valid for this list of results (the valid one{$s, are, enum.bq ? names(index_names)}). ",
+            "\nYou can, however, set it to 1 if necessary, as in `{arg} = 1`.")
+    }
+    
+    return(NULL)
+  }
 
   NAMES = index_names[[arg]]
   vmax = length(NAMES)
@@ -242,8 +252,8 @@ set_index_multi = function(x, index_names){
     res = as.integer(dict[vars])
 
     if(length(res) == 0){
-      stop_up("The set of regular expressions (equal to: ", x, ") in '", arg, 
-              "' didn't match any choice.")
+      stop_up("The set of regular expressions (equal to: {Q?x}) in {bq?arg} ", 
+              "didn't match any choice.")
     }
 
   } else if(any(abs(x) > vmax)){
@@ -286,6 +296,9 @@ rep_df = function(x, times = 1, each = 1, ...){
 #' It returns a `data.frame` whose first column (named `id`) is the index of the models and 
 #' the other columns contain the information specific to each model (e.g. which sample, 
 #' which RHS,  which dependent variable, etc).
+#' 
+#' @seealso 
+#' multiple estimations in [`feols`], [`n_models`]
 #'
 #' @examples
 #'
@@ -324,10 +337,52 @@ models = function(x, simplify = FALSE){
 }
 
 
-n_models = function(x, lhs, rhs, sample, fixef, iv){
+
+#' Gets the dimension of `fixest_multi` objects
+#' 
+#' Otabin the number of unique models of a `fixest_multi` object, depending on the 
+#' type requested.
+#' 
+#' 
+#' @param x A `fixest_mutli` object, obtained e.g. from [`feols`].
+#' @param lhs Logical scalar, default is `FALSE`. If `TRUE`, the number of different 
+#' left hand sides is returned.
+#' @param rhs Logical scalar, default is `FALSE`. If `TRUE`, the number of different 
+#' right hand sides is returned.
+#' @param sample Logical scalar, default is `FALSE`. If `TRUE`, the number of different 
+#' samples is returned.
+#' @param fixef Logical scalar, default is `FALSE`. If `TRUE`, the number of different 
+#' types of fixed-effects is returned.
+#' @param iv Logical scalar, default is `FALSE`. If `TRUE`, the number of different 
+#' IV stages is returned.
+#' 
+#' @return 
+#' It returns an integer scalar. If no argument is provided, the total number of 
+#' models is returned.
+#' 
+#' @seealso 
+#' Multiple estimations in [`feols`], [`models`]
+#' 
+#' @examples 
+#' 
+#' base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+#' est = feols(y ~ csw(x1, x2, x3), base, fsplit = ~species)
+#' 
+#' # there are 3 different RHSs and 4 different samples
+#' models(est)
+#' 
+#' # We can obtain these numbers with n_models
+#' n_models(est, rhs = TRUE)
+#' n_models(est, sample = TRUE)
+#' 
+#' 
+n_models = function(x, lhs = FALSE, rhs = FALSE, sample = FALSE, 
+                    fixef = FALSE, iv = FALSE){
+  
+  check_arg(x, "class(fixest_multi) mbt")
   check_arg("logical scalar", lhs, rhs, sample, fixef, iv)
   
-  request = c(lhs = lhs, rhs = rhs, sample = sample, fixef = fixest, iv = iv)
+  request = c(lhs = lhs, rhs = rhs, sample = sample, fixef = fixef, iv = iv)
   if(sum(request) == 0){
     return(length(x))
   }
@@ -336,7 +391,7 @@ n_models = function(x, lhs, rhs, sample, fixef, iv){
   
   if(length(dimension) > 1){
     stopi("You can request the number of different models on **only one** dimension. Currently ", 
-          "{$enum.bq, are ? dimension} `TRUE`. Please only set one to `TRUE`.")
+          "{$enum.bq, are ? dimension} `TRUE`.\n Please only set one to `TRUE`.")
   }  
   
   tree = attr(x, "tree")
@@ -344,7 +399,7 @@ n_models = function(x, lhs, rhs, sample, fixef, iv){
     return(1)
   }
   
-  
+  length(unique(tree[[dimension]]))
 }
 
 
@@ -791,13 +846,6 @@ print.fixest_multi = function(x, ...){
   nc = ncol(tree)
   n = nrow(tree)
 
-  if(!use_i && !use_I){
-    pblm = setdiff(names(mc)[-(1:2)], args)
-    if(length(pblm) > 0){
-      stopi("The ind{$(ex;ices), enum.bq, is ? pblm} not valid for this list of results (the valid one{$s, are, enum.bq ? names(tree_index)}).")
-    }
-  }
-
   if(use_i){
     check_set_arg(i, "evalset integer vector l0 no na", .data = list(.N = n))
 
@@ -855,7 +903,10 @@ print.fixest_multi = function(x, ...){
                   .data = list(.N = s_max))
     sample = set_index_multi(sample, index_names)
 
-    selection$sample = (1:s_max)[sample]
+    if(!is.null(sample)){
+      # sample can be NULL if it wasn't in the tree
+      selection$sample = (1:s_max)[sample]
+    }
 
   } else if("sample" %in% names(index_n)){
     selection$sample = 1:s_max
@@ -866,8 +917,11 @@ print.fixest_multi = function(x, ...){
     check_set_arg(lhs, "evalset logical scalar | vector(character, integer) no na", 
                   .data = list(.N = lhs_max))
     lhs = set_index_multi(lhs, index_names)
-
-    selection$lhs = (1:lhs_max)[lhs]
+    
+    if(!is.null(lhs)){
+      selection$lhs = (1:lhs_max)[lhs]
+    }
+    
   } else if("lhs" %in% names(index_n)){
     selection$lhs = 1:lhs_max
   }
@@ -878,7 +932,10 @@ print.fixest_multi = function(x, ...){
                   .data = list(.N = rhs_max))
     rhs = set_index_multi(rhs, index_names)
 
-    selection$rhs = (1:rhs_max)[rhs]
+    if(!is.null(rhs)){
+      selection$rhs = (1:rhs_max)[rhs]
+    }
+    
   } else if("rhs" %in% names(index_n)){
     selection$rhs = 1:rhs_max
   }
@@ -888,8 +945,11 @@ print.fixest_multi = function(x, ...){
     check_set_arg(fixef, "evalset logical scalar | vector(character, integer) no na", 
                   .data = list(.N = fixef_max))
     fixef = set_index_multi(fixef, index_names)
+    
+    if(!is.null(fixef)){
+      selection$fixef = (1:fixef_max)[fixef]
+    }
 
-    selection$fixef = (1:fixef_max)[fixef]
   } else if("fixef" %in% names(index_n)){
     selection$fixef = 1:fixef_max
   }
@@ -899,8 +959,11 @@ print.fixest_multi = function(x, ...){
     check_set_arg(iv, "evalset logical scalar | vector(character, integer) no na", 
                   .data = list(.N = iv_max))
     iv = set_index_multi(iv, index_names)
-
-    selection$iv = (1:iv_max)[iv]
+    
+    if(!is.null(iv)){
+      selection$iv = (1:iv_max)[iv]
+    }
+    
   } else if("iv" %in% names(index_n)){
     selection$iv = 1:iv_max
   }
@@ -916,6 +979,9 @@ print.fixest_multi = function(x, ...){
       user_order = c(setdiff(user_order, last), last)
     }
   }
+  
+  # avoid issues when a non-tree element is the only one used in argument
+  user_order = intersect(user_order, names(index_n))  
 
   tree_index$obs = 1:nrow(tree_index)
   for(my_dim in rev(user_order)){

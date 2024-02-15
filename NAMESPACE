@@ -31,7 +31,7 @@ export(i, bin, ref)
 # macro
 export(xpd)
 # multiple estimations
-export(models)
+export(models, n_models)
 # utilities
 export(to_integer, demean, obs, fixest_data)
 export(as.dict)

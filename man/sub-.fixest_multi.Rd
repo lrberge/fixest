@@ -53,7 +53,7 @@ Its default value can be modified with the function \code{\link{setFixest_multi}
 }
 \value{
 It returns a \code{fixest_multi} object. If there is only one estimation left in the object, then
-the result is simplified into a \code{fixest} object.
+the result is simplified into a \code{fixest} object only with \code{drop = TRUE}.
 }
 \description{
 Subsets a fixest_multi object using different keys.

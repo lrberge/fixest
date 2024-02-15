@@ -76,6 +76,7 @@ reference:
         - matches("stepwise|c?sw0?")
         - matches("fixest_multi")
         - models
+        - n_models
     - title: Methods from the `stats` package
       desc: Various methods from the stats package
       contents:
