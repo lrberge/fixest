@@ -5118,7 +5118,7 @@ bin_factor = function(bin, x, varname, no_error = FALSE){
       qui_bis = which(grepl(".[", value, fixed = TRUE))
       for(j in qui_bis){
         value[[j]] = error_sender(.dsb(value[[j]], frame = parent.frame(2), nest = FALSE),
-                                  sma("Error when binning: the name ({value[[j]]}) expanded",
+                                  sma("Error when binning: the name ({ value[[j]] }) expanded",
                                       " with `.[]` led to an error:"))
       }
       bin[[i]] = unlist(value)

@@ -12,6 +12,7 @@ library(fixest)
 
 test = fixest:::test ; chunk = fixest:::chunk
 vcovClust = fixest:::vcovClust
+stvec = stringmagic::string_vec_alias()
 
 setFixest_notes(FALSE)
 
