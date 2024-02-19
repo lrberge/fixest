@@ -5646,14 +5646,17 @@ fixest_CI_factor = function(x, level, vcov = NULL, df.t = NULL){
 ####
 
 
-# sma ####
-
+#
+# stringmagic ####
+#
 
 sma = string_magic_alias(.check = FALSE)
 
 catma = cat_magic_alias(.check = FALSE)
 
-mema = message_magic_alias(.check = FALSE)
+mema = message_magic_alias(.check = FALSE, .last = "'min(100, .sw)'width")
+
+
 
 escape_regex = function(x){
   # escape special characters in regular expressions => to make it as "fixed"
