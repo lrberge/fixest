@@ -611,7 +611,7 @@ summary.fixest_multi = function(object, type = "short", vcov = NULL, se = NULL,
 print.fixest_multi = function(x, ...){
 
   if(is_user_level_call()){
-    validate_dots(valid_args = dsb("/type, vcov, se, cluster, ssc, stage, lean, agg, forceCovariance, keepBounded, n, nthreads"))
+    validate_dots(valid_args = stvec("/type, vcov, se, cluster, ssc, stage, lean, agg, forceCovariance, keepBounded, n, nthreads"))
   }
 
   x = summary(x, fromPrint = TRUE, ...)

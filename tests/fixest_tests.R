@@ -797,13 +797,13 @@ test(coef(est_mult_no_exo[[2]]), coef(est_no_exo_y2))
 # proper ordering
 est_multi = feols(c(y1, y2) ~ sw0(x1) | sw0(fe2), base, split = ~species)
 test(names(models(est_multi[fixef = TRUE, sample = FALSE])),
-   dsb("/id, fixef, lhs, rhs, sample.var, sample"))
+   stvec("id, fixef, lhs, rhs, sample.var, sample"))
 
 test(names(models(est_multi[fixef = "fe2", sample = "seto"])),
-   dsb("/id, fixef, sample.var, sample, lhs, rhs"))
+   stvec("id, fixef, sample.var, sample, lhs, rhs"))
 
 test(names(models(est_multi[fixef = "fe2", sample = "seto", reorder = FALSE])),
-   dsb("/id, sample.var, sample, fixef, lhs, rhs"))
+   stvec("id, sample.var, sample, fixef, lhs, rhs"))
 
 # NA models
 base$y_0 = base$x1 ** 2 + rnorm(150)
@@ -817,7 +817,7 @@ est_pois = fepois(y_0 ~ x.[1:3] + x1_bis | sw0(species), base)
 # Different ways .[]
 base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
 
-dep_all = list(dsb("/y, x1, x2"), ~y + x1 + x2)
+dep_all = list(stvec("y, x1, x2"), ~y + x1 + x2)
 for(dep in dep_all){
   m = feols(.[dep] ~ x3, base)
   test(length(m), 3)
@@ -947,7 +947,7 @@ xmat = base[, 2:3]
 fe = base$species
 
 for(use_fe in c(TRUE, FALSE)){
-  all_vcov = dsb("/iid, hetero")
+  all_vcov = stvec("iid, hetero")
   if(use_fe){
     setFixest_fml(..fe = ~ 1 | species)
     all_vcov = c(all_vcov, "cluster")

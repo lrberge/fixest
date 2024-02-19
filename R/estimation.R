@@ -4584,7 +4584,8 @@ release_multi_notes = function(){
     tn = table(notes)
     new_notes = paste0("[x ", tn, "] ", names(tn))
 
-    message("Notes from the estimations:\n", dsb("'\n'c?new_notes"))
+    mema("Notes from the estimations:\n", 
+         "{'\n'c ? new_notes}")
   }
 
   options("fixest_multi_notes" = NULL)

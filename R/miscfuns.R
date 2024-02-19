@@ -2134,7 +2134,7 @@ xpd = function(fml, ..., add = NULL, lhs, rhs, data = NULL, frame = parent.frame
 
         vars_new = paste0(vars_filled, collapse = " + ")
 
-        pattern = dsb("(?<![[:alnum:]._])\\Q.[var]\\E(?![[:alnum:]._])")
+        pattern = sma("(?<![[:alnum:]._])\\Q{var}\\E(?![[:alnum:]._])")
 
         fml_txt = gsub(pattern, vars_new, fml_txt, perl = TRUE)
       }
@@ -5656,6 +5656,7 @@ catma = cat_magic_alias(.check = FALSE)
 
 mema = message_magic_alias(.check = FALSE, .last = "'min(100, .sw)'width")
 
+stvec = stringmagic::string_vec_alias()
 
 
 escape_regex = function(x){
@@ -7087,7 +7088,7 @@ is_calling_fun = function(pattern, full_search = FALSE, full_name = FALSE){
       fun_all = sapply(tail(sc_all, 13), function(x) deparse(x)[1])
 
       if(full_name){
-        pattern = .dsb("^.[pattern]\\(")
+        pattern = sma("^{pattern}\\(")
       }
 
       res = any(grepl(pattern, fun_all))
@@ -7104,7 +7105,7 @@ is_calling_fun = function(pattern, full_search = FALSE, full_name = FALSE){
 
       fun_name = deparse(sc)[1]
       if(full_name){
-        pattern = .dsb("^.[pattern]\\(")
+        pattern = sma("^{pattern}\\(")
       }
 
       res = grepl(pattern, fun_name)
