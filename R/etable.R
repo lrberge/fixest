@@ -1134,6 +1134,10 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
   # Export to file
   is_file = !missnull(file)
   if(is_file){
+    # Create directory if it doesn't exist
+    if(!DIR_EXISTS(dirname(file))){
+      dir.create(dirname(file), recursive = TRUE)
+    }
     error_sender(sink(file = file, append = !replace),
                  "Argument 'file': error when creating the document in ", file)
 
