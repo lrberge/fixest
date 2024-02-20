@@ -5343,7 +5343,12 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
     # (In regular markdown, the temp dir is a bit more elegant since
     #  it does not clutter the workspace)
 
-    markdown = "./images/etable/"
+    markdown = file.path(
+      knitr::opts_knit$get("output.dir"), 
+      knitr::fig_path('.png')
+    )
+    markdown = dirname(markdown)
+    # markdown = "./images/etable/"
   }
 
   # we need to clean all the tmp tags otherwise the caching does not work
@@ -5360,7 +5365,7 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
   do_build = TRUE
   export_markdown = id = NULL
   if(!is.null(markdown)){
-    markdown_path = check_set_path(markdown, "w, dir", create = TRUE, up = up)
+    markdown_path = check_set_path(markdown, "w, dir", create = TRUE, up = up, recursive = TRUE)
 
     all_files = list.files(markdown_path, "\\.png$", full.names = TRUE)
     id_all = gsub("^.+_|\\.png$", "", all_files)
@@ -5698,7 +5703,9 @@ check_set_path = function(x, type = "", create = TRUE, up = 0, recursive = FALSE
   if(nchar(path_dir) == 0) path_dir = "."
 
   if(create & recursive) {
-    dir.create(path, recursive = TRUE)
+    if(!dir.exists(path)) {
+      dir.create(path, recursive = TRUE)
+    }
   }
 
   path_parent = dirname(path)
