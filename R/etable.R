@@ -939,7 +939,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
   # Arguments that can be set globally
   opts = getOption("fixest_etable")
 
-  args_global = c("postprocess.tex", "postprocess.df", "view", "markdown", "page.width")
+  args_global = c("postprocess.tex", "postprocess.df", "view", "markdown", "page.width", "div.class")
   for(arg in setdiff(args_global, names(mc))){
     if(arg %in% names(opts)){
       assign(arg, opts[[arg]])
@@ -4585,7 +4585,7 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat,
                             style.df = NULL, notes = NULL, group = NULL, extralines = NULL,
                             fixef.group = NULL, placement = "htbp", drop.section = NULL,
                             view = FALSE, markdown = NULL, view.cache = FALSE,
-                            page.width = "fit",
+                            page.width = "fit", div.class = "etable",
                             postprocess.tex = NULL, postprocess.df = NULL,
                             fit_format = "__var__", meta.time = NULL,
                             meta.author = NULL, meta.sys = NULL,
@@ -4655,6 +4655,7 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat,
 
   check_arg(view, view.cache, "logical scalar")
   check_arg(markdown, "NULL scalar(logical, character)")
+  check_value(div.class, "character scalar")
 
   page.width = check_set_page_width(page.width)
 
