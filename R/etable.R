@@ -5406,7 +5406,7 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
   }
 
   if(!is.null(export)){
-    export_path = check_set_path(export, "w", up = up, recursive = TRUE)
+    export_path = check_set_path(export, "w, dir", create = TRUE, up = up, recursive = TRUE)
   }
 
   if(view || do_build){
@@ -5649,13 +5649,14 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
 }
 
 
-check_set_path = function(x, type = "", create = TRUE, up = 0){
+check_set_path = function(x, type = "", create = TRUE, up = 0, recursive = FALSE){
   # type:
   # + r: read (file or dir must exists), w (file is to be created)
   # + dir: directory and not a document
   # create:
   # - if file: creates the parent dir if the grand parent exists
   # - if dir: creates the dir only if grand parent exists
+  # - if recursive == TRUE: create all folders
 
   set_up(up + 1)
 
@@ -5696,12 +5697,18 @@ check_set_path = function(x, type = "", create = TRUE, up = 0){
   path_dir = str_trim(path, -nchar(file_name))
   if(nchar(path_dir) == 0) path_dir = "."
 
+  if(create & recursive) {
+    dir.create(path, recursive = TRUE)
+  }
+
   path_parent = dirname(path)
   if(dir.exists(path_parent)){
     if(is_dir && create){
       dir.create(path)
     }
-
+      
+    # ensure absolute path is returned for working with `tempdir()`
+    path = try(normalizePath(path, "/", mustWork = FALSE))
     return(path)
   }
 
@@ -5712,7 +5719,9 @@ check_set_path = function(x, type = "", create = TRUE, up = 0){
       if(is_dir){
         dir.create(path)
       }
-
+      
+      # ensure absolute path is returned for working with `tempdir()`
+      path = try(normalizePath(path, "/", mustWork = FALSE))
       return(path)
     }
   }
