@@ -5372,10 +5372,6 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
     }
   }
 
-  if(!is.null(export)){
-    export_path = check_set_path(export, "w", up = up)
-  }
-
   dir = NULL
   if(do_build){
 
@@ -5396,9 +5392,17 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
         time = gsub(" .+", "", Sys.time())
         png_name = .dsb("etable_tex_.[time]_.[id].png")
       }
+    } else if (!is.null(export) && grepl("^.+_|\\.png$", export)) {
+      # png name specified in export
+      png_name = basename(export)
+      export = dirname(export)
     } else {
       png_name = "etable.png"
     }
+  }
+
+  if(!is.null(export)){
+    export_path = check_set_path(export, "w", up = up, recursive = TRUE)
   }
 
   if(view || do_build){
@@ -5603,7 +5607,7 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
   if(view){
     my_viewer = getOption("viewer")
     if(is.null(my_viewer)){
-      warning("To preview the table, we need a viewer -- which wasn't found (it sjould work on RStudio and VScode).")
+      warning("To preview the table, we need a viewer -- which wasn't found (it should work on RStudio and VScode).")
     } else {
       # setting up the html document
 
