@@ -1174,7 +1174,10 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
 
     if(is_md){
       if(!knitr::is_latex_output()){
-        path = path_to_relative(path)
+        
+        orig = knitr::opts_knit$get("output.dir")
+        dest = normalizePath(path, "/", mustWork = FALSE)
+        path = path_to_relative(orig, dest)
         cat(sma('<div class = "{div.class}"><img src = "{path}"></div>\n'))
         return(invisible(NULL))
       }
@@ -7071,14 +7074,11 @@ is_Rmarkdown = function(){
   "knitr" %in% loadedNamespaces() && !is.null(knitr::pandoc_to())
 }
 
-path_to_relative = function(x){
+path_to_relative = function(orig, dest){
   # orig = "C:/Users/berge028/Google Drive/R_packages/fixest/fixest"
   # dest = "C:/Users/berge028/Google Drive/R_packages/automake/automake/NAMESPACE"
 
   # I'm not sure it works perfectly well on linux...
-
-  dest = normalizePath(x, "/", mustWork = FALSE)
-  orig = normalizePath(".", "/", mustWork = FALSE)
 
   if(dest == orig) return(".")
 
