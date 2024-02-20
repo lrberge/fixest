@@ -5720,8 +5720,6 @@ check_set_path = function(x, type = "", create = TRUE, up = 0){
 }
 
 viewer_html_template = function(png_name){
-  # I really wanted to see the full table all the time, so I had to add some JS.
-  # There must be some straightforward way in CSS, but I don't know it...
   .dsb0('
 <!DOCTYPE html>
 <html> <head>
