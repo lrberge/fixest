@@ -55,6 +55,8 @@ do.call(rbind, all_tables)
 - fix bug leading to the absence of warning when the convergence of the demeaning algorithm failed. Thanks to @ja-ortiz-uniandes, #323
 
 - fix bug in IV estimation when all exogenous variables were removed because of collinearity with the fixed-effects. Thanks to @Oravishayrizi, #371
+
+- fix bug in `update.fixest` when no FEs were used in the initial estimation and one wanted to add FEs. Reported by @hughjonesd, #475
  
 ## Improvements
 

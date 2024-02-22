@@ -2202,6 +2202,78 @@ test(names(m_lhs_rhs_fixef), c("y1", "fit_x2", "x1", "species"))
 
 
 ####
+#### update ####
+####
+
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+base$fe = rep(1:30, 5)
+
+# regular estimation
+est = feols(y ~ x1, base)
+
+# add variable
+est_add_x2 = update(est, . ~ . + x2)
+est_add_x2_noup = feols(y ~ x1 + x2, base)
+test(coef(est_add_x2), coef(est_add_x2_noup))
+
+# replace the var slot
+est_x2 = update(est, . ~ x2)
+est_x2_noup = feols(y ~ x2, base)
+test(coef(est_x2), coef(est_x2_noup))
+
+# add fixed-effect
+est_add_fe = update(est, . ~ . | species)
+est_add_fe_noup = feols(y ~ x1 | species, base)
+test(coef(est_add_fe), coef(est_add_fe_noup))
+
+# add IV
+est_add_iv = update(est, . ~ . | x2 ~ x3)
+est_add_iv_noup = feols(y ~ x1 | x2 ~ x3, base)
+test(coef(est_add_iv), coef(est_add_iv_noup))
+
+# cluster the SEs
+est_clu = update(est, vcov = ~species)
+est_clu = feols(y ~ x1 | species, base)
+test(se(est_add_fe), se(est_add_fe_noup))
+
+#
+# FE estimation
+#
+
+est_fe = feols(y ~ x1 | fe, base)
+
+# add variable
+est_add_x2 = update(est_fe, . ~ . + x2)
+est_add_x2_noup = feols(y ~ x1 + x2 | fe, base)
+test(coef(est_add_x2), coef(est_add_x2_noup))
+
+# replace the var slot
+est_x2 = update(est_fe, . ~ x2)
+est_x2_noup = feols(y ~ x2 | fe, base)
+test(coef(est_x2), coef(est_x2_noup))
+
+# replace the fixed-effect
+est_fe = update(est_fe, . ~ . | species)
+est_fe_noup = feols(y ~ x1 | species, base)
+test(coef(est_fe), coef(est_fe_noup))
+
+# add a FE
+est_add_fe = update(est_fe, . ~ . | . + species)
+est_add_fe_noup = feols(y ~ x1 | fe + species, base)
+test(coef(est_add_fe), coef(est_add_fe_noup))
+
+# add IV
+est_add_iv = update(est_fe, . ~ . | x2 ~ x3)
+est_add_iv_noup = feols(y ~ x1 | fe | x2 ~ x3, base)
+test(coef(est_add_iv), coef(est_add_iv_noup))
+
+# remove FE
+est_no_fe = update(est_fe, . ~ . | 0)
+est_no_fe_noup = feols(y ~ x1, base)
+test(coef(est_no_fe), coef(est_no_fe_noup))
+
+
+####
 #### fitstat ####
 ####
 
