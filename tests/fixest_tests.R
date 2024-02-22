@@ -2205,6 +2205,8 @@ test(names(m_lhs_rhs_fixef), c("y1", "fit_x2", "x1", "species"))
 #### update ####
 ####
 
+chunk("update")
+
 base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
 base$fe = rep(1:30, 5)
 
@@ -2253,9 +2255,9 @@ est_x2_noup = feols(y ~ x2 | fe, base)
 test(coef(est_x2), coef(est_x2_noup))
 
 # replace the fixed-effect
-est_fe = update(est_fe, . ~ . | species)
-est_fe_noup = feols(y ~ x1 | species, base)
-test(coef(est_fe), coef(est_fe_noup))
+est_replace_fe = update(est_fe, . ~ . | species)
+est_replace_fe_noup = feols(y ~ x1 | species, base)
+test(coef(est_replace_fe), coef(est_replace_fe_noup))
 
 # add a FE
 est_add_fe = update(est_fe, . ~ . | . + species)
