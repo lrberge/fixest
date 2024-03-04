@@ -220,12 +220,12 @@ as in: <code>~var %drop% "@^v[12]"</code> which will drop values starting with <
 
 
 <dt>fsplit</dt>
-<dd><p>A one sided formula representing a variable (eg <code>split = ~var</code>) or a vector.
+<dd><p>A one sided formula representing a variable (eg <code>fsplit = ~var</code>) or a vector.
 If provided, the sample is split according to the variable and one estimation is performed
-for each value of that variable. This argument is the same as split but also includes the
+for each value of that variable. This argument is the same as <code>split</code> but also includes the
 full sample as the first estimation. You can use the special operators <code>%keep%</code> and <code>%drop%</code>
 to select only a subset of values for which to split the sample.
-E.g. <code>split = ~var %keep% c("v1", "v2")</code> will split the sample only according to the
+E.g. <code>fsplit = ~var %keep% c("v1", "v2")</code> will split the sample only according to the
 values <code>v1</code> and <code>v2</code> of the variable <code>var</code>; it is equivalent to supplying the
 argument <code>split.keep = c("v1", "v2")</code>. By default there is partial matching on each value,
 you can trigger a regular expression evaluation by adding an <code>'@'</code> first,

@@ -176,12 +176,12 @@ you can trigger a regular expression evaluation by adding a \code{'@'} first,
 as in: \code{~var \%drop\% "@^v[12]"} which will drop values starting with \code{"v1"} or
 \code{"v2"} (of course you need to know regexes!).}
 
-\item{fsplit}{A one sided formula representing a variable (eg \code{split = ~var}) or a vector.
+\item{fsplit}{A one sided formula representing a variable (eg \code{fsplit = ~var}) or a vector.
 If provided, the sample is split according to the variable and one estimation is performed
-for each value of that variable. This argument is the same as split but also includes the
+for each value of that variable. This argument is the same as \code{split} but also includes the
 full sample as the first estimation. You can use the special operators \verb{\%keep\%} and \verb{\%drop\%}
 to select only a subset of values for which to split the sample.
-E.g. \code{split = ~var \%keep\% c("v1", "v2")} will split the sample only according to the
+E.g. \code{fsplit = ~var \%keep\% c("v1", "v2")} will split the sample only according to the
 values \code{v1} and \code{v2} of the variable \code{var}; it is equivalent to supplying the
 argument \code{split.keep = c("v1", "v2")}. By default there is partial matching on each value,
 you can trigger a regular expression evaluation by adding an \code{'@'} first,

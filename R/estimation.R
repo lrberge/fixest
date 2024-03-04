@@ -3611,12 +3611,12 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
 #' you can trigger a regular expression evaluation by adding a `'@'` first, 
 #' as in: `~var %drop% "@^v[12]"` which will drop values starting with `"v1"` or 
 #' `"v2"` (of course you need to know regexes!).
-#' @param fsplit A one sided formula representing a variable (eg `split = ~var`) or a vector. 
+#' @param fsplit A one sided formula representing a variable (eg `fsplit = ~var`) or a vector. 
 #' If provided, the sample is split according to the variable and one estimation is performed 
-#' for each value of that variable. This argument is the same as split but also includes the 
+#' for each value of that variable. This argument is the same as `split` but also includes the 
 #' full sample as the first estimation. You can use the special operators `%keep%` and `%drop%` 
 #' to select only a subset of values for which to split the sample. 
-#' E.g. `split = ~var %keep% c("v1", "v2")` will split the sample only according to the 
+#' E.g. `fsplit = ~var %keep% c("v1", "v2")` will split the sample only according to the 
 #' values `v1` and `v2` of the variable `var`; it is equivalent to supplying the 
 #' argument `split.keep = c("v1", "v2")`. By default there is partial matching on each value, 
 #' you can trigger a regular expression evaluation by adding an `'@'` first, 
