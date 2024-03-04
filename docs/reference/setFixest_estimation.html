@@ -106,7 +106,8 @@ with <code>^</code> only inside formulas (see the dedicated section in <code><a 
 Controls which observations are to be removed. If "perfect", then observations
 having a fixed-effect with perfect fit (e.g. only 0 outcomes in Poisson estimations)
 will be removed. If "singleton", all observations for which a fixed-effect appears
-only once will be removed. The meaning of "both" and "none" is direct.</p></dd>
+only once will be removed. Note, importantly, that singletons are removed in just one pass,
+there is no recursivity implemented. The meaning of "both" and "none" is direct.</p></dd>
 
 
 <dt>fixef.tol</dt>
@@ -218,12 +219,12 @@ at each iteration, such that postprocessing can be done outside the loop without
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">res</span>          <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span> <span class="op">|</span> <span class="va">fe_singletons</span>, <span class="va">base</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">res_noSingle</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span> <span class="op">|</span> <span class="va">fe_singletons</span>, <span class="va">base</span>, fixef.rm <span class="op">=</span> <span class="st">"single"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 5 fixed-effect singletons were removed (5 observations).</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 5 fixed-effect singleton was removed (5 observations, breakup: 5).</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># New defaults</span></span></span>
 <span class="r-in"><span><span class="fu">setFixest_estimation</span><span class="op">(</span>fixef.rm <span class="op">=</span> <span class="st">"single"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">res_newDefault</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span> <span class="op">|</span> <span class="va">fe_singletons</span>, <span class="va">base</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 5 fixed-effect singletons were removed (5 observations).</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 5 fixed-effect singleton was removed (5 observations, breakup: 5).</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">res</span>, <span class="va">res_noSingle</span>, <span class="va">res_newDefault</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                res     res_noSingle   res_newDefault</span>

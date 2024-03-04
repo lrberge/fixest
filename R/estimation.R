@@ -3696,7 +3696,8 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
 #' Controls which observations are to be removed. If "perfect", then observations 
 #' having a fixed-effect with perfect fit (e.g. only 0 outcomes in Poisson estimations) 
 #' will be removed. If "singleton", all observations for which a fixed-effect appears 
-#' only once will be removed. The meaning of "both" and "none" is direct.
+#' only once will be removed. Note, importantly, that singletons are removed in just one pass, 
+#' there is no recursivity implemented. The meaning of "both" and "none" is direct.
 #' @param fixef.tol Precision used to obtain the fixed-effects. Defaults to `1e-5`. 
 #' It corresponds to the maximum absolute difference allowed between two coefficients 
 #' of successive iterations. Argument `fixef.tol` cannot be lower 

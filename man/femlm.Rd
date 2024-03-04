@@ -117,7 +117,8 @@ insert them directly in the formula.}
 Controls which observations are to be removed. If "perfect", then observations
 having a fixed-effect with perfect fit (e.g. only 0 outcomes in Poisson estimations)
 will be removed. If "singleton", all observations for which a fixed-effect appears
-only once will be removed. The meaning of "both" and "none" is direct.}
+only once will be removed. Note, importantly, that singletons are removed in just one pass,
+there is no recursivity implemented. The meaning of "both" and "none" is direct.}
 
 \item{offset}{A formula or a numeric vector. An offset can be added to the estimation.
 If equal to a formula, it should be of the form (for example) \code{~0.5*x**2}. This
