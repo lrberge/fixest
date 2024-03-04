@@ -6902,7 +6902,7 @@ all_missing = function(x1, x2, x3, x4, x5, x6){
 use_t_distr = function(x){
   # whether to use the t-distribution or the normal
   # x: fixest estimation
-  x$method %in% "feols" || (x$method %in% "feglm" && !x$family$family %in% c("poisson", "binomial"))
+  x$method_type %in% "feols" || (x$method_type %in% "feglm" && !x$family$family %in% c("poisson", "binomial"))
 }
 
 
