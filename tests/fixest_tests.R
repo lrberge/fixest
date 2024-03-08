@@ -2274,6 +2274,48 @@ est_no_fe = update(est_fe, . ~ . | 0)
 est_no_fe_noup = feols(y ~ x1, base)
 test(coef(est_no_fe), coef(est_no_fe_noup))
 
+#
+# Single estimation from multiple estimation
+#
+
+base_mult = setNames(iris, c("y1", "y2", "x1", "x2", "species"))
+base_mult$fe = rep(1:30, 5)
+
+# multiple estimation
+est_mult = feols(c(y1, y2) ~ x1, base_mult)
+
+# add variable
+est_x2 = update(est_mult[[1]], . ~ . + x2)
+est_x2_noup = feols(y1 ~ x1 + x2, base_mult)
+test(coef(est_x2), coef(est_x2_noup))
+
+est_x2 = update(est_mult[[2]], . ~ . + x2)
+est_x2_noup = feols(y2 ~ x1 + x2, base_mult)
+test(coef(est_x2), coef(est_x2_noup))
+
+# add fe
+est_fe = update(est_mult[[1]], . ~ . | fe)
+est_fe_noup = feols(y1 ~ x1 | fe, base_mult)
+test(coef(est_fe), coef(est_fe_noup))
+
+#
+# Multiple estimations
+#
+
+# add variable
+est_x2 = update(est_mult, . ~ . + x2)
+est_x2_noup = feols(c(y1, y2) ~ x1 + x2, base_mult)
+test(unlist(coef(est_x2)), unlist(coef(est_x2_noup)))
+
+# add split
+est_split = update(est_mult, split = ~species)
+est_split_noup = feols(c(y1, y2) ~ x1, base_mult, split = ~species)
+test(unlist(coef(est_split)), unlist(coef(est_split_noup)))
+
+# add fe
+est_fe = update(est_mult, . ~ . | fe)
+est_fe_noup = feols(c(y1, y2) ~ x1 | fe, base_mult)
+test(unlist(coef(est_fe)), unlist(coef(est_fe_noup)))
 
 ####
 #### fitstat ####

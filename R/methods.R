@@ -3078,7 +3078,9 @@ confint.fixest = function(object, parm, level = 0.95, vcov, se, cluster,
 #' @method update fixest
 #'
 #' @inheritParams nobs.fixest
-#'
+#' 
+#' @param object A `fixest` or `fixest_multi` object. These are obtained from [`feols`], or
+#' [`feglm`] estimations, for example.
 #' @param fml.update Changes to be made to the original argument `fml`. See more information 
 #' on [`update.formula`][stats::update.formula]. You can add/withdraw both variables 
 #' and fixed-effects. E.g. `. ~ . + x2 | . + z2` would add the variable `x2` and the 
@@ -3141,6 +3143,13 @@ update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
 
   call_new = match.call()
   dots = list(...)
+  
+  is_multiple = isTRUE(dots$is_multiple)
+  if(is_multiple){
+    dots$is_multiple = NULL
+    call_new = dots$call
+    dots$call = NULL
+  }
 
   dot_names = names(dots)
   if("fixef" %in% dot_names){
@@ -3157,7 +3166,7 @@ update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
   # I) Linear formula update
   #
 
-  fml_old = object$fml
+  fml_old = object$fml_all$linear
   fml_linear = update(fml_old, fml_split(fml.update, 1))
 
   # Family information
@@ -3175,14 +3184,14 @@ update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
 
   fml_fixef = NULL
 
-  updt_fml_parts = fml_split(fml.update, raw = TRUE)
-  n_parts = length(updt_fml_parts)
+  update_fml_parts = fml_split(fml.update, raw = TRUE)
+  n_parts = length(update_fml_parts)
 
   if(n_parts > 2 + (object$method_type == "feols")){
     stop("The update formula cannot have more than ", 2 + (object$method_type == "feols"), " parts for the method ", object$method, ".")
   }
 
-  is_fe = n_parts > 1 && !is_fml_inside(updt_fml_parts[[2]])
+  is_fe = n_parts > 1 && !is_fml_inside(update_fml_parts[[2]])
 
   fixef_vars = object$fixef_vars
 
@@ -3198,7 +3207,7 @@ update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
       fixef_old_text = deparse_long(fixef_old)
     }
 
-    fixef_new_fml = fml_maker(updt_fml_parts[[2]])
+    fixef_new_fml = fml_maker(update_fml_parts[[2]])
     fixef_new_text = deparse_long(fixef_new_fml)
 
     if(fixef_new_text == "~."){
@@ -3239,7 +3248,7 @@ update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
 
   if(n_parts > 2 || (n_parts == 2 && !is_fe)){
 
-    iv_new_fml = fml_maker(updt_fml_parts[[n_parts]])
+    iv_new_fml = fml_maker(update_fml_parts[[n_parts]])
 
     if(!is_fml_inside(iv_new_fml)){
       stop("The third part of the update formula in 'feols' must be a formula.")
@@ -3261,7 +3270,6 @@ update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
 
   fml_new = merge_fml(fml_linear, fml_fixef, fml_iv)
 
-
   #
   # The call
   #
@@ -3271,18 +3279,38 @@ update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
   # we drop the argument fixef from old call (now it's in the fml_new)
   call_old$fixef = NULL
 
-  # We also drop the arguments for multiple estimations:
-  call_old$split = call_old$fsplit = NULL
+  # We also drop the arguments leading to multiple estimations:
+  if(!is_multiple){
+    # I have to think on how to handle this when implementing subset = ~x %in% list(a, b)
+    # which can lead to multiple estimations
+    # 
+    # hmmm. limitation => I need to keep track of the sample... shouldn't I?
+    # Otherwise, stg estimated for setosa following a split, may end up estimated 
+    # on the whole sample. 
+    # I'm not sure many persons use update that way... so it's not top priority, but 
+    # it should definitely be there at some point
+    # 
+    # actually the split leads to exactly the same problem as subset
+    
+    call_old$split = call_old$fsplit = NULL
+  }
 
   # new call: call_clear
   call_clear = call_old
   for(arg in setdiff(names(call_new)[-1], c("fml.update", "nframes", "evaluate", "object"))){
-    call_clear[[arg]] = call_new[[arg]]
+    if(is.null(call_new[[arg]])){
+      # for some raeson, it wouldn't work if call_new[[arg]] is NULL
+      call_clear[[arg]] = NULL
+    } else {
+      call_clear[[arg]] = call_new[[arg]]
+    }    
   }
 
   call_clear$fml = as.call(fml_new)
 
-  if(!evaluate) return(call_clear)
+  if(!evaluate){
+    return(call_clear)
+  }
   
   # Data: if the data has been saved AND isn't provided in input, the new estimation
   # will be within the saved data set
@@ -3296,6 +3324,37 @@ update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
   }
 
   res
+}
+
+
+#' @rdname update.fixest_multi
+update.fixest_multi = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
+  # We use update.fixest
+  # We just need to rewrite the formula since the call in the object is the one 
+  # of the main estimation.
+  
+  est_first = object[[1]]
+  fml_full = est_first$call$fml
+  fml_parts = fml_split(fml_full, raw = TRUE)
+  n_parts = length(fml_parts)
+  is_fe = n_parts > 1 && !is_fml_inside(fml_parts[[2]])
+
+  fml_all = est_first$fml_all
+  # linear 
+  fml_all$linear = fml_parts[[1]]
+
+  # fixef
+  if(is_fe){
+    fml_fixef = ~1
+    fml_fixef[[2]] = fml_parts[[2]]
+    fml_all$fixef = fml_fixef
+  }
+  est_first$fml_all = fml_all
+  
+  call_new = match.call()
+
+  update(est_first, fml.update = fml.update, nframes = nframes + 1, 
+         evaluate = evaluate, is_multiple = TRUE, call = call_new, ...)
 }
 
 

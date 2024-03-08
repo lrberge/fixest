@@ -57,6 +57,8 @@ do.call(rbind, all_tables)
 - fix bug in IV estimation when all exogenous variables were removed because of collinearity with the fixed-effects. Thanks to @Oravishayrizi, #371
 
 - fix bug in `update.fixest` when no FEs were used in the initial estimation and one wanted to add FEs. Reported by @hughjonesd, #475
+
+- fix bug `update.fixest`: single estimations extracted from multiple estimations can now be updated individually. Note however that if `split` was used in the main estimation, the subsample does not carry trhough (this limitation will be fixed later).
  
 ## Improvements
 
@@ -64,11 +66,13 @@ do.call(rbind, all_tables)
 
 - in estimations, the algorithm now allows to use scalars from the environment which are non numeric. Thanks to @kennchua and @kylebutts, #426
 
-- improve error messages in iplot. 
+- improve error messages in `iplot`. 
 
 - improve speed of the function `fixef.fixest` in the presence of varying slopes. PR of @etiennebacher, #390
 
 - the subsetting of multiple estimations does not error any more when the index used was not relevant in the multiple estimation (provided its value is equal to 1)
+
+- new method `update.fixest_multi`.
 
 ## Documentation
 
