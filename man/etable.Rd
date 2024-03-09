@@ -232,6 +232,7 @@ setFixest_etable(
   markdown = NULL,
   view.cache = FALSE,
   page.width = "fit",
+  div.class = "etable",
   postprocess.tex = NULL,
   postprocess.df = NULL,
   fit_format = "__var__",
