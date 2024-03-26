@@ -46,6 +46,10 @@
 #' @seealso
 #' See also the main estimation functions [`femlm`], [`feols`] or [`feglm`]. 
 #' [`summary.fixest`], [`confint.fixest`], [`resid.fixest`], [`predict.fixest`], [`fixef.fixest`].
+#' 
+#' @references
+#'
+#' Ding, Peng, 2021, "The Frisch–Waugh–Lovell theorem for standard errors." Statistics & Probability Letters 168. 
 #'
 #' @examples
 #'
