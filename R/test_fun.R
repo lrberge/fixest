@@ -505,10 +505,12 @@ run_tests = function(chunk, from = 1, source = FALSE){
     error_clean = gsub("^[^:]+: *", "", my_eval)
     message("Here is the error:\n", error_clean)
     
-    command = paste0("rstudioapi::navigateToFile(\"", my_file_full, "\", ", line_in_file, ")")
-    command = str2lang(command)
-    
-    eval(command)
+    if(interactive()){
+      command = paste0("rstudioapi::navigateToFile(\"", my_file_full, "\", ", line_in_file, ")")
+      command = str2lang(command)
+      
+      eval(command)
+    }    
 
   } else {
     n_tests = get_test_counter()
