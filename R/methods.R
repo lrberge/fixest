@@ -3076,8 +3076,6 @@ confint.fixest = function(object, parm, level = 0.95, vcov, se, cluster,
 #' `fixest` model. The data is obtained from the original `call`.
 #'
 #' @method update fixest
-#'
-#' @inheritParams nobs.fixest
 #' 
 #' @param object A `fixest` or `fixest_multi` object. These are obtained from [`feols`], or
 #' [`feglm`] estimations, for example.
@@ -3327,7 +3325,7 @@ update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
 }
 
 
-#' @rdname update.fixest_multi
+#' @rdname update.fixest
 update.fixest_multi = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
   # We use update.fixest
   # We just need to rewrite the formula since the call in the object is the one 

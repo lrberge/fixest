@@ -2,12 +2,16 @@
 % Please edit documentation in R/methods.R
 \name{update.fixest}
 \alias{update.fixest}
+\alias{update.fixest_multi}
 \title{Updates a \code{fixest} estimation}
 \usage{
 \method{update}{fixest}(object, fml.update, nframes = 1, evaluate = TRUE, ...)
+
+\method{update}{fixest_multi}(object, fml.update, nframes = 1, evaluate = TRUE, ...)
 }
 \arguments{
-\item{object}{A \code{fixest} object. Obtained using the functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}.}
+\item{object}{A \code{fixest} or \code{fixest_multi} object. These are obtained from \code{\link{feols}}, or
+\code{\link{feglm}} estimations, for example.}
 
 \item{fml.update}{Changes to be made to the original argument \code{fml}. See more information
 on \code{\link[stats:update.formula]{update.formula}}. You can add/withdraw both variables

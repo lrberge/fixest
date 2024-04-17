@@ -250,6 +250,9 @@ se(vcov(est, DK ~ period + ssc(adj = FALSE)))
 
 
 }
+\references{
+Ding, Peng, 2021, "The Frisch–Waugh–Lovell theorem for standard errors." Statistics & Probability Letters 168.
+}
 \seealso{
 You can also compute VCOVs with the following functions: \code{\link{vcov_cluster}},
 \code{\link{vcov_hac}}, \code{\link{vcov_conley}}.
