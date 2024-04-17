@@ -154,6 +154,7 @@ reference:
         - collinearity
         - estfun.fixest
         - rep.fixest
+        - emmeans_support
     - title: Data sets
       desc: Data sets used in the examples
       contents:

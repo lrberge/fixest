@@ -22,11 +22,11 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light" data-bs-theme="light"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.12.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -81,7 +81,7 @@
                         <h4 data-toc-skip class="author">Laurent Berge
 and Grant McDermott</h4>
             
-            <h4 data-toc-skip class="date">2024-02-07</h4>
+            <h4 data-toc-skip class="date">2024-04-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/vignettes/fixest_walkthrough.Rmd" class="external-link"><code>vignettes/fixest_walkthrough.Rmd</code></a></small>
       <div class="d-none name"><code>fixest_walkthrough.Rmd</code></div>
@@ -222,10 +222,10 @@ be shown directly with the <code>print</code> method:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">gravity_pois</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Poisson estimation, Dep. Var.: Euros</span></span>
-<span><span class="co">#&gt; Observations: 38,325 </span></span>
+<span><span class="co">#&gt; Observations: 38,325</span></span>
 <span><span class="co">#&gt; Fixed-effects: Origin: 15,  Destination: 15,  Product: 20,  Year: 10</span></span>
 <span><span class="co">#&gt; Standard-errors: Clustered (Origin) </span></span>
-<span><span class="co">#&gt;              Estimate Std. Error t value  Pr(&gt;|t|)    </span></span>
+<span><span class="co">#&gt;              Estimate Std. Error z value  Pr(&gt;|z|)    </span></span>
 <span><span class="co">#&gt; log(dist_km) -1.52787   0.115678 -13.208 &lt; 2.2e-16 ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
@@ -251,10 +251,10 @@ just have to do:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">gravity_pois</span>, vcov <span class="op">=</span> <span class="st">"twoway"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Poisson estimation, Dep. Var.: Euros</span></span>
-<span><span class="co">#&gt; Observations: 38,325 </span></span>
+<span><span class="co">#&gt; Observations: 38,325</span></span>
 <span><span class="co">#&gt; Fixed-effects: Origin: 15,  Destination: 15,  Product: 20,  Year: 10</span></span>
 <span><span class="co">#&gt; Standard-errors: Clustered (Origin &amp; Destination) </span></span>
-<span><span class="co">#&gt;              Estimate Std. Error  t value  Pr(&gt;|t|)    </span></span>
+<span><span class="co">#&gt;              Estimate Std. Error  z value  Pr(&gt;|z|)    </span></span>
 <span><span class="co">#&gt; log(dist_km) -1.52787   0.130734 -11.6869 &lt; 2.2e-16 ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
@@ -277,10 +277,10 @@ the argument <code>cluster</code>:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">gravity_pois</span>, cluster <span class="op">=</span> <span class="op">~</span><span class="va">Product</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Poisson estimation, Dep. Var.: Euros</span></span>
-<span><span class="co">#&gt; Observations: 38,325 </span></span>
+<span><span class="co">#&gt; Observations: 38,325</span></span>
 <span><span class="co">#&gt; Fixed-effects: Origin: 15,  Destination: 15,  Product: 20,  Year: 10</span></span>
 <span><span class="co">#&gt; Standard-errors: Clustered (Product) </span></span>
-<span><span class="co">#&gt;              Estimate Std. Error t value  Pr(&gt;|t|)    </span></span>
+<span><span class="co">#&gt;              Estimate Std. Error z value  Pr(&gt;|z|)    </span></span>
 <span><span class="co">#&gt; log(dist_km) -1.52787   0.098294 -15.544 &lt; 2.2e-16 ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
@@ -294,9 +294,9 @@ estimation contained no fixed-effect:</p>
 <span><span class="co"># (note that the values of the variables are fetched directly in the original database)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">gravity_simple</span>, <span class="op">~</span><span class="va">Origin</span> <span class="op">+</span> <span class="va">Destination</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Poisson estimation, Dep. Var.: Euros</span></span>
-<span><span class="co">#&gt; Observations: 38,325 </span></span>
+<span><span class="co">#&gt; Observations: 38,325</span></span>
 <span><span class="co">#&gt; Standard-errors: Clustered (Origin &amp; Destination) </span></span>
-<span><span class="co">#&gt;              Estimate Std. Error  t value   Pr(&gt;|t|)    </span></span>
+<span><span class="co">#&gt;              Estimate Std. Error  z value   Pr(&gt;|z|)    </span></span>
 <span><span class="co">#&gt; (Intercept)  24.70889   1.124768 21.96798  &lt; 2.2e-16 ***</span></span>
 <span><span class="co">#&gt; log(dist_km) -1.02896   0.158022 -6.51145 7.4429e-11 ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
@@ -308,9 +308,9 @@ you simply need to add the <code>vcov</code> argument:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/feglm.html">fepois</a></span><span class="op">(</span><span class="va">Euros</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">dist_km</span><span class="op">)</span>, <span class="va">trade</span>, vcov <span class="op">=</span> <span class="op">~</span><span class="va">Product</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Poisson estimation, Dep. Var.: Euros</span></span>
-<span><span class="co">#&gt; Observations: 38,325 </span></span>
+<span><span class="co">#&gt; Observations: 38,325</span></span>
 <span><span class="co">#&gt; Standard-errors: Clustered (Product) </span></span>
-<span><span class="co">#&gt;              Estimate Std. Error  t value  Pr(&gt;|t|)    </span></span>
+<span><span class="co">#&gt;              Estimate Std. Error  z value  Pr(&gt;|z|)    </span></span>
 <span><span class="co">#&gt; (Intercept)  24.70889   0.330044  74.8654 &lt; 2.2e-16 ***</span></span>
 <span><span class="co">#&gt; log(dist_km) -1.02896   0.045954 -22.3909 &lt; 2.2e-16 ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
@@ -860,7 +860,7 @@ these variables. Let’s give a first example:</p>
 <span><span class="co"># Note that there is partial matching enabled (newey = newey_west)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span>, <span class="va">newey</span> <span class="op">~</span> <span class="va">id</span> <span class="op">+</span> <span class="va">period</span><span class="op">)</span></span>
 <span><span class="co">#&gt; OLS estimation, Dep. Var.: y</span></span>
-<span><span class="co">#&gt; Observations: 1,080 </span></span>
+<span><span class="co">#&gt; Observations: 1,080</span></span>
 <span><span class="co">#&gt; Standard-errors: Newey-West (L=1) </span></span>
 <span><span class="co">#&gt;             Estimate Std. Error t value   Pr(&gt;|t|)    </span></span>
 <span><span class="co">#&gt; (Intercept) 1.988753   0.174111 11.4223 1.1709e-06 ***</span></span>
@@ -873,7 +873,7 @@ the right of the formula. Had we used the keyword only, that would have
 led to an error:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span>, <span class="st">"newey_west"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error in vcov.fixest(object, vcov = vcov, ssc = ssc, forceCovariance = forceCovariance, : To compute the Newey-West VCOV, we need a variable for the time. Since you didn't provide it in the formula, we typically deduce it from the 'panel.id' identifiers. Problem: no 'panel.id' was set in this estimation. Please provide it in the formula.</span></span></code></pre></div>
+<span><span class="co">#&gt; Error in vcov.fixest(object, vcov = vcov, ssc = ssc, forceCovariance = forceCovariance, : To compute the Newey-West VCOV, we need a variable for the time. Since you didn't provide it in the formula, we typically deduce it from the 'panel.id' identifiers. PROBLEM: no 'panel.id' was set in this estimation. Please provide it in the formula.</span></span></code></pre></div>
 <p>But, huh what does the error message says? That the <code>time</code>
 variable can be deduced? Indeed, that’s the thing: the algorithm tries
 hard to provide sensible default values for the user. Let’s now try with
@@ -882,7 +882,7 @@ panel identifiers set at estimation time:</p>
 <code class="sourceCode R"><span><span class="va">est_panel</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span>, <span class="va">base_did</span>, panel.id <span class="op">=</span> <span class="op">~</span><span class="va">id</span> <span class="op">+</span> <span class="va">period</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est_panel</span>, <span class="st">"newey_west"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; OLS estimation, Dep. Var.: y</span></span>
-<span><span class="co">#&gt; Observations: 1,080 </span></span>
+<span><span class="co">#&gt; Observations: 1,080</span></span>
 <span><span class="co">#&gt; Standard-errors: Newey-West (L=1) </span></span>
 <span><span class="co">#&gt;             Estimate Std. Error t value   Pr(&gt;|t|)    </span></span>
 <span><span class="co">#&gt; (Intercept) 1.988753   0.174111 11.4223 1.1709e-06 ***</span></span>
@@ -901,7 +901,7 @@ characteristics globally. This can be done with the
 <span><span class="va">est_implicit</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span>, <span class="va">base_did</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est_implicit</span>, <span class="st">"newey_west"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; OLS estimation, Dep. Var.: y</span></span>
-<span><span class="co">#&gt; Observations: 1,080 </span></span>
+<span><span class="co">#&gt; Observations: 1,080</span></span>
 <span><span class="co">#&gt; Standard-errors: Newey-West (L=1) </span></span>
 <span><span class="co">#&gt;             Estimate Std. Error t value   Pr(&gt;|t|)    </span></span>
 <span><span class="co">#&gt; (Intercept) 1.988753   0.174111 11.4223 1.1709e-06 ***</span></span>
@@ -915,7 +915,7 @@ paragraphs ago, now it works fine.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est_implicit</span>, <span class="st">"cluster"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; OLS estimation, Dep. Var.: y</span></span>
-<span><span class="co">#&gt; Observations: 1,080 </span></span>
+<span><span class="co">#&gt; Observations: 1,080</span></span>
 <span><span class="co">#&gt; Standard-errors: Clustered (id) </span></span>
 <span><span class="co">#&gt;             Estimate Std. Error t value  Pr(&gt;|t|)    </span></span>
 <span><span class="co">#&gt; (Intercept) 1.988753   0.194352 10.2327 &lt; 2.2e-16 ***</span></span>
@@ -929,7 +929,7 @@ for clustering:</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">|</span> <span class="va">period</span>, <span class="va">base_did</span>, <span class="st">"cluster"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; OLS estimation, Dep. Var.: y</span></span>
-<span><span class="co">#&gt; Observations: 1,080 </span></span>
+<span><span class="co">#&gt; Observations: 1,080</span></span>
 <span><span class="co">#&gt; Fixed-effects: period: 10</span></span>
 <span><span class="co">#&gt; Standard-errors: Clustered (id) </span></span>
 <span><span class="co">#&gt;    Estimate Std. Error t value  Pr(&gt;|t|)    </span></span>
@@ -945,7 +945,7 @@ clustering falls back to the first fixed-effect present:</p>
 <span><span class="fu"><a href="../reference/setFixest_estimation.html">setFixest_estimation</a></span><span class="op">(</span>reset <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">|</span> <span class="va">period</span>, <span class="va">base_did</span>, <span class="st">"cluster"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; OLS estimation, Dep. Var.: y</span></span>
-<span><span class="co">#&gt; Observations: 1,080 </span></span>
+<span><span class="co">#&gt; Observations: 1,080</span></span>
 <span><span class="co">#&gt; Fixed-effects: period: 10</span></span>
 <span><span class="co">#&gt; Standard-errors: Clustered (period) </span></span>
 <span><span class="co">#&gt;    Estimate Std. Error t value   Pr(&gt;|t|)    </span></span>
@@ -961,7 +961,7 @@ operation that the empty keyword is equivalent to clustered SEs, so that
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">|</span> <span class="va">period</span>, <span class="va">base_did</span>, <span class="op">~</span><span class="va">id</span> <span class="op">+</span> <span class="va">period</span><span class="op">)</span></span>
 <span><span class="co">#&gt; OLS estimation, Dep. Var.: y</span></span>
-<span><span class="co">#&gt; Observations: 1,080 </span></span>
+<span><span class="co">#&gt; Observations: 1,080</span></span>
 <span><span class="co">#&gt; Fixed-effects: period: 10</span></span>
 <span><span class="co">#&gt; Standard-errors: Clustered (id &amp; period) </span></span>
 <span><span class="co">#&gt;    Estimate Std. Error t value   Pr(&gt;|t|)    </span></span>
@@ -975,7 +975,7 @@ operation that the empty keyword is equivalent to clustered SEs, so that
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">quakes</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">depth</span> <span class="op">~</span> <span class="va">mag</span>, <span class="va">quakes</span>, <span class="st">"conley"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; OLS estimation, Dep. Var.: depth</span></span>
-<span><span class="co">#&gt; Observations: 1,000 </span></span>
+<span><span class="co">#&gt; Observations: 1,000</span></span>
 <span><span class="co">#&gt; Standard-errors: Conley (90km) </span></span>
 <span><span class="co">#&gt;             Estimate Std. Error  t value   Pr(&gt;|t|)    </span></span>
 <span><span class="co">#&gt; (Intercept)  881.625   110.6727  7.96606 4.4465e-15 ***</span></span>
@@ -1010,7 +1010,7 @@ but also accept arguments. Here are two examples:</p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">|</span> <span class="va">period</span>, <span class="va">base_did</span>, <span class="fu"><a href="../reference/vcov_hac.html">NW</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span> <span class="op">~</span> <span class="va">id</span> <span class="op">+</span> <span class="va">period</span><span class="op">)</span></span>
 <span><span class="co">#&gt; OLS estimation, Dep. Var.: y</span></span>
-<span><span class="co">#&gt; Observations: 1,080 </span></span>
+<span><span class="co">#&gt; Observations: 1,080</span></span>
 <span><span class="co">#&gt; Fixed-effects: period: 10</span></span>
 <span><span class="co">#&gt; Standard-errors: Newey-West (L=2) </span></span>
 <span><span class="co">#&gt;    Estimate Std. Error t value   Pr(&gt;|t|)    </span></span>
@@ -1022,7 +1022,7 @@ but also accept arguments. Here are two examples:</p>
 <span></span>
 <span><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">depth</span> <span class="op">~</span> <span class="va">mag</span>, <span class="va">quakes</span>, <span class="fu"><a href="../reference/vcov_conley.html">conley</a></span><span class="op">(</span><span class="fl">200</span>, distance <span class="op">=</span> <span class="st">"spherical"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; OLS estimation, Dep. Var.: depth</span></span>
-<span><span class="co">#&gt; Observations: 1,000 </span></span>
+<span><span class="co">#&gt; Observations: 1,000</span></span>
 <span><span class="co">#&gt; Standard-errors: Conley (200km) </span></span>
 <span><span class="co">#&gt;             Estimate Std. Error  t value   Pr(&gt;|t|)    </span></span>
 <span><span class="co">#&gt; (Intercept)  881.625   128.2426  6.87467 1.0937e-11 ***</span></span>
@@ -1046,7 +1046,7 @@ way. Let’s redo the same two examples with them:</p>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">|</span> <span class="va">period</span>, <span class="va">base_did</span>, <span class="fu"><a href="../reference/vcov_hac.html">vcov_NW</a></span><span class="op">(</span><span class="st">"id"</span>, <span class="st">"period"</span>, lag <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; OLS estimation, Dep. Var.: y</span></span>
-<span><span class="co">#&gt; Observations: 1,080 </span></span>
+<span><span class="co">#&gt; Observations: 1,080</span></span>
 <span><span class="co">#&gt; Fixed-effects: period: 10</span></span>
 <span><span class="co">#&gt; Standard-errors: Newey-West (L=2) </span></span>
 <span><span class="co">#&gt;    Estimate Std. Error t value   Pr(&gt;|t|)    </span></span>
@@ -1059,7 +1059,7 @@ way. Let’s redo the same two examples with them:</p>
 <span><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">depth</span> <span class="op">~</span> <span class="va">mag</span>, <span class="va">quakes</span>, <span class="fu"><a href="../reference/vcov_conley.html">vcov_conley</a></span><span class="op">(</span>lat <span class="op">=</span> <span class="st">"lat"</span>, lon <span class="op">=</span> <span class="st">"long"</span>, </span>
 <span>                                       cutoff <span class="op">=</span> <span class="fl">200</span>, distance <span class="op">=</span> <span class="st">"spherical"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; OLS estimation, Dep. Var.: depth</span></span>
-<span><span class="co">#&gt; Observations: 1,000 </span></span>
+<span><span class="co">#&gt; Observations: 1,000</span></span>
 <span><span class="co">#&gt; Standard-errors: Conley (200km) </span></span>
 <span><span class="co">#&gt;             Estimate Std. Error  t value   Pr(&gt;|t|)    </span></span>
 <span><span class="co">#&gt; (Intercept)  881.625   128.2426  6.87467 1.0937e-11 ***</span></span>
@@ -1127,7 +1127,7 @@ a formula:</p>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">|</span> <span class="va">id</span>, <span class="va">base_did</span>, <span class="va">iid</span> <span class="op">~</span> <span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; OLS estimation, Dep. Var.: y</span></span>
-<span><span class="co">#&gt; Observations: 1,080 </span></span>
+<span><span class="co">#&gt; Observations: 1,080</span></span>
 <span><span class="co">#&gt; Fixed-effects: id: 108</span></span>
 <span><span class="co">#&gt; Standard-errors: IID </span></span>
 <span><span class="co">#&gt;    Estimate Std. Error t value  Pr(&gt;|t|)    </span></span>
@@ -1138,7 +1138,7 @@ a formula:</p>
 <span><span class="co">#&gt;                 Within R2: 0.265068</span></span>
 <span><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">|</span> <span class="va">id</span>, <span class="va">base_did</span>, <span class="va">hetero</span> <span class="op">~</span> <span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; OLS estimation, Dep. Var.: y</span></span>
-<span><span class="co">#&gt; Observations: 1,080 </span></span>
+<span><span class="co">#&gt; Observations: 1,080</span></span>
 <span><span class="co">#&gt; Fixed-effects: id: 108</span></span>
 <span><span class="co">#&gt; Standard-errors: Heteroskedasticity-robust </span></span>
 <span><span class="co">#&gt;    Estimate Std. Error t value  Pr(&gt;|t|)    </span></span>
@@ -1164,7 +1164,7 @@ function. You can provide custom functions to compute the VCOV:</p>
 <div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span>, vcov <span class="op">=</span> <span class="fu">sandwich</span><span class="fu">::</span><span class="va"><a href="https://sandwich.R-Forge.R-project.org/reference/vcovHC.html" class="external-link">vcovHC</a></span>, type <span class="op">=</span> <span class="st">"HC1"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; OLS estimation, Dep. Var.: y</span></span>
-<span><span class="co">#&gt; Observations: 1,080 </span></span>
+<span><span class="co">#&gt; Observations: 1,080</span></span>
 <span><span class="co">#&gt; Fixed-effects: id: 108</span></span>
 <span><span class="co">#&gt; Standard-errors: vcovHC </span></span>
 <span><span class="co">#&gt;    Estimate Std. Error t value  Pr(&gt;|t|)    </span></span>
@@ -1181,7 +1181,7 @@ own wrapper function may be necessary:</p>
 <div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">|</span> <span class="va">id</span>, <span class="va">base_did</span>, vcov <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu">sandwich</span><span class="fu">::</span><span class="fu"><a href="https://sandwich.R-Forge.R-project.org/reference/vcovHC.html" class="external-link">vcovHC</a></span><span class="op">(</span><span class="va">x</span>, type <span class="op">=</span> <span class="st">"HC1"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; OLS estimation, Dep. Var.: y</span></span>
-<span><span class="co">#&gt; Observations: 1,080 </span></span>
+<span><span class="co">#&gt; Observations: 1,080</span></span>
 <span><span class="co">#&gt; Fixed-effects: id: 108</span></span>
 <span><span class="co">#&gt; Standard-errors: vcovHC(x, type = "HC1") </span></span>
 <span><span class="co">#&gt;    Estimate Std. Error t value  Pr(&gt;|t|)    </span></span>
@@ -1207,9 +1207,11 @@ variables. Let’s have an example.</p>
 <span></span>
 <span><span class="va">est_iv</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">|</span> <span class="va">x_endo_1</span> <span class="op">+</span> <span class="va">x_endo_2</span> <span class="op">~</span> <span class="va">x_inst_1</span> <span class="op">+</span> <span class="va">x_inst_2</span>, <span class="va">base</span><span class="op">)</span></span>
 <span><span class="va">est_iv</span></span>
-<span><span class="co">#&gt; TSLS estimation, Dep. Var.: y, Endo.: x_endo_1, x_endo_2, Instr.: x_inst_1, x_inst_2</span></span>
+<span><span class="co">#&gt; TSLS estimation - Dep. Var.: y</span></span>
+<span><span class="co">#&gt;                   Endo.    : x_endo_1, x_endo_2</span></span>
+<span><span class="co">#&gt;                   Instr.   : x_inst_1, x_inst_2</span></span>
 <span><span class="co">#&gt; Second stage: Dep. Var.: y</span></span>
-<span><span class="co">#&gt; Observations: 150 </span></span>
+<span><span class="co">#&gt; Observations: 150</span></span>
 <span><span class="co">#&gt; Standard-errors: IID </span></span>
 <span><span class="co">#&gt;              Estimate Std. Error  t value   Pr(&gt;|t|)    </span></span>
 <span><span class="co">#&gt; (Intercept)  1.831380   0.411435  4.45121 1.6844e-05 ***</span></span>
@@ -1251,9 +1253,11 @@ by changing the default print values:</p>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/print.fixest.html">setFixest_print</a></span><span class="op">(</span>fitstat <span class="op">=</span> <span class="op">~</span> <span class="va">.</span> <span class="op">+</span> <span class="va">ivwald2</span><span class="op">)</span></span>
 <span><span class="va">est_iv</span></span>
-<span><span class="co">#&gt; TSLS estimation, Dep. Var.: y, Endo.: x_endo_1, x_endo_2, Instr.: x_inst_1, x_inst_2</span></span>
+<span><span class="co">#&gt; TSLS estimation - Dep. Var.: y</span></span>
+<span><span class="co">#&gt;                   Endo.    : x_endo_1, x_endo_2</span></span>
+<span><span class="co">#&gt;                   Instr.   : x_inst_1, x_inst_2</span></span>
 <span><span class="co">#&gt; Second stage: Dep. Var.: y</span></span>
-<span><span class="co">#&gt; Observations: 150 </span></span>
+<span><span class="co">#&gt; Observations: 150</span></span>
 <span><span class="co">#&gt; Standard-errors: IID </span></span>
 <span><span class="co">#&gt;              Estimate Std. Error  t value   Pr(&gt;|t|)    </span></span>
 <span><span class="co">#&gt; (Intercept)  1.831380   0.411435  4.45121 1.6844e-05 ***</span></span>
@@ -1275,9 +1279,11 @@ you need to add them after the first right-hand-side, as follows:</p>
 <div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">est_iv_fe</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">|</span> <span class="va">fe</span> <span class="op">|</span> <span class="va">x_endo_1</span> <span class="op">+</span> <span class="va">x_endo_2</span> <span class="op">~</span> <span class="va">x_inst_1</span> <span class="op">+</span> <span class="va">x_inst_2</span>, <span class="va">base</span><span class="op">)</span></span>
 <span><span class="va">est_iv_fe</span></span>
-<span><span class="co">#&gt; TSLS estimation, Dep. Var.: y, Endo.: x_endo_1, x_endo_2, Instr.: x_inst_1, x_inst_2</span></span>
+<span><span class="co">#&gt; TSLS estimation - Dep. Var.: y</span></span>
+<span><span class="co">#&gt;                   Endo.    : x_endo_1, x_endo_2</span></span>
+<span><span class="co">#&gt;                   Instr.   : x_inst_1, x_inst_2</span></span>
 <span><span class="co">#&gt; Second stage: Dep. Var.: y</span></span>
-<span><span class="co">#&gt; Observations: 150 </span></span>
+<span><span class="co">#&gt; Observations: 150</span></span>
 <span><span class="co">#&gt; Fixed-effects: fe: 3</span></span>
 <span><span class="co">#&gt; Standard-errors: Clustered (fe) </span></span>
 <span><span class="co">#&gt;              Estimate Std. Error t value Pr(&gt;|t|)    </span></span>
@@ -1296,9 +1302,11 @@ you need to add them after the first right-hand-side, as follows:</p>
 <div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est_iv_fe</span>, stage <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; IV: First stage: x_endo_1</span></span>
-<span><span class="co">#&gt; TSLS estimation, Dep. Var.: x_endo_1, Endo.: x_endo_1, x_endo_2, Instr.: x_inst_1, x_inst_2</span></span>
+<span><span class="co">#&gt; TSLS estimation - Dep. Var.: x_endo_1</span></span>
+<span><span class="co">#&gt;                   Endo.    : x_endo_1, x_endo_2</span></span>
+<span><span class="co">#&gt;                   Instr.   : x_inst_1, x_inst_2</span></span>
 <span><span class="co">#&gt; First stage: Dep. Var.: x_endo_1</span></span>
-<span><span class="co">#&gt; Observations: 150 </span></span>
+<span><span class="co">#&gt; Observations: 150</span></span>
 <span><span class="co">#&gt; Fixed-effects: fe: 3</span></span>
 <span><span class="co">#&gt; Standard-errors: Clustered (fe) </span></span>
 <span><span class="co">#&gt;          Estimate Std. Error t value Pr(&gt;|t|) </span></span>
@@ -1312,9 +1320,11 @@ you need to add them after the first right-hand-side, as follows:</p>
 <span><span class="co">#&gt; F-test (1st stage): stat = 21.6, p = 6.151e-9, on 2 and 146 DoF.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; IV: First stage: x_endo_2</span></span>
-<span><span class="co">#&gt; TSLS estimation, Dep. Var.: x_endo_2, Endo.: x_endo_1, x_endo_2, Instr.: x_inst_1, x_inst_2</span></span>
+<span><span class="co">#&gt; TSLS estimation - Dep. Var.: x_endo_2</span></span>
+<span><span class="co">#&gt;                   Endo.    : x_endo_1, x_endo_2</span></span>
+<span><span class="co">#&gt;                   Instr.   : x_inst_1, x_inst_2</span></span>
 <span><span class="co">#&gt; First stage: Dep. Var.: x_endo_2</span></span>
-<span><span class="co">#&gt; Observations: 150 </span></span>
+<span><span class="co">#&gt; Observations: 150</span></span>
 <span><span class="co">#&gt; Fixed-effects: fe: 3</span></span>
 <span><span class="co">#&gt; Standard-errors: Clustered (fe) </span></span>
 <span><span class="co">#&gt;           Estimate Std. Error  t value Pr(&gt;|t|)    </span></span>
@@ -1413,7 +1423,7 @@ variable. We can do it simply via <code>fixest</code>’s special
 <code class="sourceCode R"><span><span class="va">est_comb</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">|</span> <span class="va">fe1</span><span class="op">^</span><span class="va">fe2</span>, <span class="va">base</span><span class="op">)</span></span>
 <span><span class="va">est_comb</span></span>
 <span><span class="co">#&gt; OLS estimation, Dep. Var.: y</span></span>
-<span><span class="co">#&gt; Observations: 150 </span></span>
+<span><span class="co">#&gt; Observations: 150</span></span>
 <span><span class="co">#&gt; Fixed-effects: fe1^fe2: 15</span></span>
 <span><span class="co">#&gt; Standard-errors: Clustered (fe1^fe2) </span></span>
 <span><span class="co">#&gt;    Estimate Std. Error t value   Pr(&gt;|t|)    </span></span>
@@ -1468,9 +1478,9 @@ We can do this as follows:</p>
 <code class="sourceCode R"><span><span class="va">est_vs</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">|</span> <span class="va">fe1</span><span class="op">[</span><span class="va">x2</span><span class="op">]</span>, <span class="va">base</span><span class="op">)</span></span>
 <span><span class="va">est_vs</span></span>
 <span><span class="co">#&gt; OLS estimation, Dep. Var.: y</span></span>
-<span><span class="co">#&gt; Observations: 150 </span></span>
+<span><span class="co">#&gt; Observations: 150</span></span>
 <span><span class="co">#&gt; Fixed-effects: fe1: 3</span></span>
-<span><span class="co">#&gt; Varying slopes: x2 (fe1: 3)</span></span>
+<span><span class="co">#&gt; Varying slopes: x2 (fe1): 3</span></span>
 <span><span class="co">#&gt; Standard-errors: Clustered (fe1) </span></span>
 <span><span class="co">#&gt;    Estimate Std. Error t value Pr(&gt;|t|) </span></span>
 <span><span class="co">#&gt; x1 0.450006   0.156731  2.8712  0.10292 </span></span>
@@ -1603,7 +1613,7 @@ variables. This is easily done using the
 <span><span class="va">est_did</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu"><a href="../reference/i.html">i</a></span><span class="op">(</span><span class="va">period</span>, <span class="va">treat</span>, <span class="fl">5</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">period</span>, <span class="va">base_did</span><span class="op">)</span></span>
 <span><span class="va">est_did</span></span>
 <span><span class="co">#&gt; OLS estimation, Dep. Var.: y</span></span>
-<span><span class="co">#&gt; Observations: 1,080 </span></span>
+<span><span class="co">#&gt; Observations: 1,080</span></span>
 <span><span class="co">#&gt; Fixed-effects: id: 108,  period: 10</span></span>
 <span><span class="co">#&gt; Standard-errors: Clustered (id) </span></span>
 <span><span class="co">#&gt;                   Estimate Std. Error   t value   Pr(&gt;|t|)    </span></span>
@@ -1727,7 +1737,7 @@ for the treated (ATT):</p>
 <code class="sourceCode R"><span><span class="co"># The full ATT</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res_sa20</span>, agg <span class="op">=</span> <span class="st">"att"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; OLS estimation, Dep. Var.: y</span></span>
-<span><span class="co">#&gt; Observations: 950 </span></span>
+<span><span class="co">#&gt; Observations: 950</span></span>
 <span><span class="co">#&gt; Fixed-effects: id: 95,  year: 10</span></span>
 <span><span class="co">#&gt; Standard-errors: Clustered (id) </span></span>
 <span><span class="co">#&gt;      Estimate Std. Error  t value  Pr(&gt;|t|)    </span></span>
@@ -1827,7 +1837,7 @@ if appropriate. This means that the following code works just fine:</p>
 <div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">..ctrl</span>, <span class="va">base</span><span class="op">)</span></span>
 <span><span class="co">#&gt; OLS estimation, Dep. Var.: y</span></span>
-<span><span class="co">#&gt; Observations: 150 </span></span>
+<span><span class="co">#&gt; Observations: 150</span></span>
 <span><span class="co">#&gt; Standard-errors: IID </span></span>
 <span><span class="co">#&gt;               Estimate Std. Error  t value   Pr(&gt;|t|)    </span></span>
 <span><span class="co">#&gt; (Intercept)   4.122797   0.233398 17.66423  &lt; 2.2e-16 ***</span></span>
@@ -1855,7 +1865,7 @@ works:</p>
 <div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="fu">regex</span><span class="op">(</span><span class="st">"GNP|ployed"</span><span class="op">)</span>, <span class="va">longley</span><span class="op">)</span></span>
 <span><span class="co">#&gt; OLS estimation, Dep. Var.: Armed.Forces</span></span>
-<span><span class="co">#&gt; Observations: 16 </span></span>
+<span><span class="co">#&gt; Observations: 16</span></span>
 <span><span class="co">#&gt; Standard-errors: IID </span></span>
 <span><span class="co">#&gt;                 Estimate  Std. Error   t value Pr(&gt;|t|)    </span></span>
 <span><span class="co">#&gt; (Intercept)  4403.682352 4091.847594  1.076209 0.307112    </span></span>
@@ -1880,7 +1890,7 @@ in the current environment. Let’s give an example:</p>
 <span><span class="va">z</span> <span class="op">=</span> <span class="st">"i(species)"</span></span>
 <span><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x.</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">+</span> <span class="va">.</span><span class="op">[</span><span class="va">z</span><span class="op">]</span>, <span class="va">base</span><span class="op">)</span></span>
 <span><span class="co">#&gt; OLS estimation, Dep. Var.: y</span></span>
-<span><span class="co">#&gt; Observations: 150 </span></span>
+<span><span class="co">#&gt; Observations: 150</span></span>
 <span><span class="co">#&gt; Standard-errors: IID </span></span>
 <span><span class="co">#&gt;                      Estimate Std. Error   t value   Pr(&gt;|t|)    </span></span>
 <span><span class="co">#&gt; (Intercept)          3.682982   0.107403 34.291343  &lt; 2.2e-16 ***</span></span>
@@ -2066,14 +2076,16 @@ of lead/lag creation:</p>
 <span><span class="va">pdat_dt</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x1_l1_fill0"</span>, <span class="st">"y_f2"</span><span class="op">)</span> <span class="op">:=</span> <span class="fu">.</span><span class="op">(</span><span class="fu"><a href="../reference/l.html">l</a></span><span class="op">(</span><span class="va">x1</span>, fill <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>, <span class="fu"><a href="../reference/l.html">f</a></span><span class="op">(</span><span class="va">y</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pdat_dt</span><span class="op">)</span></span>
-<span><span class="co">#&gt;              y         x1 id period post treat      x1_l1 x1_l1_fill0</span></span>
-<span><span class="co">#&gt; 1:  2.87530627  0.5365377  1      1    0     1         NA   0.0000000</span></span>
-<span><span class="co">#&gt; 2:  1.86065272 -3.0431894  1      2    0     1  0.5365377   0.5365377</span></span>
-<span><span class="co">#&gt; 3:  0.09416524  5.5768439  1      3    0     1 -3.0431894  -3.0431894</span></span>
-<span><span class="co">#&gt; 4:  3.78147485 -2.8300587  1      4    0     1  5.5768439   5.5768439</span></span>
-<span><span class="co">#&gt; 5: -2.55819959 -5.0443544  1      5    0     1 -2.8300587  -2.8300587</span></span>
-<span><span class="co">#&gt; 6:  1.72873240 -0.6363849  1      6    1     1 -5.0443544  -5.0443544</span></span>
+<span><span class="co">#&gt;              y         x1    id period  post treat      x1_l1 x1_l1_fill0</span></span>
+<span><span class="co">#&gt;          &lt;num&gt;      &lt;num&gt; &lt;int&gt;  &lt;int&gt; &lt;num&gt; &lt;num&gt;      &lt;num&gt;       &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1:  2.87530627  0.5365377     1      1     0     1         NA   0.0000000</span></span>
+<span><span class="co">#&gt; 2:  1.86065272 -3.0431894     1      2     0     1  0.5365377   0.5365377</span></span>
+<span><span class="co">#&gt; 3:  0.09416524  5.5768439     1      3     0     1 -3.0431894  -3.0431894</span></span>
+<span><span class="co">#&gt; 4:  3.78147485 -2.8300587     1      4     0     1  5.5768439   5.5768439</span></span>
+<span><span class="co">#&gt; 5: -2.55819959 -5.0443544     1      5     0     1 -2.8300587  -2.8300587</span></span>
+<span><span class="co">#&gt; 6:  1.72873240 -0.6363849     1      6     1     1 -5.0443544  -5.0443544</span></span>
 <span><span class="co">#&gt;           y_f2</span></span>
+<span><span class="co">#&gt;          &lt;num&gt;</span></span>
 <span><span class="co">#&gt; 1:  0.09416524</span></span>
 <span><span class="co">#&gt; 2:  3.78147485</span></span>
 <span><span class="co">#&gt; 3: -2.55819959</span></span>
@@ -2157,9 +2169,9 @@ see them with a print:</p>
 <div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result_NL</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Non-linear ML estimation, family = Poisson, Dep. Var.: z</span></span>
-<span><span class="co">#&gt; Observations: 1,000 </span></span>
+<span><span class="co">#&gt; Observations: 1,000</span></span>
 <span><span class="co">#&gt; Standard-errors: IID </span></span>
-<span><span class="co">#&gt;   Estimate Std. Error t value  Pr(&gt;|t|)    </span></span>
+<span><span class="co">#&gt;   Estimate Std. Error z value  Pr(&gt;|z|)    </span></span>
 <span><span class="co">#&gt; a  2.02334   0.011217 180.383 &lt; 2.2e-16 ***</span></span>
 <span><span class="co">#&gt; b  3.02817   0.012684 238.736 &lt; 2.2e-16 ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
@@ -2271,7 +2283,7 @@ won’t need to re-set the number of threads whenever you restart
 
 <div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.8.</p>
 </div>
 
     </footer>

@@ -109,7 +109,13 @@
     <loc>https://lrberge.github.io/fixest/reference/demean.html</loc>
   </url>
   <url>
+    <loc>https://lrberge.github.io/fixest/reference/demeaning_algo.html</loc>
+  </url>
+  <url>
     <loc>https://lrberge.github.io/fixest/reference/deviance.fixest.html</loc>
+  </url>
+  <url>
+    <loc>https://lrberge.github.io/fixest/reference/df.residual.fixest.html</loc>
   </url>
   <url>
     <loc>https://lrberge.github.io/fixest/reference/did_estimate_yearly_effects.html</loc>
@@ -125,6 +131,9 @@
   </url>
   <url>
     <loc>https://lrberge.github.io/fixest/reference/dsb.html</loc>
+  </url>
+  <url>
+    <loc>https://lrberge.github.io/fixest/reference/emmeans_support.html</loc>
   </url>
   <url>
     <loc>https://lrberge.github.io/fixest/reference/errbar.html</loc>
@@ -220,6 +229,9 @@
     <loc>https://lrberge.github.io/fixest/reference/nobs.fixest.html</loc>
   </url>
   <url>
+    <loc>https://lrberge.github.io/fixest/reference/n_models.html</loc>
+  </url>
+  <url>
     <loc>https://lrberge.github.io/fixest/reference/n_unik.html</loc>
   </url>
   <url>
@@ -284,6 +296,9 @@
   </url>
   <url>
     <loc>https://lrberge.github.io/fixest/reference/setFixest_fml.html</loc>
+  </url>
+  <url>
+    <loc>https://lrberge.github.io/fixest/reference/setFixest_multi.html</loc>
   </url>
   <url>
     <loc>https://lrberge.github.io/fixest/reference/setFixest_na_inf.rm.html</loc>
