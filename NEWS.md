@@ -1,5 +1,5 @@
 
-# fixest 0.11.3
+# fixest 0.12.0
 
 ## New features
 
@@ -31,6 +31,8 @@ for(i in 1:n_models(est, sample = TRUE)){
 do.call(rbind, all_tables)
 # ... the output is too long to be displayed here
 ```
+
+- `fixest` is now compatible with [`emmeans`](https://github.com/rvlenth/emmeans) thanks to the contribution of Russell Lenth (#454).
 
 ## Bugs
 
