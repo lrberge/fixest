@@ -33,7 +33,12 @@
   # To circumvent a peculiar behavior from pkgdown
   fix_pkgwdown_path()
 
-  invisible()
+  # register emmeans methods
+  if(requireNamespace("emmeans", quietly = TRUE)){
+    emmeans::.emm_register(c("fixest", "fixest_multi"), pkgname)
+  }
+
+	invisible()
 }
 
 

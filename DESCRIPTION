@@ -14,9 +14,13 @@ Authors@R:
              family = "McDermott",
              role = "ctb",
              email = "grantmcd@uoregon.edu",
-             comment = c(ORCID = "0000-0001-7883-8573")))
+             comment = c(ORCID = "0000-0001-7883-8573")),
+       person(given = "Russell",
+             family = "Lenth",
+             role = "ctb",
+             email = "russell-lenth@uiowa.edu"))
 Imports: stats, graphics, grDevices, tools, utils, methods, numDeriv, nlme, sandwich, Rcpp(>= 1.0.5), dreamerr(>= 1.4.0), stringmagic
-Suggests: knitr, rmarkdown, data.table, plm, MASS, pander, ggplot2, lfe, tinytex, pdftools
+Suggests: knitr, rmarkdown, data.table, plm, MASS, pander, ggplot2, lfe, tinytex, pdftools, emmeans, estimability
 LinkingTo: Rcpp
 Depends: R(>= 3.5.0)
 Description: Fast and user-friendly estimation of econometric models with multiple fixed-effects. Includes ordinary least squares (OLS), generalized linear models (GLM) and the negative binomial.
