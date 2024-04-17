@@ -20,7 +20,7 @@ Authors@R:
              role = "ctb",
              email = "russell-lenth@uiowa.edu"))
 Imports: stats, graphics, grDevices, tools, utils, methods, numDeriv, nlme, sandwich, Rcpp(>= 1.0.5), dreamerr(>= 1.4.0), stringmagic
-Suggests: knitr, rmarkdown, data.table, plm, MASS, pander, ggplot2, lfe, tinytex, pdftools, emmeans, estimability
+Suggests: knitr, rmarkdown, data.table, plm, MASS, pander, ggplot2, lfe, tinytex, pdftools, emmeans, estimability, AER
 LinkingTo: Rcpp
 Depends: R(>= 3.5.0)
 Description: Fast and user-friendly estimation of econometric models with multiple fixed-effects. Includes ordinary least squares (OLS), generalized linear models (GLM) and the negative binomial.
@@ -31,6 +31,6 @@ BugReports: https://github.com/lrberge/fixest/issues
 URL: https://lrberge.github.io/fixest/, https://github.com/lrberge/fixest
 VignetteBuilder: knitr
 LazyData: true
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Roxygen: list(markdown = TRUE)
 Encoding: UTF-8

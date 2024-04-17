@@ -19,7 +19,7 @@ estimated and tested with no issues, because these do not involve the
 intercept.
 }
 \examples{
-if(requireNamespace("emmeans") && requireNamespace(AER)) {
+if(requireNamespace("emmeans") && requireNamespace("AER")) {
     data(Fatalities, package = "AER")
     Fatalities$frate <- with(Fatalities, fatal/pop * 10000)
     fat.mod = feols(frate ~ breath * jail * beertax | state + year, data = Fatalities)

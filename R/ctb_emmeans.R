@@ -29,7 +29,7 @@
 #' Russell V. Lenth
 #'
 #' @examples
-#' if(requireNamespace("emmeans") && requireNamespace(AER)) {
+#' if(requireNamespace("emmeans") && requireNamespace("AER")) {
 #'     data(Fatalities, package = "AER")
 #'     Fatalities$frate <- with(Fatalities, fatal/pop * 10000)
 #'     fat.mod = feols(frate ~ breath * jail * beertax | state + year, data = Fatalities)
@@ -45,8 +45,9 @@ NULL
 ### DO NOT export - this is done dynamically in .onLoad()
 recover_data.fixest = function (object, ...) {
     fcall = object$call
-    dat = recover_data(fcall, delete.response(terms(object)), object$na.action,
-                       pwts = weights(object), ...)
+    dat = emmeans::recover_data(fcall, stats::delete.response(terms(object)), 
+                                object$na.action,
+                                pwts = weights(object), ...)
     if(!is.character(dat)) { # i.e., we actually did recover data
         # if any fixed effects, make them a prior offset
         fe = try(fixef(object), silent = TRUE)
@@ -78,14 +79,14 @@ emm_basis.fixest = function(object, trms, xlev, grid, ...) {
     if (!is.null(fam<- object$family)) {
         if(is.character(fam))
             fam = list(family = fam, link = "identity")
-        misc = .std.link.labels(fam, misc)
+        misc = emmeans::.std.link.labels(fam, misc)
         dfargs = list(df = Inf)
     }
     else
         dfargs = list(df = object$nobs - object$nparams)
     dffun = function(k, dfargs) dfargs$df
     list(X=X, bhat=bhat, nbasis=nbasis, V=V, dffun=dffun, dfargs=dfargs, misc=misc,
-         model.matrix = .cmpMM(object$qr, assign = assign))
+         model.matrix = emmeans::.cmpMM(object$qr, assign = assign))
 }
 
 # multi methods ------------------------------------------------
