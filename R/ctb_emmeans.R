@@ -33,10 +33,10 @@
 #'     data(Fatalities, package = "AER")
 #'     Fatalities$frate = with(Fatalities, fatal/pop * 10000)
 #'     fat.mod = feols(frate ~ breath * jail * beertax | state + year, data = Fatalities)
-#'     emm = emmeans(fat.mod, ~ breath*jail, cluster = ~ state + year)
+#'     emm = emmeans::emmeans(fat.mod, ~ breath*jail, cluster = ~ state + year)
 #'     emm   ### SEs and CIs are incorrect
 #'
-#'     contrast(emm, "consec", by = "breath")   ### results are reliable
+#'     emmeans::contrast(emm, "consec", by = "breath")   ### results are reliable
 #' }
 #' @name emmeans_support
 NULL
