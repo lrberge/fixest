@@ -218,7 +218,6 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
     cat(half_line, sep_value, "Dep. Var.: ", depvar_name, "\n", sep="")
   }
 
-
   catma("Observations: {n ? x$nobs}\n")
 
   extra_info = c("subset", "sample", "offset", "weights")

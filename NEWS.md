@@ -1,4 +1,10 @@
 
+# fixest 0.12.1
+
+# Major bugs affecting R versions <= 4.1.2
+
+- require `stringmagic` version >= 1.1.2 to fix several major bugs affecting R versions <= 4.1.2
+
 # fixest 0.12.0
 
 ## New features
