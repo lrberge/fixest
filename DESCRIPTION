@@ -19,7 +19,7 @@ Authors@R:
              family = "Lenth",
              role = "ctb",
              email = "russell-lenth@uiowa.edu"))
-Imports: stats, graphics, grDevices, tools, utils, methods, numDeriv, nlme, sandwich, Rcpp(>= 1.0.5), dreamerr(>= 1.4.0), stringmagic(>= 1.1.2)
+Imports: stats, graphics, grDevices, tools, utils, methods, numDeriv, nlme, sandwich, Rcpp(>= 1.0.5), dreamerr(>= 1.4.0), stringmagic(>= 1.1.3)
 Suggests: knitr, rmarkdown, data.table, plm, MASS, pander, ggplot2, lfe, tinytex, pdftools, emmeans, estimability, AER
 LinkingTo: Rcpp
 Depends: R(>= 3.5.0)
