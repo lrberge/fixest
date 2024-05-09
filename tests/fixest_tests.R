@@ -1243,66 +1243,40 @@ test(se(est_feols, se = "twoway", ssc = ssc(fixef.K = "full", cluster.df = "conv
 # HC2/HC3
 base = iris
 base$w = runif(nrow(base))
+base$Sepal.Length = floor(base$Sepal.Length)
 
 est_feols = feols(Sepal.Length ~ Sepal.Width | Species, base)
 est_lm = lm(Sepal.Length ~ Sepal.Width + factor(Species), base)
+est_feols_w = feols(Sepal.Length ~ Sepal.Width | Species, base, weights = ~w)
+est_lm_w = lm(Sepal.Length ~ Sepal.Width + factor(Species), base, weights = base$w)
+est_feglm = feglm(Sepal.Length ~ Sepal.Width | Species, base, "poisson", weights = ~ w)
+est_glm = glm(Sepal.Length ~ Sepal.Width + factor(Species), base, family = poisson(), weights = base$w)
 
-test(
-  vcov(est_feols, "hc2", ssc = ssc(adj = FALSE, cluster.adj = FALSE)),
-  sandwich::vcovHC(est_lm, "HC2")["Sepal.Width", "Sepal.Width"]
-)
-
-test(
-  vcov(est_feols, "hc3", ssc = ssc(adj = FALSE, cluster.adj = FALSE)),
-  sandwich::vcovHC(est_lm, "HC3")["Sepal.Width", "Sepal.Width"]
-)
-
-# HC2/HC3 with weights
-base = iris
-base$w = runif(nrow(base))
-
-est_feols = feols(Sepal.Length ~ Sepal.Width | Species, base, weights = ~ w)
-est_lm = lm(Sepal.Length ~ Sepal.Width + factor(Species), base, weights = base$w)
-
-test(
-  vcov(est_feols, "hc2", ssc = ssc(adj = FALSE, cluster.adj = FALSE)),
-  sandwich::vcovHC(est_lm, "HC2")["Sepal.Width", "Sepal.Width"]
-)
-
-test(
-  vcov(est_feols, "hc3", ssc = ssc(adj = FALSE, cluster.adj = FALSE)),
-  sandwich::vcovHC(est_lm, "HC3")["Sepal.Width", "Sepal.Width"]
-)
-
-# HC2/HC3 with GLM
-base$Sepal.Length = floor(base$Sepal.Length)
-est_feglm = feglm(
-  Sepal.Length ~ Sepal.Width | Species, base, 
-  "poisson", weights = ~ w
-)
-est_glm = glm(
-  Sepal.Length ~ Sepal.Width + factor(Species), base, 
-  family = poisson(), weights = base$w
-)
-
-test(
-  vcov(est_feglm, "hc2", ssc = ssc(adj = FALSE, cluster.adj = FALSE)),
-  sandwich::vcovHC(est_glm, "HC2")["Sepal.Width", "Sepal.Width"]
-)
-test(
-  vcov(est_feglm, "hc3", ssc = ssc(adj = FALSE, cluster.adj = FALSE)),
-  sandwich::vcovHC(est_glm, "HC3")["Sepal.Width", "Sepal.Width"]
-)
+for (vcov_type in c("HC2", "HC3")) {
+  # ls
+  test(
+    vcov(est_feols, vcov_type, ssc = ssc(adj = FALSE, cluster.adj = FALSE)),
+    sandwich::vcovHC(est_lm, vcov_type)["Sepal.Width", "Sepal.Width"]
+  )
+  # Weighted ls
+  test(
+    vcov(est_feols_w, vcov_type, ssc = ssc(adj = FALSE, cluster.adj = FALSE)),
+    sandwich::vcovHC(est_lm_w, vcov_type)["Sepal.Width", "Sepal.Width"]
+  )
+  # GLM
+  test(
+    vcov(est_feglm, vcov_type, ssc = ssc(adj = FALSE, cluster.adj = FALSE)),
+    sandwich::vcovHC(est_glm, vcov_type)["Sepal.Width", "Sepal.Width"]
+  )
+}
 
 # Fail when P_ii = 1
 base$Species = as.character(base$Species)
 base[1, "Species"] = "foo"
-
 est_pii_singular = feols(Sepal.Length ~ Sepal.Width | Species, base)
+test(vcov(est_pii_singular, "HC2"), "err")
+test(vcov(est_pii_singular, "HC3"), "err")
 
-test(
-  vcov(est_pii_singular, "hc2"), "err"
-)
 
 #
 # Checking the calls work properly
@@ -1390,7 +1364,6 @@ test(se(est_pois, se = "cluster", cluster = ~Origin_na^not_there), "err")
 #
 # Checking that the aliases work fine
 #
-
 se_hetero = se(est_pois, se = "hetero")
 se_hc1    = se(est_pois, se = "hc1")
 se_white  = se(est_pois, se = "white")

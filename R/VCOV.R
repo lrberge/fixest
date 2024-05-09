@@ -2014,7 +2014,7 @@ vcov_hetero_internal = function(bread, scores, sandwich, ssc, nthreads, ...){
   if(!sandwich){
     vcov_noAdj = cpp_crossprod(scores, 1, nthreads)
   } else {
-    vcov_noAdj = cpppar_crossprod(cpppar_matprod(scores, bread, nthreads), 1, nthreads)
+    vcov_noAdj = cpp_crossprod(cpp_matprod(scores, bread, nthreads), 1, nthreads)
   }
 
   vcov_noAdj
