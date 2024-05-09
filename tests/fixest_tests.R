@@ -2330,6 +2330,24 @@ res_pois = fepois(Sepal.Length ~ Sepal.Width + Petal.Length | Species, iris)
 sp_pois = sparse_model_matrix(res_pois, data = iris)
 
 
+# make sure names are correct
+test_col_names <- function(est) {
+  m <- fixest::sparse_model_matrix(est, collin.rm = FALSE)
+  q <- test(all(names(coef(est)) %in% colnames(m)), TRUE)
+  return(invisible(NULL))
+}
+test_col_names(feols(mpg ~ i(am) + disp | vs, mtcars))
+test_col_names(feols(mpg ~ i(am, i.cyl) + disp | vs, mtcars))
+test_col_names(feols(mpg ~ i(am, hp) + disp | vs, mtcars))
+test_col_names(feols(mpg ~ i(am):hp + disp | vs, mtcars))
+test_col_names(feols(mpg ~ factor(am) + disp | vs, mtcars))
+test_col_names(feols(mpg ~ factor(am):factor(cyl) + disp | vs, mtcars, notes = FALSE))
+test_col_names(feols(mpg ~ factor(am):hp + disp | vs, mtcars))
+test_col_names(feols(mpg ~ poly(hp, degree = 2) + disp | vs, mtcars))
+
+
+
+
 ####
 #### fitstat ####
 ####

@@ -466,25 +466,36 @@ mult_sparse = function(...) {
 
 	dots = list(...)
 	n = length(dots)
+  mc = match.call()
+  var_call = sapply(seq_len(n), function(i) deparse_long(mc[[i+1]]))
 
 	num_var = NULL
 	factor_list = list()
+  factor_idx = c()
+  i_idx = c()
 	info_i = NULL
 	is_i = is_factor = FALSE
 	# You can't have interactions between i and factors, it's either
 
 	for (i in 1:n) {
 		xi = dots[[i]]
+    vari = mc[[i+1]]
 		if (is.numeric(xi)) {
 			# We stack the product
 			num_var = if (is.null(num_var)) xi else xi * num_var
 		} else if (inherits(xi, "i_sparse")) {
 			is_i = TRUE
 			info_i = xi
+      i_idx = c(i_idx, i)
 		} else {
 			is_factor = TRUE
 			factor_list[[length(factor_list) + 1]] = xi
+      factor_idx = c(factor_idx, i)
 		}
+	}
+
+  if (is_factor && is_i) {
+    stop("Unfortunately, can not interact factor with `i()` in sparse_model_matrix")
   }
 
 	# numeric
@@ -495,14 +506,24 @@ mult_sparse = function(...) {
 	if (is_factor) {
 		factor_list$add_items = TRUE
 		factor_list$items.list = TRUE
-
+    factor_list$multi.join = " ; "
 		fact_as_int = do.call(to_integer, factor_list)
 
 		values = if (is.null(num_var)) rep(1, length(fact_as_int$x)) else num_var
-
 		rowid = seq_along(values)
+
+    # messy, but need this to get things like `factor(am)1:hp:factor(cyl)6`
+    items_mat = do.call(rbind, strsplit(fact_as_int$items, " ; "))
+
+    # intersplice var_call with items 
+    col_names = sapply(seq_len(nrow(items_mat)), function(i) {
+      pasteable = var_call 
+      pasteable[factor_idx] = paste0(var_call[factor_idx], items_mat[i, ])
+      paste(pasteable, collapse = ":")
+    }, USE.NAMES = FALSE)
+    
 		res = list(rowid = rowid, colid = fact_as_int$x, values = values,
-				   col_names = fact_as_int$items, n_cols = length(fact_as_int$items))
+				   col_names = col_names, n_cols = length(fact_as_int$items))
 	# i()
 	} else {
 
@@ -510,11 +531,18 @@ mult_sparse = function(...) {
 		if (!is.null(num_var)) {
 			num_var = num_var[info_i$rowid]
 			values = values * num_var
+      col_names = sapply(info_i$col_names, function(item) {
+        pasteable = var_call
+        pasteable[i_idx] = item
+        paste(pasteable, collapse = ":")
+      }, USE.NAMES = FALSE)
+		} else {
+      col_names = info_i$col_names
     }
 
 		res = list(rowid = info_i$rowid, colid = info_i$colid,
 				   values = values[info_i$rowid],
-				   col_names = info_i$col_names,
+				   col_names = col_names,
 				   n_cols = length(info_i$col_names))
 	}
 
@@ -607,13 +635,6 @@ vars_to_sparse_mat = function(vars, data, collin.rm = FALSE, object = NULL, type
       mat[id_mat] = values_vec
 
     }
-
-    # TODO: Should I use error_sender?
-    # mat = error_sender(fixest_model_matrix_extra(
-    #     object = object, newdata = data, original_data = original_data,
-    #     fml = fml, fake_intercept = fake_intercept,
-    #     subset = subset),
-    #     "In 'model.matrix', the RHS could not be evaluated: ")
 
     if (collin.rm & is.null(object)) {
       stop("You need to provide the 'object' argument to use 'collin.rm = TRUE'.")
