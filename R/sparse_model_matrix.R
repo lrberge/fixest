@@ -1,13 +1,13 @@
 #' Design matrix of a `fixest` object returned in sparse format
 #'
-#' This function creates the left-hand-side or the right-hand-side(s) of a [`femlm`], [`feols`] or [`feglm`] estimation. Note that this function currently does not accept a formula
+#' This function creates the left-hand-side or the right-hand-side(s) of a [`femlm`], [`feols`] or [`feglm`] estimation.
 #'
 #' @inheritParams nobs.fixest
 #'
 #' @param data If missing (default) then the original data is obtained by evaluating the `call`. Otherwise, it should be a `data.frame`.
 #' @param type Character vector or one sided formula, default is "rhs". Contains the type of matrix/data.frame to be returned. Possible values are: "lhs", "rhs", "fixef", "iv.rhs1" (1st stage RHS), "iv.rhs2" (2nd stage RHS), "iv.endo" (endogenous vars.), "iv.exo" (exogenous vars), "iv.inst" (instruments).
 #' @param na.rm Default is `TRUE`. Should observations with NAs be removed from the matrix?
-#' @param collin.rm Logical scalar, default is `TRUE`. Whether to remove variables that were found to be collinear during the estimation. Beware: it does not perform a collinearity check.
+#' @param collin.rm Logical scalar. Whether to remove variables that were found to be collinear during the estimation. Beware: it does not perform a collinearity check and bases on the `coef(object)`. Default is TRUE if object is a `fixest` object, or FALSE if object is a formula.
 #' @param combine Logical scalar, default is `TRUE`. Whether to combine each resulting sparse matrix 
 #' @param ... Not currently used.
 #'
@@ -25,10 +25,10 @@
 #'
 #' est = feols(wt ~ i(vs) + hp | cyl, mtcars)
 #' sparse_model_matrix(est)
-#' 
+#' sparse_model_matrix(wt ~ i(vs) + hp | cyl, mtcars)
 #'
 #' @export
-sparse_model_matrix = function(object, data, type = "rhs", na.rm = TRUE,  collin.rm = TRUE, combine = TRUE, ...) {
+sparse_model_matrix = function(object, data, type = "rhs", na.rm = TRUE,  collin.rm = NULL, combine = TRUE, ...) {
     # We evaluate the formula with the past call
     # type: lhs, rhs, fixef, iv.endo, iv.inst, iv.rhs1, iv.rhs2
     # if fixef => return a DF
@@ -53,7 +53,7 @@ sparse_model_matrix = function(object, data, type = "rhs", na.rm = TRUE,  collin
     type = check_set_types(type, c("lhs", "rhs", "fixef", "iv.endo", "iv.inst", "iv.exo", "iv.rhs1", "iv.rhs2"))
 
     if (isTRUE(object$is_fit)) {
-        stop("model.matrix method not available for fixest estimations obtained from fit methods.")
+        stop("sparse_model_matrix method not available for fixest estimations obtained from fit methods.")
     }
 
     if (any(grepl("^iv", type)) && !isTRUE(object$iv)) {
@@ -62,13 +62,16 @@ sparse_model_matrix = function(object, data, type = "rhs", na.rm = TRUE,  collin
 
     check_arg(subset, "logical scalar | character vector no na")
 
-    check_arg_plus(collin.rm, "logical scalar")
+    if (missing(collin.rm)) {
+      collin.rm = if (inherits(object, "formula")) FALSE else TRUE
+    } else {
+      check_arg_plus(collin.rm, "logical scalar")
+    }
 
     # Evaluation with the data
     original_data = FALSE
     if (missnull(data)) {
         original_data = TRUE
-
         data = fetch_data(object, "To apply 'sparse_model_matrix', ")
     }
 
@@ -84,16 +87,17 @@ sparse_model_matrix = function(object, data, type = "rhs", na.rm = TRUE,  collin
         stop("The argument 'data' must be a data.frame or a matrix.")
     }
 
-    # data = as.data.frame(data)
 
     # Allows passage of formula to sparse_model_matrix. A bit inefficient, but it works.
     isFormula = FALSE
     split_fml = NULL
-    if ("formula" %in% class(object)) {
+    if (inherits(object, "formula")) {
       split_fml = fml_split_internal(object)
-
-      if (collin.rm == TRUE | length(split_fml) == 3) {
-        message("Formula passed to sparse_model_matrix with collin.rm == TRUE or iv. Estimating feols with formula.")
+      if (isTRUE(collin.rm)) {
+        message("Formula passed to sparse_model_matrix with collin.rm == TRUE. Estimating feols with formula.")
+        object = feols(object, data = data)
+      } else if (length(split_fml) == 3) {
+        message("Formula passed to sparse_model_matrix with an iv formula. Estimating feols with formula.")
         object = feols(object, data = data)
       } else {
         isFormula = TRUE
@@ -481,7 +485,7 @@ mult_sparse = function(...) {
 			is_factor = TRUE
 			factor_list[[length(factor_list) + 1]] = xi
 		}
-	}
+  }
 
 	# numeric
 	if (!is_i && !is_factor) {
@@ -506,7 +510,7 @@ mult_sparse = function(...) {
 		if (!is.null(num_var)) {
 			num_var = num_var[info_i$rowid]
 			values = values * num_var
-		}
+    }
 
 		res = list(rowid = info_i$rowid, colid = info_i$colid,
 				   values = values[info_i$rowid],
@@ -675,8 +679,8 @@ vars_to_sparse_mat = function(vars, data, collin.rm = FALSE, object = NULL, type
     }
 
     if (add_intercept) {
-      mat = cbind(1, mat)
-      colnames(mat)[1] = "(Intercept)"
+        mat = cbind(1, mat)
+        colnames(mat)[1] = "(Intercept)"
     }
 
     return(mat)
