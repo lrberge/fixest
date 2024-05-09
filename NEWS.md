@@ -1,4 +1,41 @@
 
+
+# fixest 0.12.1
+
+## Sparse Model Matrix
+
+- Add the ability to create sparse model matrices from regression objects and formula in a memory-efficient way.
+
+```R
+est = feols(mpg ~ drat | cyl, mtcars)
+
+sparse_model_matrix(est, type = "lhs")
+#> 32 x 1 sparse Matrix of class "dgCMatrix"
+#>        mpg
+#>  [1,] 21.0
+#>  [2,] 21.0
+#>  [3,] 22.8
+
+sparse_model_matrix(est, type = c("rhs", "fixef"))
+#> 32 x 4 sparse Matrix of class "dgCMatrix"
+#>       drat cyl::4 cyl::6 cyl::8
+#>  [1,] 3.90      .      1      .
+#>  [2,] 3.90      .      1      .
+
+# Or you can pass a (linear) formula
+sparse_model_matrix(mpg ~ i(vs) | gear^cyl, data = mtcars, type = c("rhs", "fixef"))
+#> 32 x 9 sparse Matrix of class "dgCMatrix"
+#>       vs::1 gear^cyl::3_4 gear^cyl::3_6 gear^cyl::3_8 gear^cyl::4_4 gear^cyl::4_6 gear^cyl::5_4 gear^cyl::5_6 gear^cyl::5_8
+#>  [1,]     .             .             .             .             .             1             .             .             .
+#>  [2,]     .             .             .             .             .             1             .             .             .
+#>  [3,]     1             .             .             .             1             .             .             .             .
+```
+
+
+- `hatvalues` now works with fixed effects. It also allows for approximate computation (via `exact` and `p` arguments). For details on the approximation, see [Kline, Saggio, and Sølvsten 2020](https://eml.berkeley.edu/~pkline/papers/KSS2020.pdf).
+
+- Add `HC2` and `HC3` options to `vcov` for `feols` and `feglm` models. With this gets added the `vcov_hetero` function.
+
 # fixest 0.12.0
 
 ## New features
