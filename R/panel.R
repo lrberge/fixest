@@ -246,10 +246,9 @@ d = function(x, lag = 1, fill = NA){
 #' the function [`panel`] or with the argument `panel.id` in the estimation).
 #'
 #' @param x The variable.
-#' @param lag A vector of integers giving the number of lags. Negative values lead to leads. 
-#' This argument can be a vector when using it in fixest estimations. When creating variables in 
-#' a [`data.table::data.table`], it **must** be of length one.
-#' @param lead A vector of integers giving the number of leads. Negative values lead to lags. 
+#' @param k A vector of integers giving the number of lags (for `l()` and `d()`) or 
+#' leads (for `f()`). For `l()` and `d()` negative values lead to leads. For `f()` 
+#' negative values lead to lags.
 #' This argument can be a vector when using it in fixest estimations. When creating variables in 
 #' a [`data.table::data.table`], it **must** be of length one.
 #' @param fill A scalar, default is `NA`. How to fill the missing values due to the lag/lead? 
@@ -295,7 +294,7 @@ d = function(x, lag = 1, fill = NA){
 #'
 #'
 #'
-l = function(x, lag = 1, fill = NA){
+l = function(x, k = 1, fill = NA){
 
   value = x
 
@@ -318,7 +317,7 @@ l = function(x, lag = 1, fill = NA){
 
     if(fl_authorized){
       # Further control
-      check_arg(lag, "integer scalar", 
+      check_arg(k, "integer scalar", 
                 .message = "When creating lags (or leads) within a data.table with l() (or f()), the argument 'lag' must be a single integer.")
 
       check_arg(fill, "NA | scalar")
@@ -383,7 +382,7 @@ l = function(x, lag = 1, fill = NA){
     stop("Internal error: lengths of the individuals and the time vectors are different.")
   }
 
-  obs_lagged = cpp_lag_obs(id = meta_info$id_sorted, time = meta_info$time_sorted, nlag = lag)
+  obs_lagged = cpp_lag_obs(id = meta_info$id_sorted, time = meta_info$time_sorted, nlag = k)
 
   # the lagged value => beware of NAs in IDs!
   if(meta_info$na_flag){

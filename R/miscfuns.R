@@ -6441,8 +6441,11 @@ error_sender = function(expr, ..., clean, up = 0, arg_name){
           from = clean
           to = ""
         }
+        
+        err = gsub(from, to, err)
+        call_error = gsub(from, to, call_error)
 
-        stop_up(msg, "\n  ", call_error, gsub(from, to, err))
+        stop_up(msg, "\n  ", call_error, err)
       } else {
         stop_up(msg, "\n  ", call_error, err)
       }
@@ -6527,7 +6530,8 @@ fixest_fml_rewriter = function(fml){
     }
 
     lhs_all = error_sender(expand_lags_internal(lhs_names),
-                 "Problem in the formula regarding lag/leads: ", clean = "__expand")
+                           "Problem in the formula regarding lag/leads: ", 
+                           clean = "__expand")
 
     if(length(lhs_all) > 1){
       lhs_fml = paste("c(", paste(lhs_all, collapse = ","), ")")
@@ -6564,7 +6568,8 @@ fixest_fml_rewriter = function(fml){
       rhs_text = "1"
     } else {
       rhs_terms = error_sender(expand_lags_internal(rhs_terms),
-                   "Problem in the formula regarding lag/leads: ", clean = "__expand")
+                               "Problem in the formula regarding lag/leads: ", 
+                               clean = "__expand")
 
       if(attr(terms(fml_rhs), "intercept") == 0){
         rhs_terms = c("-1", rhs_terms)
@@ -6612,7 +6617,8 @@ fixest_fml_rewriter = function(fml){
 
             fixef_terms = attr(terms(fml_fixef), "term.labels")
             fixef_text = error_sender(expand_lags_internal(fixef_terms),
-                          "Problem in the formula regarding lag/leads: ", clean = "__expand")
+                                      "Problem in the formula regarding lag/leads: ", 
+                                      clean = "__expand")
 
             if(do_sub){
               fixef_text = gsub(" %^% ", "^", fixef_text, fixed = TRUE)

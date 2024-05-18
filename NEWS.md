@@ -5,6 +5,12 @@
 
 - require `stringmagic` version >= 1.1.2 to fix several major bugs affecting R versions <= 4.1.2
 
+# Bugs
+
+- fix display bug in errors regarding lead/lag problems in fixest estimations.
+
+- fix bug when arguments lead or lag in functions l/f were given explicitly in fixest estimations. Reported by @MaelAstruc, #499
+
 # fixest 0.12.0
 
 ## New features

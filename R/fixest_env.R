@@ -772,6 +772,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
     #
     # ... Panel setup ####
     #
+    
 
     if(debug) cat(" ---> Panel setup\n")
 
