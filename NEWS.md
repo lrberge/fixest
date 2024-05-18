@@ -11,6 +11,10 @@
 
 - fix bug when arguments lead or lag in functions l/f were given explicitly in fixest estimations. Reported by @MaelAstruc, #499
 
+- remove the diplay of `TRUE` when creating lags/leads in `data.table`.
+
+- fix bug when creating lead/lags in `data.table`s and the name of the data set was equal to the name of a function. Reported by @kmfrick, #500
+
 # fixest 0.12.0
 
 ## New features

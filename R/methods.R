@@ -91,7 +91,13 @@
 #'
 #'
 print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
-
+  
+  if(inherits(x, "dummy_print")){
+    # This is a hack to avoid print when lags are created in data.tables
+    # ex: pdat_dt[, x1_l1 := d(x1)]
+    return(invisible())
+  }
+  
   # checking the arguments
   if(is_user_level_call()){
     validate_dots(suggest_args = c("n", "type", "vcov"),

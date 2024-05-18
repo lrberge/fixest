@@ -339,7 +339,8 @@ l = function(x, k = 1, fill = NA){
       # we fetch the panel information
       i = 2
       sysEval = sys.parent(i)
-      while(sysEval != 0 && !grepl("[.data.table", deparse(sys.call(sysEval)[[1]])[1], fixed = TRUE)){
+      while(sysEval != 0 && !grepl("[.data.table", deparse(sys.call(sysEval)[[1]])[1], 
+                                   fixed = TRUE)){
         i = i + 1
         sysEval = sys.parent(i)
       }
@@ -355,10 +356,19 @@ l = function(x, k = 1, fill = NA){
 
       var = sys.call(sysEval)$x
 
-      m = NULL
+      data_fixest_panel = NULL
       up = 0
-      while(is.null(m) && sys.parent(i + up) != 0){
-        try(m <- eval(var, parent.frame(i + up)), silent = TRUE)
+      while(!inherits(data_fixest_panel, "fixest_panel") && 
+              sys.parent(i + up) != 0){
+        if(exists(var, envir = parent.frame(i + up), mode = "list")){
+          # bug #500 => more robust way to get the panel data set
+          data_fixest_panel = get(var, envir = parent.frame(i + up), 
+                                  mode = "list")
+        } else {
+          try(data_fixest_panel <- eval(var, parent.frame(i + up)), 
+              silent = TRUE)
+        }
+        
         up = up + 1
       }
 
@@ -366,11 +376,11 @@ l = function(x, k = 1, fill = NA){
         stop("We tried to lag a variable but the data set could not be fetched. This is an internal error to 'fixest'. It could be interesting to report this bug.")
       }
 
-      if(!"fixest_panel" %in% class(m)){
-        stop("You can use l() or f() only when the data set is of class 'fixest_panel', you can use function panel() to set it.")
+      if(!"fixest_panel" %in% class(data_fixest_panel)){
+        stopi("It seems l(), d() or f() has been called within a `fixest_panel` which is also a `data_table`.\nUnfortunately we could not get the data set.\nThis is an internal error: Could you report?")
       }
 
-      meta_info = attr(m, "panel_info")
+      meta_info = attr(data_fixest_panel, "panel_info")
     } else {
       stop("Function l() (or f()) is only callable within 'fixest' estimations or within a variable creation with data.table (i.e. using ':=') where the data set is a 'fixest_panel' (obtained from panel()). Alternatively, you can use lag.formula().")
     }
@@ -924,14 +934,14 @@ unpanel = function(x){
 #' }
 #'
 #'
-"[.fixest_panel" = function(x, i, j, ...){
+`[.fixest_panel` = function(x, i, j, ...){
   # we need to perform proper bookkeeping
 
   info = attr(x, "panel_info")
   mc = match.call()
 
   IS_DT = FALSE
-  if("data.table" %in% class(x) && requireNamespace("data.table", quietly=TRUE)){
+  if("data.table" %in% class(x) && requireNamespace("data.table", quietly = TRUE)){
     IS_DT = TRUE
     # data.table is really hard to handle....
     # Not very elegant... but that's life!
@@ -963,7 +973,10 @@ unpanel = function(x){
       assign("[.data.table", asNamespace("data.table")[["[.data.table"]], my_frame)
       eval(mc_new, my_frame)
 
-      return(invisible(TRUE))
+      # what a pain...
+      out = TRUE
+      class(out) = c("fixest", "dummy_print")
+      return(out)
     } else {
 
       x_dt = data.table::copy(x)
