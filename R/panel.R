@@ -229,13 +229,13 @@ panel_setup = function(data, panel.id, time.step = NULL, duplicate.method = "non
 
 
 #' @describeIn l Forwards a variable (inverse of lagging) in a `fixest` estimation
-f = function(x, lead = 1, fill = NA){
-  l(x, -lead, fill)
+f = function(x, k = 1, fill = NA){
+  l(x, -k, fill)
 }
 
 #' @describeIn l Creates differences (i.e. x - lag(x)) in a `fixest` estimation
-d = function(x, lag = 1, fill = NA){
-  x - l(x, lag, fill)
+d = function(x, k = 1, fill = NA){
+  x - l(x, k, fill)
 }
 
 
