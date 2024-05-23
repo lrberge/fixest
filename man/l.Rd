@@ -6,24 +6,24 @@
 \alias{l}
 \title{Lags a variable in a \code{fixest} estimation}
 \usage{
-f(x, lead = 1, fill = NA)
+f(x, k = 1, fill = NA)
 
-d(x, lag = 1, fill = NA)
+d(x, k = 1, fill = NA)
 
 l(x, k = 1, fill = NA)
 }
 \arguments{
 \item{x}{The variable.}
 
-\item{fill}{A scalar, default is \code{NA}. How to fill the missing values due to the lag/lead?
-Note that in a \code{fixest} estimation, 'fill' must be numeric (not required when
-creating new variables).}
-
 \item{k}{A vector of integers giving the number of lags (for \code{l()} and \code{d()}) or
 leads (for \code{f()}). For \code{l()} and \code{d()} negative values lead to leads. For \code{f()}
 negative values lead to lags.
 This argument can be a vector when using it in fixest estimations. When creating variables in
 a \code{\link[data.table:data.table]{data.table::data.table}}, it \strong{must} be of length one.}
+
+\item{fill}{A scalar, default is \code{NA}. How to fill the missing values due to the lag/lead?
+Note that in a \code{fixest} estimation, 'fill' must be numeric (not required when
+creating new variables).}
 }
 \value{
 These functions can only be used i) in a formula of a \code{fixest} estimation, or ii) when
