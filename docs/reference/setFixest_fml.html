@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.12.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.12.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -202,7 +202,7 @@ controls the variable <code>Temp</code> and <code>Day</code> fixed-effects, you 
 <span class="r-in"><span><span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="va">iris</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x..</span>, data <span class="op">=</span> <span class="va">base</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> y ~ x1 + x2 + x3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001bd7e3ec070&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001cf45f858e0&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># In fixest estimations, this is automatically taken care of</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x..</span>, data <span class="op">=</span> <span class="va">base</span><span class="op">)</span></span></span>
@@ -419,17 +419,17 @@ controls the variable <code>Temp</code> and <code>Day</code> fixed-effects, you 
 <span class="r-in"><span><span class="va">vars</span> <span class="op">=</span> <span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span>rhs <span class="op">=</span> <span class="va">vars</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ~a + b + c + d + e</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001bd7e3ec070&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001cf45f858e0&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Alternatively, to replace the RHS</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fl">1</span>, rhs <span class="op">=</span> <span class="va">vars</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> y ~ a + b + c + d + e</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001bd7e3ec070&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001cf45f858e0&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># To create a two sided formula</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span>lhs <span class="op">=</span> <span class="st">"y"</span>, rhs <span class="op">=</span> <span class="va">vars</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> y ~ a + b + c + d + e</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001bd7e3ec070&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001cf45f858e0&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># argument 'add'</span></span></span>
@@ -437,17 +437,17 @@ controls the variable <code>Temp</code> and <code>Day</code> fixed-effects, you 
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="op">~</span><span class="va">x1</span>, add <span class="op">=</span> <span class="op">~</span> <span class="va">x2</span> <span class="op">+</span> <span class="va">x3</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ~x1 + x2 + x3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001bd7e3ec070&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001cf45f858e0&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># also works with character vectors</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="op">~</span><span class="va">x1</span>, add <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x2"</span>, <span class="st">"x3"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ~x1 + x2 + x3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001bd7e3ec070&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001cf45f858e0&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># only adds to the RHS</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span>, add <span class="op">=</span> <span class="op">~</span><span class="va">bon</span> <span class="op">+</span> <span class="va">jour</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> y ~ x + bon + jour</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001bd7e3ec070&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001cf45f858e0&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># Dot square bracket operator</span></span></span>
@@ -457,41 +457,41 @@ controls the variable <code>Temp</code> and <code>Day</code> fixed-effects, you 
 <span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x1"</span>, <span class="st">"x2"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">.</span><span class="op">[</span><span class="va">x</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> y ~ x1 + x2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001bd7e3ec070&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001cf45f858e0&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Alternatively, one-sided formulas can be used and their content will be inserted verbatim</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="op">~</span><span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">.</span><span class="op">[</span><span class="va">x</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> y ~ x1 + x2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001bd7e3ec070&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001cf45f858e0&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># You can create multiple variables at once</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x.</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span> <span class="op">+</span> <span class="va">z.</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> y ~ x1 + x2 + x3 + x4 + x5 + z2 + z3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001bd7e3ec070&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001cf45f858e0&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># You can summon variables from the environment to complete variables names</span></span></span>
 <span class="r-in"><span><span class="va">var</span> <span class="op">=</span> <span class="st">"a"</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x.</span><span class="op">[</span><span class="va">var</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> y ~ xa</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001bd7e3ec070&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001cf45f858e0&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># ... the variables can be multiple</span></span></span>
 <span class="r-in"><span><span class="va">vars</span> <span class="op">=</span> <span class="va">LETTERS</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x.</span><span class="op">[</span><span class="va">vars</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> y ~ xA + xB + xC</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001bd7e3ec070&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001cf45f858e0&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># You can have "complex" variable names but they must be nested in character form</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">.</span><span class="op">[</span><span class="st">"x.[vars]_sq"</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> y ~ xA_sq + xB_sq + xC_sq</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001bd7e3ec070&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001cf45f858e0&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># DSB can be used within regular expressions</span></span></span>
 <span class="r-in"><span><span class="va">re</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"GNP"</span>, <span class="st">"Pop"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="va">Unemployed</span> <span class="op">~</span> <span class="fu">regex</span><span class="op">(</span><span class="st">".[re]"</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">longley</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Unemployed ~ GNP.deflator + GNP + Population</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001bd7e3ec070&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001cf45f858e0&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># =&gt; equivalent to regex("GNP|Pop")</span></span></span>
 <span class="r-in"><span></span></span>
@@ -500,7 +500,7 @@ controls the variable <code>Temp</code> and <code>Day</code> fixed-effects, you 
 <span class="r-in"><span><span class="va">vars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"wage"</span>, <span class="st">"unemp"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="xpd.html">xpd</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">y.</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="stepwise.html">csw</a></span><span class="op">(</span><span class="va">.</span><span class="op">[</span>,<span class="va">vars</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> c(y1, y2, y3) ~ csw(wage, unemp)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001bd7e3ec070&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001cf45f858e0&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example of use of .[] within a loop</span></span></span>

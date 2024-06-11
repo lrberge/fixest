@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.12.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.12.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -181,155 +181,51 @@ the coefficients with <code>NA</code> values.</p></dd>
 <span class="r-in"><span><span class="co"># collin + long + na.rm</span></span></span>
 <span class="r-in"><span><span class="va">base</span><span class="op">$</span><span class="va">x1_bis</span> <span class="op">=</span> <span class="va">base</span><span class="op">$</span><span class="va">x1</span> <span class="co"># =&gt; collinear</span></span></span>
 <span class="r-in"><span><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1_bis</span> <span class="op">+</span> <span class="fu"><a href="stepwise.html">csw0</a></span><span class="op">(</span><span class="va">x1</span>, <span class="va">x2</span>, <span class="va">x3</span><span class="op">)</span>, <span class="va">base</span>, split <span class="op">=</span> <span class="op">~</span><span class="va">species</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Notes from the estimations:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> [x 9] The variable 'x1' has been removed because of collinearity (see</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> $collin.var).</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> in message_magic(..., .sep = .sep, .end = .end, .wid...: </span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> In `string_magic`, the operator `width` must take a numeric argument.</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> PROBLEM: `min(100, .sw)` is not numeric.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># does not display x1 since it is always collinear</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    id sample.var     sample                   rhs (Intercept)    x1_bis</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1    species     setosa                x1_bis   2.6390012 0.6904897</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   2    species     setosa           x1_bis + x1   2.6390012 0.6904897</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   3    species     setosa      x1_bis + x1 + x2   2.3037382 0.6674162</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4   4    species     setosa x1_bis + x1 + x2 + x3   2.3518898 0.6548350</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   5    species versicolor                x1_bis   3.5397347 0.8650777</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   6    species versicolor           x1_bis + x1   3.5397347 0.8650777</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7   7    species versicolor      x1_bis + x1 + x2   2.1164314 0.2476422</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8   8    species versicolor x1_bis + x1 + x2 + x3   1.8955395 0.3868576</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9   9    species  virginica                x1_bis   3.9068365 0.9015345</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10 10    species  virginica           x1_bis + x1   3.9068365 0.9015345</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11 11    species  virginica      x1_bis + x1 + x2   0.6247824 0.2599540</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12 12    species  virginica x1_bis + x1 + x2 + x3   0.6998830 0.3303370</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           x2         x3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1         NA         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2         NA         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3  0.2834193         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4  0.2375602  0.2521257</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5         NA         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6         NA         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7  0.7355868         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8  0.9083370 -0.6792238</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9         NA         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10        NA         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11 0.9348189         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12 0.9455356 -0.1697527</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   id          rhs (Intercept)         x1       x2         x3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  1           x1    6.526223 -0.2233611       NA         NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  2      x1 + x2    2.249140  0.5955247 0.471920         NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  3 x1 + x2 + x3    1.855997  0.6508372 0.709132 -0.5564827</span>
 <span class="r-in"><span><span class="co"># now it does</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">est</span>, collin <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    id sample.var     sample                   rhs (Intercept)    x1_bis x1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1    species     setosa                x1_bis   2.6390012 0.6904897 NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   2    species     setosa           x1_bis + x1   2.6390012 0.6904897 NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   3    species     setosa      x1_bis + x1 + x2   2.3037382 0.6674162 NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4   4    species     setosa x1_bis + x1 + x2 + x3   2.3518898 0.6548350 NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   5    species versicolor                x1_bis   3.5397347 0.8650777 NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   6    species versicolor           x1_bis + x1   3.5397347 0.8650777 NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7   7    species versicolor      x1_bis + x1 + x2   2.1164314 0.2476422 NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8   8    species versicolor x1_bis + x1 + x2 + x3   1.8955395 0.3868576 NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9   9    species  virginica                x1_bis   3.9068365 0.9015345 NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10 10    species  virginica           x1_bis + x1   3.9068365 0.9015345 NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11 11    species  virginica      x1_bis + x1 + x2   0.6247824 0.2599540 NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12 12    species  virginica x1_bis + x1 + x2 + x3   0.6998830 0.3303370 NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           x2         x3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1         NA         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2         NA         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3  0.2834193         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4  0.2375602  0.2521257</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5         NA         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6         NA         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7  0.7355868         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8  0.9083370 -0.6792238</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9         NA         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10        NA         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11 0.9348189         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12 0.9455356 -0.1697527</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   id          rhs (Intercept)         x1       x2         x3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  1           x1    6.526223 -0.2233611       NA         NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  2      x1 + x2    2.249140  0.5955247 0.471920         NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  3 x1 + x2 + x3    1.855997  0.6508372 0.709132 -0.5564827</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># long</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">est</span>, long <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    id sample.var     sample                   rhs coefficient   estimate</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1    species     setosa                x1_bis (Intercept)  2.6390012</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   1    species     setosa                x1_bis      x1_bis  0.6904897</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   2    species     setosa           x1_bis + x1 (Intercept)  2.6390012</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   2    species     setosa           x1_bis + x1      x1_bis  0.6904897</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9   3    species     setosa      x1_bis + x1 + x2 (Intercept)  2.3037382</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10  3    species     setosa      x1_bis + x1 + x2      x1_bis  0.6674162</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11  3    species     setosa      x1_bis + x1 + x2          x2  0.2834193</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13  4    species     setosa x1_bis + x1 + x2 + x3 (Intercept)  2.3518898</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14  4    species     setosa x1_bis + x1 + x2 + x3      x1_bis  0.6548350</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15  4    species     setosa x1_bis + x1 + x2 + x3          x2  0.2375602</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16  4    species     setosa x1_bis + x1 + x2 + x3          x3  0.2521257</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17  5    species versicolor                x1_bis (Intercept)  3.5397347</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18  5    species versicolor                x1_bis      x1_bis  0.8650777</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21  6    species versicolor           x1_bis + x1 (Intercept)  3.5397347</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 22  6    species versicolor           x1_bis + x1      x1_bis  0.8650777</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 25  7    species versicolor      x1_bis + x1 + x2 (Intercept)  2.1164314</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 26  7    species versicolor      x1_bis + x1 + x2      x1_bis  0.2476422</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 27  7    species versicolor      x1_bis + x1 + x2          x2  0.7355868</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 29  8    species versicolor x1_bis + x1 + x2 + x3 (Intercept)  1.8955395</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 30  8    species versicolor x1_bis + x1 + x2 + x3      x1_bis  0.3868576</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 31  8    species versicolor x1_bis + x1 + x2 + x3          x2  0.9083370</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 32  8    species versicolor x1_bis + x1 + x2 + x3          x3 -0.6792238</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 33  9    species  virginica                x1_bis (Intercept)  3.9068365</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 34  9    species  virginica                x1_bis      x1_bis  0.9015345</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 37 10    species  virginica           x1_bis + x1 (Intercept)  3.9068365</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 38 10    species  virginica           x1_bis + x1      x1_bis  0.9015345</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 41 11    species  virginica      x1_bis + x1 + x2 (Intercept)  0.6247824</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 42 11    species  virginica      x1_bis + x1 + x2      x1_bis  0.2599540</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 43 11    species  virginica      x1_bis + x1 + x2          x2  0.9348189</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 45 12    species  virginica x1_bis + x1 + x2 + x3 (Intercept)  0.6998830</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 46 12    species  virginica x1_bis + x1 + x2 + x3      x1_bis  0.3303370</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 47 12    species  virginica x1_bis + x1 + x2 + x3          x2  0.9455356</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 48 12    species  virginica x1_bis + x1 + x2 + x3          x3 -0.1697527</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    id          rhs coefficient   estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1           x1 (Intercept)  6.5262226</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   1           x1          x1 -0.2233611</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5   2      x1 + x2 (Intercept)  2.2491402</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6   2      x1 + x2          x1  0.5955247</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7   2      x1 + x2          x2  0.4719200</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9   3 x1 + x2 + x3 (Intercept)  1.8559975</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10  3 x1 + x2 + x3          x1  0.6508372</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11  3 x1 + x2 + x3          x2  0.7091320</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12  3 x1 + x2 + x3          x3 -0.5564827</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># long but balanced (with NAs then)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">est</span>, long <span class="op">=</span> <span class="cn">TRUE</span>, na.rm <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    id sample.var     sample                   rhs coefficient   estimate</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1    species     setosa                x1_bis (Intercept)  2.6390012</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   1    species     setosa                x1_bis      x1_bis  0.6904897</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   1    species     setosa                x1_bis          x2         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4   1    species     setosa                x1_bis          x3         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   2    species     setosa           x1_bis + x1 (Intercept)  2.6390012</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   2    species     setosa           x1_bis + x1      x1_bis  0.6904897</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7   2    species     setosa           x1_bis + x1          x2         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8   2    species     setosa           x1_bis + x1          x3         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9   3    species     setosa      x1_bis + x1 + x2 (Intercept)  2.3037382</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10  3    species     setosa      x1_bis + x1 + x2      x1_bis  0.6674162</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11  3    species     setosa      x1_bis + x1 + x2          x2  0.2834193</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12  3    species     setosa      x1_bis + x1 + x2          x3         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13  4    species     setosa x1_bis + x1 + x2 + x3 (Intercept)  2.3518898</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14  4    species     setosa x1_bis + x1 + x2 + x3      x1_bis  0.6548350</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15  4    species     setosa x1_bis + x1 + x2 + x3          x2  0.2375602</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16  4    species     setosa x1_bis + x1 + x2 + x3          x3  0.2521257</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17  5    species versicolor                x1_bis (Intercept)  3.5397347</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18  5    species versicolor                x1_bis      x1_bis  0.8650777</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19  5    species versicolor                x1_bis          x2         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20  5    species versicolor                x1_bis          x3         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21  6    species versicolor           x1_bis + x1 (Intercept)  3.5397347</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 22  6    species versicolor           x1_bis + x1      x1_bis  0.8650777</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 23  6    species versicolor           x1_bis + x1          x2         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 24  6    species versicolor           x1_bis + x1          x3         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 25  7    species versicolor      x1_bis + x1 + x2 (Intercept)  2.1164314</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 26  7    species versicolor      x1_bis + x1 + x2      x1_bis  0.2476422</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 27  7    species versicolor      x1_bis + x1 + x2          x2  0.7355868</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 28  7    species versicolor      x1_bis + x1 + x2          x3         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 29  8    species versicolor x1_bis + x1 + x2 + x3 (Intercept)  1.8955395</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 30  8    species versicolor x1_bis + x1 + x2 + x3      x1_bis  0.3868576</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 31  8    species versicolor x1_bis + x1 + x2 + x3          x2  0.9083370</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 32  8    species versicolor x1_bis + x1 + x2 + x3          x3 -0.6792238</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 33  9    species  virginica                x1_bis (Intercept)  3.9068365</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 34  9    species  virginica                x1_bis      x1_bis  0.9015345</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 35  9    species  virginica                x1_bis          x2         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 36  9    species  virginica                x1_bis          x3         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 37 10    species  virginica           x1_bis + x1 (Intercept)  3.9068365</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 38 10    species  virginica           x1_bis + x1      x1_bis  0.9015345</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 39 10    species  virginica           x1_bis + x1          x2         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 40 10    species  virginica           x1_bis + x1          x3         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 41 11    species  virginica      x1_bis + x1 + x2 (Intercept)  0.6247824</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 42 11    species  virginica      x1_bis + x1 + x2      x1_bis  0.2599540</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 43 11    species  virginica      x1_bis + x1 + x2          x2  0.9348189</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 44 11    species  virginica      x1_bis + x1 + x2          x3         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 45 12    species  virginica x1_bis + x1 + x2 + x3 (Intercept)  0.6998830</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 46 12    species  virginica x1_bis + x1 + x2 + x3      x1_bis  0.3303370</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 47 12    species  virginica x1_bis + x1 + x2 + x3          x2  0.9455356</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 48 12    species  virginica x1_bis + x1 + x2 + x3          x3 -0.1697527</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    id          rhs coefficient   estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1           x1 (Intercept)  6.5262226</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   1           x1          x1 -0.2233611</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   1           x1          x2         NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   1           x1          x3         NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5   2      x1 + x2 (Intercept)  2.2491402</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6   2      x1 + x2          x1  0.5955247</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7   2      x1 + x2          x2  0.4719200</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8   2      x1 + x2          x3         NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9   3 x1 + x2 + x3 (Intercept)  1.8559975</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10  3 x1 + x2 + x3          x1  0.6508372</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11  3 x1 + x2 + x3          x2  0.7091320</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12  3 x1 + x2 + x3          x3 -0.5564827</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

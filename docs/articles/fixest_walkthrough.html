@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.12.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.12.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -81,7 +81,7 @@
                         <h4 data-toc-skip class="author">Laurent Berge
 and Grant McDermott</h4>
             
-            <h4 data-toc-skip class="date">2024-04-17</h4>
+            <h4 data-toc-skip class="date">2024-06-11</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/vignettes/fixest_walkthrough.Rmd" class="external-link"><code>vignettes/fixest_walkthrough.Rmd</code></a></small>
       <div class="d-none name"><code>fixest_walkthrough.Rmd</code></div>
@@ -2071,10 +2071,8 @@ of lead/lag creation:</p>
 <span><span class="va">pdat_dt</span> <span class="op">=</span> <span class="fu"><a href="../reference/panel.html">panel</a></span><span class="op">(</span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="va">base_did</span><span class="op">)</span>, <span class="op">~</span><span class="va">id</span><span class="op">+</span><span class="va">period</span><span class="op">)</span></span>
 <span><span class="co"># we create a lagged value of the variable x1</span></span>
 <span><span class="va">pdat_dt</span><span class="op">[</span>, <span class="va">x1_l1</span> <span class="op">:=</span> <span class="fu"><a href="../reference/l.html">l</a></span><span class="op">(</span><span class="va">x1</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt; [1] TRUE</span></span>
 <span><span class="co"># Now </span></span>
 <span><span class="va">pdat_dt</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x1_l1_fill0"</span>, <span class="st">"y_f2"</span><span class="op">)</span> <span class="op">:=</span> <span class="fu">.</span><span class="op">(</span><span class="fu"><a href="../reference/l.html">l</a></span><span class="op">(</span><span class="va">x1</span>, fill <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>, <span class="fu"><a href="../reference/l.html">f</a></span><span class="op">(</span><span class="va">y</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt; [1] TRUE</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pdat_dt</span><span class="op">)</span></span>
 <span><span class="co">#&gt;              y         x1    id period  post treat      x1_l1 x1_l1_fill0</span></span>
 <span><span class="co">#&gt;          &lt;num&gt;      &lt;num&gt; &lt;int&gt;  &lt;int&gt; &lt;num&gt; &lt;num&gt;      &lt;num&gt;       &lt;num&gt;</span></span>

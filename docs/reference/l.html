@@ -14,7 +14,7 @@ the function panel or with the argument panel.id in the estimation)."><!-- mathj
     
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.12.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.12.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -69,11 +69,11 @@ the function <code><a href="panel.html">panel</a></code> or with the argument <c
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">f</span><span class="op">(</span><span class="va">x</span>, lead <span class="op">=</span> <span class="fl">1</span>, fill <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">f</span><span class="op">(</span><span class="va">x</span>, k <span class="op">=</span> <span class="fl">1</span>, fill <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">d</span><span class="op">(</span><span class="va">x</span>, lag <span class="op">=</span> <span class="fl">1</span>, fill <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span>
+<span><span class="fu">d</span><span class="op">(</span><span class="va">x</span>, k <span class="op">=</span> <span class="fl">1</span>, fill <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">l</span><span class="op">(</span><span class="va">x</span>, lag <span class="op">=</span> <span class="fl">1</span>, fill <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">l</span><span class="op">(</span><span class="va">x</span>, k <span class="op">=</span> <span class="fl">1</span>, fill <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -82,8 +82,10 @@ the function <code><a href="panel.html">panel</a></code> or with the argument <c
 <dd><p>The variable.</p></dd>
 
 
-<dt>lead</dt>
-<dd><p>A vector of integers giving the number of leads. Negative values lead to lags.
+<dt>k</dt>
+<dd><p>A vector of integers giving the number of lags (for <code>l()</code> and <code>d()</code>) or
+leads (for <code>f()</code>). For <code>l()</code> and <code>d()</code> negative values lead to leads. For <code>f()</code>
+negative values lead to lags.
 This argument can be a vector when using it in fixest estimations. When creating variables in
 a <code><a href="https://rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table</a></code>, it <strong>must</strong> be of length one.</p></dd>
 
@@ -92,12 +94,6 @@ a <code><a href="https://rdatatable.gitlab.io/data.table/reference/data.table.ht
 <dd><p>A scalar, default is <code>NA</code>. How to fill the missing values due to the lag/lead?
 Note that in a <code>fixest</code> estimation, 'fill' must be numeric (not required when
 creating new variables).</p></dd>
-
-
-<dt>lag</dt>
-<dd><p>A vector of integers giving the number of lags. Negative values lead to leads.
-This argument can be a vector when using it in fixest estimations. When creating variables in
-a <code><a href="https://rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table</a></code>, it <strong>must</strong> be of length one.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -190,7 +186,6 @@ the argument <code>panel.id</code> (see for example in the function <code><a hre
 <span class="r-in"><span>  <span class="va">pdat_dt</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x1_l1_fill0"</span>, <span class="st">"y_f2"</span><span class="op">)</span> <span class="op">:=</span> <span class="fu">.</span><span class="op">(</span><span class="fu">l</span><span class="op">(</span><span class="va">x1</span>, fill <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>, <span class="fu">f</span><span class="op">(</span><span class="va">y</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: data.table</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>

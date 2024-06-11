@@ -18,7 +18,7 @@ arguments in emmeans::emmeans() or emmeans::ref_grid()."><!-- mathjax --><script
     
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.12.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.12.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -94,11 +94,12 @@ intercept.</p>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">Fatalities</span>, package <span class="op">=</span> <span class="st">"AER"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="va">Fatalities</span><span class="op">$</span><span class="va">frate</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">Fatalities</span>, <span class="va">fatal</span><span class="op">/</span><span class="va">pop</span> <span class="op">*</span> <span class="fl">10000</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="va">fat.mod</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">frate</span> <span class="op">~</span> <span class="va">breath</span> <span class="op">*</span> <span class="va">jail</span> <span class="op">*</span> <span class="va">beertax</span> <span class="op">|</span> <span class="va">state</span> <span class="op">+</span> <span class="va">year</span>, data <span class="op">=</span> <span class="va">Fatalities</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="va">emm</span> <span class="op">=</span> <span class="fu">emmeans</span><span class="op">(</span><span class="va">fat.mod</span>, <span class="op">~</span> <span class="va">breath</span><span class="op">*</span><span class="va">jail</span>, cluster <span class="op">=</span> <span class="op">~</span> <span class="va">state</span> <span class="op">+</span> <span class="va">year</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">emm</span> <span class="op">=</span> <span class="fu">emmeans</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/emmeans/man/emmeans.html" class="external-link">emmeans</a></span><span class="op">(</span><span class="va">fat.mod</span>, <span class="op">~</span> <span class="va">breath</span><span class="op">*</span><span class="va">jail</span>, cluster <span class="op">=</span> <span class="op">~</span> <span class="va">state</span> <span class="op">+</span> <span class="va">year</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="va">emm</span>   <span class="co">### SEs and CIs are incorrect</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>    <span class="fu">contrast</span><span class="op">(</span><span class="va">emm</span>, <span class="st">"consec"</span>, by <span class="op">=</span> <span class="st">"breath"</span><span class="op">)</span>   <span class="co">### results are reliable</span></span></span>
+<span class="r-in"><span>    <span class="fu">emmeans</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/emmeans/man/contrast.html" class="external-link">contrast</a></span><span class="op">(</span><span class="va">emm</span>, <span class="st">"consec"</span>, by <span class="op">=</span> <span class="st">"breath"</span><span class="op">)</span>   <span class="co">### results are reliable</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required namespace: AER</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 1 observation removed because of NA values (RHS: 1).</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: Results may be misleading due to involvement in interactions</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> breath = no:</span>
