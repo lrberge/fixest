@@ -17,6 +17,8 @@
 
 - fix bug when creating lead/lags in `data.table`s and the name of the data set was equal to the name of a function. Reported by @kmfrick, #500
 
+- fix several bugs affecting R version 3.5.0
+
 # fixest 0.12.0
 
 ## New features

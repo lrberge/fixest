@@ -1555,6 +1555,8 @@ test(var(c2 - m_fe$fe_bis[names(c2)]), 0, "~")
 
 c3  = get_coef(all_coef, "fe_bis::|:x3")
 test(c3, m_fe[["fe_bis[[x3]]"]][names(c3)], "~", tol = 1e-5)
+# This test does not pass in R 3.5.0.... why?
+# diff: 6.56851425546723e-05
 
 #
 # With 2 x (1 FE + 1 VS) + 1 FE
@@ -1595,7 +1597,8 @@ test(c3, m_fe[["fe_bis[[x2]]"]][names(c3)], "~", tol = 2e-4)
 
 c4  = get_coef(all_coef, "fe_bis::(?=.+x3)|:x3")
 test(c4, m_fe[["fe_bis[[x3]]"]][names(c4)], "~", tol = 2e-4)
-
+# This test does not pass in R 3.5.0.... why?
+# diff: 0.000239702137861342
 
 #
 # With weights
@@ -2044,7 +2047,7 @@ est_singleF_lm = lm(y ~ x1 + species, base)
 new_data = data.frame(x1 = 12:13, species = factor("setosa"))
 
 test(predict(est_singleF, newdata = new_data),
-   predict(est_singleF_lm, newdata = new_data))
+     predict(est_singleF_lm, newdata = new_data))
 
 #
 # SE of prediction

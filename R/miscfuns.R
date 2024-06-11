@@ -4020,7 +4020,6 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
 
   # Are there factors NOT in i()? If so => model.matrix is used
   dataNames = names(data)
-
   if(!is.null(mf)){
     useModel.matrix = TRUE
   } else {
@@ -4050,6 +4049,13 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
       # case i() + anything that requires evaluation based on the raw data (poly, factor, etc)
       # is there any drawback?
       fml = formula(mf)
+      if(length(fml) == 3){
+        # bug R 3.5.0
+        fml_new = update(fml, .~xxxxxx + .)
+        fml_new[[3]][[2]] = fml[[2]]
+        fml_new[[2]] = NULL
+        fml = fml_new
+      }
     }
 
     linear.mat = stats::model.matrix(fml, mf)
@@ -4187,6 +4193,10 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml,
   I_IGNORE_ERRORS = TRUE
 
   new_matrix = fixest_model_matrix(fml, newdata, fake_intercept, i_noref, mf = mf)
+  
+  if(R.Version()$major == "3"){
+    colnames(new_matrix) = gsub("`", "", colnames(new_matrix), fixed = TRUE)
+  }
 
   if(length(GLOBAL_fixest_mm_info) > 0){
     attr(new_matrix, "model_matrix_info") = GLOBAL_fixest_mm_info
