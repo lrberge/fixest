@@ -372,8 +372,9 @@ void mp_sparse_Xty(NumericVector &Xty, const std::vector<int> &start_j, const st
 void mp_XtX(NumericMatrix &XtX, const NumericMatrix &X, const NumericMatrix &wX, int nthreads){
 
   int N = X.nrow();
-  int K = X.ncol();
-
+  bool isX = N > 1;
+  int K = isX ? X.ncol() : 0;
+  
   // specific scheme for large N and K == 1
   if(K == 1){
 

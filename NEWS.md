@@ -7,6 +7,8 @@
 
 # Bugs
 
+- fix bug leading to CRAN error (in IV with fixed-effects and no exogenous variable)
+
 - fix display bug in errors regarding lead/lag problems in fixest estimations.
 
 - fix bug when arguments lead or lag in functions l/f were given explicitly in fixest estimations. Reported by @MaelAstruc, #499
