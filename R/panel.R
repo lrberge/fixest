@@ -354,7 +354,8 @@ l = function(x, k = 1, fill = NA){
       # I don't understand why but the frame numbers got messed up when
       # variables are created within a function
 
-      var = sys.call(sysEval)$x
+      # I need deparse for it to work with R 3.5.0
+      var = deparse(sys.call(sysEval)$x)[1]
 
       data_fixest_panel = NULL
       up = 0
