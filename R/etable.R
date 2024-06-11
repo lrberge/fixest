@@ -2861,12 +2861,15 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         if(!grepl("::", x, fixed = TRUE)) return(fitstat_dict[x])
 
         xx = strsplit(x, "::")[[1]]
+        
+        res = paste0(fitstat_dict[xx[1]], ", ", dict_apply(xx[2], dict))
 
         if(isTex) {
-          xx[2] = escape_latex(xx[2])
+          # LB: we should NOT escape before applying the dictionnary
+          res = escape_latex(res)
         }
 
-        paste0(fitstat_dict[xx[1]], ", ", dict_apply(xx[2], dict))
+        res
       }
 
       for(v in all_names_new){

@@ -19,6 +19,8 @@
 
 - fix several bugs affecting R version 3.5.0
 
+- fix bug in `etable` when variables appeared in the statistics and those variables contained invalid Latex characters. PR by @MaelAstruc, #508
+
 # fixest 0.12.0
 
 ## New features
