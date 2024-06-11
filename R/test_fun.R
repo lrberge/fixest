@@ -276,7 +276,7 @@ test_err_contains = function(x, pattern){
   
 }
 
-run_tests = function(chunk, from = 1, source = FALSE){
+run_tests = function(chunk, from = 1, source = FALSE, use_devtools = TRUE){
   update_test_counter(reset = TRUE)
   
   wd = getwd()
@@ -452,7 +452,8 @@ run_tests = function(chunk, from = 1, source = FALSE){
 
   # D) Evaluation
 
-  test_code = c("devtools::load_all(export_all = FALSE)", test_code)
+  loader = if(use_devtools) "devtools::load_all(export_all = FALSE)" else ""
+  test_code = c(loader, test_code)
 
   parsed_code = parse(text = test_code)
 
@@ -505,7 +506,7 @@ run_tests = function(chunk, from = 1, source = FALSE){
     error_clean = gsub("^[^:]+: *", "", my_eval)
     message("Here is the error:\n", error_clean)
     
-    if(interactive()){
+    if(interactive() && use_devtools){
       command = paste0("rstudioapi::navigateToFile(\"", my_file_full, "\", ", line_in_file, ")")
       command = str2lang(command)
       
