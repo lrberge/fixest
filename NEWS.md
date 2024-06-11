@@ -1,11 +1,11 @@
 
 # fixest 0.12.1
 
-# Major bugs affecting R versions <= 4.1.2
+## Major bugs affecting R versions <= 4.1.2
 
 - require `stringmagic` version >= 1.1.2 to fix several major bugs affecting R versions <= 4.1.2
 
-# Bugs
+## Bugs
 
 - fix bug leading to CRAN error (in IV with fixed-effects and no exogenous variable)
 
@@ -20,6 +20,8 @@
 - fix several bugs affecting R version 3.5.0
 
 - fix bug in `etable` when variables appeared in the statistics and those variables contained invalid Latex characters. PR by @MaelAstruc, #508
+
+- fix formatting for coefficients/statistics equal to 0. Reported by @MaelAstruc, #504
 
 # fixest 0.12.0
 

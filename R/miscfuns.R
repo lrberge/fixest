@@ -5790,7 +5790,7 @@ format_nber_single = function(x, digits, round = FALSE, pow_above = 10, pow_belo
     }
   }
 
-  exponent = floor(log10(abs(x)))
+  exponent = if(x == 0) -16 else floor(log10(abs(x)))
 
   if(exponent >= pow_above || exponent <= pow_below){
     left_value = round(x*10**-exponent, min(digits, 2))

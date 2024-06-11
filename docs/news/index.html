@@ -58,6 +58,21 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.12.1" id="fixest-0121">fixest 0.12.1<a class="anchor" aria-label="anchor" href="#fixest-0121"></a></h2>
+<div class="section level3">
+<h3 id="major-bugs-affecting-r-versions--0-12-1">Major bugs affecting R versions &lt;= 4.1.2<a class="anchor" aria-label="anchor" href="#major-bugs-affecting-r-versions--0-12-1"></a></h3>
+<ul><li>require <code>stringmagic</code> version &gt;= 1.1.2 to fix several major bugs affecting R versions &lt;= 4.1.2</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bugs-0-12-1">Bugs<a class="anchor" aria-label="anchor" href="#bugs-0-12-1"></a></h3>
+<ul><li><p>fix bug leading to CRAN error (in IV with fixed-effects and no exogenous variable)</p></li>
+<li><p>fix display bug in errors regarding lead/lag problems in fixest estimations.</p></li>
+<li><p>fix bug when arguments lead or lag in functions l/f were given explicitly in fixest estimations. Reported by <a href="https://github.com/MaelAstruc" class="external-link">@MaelAstruc</a>, <a href="https://github.com/lrberge/fixest/issues/499" class="external-link">#499</a></p></li>
+<li><p>remove the diplay of <code>TRUE</code> when creating lags/leads in <code>data.table</code>.</p></li>
+<li><p>fix bug when creating lead/lags in <code>data.table</code>s and the name of the data set was equal to the name of a function. Reported by <a href="https://github.com/kmfrick" class="external-link">@kmfrick</a>, <a href="https://github.com/lrberge/fixest/issues/500" class="external-link">#500</a></p></li>
+<li><p>fix several bugs affecting R version 3.5.0</p></li>
+<li><p>fix bug in <code>etable</code> when variables appeared in the statistics and those variables contained invalid Latex characters. PR by <a href="https://github.com/MaelAstruc" class="external-link">@MaelAstruc</a>, <a href="https://github.com/lrberge/fixest/issues/508" class="external-link">#508</a></p></li>
+<li><p>fix formatting for coefficients/statistics equal to 0. Reported by <a href="https://github.com/MaelAstruc" class="external-link">@MaelAstruc</a>, <a href="https://github.com/lrberge/fixest/issues/504" class="external-link">#504</a></p></li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.12.0" id="fixest-0120">fixest 0.12.0<a class="anchor" aria-label="anchor" href="#fixest-0120"></a></h2><p class="text-muted">CRAN release: 2024-04-17</p>
