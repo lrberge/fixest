@@ -2857,23 +2857,23 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
 
       # Now the aliases
       fitstat_dict_new = c()
-      fun_rename = function(x, isTex) {
+      fun_rename_stats = function(x, isTex) {
         if(!grepl("::", x, fixed = TRUE)) return(fitstat_dict[x])
 
         xx = strsplit(x, "::")[[1]]
         
-        res = paste0(fitstat_dict[xx[1]], ", ", dict_apply(xx[2], dict))
-
-        if(isTex) {
-          # LB: we should NOT escape before applying the dictionnary
-          res = escape_latex(res)
+        var = dict_apply(xx[2], dict)
+        if(isTex){
+          var = escape_latex(var)
         }
+        
+        res = paste0(fitstat_dict[xx[1]], ", ", var)
 
         res
       }
 
       for(v in all_names_new){
-        fitstat_dict_new[v] = fun_rename(v, isTex)
+        fitstat_dict_new[v] = fun_rename_stats(v, isTex)
       }
 
       fitstat_list = fitstat_list_new
