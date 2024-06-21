@@ -5278,6 +5278,7 @@ print.etable_df = function(x, ...){
 #### Viewer ####
 ####
 
+
 check_build_available = function(){
 
   opt = getOption("fixest_build_available")
@@ -5610,7 +5611,7 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
   if(view){
     my_viewer = getOption("viewer")
     if(is.null(my_viewer)){
-      warning("To preview the table, we need a viewer -- which wasn't found (it sjould work on RStudio and VScode).")
+      warning("To preview the table, we need a viewer -- which wasn't found (it should work on RStudio and VScode).")
     } else {
       # setting up the html document
 
@@ -5723,8 +5724,7 @@ check_set_path = function(x, type = "", create = TRUE, up = 0){
 }
 
 viewer_html_template = function(png_name){
-  # I really wanted to see the full table all the time, so I had to add some JS.
-  # There must be some straightforward way in CSS, but I don't know it...
+
   .dsb0('
 <!DOCTYPE html>
 <html> <head>
