@@ -81,7 +81,7 @@
                         <h4 data-toc-skip class="author">Laurent Berge
 and Grant McDermott</h4>
             
-            <h4 data-toc-skip class="date">2024-06-11</h4>
+            <h4 data-toc-skip class="date">2024-08-16</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/vignettes/fixest_walkthrough.Rmd" class="external-link"><code>vignettes/fixest_walkthrough.Rmd</code></a></small>
       <div class="d-none name"><code>fixest_walkthrough.Rmd</code></div>
@@ -872,8 +872,9 @@ these variables. Let’s give a first example:</p>
 the right of the formula. Had we used the keyword only, that would have
 led to an error:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span>, <span class="st">"newey_west"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error in vcov.fixest(object, vcov = vcov, ssc = ssc, forceCovariance = forceCovariance, : To compute the Newey-West VCOV, we need a variable for the time. Since you didn't provide it in the formula, we typically deduce it from the 'panel.id' identifiers. PROBLEM: no 'panel.id' was set in this estimation. Please provide it in the formula.</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span>, <span class="st">"newey_west"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error in vcov.fixest(object, vcov = vcov, ssc = ssc, forceCovariance = forceCovariance,  : </span></span>
+<span><span class="co">#&gt;   To compute the Newey-West VCOV, we need a variable for the time. Since you didn't provide it in the formula, we typically deduce it from the 'panel.id' identifiers. PROBLEM: no 'panel.id' was set in this estimation. Please provide it in the formula.</span></span></code></pre></div>
 <p>But, huh what does the error message says? That the <code>time</code>
 variable can be deduced? Indeed, that’s the thing: the algorithm tries
 hard to provide sensible default values for the user. Let’s now try with
@@ -2071,8 +2072,10 @@ of lead/lag creation:</p>
 <span><span class="va">pdat_dt</span> <span class="op">=</span> <span class="fu"><a href="../reference/panel.html">panel</a></span><span class="op">(</span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="va">base_did</span><span class="op">)</span>, <span class="op">~</span><span class="va">id</span><span class="op">+</span><span class="va">period</span><span class="op">)</span></span>
 <span><span class="co"># we create a lagged value of the variable x1</span></span>
 <span><span class="va">pdat_dt</span><span class="op">[</span>, <span class="va">x1_l1</span> <span class="op">:=</span> <span class="fu"><a href="../reference/l.html">l</a></span><span class="op">(</span><span class="va">x1</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span>
 <span><span class="co"># Now </span></span>
 <span><span class="va">pdat_dt</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x1_l1_fill0"</span>, <span class="st">"y_f2"</span><span class="op">)</span> <span class="op">:=</span> <span class="fu">.</span><span class="op">(</span><span class="fu"><a href="../reference/l.html">l</a></span><span class="op">(</span><span class="va">x1</span>, fill <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>, <span class="fu"><a href="../reference/l.html">f</a></span><span class="op">(</span><span class="va">y</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pdat_dt</span><span class="op">)</span></span>
 <span><span class="co">#&gt;              y         x1    id period  post treat      x1_l1 x1_l1_fill0</span></span>
 <span><span class="co">#&gt;          &lt;num&gt;      &lt;num&gt; &lt;int&gt;  &lt;int&gt; &lt;num&gt; &lt;num&gt;      &lt;num&gt;       &lt;num&gt;</span></span>

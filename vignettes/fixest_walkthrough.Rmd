@@ -312,8 +312,8 @@ summary(est, newey ~ id + period)
 
 Here we queried Newey-West SEs and provided the panel identifiers in the right of the formula. Had we used the keyword only, that would have led to an error:
 
-```{r, error=TRUE}
-summary(est, "newey_west")
+```{r}
+try(summary(est, "newey_west"))
 ```
 
 But, huh what does the error message says? That the `time` variable can be deduced? Indeed, that's the thing: the algorithm tries hard to provide sensible default values for the user.
