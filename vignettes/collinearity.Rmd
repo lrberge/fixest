@@ -1,0 +1,183 @@
+---
+title: "On collinearity"
+author: "Laurent Bergé"
+date: "`r Sys.Date()`"
+output: 
+  html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, results = "asis")
+```
+
+Collinearity is the pebble that inevitably enters the shoe of any applied econometrician in the course of their work. The good news is that econometrics software take that pebble out of your shoe for you. The bad news is that sometimes this pebble is informative and tells you that something is wrong with the model you are estimating.
+
+If you know what collinearity is, how software deal with it, and how it affects your coefficients, you're fine! If you're not described by the previous sentence, then two cases when you encounter collinearity.
+Either you're lucky, and nothing happens or just a few unimportant coefficients become meaningless. Either you're unlucky and... well, your main results are wrong and your paper should be retracted.
+
+Without further ado, let's try to remove chance from the econometrics process and try to undestand what collinearity is and how to deal with it. 
+
+
+# What collinearity is
+
+## This document's definitions
+
+**Definitions.** We are in the context of an OLS estimation. We have one dependent variable represented by the $N$-vector $y$, and the explanatory variables represented by the $N \times K$ matrix $X$. The term *variable* can be used interchangeably with the term *column* (referring to $X$).
+
+**Collinearity.** There is presence of collinearity if at least one column of the matrix $X$ is a linear combination of the other columns. 
+Alternatively, using a more sophisticated language, there is collinearity whenever the rank of $X$ is strictly lower than $K$.
+
+**Collinear set.** The collinear set is the set of all columns that are a linear combination of the other columns.
+
+**Regular set.** The regular set is the set of all columns that are not a linear combination of the other columns. 
+
+## Why collinearity can be a problem
+
+### Technical reason
+
+The OLS estimator is:
+
+$$ \hat{\beta} = (X^\prime X)^{-1}X^\prime y $$
+
+In the presence of collinearity the square matrix $X^\prime X$ is not of full rank, and hence is not invertible. This is like dividing by 0, you can't because it does not make sense. Here you cannot invert, so $\hat{\beta}$ is not defined.
+
+### Substantial reason
+
+A good theorem to understand how OLS works is the Frisch-Waugh-Lovell (FWL) theorem.
+
+Assume your set of explanatory variables is split in two: the matrix $X$ with $k_1$ columns and the matrix $Z$ with $k_2$ columns (we have $K = k_1 + k_2$). Note that you can split the variables in any way you want. The model you want to estimate is:
+
+$$ y = X\beta + Z\gamma + \epsilon $$
+
+Define $y^{resid}$ as the residual of $y$ on $Z$, and $X^{resid}$ as the matrix where each column is the residual of each column of $X$ on $Z$. Consider the following estimation:
+
+$$ y^{resid} = X^{resid}\theta + \epsilon^{resid} $$
+
+Then the theorem states that $\hat\beta = \hat\theta$ and that the residuals of the two regressions are the same. You can find an illustration below.
+
+```{r}
+# Illustration of the FWL theorem's magic
+
+# We use the `iris` data set
+base = setNames(iris, c("y", "x", "z1", "z2", "species"))
+
+library(fixest)
+# The main estimation, we're only interested in `x`'s coefficient
+est = feols(y ~ x + z1 + z2, base)
+
+# We estimate both `y` and `x` on the other explanatory variables
+#  and get the matrix of residuals
+resids = feols(c(y, x) ~ z1 + z2, base) |> resid()
+# We estimate y's residuals on x's residuals
+est_fwl = feols.fit(resids[, 1], resids[, 2])
+
+# We compare the estimates: they are identical
+# The standards errors are also the same, modulo a constant factor
+etable(est, est_fwl, order = "x|resid")
+#>                                 est            est_fwl
+#> Dependent Var.:                   y         resids[,1]
+#> 
+#> x                0.6508*** (0.0667)
+#> resids[,2]                          0.6508*** (0.0660)
+#> Constant          1.856*** (0.2508)
+#> z1               0.7091*** (0.0567)
+#> z2              -0.5565*** (0.1275)
+#> _______________ ___________________ __________________
+#> S.E. type                       IID                IID
+#> Observations                    150                150
+#> R2                          0.85861            0.39104
+#> Adj. R2                     0.85571            0.39104
+#> ---
+#> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+Now let us use the theorem to understand collinearity. Take one variable from the collinear set as the focal variable. By the definition of collinearity, the residual of this variable on all other variables is a $N$-vector of 0s. Indeed, since it is a linear combination of the other variables in the collinear set, it can be perfectly explained and there is no residual. 
+
+Using the FWL theorem, this means that the coefficient of this variable in the main regression is the same as the coefficient of the regression of the residual of $y$ on a constant equal to 0! This makes no sense, right. **And this is true for any variable in the collinear set!**
+
+But what does that mean for *variables in the regular set?* For any such variable, the residual on all other variables contains variation, and hence the coefficient is well defined. 
+
+
+# When is collinearity a problem?
+
+Assume you have two sets of variables: focal variables for which you want to *interpret* the coefficients, and control variables for which the coefficients are not interpreted. These sets are represented by the matrices $X$ and $Z$ respectively with $k_1$ and $k_2$ columns.
+
+$$ y = X\beta + Z\gamma + \epsilon $$
+
+Now assume there is presence of collinearity and the model cannot be directly estimated. There are two cases. 
+
+**1) The collinear set contains only control variables.** In this case collinearity is not an issue since it affects only variables that are not interpreted. The fix is easy: drop iteratively variables from the collinear set until there is no remaining collinearity (reconstruct the collinear set at each step). 
+
+Note, importantly, that it is not because it affects only control variables that collinearity is fine. You should always be wary: when there is collinearity in practice when it shouldn't in theory, this is often the sign of coding mistakes (either the raw data is wrong or the processing is flawed). Allow collinearity only when it makes sense in theory (we'll cover examples later when collinearity is fine in theory **ADD LINK!!!!!**). 
+
+**2) The collinear set contains at least one focal variable.** *Now we have a problem.* Here collinearity can have two origins: i) the model is misspecified, or ii) the focal variables have been wrongly coded. If you are sure that the model is well specified, then check the data and fix how the variables are constructed. Now let's cover model misspecification. 
+
+## The model is misspecified
+
+Err... *the model is misspecified*, what does that mean? This means that you are trying to estimate stuff that don't make sense! It's like accepting the result of the following syllogism:
+
+Let's add $0 = 1 - 1$ to $1 + 1$:
+$$ 1 + 1 = 1 + 1 + (1 - 1) $$ 
+then let's substract $2$ on both sides:
+$$ \Leftright (1 - 1) + (1 - 1) = (1 - 1)  $$
+and finally let's divide by the same number on both sides:
+$$ \Leftright 1 + 1 = 1  $$
+
+The above equations look right but they're wrong (notice the last one). Misspecification in an econometric model is the same: **it (often) can be estimated, it looks right, but it's wrong!**
+
+The problem with a misspecified model is that *there is no technical solution*, you have something wrong in the model and you need to fix it -- *theoretically*. To illustrate this, let us give examples, some obvious, others less so.
+
+### Example 1: Gender gap in publications
+
+Let's take the following context: you study the publication process in science and want to quantify the gender gap in terms of publications. You are also interested in the effect of age on publications. You have a panel where scientists are indexed with $i$ and years are indexed with $t$. 
+The dependent variable $y$ is the number of publications, the focal explanatory variables are $woman_{it}$ taking the value 1 if the person is a woman and 0 otherwise, and $age_{it}$ is equal to the age of scientist $i$ at time $t$. Finally you want to control for time invariant characteristics specific to each scientist, and year specific factors common to all scientists. That means: you include scientist and year fixed-effects.
+
+You end up with the following specification:
+
+$$ y_{it} = \alpha_i + \beta_t + \gamma \times woman_{it} + \theta \times age_{it} + \epsilon{it} $$
+
+The above model is utterly misspecified. Given that the variable $woman_{it}$ is time invariant (we'll allow variation and introduce another problem later), it can be fully explained by the scientist fixed-effects. Hence if you want absolutely to control for scientist fixed-effects: *you cannot estimate the gender gap*, $\hat\gamma$. You **absolutely can't**, live with it. You really need to be aware of that, especially that **econometrics software can give you estimates for $\hat\gamma$!!!!** Ouch! The behavior of econometrics software is detailed later. **ADD LINK**
+
+Is that all? Are we done with misspecification? Well, although the variable $age$ varies across time and scientists, it *is* in the collinear set. We can decompose this variable as follows: $age_{it} = year_{t} - birth\_year_{i}$. Now we can see that this variable is a linear combination of a scientist-invariant variable ($year_{t}$) and a time-invariant variable ($birth\_year_{i}$). This means that the variable $age_{it}$ can be fully explained by the scientist and time fixed-effects. Hence you cannot estimate the effect of age in the presence of these fixed-effects. 
+
+**Any solution?** No. You need to change your model. In this case, the easy solution is to drop the scientist fixed-effects and accept the criticisms that may arise from not controlling for important time invariant confounders. To reformulate, if any of your focal variables is in a collinear set, you need to make non trivial changes to your model specification. 
+
+
+### Example 2: Sneaky misspecification
+
+We use the same context as above: the gender gap in publications. We introduce the following differences. First the variable $woman$ varies: some scientist can change from man to woman and vice versa. Second, we use the variable $harassed_{it}$ which is equal to 1 if scientist $i$ reports being harrassed in year $t$, and 0 otherwise. This variable contains missing values -- this is important.
+
+The model we estimate is:
+
+$$ y_{it} = \alpha_i + \beta_t + \gamma \times woman_{it} + \theta \times harassed_{it} + \epsilon{it} $$
+
+This time the model is not misspecified since both $woman_{it}$ and $harassed_{it}$ present variations that cannot be explained by scientist and time fixed-effects alone.
+
+**Sneaky misspecification.** One problem arises if the variable $harassed$ contains missing values and if, after removing observation with missing values, there is no more within-scientist variation in the variable $woman_{it}$. In that case, the variable $woman$ ends up in the collinear set when the variable $harassed$ is included in the model. This is not a misspecified model *per se*, but purely a data problem: the data does not support the model specification. 
+
+In this specific case, one can apply variable imputation to end up with more non-missing values for the variable $harassed$ and be able to estimate the model. Or simply not use the variable $harassed$ at all.
+
+The bottom line is that, even if the model is well specified, modifications of the sample, due to data availability for example, can lead *in fine* to model misspecification. As mentionned before, the problem is that econmetrics software can provide results even when the model is misspecified, so one really needs to be aware of the problem. 
+
+Now let us review how econometrics software deal with collinearity.
+
+
+# Econometrics sowftare and collinearity
+
+
+
+
+
+## Detecting collinearity: Different algorithms = Different results
+
+
+
+
+
+
+
+
+
+
+
+
