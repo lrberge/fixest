@@ -1,4 +1,11 @@
 
+# fixest 0.12.2
+
+## Bugs
+
+- fix bug when several scalars are included in the formula of the regression
+
+
 # fixest 0.12.1
 
 ## Major bugs affecting R versions <= 4.1.2

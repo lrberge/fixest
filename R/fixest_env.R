@@ -615,7 +615,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
         if(exists(var, envir = call_env)){
           var_value = eval(str2lang(var), call_env)
           if(is.atomic(var_value) && length(var_value) < 5){
-            var_pblm_dp = deparse_long(var_value)
+            var_pblm_dp[i] = deparse_long(var_value)
             type[i] = "scalar"
           } else {
             ok = FALSE
