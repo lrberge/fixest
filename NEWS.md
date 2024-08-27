@@ -9,6 +9,8 @@
 
 - fix bug `lean = TRUE`: remove a potentially large a copy of environments when an estimation was called within a function. Thanks to @aaronrudkin, #514
 
+- fix bug in `etable`: some arguments globally set were wrongly reset when calling the function. Reported by @aaronrudkin, @etiennebacher kindly provided a reprex, #517
+
 
 # fixest 0.12.1
 

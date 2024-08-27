@@ -1535,13 +1535,20 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
   }
 
   check_set_arg(drop.section, "NULL multi match(fixef, slopes, stats)")
-
-  check_set_arg(group, "NULL{list()} named list l0")
-  check_set_arg(extralines, "NULL{list()} list l0 | os formula | vector")
+  
+  check_arg(group, "NULL named list l0")
+  if(is.null(group)){
+    group = list()
+  }
+  
+  check_arg(extralines, "NULL list l0 | os formula | vector")
+  if(is.null(extralines)){
+    extralines = list()
+  }
   # we check it more in depth later
 
-  check_arg(fixef.group, "NULL{list()} logical scalar | named list l0")
-  if(isFALSE(fixef.group)){
+  check_arg(fixef.group, "NULL logical scalar | named list l0")
+  if(is.null(fixef.group) || isFALSE(fixef.group)){
     fixef.group = list()
   }
 
