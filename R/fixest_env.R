@@ -474,6 +474,8 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
     if(length(getFixest_fml()) > 0 || 
          any(c("..", "[", "regex", "mvsw") %in% all.vars(fml, functions = TRUE)) ||
          any(grepl("[[:alnum:]]\\.\\.$", all.vars(fml)))){
+      
+      is_iv_fml = FALSE
 
       fml_no_xpd = fml
 
@@ -537,13 +539,20 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
           }  
         }
       }
-
+      
       # Expansion
       fml = .xpd(fml, data = dataNames, macro = TRUE, frame = call_env, check = TRUE)
 
       # Cleaning if necessary
       lhs = fml[[2]]
-      if(length(lhs) == 2 && lhs[[1]] == "c"){
+      if(length(lhs) == 3){
+        # IV formula
+        lhs = lhs[[2]]
+        if(length(lhs) == 2 && lhs[[1]] == "c"){
+          fml[[2]][[2]] = lhs[[2]]
+        }
+        
+      } else if(length(lhs) == 2 && lhs[[1]] == "c"){
         fml[[2]] = lhs[[2]]
       }
 

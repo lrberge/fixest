@@ -3,7 +3,9 @@
 
 ## Bugs
 
-- fix bug when several scalars are included in the formula of the regression
+- fix bug when several scalars to be evaluated from the calling environment are included in the formula of the regression
+
+- fix bug when: using IV, interpolating the LHS variable, requesting multiple LHS, using a RHS formula as interpolated variable. Reported by @sumtxt, #522
 
 
 # fixest 0.12.1
