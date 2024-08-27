@@ -164,16 +164,27 @@ Now let us review how econometrics software deal with collinearity.
 
 # Econometrics sowftare and collinearity
 
+Most econometrics software, be it in R, Stata, Python, etc, automatically remove collinear variables to perform the estimation. 
+
+**Importantly, all software routines assume that the user provides a well specified model.** In other words, using the terminology defined above, they assume that the focal variables *are not* in the collinear set. It is the user's responsibility to ensure that. If this condition is respected, automatic removal of collinear variables is a feature and not a bug.
+
+In this section we first detail how most software remove collinear variables and how they differ in doing so. We detail why automatic removal is a feature. We end with a description of the pitfalls of automatic removal.
 
 
 
+## Detecting collinearity
 
-## Detecting collinearity: Different algorithms = Different results
+In general the process of collinearity removal is as follows:
+- for each explanatory variable, from left to right, *following the order of the variables given by the user* (this is important):
+  - check wether the current variable is collinear with the variables previously done:
+    - if collinear: remove it
+    - else: continue
+
+```{r}
 
 
 
-
-
+```
 
 
 
