@@ -321,7 +321,6 @@ expected predictor (i.e. fitted.values) obtained by the estimation.}
 \item{residuals}{The difference between the dependent variable and the expected predictor.}
 \item{sumFE}{The sum of the fixed-effects coefficients for each observation.}
 \item{offset}{(When relevant.) The offset formula.}
-\item{weights}{(When relevant.) The weights formula.}
 }
 \description{
 This function estimates maximum likelihood models with any number of fixed-effects.

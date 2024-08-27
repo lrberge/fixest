@@ -3360,7 +3360,6 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
 #' \item{residuals}{The difference between the dependent variable and the expected predictor.}
 #' \item{sumFE}{The sum of the fixed-effects coefficients for each observation.}
 #' \item{offset}{(When relevant.) The offset formula.}
-#' \item{weights}{(When relevant.) The weights formula.}
 #'
 #'
 #' @seealso
