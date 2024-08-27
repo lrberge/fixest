@@ -707,7 +707,8 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov
     var2clean = c("fixef_id", "data", "residuals", "fitted.values", "scores", "sumFE",
                   "slope_variables_reordered", "y", "weights", "irls_weights",
                   "obs_selection", "iv_residuals", "fitted.values_demean",
-                  "working_residuals", "linear.predictors")
+                  "working_residuals", "linear.predictors", 
+                  "summary_flags", "call_env")
 
     object[var2clean] = NULL
 
@@ -722,31 +723,25 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov
   }
 
   object$summary = TRUE
-
+  
+  # New behavior 2024-08-27: we do not keep the flags if lean = TRUE
+  # => leads to large objects + feature lost is OK
+  #
+  
   # We save the arguments used to construct the summary
   if("summary_flags" %in% names(dots)){
     # If here => this is a call from an estimation (=fit)
-    object$summary_flags = dots$summary_flags
+    if(!lean){
+      object$summary_flags = dots$summary_flags
+    }
     object$summary_from_fit = TRUE
-  } else {
+  } else if(!lean){
     # build_flags does not accept missing arguments
     if(missing(ssc)) ssc = NULL
-
-    if(lean){
-
-      size_KB = as.numeric(object.size(vcov)) / 8 / 1000
-
-      if(size_KB > 100){
-        # Here => means the user has manually provided a cluster => will be of size N at least
-        # To respect lean = TRUE we keep no memory of this choice
-        vcov_in = NULL
-      }
-
-    }
-
     object$summary_flags = build_flags(mc, vcov = vcov_in, ssc = ssc)
     object$summary_from_fit = NULL
   }
+  
 
   # agg
   if(!missnull(agg)){

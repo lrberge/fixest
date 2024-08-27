@@ -7,6 +7,8 @@
 
 - fix bug when: using IV, interpolating the LHS variable, requesting multiple LHS, using a RHS formula as interpolated variable. Reported by @sumtxt, #522
 
+- fix bug `lean = TRUE`: remove a potentially large a copy of environments when an estimation was called within a function. Thanks to @aaronrudkin, #514
+
 
 # fixest 0.12.1
 
