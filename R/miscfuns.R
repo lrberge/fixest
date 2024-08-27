@@ -5664,7 +5664,7 @@ sma = string_magic_alias(.check = FALSE)
 
 catma = cat_magic_alias(.check = FALSE)
 
-mema = message_magic_alias(.check = FALSE, .last = "'min(100, .sw)'width")
+mema = message_magic_alias(.check = FALSE)
 
 stvec = stringmagic::string_vec_alias()
 
