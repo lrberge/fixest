@@ -11,6 +11,7 @@
 
 - fix bug in `etable`: some arguments globally set were wrongly reset when calling the function. Reported by @aaronrudkin, @etiennebacher kindly provided a reprex, #517
 
+- fix documentation bugs. Reported by @cseveren
 
 # fixest 0.12.1
 
