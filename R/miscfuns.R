@@ -3789,7 +3789,7 @@ print_coeftable = function(coeftable, lastLine = "", show_signif = TRUE){
   names(ct)[5] = ""
 
   print(ct)
-
+  
   catma(lastLine)
 
   if(show_signif){
