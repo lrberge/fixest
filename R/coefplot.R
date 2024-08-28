@@ -705,7 +705,7 @@ coefplot = function(object, ..., style = NULL, sd, ci_low, ci_high, df.t = NULL,
   # xlim
   if(!missnull(xlim.add)){
     if("xlim" %in% names(dots)){
-      message("Since argument 'xlim' is provided, argument 'xlim.add' is ignored.")
+      mema("Since argument 'xlim' is provided, argument 'xlim.add' is ignored.")
     } else {
       if((!is.numeric(xlim.add) || !length(xlim.add) %in% 1:2)){
         stop("Argument 'xlim.add' must be a numeric vector of length 1 or 2. It represents an extension factor of xlim, in percentage. (Eg: xlim.add = c(0, 0.5) extends xlim of 50% on the right.) If of lentgh 1, positive values represent the right, and negative values the left (Eg: xlim.add = -0.5 is equivalent to xlim.add = c(0.5, 0)).")
@@ -729,7 +729,7 @@ coefplot = function(object, ..., style = NULL, sd, ci_low, ci_high, df.t = NULL,
 
   if(!missnull(ylim.add)){
     if("ylim" %in% names(dots)){
-      message("Since argument 'ylim' is provided, argument 'ylim.add' is ignored.")
+      mema("Since argument 'ylim' is provided, argument 'ylim.add' is ignored.")
     } else {
       if((!length(ylim.add) %in% 1:2 || !is.numeric(ylim.add))){
         stop("Argument 'ylim.add' must be a numeric vector of length 1 or 2. It represents an extension factor of ylim, in percentage. (Eg: ylim.add = c(0, 0.5) extends ylim of 50% on the top.) If of lentgh 1, positive values represent the top, and negative values the bottom (Eg: ylim.add = -0.5 is equivalent to ylim.add = c(0.5, 0)).")
@@ -1819,7 +1819,7 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
                   error = function(e) NULL)
           if(is.null(df.t)){
             if(not_too_many_messages("coefplot_df")){
-              message("The degrees of freedom for the t distribution could",
+              mema("The degrees of freedom for the t distribution could",
                   " not be deduced. Using a Normal distribution instead.\n",
                   "Note that you can provide the argument `df.t` directly.")
             }

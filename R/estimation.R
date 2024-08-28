@@ -1599,7 +1599,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
       if(IN_MULTI){
         stack_multi_notes(msg)
       } else {
-        message(msg)
+        mema(msg)
       }
 
     }
@@ -1867,7 +1867,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
       if(IN_MULTI){
         stack_multi_notes(msg)
       } else {
-        message(msg)
+        mema(msg)
       }
 
     }
@@ -3040,7 +3040,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
       if(IN_MULTI){
         stack_multi_notes(msg)
       } else {
-        message(msg)
+        mema(msg)
       }
     }
 
@@ -4370,7 +4370,7 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
       if(IN_MULTI){
         stack_multi_notes(msg)
       } else {
-        message(msg)
+        mema(msg)
       }
     }
 

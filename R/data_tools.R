@@ -1497,7 +1497,7 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
     ANY_NA = TRUE
 
     if(all(is_na)){
-      message("NOTE: All values are NA.")
+      mema("NOTE: All values are NA.")
       res = rep(NA, n)
       if(add_items){
         if(items.list){

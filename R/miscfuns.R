@@ -752,7 +752,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
       if(all(!is_num)){
         stop("Function cannot be performed: not any numeric variable.")
       } else if(length(pblm) > 0){
-        message("NOTE: The variable", enumerate_items(pblm, "s.is"), " removed because they are non-numeric.")
+        mema("NOTE: The variable{$s, enum.bq, is ? pblm} removed because {$(it;they), is} non-numeric.")
       }
 
       mat_vars = as.matrix(mat_vars[, is_num, FALSE])
@@ -764,7 +764,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
       all_vars = all.vars(fml_x)
       pblm = setdiff(all_vars, names(base))
       if(length(pblm) > 0){
-        stop("The variable", enumerate_items(pblm, "s.is"), " not in the data set (", deparse_short(substitute(base)), ").")
+        stopi("The variable{$s, enum.bq, is ? pblm} not in the data set (", deparse_short(substitute(base)), ").")
       }
 
       # Evaluation control
