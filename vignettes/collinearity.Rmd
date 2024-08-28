@@ -120,9 +120,9 @@ Err... *the model is misspecified*, what does that mean? This means that you are
 Let's add $0 = 1 - 1$ to $1 + 1$:
 $$ 1 + 1 = 1 + 1 + (1 - 1) $$ 
 then let's substract $2$ on both sides:
-$$ \Leftright (1 - 1) + (1 - 1) = (1 - 1)  $$
+$$ \Leftrightarrow (1 - 1) + (1 - 1) = (1 - 1)  $$
 and finally let's divide by the same number on both sides:
-$$ \Leftright 1 + 1 = 1  $$
+$$ \Leftrightarrow 1 + 1 = 1  $$
 
 The above equations look right but they're wrong (notice the last one). Misspecification in an econometric model is the same: **it (often) can be estimated, it looks right, but it's wrong!**
 
@@ -135,7 +135,7 @@ The dependent variable $y$ is the number of publications, the focal explanatory 
 
 You end up with the following specification:
 
-$$ y_{it} = \alpha_i + \beta_t + \gamma \times woman_{it} + \theta \times age_{it} + \epsilon{it} $$
+$$ y_{it} = \alpha_i + \beta_t + \gamma \times woman_{it} + \theta \times age_{it} + \epsilon_{it} $$
 
 The above model is utterly misspecified. Given that the variable $woman_{it}$ is time invariant (we'll allow variation and introduce another problem later), it can be fully explained by the scientist fixed-effects. Hence if you want absolutely to control for scientist fixed-effects: *you cannot estimate the gender gap*, $\hat\gamma$. You **absolutely can't**, live with it. You really need to be aware of that, especially that **econometrics software can give you estimates for $\hat\gamma$!!!!** Ouch! The behavior of econometrics software is [detailed later](#sec_software).
 
@@ -150,7 +150,7 @@ We use the same context as above: the gender gap in publications. We introduce t
 
 The model we estimate is:
 
-$$ y_{it} = \alpha_i + \beta_t + \gamma \times woman_{it} + \theta \times harassed_{it} + \epsilon{it} $$
+$$ y_{it} = \alpha_i + \beta_t + \gamma \times woman_{it} + \theta \times harassed_{it} + \epsilon_{it} $$
 
 This time the model is not misspecified since both $woman_{it}$ and $harassed_{it}$ present variations that cannot be explained by scientist and time fixed-effects alone.
 
@@ -163,7 +163,7 @@ The bottom line is that, even if the model is well specified, modifications of t
 Now let us review how econometrics software deal with collinearity.
 
 
-# Econometrics sowftare and collinearity {#sec_software}
+# Econometrics software and collinearity {#sec_software}
 
 Most econometrics software, be it in R, Stata, Python, etc, automatically remove collinear variables to perform the estimation. 
 
@@ -176,10 +176,11 @@ In this section we first detail how most software remove collinear variables and
 ## Detecting collinearity: Automatic variable removal algorithms
 
 In general the process of collinearity fixing by variable removal is as follows:
-- for each explanatory variable, from left to right, *following the order of the variables given by the user* (this is important):
-  - check wether the current variable is positive to a collinearity test with the variables previously done:
-    - if collinear: remove it
-    - else: continue
+
+* for each explanatory variable, from left to right, *following the order of the variables given by the user* (this is important):
+  * check wether the current variable is positive to a collinearity test with the variables previously done:
+    * if collinear: remove it
+    * else: continue
 
 It is important to stress that we are not talking about *mathematical collinearity* but only about *numerical collinearity* which are two different beasts. 
 Indeed, the results of collinearity detection and fixing depend on the rountines' algorithms. This means that two different routines can lead to different results due to their diverging algorithms -- although this should be the excteption rather than the rule.
@@ -279,7 +280,7 @@ lm(y ~ I(x + 1e7), df) |> coef()
 #>    0.500031           NA
 ```
 
-Contrary to `feols`, for a translation of 1,000,000 `lm` does not remove the variable and gives the right result. However, the behavior becomes similar to that of feols when we apply a translation of $10^7$. A notable difference between the two routines is that there is no explicit message from `lm`.
+Contrary to `feols`, for a translation of 1,000,000 `lm` does not remove the variable and gives the right result. However, the behavior becomes similar to that of `feols` when we apply a translation of $10^7$. A notable difference between the two routines is that there is no explicit message from `lm` (but this is displayed in `lm`'s `summary`).
 
 **Bottom line.** Collinearity detection and fixing is a numerical problem and as such is subject to the ususal pitfall of these, in particular precision problems. Always be wary when variables are removed: if there is no theoretical reason for removal then there might be a data problem. In general, ensuring that the variables have a reasonable numerical range is a good idea.
 
@@ -287,7 +288,9 @@ Contrary to `feols`, for a translation of 1,000,000 `lm` does not remove the var
 
 Consider the context defined in the [model misspecification section](#subsec_gender_gap): where we follow the output of a panel of scientists. Here we want to see the effect of age on performance, when removing individual-specific confounders and confounders linked to the institution of the scientist. Formally, we estimate the following model:
 
-$$ y_{ijt} = \alpha_i + \beta_j + \gamma age_{ijt} + \epsilon_{ijt} $$
+$$ y_{ijt} = \alpha_i + \beta_j + \gamma age_{ijt} + \epsilon_{ijt}, $$
+
+with $i$ indexing the scientist, $j$ the institution and $t$ the year.
 
 Our coefficient of interest is $\gamma$ and we include scientist and institution fixed-effects. 
 For this example we use a built-in data set of `fixest`: `base_pub` which corresponds to a small panel following the output of researchers across time (this panel is constructed from Microsoft Academic Graph data). 
@@ -338,7 +341,7 @@ feols(nb_pub ~ age | author_id + affil_id, base_pub, vcov = "iid")
 #>                 Within R2: 0.015731
 ```
 
-Coming back to our first question: Why is automatic variable removal a feature? In this example the scientist and affiliation fixed-effects *are just controls* and the researcher has no interest in interpreting them. Therefore collinearity is no issue here and whatever variable in the collinear set can be removed to fix it, it does not matter. 
+Coming back to our first question: Why is automatic variable removal a feature? In this example the scientist and affiliation fixed-effects *are just controls* and the researcher has no interest in interpreting them. Therefore collinearity is no issue here and it does not matter which variable is removed to fix collinearity. 
 
 Automatic variable removal is a critical feature especially for routines that do not handle fixed-effects specifically, like `lm`. If there was no automatic variable removal in `lm`, you would not be able to estimate your model even though it *is* well specified!
 
@@ -348,7 +351,7 @@ Automatic variable removal can be a problem **when your model is misspecified** 
 
 We keep using the example on publications. Remember from the section discussing misspecification that the following model is misspecified:
 
-$$ y_{it} = \alpha_i + \beta_t + \gamma \times woman_{it} + \theta \times age_{it} + \epsilon{it}, $$
+$$ y_{it} = \alpha_i + \beta_t + \gamma \times woman_{it} + \theta \times age_{it} + \epsilon_{it}, $$
 
 as both $woman$ and $age$ are in the collinear set.
 
