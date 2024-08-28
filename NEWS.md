@@ -11,6 +11,8 @@
 
 - more notes and messages better fit the user screen
 
+- default for the argument `collin.tol` increased from `1e-10` to `1e-9`.
+
 ## Bugs
 
 - fix bug when several scalars to be evaluated from the calling environment are included in the formula of the regression

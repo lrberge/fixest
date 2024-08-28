@@ -241,7 +241,7 @@ collinearity = function(x, verbose){
 
     } else {
 
-      isIntercept = attr(terms(x$fml),"intercept")
+      isIntercept = attr(terms(x$fml), "intercept")
 
       if(isIntercept && any(constant_id[-1])){
         var_problem = colnames(linear_mat_noIntercept)[constant_id[-1]]

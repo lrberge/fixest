@@ -40,7 +40,7 @@
 #' (to show additional information) and when some observations are removed because 
 #' of collinearity. To avoid displaying these messages, you can set `notes = FALSE`. 
 #' You can remove these messages permanently by using `setFixest_notes(FALSE)`.
-#' @param collin.tol Numeric scalar, default is `1e-10`. Threshold deciding when variables should 
+#' @param collin.tol Numeric scalar, default is `1e-9`. Threshold deciding when variables should 
 #' be considered collinear and subsequently removed from the estimation. Higher values means more 
 #' variables will be removed (if there is presence of collinearity). One signal of presence of 
 #' collinearity is t-stats that are extremely low (for instance when t-stats < 1e-3).
@@ -507,7 +507,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
                  split.drop, cluster, se,
                  ssc, panel.id, fixef, fixef.rm = "none", fixef.tol = 1e-6,
                  fixef.iter = 10000, fixef.algo = NULL,
-                 collin.tol = 1e-10, nthreads = getFixest_nthreads(),
+                 collin.tol = 1e-9, nthreads = getFixest_nthreads(),
                  lean = FALSE, verbose = 0, warn = TRUE, notes = getFixest_notes(),
                  only.coef = FALSE, data.save = FALSE,
                  combine.quick, demeaned = FALSE, mem.clean = FALSE, 
@@ -2194,7 +2194,7 @@ check_conv = function(y, X, fixef_id_list, slope_flag, slope_vars, weights, full
 feols.fit = function(y, X, fixef_df, vcov, offset, split, fsplit, split.keep, split.drop,
                      cluster, se, ssc, weights,
                      subset, fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000,
-                     fixef.algo = NULL, collin.tol = 1e-10,
+                     fixef.algo = NULL, collin.tol = 1e-9,
                      nthreads = getFixest_nthreads(), lean = FALSE,
                      warn = TRUE, notes = getFixest_notes(), mem.clean = FALSE, verbose = 0,
                      only.env = FALSE, only.coef = FALSE, env, ...){
@@ -2427,7 +2427,7 @@ feglm = function(fml, data, family = "gaussian", vcov, offset, weights, subset, 
                  fsplit, split.keep, split.drop, cluster, se, ssc, panel.id, start = NULL,
                  etastart = NULL, mustart = NULL, fixef, fixef.rm = "perfect",
                  fixef.tol = 1e-6, fixef.iter = 10000, fixef.algo = NULL, 
-                 collin.tol = 1e-10,
+                 collin.tol = 1e-9,
                  glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(),
                  lean = FALSE, warn = TRUE, notes = getFixest_notes(), verbose = 0,
                  only.coef = FALSE, data.save = FALSE,
@@ -2491,7 +2491,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
                      weights, subset, start = NULL,
                      etastart = NULL, mustart = NULL, fixef.rm = "perfect",
                      fixef.tol = 1e-6, fixef.iter = 10000, fixef.algo = NULL, 
-                     collin.tol = 1e-10,
+                     collin.tol = 1e-9,
                      glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(),
                      lean = FALSE, warn = TRUE, notes = getFixest_notes(), mem.clean = FALSE,
                      verbose = 0, only.env = FALSE, only.coef = FALSE, env, ...){
@@ -3524,7 +3524,7 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
                   cluster, se, ssc, panel.id, start = NULL, etastart = NULL,
                   mustart = NULL, fixef, fixef.rm = "perfect", fixef.tol = 1e-6,
                   fixef.iter = 10000, fixef.algo = NULL,
-                  collin.tol = 1e-10, glm.iter = 25, glm.tol = 1e-8,
+                  collin.tol = 1e-9, glm.iter = 25, glm.tol = 1e-8,
                   nthreads = getFixest_nthreads(), lean = FALSE, 
                   warn = TRUE, notes = getFixest_notes(),
                   verbose = 0, combine.quick, mem.clean = FALSE, only.env = FALSE,

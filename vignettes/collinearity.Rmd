@@ -344,10 +344,42 @@ Automatic variable removal is a critical feature especially for routines that do
 
 ## When automatic removal bites
 
+Automatic variable removal can be a problem **when your model is misspecified** and you haven't noticed it. 
 
+We keep using the example on publications. Remember from the section discussing misspecification that the following model is misspecified:
 
+$$ y_{it} = \alpha_i + \beta_t + \gamma \times woman_{it} + \theta \times age_{it} + \epsilon{it} $$
 
+As both $woman$ and $age$ are in the collinear set.
 
+We estimate this model anyway by including the scientist and year fixed-effects as dummy variables, and we also add the square of the age:
 
+```{r}
+feols(nb_pub ~ is_woman + age + I(age ** 2) + i(author_id) + i(year), base_pub)
+#> The variables 'author_id::2747123765' and 'year::2000' have been removed because of
+#> collinearity (see $collin.var).
+#> OLS estimation, Dep. Var.: nb_pub
+#> Observations: 4,024
+#> Standard-errors: IID
+#>                       Estimate Std. Error   t value Pr(>|t|)
+#> (Intercept)           3.224328   2.203459  1.463303  0.14347
+#> is_woman             -0.673406   1.624295 -0.414583  0.67847
+#> age                   0.046843   0.045423  1.031271  0.30248
+#> author_id::90561406  -1.028373   1.093804 -0.940180  0.34719
+#> author_id::94862465  -1.953734   0.985021 -1.983444  0.04739 *
+#> author_id::168896994 -1.449938   0.914733 -1.585094  0.11303
+#> author_id::217986139 -1.576761   0.923925 -1.706591  0.08798 .
+#> author_id::226108609 -0.568410   1.171480 -0.485207  0.62756
+#> ... 242 coefficients remaining (display them with summary() or use argument n)
+#> ... 2 variables were removed because of collinearity (author_id::2747123765 and
+#> year::2000)
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> RMSE: 2.96683   Adj. R2: 0.457524
+```
+
+It just worked! We have coefficients for `is_woman` and `age`! Good news right, we thought our model was misspecified but in fact it's not: we can estimate the gender gap with fixed-effects! Or is it? 
+
+Well of course this is just a dream. If the model is misspecified in theory, it is misspecified in practice: the estimates for `is_woman` and `age` do exist but cannot be intrepreted. 
 
 
