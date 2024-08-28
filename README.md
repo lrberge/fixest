@@ -3,7 +3,7 @@
 
 <a href="https://cran.r-project.org/web/checks/check_results_fixest.html"><img src="https://badges.cranchecks.info/worst/fixest.svg" alt="CRAN status"></a>
 <a href="https://fastverse.r-universe.dev"><img src="https://fastverse.r-universe.dev/badges/fixest" alt="Version_ROpensci"></a>
-<a href="https://CRAN.R-project.org/package=fixest"><img src="http://www.r-pkg.org/badges/version/fixest" alt="Version"> </a>
+<a href="https://CRAN.R-project.org/package=fixest"><img src="https://www.r-pkg.org/badges/version/fixest" alt="Version"> </a>
 <a href="https://ipub.com/dev-corner/apps/r-package-downloads/"> <img src="https://cranlogs.r-pkg.org/badges/fixest" alt = "Downloads"> </a>
 
 The `fixest` package offers a family of functions to perform estimations with multiple fixed-effects in both an OLS and a GLM context. Please refer to the [introduction](https://CRAN.R-project.org/package=fixest/vignettes/fixest_walkthrough.html) for a walk-through.
