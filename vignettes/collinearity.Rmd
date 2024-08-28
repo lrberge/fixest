@@ -7,7 +7,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, results = "asis")
+knitr::opts_chunk$set(echo = TRUE, results = "asis", eval = FALSE)
 ```
 
 Collinearity is the pebble that inevitably enters the shoe of any applied econometrician in the course of their work. The good news is that econometrics software take that pebble out of your shoe for you. The bad news is that sometimes this pebble is informative and tells you that something is wrong with the model you are estimating.
@@ -172,19 +172,120 @@ In this section we first detail how most software remove collinear variables and
 
 
 
-## Detecting collinearity
+## Detecting collinearity: Automatic variable removal algorithms
 
-In general the process of collinearity removal is as follows:
+In general the process of collinearity fixing by variable removal is as follows:
 - for each explanatory variable, from left to right, *following the order of the variables given by the user* (this is important):
-  - check wether the current variable is collinear with the variables previously done:
+  - check wether the current variable is positive to a collinearity test with the variables previously done:
     - if collinear: remove it
     - else: continue
 
+It is important to stress that we are not talking about *mathematical collinearity* but only about *numerical collinearity* which are two different beasts. 
+Indeed, the results of collinearity detection and fixing depend on the rountines' algorithms. This means that two different routines can lead to different results due to their diverging algorithms -- although this should be the excteption rather than the rule.
+
+Let us give two examples. In `R`, the function `lm` uses a QR decomposition of the matrix $X$ to solve the OLS problem. Linear dependencies (collinearity) are resolved during the QR decomposition. 
+Differently from `lm`, the function `feols` from `fixest` resolves collinearity during a Cholesky decompostion of the matrix $X^\prime X$. While there are major advantages in terms of speed to use this method, it is known to be inferior to the QR method for collinearity detection because using $X^\prime X$ instead of $X$ reduces numeric precision. 
+In the vast majority of cases however, the two methods are equivalent and provide similar results.
+
+## Collinearity is a numerical problem
+
+To nail the fact that collinearity fixing in econometrics sowftare is a numerical problem, we give the following example. Consider the OLS estimation of this simple model:
+
+$$ y = \alpha + \beta x + \epsilon $$
+
+where $x$ is a vector equal to 1 for half of the observations and 0 for the others. We generate the data with $\alpha = 0$ and $\beta = 1$. You know from your econometrics courses that the estimated coefficients are invariant to translations as long as there is a constant in the model. Let us check that out!
+
 ```{r}
+# We generate the data
+n = 1e6
+n_half = n / 2
+df = data.frame(x = rep(0, n))
+df$x[1:n_half] = 1
+df$y = df$x + rnorm(n)
 
+# we estimate y on x for various translations of x
+all_trans = c(0, 10 ** (1:5))
+all_results = list()
+for(i in seq_along(all_trans)){
+  trans = all_trans[i]
+  all_results[[i]] = feols(y ~ I(x + trans), df)
+}
 
-
+# we display the results
+etable(all_results)
+#>                            model 1            model 2            model 3
+#> Dependent Var.:                  y                  y                  y      
+#> 
+#> Constant           0.0013 (0.0014) -9.974*** (0.0210) -99.75*** (0.2009)      
+#> I(x+0)          0.9975*** (0.0020)
+#> I(x+10)                            0.9975*** (0.0020)
+#> I(x+100)                                              0.9975*** (0.0020)      
+#> I(x+1000)
+#> I(x+10000)
+#> I(x+1e+05)
+#> _______________ __________________ __________________ __________________      
+#> S.E. type                      IID                IID                IID      
+#> Observations             1,000,000          1,000,000          1,000,000      
+#> R2                         0.19936            0.19936            0.19936      
+#> Adj. R2                    0.19936            0.19936            0.19936      
+#> 
+#>                            model 4             model 5              model 6   
+#> Dependent Var.:                  y                   y                    y   
+#> 
+#> Constant         -997.5*** (2.000) -9,974.9*** (19.99) -99,749.2*** (199.9)   
+#> I(x+0)
+#> I(x+10)
+#> I(x+100)
+#> I(x+1000)       0.9975*** (0.0020)
+#> I(x+10000)                          0.9975*** (0.0020)
+#> I(x+1e+05)                                               0.9975*** (0.0020)   
+#> _______________ __________________ ___________________ ____________________   
+#> S.E. type                      IID                 IID                  IID   
+#> Observations             1,000,000           1,000,000            1,000,000   
+#> R2                         0.19936             0.19936              0.19936   
+#> Adj. R2                    0.19936             0.19936              0.19936   
+#> ---
+#> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
+
+As we can see, the prediction is true: translations do not change the estimate of $\hat\beta$. But is that always true? What happens if we apply a bigger translation?
+
+```{r}
+# we add 1,000,000 to x
+feols(y ~ I(x + 1e6), df)
+#> The variable 'I(x + 1e+06)' has been removed because of collinearity (see $collin.var).
+#> OLS estimation, Dep. Var.: y
+#> Observations: 1,000,000
+#> Standard-errors: IID
+#>             Estimate Std. Error t value  Pr(>|t|)    
+#> (Intercept) 0.500031   0.001117 447.653 < 2.2e-16 ***
+#> ... 1 variable was removed because of collinearity (I(x + 1e+06))
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> RMSE: 1.11701
+```
+
+Ooopsie, our variable is now removed! This happens with the message: "The variable [...] removed because of collinearity". What happened? The algorithm could not invert $X^\prime X$ so removed the variable to be able to carry on. This is purely a numerical problem: remember that we store numbers with 64 bits, leading to at most 15 digits precision (so don't be suprised of the result of `1 + 1e16 == 1e16`). If the numbers were stored with 128bits precision, there would be no rounding error and no variable removal. 
+
+Now let's see `lm`'s algorithm.
+
+```{r}
+lm(y ~ I(x + 1e6), df) |> coef()
+#>   (Intercept)  I(x + 1e+06) 
+#> -9.974923e+05  9.974923e-01
+lm(y ~ I(x + 1e7), df) |> coef()
+#> (Intercept) I(x + 1e+07) 
+#>    0.500031           NA
+```
+
+Contrary to `feols`, for a translation of 1,000,000 `lm` does not remove the variable and gives the right result. However, the behavior becomes similar to that of feols when we apply a translation of $10^7$. A notable difference between the two routines is that there is no explicit message from `lm`.
+
+**Bottom line.** Collinearity detection and fixing is a numerical problem and as such is subject to the ususal pitfall of these, in particular precision problems. Always be wary when variables are removed: if there is no theoretical reason for removal then there might be a data problem. In general, ensuring that the variables have a reasonable numerical range is a good idea.
+
+## When automatic removal is good
+
+## When automatic removal bites
+
 
 
 
