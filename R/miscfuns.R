@@ -3790,7 +3790,7 @@ print_coeftable = function(coeftable, lastLine = "", show_signif = TRUE){
 
   print(ct)
 
-  cat(lastLine)
+  catma(lastLine)
 
   if(show_signif){
     cat("---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n")
@@ -5662,7 +5662,7 @@ fixest_CI_factor = function(x, level, vcov = NULL, df.t = NULL){
 
 sma = string_magic_alias(.check = FALSE)
 
-catma = cat_magic_alias(.check = FALSE)
+catma = cat_magic_alias(.check = FALSE, .width = NULL)
 
 mema = message_magic_alias(.check = FALSE)
 

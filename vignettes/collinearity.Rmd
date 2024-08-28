@@ -108,7 +108,7 @@ Now assume there is presence of collinearity and the model cannot be directly es
 
 **1) The collinear set contains only control variables.** In this case collinearity is not an issue since it affects only variables that are not interpreted. The fix is easy: drop iteratively variables from the collinear set until there is no remaining collinearity (reconstruct the collinear set at each step). 
 
-Note, importantly, that it is not because it affects only control variables that collinearity is fine. You should always be wary: when there is collinearity in practice when it shouldn't in theory, this is often the sign of coding mistakes (either the raw data is wrong or the processing is flawed). Allow collinearity only when it makes sense in theory (we'll cover examples later when collinearity is fine in theory **ADD LINK!!!!!**). 
+Note, importantly, that it is not because it affects only control variables that collinearity is fine. You should always be wary: when there is collinearity in practice when it shouldn't in theory, this is often the sign of coding mistakes (either the raw data is wrong or the processing is flawed). Allow collinearity only when it makes sense in theory (we'll cover examples later [when collinearity is fine in theory](#subsec_removal_good)). 
 
 **2) The collinear set contains at least one focal variable.** *Now we have a problem.* Here collinearity can have two origins: i) the model is misspecified, or ii) the focal variables have been wrongly coded. If you are sure that the model is well specified, then check the data and fix how the variables are constructed. Now let's cover model misspecification. 
 
@@ -127,7 +127,7 @@ The above equations look right but they're wrong (notice the last one). Misspeci
 
 The problem with a misspecified model is that *there is no technical solution*, you have something wrong in the model and you need to fix it -- *theoretically*. To illustrate this, let us give examples, some obvious, others less so.
 
-### Example 1: Gender gap in publications
+### Example 1: Gender gap in publications {#subsec_gender_gap}
 
 Let's take the following context: you study the publication process in science and want to quantify the gender gap in terms of publications. You are also interested in the effect of age on publications. You have a panel where scientists are indexed with $i$ and years are indexed with $t$. 
 The dependent variable $y$ is the number of publications, the focal explanatory variables are $woman_{it}$ taking the value 1 if the person is a woman and 0 otherwise, and $age_{it}$ is equal to the age of scientist $i$ at time $t$. Finally you want to control for time invariant characteristics specific to each scientist, and year specific factors common to all scientists. That means: you include scientist and year fixed-effects.
@@ -136,7 +136,7 @@ You end up with the following specification:
 
 $$ y_{it} = \alpha_i + \beta_t + \gamma \times woman_{it} + \theta \times age_{it} + \epsilon{it} $$
 
-The above model is utterly misspecified. Given that the variable $woman_{it}$ is time invariant (we'll allow variation and introduce another problem later), it can be fully explained by the scientist fixed-effects. Hence if you want absolutely to control for scientist fixed-effects: *you cannot estimate the gender gap*, $\hat\gamma$. You **absolutely can't**, live with it. You really need to be aware of that, especially that **econometrics software can give you estimates for $\hat\gamma$!!!!** Ouch! The behavior of econometrics software is detailed later. **ADD LINK**
+The above model is utterly misspecified. Given that the variable $woman_{it}$ is time invariant (we'll allow variation and introduce another problem later), it can be fully explained by the scientist fixed-effects. Hence if you want absolutely to control for scientist fixed-effects: *you cannot estimate the gender gap*, $\hat\gamma$. You **absolutely can't**, live with it. You really need to be aware of that, especially that **econometrics software can give you estimates for $\hat\gamma$!!!!** Ouch! The behavior of econometrics software is [detailed later](#sec_software).
 
 Is that all? Are we done with misspecification? Well, although the variable $age$ varies across time and scientists, it *is* in the collinear set. We can decompose this variable as follows: $age_{it} = year_{t} - birth\_year_{i}$. Now we can see that this variable is a linear combination of a scientist-invariant variable ($year_{t}$) and a time-invariant variable ($birth\_year_{i}$). This means that the variable $age_{it}$ can be fully explained by the scientist and time fixed-effects. Hence you cannot estimate the effect of age in the presence of these fixed-effects. 
 
@@ -162,7 +162,7 @@ The bottom line is that, even if the model is well specified, modifications of t
 Now let us review how econometrics software deal with collinearity.
 
 
-# Econometrics sowftare and collinearity
+# Econometrics sowftare and collinearity {#sec_software}
 
 Most econometrics software, be it in R, Stata, Python, etc, automatically remove collinear variables to perform the estimation. 
 
@@ -282,7 +282,20 @@ Contrary to `feols`, for a translation of 1,000,000 `lm` does not remove the var
 
 **Bottom line.** Collinearity detection and fixing is a numerical problem and as such is subject to the ususal pitfall of these, in particular precision problems. Always be wary when variables are removed: if there is no theoretical reason for removal then there might be a data problem. In general, ensuring that the variables have a reasonable numerical range is a good idea.
 
-## When automatic removal is good
+## When automatic removal is good {#subsec_removal_good}
+
+Consider the context defined in the [model misspecification section](#subsec_gender_gap): where we follow the output of a panel of scientists. Here we want to see the effect of age on performance, when removing individual-specific confounders and confounders linked to the institution of the scientist. Formally, we estimate the following model:
+
+$$ y_{ijt} = \alpha_i + \beta_j + \gamma age_{ijt} + \epsilon_{ijt} $$
+
+Our coefficient of interest is $\gamma$ and we include scientist and institution fixed-effects. 
+
+```{r}
+data(base_pub, package = "fixest")
+
+est = feols(nb_pub ~ age + i(author_id) + i(affil_id), base_pub)
+
+```
 
 ## When automatic removal bites
 
