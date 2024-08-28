@@ -1,6 +1,12 @@
 
 # fixest 0.12.2
 
+## New vignette and data set
+
+- add a new vignette on collinearity
+
+- new data set `base_pub`, base on publication data from the Microsoft Academic Graph, used to illustrate the new vignette
+
 ## Bugs
 
 - fix bug when several scalars to be evaluated from the calling environment are included in the formula of the regression

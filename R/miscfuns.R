@@ -7756,36 +7756,7 @@ getFixest_multi = function(){
 }
 
 
-#### .................. ####
-#### DOCUMENTATION DATA ####
-####
 
-
-
-#' Trade data sample
-#'
-#' This data reports trade information between countries of the European Union (EU15).
-#'
-#' @usage
-#' data(trade)
-#'
-#' @format
-#' `trade` is a data frame with 38,325 observations and 6 variables named `Destination`, `Origin`, `Product`, `Year`, `dist_km` and `Euros`.
-#'
-#' * Origin: 2-digits codes of the countries of origin of the trade flow.
-#' * Destination: 2-digits codes of the countries of destination of the trade flow.
-#' * Products: Number representing the product categories (from 1 to 20).
-#' * Year: Years from 2007 to 2016
-#' * dist_km: Geographic distance in km between the centers of the countries of origin and destination.
-#' * Euros: The total amount in euros of the trade flow for the specific year/product category/origin-destination country pair.
-#'
-#'
-#' @source
-#' This data has been extrated from Eurostat on October 2017.
-#'
-#'
-#'
-"trade"
 
 
 
