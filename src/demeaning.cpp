@@ -84,7 +84,7 @@ int pending_interrupt() {
 
 // Later I may use the number of observations
 // I don't at the moment because everything is strongly checked beforehand
-class sVec{
+class RealVec{
   double *p_dble = nullptr;
   int *p_int = nullptr;
 
@@ -94,11 +94,11 @@ public:
   // is_int public member
   bool is_int = false;
 
-  sVec(){};
-  sVec(SEXP);
-  sVec(double *p_x): p_dble(p_x), is_int(false){};
-  sVec(int *p_x): p_int(p_x), is_int(true){};
-  sVec(std::nullptr_t){};
+  RealVec(){};
+  RealVec(SEXP);
+  RealVec(double *p_x): p_dble(p_x), is_int(false){};
+  RealVec(int *p_x): p_int(p_x), is_int(true){};
+  RealVec(std::nullptr_t){};
 
 
   double operator[](int i){
@@ -108,7 +108,7 @@ public:
 
 };
 
-sVec::sVec(SEXP x){
+RealVec::RealVec(SEXP x){
   if(TYPEOF(x) == REALSXP){
     is_int = false;
     p_dble = REAL(x);
@@ -116,30 +116,30 @@ sVec::sVec(SEXP x){
     is_int = true;
     p_int = INTEGER(x);
   } else {
-    stop("The current SEXP type is not supported by the sVec class.");
+    stop("The current SEXP type is not supported by the RealVec class.");
   }
 }
 
 
-class sMat{
+class RealMat{
 
-  std::vector<sVec> p_sVec;
+  std::vector<RealVec> p_RealVec;
   int n = 0;
   int K = 0;
 
-  sMat() = delete;
+  RealMat() = delete;
 
 public:
-  sMat(SEXP, bool);
+  RealMat(SEXP, bool);
 
   int nrow(){return n;};
   int ncol(){return K;};
 
-  sVec operator[](int);
+  RealVec operator[](int);
   double operator()(int, int);
 };
 
-sMat::sMat(SEXP x, bool single_obs = false){
+RealMat::RealMat(SEXP x, bool single_obs = false){
 
   if(TYPEOF(x) == VECSXP){
     // x can be a list of either vectors or matrices
@@ -166,7 +166,7 @@ sMat::sMat(SEXP x, bool single_obs = false){
       if(l == 0){
         n = n_tmp;
       } else {
-        if(n != n_tmp) stop("When setting up the class sMat: The number of observations in the list is not coherent across columns.");
+        if(n != n_tmp) stop("When setting up the class RealMat: The number of observations in the list is not coherent across columns.");
       }
 
       K += K_tmp;
@@ -174,18 +174,18 @@ sMat::sMat(SEXP x, bool single_obs = false){
       if(TYPEOF(xx) == REALSXP){
         double *p_x = REAL(xx);
         for(int k=0 ; k<K_tmp ; ++k){
-          p_sVec.push_back(sVec(p_x));
+          p_RealVec.push_back(RealVec(p_x));
           if(k + 1 < K_tmp) p_x += n;
         }
 
       } else if(TYPEOF(xx) == INTSXP){
         int *p_x = INTEGER(xx);
         for(int k=0 ; k<K_tmp ; ++k){
-          p_sVec.push_back(sVec(p_x));
+          p_RealVec.push_back(RealVec(p_x));
           if(k + 1 < K_tmp) p_x += n;
         }
       } else {
-        stop("The current SEXP type is not supported by the sMat class.");
+        stop("The current SEXP type is not supported by the RealMat class.");
       }
     }
 
@@ -213,28 +213,28 @@ sMat::sMat(SEXP x, bool single_obs = false){
     } else if(TYPEOF(x) == REALSXP){
       double *p_x = REAL(x);
       for(int k=0 ; k<K ; ++k){
-        p_sVec.push_back(sVec(p_x));
+        p_RealVec.push_back(RealVec(p_x));
         if(k + 1 < K) p_x += n;
       }
 
     } else if(TYPEOF(x) == INTSXP){
       int *p_x = INTEGER(x);
       for(int k=0 ; k<K ; ++k){
-        p_sVec.push_back(sVec(p_x));
+        p_RealVec.push_back(RealVec(p_x));
         if(k + 1 < K) p_x += n;
       }
     } else {
-      stop("The current SEXP type is not supported by the sMat class.");
+      stop("The current SEXP type is not supported by the RealMat class.");
     }
   }
 }
 
-sVec sMat::operator[](int k){
-  return p_sVec[k];
+RealVec RealMat::operator[](int k){
+  return p_RealVec[k];
 }
 
-double sMat::operator()(int i, int k){
-  return p_sVec[k][i];
+double RealMat::operator()(int i, int k){
+  return p_RealVec[k][i];
 }
 
 
@@ -307,7 +307,7 @@ class FEClass{
   // eq_systems_VS_C: vector stacking all the systems of equations (each system is of size n_coef * n_vs * n_vs)
   // p_eq_systems_VS_C: pointer to the right equation system. Of length Q.
   vector<int*> p_fe_id;
-  vector<sVec> p_vs_vars;
+  vector<RealVec> p_vs_vars;
   double *p_weights = nullptr;
 
   vector<bool> is_slope_Q;
@@ -321,7 +321,7 @@ class FEClass{
   vector<int> coef_start_Q;
 
   // internal functions
-  void compute_fe_coef_internal(int, double *, bool, sVec, double *, double *);
+  void compute_fe_coef_internal(int, double *, bool, RealVec, double *, double *);
   void compute_fe_coef_2_internal(double *, double *, double *, bool);
   void add_wfe_coef_to_mu_internal(int, double *, double *, bool);
 
@@ -330,7 +330,7 @@ public:
   // Utility class: Facilitates the access to the VS variables
   class simple_mat_of_vs_vars{
     int K_fe;
-    vector<sVec> pvars;
+    vector<RealVec> pvars;
 
   public:
     simple_mat_of_vs_vars(const FEClass*, int);
@@ -344,7 +344,7 @@ public:
   FEClass(int n_obs, int Q, SEXP r_weights, SEXP fe_id_list, SEXP r_nb_id_Q, SEXP table_id_I, SEXP slope_flag_Q, SEXP slope_vars_list);
 
   // functions
-  void compute_fe_coef(double *fe_coef, sVec &mu_in_N);
+  void compute_fe_coef(double *fe_coef, RealVec &mu_in_N);
   void compute_fe_coef(int q, double *fe_coef, double *sum_other_coef_N, double *in_out_C);
 
   void add_wfe_coef_to_mu(int q, double *fe_coef_C, double *out_N);
@@ -354,7 +354,7 @@ public:
 
   void add_2_fe_coef_to_mu(double *fe_coef_a, double *fe_coef_b, double *in_out_C, double *out_N, bool update_beta);
 
-  void compute_in_out(int q, double *in_out_C, sVec &in_N, double *out_N);
+  void compute_in_out(int q, double *in_out_C, RealVec &in_N, double *out_N);
 };
 
 FEClass::FEClass(int n_obs, int Q, SEXP r_weights, SEXP fe_id_list, SEXP r_nb_id_Q, SEXP table_id_I, SEXP slope_flag_Q, SEXP slope_vars_list){
@@ -516,7 +516,7 @@ FEClass::FEClass(int n_obs, int Q, SEXP r_weights, SEXP fe_id_list, SEXP r_nb_id
 
     // A) Meta variables => the ones containing the main information
 
-    sMat m_slopes(slope_vars_list);
+    RealMat m_slopes(slope_vars_list);
     p_vs_vars.resize(nb_slopes);
     for(int v=0 ; v<nb_slopes ; ++v){
       p_vs_vars[v] = m_slopes[v];
@@ -600,7 +600,7 @@ FEClass::FEClass(int n_obs, int Q, SEXP r_weights, SEXP fe_id_list, SEXP r_nb_id
 
 
 // Overloaded versions
-void FEClass::compute_fe_coef(double *fe_coef_C, sVec &mu_in_N){
+void FEClass::compute_fe_coef(double *fe_coef_C, RealVec &mu_in_N){
   // mu: length n_obs, vector giving sum_in_out
   // fe_coef: vector receiving the fixed-effects coefficients
 
@@ -617,7 +617,7 @@ void FEClass::compute_fe_coef(int q, double *fe_coef_C, double *sum_other_coef_N
 
 }
 
-void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single, sVec mu_in_N, 
+void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single, RealVec mu_in_N, 
                                        double *sum_other_coef_N, double *in_out_C){
   // mu: length n_obs, vector giving sum_in_out
   // fe_coef: vector receiving the fixed-effects coefficients
@@ -988,7 +988,7 @@ void FEClass::add_2_fe_coef_to_mu(double *fe_coef_a, double *fe_coef_b, double *
 }
 
 
-void FEClass::compute_in_out(int q, double *in_out_C, sVec &in_N, double *out_N){
+void FEClass::compute_in_out(int q, double *in_out_C, RealVec &in_N, double *out_N){
   // q: the index of the FE
   // *in_out_C: pointer to the vector of cumulated (input-output), of length C (nber of FE coefs)
   //            => this is a precomputation of the target quantity
@@ -1079,7 +1079,7 @@ struct PARAM_DEMEAN{
   int *p_iterations_all;
 
   // vectors of pointers
-  vector<sVec> p_input;
+  vector<RealVec> p_input;
   vector<double*> p_output;
 
   // saving the fixed effects
@@ -1204,7 +1204,7 @@ void demean_single_1(int v, PARAM_DEMEAN* args){
   // loading the data
   int nb_coef_T = args->nb_coef_T;
 
-  vector<sVec> &p_input = args->p_input;
+  vector<RealVec> &p_input = args->p_input;
   vector<double*> &p_output = args->p_output;
 
   // fe_info
@@ -1224,7 +1224,7 @@ void demean_single_1(int v, PARAM_DEMEAN* args){
   }
 
   // the input & output
-  sVec &input = p_input[v];
+  RealVec &input = p_input[v];
   double *output = p_output[v];
 
   // We compute the FEs
@@ -1276,9 +1276,9 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
   }  
 
   // input output
-  vector<sVec> &p_input = args->p_input;
+  vector<RealVec> &p_input = args->p_input;
   vector<double*> &p_output = args->p_output;
-  sVec &input = p_input[v];
+  RealVec &input = p_input[v];
   double *output = p_output[v];
 
   // temp var:
@@ -1592,14 +1592,14 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
   int Q = Rf_length(r_nb_id_Q);
 
   // info on y
-  sMat m_y(y);
+  RealMat m_y(y);
   int n_vars_y = m_y.ncol();
   bool useY = n_vars_y > 0;
   bool is_y_list = n_vars_y > 1 || TYPEOF(y) == VECSXP;
   int n_obs = m_y.nrow();
 
   // info on X
-  sMat m_X(X_raw);
+  RealMat m_X(X_raw);
   int n_vars_X = m_X.ncol();
   if(useY == false){
     n_obs = m_X.nrow();
@@ -1610,11 +1610,11 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
     // The data set is of length 1!!!!
     n_obs = 1;
     
-    m_y = sMat(y, true);
+    m_y = RealMat(y, true);
     n_vars_y = m_y.ncol();
     useY = true;
     
-    m_X = sMat(X_raw, true);
+    m_X = RealMat(X_raw, true);
     n_vars_X = m_X.ncol();
     useX = n_vars_X > 0;
     
@@ -1651,7 +1651,7 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
     p_output[v] = p_output[v - 1] + n_obs;
   }
 
-  vector<sVec> p_input(n_vars);
+  vector<RealVec> p_input(n_vars);
 
   for(int k=0 ; k<n_vars_X ; ++k){
     p_input[k] = m_X[k];
@@ -1755,7 +1755,7 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
   int ncol = useX ? n_vars_X : 1;
   NumericMatrix X_demean(nrow, ncol);
 
-  sVec p_input_tmp;
+  RealVec p_input_tmp;
   double *p_output_tmp;
   for(int k=0 ; k<n_vars_X ; ++k){
     p_input_tmp = p_input[k];
@@ -1831,7 +1831,7 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
 }
 
 //
-// Next version => clean c++ code, use only sMat, create file with common functions
+// Next version => clean c++ code, use only RealMat, create file with common functions
 //
 
 
@@ -1848,7 +1848,7 @@ List cpp_which_na_inf(SEXP x, int nthreads){
    in the "best" case (default expected), we need not construct is_na_inf
    */
 
-  sMat mat(x);
+  RealMat mat(x);
 
   int nobs = mat.nrow();
   int K = mat.ncol();
