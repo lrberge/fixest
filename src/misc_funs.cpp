@@ -15,9 +15,8 @@
  **********************************************************************************/
 
 
-#include <Rcpp.h>
+#include "fixest_main.hpp"
 #include <math.h>
-#include <vector>
 #include <stdio.h>
 #include <cmath>
 #include <functional>
@@ -25,7 +24,6 @@
 using namespace Rcpp;
 using namespace std;
 
-// [[Rcpp::plugins(cpp11)]]
 
 // [[Rcpp::export]]
 NumericVector cpp_partialDerivative_other(int iterMax, int Q, int N, double epsDeriv, 

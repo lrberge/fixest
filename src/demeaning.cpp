@@ -29,17 +29,8 @@
  *                                                                   *
  ********************************************************************/
 
-#include <Rcpp.h>
+#include "fixest_main.hpp"
 #include <math.h>
-#include <vector>
-#include <cstdint>
-#ifdef _OPENMP
-  #include <omp.h>
-#else
-  #define omp_get_thread_num() 0
-#endif
-
-// [[Rcpp::plugins(openmp)]]
 
 using namespace Rcpp;
 using std::vector;
@@ -69,23 +60,6 @@ using std::int64_t;
  * - vs: means varying slopes
  */
 
-
-
-
-
-// Stopping / continuing criteria:
-// Functions used inside all loops
-inline bool continue_crit(double a, double b, double diffMax){
-  // continuing criterion of the algorithm
-  double diff = fabs(a - b);
-  return ( (diff > diffMax) && (diff/(0.1 + fabs(a)) > diffMax) );
-}
-
-inline bool stopping_crit(double a, double b, double diffMax){
-  // stopping criterion of the algorithm
-  double diff = fabs(a - b);
-  return ( (diff < diffMax) || (diff/(0.1 + fabs(a)) < diffMax) );
-}
 
 //
 // Demeans each variable in input
@@ -1861,23 +1835,6 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
 //
 
 
-std::vector<int> set_parallel_scheme_ter(int N, int nthreads){
-  // => this concerns only the parallel application on a 1-Dimensional matrix
-  // takes in the nber of observations of the vector and the nber of threads
-  // gives back a vector of the length the nber of threads + 1 giving the start/stop of each threads
-
-  std::vector<int> res(nthreads + 1, 0);
-  double N_rest = N;
-
-  for(int i=0 ; i<nthreads ; ++i){
-    res[i + 1] = ceil(N_rest / (nthreads - i));
-    N_rest -= res[i + 1];
-    res[i + 1] += res[i];
-  }
-
-  return res;
-}
-
 
 // [[Rcpp::export]]
 List cpp_which_na_inf(SEXP x, int nthreads){
@@ -1908,7 +1865,7 @@ List cpp_which_na_inf(SEXP x, int nthreads){
   // no need to care about the race condition
   // "trick" to make a break in a multi-threaded section
 
-  std::vector<int> bounds = set_parallel_scheme_ter(nobs, nthreads);
+  std::vector<int> bounds = set_parallel_scheme(nobs, nthreads);
 
   #pragma omp parallel for num_threads(nthreads)
   for(int t=0 ; t<nthreads ; ++t){

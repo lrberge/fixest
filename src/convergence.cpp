@@ -31,33 +31,11 @@
  *                                                                         *
  **************************************************************************/
 
-#include <Rcpp.h>
+#include "fixest_main.hpp"
 #include <math.h>
-#include <vector>
-#ifdef _OPENMP
-	#include <omp.h>
-#else
-	#define omp_get_thread_num() 0
-#endif
-
-// [[Rcpp::plugins(openmp)]]
 
 using namespace Rcpp;
 using std::vector;
-
-// Stopping / continuing criteria
-// Functions used inside all loops
-inline bool continue_criterion(double a, double b, double diffMax){
-	// continuing criterion of the algorithm
-	double diff = fabs(a - b);
-	return ( (diff > diffMax) && (diff/(0.1 + fabs(a)) > diffMax) );
-}
-
-inline bool stopping_criterion(double a, double b, double diffMax){
-	// stopping criterion of the algorithm
-	double diff = fabs(a - b);
-	return ( (diff < diffMax) || (diff/(0.1 + fabs(a)) < diffMax) );
-}
 
 // List of objects that will be used to
 // lighten the writting of the functions
@@ -330,7 +308,7 @@ void CCC_negbin(int nthreads, int nb_cluster, double theta, double diffMax_NR,
 			}
 
 			// if(fabs(x0-x1) / (0.1 + fabs(x1)) < diffMax_NR){
-			if(stopping_criterion(x0, x1, diffMax_NR)){
+			if(stopping_crit(x0, x1, diffMax_NR)){
 				keepGoing = false;
 			}
 
@@ -457,7 +435,7 @@ void CCC_logit(int nthreads, int nb_cluster, double diffMax_NR,
 			}
 
 			// if(fabs(x0-x1) / (0.1 + fabs(x1)) < diffMax_NR){
-		    if(stopping_criterion(x0, x1, diffMax_NR)){
+		    if(stopping_crit(x0, x1, diffMax_NR)){
 				keepGoing = false;
 			}
 
@@ -901,7 +879,7 @@ List cpp_conv_acc_gnl(int family, int iterMax, double diffMax, double diffMax_NR
 	bool keepGoing = false;
 	for(int i=0 ; i<nb_coef ; ++i){
 		// if(fabs(X[i] - GX[i]) / (0.1 + fabs(GX[i])) > diffMax){
-		if(continue_criterion(X[i], GX[i], diffMax)){
+		if(continue_crit(X[i], GX[i], diffMax)){
 			keepGoing = true;
 			break;
 		}
@@ -960,7 +938,7 @@ List cpp_conv_acc_gnl(int family, int iterMax, double diffMax, double diffMax_NR
 		keepGoing = false;
 		for(int i=0 ; i<nb_coef_no_K ; ++i){
 			// if(fabs(X[i] - GX[i]) / (0.1 + fabs(GX[i])) > diffMax){
-			if(continue_criterion(X[i], GX[i], diffMax)){
+			if(continue_crit(X[i], GX[i], diffMax)){
 				keepGoing = true;
 				break;
 			}
@@ -1360,7 +1338,7 @@ List cpp_conv_acc_poi_2(int n_i, int n_j, int n_cells, SEXP index_i, SEXP index_
 	bool keepGoing = true;
 	for(int i=0 ; i<n_i ; ++i){
 		// if(fabs(X[i] - GX[i]) / (0.1 + fabs(GX[i])) > diffMax){
-		if(continue_criterion(X[i], GX[i], diffMax)){
+		if(continue_crit(X[i], GX[i], diffMax)){
 			keepGoing = true;
 			break;
 		}
@@ -1416,7 +1394,7 @@ List cpp_conv_acc_poi_2(int n_i, int n_j, int n_cells, SEXP index_i, SEXP index_
 		keepGoing = false;
 		for(int i=0 ; i<n_i ; ++i){
 			// if(fabs(X[i] - GX[i]) / (0.1 + fabs(GX[i])) > diffMax){
-			if(continue_criterion(X[i], GX[i], diffMax)){
+			if(continue_crit(X[i], GX[i], diffMax)){
 				keepGoing = true;
 				break;
 			}
@@ -1557,7 +1535,7 @@ List cpp_conv_seq_poi_2(int n_i, int n_j, int n_cells, SEXP index_i, SEXP index_
 		keepGoing = false;
 		for(int i=0 ; i<n_i ; ++i){
 			// if(fabs(X[i] - X_new[i]) / (0.1 + fabs(X_new[i])) > diffMax){
-			if(continue_criterion(X[i], X_new[i], diffMax)){
+			if(continue_crit(X[i], X_new[i], diffMax)){
 				keepGoing = true;
 				break;
 			}
@@ -1915,7 +1893,7 @@ List cpp_conv_acc_gau_2(int n_i, int n_j, int n_cells,
 		keepGoing = false;
 		for(int i=0 ; i<n_i ; ++i){
 			// if(fabs(X[i] - GX[i]) / (0.1 + fabs(GX[i])) > diffMax){
-			if(continue_criterion(X[i], GX[i], diffMax)){
+			if(continue_crit(X[i], GX[i], diffMax)){
 			    keepGoing = true;
 				break;
 			}
@@ -2079,7 +2057,7 @@ List cpp_conv_seq_gau_2(int n_i, int n_j, int n_cells,
 		keepGoing = false;
 		for(int i=0 ; i<n_i ; ++i){
 			// if(fabs(X[i] - X_new[i]) / (0.1 + fabs(X_new[i])) > diffMax){
-			if(continue_criterion(X[i], X_new[i], diffMax)){
+			if(continue_crit(X[i], X_new[i], diffMax)){
 			    keepGoing = true;
 				break;
 			}
@@ -2595,7 +2573,7 @@ List cpp_derivconv_acc_gnl(int iterMax, double diffMax, int n_vars, SEXP nb_clus
 			// the stopping criterion
 			for(int m=0 ; m<nb_coef_no_K ; ++m){
 				// if(fabs(X[m] - GX[m]) / (0.1 + fabs(GX[m])) > diffMax){
-				if(continue_criterion(X[m], GX[m], diffMax)){
+				if(continue_crit(X[m], GX[m], diffMax)){
 				    // Rprintf("diffMax = %f\n", fabs(X[m] - GX[m]));
 					keepGoing = true;
 					break;
@@ -2855,7 +2833,7 @@ List cpp_derivconv_acc_2(int iterMax, double diffMax, int n_vars, SEXP nb_cluste
 			// the stopping criterion
 			for(int m=0 ; m<n_i ; ++m){
 				// if(fabs(X[m] - GX[m]) / (0.1 + fabs(GX[m])) > diffMax){
-				if(continue_criterion(X[m], GX[m], diffMax)){
+				if(continue_crit(X[m], GX[m], diffMax)){
 					keepGoing = true;
 					break;
 				}
@@ -3078,7 +3056,7 @@ List cpp_derivconv_seq_2(int iterMax, double diffMax, int n_vars, SEXP nb_cluste
 			// the stopping criterion
 			for(int m=0 ; m<n_i ; ++m){
 				// if(fabs(X[m] - X_new[m]) / (0.1 + fabs(X_new[m])) > diffMax){
-				if(continue_criterion(X[m], X_new[m], diffMax)){
+				if(continue_crit(X[m], X_new[m], diffMax)){
 				    keepGoing = true;
 					break;
 				}

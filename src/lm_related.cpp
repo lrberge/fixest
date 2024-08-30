@@ -12,36 +12,11 @@
 *                                                             *
 **************************************************************/
 
-#include <Rcpp.h>
+#include "fixest_main.hpp"
 #include <cmath>
 #include <math.h>
-#ifdef _OPENMP
-  #include <omp.h>
-#else
-  #define omp_get_thread_num() 0
-#endif
+
 using namespace Rcpp;
-
-// [[Rcpp::plugins(openmp)]]
-
-
-std::vector<int> set_parallel_scheme(int N, int nthreads){
-  // => this concerns only the parallel application on a 1-Dimensional matrix
-  // takes in the nber of observations of the vector and the nber of threads
-  // gives back a vector of the length the nber of threads + 1 giving the start/stop of each threads
-
-  std::vector<int> res(nthreads + 1, 0);
-  double N_rest = N;
-
-  for(int i=0 ; i<nthreads ; ++i){
-    res[i + 1] = ceil(N_rest / (nthreads - i));
-    N_rest -= res[i + 1];
-    res[i + 1] += res[i];
-  }
-
-  return res;
-}
-
 
 
 void invert_tri(NumericMatrix &R, int K, int nthreads = 1){

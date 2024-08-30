@@ -12,16 +12,9 @@
  ******************************************************************/
 
 
-#include <Rcpp.h>
+#include "fixest_main.hpp"
 #include <cfloat>
 #include <math.h>
-#include <vector>
-#ifdef _OPENMP
-  #include <omp.h>
-  #include <pthread.h>
-#else
-  #define omp_get_max_threads() 0
-#endif
 #include <cmath>
 #include <stdio.h>
 #include <Rmath.h>
@@ -32,61 +25,10 @@ using namespace Rcpp;
 
 // This file contains misc fixest functions parallelized with the omp library
 
-
-// Regarding fork detection => I don't know enough yet
-// The code below doesn't seem to work. And I can't check since I'm on Windows....
-// Safer not to include it for now.
-
-// static bool fixest_in_fork = false;
-//
-// // Trick taken from data.table to detect forking
-// // Actually I don't know if it works, and I can't check...
-// void when_fork() {
-//   fixest_in_fork = true;
-// }
-//
-// void after_fork() {
-//   fixest_in_fork = false;
-// }
-//
-// // [[Rcpp::export]]
-// void cpp_setup_fork_presence() {
-//  // Called only once at startup
-//  #ifdef _OPENMP
-//     pthread_atfork(&when_fork, &after_fork, NULL);
-//  #endif
-// }
-//
-// // [[Rcpp::export]]
-// bool cpp_is_in_fork(){
-//     return fixest_in_fork;
-// }
-
-
 // [[Rcpp::export]]
 int cpp_get_nb_threads(){
   return omp_get_max_threads();
 }
-
-
-// The following function is already defined in lm_related (I know...)
-std::vector<int> set_parallel_scheme_bis(int N, int nthreads){
-  // => this concerns only the parallel application on a 1-Dimensional matrix
-  // takes in the nber of observations of the vector and the nber of threads
-  // gives back a vector of the length the nber of threads + 1 giving the start/stop of each threads
-
-  std::vector<int> res(nthreads + 1, 0);
-  double N_rest = N;
-
-  for(int i=0 ; i<nthreads ; ++i){
-    res[i + 1] = ceil(N_rest / (nthreads - i));
-    N_rest -= res[i + 1];
-    res[i + 1] += res[i];
-  }
-
-  return res;
-}
-
 
 // [[Rcpp::export]]
 NumericVector cpp_exp(NumericVector x, int nthreads){
@@ -476,7 +418,7 @@ List cpp_which_na_inf_vec(SEXP x, int nthreads){
   // no need to care about the race condition
   // "trick" to make a break in a multi-threaded section
 
-  std::vector<int> bounds = set_parallel_scheme_bis(nobs, nthreads);
+  std::vector<int> bounds = set_parallel_scheme(nobs, nthreads);
   #pragma omp parallel for num_threads(nthreads)
   for(int t=0 ; t<nthreads ; ++t){
     for(int i=bounds[t]; i<bounds[t + 1] && !anyNAInf ; ++i){
@@ -543,7 +485,7 @@ List cpp_which_na_inf_mat(NumericMatrix mat, int nthreads){
   // no need to care about the race condition
   // "trick" to make a break in a multi-threaded section
 
-  std::vector<int> bounds = set_parallel_scheme_bis(nobs, nthreads);
+  std::vector<int> bounds = set_parallel_scheme(nobs, nthreads);
 
   #pragma omp parallel for num_threads(nthreads)
   for(int t=0 ; t<nthreads ; ++t){
@@ -622,7 +564,7 @@ List cpp_which_na_inf_df(SEXP df, int nthreads){
   // no need to care about the race condition
   // "trick" to make a break in a multi-threaded section
 
-  std::vector<int> bounds = set_parallel_scheme_bis(nobs, nthreads);
+  std::vector<int> bounds = set_parallel_scheme(nobs, nthreads);
 
   #pragma omp parallel for num_threads(nthreads)
   for(int t=0 ; t<nthreads ; ++t){

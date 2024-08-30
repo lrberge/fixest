@@ -1,14 +1,7 @@
-#include <Rcpp.h>
-#include <math.h>
-#include <vector>
-#include <cstdint>
-#ifdef _OPENMP
-  #include <omp.h>
-#else
-  #define omp_get_thread_num() 0
-#endif
 
-// [[Rcpp::plugins(openmp)]]
+#include "fixest_main.hpp"
+
+#include <math.h>
 
 using namespace Rcpp;
 

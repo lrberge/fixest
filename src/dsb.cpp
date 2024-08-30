@@ -1,7 +1,8 @@
-#include <Rcpp.h>
+
+#include "fixest_main.hpp"
 #include <string>
 #include <cstring>
-#include <vector>
+
 using namespace Rcpp;
 
 
