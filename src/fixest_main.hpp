@@ -48,6 +48,71 @@ inline bool stopping_crit(double a, double b, double diffMax){
   return ( (diff < diffMax) || (diff/(0.1 + fabs(a)) < diffMax) );
 }
 
+//
+// classes 
+//
+
+//
+// We introduce a class that handles varying types of SEXP and behaves as a regular matrix
+//
+
+
+/**
+ * @brief treats an int/double vector as a double vector without copy
+ * 
+ */
+class RealVec{
+  double *p_dble = nullptr;
+  int *p_int = nullptr;
+
+public:
+  // several constructors
+
+  // is_int public member
+  bool is_int = false;
+
+  RealVec(){};
+  RealVec(SEXP);
+  RealVec(double *p_x): p_dble(p_x), is_int(false){};
+  RealVec(int *p_x): p_int(p_x), is_int(true){};
+  RealVec(std::nullptr_t){};
+
+
+  inline double operator[](int i){
+    if(is_int) return static_cast<double>(p_int[i]);
+    return p_dble[i];
+  }
+
+};
+
+/**
+ * @brief treats a matrix/R DF as a matrix of doubles without copy
+ * 
+ */
+class RealMat{
+
+  std::vector<RealVec> p_RealVec;
+  int n = 0;
+  int K = 0;
+
+  RealMat() = delete;
+
+public:
+  RealMat(SEXP);
+  RealMat(SEXP, bool);
+
+  inline int nrow(){return n;};
+  inline int ncol(){return K;};
+
+  inline RealVec operator[](int k){
+    return p_RealVec[k];
+  };
+  inline double operator()(int i, int k){
+    return p_RealVec[k][i];
+  };
+};
+
+
 
 //
 // fork detection
