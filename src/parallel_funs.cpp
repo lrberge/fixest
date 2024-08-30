@@ -21,8 +21,6 @@
 
 using namespace Rcpp;
 
-// [[Rcpp::plugins(openmp)]]
-
 // This file contains misc fixest functions parallelized with the omp library
 
 // [[Rcpp::export]]
