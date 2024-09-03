@@ -98,8 +98,7 @@ class RealMat{
   RealMat() = delete;
 
 public:
-  RealMat(SEXP);
-  RealMat(SEXP, bool);
+  RealMat(SEXP x, bool single_obs = false);
 
   inline int nrow(){return n;};
   inline int ncol(){return K;};

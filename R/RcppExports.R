@@ -65,10 +65,6 @@ cpp_demean <- function(y, X_raw, r_weights, iterMax, diffMax, r_nb_id_Q, fe_id_l
     .Call(`_fixest_cpp_demean`, y, X_raw, r_weights, iterMax, diffMax, r_nb_id_Q, fe_id_list, table_id_I, slope_flag_Q, slope_vars_list, r_init, nthreads, algo_extraProj, algo_iter_warmup, algo_iter_projAfterAcc, algo_iter_grandAcc, save_fixef)
 }
 
-cpp_which_na_inf <- function(x, nthreads) {
-    .Call(`_fixest_cpp_which_na_inf`, x, nthreads)
-}
-
 cpp_dsb <- function(Rstr) {
     .Call(`_fixest_cpp_dsb`, Rstr)
 }
@@ -207,6 +203,10 @@ cpp_hash_string <- function(x) {
 
 cpp_escape_markup <- function(Rstr) {
     .Call(`_fixest_cpp_escape_markup`, Rstr)
+}
+
+cpp_which_na_inf <- function(x, nthreads) {
+    .Call(`_fixest_cpp_which_na_inf`, x, nthreads)
 }
 
 cpp_get_nb_threads <- function() {

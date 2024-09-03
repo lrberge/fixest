@@ -45,6 +45,7 @@ RealVec::RealVec(SEXP x){
 //
 
 RealMat::RealMat(SEXP x, bool single_obs){
+  // NOTA: you only default values to declarations, not implementations
 
   if(TYPEOF(x) == VECSXP){
     // x can be a list of either vectors or matrices
@@ -132,8 +133,4 @@ RealMat::RealMat(SEXP x, bool single_obs){
       Rf_error("The current SEXP type is not supported by the RealMat class.");
     }
   }
-}
-
-RealMat::RealMat(SEXP x){
-  RealMat::RealMat(x, false);
 }

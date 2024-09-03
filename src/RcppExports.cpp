@@ -341,18 +341,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// cpp_which_na_inf
-List cpp_which_na_inf(SEXP x, int nthreads);
-RcppExport SEXP _fixest_cpp_which_na_inf(SEXP xSEXP, SEXP nthreadsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
-    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_which_na_inf(x, nthreads));
-    return rcpp_result_gen;
-END_RCPP
-}
 // cpp_dsb
 List cpp_dsb(SEXP Rstr);
 RcppExport SEXP _fixest_cpp_dsb(SEXP RstrSEXP) {
@@ -805,6 +793,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_which_na_inf
+List cpp_which_na_inf(SEXP x, int nthreads);
+RcppExport SEXP _fixest_cpp_which_na_inf(SEXP xSEXP, SEXP nthreadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_which_na_inf(x, nthreads));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_get_nb_threads
 int cpp_get_nb_threads();
 RcppExport SEXP _fixest_cpp_get_nb_threads() {
@@ -1186,7 +1186,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpp_derivconv_seq_2", (DL_FUNC) &_fixest_cpp_derivconv_seq_2, 12},
     {"_fixest_update_deriv_single", (DL_FUNC) &_fixest_update_deriv_single, 5},
     {"_fixest_cpp_demean", (DL_FUNC) &_fixest_cpp_demean, 17},
-    {"_fixest_cpp_which_na_inf", (DL_FUNC) &_fixest_cpp_which_na_inf, 2},
     {"_fixest_cpp_dsb", (DL_FUNC) &_fixest_cpp_dsb, 1},
     {"_fixest_cpp_dsb_full_string", (DL_FUNC) &_fixest_cpp_dsb_full_string, 1},
     {"_fixest_cpp_dsb_if_extract", (DL_FUNC) &_fixest_cpp_dsb_if_extract, 1},
@@ -1222,6 +1221,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpp_is_int", (DL_FUNC) &_fixest_cpp_is_int, 1},
     {"_fixest_cpp_hash_string", (DL_FUNC) &_fixest_cpp_hash_string, 1},
     {"_fixest_cpp_escape_markup", (DL_FUNC) &_fixest_cpp_escape_markup, 1},
+    {"_fixest_cpp_which_na_inf", (DL_FUNC) &_fixest_cpp_which_na_inf, 2},
     {"_fixest_cpp_get_nb_threads", (DL_FUNC) &_fixest_cpp_get_nb_threads, 0},
     {"_fixest_cpp_exp", (DL_FUNC) &_fixest_cpp_exp, 2},
     {"_fixest_cpp_log", (DL_FUNC) &_fixest_cpp_log, 2},
