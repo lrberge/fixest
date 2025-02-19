@@ -761,15 +761,19 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov
 
 
 #' @rdname summary.fixest
-summary.fixest_list = function(object, se, cluster, ssc = getFixest_ssc(), .vcov, 
+summary.fixest_list = function(object, se, cluster, ssc = getFixest_ssc(), .vcov = NULL, 
                                stage = 2, lean = FALSE, n, ...){
 
   dots = list(...)
 
   res = list()
   for(i in seq_along(object)){
-    my_res = summary(object[[i]], se = se, cluster = cluster, ssc = ssc, 
-                     .vcov = .vcov, stage = stage, lean = lean, n = n)
+    if (!is.null(.vcov) && is.list(.vcov) && length(object) == length(.vcov)) {
+      my_res = summary(object[[i]], se = se, cluster = cluster, ssc = ssc, 
+        .vcov = .vcov[[i]], stage = stage, lean = lean, n = n)
+    } else {
+      my_res = summary(object[[i]], vcov = vcov, se = se, cluster = cluster, ssc = ssc, .vcov = .vcov, stage = stage, lean = lean, n = n, ...)
+    }
 
     # we unroll in case of IV
     if("fixest_multi" %in% class(my_res)){

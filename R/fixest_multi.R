@@ -463,6 +463,7 @@ summary.fixest_multi = function(object, type = "short", vcov = NULL, se = NULL,
   dots = list(...)
 
   check_set_arg(type, "match(short, long, compact, se_compact, se_long)")
+  check_arg(.vcov, "NULL | matrix | list | function")
 
   if(!missing(type) || is.null(attr(object, "print_request"))){
     attr(object, "print_request") = type
@@ -477,8 +478,11 @@ summary.fixest_multi = function(object, type = "short", vcov = NULL, se = NULL,
   if(is.null(est_1$cov.scaled) || !isTRUE(dots$fromPrint)){
 
     for(i in 1:length(object)){
-      object[[i]] = summary(object[[i]], vcov = vcov, se = se, cluster = cluster, ssc = ssc,
-                            .vcov = .vcov, stage = stage, lean = lean, n = n, ...)
+      if (!is.null(.vcov) && is.list(.vcov) && length(object) == length(.vcov)) {
+        object[[i]] = summary(object[[i]], vcov = vcov, se = se, cluster = cluster, ssc = ssc, .vcov = .vcov[[i]], stage = stage, lean = lean, n = n, ...)
+      } else {
+        object[[i]] = summary(object[[i]], vcov = vcov, se = se, cluster = cluster, ssc = ssc, .vcov = .vcov, stage = stage, lean = lean, n = n, ...)
+      }
     }
 
     # In IV: multiple estimations can be returned
