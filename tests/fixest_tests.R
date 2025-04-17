@@ -2217,10 +2217,10 @@ test(sp1$col_names, c("x::1", "x::3"))
 
 y1 <- rnorm(5)
 sp2 <- i(x, y1, sparse = TRUE)
-test(sp1$rowid, seq_len(length(x)))
-test(sp1$values, y1)
-test(sp1$colid, match(x, unique(x)))
-test(sp1$col_names, c("x::1:y1", "x::3:y1"))
+test(sp2$rowid, seq_len(length(x)))
+test(sp2$values, y1)
+test(sp2$colid, match(x, unique(x)))
+test(sp2$col_names, c("x::1:y1", "x::3:y1"))
 
 y2 <- c(2, 2, 2, 3, 3)
 sp3 <- i(x, i.y2, sparse = TRUE)
@@ -2244,6 +2244,28 @@ test(m[, 9], mtcars$cyl == 4)
 test(m[, 10], mtcars$hp * (mtcars$cyl == 8))
 test(m[, 11], mtcars$hp * (mtcars$cyl == 6))
 test(m[, 12], mtcars$hp * (mtcars$cyl == 4))
+
+# checking collin.rm = TRUE
+est <- feols(mpg ~ i(am) + i(cyl) + hp, mtcars)
+m <- vars_to_sparse_mat(
+  c("i(am)", "i(cyl)", "hp"), 
+  data = mtcars,
+  collin.rm = TRUE, 
+  object = est
+)
+test(ncol(m), length(est$coefficients))
+test(colnames(m), names(est$coefficients))
+
+est <- feols(mpg ~ i(am) + hp | cyl, mtcars)
+m <- vars_to_sparse_mat(
+  c("i(am)", "hp"), 
+  data = mtcars,
+  collin.rm = TRUE, 
+  object = est
+)
+test(ncol(m), length(est$coefficients))
+test(colnames(m), names(est$coefficients))
+
 
 
 # sparse_model_matrix

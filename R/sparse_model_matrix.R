@@ -642,15 +642,15 @@ vars_to_sparse_mat = function(vars, data, collin.rm = FALSE, object = NULL, type
       stop("You need to provide the 'object' argument to use 'collin.rm = TRUE'.")
     }
 
+    coef_names <- names(object$coefficients)
     if (collin.rm) {
-        qui = which(colnames(mat) %in% object$collin.var)
-        if (length(qui) == ncol(mat)) {
+        keep = which(colnames(mat) %in% coef_names)
+        if (length(keep) == 0) {
             mat = NULL
-        } else if (length(qui) > 0) {
-            mat =  mat[, -qui, drop = FALSE]
+        } else if (length(keep) < ncol(mat)) {
+            mat = mat[, keep, drop = FALSE]
         }
 
-        coefs = names(object$coefficients)
         if (isTRUE(object$iv)) {
           fml_iv = object$fml_all$iv
           endo = fml_iv[[2]]
@@ -667,18 +667,18 @@ vars_to_sparse_mat = function(vars, data, collin.rm = FALSE, object = NULL, type
         if (!is.null(type)) {
           if (type == "rhs") {
             if (isTRUE(object$iv)) {
-              keep = c(endo, coefs)
+              keep = c(endo, coef_names)
             } else {
-              keep = coefs
+              keep = coef_names
             }
           } else if (type == "iv.exo") {
-            keep = coefs
+            keep = coef_names
           } else if (type == "iv.exo") {
-            keep = c(endo, coefs)
+            keep = c(endo, coef_names)
           } else if (type == "iv.rhs1") {
-            keep = c(exo, coefs)
+            keep = c(exo, coef_names)
           } else if (type == "iv.rhs2") {
-            keep = coefs
+            keep = coef_names
           }
 
           keep = keep[!keep %in% object$collin.var]
@@ -690,18 +690,19 @@ vars_to_sparse_mat = function(vars, data, collin.rm = FALSE, object = NULL, type
           }
         }
 
-        if (length(coefs) == ncol(mat) && any(colnames(mat) != names(coefs))) {
+        if (length(coef_names) == ncol(mat) && any(colnames(mat) != names(coef_names))) {
             # we reorder the matrix
             # This can happen in multiple estimations, where we respect the
             # order of the user
 
-            if (all(names(coefs) %in% colnames(mat))) {
-                mat = mat[, names(coefs), drop = FALSE]
+            if (all(names(coef_names) %in% colnames(mat))) {
+                mat = mat[, names(coef_names), drop = FALSE]
             }
         }
     }
 
-    if (add_intercept) {
+    # Add back in intercept if `collin.rm == TRUE` and there was on in the original estimation (i.e. no fixed effects or i() with no reference)
+    if (add_intercept || (collin.rm == TRUE && "(Intercept)" %in% coef_names)) {
         mat = cbind(1, mat)
         colnames(mat)[1] = "(Intercept)"
     }
