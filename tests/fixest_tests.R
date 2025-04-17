@@ -2231,7 +2231,7 @@ test(sp3$colid, match(sprintf("x::%s:y2::%s", x, y2), uniq_col_names))
 test(sp3$col_names, uniq_col_names)
  
 # unit tests: vars_to_sparse_mat
-m <- vars_to_sparse_mat(c("mpg^2", "i(cyl, ref = 6)", "I(mpg + hp)", "poly(mpg, 2)", "factor(cyl)", "factor(cyl):hp"), mtcars)
+m <- fixest:::vars_to_sparse_mat(c("mpg^2", "i(cyl, ref = 6)", "I(mpg + hp)", "poly(mpg, 2)", "factor(cyl)", "factor(cyl):hp"), mtcars)
 test(m[, 1], mtcars$mpg^2)
 test(m[, 2], mtcars$cyl == 4)
 test(m[, 3], mtcars$cyl == 8)
@@ -2247,7 +2247,7 @@ test(m[, 12], mtcars$hp * (mtcars$cyl == 4))
 
 # checking collin.rm = TRUE
 est <- feols(mpg ~ i(am) + i(cyl) + hp, mtcars)
-m <- vars_to_sparse_mat(
+m <- fixest:::vars_to_sparse_mat(
   c("i(am)", "i(cyl)", "hp"), 
   data = mtcars,
   collin.rm = TRUE, 
@@ -2257,7 +2257,7 @@ test(ncol(m), length(est$coefficients))
 test(colnames(m), names(est$coefficients))
 
 est <- feols(mpg ~ i(am) + hp | cyl, mtcars)
-m <- vars_to_sparse_mat(
+m <- fixest:::vars_to_sparse_mat(
   c("i(am)", "hp"), 
   data = mtcars,
   collin.rm = TRUE, 
