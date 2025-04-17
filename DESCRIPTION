@@ -18,7 +18,11 @@ Authors@R:
        person(given = "Russell",
              family = "Lenth",
              role = "ctb",
-             email = "russell-lenth@uiowa.edu"))
+             email = "russell-lenth@uiowa.edu"),
+      person(given = "Kyle",
+             family = "Butts",
+             role = "ctb",
+             email = "buttskyle96@gmail.com"))
 Imports: stats, graphics, grDevices, tools, utils, methods, numDeriv, nlme, sandwich, Rcpp(>= 1.0.5), dreamerr(>= 1.4.0), stringmagic(>= 1.1.2), Matrix
 Suggests: knitr, rmarkdown, data.table, plm, MASS, pander, ggplot2, lfe, tinytex, pdftools, emmeans, estimability, AER
 LinkingTo: Rcpp
