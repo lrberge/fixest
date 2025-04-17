@@ -121,6 +121,7 @@ S3method(sigma, fixest)
 S3method(weights, fixest)
 S3method(hatvalues, fixest)
 S3method(df.residual, fixest)
+S3method(case.names, fixest)
 
 # Stats methods => fixest_multi
 S3method(coef, fixest_multi)

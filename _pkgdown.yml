@@ -91,6 +91,7 @@ reference:
         - formula.fixest
         - terms.fixest
         - df.residual.fixest
+        - case.names.fixest
     - title: Formula tools
       desc: Tools to manipulate formulas
       contents:
