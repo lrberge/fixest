@@ -2783,7 +2783,8 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
 
 #' Extracts the observations used for the estimation
 #'
-#' This function extracts the observations used in `fixest` estimation.
+#' This function extracts the observations used in `fixest` estimation. 
+#' The `stats::case.names` S3 method calls this function
 #'
 #' @param x A `fixest` object.
 #'
@@ -2823,6 +2824,25 @@ obs = function(x){
 
   return(id)
 }
+
+#' @rdname obs
+#' @export
+case.names.fixest = function(x){
+  check_arg(x, "class(fixest)")
+
+  if(isTRUE(x$lean)){
+    stop("obs() does not work with models estimated with 'lean = TRUE'.")
+  }
+
+  id = 1:x$nobs_origin
+
+  for(i in seq_along(x$obs_selection)){
+    id = id[x$obs_selection[[i]]]
+  }
+
+  return(id)
+}
+
 
 
 

@@ -59,6 +59,7 @@ Other contributors:
   \item Sebastian Krantz [contributor]
   \item Grant McDermott \email{grantmcd@uoregon.edu} (\href{https://orcid.org/0000-0001-7883-8573}{ORCID}) [contributor]
   \item Russell Lenth \email{russell-lenth@uiowa.edu} [contributor]
+  \item Kyle Butts \email{buttskyle96@gmail.com} [contributor]
 }
 
 }
