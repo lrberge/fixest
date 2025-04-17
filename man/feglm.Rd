@@ -30,7 +30,7 @@ feglm(
   fixef.tol = 1e-06,
   fixef.iter = 10000,
   fixef.algo = NULL,
-  collin.tol = 1e-10,
+  collin.tol = 1e-09,
   glm.iter = 25,
   glm.tol = 1e-08,
   nthreads = getFixest_nthreads(),
@@ -70,7 +70,7 @@ feglm.fit(
   fixef.tol = 1e-06,
   fixef.iter = 10000,
   fixef.algo = NULL,
-  collin.tol = 1e-10,
+  collin.tol = 1e-09,
   glm.iter = 25,
   glm.tol = 1e-08,
   nthreads = getFixest_nthreads(),
@@ -108,7 +108,7 @@ fepois(
   fixef.tol = 1e-06,
   fixef.iter = 10000,
   fixef.algo = NULL,
-  collin.tol = 1e-10,
+  collin.tol = 1e-09,
   glm.iter = 25,
   glm.tol = 1e-08,
   nthreads = getFixest_nthreads(),
@@ -269,7 +269,7 @@ over 50, it may be worth playing around with it. Please read the documentation o
 function \code{\link{demeaning_algo}}. Be aware that there is no clear guidance on how to change the
 settings, it's more a matter of try-and-see.}
 
-\item{collin.tol}{Numeric scalar, default is \code{1e-10}. Threshold deciding when variables should
+\item{collin.tol}{Numeric scalar, default is \code{1e-9}. Threshold deciding when variables should
 be considered collinear and subsequently removed from the estimation. Higher values means more
 variables will be removed (if there is presence of collinearity). One signal of presence of
 collinearity is t-stats that are extremely low (for instance when t-stats < 1e-3).}
