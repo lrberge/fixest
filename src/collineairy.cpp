@@ -1,5 +1,5 @@
 
-#include <Rcpp.h>
+#include "fixest_main.hpp"
 using namespace Rcpp;
 
 inline int get_sexp_ncol(SEXP &x){
@@ -14,7 +14,8 @@ inline int get_sexp_ncol(SEXP &x){
 }
 
 
-
+/*
+// use 128bit for scaling? Would avoid issues. 
 SEXP cpp_scale(SEXP x){
   // x: numeric matrix
   //    garanteed without NA
@@ -52,9 +53,13 @@ SEXP cpp_scale(SEXP x){
     }
   }
   
-  
-  
-  
-  
 }
+
+*/
+
+
+
+
+
+
 
