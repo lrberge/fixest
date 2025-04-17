@@ -218,7 +218,7 @@ print.fixest_fitstat = function(x, na.rm = FALSE, ...){
 
 #' Register custom fit statistics
 #'
-#' Enables the registration of custom fi statistics that can be easily summoned with the function [`fitstat`].
+#' Enables the registration of custom fit statistics that can be easily summoned with the function [`fitstat`].
 #'
 #' @inherit fitstat seealso
 #'

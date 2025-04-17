@@ -1488,7 +1488,7 @@ i = function(factor_var, var, ref, keep, bin, ref2, keep2, bin2, ...){
 
     values = if(length(var) == 1) rep(1, length(valid_row)) else var
     res = list(rowid = which(valid_row), values = values,
-           colid = fe_colid, col_names = col_names)
+               colid = fe_colid, col_names = col_names)
 
     class(res) = "i_sparse"
 
