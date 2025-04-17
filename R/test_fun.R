@@ -243,7 +243,10 @@ test = function(x, y, type = "=", tol = 1e-6){
 }
 
 
-chunk = function(x) message(toupper(x), "\n")
+chunk = function(x){
+  options(TEST_CHUNK = x)
+  message(toupper(x), "\n")
+}
 
 test_contains = function(x, pattern){
   update_test_counter()
@@ -278,6 +281,7 @@ test_err_contains = function(x, pattern){
 
 run_tests = function(chunk, from = 1, source = FALSE, use_devtools = TRUE){
   update_test_counter(reset = TRUE)
+  options(TEST_CHUNK = NULL)
   
   wd = getwd()
   
@@ -486,6 +490,11 @@ run_tests = function(chunk, from = 1, source = FALSE, use_devtools = TRUE){
     message("\n---------------------------\n")
 
     message(file_info, "Test failed at line: ", line_in_file)
+    
+    chunk_info = getOption("TEST_CHUNK")
+    if(!is.null(chunk_info)){
+      message("Chunk = ", chunk_info, ", rerun with run_tests(\"", chunk_info, "\")")
+    }
     
     i = which(test_code == paste0("LINE_COUNTER = ", line_fail))
     my_line = test_code[i + 1]
