@@ -25,6 +25,8 @@
 
 - fix documentation bugs. Reported by @cseveren
 
+- fix bug in etable: `drop.section` was not catching the option `coef`. Thanks to @Oravishayrizi, #540
+
 # fixest 0.12.1
 
 ## Major bugs affecting R versions <= 4.1.2

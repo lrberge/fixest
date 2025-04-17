@@ -1534,7 +1534,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     }
   }
 
-  check_set_arg(drop.section, "NULL multi match(fixef, slopes, stats)")
+  check_set_arg(drop.section, "NULL multi match(coef, fixef, slopes, stats)")
   
   check_arg(group, "NULL named list l0")
   if(is.null(group)){
@@ -4651,7 +4651,7 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat,
                 .message = "Argument 'placement' must be a character string containing only the following characters: 'h', 't', 'b', 'p', 'H', and '!'.")
   }
 
-  check_set_arg(drop.section, "NULL multi match(fixef, slopes, stats)")
+  check_set_arg(drop.section, "NULL multi match(coef, fixef, slopes, stats)")
 
   check_arg(style.tex, "NULL class(fixest_style_tex)")
 
