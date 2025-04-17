@@ -9,6 +9,7 @@
 # Some functions are not trivial to test properly though
 
 library(fixest)
+library(sandwich)
 
 test = fixest:::test ; chunk = fixest:::chunk
 vcovClust = fixest:::vcovClust
@@ -744,6 +745,7 @@ for(id_fun in 1:5){
 cat("\n")
 
 
+
 # No error tests
 # We test with IV + possible corner cases
 
@@ -851,6 +853,12 @@ test(length(est_lhs), 2)
 est_lhs = feols(..("mpg|wt") ~ disp | hp ~ qsec, data = mtcars)
 test(length(est_lhs), 2)
 
+# Custom vcov to fixest multi
+est_multi <- feols(c(y1, y2) ~ x2 + x3, base)
+vcovs_HC3 <- lapply(est_multi, function(est) sandwich::vcovHC(est, type = "HC3"))
+est_multi_HC3 <- summary(est_multi, .vcov = vcovs_HC3)
+test(vcov(est_multi_HC3[[1]]), vcovs_HC3[[1]])
+test(vcov(est_multi_HC3[[2]]), vcovs_HC3[[2]])
 
 ####
 #### ... IV ####
@@ -1185,8 +1193,6 @@ for(cdf in c("conventional", "min")){
 #
 # Comparison with sandwich and plm
 #
-
-library(sandwich)
 
 # Data generation
 set.seed(0)

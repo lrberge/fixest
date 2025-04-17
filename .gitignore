@@ -16,3 +16,4 @@ Rplots.pdf
 vignettes/*.html
 
 _CPP_CACHE
+.DS_Store
