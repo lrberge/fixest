@@ -2207,6 +2207,46 @@ test(names(m_lhs_rhs_fixef), c("y1", "fit_x2", "x1", "species"))
 #### sparse_model_matrix ####
 ####
 
+# unit tests: i(..., sparse = TRUE) 
+x <- c(1, 1, 3, 1, 3)
+sp1 <- i(x, sparse = TRUE)
+test(sp1$rowid, seq_len(length(x)))
+test(sp1$values, rep(1, length(x)))
+test(sp1$colid, match(x, unique(x)))
+test(sp1$col_names, c("x::1", "x::3"))
+
+y1 <- rnorm(5)
+sp2 <- i(x, y1, sparse = TRUE)
+test(sp1$rowid, seq_len(length(x)))
+test(sp1$values, y1)
+test(sp1$colid, match(x, unique(x)))
+test(sp1$col_names, c("x::1:y1", "x::3:y1"))
+
+y2 <- c(2, 2, 2, 3, 3)
+sp3 <- i(x, i.y2, sparse = TRUE)
+uniq_col_names <- sprintf("x::%s:y2::%s", c(1, 1, 3, 3), c(2, 3, 2, 3))
+test(sp3$rowid, seq_len(length(x)))
+test(sp3$values, rep(1, length(x)))
+test(sp3$colid, match(sprintf("x::%s:y2::%s", x, y2), uniq_col_names))
+test(sp3$col_names, uniq_col_names)
+ 
+# unit tests: vars_to_sparse_mat
+m <- vars_to_sparse_mat(c("mpg^2", "i(cyl, ref = 6)", "I(mpg + hp)", "poly(mpg, 2)", "factor(cyl)", "factor(cyl):hp"), mtcars)
+test(m[, 1], mtcars$mpg^2)
+test(m[, 2], mtcars$cyl == 4)
+test(m[, 3], mtcars$cyl == 8)
+test(m[, 4], mtcars$mpg + mtcars$hp)
+test(m[, 5:6], poly(mtcars$mpg, 2))
+# matches order of appearance in mtcars$cyl
+test(m[, 7], mtcars$cyl == 8)
+test(m[, 8], mtcars$cyl == 6)
+test(m[, 9], mtcars$cyl == 4)
+test(m[, 10], mtcars$hp * (mtcars$cyl == 8))
+test(m[, 11], mtcars$hp * (mtcars$cyl == 6))
+test(m[, 12], mtcars$hp * (mtcars$cyl == 4))
+
+
+# sparse_model_matrix
 base = iris
 names(base) = c("y1", "x1", "x2", "x3", "species")
 base$y2 = 10 + rnorm(150) + 0.5 * base$x1

@@ -1,3 +1,5 @@
+# Contributed by @kylebutts; please tag him in github issues
+
 #' Design matrix of a `fixest` object returned in sparse format
 #'
 #' This function creates the left-hand-side or the right-hand-side(s) of a [`femlm`], [`feols`] or [`feglm`] estimation.
