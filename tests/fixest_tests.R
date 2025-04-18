@@ -9,7 +9,6 @@
 # Some functions are not trivial to test properly though
 
 library(fixest)
-library(sandwich)
 
 test = fixest:::test ; chunk = fixest:::chunk
 vcovClust = fixest:::vcovClust
@@ -745,7 +744,6 @@ for(id_fun in 1:5){
 cat("\n")
 
 
-
 # No error tests
 # We test with IV + possible corner cases
 
@@ -1246,6 +1244,8 @@ for(cdf in c("conventional", "min")){
 #
 # Comparison with sandwich and plm
 #
+
+library(sandwich)
 
 # Data generation
 set.seed(0)
