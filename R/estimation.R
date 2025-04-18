@@ -3671,10 +3671,10 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
 #' @param jacobian.method (For NL models only) Character scalar. Provides the method 
 #' used to numerically compute the Jacobian of the non-linear part. 
 #' Can be either `"simple"` or `"Richardson"`. Default is `"simple"`. 
-#' See the help of [`jacobian`] for more information.
+#' See the help of [numDeriv::jacobian()] for more information.
 #' @param useHessian Logical. Should the Hessian be computed in the optimization stage? 
 #' Default is `TRUE`.
-#' @param hessian.args List of arguments to be passed to function [`genD`]. 
+#' @param hessian.args List of arguments to be passed to function [numDeriv::genD()]. 
 #' Defaults is missing. Only used with the presence of `NL.fml`.
 #' @param opt.control List of elements to be passed to the optimization method [`nlminb`]. 
 #' See the help page of [`nlminb`] for more information.

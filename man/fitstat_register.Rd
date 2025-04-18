@@ -28,7 +28,7 @@ Note that you can use the shortcut "test" when the sub-types are "stat", "p" and
 and "test2" when these are "stat", "p", "df1" and "df2".}
 }
 \description{
-Enables the registration of custom fi statistics that can be easily summoned with the function \code{\link{fitstat}}.
+Enables the registration of custom fit statistics that can be easily summoned with the function \code{\link{fitstat}}.
 }
 \details{
 If there are several components to the computed statistics (i.e. the function returns

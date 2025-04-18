@@ -204,12 +204,12 @@ named vector of any length (the names will be used to initialize the appropriate
 \item{jacobian.method}{(For NL models only) Character scalar. Provides the method
 used to numerically compute the Jacobian of the non-linear part.
 Can be either \code{"simple"} or \code{"Richardson"}. Default is \code{"simple"}.
-See the help of \code{\link{jacobian}} for more information.}
+See the help of \code{\link[numDeriv:jacobian]{numDeriv::jacobian()}} for more information.}
 
 \item{useHessian}{Logical. Should the Hessian be computed in the optimization stage?
 Default is \code{TRUE}.}
 
-\item{hessian.args}{List of arguments to be passed to function \code{\link{genD}}.
+\item{hessian.args}{List of arguments to be passed to function \code{\link[numDeriv:genD]{numDeriv::genD()}}.
 Defaults is missing. Only used with the presence of \code{NL.fml}.}
 
 \item{opt.control}{List of elements to be passed to the optimization method \code{\link{nlminb}}.
