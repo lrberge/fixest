@@ -470,7 +470,7 @@ In the previous code, `fitstat = ~ . + ivwald2` means that we want to add the se
 Now what about adding some fixed-effects? That's of course possible, you need to add them after the first right-hand-side, as follows:
 
 ```{r}
-est_iv_fe = est_iv = feols(qty ~ t | day | price ~ speed2 + wave2, fulton)
+est_iv_fe = feols(qty ~ t | day | price ~ speed2 + wave2, fulton)
 est_iv_fe
 ```
 
