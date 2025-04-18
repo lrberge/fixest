@@ -2203,6 +2203,218 @@ res_mult = feols(y1 ~ x1 | species | x2 ~ x3, base)
 m_lhs_rhs_fixef = model.matrix(res_mult, type = c("lhs", "iv.rhs2", "fixef"), na.rm = FALSE)
 test(names(m_lhs_rhs_fixef), c("y1", "fit_x2", "x1", "species"))
 
+####
+#### sparse_model_matrix ####
+####
+
+# unit tests: i(..., sparse = TRUE) 
+x <- c(1, 1, 3, 1, 3)
+sp1 <- i(x, sparse = TRUE)
+test(sp1$rowid, seq_len(length(x)))
+test(sp1$values, rep(1, length(x)))
+test(sp1$colid, match(x, unique(x)))
+test(sp1$col_names, c("x::1", "x::3"))
+
+y1 <- rnorm(5)
+sp2 <- i(x, y1, sparse = TRUE)
+test(sp2$rowid, seq_len(length(x)))
+test(sp2$values, y1)
+test(sp2$colid, match(x, unique(x)))
+test(sp2$col_names, c("x::1:y1", "x::3:y1"))
+
+y2 <- c(2, 2, 2, 3, 3)
+sp3 <- i(x, i.y2, sparse = TRUE)
+uniq_col_names <- sprintf("x::%s:y2::%s", c(1, 1, 3, 3), c(2, 3, 2, 3))
+test(sp3$rowid, seq_len(length(x)))
+test(sp3$values, rep(1, length(x)))
+test(sp3$colid, match(sprintf("x::%s:y2::%s", x, y2), uniq_col_names))
+test(sp3$col_names, uniq_col_names)
+ 
+# unit tests: vars_to_sparse_mat
+m <- fixest:::vars_to_sparse_mat(c("mpg^2", "i(cyl, ref = 6)", "I(mpg + hp)", "poly(mpg, 2)", "factor(cyl)", "factor(cyl):hp"), mtcars)
+test(m[, "mpg^2"], mtcars$mpg^2)
+test(m[, "cyl::4"], mtcars$cyl == 4)
+test(m[, "cyl::8"], mtcars$cyl == 8)
+test(m[, "I(mpg + hp)"], mtcars$mpg + mtcars$hp)
+test(m[, c("poly(mpg, 2)1", "poly(mpg, 2)2")], poly(mtcars$mpg, 2))
+# matches order of appearance in mtcars$cyl
+test(m[, "factor(cyl)4"], mtcars$cyl == 4)
+test(m[, "factor(cyl)6"], mtcars$cyl == 6)
+test(m[, "factor(cyl)8"], mtcars$cyl == 8)
+test(m[, "factor(cyl)4:hp"], mtcars$hp * (mtcars$cyl == 4))
+test(m[, "factor(cyl)6:hp"], mtcars$hp * (mtcars$cyl == 6))
+test(m[, "factor(cyl)8:hp"], mtcars$hp * (mtcars$cyl == 8))
+
+# checking collin.rm = TRUE
+est <- feols(mpg ~ i(am) + i(cyl) + hp, mtcars)
+m <- fixest:::vars_to_sparse_mat(
+  c("i(am)", "i(cyl)", "hp"), 
+  data = mtcars,
+  collin.rm = TRUE, 
+  object = est
+)
+test(ncol(m), length(est$coefficients))
+test(colnames(m), names(est$coefficients))
+
+est <- feols(mpg ~ i(am) + hp | cyl, mtcars)
+m <- fixest:::vars_to_sparse_mat(
+  c("i(am)", "hp"), 
+  data = mtcars,
+  collin.rm = TRUE, 
+  object = est
+)
+test(ncol(m), length(est$coefficients))
+test(colnames(m), names(est$coefficients))
+
+
+
+# sparse_model_matrix
+base = iris
+names(base) = c("y1", "x1", "x2", "x3", "species")
+base$y2 = 10 + rnorm(150) + 0.5 * base$x1
+base$x4 = rnorm(150) + 0.5 * base$y1
+base$fe2 = rep(letters[1:15], 10)
+base$fe2[50:51] = NA
+base$y2[base$fe2 == "a" & !is.na(base$fe2)] = 0
+base$x2[1:5] = NA
+base$x3[6] = NA
+base$fe3 = rep(letters[1:10], 15)
+base$id = rep(1:15, each = 10)
+base$time = rep(1:10, 15)
+
+base_bis = base[1:50, ]
+base_bis$id = rep(1:5, each = 10)
+base_bis$time = rep(1:10, 5)
+
+
+res = feols(y1 ~ x1 + x2 + x3, base)
+sm1 = sparse_model_matrix(
+  res, type = "lhs",
+  na.rm = TRUE
+)
+test(length(sm1), res$nobs)
+
+sm1_na = sparse_model_matrix(
+  res, data = base, 
+  type = "lhs",
+  na.rm = FALSE
+)
+test(length(sm1_na), res$nobs_origin)
+test(max(abs(sm1_na - base$y1), na.rm = TRUE), 0)
+
+
+sm2 = sparse_model_matrix(
+  res, type = c("lhs", "rhs"), data = base, 
+  combine = FALSE, na.rm = FALSE
+)
+y = sm2[["lhs"]]
+X = sm2[["rhs"]]
+obs_rm = res$obs_selection$obsRemoved
+res_bis = solve(
+  crossprod(as.matrix(X)[obs_rm, ]), 
+  crossprod(as.matrix(X)[obs_rm, ], as.matrix(y)[obs_rm, ])
+)
+test(as.numeric(res_bis), res$coefficients)
+
+# No constant
+res_nocons = feols(mpg ~ 0 + i(cyl), mtcars)
+sm_nocons = sparse_model_matrix(res_nocons, type = "rhs")
+test("(Intercept)" %in% colnames(sm_nocons), FALSE)
+
+# Lag 
+res_lag = feols(y1 ~ l(x1, 1:2) + x2 + x3, base, panel = ~id + time)
+sm_lag = sparse_model_matrix(res_lag, type = "rhs")
+test(nrow(sm_lag), nobs(res_lag))
+
+
+# TODO: Fix poly and newdata
+# With poly
+# res_poly = feols(y1 ~ poly(x1, 2), base)
+# works
+# res_poly = feols(y1 ~ x1, base)
+# sm_poly_old = sparse_model_matrix(res_poly)
+# sm_poly_new = sparse_model_matrix(res_poly, data = base_bis)
+# test(sm_poly_old[1:50, 3], sm_poly_new[, 3])
+
+
+# Interacted fixef
+res = feols(y1 ~ x1 + x2 + x3 | species^fe2, base)
+sm_ife = sparse_model_matrix(res, data = base, type = "fixef", collin.rm = FALSE)
+
+# fixef
+res = feols(y1 ~ x1 + x2 + x3 | species + fe2, base)
+sm_fe = sparse_model_matrix(res, data = base, type = "fixef")
+test(ncol(sm_fe), 17)
+
+sm_fe_no_collin_rm = sparse_model_matrix(res, data = base, type = "fixef", collin.rm = FALSE)
+test(ncol(sm_fe_no_collin_rm), 18)
+
+sm_fe_base_bis = sparse_model_matrix(res, data = base_bis, type = "fixef")
+
+
+# Time-varying slopes
+res_slopes = feols(y1 ~ x1 + x2 + x3 | fe2[I(x2+1)], data = base[7:48, ])
+sm_slopes = sparse_model_matrix(res_slopes, type = "fixef")
+
+# IV
+res_iv = feols(y1 ~ x1 | x2 ~ x3, base)
+
+sm_rhs = sparse_model_matrix(res_iv, type = "rhs")
+m_rhs = model.matrix(res_iv, type = "rhs")
+test(head(sm_rhs), head(m_rhs))
+
+sm_rhs1 = sparse_model_matrix(res_iv, type = "iv.rhs1")
+m_rhs1 = model.matrix(res_iv, type = "iv.rhs1")
+test(colnames(sm_rhs1), c("(Intercept)", "x3", "x1"))
+test(head(sm_rhs1), head(m_rhs1))
+
+sm_rhs2 = sparse_model_matrix(res_iv, type = "iv.rhs2")
+m_rhs2 = model.matrix(res_iv, type = "iv.rhs2")
+test(colnames(sm_rhs2), c("(Intercept)", "fit_x2", "x1"))
+test(head(sm_rhs2), head(m_rhs2))
+
+sm_endo = sparse_model_matrix(res_iv, type = "iv.endo")
+m_endo = model.matrix(res_iv, type = "iv.endo")
+test(colnames(sm_endo), "x2")
+test(head(sm_endo), head(m_endo))
+
+sm_exo = sparse_model_matrix(res_iv, type = "iv.exo")
+m_exo = model.matrix(res_iv, type = "iv.exo")
+test(colnames(sm_exo), c("(Intercept)", "x1"))
+test(head(sm_exo), head(m_exo))
+
+sm_inst  = sparse_model_matrix(res_iv, type = "iv.inst")
+m_inst  = model.matrix(res_iv, type = "iv.inst")
+test(colnames(sm_inst), "x3")
+test(head(sm_inst), head(m_inst))
+
+# several
+res_mult = feols(y1 ~ x1 | species | x2 ~ x3, base)
+
+sm_lhs_rhs_fixef = sparse_model_matrix(res_mult, type = c("lhs", "iv.rhs2", "fixef"))
+test(colnames(sm_lhs_rhs_fixef), c("y1", "fit_x2", "x1", "species::setosa", "species::versicolor", "species::virginica"))
+
+
+# non-linear model
+res_pois = fepois(Sepal.Length ~ Sepal.Width + Petal.Length | Species, iris)
+sp_pois = sparse_model_matrix(res_pois, data = iris)
+
+
+# make sure names are correct
+test_col_names <- function(est) {
+  m <- fixest::sparse_model_matrix(est, collin.rm = FALSE)
+  q <- test(all(names(coef(est)) %in% colnames(m)), TRUE)
+  return(invisible(NULL))
+}
+test_col_names(feols(mpg ~ i(am) + disp | vs, mtcars))
+test_col_names(feols(mpg ~ i(am, i.cyl) + disp | vs, mtcars))
+test_col_names(feols(mpg ~ i(am, hp) + disp | vs, mtcars))
+test_col_names(feols(mpg ~ i(am):hp + disp | vs, mtcars))
+test_col_names(feols(mpg ~ factor(am) + disp | vs, mtcars))
+test_col_names(feols(mpg ~ factor(am):factor(cyl) + disp | vs, mtcars, notes = FALSE))
+test_col_names(feols(mpg ~ factor(am):hp + disp | vs, mtcars))
+test_col_names(feols(mpg ~ poly(hp, degree = 2) + disp | vs, mtcars))
+
 
 ####
 #### update ####

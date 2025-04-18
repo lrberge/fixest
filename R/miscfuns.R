@@ -1450,7 +1450,7 @@ i = function(factor_var, var, ref, keep, bin, ref2, keep2, bin2, ...){
     items_name = items
   }
 
-  if(FROM_FIXEST){
+  if(FROM_FIXEST || is_sparse){
     # Pour avoir des jolis noms c'est un vrai gloubiboulga,
     # mais j'ai pas trouve plus simple...
     if(IS_INTER_FACTOR){
@@ -1487,6 +1487,10 @@ i = function(factor_var, var, ref, keep, bin, ref2, keep2, bin2, ...){
     fe_colid = to_integer(fe_num[valid_row], sorted = TRUE)
 
     values = if(length(var) == 1) rep(1, length(valid_row)) else var
+
+    # Clean names
+    col_names = sub("^.*__CLEAN__", "", col_names)
+
     res = list(rowid = which(valid_row), values = values,
                colid = fe_colid, col_names = col_names)
 

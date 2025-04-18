@@ -93,6 +93,8 @@ reference:
         - terms.fixest
         - df.residual.fixest
         - case.names.fixest
+        - sparse_model_matrix
+
     - title: Formula tools
       desc: Tools to manipulate formulas
       contents:
