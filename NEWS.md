@@ -82,6 +82,10 @@ sparse_model_matrix(mpg ~ i(vs) | gear^cyl, data = mtcars, type = c("rhs", "fixe
 
 - fix formatting for coefficients/statistics equal to 0. Reported by @MaelAstruc, #504
 
+## Deprecation
+
+ - Argument `.vcov` has been removed. It was present for historical reasons, and is removed to increase code clarity. Old code will still work with a warning to use the `vcov` argument instead
+
 # fixest 0.12.0
 
 ## New features

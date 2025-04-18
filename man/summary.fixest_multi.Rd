@@ -11,7 +11,6 @@
   se = NULL,
   cluster = NULL,
   ssc = NULL,
-  .vcov = NULL,
   stage = 2,
   lean = FALSE,
   n = 1000,
@@ -31,7 +30,7 @@ returned with one line per model, one numeric column for each coefficient and on
 column for each standard-error. If \code{"se_long"}, same as \code{"se_compact"} but the data is in a
 long format instead of wide.}
 
-\item{vcov, .vcov}{Versatile argument to specify the VCOV. In general, it is either a character
+\item{vcov}{Versatile argument to specify the VCOV. In general, it is either a character
 scalar equal to a VCOV type, either a formula of the form: \code{vcov_type ~ variables}. The
 VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway",
 "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts

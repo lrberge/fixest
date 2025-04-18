@@ -459,10 +459,16 @@ n_models = function(x, lhs = FALSE, rhs = FALSE, sample = FALSE,
 #'
 summary.fixest_multi = function(object, type = "short", vcov = NULL, se = NULL, 
                                 cluster = NULL, ssc = NULL,
-                                .vcov = NULL, stage = 2, lean = FALSE, n = 1000, ...){
+                                stage = 2, lean = FALSE, n = 1000, ...){
   dots = list(...)
 
   check_set_arg(type, "match(short, long, compact, se_compact, se_long)")
+  # .vcov is now deprecated
+  if (".vcov" %in% names(dots)) {
+    assign("vcov", dots[[".vcov"]])
+    warning("Argument '.vcov' is deprecated. Use 'vcov' instead.", immediate. = TRUE) 
+  }
+  check_arg(vcov, "NULL | matrix | list | function")
 
   if(!missing(type) || is.null(attr(object, "print_request"))){
     attr(object, "print_request") = type
@@ -477,8 +483,17 @@ summary.fixest_multi = function(object, type = "short", vcov = NULL, se = NULL,
   if(is.null(est_1$cov.scaled) || !isTRUE(dots$fromPrint)){
 
     for(i in 1:length(object)){
-      object[[i]] = summary(object[[i]], vcov = vcov, se = se, cluster = cluster, ssc = ssc,
-                            .vcov = .vcov, stage = stage, lean = lean, n = n, ...)
+      if (!is.null(vcov) && is.list(vcov) && length(object) == length(vcov)) {
+        # this is necessary if the list has names
+        vcov_list <- list(vcov[[i]])
+        names(vcov_list)[[1]] <- names(vcov)[[i]]
+        object[[i]] = summary(object[[i]], se = se, cluster = cluster, ssc = ssc, vcov = vcov_list, stage = stage, lean = lean, n = n, ...)
+      } else {
+        # this is necessary if the list has names
+        vcov_list <- list(vcov)
+        names(vcov_list)[[1]] <- names(vcov)
+        object[[i]] = summary(object[[i]], vcov = vcov, se = se, cluster = cluster, ssc = ssc, stage = stage, lean = lean, n = n, ...)
+      }
     }
 
     # In IV: multiple estimations can be returned
