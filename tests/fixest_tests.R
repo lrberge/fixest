@@ -2232,18 +2232,18 @@ test(sp3$col_names, uniq_col_names)
  
 # unit tests: vars_to_sparse_mat
 m <- fixest:::vars_to_sparse_mat(c("mpg^2", "i(cyl, ref = 6)", "I(mpg + hp)", "poly(mpg, 2)", "factor(cyl)", "factor(cyl):hp"), mtcars)
-test(m[, 1], mtcars$mpg^2)
-test(m[, 2], mtcars$cyl == 4)
-test(m[, 3], mtcars$cyl == 8)
-test(m[, 4], mtcars$mpg + mtcars$hp)
-test(m[, 5:6], poly(mtcars$mpg, 2))
+test(m[, "mpg^2"], mtcars$mpg^2)
+test(m[, "cyl::4"], mtcars$cyl == 4)
+test(m[, "cyl::8"], mtcars$cyl == 8)
+test(m[, "I(mpg + hp)"], mtcars$mpg + mtcars$hp)
+test(m[, c("poly(mpg, 2)1", "poly(mpg, 2)2")], poly(mtcars$mpg, 2))
 # matches order of appearance in mtcars$cyl
-test(m[, 7], mtcars$cyl == 8)
-test(m[, 8], mtcars$cyl == 6)
-test(m[, 9], mtcars$cyl == 4)
-test(m[, 10], mtcars$hp * (mtcars$cyl == 8))
-test(m[, 11], mtcars$hp * (mtcars$cyl == 6))
-test(m[, 12], mtcars$hp * (mtcars$cyl == 4))
+test(m[, "factor(cyl)4"], mtcars$cyl == 4)
+test(m[, "factor(cyl)6"], mtcars$cyl == 6)
+test(m[, "factor(cyl)8"], mtcars$cyl == 8)
+test(m[, "factor(cyl)4:hp"], mtcars$hp * (mtcars$cyl == 4))
+test(m[, "factor(cyl)6:hp"], mtcars$hp * (mtcars$cyl == 6))
+test(m[, "factor(cyl)8:hp"], mtcars$hp * (mtcars$cyl == 8))
 
 # checking collin.rm = TRUE
 est <- feols(mpg ~ i(am) + i(cyl) + hp, mtcars)
@@ -2359,20 +2359,34 @@ sm_slopes = sparse_model_matrix(res_slopes, type = "fixef")
 # IV
 res_iv = feols(y1 ~ x1 | x2 ~ x3, base)
 
+sm_rhs = sparse_model_matrix(res_iv, type = "rhs")
+m_rhs = model.matrix(res_iv, type = "rhs")
+test(head(sm_rhs), head(m_rhs))
+
 sm_rhs1 = sparse_model_matrix(res_iv, type = "iv.rhs1")
-test(colnames(sm_rhs1)[-1], c("x3", "x1"))
+m_rhs1 = model.matrix(res_iv, type = "iv.rhs1")
+test(colnames(sm_rhs1), c("(Intercept)", "x3", "x1"))
+test(head(sm_rhs1), head(m_rhs1))
 
 sm_rhs2 = sparse_model_matrix(res_iv, type = "iv.rhs2")
-test(colnames(sm_rhs2)[-1], c("fit_x2", "x1"))
+m_rhs2 = model.matrix(res_iv, type = "iv.rhs2")
+test(colnames(sm_rhs2), c("(Intercept)", "fit_x2", "x1"))
+test(head(sm_rhs2), head(m_rhs2))
 
 sm_endo = sparse_model_matrix(res_iv, type = "iv.endo")
+m_endo = model.matrix(res_iv, type = "iv.endo")
 test(colnames(sm_endo), "x2")
+test(head(sm_endo), head(m_endo))
 
-sm_exo  = sparse_model_matrix(res_iv, type = "iv.exo")
-test(colnames(sm_exo)[-1], "x1")
+sm_exo = sparse_model_matrix(res_iv, type = "iv.exo")
+m_exo = model.matrix(res_iv, type = "iv.exo")
+test(colnames(sm_exo), c("(Intercept)", "x1"))
+test(head(sm_exo), head(m_exo))
 
 sm_inst  = sparse_model_matrix(res_iv, type = "iv.inst")
+m_inst  = model.matrix(res_iv, type = "iv.inst")
 test(colnames(sm_inst), "x3")
+test(head(sm_inst), head(m_inst))
 
 # several
 res_mult = feols(y1 ~ x1 | species | x2 ~ x3, base)

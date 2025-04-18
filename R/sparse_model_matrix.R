@@ -31,211 +31,229 @@
 #'
 #' @export
 sparse_model_matrix = function(object, data, type = "rhs", na.rm = TRUE,  collin.rm = NULL, combine = TRUE, ...) {
-    # We evaluate the formula with the past call
-    # type: lhs, rhs, fixef, iv.endo, iv.inst, iv.rhs1, iv.rhs2
-    # if fixef => return a DF
+  # We evaluate the formula with the past call
+  # type: lhs, rhs, fixef, iv.endo, iv.inst, iv.rhs1, iv.rhs2
+  # if fixef => return a DF
 
-    # Checking the arguments
-    if (is_user_level_call()) {
-        validate_dots(suggest_args = c("data", "type"))
-    }
+  # Checking the arguments
+  if (is_user_level_call()) {
+      validate_dots(suggest_args = c("data", "type"))
+  }
 
-    # We allow type to be used in the location of data if data is missing
-    if (!missing(data) && missing(type)) {
-        sc = sys.call()
-        if (!"data" %in% names(sc)) {
-            if (!is.null(data) && (is.character(data) || "formula" %in% class(data))) {
-                # data is in fact the type
-                type = data
-                data = NULL
-            }
-        }
-    }
-
-    type = check_set_types(type, c("lhs", "rhs", "fixef", "iv.endo", "iv.inst", "iv.exo", "iv.rhs1", "iv.rhs2"))
-
-    if (isTRUE(object$is_fit)) {
-        stop("sparse_model_matrix method not available for fixest estimations obtained from fit methods.")
-    }
-
-    if (any(grepl("^iv", type)) && !isTRUE(object$iv)) {
-        stop("The type", enumerate_items(grep("^iv", type, value = TRUE), "s.is"), " only valid for IV estimations.")
-    }
-
-    check_arg(subset, "logical scalar | character vector no na")
-
-    if (missing(collin.rm)) {
-      collin.rm = if (inherits(object, "formula")) FALSE else TRUE
-    } else {
-      check_arg_plus(collin.rm, "logical scalar")
-    }
-
-    # Evaluation with the data
-    original_data = FALSE
-    if (missnull(data)) {
-        original_data = TRUE
-        data = fetch_data(object, "To apply 'sparse_model_matrix', ")
-    }
-
-    # control of the data
-    if (is.matrix(data)) {
-        if (is.null(colnames(data))) {
-            stop("If argument 'data' is to be a matrix, its columns must be named.")
-        }
-        data = as.data.frame(data)
-    }
-
-    if (!"data.frame" %in% class(data)) {
-        stop("The argument 'data' must be a data.frame or a matrix.")
-    }
-
-
-    # Allows passage of formula to sparse_model_matrix. A bit inefficient, but it works.
-    isFormula = FALSE
-    split_fml = NULL
-    if (inherits(object, "formula")) {
-      split_fml = fml_split_internal(object)
-      if (isTRUE(collin.rm)) {
-        message("Formula passed to sparse_model_matrix with collin.rm == TRUE. Estimating feols with formula.")
-        object = feols(object, data = data)
-      } else if (length(split_fml) == 3) {
-        message("Formula passed to sparse_model_matrix with an iv formula. Estimating feols with formula.")
-        object = feols(object, data = data)
-      } else {
-        isFormula = TRUE
+  # We allow type to be used in the location of data if data is missing
+  if (!missing(data) && missing(type)) {
+      sc = sys.call()
+      if (!"data" %in% names(sc)) {
+          if (!is.null(data) && (is.character(data) || "formula" %in% class(data))) {
+              # data is in fact the type
+              type = data
+              data = NULL
+          }
       }
-    }
+  }
 
-    # na.rm = FALSE doesn't work with type = "fixef" (which FE col gets NA?)
-    if (("fixef" %in% type & !na.rm)) {
-        # na.rm = TRUE
-        message("na.rm = FALSE doesn't work with type = 'fixef'. It has been set to TRUE.")
-    }
+  type = check_set_types(type, c("lhs", "rhs", "fixef", "iv.endo", "iv.inst", "iv.exo", "iv.rhs1", "iv.rhs2"))
+
+  if (isTRUE(object$is_fit)) {
+      stop("sparse_model_matrix method not available for fixest estimations obtained from fit methods.")
+  }
+
+  if (any(grepl("^iv", type)) && !isTRUE(object$iv)) {
+      stop("The type", enumerate_items(grep("^iv", type, value = TRUE), "s.is"), " only valid for IV estimations.")
+  }
+
+  check_arg(subset, "logical scalar | character vector no na")
+
+  if (missing(collin.rm)) {
+    collin.rm = if (inherits(object, "formula")) FALSE else TRUE
+  } else {
+    check_arg_plus(collin.rm, "logical scalar")
+  }
+
+  # Evaluation with the data
+  original_data = FALSE
+  if (missnull(data)) {
+      original_data = TRUE
+      data = fetch_data(object, "To apply 'sparse_model_matrix', ")
+  }
+
+  # control of the data
+  if (is.matrix(data)) {
+      if (is.null(colnames(data))) {
+          stop("If argument 'data' is to be a matrix, its columns must be named.")
+      }
+      data = as.data.frame(data)
+  }
+
+  if (!"data.frame" %in% class(data)) {
+      stop("The argument 'data' must be a data.frame or a matrix.")
+  }
 
 
-    # Panel setup
-    if (!isFormula) {
-      panel__meta__info = set_panel_meta_info(object, data)
-    }
-
-    # The formulas
-    if (isFormula) {
-      fml_linear = split_fml[[1]]
-
-      fml_0 = attr(stats::terms(fml_linear), "intercept") == 0
-      fake_intercept = !is.null(split_fml[[2]]) | fml_0
-
+  # Allows passage of formula to sparse_model_matrix. A bit inefficient, but it works.
+  isFormula = FALSE
+  split_fml = NULL
+  if (inherits(object, "formula")) {
+    split_fml = fml_split_internal(object)
+    if (isTRUE(collin.rm)) {
+      message("Formula passed to sparse_model_matrix with collin.rm == TRUE. Estimating feols with formula.")
+      object = feols(object, data = data)
+    } else if (length(split_fml) == 3) {
+      message("Formula passed to sparse_model_matrix with an iv formula. Estimating feols with formula.")
+      object = feols(object, data = data)
     } else {
-      fml_linear = formula(object, type = "linear")
-
-      # we kick out the intercept if there is presence of fixed-effects
-      fml_0 = attr(stats::terms(fml_linear), "intercept") == 0
-      fake_intercept = !is.null(object$fixef_vars) && !(!is.null(object$slope_flag) && all(object$slope_flag < 0)) 
-      fake_intercept = fake_intercept | fml_0
+      isFormula = TRUE
     }
+  }
 
-    res = list()
+  # na.rm = FALSE doesn't work with type = "fixef" (which FE col gets NA?)
+  if (("fixef" %in% type & !na.rm)) {
+      # na.rm = TRUE
+      message("na.rm = FALSE doesn't work with type = 'fixef'. It has been set to TRUE.")
+  }
 
-    if ("lhs" %in% type) {
-        lhs_text = deparse_long(fml_linear[[2]])
-        lhs = eval(fml_linear[[2]], data) 
-        lhs = Matrix::Matrix(lhs, sparse = TRUE, ncol = 1)
 
-        colnames(lhs) = lhs_text
+  # Panel setup
+  if (!isFormula) {
+    panel__meta__info = set_panel_meta_info(object, data)
+  }
 
-        res[["lhs"]] = lhs
-    }
+  # The formulas
+  if (isFormula) {
+    fml_linear = split_fml[[1]]
 
-    if ("rhs" %in% type && !isTRUE(object$onlyFixef)) {
+    fml_0 = attr(stats::terms(fml_linear), "intercept") == 0
+    fake_intercept = !is.null(split_fml[[2]]) | fml_0
 
-        fml = fml_linear
+  } else {
+    fml_linear = formula(object, type = "linear")
 
-        if (isFormula && (length(split_fml) == 3)) {
-          fml_iv = split_fml[[3]]
-          fml = .xpd(..lhs ~ ..endo + ..rhs, ..lhs = fml[[2]], ..endo = fml_iv[[2]], ..rhs = fml[[3]])
-        } else if (isTRUE(object$iv)) {
-          fml_iv = object$fml_all$iv
-          fml = .xpd(..lhs ~ ..endo + ..rhs, ..lhs = fml[[2]], ..endo = fml_iv[[2]], ..rhs = fml[[3]])
-        }
+    # we kick out the intercept if there is presence of fixed-effects
+    fml_0 = attr(stats::terms(fml_linear), "intercept") == 0
+    fake_intercept = !is.null(object$fixef_vars) && !(!is.null(object$slope_flag) && all(object$slope_flag < 0)) 
+    fake_intercept = fake_intercept | fml_0
+  }
 
-        vars = attr(stats::terms(fml), "term.labels")
+  res = list()
 
-        linear.mat = vars_to_sparse_mat(vars = vars, data = data, object = object, collin.rm = collin.rm, type = "rhs", add_intercept = !fake_intercept)
+  if ("lhs" %in% type) {
+      lhs_text = deparse_long(fml_linear[[2]])
+      lhs = eval(fml_linear[[2]], data) 
+      lhs = Matrix::Matrix(lhs, sparse = TRUE, ncol = 1)
 
-        res[["rhs"]] = linear.mat
-    }
+      colnames(lhs) = lhs_text
 
-    if ("fixef" %in% type) {
+      res[["lhs"]] = lhs
+  }
 
-        if (isFormula && (length(split_fml) < 2)) {
-          mat_FE = NULL
-        } else if (!isFormula & length(object$fixef_id) == 0) {
-          mat_FE = NULL
-        } else { 
+  if ("rhs" %in% type && !isTRUE(object$onlyFixef)) {
 
-            if (isFormula) {
-              fixef_fml = .xpd(~ ..fe, ..fe = split_fml[[2]])
-            } else {
-              fixef_fml = object$fml_all$fixef
-            }
+      fml = fml_linear
 
-            fixef_terms_full = fixef_terms(fixef_fml)
-            fe_vars = fixef_terms_full$fe_vars
-            slope_var_list = fixef_terms_full$slope_vars_list
+      if (isFormula && (length(split_fml) == 3)) {
+        fml_iv = split_fml[[3]]
+        fml = .xpd(..lhs ~ ..endo + ..rhs, ..lhs = fml[[2]], ..endo = fml_iv[[2]], ..rhs = fml[[3]])
+      } else if (isTRUE(object$iv)) {
+        fml_iv = object$fml_all$iv
+        fml = .xpd(..lhs ~ ..endo + ..rhs, ..lhs = fml[[2]], ..endo = fml_iv[[2]], ..rhs = fml[[3]])
+      }
 
-            fixef_df = prepare_df(fe_vars, data, fastCombine = FALSE)
+      vars = attr(stats::terms(fml), "term.labels")
 
-            # Check for slope vars
-            if (any(fixef_terms_full$slope_flag > 0)) {
-              slope_df = prepare_df(unlist(slope_var_list), data)
-            }
+      linear.mat = vars_to_sparse_mat(vars = vars, data = data, object = object, collin.rm = collin.rm, type = "rhs", add_intercept = !fake_intercept)
 
-            cols_lengths = c(0)
-            total_cols = 0
-            n_FE = 0
-            nrows = nrow(data)
-            for (i in seq_along(fe_vars)) {
+      res[["rhs"]] = linear.mat
+  }
 
-              fe_var = fe_vars[i]
-              slope_vars = slope_var_list[[i]]
-              n_slope_vars = if (is.null(slope_vars)) 0 else length(slope_vars)
+  if ("fixef" %in% type) {
 
-              fe = fixef_df[[fe_var]]
-              unique_fe = unique(fe)
-              n_cols = length(unique_fe[!is.na(unique_fe)])
+      if (isFormula && (length(split_fml) < 2)) {
+        mat_FE = NULL
+      } else if (!isFormula & length(object$fixef_id) == 0) {
+        mat_FE = NULL
+      } else { 
 
-              total_cols = total_cols + n_cols * (1 + n_slope_vars)
-              cols_lengths = c(cols_lengths, rep(n_cols, 1 + n_slope_vars))
-              n_FE = n_FE + 1 + n_slope_vars
-            }
-            running_cols = cumsum(cols_lengths)
+          if (isFormula) {
+            fixef_fml = .xpd(~ ..fe, ..fe = split_fml[[2]])
+          } else {
+            fixef_fml = object$fml_all$fixef
+          }
 
-            id_all = names_all = val_all = vector("list", n_FE)
-            rowid = 1:nrows
-            j = 1
-            for (i in seq_along(fe_vars)) {
+          fixef_terms_full = fixef_terms(fixef_fml)
+          fe_vars = fixef_terms_full$fe_vars
+          slope_var_list = fixef_terms_full$slope_vars_list
 
-              fe_var = fe_vars[i]
-              xi = fixef_df[[fe_var]]
+          fixef_df = prepare_df(fe_vars, data, fastCombine = FALSE)
 
-              keep = which(!is.na(xi))
-              if (length(keep) == 0) stop("All values of the fixed-effect variable '", fe_var, "' are NA.")
+          # Check for slope vars
+          if (any(fixef_terms_full$slope_flag > 0)) {
+            slope_df = prepare_df(unlist(slope_var_list), data)
+          }
 
-              xi = xi[keep]
-              xi_quf = quickUnclassFactor(xi, addItem = TRUE)
+          cols_lengths = c(0)
+          total_cols = 0
+          n_FE = 0
+          nrows = nrow(data)
+          for (i in seq_along(fe_vars)) {
 
-              col_id = xi_quf$x
-              col_levels = as.character(xi_quf$items)
+            fe_var = fe_vars[i]
+            slope_vars = slope_var_list[[i]]
+            n_slope_vars = if (is.null(slope_vars)) 0 else length(slope_vars)
 
-              slope_vars = slope_var_list[[i]]
-              n_slope_vars = if (is.null(slope_vars)) 0 else length(slope_vars)
+            fe = fixef_df[[fe_var]]
+            unique_fe = unique(fe)
+            n_cols = length(unique_fe[!is.na(unique_fe)])
 
-              # Be careful with NAs
-              # First fixed-effect by itself
-              val_all[[j]] = c(rep(1, length(col_id)), rep(NA, nrows - length(keep)))
+            total_cols = total_cols + n_cols * (1 + n_slope_vars)
+            cols_lengths = c(cols_lengths, rep(n_cols, 1 + n_slope_vars))
+            n_FE = n_FE + 1 + n_slope_vars
+          }
+          running_cols = cumsum(cols_lengths)
+
+          id_all = names_all = val_all = vector("list", n_FE)
+          rowid = 1:nrows
+          j = 1
+          for (i in seq_along(fe_vars)) {
+
+            fe_var = fe_vars[i]
+            xi = fixef_df[[fe_var]]
+
+            keep = which(!is.na(xi))
+            if (length(keep) == 0) stop("All values of the fixed-effect variable '", fe_var, "' are NA.")
+
+            xi = xi[keep]
+            xi_quf = quickUnclassFactor(xi, addItem = TRUE)
+
+            col_id = xi_quf$x
+            col_levels = as.character(xi_quf$items)
+
+            slope_vars = slope_var_list[[i]]
+            n_slope_vars = if (is.null(slope_vars)) 0 else length(slope_vars)
+
+            # Be careful with NAs
+            # First fixed-effect by itself
+            val_all[[j]] = c(rep(1, length(col_id)), rep(NA, nrows - length(keep)))
+            id_all[[j]] = cbind(
+              c(
+                rowid[keep],
+                rowid[-keep]
+              ), 
+              c(
+                running_cols[j] + col_id, 
+                rep(running_cols[j] + 1, nrows - length(keep))
+              )
+            )
+            names_all[[j]] = paste0(fe_var, "::", col_levels)
+            j = j + 1
+
+            for (k in seq_along(slope_vars)) {
+              slope_var = slope_vars[k]
+              slope = slope_df[[slope_var]]
+
+              val_all[[j]] = c(as.numeric(slope[keep]), rep(NA, nrows - length(keep)))
               id_all[[j]] = cbind(
                 c(
-                  rowid[keep],
+                  rowid[keep],         
                   rowid[-keep]
                 ), 
                 c(
@@ -243,469 +261,445 @@ sparse_model_matrix = function(object, data, type = "rhs", na.rm = TRUE,  collin
                   rep(running_cols[j] + 1, nrows - length(keep))
                 )
               )
-              names_all[[j]] = paste0(fe_var, "::", col_levels)
+              names_all[[j]] = paste0(fe_var, "[[", slope_var, "]]", "::", col_levels)
               j = j + 1
-
-              for (k in seq_along(slope_vars)) {
-                slope_var = slope_vars[k]
-                slope = slope_df[[slope_var]]
-
-                val_all[[j]] = c(as.numeric(slope[keep]), rep(NA, nrows - length(keep)))
-                id_all[[j]] = cbind(
-                  c(
-                    rowid[keep],         
-                    rowid[-keep]
-                  ), 
-                  c(
-                    running_cols[j] + col_id, 
-                    rep(running_cols[j] + 1, nrows - length(keep))
-                  )
-                )
-                names_all[[j]] = paste0(fe_var, "[[", slope_var, "]]", "::", col_levels)
-                j = j + 1
-              }
             }
+          }
 
-            id_mat = do.call(rbind, id_all)
-            val_vec = unlist(val_all)
-            names_vec = unlist(names_all)
+          id_mat = do.call(rbind, id_all)
+          val_vec = unlist(val_all)
+          names_vec = unlist(names_all)
 
-            mat_FE = Matrix::sparseMatrix(
-              i = id_mat[, 1],
-              j = id_mat[, 2],
-              x = val_vec,
-              dimnames = list(NULL, names_vec)
+          mat_FE = Matrix::sparseMatrix(
+            i = id_mat[, 1],
+            j = id_mat[, 2],
+            x = val_vec,
+            dimnames = list(NULL, names_vec)
+          )
+
+
+          # Keep non-zero FEs
+          if (collin.rm == TRUE) {
+            fixefs = fixef(object, sorted = TRUE)
+
+            select =	lapply(
+              names(fixefs), 
+              function(var) {
+                names = names(fixefs[[var]])
+                names = names[fixefs[[var]] != 0]
+
+                paste0(var, "::", names)
+              }
+            )
+            select = unlist(select)
+
+            # When original_data isn't used, some FEs may not be in the new dataset, add them in
+            missing_cols = setdiff(select, colnames(mat_FE))
+            mat_FE = cbind(
+              mat_FE, 
+              Matrix::Matrix(0, ncol = length(missing_cols), nrow = nrow(mat_FE), sparse = TRUE, dimnames = list(NULL, missing_cols))
             )
 
+            # Subset fixef and order columns to match fixef(object)
+            idx = which(colnames(mat_FE) %in% select)
+            mat_FE = mat_FE[, idx, drop = FALSE]
 
-            # Keep non-zero FEs
-            if (collin.rm == TRUE) {
-              fixefs = fixef(object, sorted = TRUE)
+            # Reorder columns to match fixef(object)
+            reorder = match(unlist(select), colnames(mat_FE))
+            mat_FE = mat_FE[, reorder[!is.na(reorder)], drop = FALSE]
+          }
 
-              select =	lapply(
-                names(fixefs), 
-                function(var) {
-                  names = names(fixefs[[var]])
-                  names = names[fixefs[[var]] != 0]
+      }
 
-                  paste0(var, "::", names)
-                }
-              )
-              select = unlist(select)
+      res[["fixef"]] = mat_FE
+  }
 
-              # When original_data isn't used, some FEs may not be in the new dataset, add them in
-              missing_cols = setdiff(select, colnames(mat_FE))
-              mat_FE = cbind(
-                mat_FE, 
-                Matrix::Matrix(0, ncol = length(missing_cols), nrow = nrow(mat_FE), sparse = TRUE, dimnames = list(NULL, missing_cols))
-              )
+  #
+  # IV
+  #
+  if ("iv.endo" %in% type) {
+      fml = object$iv_endo_fml
+      vars = attr(stats::terms(fml), "term.labels")
+      endo.mat = vars_to_sparse_mat(vars = vars, data = data, object, collin.rm = collin.rm, type = "iv.endo")
 
-              # Subset fixef and order columns to match fixef(object)
-              idx = which(colnames(mat_FE) %in% select)
-              mat_FE = mat_FE[, idx, drop = FALSE]
+      res[["iv.endo"]] = endo.mat
+  }
 
-              # Reorder columns to match fixef(object)
-              reorder = match(unlist(select), colnames(mat_FE))
-              mat_FE = mat_FE[, reorder[!is.na(reorder)], drop = FALSE]
-            }
+  if ("iv.inst" %in% type) {
+      fml = object$fml_all$iv
+      vars = attr(stats::terms(fml), "term.labels")
+      inst.mat = vars_to_sparse_mat(vars = vars, data = data, object, collin.rm = collin.rm, type = "iv.inst")
 
-        }
+      res[["iv.inst"]] = inst.mat
+  }
 
-        res[["fixef"]] = mat_FE
+  if ("iv.exo" %in% type) {
+
+      fml = object$fml_all$linear
+      vars = attr(stats::terms(fml), "term.labels")
+      exo.mat = vars_to_sparse_mat(vars = vars, data = data, object = object, collin.rm = collin.rm, type = "iv.exo", add_intercept = !fake_intercept)
+
+      res[["iv.exo"]] = exo.mat
+  }
+
+  if ("iv.rhs1" %in% type) {
+      fml = object$fml
+      if (object$iv_stage == 2) {
+          fml_iv = object$fml_all$iv
+          fml = .xpd(..lhs ~ ..inst + ..rhs, ..lhs = fml[[2]], ..inst = fml_iv[[3]], ..rhs = fml[[3]])
+      }
+      vars = attr(stats::terms(fml), "term.labels")
+      iv_rhs1 = vars_to_sparse_mat(vars = vars, data = data, object = object, collin.rm = collin.rm, type = "iv.rhs1", add_intercept = !fake_intercept)
+
+      res[["iv.rhs1"]] = iv_rhs1
+  }
+
+  if ("iv.rhs2" %in% type) {
+      # Second stage
+      if (!object$iv_stage == 2) {
+          stop("In model.matrix, the type 'iv.rhs2' is only valid for second stage IV models. This estimation is the first stage.")
+      }
+
+      # I) we get the fitted values
+      stage_1 = object$iv_first_stage
+
+      fit_vars = c()
+      for (i in seq_along(stage_1)) {
+          fit_vars[i] = v = paste0("fit_", names(stage_1)[i])
+          data[[v]] = predict(stage_1[[i]], newdata = data, sample = "original")
+      }
+
+      # II) we create the variables
+      fml = object$fml
+      fml = .xpd(..lhs ~ ..fit + ..rhs, ..lhs = fml[[2]], ..fit = fit_vars, ..rhs = fml[[3]])
+      vars = attr(stats::terms(fml), "term.labels")
+      iv_rhs2 = vars_to_sparse_mat(vars = vars, data = data, object = object, collin.rm = collin.rm, type = "iv.rhs2", add_intercept = !fake_intercept)
+
+      res[["iv.rhs2"]] = iv_rhs2
+  }
+
+  if (na.rm) {
+    na_rows = lapply(res, function(mat) {
+      # Get rows with NA 
+      1 + mat@i[is.na(mat@x)]
+    })
+
+    na_rows = unlist(na_rows, use.names = FALSE)
+
+    if (original_data) {
+      na_rows = c(na_rows, -1 * object$obs_selection$obsRemoved)
     }
 
-    #
-    # IV
-    #
-    if ("iv.endo" %in% type) {
-        fml = object$iv_endo_fml
-        vars = attr(stats::terms(fml), "term.labels")
-        endo.mat = vars_to_sparse_mat(vars = vars, data = data, object = object, collin.rm = collin.rm)
+    na_rows = unique(na_rows)
 
-        res[["iv.endo"]] = endo.mat
-    }
-
-    if ("iv.inst" %in% type) {
-        fml = object$fml_all$iv
-        vars = attr(stats::terms(fml), "term.labels")
-        inst.mat = vars_to_sparse_mat(vars = vars, data = data, object = object, collin.rm = collin.rm)
-
-        res[["iv.inst"]] = inst.mat
-    }
-
-    if ("iv.exo" %in% type) {
-
-        fml = object$fml_all$linear
-        vars = attr(stats::terms(fml), "term.labels")
-        exo.mat = vars_to_sparse_mat(vars = vars, data = data, object = object, collin.rm = collin.rm, type = "iv.exo", add_intercept = !fake_intercept)
-
-        res[["iv.exo"]] = exo.mat
-    }
-
-    if ("iv.rhs1" %in% type) {
-        fml = object$fml
-        if (object$iv_stage == 2) {
-            fml_iv = object$fml_all$iv
-            fml = .xpd(..lhs ~ ..inst + ..rhs, ..lhs = fml[[2]], ..inst = fml_iv[[3]], ..rhs = fml[[3]])
-        }
-        vars = attr(stats::terms(fml), "term.labels")
-        iv_rhs1 = vars_to_sparse_mat(vars = vars, data = data, object = object, collin.rm = collin.rm, type = "iv.rhs1", add_intercept = !fake_intercept)
-
-        res[["iv.rhs1"]] = iv_rhs1
-    }
-
-    if ("iv.rhs2" %in% type) {
-        # Second stage
-        if (!object$iv_stage == 2) {
-            stop("In model.matrix, the type 'iv.rhs2' is only valid for second stage IV models. This estimation is the first stage.")
-        }
-
-        # I) we get the fitted values
-        stage_1 = object$iv_first_stage
-
-        fit_vars = c()
-        for (i in seq_along(stage_1)) {
-            fit_vars[i] = v = paste0("fit_", names(stage_1)[i])
-            data[[v]] = predict(stage_1[[i]], newdata = data, sample = "original")
-        }
-
-        # II) we create the variables
-        fml = object$fml
-        fml = .xpd(..lhs ~ ..fit + ..rhs, ..lhs = fml[[2]], ..fit = fit_vars, ..rhs = fml[[3]])
-        vars = attr(stats::terms(fml), "term.labels")
-        iv_rhs2 = vars_to_sparse_mat(vars = vars, data = data, object = object, collin.rm = collin.rm, type = "iv.rhs2", add_intercept = !fake_intercept)
-
-        res[["iv.rhs2"]] = iv_rhs2
-    }
-
-    if (na.rm) {
-      na_rows = lapply(res, function(mat) {
-        # Get rows with NA 
-        1 + mat@i[is.na(mat@x)]
+    if (length(na_rows) > 0) {
+      res = lapply(res, function(mat) { 
+        mat[-na_rows, , drop = FALSE]
       })
-
-      na_rows = unlist(na_rows, use.names = FALSE)
-
-      if (original_data) {
-        na_rows = c(na_rows, -1 * object$obs_selection$obsRemoved)
-      }
-
-      na_rows = unique(na_rows)
-
-      if (length(na_rows) > 0) {
-        res = lapply(res, function(mat) { 
-          mat[-na_rows, , drop = FALSE]
-        })
-      }
-    } 
-
-    # Formatting res
-    if (length(res) == 0) {
-        return(NULL)
-    } else if (length(type) > 1) {
-        if (combine) {
-          res = res[type]
-          res = do.call(cbind, unname(res))
-        }
-    } else {
-        res = res[[1]]
     }
+  } 
 
-    res
+  # Formatting res
+  if (length(res) == 0) {
+      return(NULL)
+  } else if (length(type) > 1) {
+      if (combine) {
+        res = res[type]
+        res = do.call(cbind, unname(res))
+      }
+  } else {
+      res = res[[1]]
+  }
+
+  res
 }
 
 
 
 # Internal: modifies the calls so that each variable/interaction is evaluated with mult_sparse
 mult_wrap = function(x) {
-	# x: character string of a variable to be evaluated
-	# ex: "x1" => mult_sparse(x1)
-	#     "x1:factor(x2):x3" => mult_sparse(x3, factor(x2), x1)
-	#
-	# We also add the argument sparse to i()
-	#     "x1:i(species, TRUE)" => mult_sparse(x1, i(species, TRUE, sparse = TRUE))
+# x: character string of a variable to be evaluated
+# ex: "x1" => mult_sparse(x1)
+#     "x1:factor(x2):x3" => mult_sparse(x3, factor(x2), x1)
+#
+# We also add the argument sparse to i()
+#     "x1:i(species, TRUE)" => mult_sparse(x1, i(species, TRUE, sparse = TRUE))
 
-	x_call = str2lang(x)
+x_call = str2lang(x)
 
-	res = (~ mult_sparse())[[2]]
+res = (~ mult_sparse())[[2]]
 
-	if (length(x_call) == 1 || x_call[[1]] != ":") {
-		res[[2]] = x_call
+if (length(x_call) == 1 || x_call[[1]] != ":") {
+  res[[2]] = x_call
 
-	} else {
-		res[[2]] = x_call[[3]]
-		tmp = x_call[[2]]
+} else {
+  res[[2]] = x_call[[3]]
+  tmp = x_call[[2]]
 
-		while (length(tmp) == 3 && tmp[[1]] == ":") {
-			res[[length(res) + 1]] = tmp[[3]]
-			tmp = tmp[[2]]
-		}
+  while (length(tmp) == 3 && tmp[[1]] == ":") {
+    res[[length(res) + 1]] = tmp[[3]]
+    tmp = tmp[[2]]
+  }
 
-		res[[length(res) + 1]] = tmp
-	}
+  res[[length(res) + 1]] = tmp
+}
 
-	# We also add sparse to i() if found
-	for (i in 2:length(res)) {
-		ri = res[[i]]
-		if (length(ri) > 1 && ri[[1]] == "i") {
-			ri[["sparse"]] = TRUE
-			res[[i]] = ri
-		}
-	}
+# We also add sparse to i() if found
+for (i in 2:length(res)) {
+  ri = res[[i]]
+  if (length(ri) > 1 && ri[[1]] == "i") {
+    ri[["sparse"]] = TRUE
+    res[[i]] = ri
+  }
+}
 
-	if (length(res) > 2) {
-		# we restore the original order
-		res[-1] = rev(res[-1])
-	}
+if (length(res) > 2) {
+  # we restore the original order
+  res[-1] = rev(res[-1])
+}
 
-	return(res)
+return(res)
 }
 
 # Internal function to evaluate the variables (and interactions) in a sparse way
 mult_sparse = function(...) {
-	# Only sparsifies factor variables
-	# Takes care of interactions
+# Only sparsifies factor variables
+# Takes care of interactions
 
-	dots = list(...)
-	n = length(dots)
-  mc = match.call()
-  var_call = sapply(seq_len(n), function(i) deparse_long(mc[[i+1]]))
+dots = list(...)
+n = length(dots)
+mc = match.call()
+var_call = sapply(seq_len(n), function(i) deparse_long(mc[[i+1]]))
 
-	num_var = NULL
-	factor_list = list()
-  factor_idx = c()
-  i_idx = c()
-	info_i = NULL
-	is_i = is_factor = FALSE
-	# You can't have interactions between i and factors, it's either
+num_var = NULL
+factor_list = list()
+factor_idx = c()
+i_idx = c()
+info_i = NULL
+is_i = is_factor = FALSE
+# You can't have interactions between i and factors, it's either
 
-	for (i in 1:n) {
-		xi = dots[[i]]
-    vari = mc[[i+1]]
-		if (is.numeric(xi)) {
-			# We stack the product
-			num_var = if (is.null(num_var)) xi else xi * num_var
-		} else if (inherits(xi, "i_sparse")) {
-			is_i = TRUE
-			info_i = xi
-      i_idx = c(i_idx, i)
-		} else {
-			is_factor = TRUE
-			factor_list[[length(factor_list) + 1]] = xi
-      factor_idx = c(factor_idx, i)
-		}
-	}
-
-  if (is_factor && is_i) {
-    stop("Unfortunately, can not interact factor with `i()` in sparse_model_matrix")
+for (i in 1:n) {
+  xi = dots[[i]]
+  vari = mc[[i+1]]
+  if (is.numeric(xi)) {
+    # We stack the product
+    num_var = if (is.null(num_var)) xi else xi * num_var
+  } else if (inherits(xi, "i_sparse")) {
+    is_i = TRUE
+    info_i = xi
+    i_idx = c(i_idx, i)
+  } else {
+    is_factor = TRUE
+    factor_list[[length(factor_list) + 1]] = xi
+    factor_idx = c(factor_idx, i)
   }
+}
 
-	# numeric
-	if (!is_i && !is_factor) {
-		return(num_var)
-	}
-	# factor()
-	if (is_factor) {
-		factor_list$add_items = TRUE
-		factor_list$items.list = TRUE
-    factor_list$multi.join = " ; "
-		fact_as_int = do.call(to_integer, factor_list)
+if (is_factor && is_i) {
+  stop("Unfortunately, can not interact factor with `i()` in sparse_model_matrix")
+}
 
-		values = if (is.null(num_var)) rep(1, length(fact_as_int$x)) else num_var
-		rowid = seq_along(values)
+# numeric
+if (!is_i && !is_factor) {
+  return(num_var)
+}
+# factor()
+if (is_factor) {
+  factor_list$add_items = TRUE
+  factor_list$items.list = TRUE
+  factor_list$multi.join = " ; "
+  fact_as_int = do.call(to_integer, factor_list)
 
-    # messy, but need this to get things like `factor(am)1:hp:factor(cyl)6`
-    items_mat = do.call(rbind, strsplit(fact_as_int$items, " ; "))
+  values = if (is.null(num_var)) rep(1, length(fact_as_int$x)) else num_var
+  rowid = seq_along(values)
 
-    # intersplice var_call with items 
-    col_names = sapply(seq_len(nrow(items_mat)), function(i) {
-      pasteable = var_call 
-      pasteable[factor_idx] = paste0(var_call[factor_idx], items_mat[i, ])
+  # messy, but need this to get things like `factor(am)1:hp:factor(cyl)6`
+  items_mat = do.call(rbind, strsplit(fact_as_int$items, " ; "))
+
+  # intersplice var_call with items 
+  col_names = sapply(seq_len(nrow(items_mat)), function(i) {
+    pasteable = var_call 
+    pasteable[factor_idx] = paste0(var_call[factor_idx], items_mat[i, ])
+    paste(pasteable, collapse = ":")
+  }, USE.NAMES = FALSE)
+
+  res = list(rowid = rowid, colid = fact_as_int$x, values = values,
+         col_names = col_names, n_cols = length(fact_as_int$items))
+# i()
+} else {
+
+  values = info_i$values
+  if (!is.null(num_var)) {
+    num_var = num_var[info_i$rowid]
+    values = values * num_var
+    col_names = sapply(info_i$col_names, function(item) {
+      pasteable = var_call
+      pasteable[i_idx] = item
       paste(pasteable, collapse = ":")
     }, USE.NAMES = FALSE)
+  } else {
+    col_names = info_i$col_names
+  }
 
-		res = list(rowid = rowid, colid = fact_as_int$x, values = values,
-				   col_names = col_names, n_cols = length(fact_as_int$items))
-	# i()
-	} else {
+  res = list(rowid = info_i$rowid, colid = info_i$colid,
+         values = values[info_i$rowid],
+         col_names = col_names,
+         n_cols = length(info_i$col_names))
+}
 
-		values = info_i$values
-		if (!is.null(num_var)) {
-			num_var = num_var[info_i$rowid]
-			values = values * num_var
-      col_names = sapply(info_i$col_names, function(item) {
-        pasteable = var_call
-        pasteable[i_idx] = item
-        paste(pasteable, collapse = ":")
-      }, USE.NAMES = FALSE)
-		} else {
-      col_names = info_i$col_names
-    }
+class(res) = "sparse_var"
 
-		res = list(rowid = info_i$rowid, colid = info_i$colid,
-				   values = values[info_i$rowid],
-				   col_names = col_names,
-				   n_cols = length(info_i$col_names))
-	}
-
-	class(res) = "sparse_var"
-
-	res
+res
 }
 
 # Takes a vector of strings denoting the variables (including terms like `poly()`, `i()`, `I()`, `lag()`, etc.) and returns a sparse matrix of the variables extracted from `data`.
 vars_to_sparse_mat = function(vars, data, collin.rm = FALSE, object = NULL, type = NULL, add_intercept = FALSE) {
+  if (collin.rm & is.null(object)) {
+    stop("You need to provide the 'object' argument to use 'collin.rm = TRUE'.")
+  }
 
-    if (length(vars) == 0) {
-      # Case only FEs
+  if (length(vars) == 0) {
+    # Case only FEs
+    mat = NULL
+  } else {
+
+    # Since we don't want to evaluate the factors,
+    # the code is a bit intricate because we have to catch them before
+    # any interaction takes place
+    #
+    # that's why I wrap interactions in a function (mult_sparse())
+    #
+
+    # Below, we evaluate all the variables in a "sparse" way
+
+    vars_calls = lapply(vars, mult_wrap)
+
+    n = length(vars)
+    variables_list = vector("list", n)
+    for (i in 1:n) {
+      variables_list[[i]] = eval(vars_calls[[i]], data)
+    }
+
+    # To create the sparse matrix, we need the column indexes
+    total_cols = 0
+    running_cols = c(0)
+    for (i in 1:n) {
+      xi = variables_list[[i]]
+      if (inherits(xi, "sparse_var")) {
+        total_cols = total_cols + xi$n_cols
+      } else {
+        total_cols = total_cols + NCOL(xi)
+      }
+      running_cols[i + 1] = total_cols
+    }
+
+    # We just create a sparse matrix and fill it
+
+    # 1) creating the indexes + names
+
+    # NOTA: I use lists to avoid creating copies
+    rowid = 1:nrow(data)
+    id_all = values_all = names_all = vector("list", n)
+    for (i in 1:n) {
+      xi = variables_list[[i]]
+
+      if (inherits(xi, "sparse_var")) {
+
+        id_all[[i]] = cbind(xi$rowid, running_cols[i] + xi$colid)
+        values_all[[i]] = xi$values
+        names_all[[i]] = xi$col_names
+
+      } else if (NCOL(xi) == 1) {
+
+        id_all[[i]] = cbind(rowid, running_cols[i] + 1)
+        values_all[[i]] = xi
+        names_all[[i]] = vars[[i]]
+
+      } else {
+
+        colid = rep(1:NCOL(xi), each = nrow(data))
+        id_all[[i]] = cbind(rep(rowid, NCOL(xi)), running_cols[i] + colid)
+        values_all[[i]] = as.vector(xi)
+        if (!is.null(colnames(xi))) {
+          names_all[[i]] = paste0(vars[[i]], colnames(xi))
+        } else {
+          names_all[[i]] = paste0(vars[[i]], 1:NCOL(xi))
+        }
+
+      }
+    }
+
+    id_mat = do.call(rbind, id_all)
+    values_vec = unlist(values_all)
+    names_vec = unlist(names_all)
+
+    # 2) filling the matrix: one shot, no copies
+
+    mat = Matrix::Matrix(0, nrow(data), total_cols, dimnames = list(NULL, names_vec))
+    mat[id_mat] = values_vec
+
+  }
+
+  if (collin.rm) {
+
+    if (isTRUE(object$iv)) {
+      fml_iv = object$fml_all$iv
+      endo = fml_iv[[2]]        
+      # Trick to get the rhs variables as a character vector
+      endo = .xpd(~ ..endo, ..endo = endo)
+      endo = attr(stats::terms(endo), "term.labels")
+
+      exo = lapply(object$iv_first_stage, function(x) names(stats::coef(x)))
+      exo = unique(unlist(exo, use.names = FALSE))
+
+      inst = setdiff(exo, names(object$coefficients))
+    }
+    
+    # Custom subsetting for collin.rm depending on `type`
+    if (is.null(type)) { 
+      coef_names = names(object$coefficients)
+      add_intercept = "(Intercept)" %in% coef_names
+    } else if (type == "rhs") {
+      if (isTRUE(object$iv)) {
+        coef_names = c(endo, names(object$coefficients))
+        coef_names = coef_names[!grepl("^fit_", coef_names)]
+        add_intercept = "(Intercept)" %in% coef_names
+      } else {
+        coef_names = names(object$coefficients)
+        add_intercept = "(Intercept)" %in% coef_names
+      }
+    } else if (type == "iv.exo") { 
+      coef_names = exo
+      add_intercept = "(Intercept)" %in% coef_names
+    } else if (type == "iv.inst") {
+      coef_names = inst
+      add_intercept = FALSE
+    } else if (type == "iv.endo") {
+      coef_names = endo
+      add_intercept = FALSE
+    } else if (type == "iv.rhs1") {
+      coef_names = exo
+      add_intercept = "(Intercept)" %in% coef_names
+    } else if (type == "iv.rhs2") {
+      coef_names = names(object$coefficients)
+      add_intercept = "(Intercept)" %in% coef_names
+    }
+
+    keep = colnames(mat) %in% coef_names
+    if (length(keep) == 0) {
       mat = NULL
     } else {
-
-      # Since we don't want to evaluate the factors,
-      # the code is a bit intricate because we have to catch them before
-      # any interaction takes place
-      #
-      # that's why I wrap interactions in a function (mult_sparse())
-      #
-
-      # Below, we evaluate all the variables in a "sparse" way
-
-      vars_calls = lapply(vars, mult_wrap)
-
-      n = length(vars)
-      variables_list = vector("list", n)
-      for (i in 1:n) {
-        variables_list[[i]] = eval(vars_calls[[i]], data)
+      mat =  mat[, keep, drop = FALSE]
+    }
       }
 
-      # To create the sparse matrix, we need the column indexes
-      total_cols = 0
-      running_cols = c(0)
-      for (i in 1:n) {
-        xi = variables_list[[i]]
-        if (inherits(xi, "sparse_var")) {
-          total_cols = total_cols + xi$n_cols
-        } else {
-          total_cols = total_cols + NCOL(xi)
-        }
-        running_cols[i + 1] = total_cols
-      }
+  # add intercept if needed and not already present
+  # when collin.rm = TRUE, we change add_intercept depending on if it is needed
+  if (add_intercept && !("(Intercept)" %in% colnames(mat))) {
+    mat = cbind(1, mat)
+    colnames(mat)[1] = "(Intercept)"
+  }
 
-      # We just create a sparse matrix and fill it
-
-      # 1) creating the indexes + names
-
-      # NOTA: I use lists to avoid creating copies
-      rowid = 1:nrow(data)
-      id_all = values_all = names_all = vector("list", n)
-      for (i in 1:n) {
-        xi = variables_list[[i]]
-
-        if (inherits(xi, "sparse_var")) {
-
-          id_all[[i]] = cbind(xi$rowid, running_cols[i] + xi$colid)
-          values_all[[i]] = xi$values
-          names_all[[i]] = xi$col_names
-
-        } else if (NCOL(xi) == 1) {
-
-          id_all[[i]] = cbind(rowid, running_cols[i] + 1)
-          values_all[[i]] = xi
-          names_all[[i]] = vars[[i]]
-
-        } else {
-
-          colid = rep(1:NCOL(xi), each = nrow(data))
-          id_all[[i]] = cbind(rep(rowid, NCOL(xi)), running_cols[i] + colid)
-          values_all[[i]] = as.vector(xi)
-          if (!is.null(colnames(xi))) {
-            names_all[[i]] = paste0(vars[[i]], colnames(xi))
-          } else {
-            names_all[[i]] = paste0(vars[[i]], 1:NCOL(xi))
-          }
-
-        }
-      }
-
-      id_mat = do.call(rbind, id_all)
-      values_vec = unlist(values_all)
-      names_vec = unlist(names_all)
-
-      # 2) filling the matrix: one shot, no copies
-
-      mat = Matrix::Matrix(0, nrow(data), total_cols, dimnames = list(NULL, names_vec))
-      mat[id_mat] = values_vec
-
-    }
-
-    if (collin.rm & is.null(object)) {
-      stop("You need to provide the 'object' argument to use 'collin.rm = TRUE'.")
-    }
-
-    coef_names <- names(object$coefficients)
-    if (collin.rm) {
-        keep = which(colnames(mat) %in% coef_names)
-        if (length(keep) == 0) {
-            mat = NULL
-        } else if (length(keep) < ncol(mat)) {
-            mat = mat[, keep, drop = FALSE]
-        }
-
-        if (isTRUE(object$iv)) {
-          fml_iv = object$fml_all$iv
-          endo = fml_iv[[2]]
-
-          # Trick to get the rhs variables as a character vector
-          endo = .xpd(~ ..endo, ..endo = endo)
-          endo = attr(stats::terms(endo), "term.labels")
-
-          exo = lapply(object$iv_first_stage, function(x) names(stats::coef(x)))
-          exo = unique(unlist(exo, use.names = FALSE))
-        }
-
-        # Custom subsetting for na.rm depending on `type`
-        if (!is.null(type)) {
-          if (type == "rhs") {
-            if (isTRUE(object$iv)) {
-              keep = c(endo, coef_names)
-            } else {
-              keep = coef_names
-            }
-          } else if (type == "iv.exo") {
-            keep = coef_names
-          } else if (type == "iv.exo") {
-            keep = c(endo, coef_names)
-          } else if (type == "iv.rhs1") {
-            keep = c(exo, coef_names)
-          } else if (type == "iv.rhs2") {
-            keep = coef_names
-          }
-
-          keep = keep[!keep %in% object$collin.var]
-          if (length(keep) == 0) {
-              mat = NULL
-          } else {
-              idx = which(colnames(mat) %in% keep)
-              mat =  mat[, idx, drop = FALSE]
-          }
-        }
-
-        if (length(coef_names) == ncol(mat) && any(colnames(mat) != names(coef_names))) {
-            # we reorder the matrix
-            # This can happen in multiple estimations, where we respect the
-            # order of the user
-
-            if (all(names(coef_names) %in% colnames(mat))) {
-                mat = mat[, names(coef_names), drop = FALSE]
-            }
-        }
-    }
-
-    # Add back in intercept if `collin.rm == TRUE` and there was on in the original estimation (i.e. no fixed effects or i() with no reference)
-    if (add_intercept || (collin.rm == TRUE && "(Intercept)" %in% coef_names)) {
-        mat = cbind(1, mat)
-        colnames(mat)[1] = "(Intercept)"
-    }
-
-    return(mat)
+  return(mat)
 }
