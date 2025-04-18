@@ -121,6 +121,7 @@ S3method(sigma, fixest)
 S3method(weights, fixest)
 S3method(hatvalues, fixest)
 S3method(df.residual, fixest)
+S3method(case.names, fixest)
 
 # Stats methods => fixest_multi
 S3method(coef, fixest_multi)
@@ -163,7 +164,7 @@ importFrom(stats, model.matrix, sigma, deviance, weights, terms,
            nobs, AIC, BIC, update, predict, fitted, fitted.values,
 			     resid, residuals, logLik, coef, coefficients, lag,
 			     confint, vcov, binomial, setNames, complete.cases, pchisq, pf,
-			     aggregate, cancor, rnorm, median, qt, .getXlevels, quantile)
+			     aggregate, cancor, rnorm, median, qt, .getXlevels, quantile, case.names)
 
 importFrom(utils, combn, head, tail, packageVersion, object.size, read.csv,
            write.csv, write.table, capture.output, as.roman)

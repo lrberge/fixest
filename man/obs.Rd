@@ -2,18 +2,26 @@
 % Please edit documentation in R/miscfuns.R
 \name{obs}
 \alias{obs}
+\alias{case.names.fixest}
 \title{Extracts the observations used for the estimation}
 \usage{
 obs(x)
+
+\method{case.names}{fixest}(object, ...)
 }
 \arguments{
 \item{x}{A \code{fixest} object.}
+
+\item{object}{A \code{fixest} object.}
+
+\item{...}{Ignored}
 }
 \value{
 It returns a simple vector of integers.
 }
 \description{
 This function extracts the observations used in \code{fixest} estimation.
+The \code{stats::case.names} S3 method calls this function
 }
 \examples{
 
