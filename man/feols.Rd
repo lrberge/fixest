@@ -638,15 +638,10 @@ coefplot(est_did)
 # To estimate Two stage least squares,
 # insert a formula describing the endo. vars./instr. relation after a pipe:
 
-base = iris
-names(base) = c("y", "x1", "x2", "x3", "fe1")
-base$x_inst1 = 0.2 * base$x1 + 0.7 * base$x2 + rpois(150, 2)
-base$x_inst2 = 0.2 * base$x2 + 0.7 * base$x3 + rpois(150, 3)
-base$x_endo1 = 0.5 * base$y + 0.5 * base$x3 + rnorm(150, sd = 2)
-base$x_endo2 = 1.5 * base$y + 0.5 * base$x3 + 3 * base$x_inst1 + rnorm(150, sd = 5)
+data(fulton)
 
-# Using 2 controls, 1 endogenous var. and 1 instrument
-res_iv = feols(y ~ x1 + x2 | x_endo1 ~ x_inst1, base)
+# Using exogenous control, 1 endogenous var. and 1 instrument
+res_iv = feols(qty ~ t | price ~ speed2, fulton)
 
 # The second stage is the default
 summary(res_iv)
@@ -658,10 +653,10 @@ summary(res_iv, stage = 1)
 summary(res_iv, stage = 1:2)
 
 # Adding a fixed-effect => IV formula always last!
-res_iv_fe = feols(y ~ x1 + x2 | fe1 | x_endo1 ~ x_inst1, base)
+res_iv_fe = feols(qty ~ t | day | price ~ speed2, fulton)
 
-# With two endogenous regressors
-res_iv2 = feols(y ~ x1 + x2 | x_endo1 + x_endo2 ~ x_inst1 + x_inst2, base)
+# With two instruments
+res_iv2 = feols(qty ~ t | day | price ~ speed2 + wave2, fulton)
 
 # Now there's two first stages => a fixest_multi object is returned
 sum_res_iv2 = summary(res_iv2, stage = 1)
