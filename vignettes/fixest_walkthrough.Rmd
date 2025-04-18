@@ -434,27 +434,28 @@ feols(y ~ x1 | id, base_did, vcov = function(x) sandwich::vcovHC(x, type = "HC1"
 
 # Instrumental variables
 
-Two stage least square estimations can be performed by simply adding in the formula the link between the endogenous and the instrumental variables. Let's have an example.
+Two stage least square estimations can be performed by simply adding in the formula the link between the endogenous and the instrumental variables. 
+Let's have an example using the Fulton fish market data ([Graddy 1995](https://doi.org/10.2307/2556036)). 
+This data consists of daily recordings of the price and quantity of fish sold in the NYC market.
+We want to estimate quantity/price but are facing the well-known simultaneity problem from supply and demand being jointly determined. 
+We will follow [Angrist, Grady, and Imbens (2000)](https://doi.org/10.1111/1467-937X.00141) and use the sea weather (measured in `speed2` and `wave2`) as a "supply shifter" to estimate the demand elasticity.
+
 
 ```{r}
-base = iris
-names(base) = c("y", "x1", "x_endo_1", "x_inst_1", "fe")
-set.seed(2)
-base$x_inst_2 = 0.2 * base$y + 0.2 * base$x_endo_1 + rnorm(150, sd = 0.5)
-base$x_endo_2 = 0.2 * base$y - 0.2 * base$x_inst_1 + rnorm(150, sd = 0.5)
+data(fulton)
 
-est_iv = feols(y ~ x1 | x_endo_1 + x_endo_2 ~ x_inst_1 + x_inst_2, base)
+est_iv = feols(qty ~ t | price ~ speed2 + wave2, fulton)
 est_iv
 ```
 
-So we've just performed a two stage least squares estimation. The formula coming after the pipe, `x_endo_1 + x_endo_2 ~ x_inst_1 + x_inst_2`, describes the endogenous variables (on the left) and the instruments (on the right). 
+So we've just performed a two stage least squares estimation. The formula coming after the pipe, `price ~ speed2 + wave2`, describes the endogenous variables (on the left) and the instruments (on the right). 
 
-By default, three statistics are displayed: the F-test from the first stage (weak instrument test), the Wu-Hausman endogeneity test and the overidentifying restrictions (Sargan) test. Note that the Sargan statistic appears only when relevant (i.e. when # instr. > # endo. vars., not the case here).
+By default, three statistics are displayed: the F-test from the first stage (weak instrument test), the Wu-Hausman endogeneity test and the overidentifying restrictions (Sargan) test. Note that the Sargan statistic appears only when relevant (i.e. when # instr. > # endo. vars.).
 
 You can use the `fitstat` command to summon other kind of tests, notably Wald tests on the first/second stages:
 
 ```{r}
-fitstat(est_iv, ~ ivf1 + ivwald1 + ivf2 + ivwald2, cluster = "fe")
+fitstat(est_iv, ~ ivf1 + ivwald1 + ivf2 + ivwald2, cluster = "day")
 ```
 
 As the Wald test relies on a given variance-covariance matrix, you can pass extra arguments to `fitstat`, as the argument `cluster` in the previous example, to specify which type of VCOV matrix is desired.
@@ -471,7 +472,7 @@ In the previous code, `fitstat = ~ . + ivwald2` means that we want to add the se
 Now what about adding some fixed-effects? That's of course possible, you need to add them after the first right-hand-side, as follows:
 
 ```{r}
-est_iv_fe = feols(y ~ x1 | fe | x_endo_1 + x_endo_2 ~ x_inst_1 + x_inst_2, base)
+est_iv_fe = feols(qty ~ t | day | price ~ speed2 + wave2, fulton)
 est_iv_fe
 ```
 

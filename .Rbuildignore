@@ -17,3 +17,5 @@
 ^_
 ^altdoc$
 ^_quarto$
+
+^data-raw$
