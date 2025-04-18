@@ -1,34 +1,6 @@
 
 # fixest 0.12.2
 
-## New vignette and data set
-
-- add a new vignette on collinearity
-
-- new data set `base_pub`, base on publication data from the Microsoft Academic Graph, used to illustrate the new vignette
-
-## Minor changes
-
-- more notes and messages better fit the user screen
-
-- default for the argument `collin.tol` increased from `1e-10` to `1e-9`.
-
-## Bugs
-
-- fix bug when several scalars to be evaluated from the calling environment are included in the formula of the regression
-
-- fix bug when: using IV, interpolating the LHS variable, requesting multiple LHS, using a RHS formula as interpolated variable. Reported by @sumtxt, #522
-
-- fix bug `lean = TRUE`: remove a potentially large a copy of environments when an estimation was called within a function. Thanks to @aaronrudkin, #514
-
-- fix bug in `etable`: some arguments globally set were wrongly reset when calling the function. Reported by @aaronrudkin, @etiennebacher kindly provided a reprex, #517
-
-- fix documentation bugs. Reported by @cseveren
-
-- fix bug in etable: `drop.section` was not catching the option `coef`. Thanks to @Oravishayrizi, #540
-
-# fixest 0.12.1
-
 ## New Features
 
 - Add the ability to create sparse model matrices from regression objects and formula in a memory-efficient way.
@@ -60,6 +32,33 @@ sparse_model_matrix(mpg ~ i(vs) | gear^cyl, data = mtcars, type = c("rhs", "fixe
 #>  [3,] . 1 . 1 . . . . . .
 ```
 
+## New vignette and data set
+
+- add a new vignette on collinearity
+
+- new data set `base_pub`, base on publication data from the Microsoft Academic Graph, used to illustrate the new vignette
+
+## Minor changes
+
+- more notes and messages better fit the user screen
+
+- default for the argument `collin.tol` increased from `1e-10` to `1e-9`.
+
+## Bugs
+
+- fix bug when several scalars to be evaluated from the calling environment are included in the formula of the regression
+
+- fix bug when: using IV, interpolating the LHS variable, requesting multiple LHS, using a RHS formula as interpolated variable. Reported by @sumtxt, #522
+
+- fix bug `lean = TRUE`: remove a potentially large a copy of environments when an estimation was called within a function. Thanks to @aaronrudkin, #514
+
+- fix bug in `etable`: some arguments globally set were wrongly reset when calling the function. Reported by @aaronrudkin, @etiennebacher kindly provided a reprex, #517
+
+- fix documentation bugs. Reported by @cseveren
+
+- fix bug in etable: `drop.section` was not catching the option `coef`. Thanks to @Oravishayrizi, #540
+
+# fixest 0.12.1
 
 ## Major bugs affecting R versions <= 4.1.2
 
