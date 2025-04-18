@@ -853,12 +853,7 @@ test(length(est_lhs), 2)
 est_lhs = feols(..("mpg|wt") ~ disp | hp ~ qsec, data = mtcars)
 test(length(est_lhs), 2)
 
-# Custom vcov to fixest multi
-est_multi <- feols(c(y1, y2) ~ x2 + x3, base)
-vcovs_HC3 <- lapply(est_multi, function(est) sandwich::vcovHC(est, type = "HC3"))
-est_multi_HC3 <- summary(est_multi, .vcov = vcovs_HC3)
-test(vcov(est_multi_HC3[[1]]), vcovs_HC3[[1]])
-test(vcov(est_multi_HC3[[2]]), vcovs_HC3[[2]])
+
 
 ####
 #### ... IV ####
@@ -893,7 +888,7 @@ test(coef(est_iv), coef(res_2nd))
 resid_iv = base$y - predict(res_2nd, data.frame(x1 = base$x1, fit_x_endo_1 = base$x_endo_1, fit_x_endo_2 = base$x_endo_2))
 sigma2_iv = sum(resid_iv**2) / (res_2nd$nobs - res_2nd$nparams)
 
-sum_2nd = summary(res_2nd, .vcov = res_2nd$cov.iid / res_2nd$sigma2 * sigma2_iv)
+sum_2nd = summary(res_2nd, vcov = res_2nd$cov.iid / res_2nd$sigma2 * sigma2_iv)
 
 # We only check that on Windows => avoids super odd bug in fedora devel
 # The worst is that I just can't debug it.... so that's the way it's done.
@@ -977,6 +972,47 @@ for(use_fe in c(TRUE, FALSE)){
     test(vcov(est), vcov(est_fit))
   }
 }
+
+####
+#### ... Custom VCOV ####
+####
+
+chunk("custom vcov")
+
+# Named list stores string
+est <- feols(mpg ~ i(cyl), mtcars)
+vcov_HC3 <- sandwich::vcovHC(est, type = "HC3")
+est_HC3 <- summary(est, vcov = list("HC3" = vcov_HC3))
+test(attr(est_HC3$se, "type"), "HC3")
+est_tab <- etable(est_HC3)
+test(any(grepl("HC3", est_tab$est)), TRUE)
+
+# deprecated `.vcov` still works
+est_.vcov <- summary(est, .vcov = vcov_HC3)
+test(est_.vcov$se, est_HC3$se)
+etable(est, .vcov = vcov_HC3)
+
+# Custom vcov to fixest multi
+est_multi <- feols(c(mpg, hp) ~ i(cyl), mtcars)
+vcovs_HC3 <- lapply(est_multi, function(est) sandwich::vcovHC(est, type = "HC3"))
+names(vcovs_HC3) <- c("HC3", "HC3")
+est_multi_HC3 <- summary(est_multi, vcov = vcovs_HC3)
+
+test(vcov(est_multi_HC3[[1]]), vcovs_HC3[[1]])
+test(vcov(est_multi_HC3[[2]]), vcovs_HC3[[2]])
+
+test(attr(est_multi_HC3[[1]]$se, "type"), "HC3")
+test(attr(est_multi_HC3[[2]]$se, "type"), "HC3")
+
+est_tab <- etable(est_multi, est_multi_HC3)
+test(any(grepl("HC3", est_tab$est_multi_HC3.1)), TRUE)
+test(any(grepl("HC3", est_tab$est_multi_HC3.2)), TRUE)
+
+# deprecated `.vcov` still works
+est_multi_.vcov <- summary(est_multi, .vcov = vcovs_HC3)
+test(est_multi_.vcov[[1]]$se, est_multi_HC3[[1]]$se)
+etable(est_multi, .vcov = vcovs_HC3)
+
 
 
 

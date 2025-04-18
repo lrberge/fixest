@@ -376,9 +376,6 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #' for this argument. The arguments and defaults of the function [`ssc`] are: 
 #' `adj = TRUE`, `fixef.K="nested"`, `cluster.adj = TRUE`, `cluster.df = "min"`, 
 #' `t.df = "min"`, `fixef.force_exact=FALSE)`. See the help of the function [`ssc`] for details.
-#' @param .vcov A user provided covariance matrix or a function computing this matrix. If a 
-#' matrix, it must be a square matrix of the same number of rows as the number 
-#' of variables estimated. If a function, it must return the previously mentioned matrix.
 #' @param lean Logical, default is `FALSE`. Used to reduce the (memory) size of the summary object.
 #'  If `TRUE`, then all objects of length N (the number of observations) are removed 
 #' from the result. Note that some `fixest` methods may consequently not work when applied 
@@ -396,7 +393,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #' (a la Cameron, Gelbach & Miller 2011).
 #' @param n Integer, default is 1000. Number of coefficients to display when the print method 
 #' is used.
-#' @param ... Only used if the argument `.vcov` is provided and is a function: extra arguments 
+#' @param ... Only used if the argument `vcov` is provided and is a function: extra arguments 
 #' to be passed to that function.
 #'
 #' @section Compatibility with \pkg{sandwich} package:
@@ -511,12 +508,12 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #' # Compatibility with sandwich
 #' #
 #'
-#' # You can use the VCOVs from sandwich by using the argument .vcov:
+#' # You can use the VCOVs from sandwich by using the argument vcov:
 #' library(sandwich)
-#' summary(est_pois, .vcov = vcovCL, cluster = trade[, c("Destination", "Product")])
+#' summary(est_pois, vcov = vcovCL, cluster = trade[, c("Destination", "Product")])
 #'
 #'
-summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov = NULL,
+summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL,
                           stage = NULL, lean = FALSE, agg = NULL, forceCovariance = FALSE,
                           se = NULL, keepBounded = FALSE, n = 1000, vcov_fix = TRUE,
                           nthreads = getFixest_nthreads(), ...){
@@ -538,9 +535,15 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov
     object$n_print = n
   }
 
+  # .vcov is now deprecated
+  if (".vcov" %in% names(dots) && is.null(vcov)) {
+    assign("vcov", dots[[".vcov"]])
+    warning("Argument '.vcov' is deprecated. Use 'vcov' instead.", immediate. = TRUE) 
+  }
+
   # we need this to save the summary flags
-  # All three arguments se+cluster+.vcov are formatted into a valid vcov arg.
-  vcov_in = vcov = oldargs_to_vcov(se, cluster, vcov, .vcov)
+  # All three arguments se+cluster are formatted into a valid vcov arg.
+  vcov_in = vcov = oldargs_to_vcov(se, cluster, vcov)
 
   check_arg(lean, "logical scalar")
   check_arg(stage, "NULL integer vector no na len(,2) GE{1} LE{2}")
@@ -761,18 +764,18 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov
 
 
 #' @rdname summary.fixest
-summary.fixest_list = function(object, se, cluster, ssc = getFixest_ssc(), .vcov = NULL, 
+summary.fixest_list = function(object, se, cluster, ssc = getFixest_ssc(), vcov = NULL, 
                                stage = 2, lean = FALSE, n, ...){
 
   dots = list(...)
 
   res = list()
   for(i in seq_along(object)){
-    if (!is.null(.vcov) && is.list(.vcov) && length(object) == length(.vcov)) {
+    if (!is.null(vcov) && is.list(vcov) && length(object) == length(vcov)) {
       my_res = summary(object[[i]], se = se, cluster = cluster, ssc = ssc, 
-        .vcov = .vcov[[i]], stage = stage, lean = lean, n = n)
+        vcov = vcov[[i]], stage = stage, lean = lean, n = n)
     } else {
-      my_res = summary(object[[i]], vcov = vcov, se = se, cluster = cluster, ssc = ssc, .vcov = .vcov, stage = stage, lean = lean, n = n, ...)
+      my_res = summary(object[[i]], vcov = vcov, se = se, cluster = cluster, ssc = ssc, vcov = vcov, stage = stage, lean = lean, n = n, ...)
     }
 
     # we unroll in case of IV

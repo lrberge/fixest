@@ -2238,12 +2238,11 @@ vcov_conley_internal = function(bread, scores, vars, sandwich, nthreads,
 ####
 
 
-oldargs_to_vcov = function(se, cluster, vcov, .vcov = NULL){
-  # Transforms se + cluster + .vcov into a vcov call
-
+oldargs_to_vcov = function(se, cluster, vcov){
+  # Transforms se + cluster into a vcov call
   set_up(1)
 
-  if(missnull(se) && missnull(cluster) && missnull(.vcov)){
+  if(missnull(se) && missnull(cluster)){
     if(!missnull(vcov)){
       return(vcov)
     } else {
@@ -2257,56 +2256,39 @@ oldargs_to_vcov = function(se, cluster, vcov, .vcov = NULL){
       return(vcov)
 
     } else {
-      id = c(!missnull(se), !missnull(cluster), !missnull(.vcov))
-      msg = c("se", "cluster", ".vcov")[id]
+      id = c(!missnull(se), !missnull(cluster))
+      msg = c("se", "cluster")[id]
       stop_up("You cannot use the argument 'vcov' in combination with {enum.q.or ? msg}.")
     }
   }
 
-  if(!missnull(.vcov)){
+  all_vcov = getOption("fixest_vcov_builtin")
+  all_vcov_names = unlist(lapply(all_vcov, `[[`, "name"))
+  all_vcov_names = all_vcov_names[nchar(all_vcov_names) > 0]
 
-    if(!is_function_in_it(.vcov)){
-      if(!missnull(se) || !missnull(cluster)){
-        id = c(!missnull(se), !missnull(cluster))
-        msg = c("se", "cluster")[id]
-        stop_up("You cannot use the argument '.vcov' in combination with {enum.q.or ? msg}.")
-      }
-    }
+  if(missnull(se)) se = "cluster"
+  check_set_value(se, "match", .choices = all_vcov_names, 
+                  .prefix = "Argument 'se' (which has been replaced by arg. 'vcov')")
 
-    check_arg(.vcov, "matrix | function")
+  if(missnull(cluster)){
+    vcov = se
 
-    vcov = .vcov
-    attr(vcov, "deparsed_arg") = fetch_arg_deparse(".vcov")
+  } else if(!se %in% c("cluster", "twoway", "threeway", "frouway")){
+    stop_up("The VCOV requested with the argument se = '", se, "' is not compatible with the use of the argument 'cluster' (i.e. you have to choose!).")
 
   } else {
-    all_vcov = getOption("fixest_vcov_builtin")
-    all_vcov_names = unlist(lapply(all_vcov, `[[`, "name"))
-    all_vcov_names = all_vcov_names[nchar(all_vcov_names) > 0]
-
-    if(missnull(se)) se = "cluster"
-    check_set_value(se, "match", .choices = all_vcov_names, 
-                    .prefix = "Argument 'se' (which has been replaced by arg. 'vcov')")
-
-    if(missnull(cluster)){
-      vcov = se
-
-    } else if(!se %in% c("cluster", "twoway", "threeway", "frouway")){
-      stop_up("The VCOV requested with the argument se = '", se, "' is not compatible with the use of the argument 'cluster' (i.e. you have to choose!).")
-
+    if(inherits(cluster, "formula")){
+      vcov = cluster
+    } else if(is.character(cluster) && length(cluster) <= 4){
+      vcov = .xpd(lhs = "cluster", rhs = cluster)
     } else {
-      if(inherits(cluster, "formula")){
-        vcov = cluster
-      } else if(is.character(cluster) && length(cluster) <= 4){
-        vcov = .xpd(lhs = "cluster", rhs = cluster)
-      } else {
-        # We create a vcov request
-        vcov = vcov_cluster(cluster = cluster)
-      }
+      # We create a vcov request
+      vcov = vcov_cluster(cluster = cluster)
     }
-
-    assign("se", NULL, parent.frame())
-    assign("cluster", NULL, parent.frame())
   }
+
+  assign("se", NULL, parent.frame())
+  assign("cluster", NULL, parent.frame())
 
   vcov
 }

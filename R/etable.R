@@ -205,9 +205,7 @@
 #' fit statistics section.
 #' @param reset (`setFixest_etable` only.) Logical, default is `FALSE`. If `TRUE`, this will reset 
 #' all the default values that were already set by the user in previous calls.
-#' @param .vcov A function to be used to compute the standard-errors of each fixest object. You can 
-#' pass extra arguments to this function using the argument `.vcov_args`. See the example.
-#' @param .vcov_args A list containing arguments to be passed to the function `.vcov`.
+#' @param .vcov_args A list containing arguments to be passed to the function `vcov`.
 #' @param poly_dict Character vector, default is `c("", " square", " cube")`. When raw polynomials 
 #' (`x^2`, etc) are used, the variables are automatically renamed and `poly_dict` rules the display 
 #' of the power. For powers greater than the number of elements of the vector, the value displayed 
@@ -796,7 +794,7 @@
 #'
 etable = function(..., vcov = NULL, stage = 2, agg = NULL,
                   se = NULL, ssc = NULL, cluster = NULL,
-                  .vcov = NULL, .vcov_args = NULL, digits = 4, digits.stats = 5, tex,
+                  digits = 4, digits.stats = 5, tex,
                   fitstat = NULL, title = NULL, coefstat = "se", ci = 0.95,
                   se.row = NULL, se.below = NULL,
                   keep = NULL, drop = NULL, order = NULL,
@@ -824,7 +822,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
 
   # Need to check for the presence of the se
   useSummary = TRUE
-  if(missnull(vcov) && missnull(se) && missnull(cluster) && missing(.vcov) && missing(stage) && missnull(agg)){
+  if(missnull(vcov) && missnull(se) && missnull(cluster) && missing(stage) && missnull(agg)){
     useSummary = FALSE
   }
 
@@ -915,6 +913,12 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
     dots$signifCode = NULL
   }
 
+  if(".vcov" %in% names(dots)){
+    warning("Argument '.vcov' is deprecated. Use 'vcov' instead.")
+    vcov = dots[[".vcov"]]
+    dots[[".vcov"]] = NULL
+  }
+
   # Getting the model names
   if(.up == 2){
     # it's pain in the necky
@@ -927,7 +931,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
   }
 
   # vcov
-  vcov = oldargs_to_vcov(se, cluster, vcov, .vcov)
+  vcov = oldargs_to_vcov(se, cluster, vcov)
 
   if(is_function_in_it(vcov) && missnull(.vcov_args)){
     vcov_fun = if(is.function(vcov)) vcov else vcov[[1]]
@@ -2012,16 +2016,11 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
 
     sysOrigin = sys.parent(.up)
     mc = match.call(definition = sys.function(sysOrigin), call = sys.call(sysOrigin), expand.dots = FALSE)
-    # must be either in .vcov (backward comp) or in vcov
-    if(".vcov" %in% names(mc)){
-      vcov_name = deparse_long(mc$.vcov)
-    } else {
-      vcov_name = deparse_long(mc$vcov)
-    }
+    vcov_name = deparse_long(mc$vcov)
 
     if(missnull(.vcov_args)) .vcov_args = list()
     check_set_arg(.vcov_args, "list", 
-                  .message = "The argument '.vcov_args' must be a list of arguments to be passed to the function in '.vcov'.")
+                  .message = "The argument '.vcov_args' must be a list of arguments to be passed to the function in 'vcov'.")
   }
 
   # If vcov is provided, we use summary
