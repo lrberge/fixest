@@ -13,6 +13,7 @@ articles:
       - fixest_walkthrough
       - multiple_estimations
       - standard_errors
+      - collinearity
   - title: Export
     navbar: Estimation tables
     contents:
@@ -162,5 +163,6 @@ reference:
         - base_did
         - trade
         - base_stagg
+        - base_pub
 
 
