@@ -12,7 +12,7 @@
 *                                                             *
 **************************************************************/
 
-#include "fixest_main.hpp"
+#include "fixest_main.h"
 #include <cmath>
 #include <math.h>
 

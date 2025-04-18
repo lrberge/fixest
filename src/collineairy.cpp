@@ -1,5 +1,5 @@
 
-#include "fixest_main.hpp"
+#include "fixest_main.h"
 using namespace Rcpp;
 
 inline int get_sexp_ncol(SEXP &x){

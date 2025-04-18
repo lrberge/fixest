@@ -31,7 +31,7 @@
  *                                                                         *
  **************************************************************************/
 
-#include "fixest_main.hpp"
+#include "fixest_main.h"
 #include <math.h>
 
 using namespace Rcpp;

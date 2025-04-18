@@ -1,5 +1,5 @@
 
-#include "fixest_main.hpp"
+#include "fixest_main.h"
 
 /**
  * @brief Set the parallel scheme for a 1 dimentional matrix

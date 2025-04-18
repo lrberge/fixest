@@ -15,7 +15,7 @@
  **********************************************************************************/
 
 
-#include "fixest_main.hpp"
+#include "fixest_main.h"
 #include <math.h>
 #include <stdio.h>
 #include <cmath>

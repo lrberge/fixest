@@ -47,7 +47,7 @@
  *                                                                    *
  *********************************************************************/
 
-#include "fixest_main.hpp"
+#include "fixest_main.h"
 
 using namespace Rcpp;
 using std::vector;
