@@ -19,7 +19,6 @@ esttable(
   se = NULL,
   ssc = NULL,
   cluster = NULL,
-  .vcov = NULL,
   .vcov_args = NULL,
   digits = 4,
   digits.stats = 5,
@@ -70,7 +69,6 @@ esttex(
   se = NULL,
   ssc = NULL,
   cluster = NULL,
-  .vcov = NULL,
   .vcov_args = NULL,
   digits = 4,
   digits.stats = 5,
@@ -138,7 +136,6 @@ etable(
   se = NULL,
   ssc = NULL,
   cluster = NULL,
-  .vcov = NULL,
   .vcov_args = NULL,
   digits = 4,
   digits.stats = 5,
@@ -305,10 +302,7 @@ blank with \code{vcov = "twoway"} (assuming \code{var1} [resp. \code{var2}] was
 the 1st [resp. 2nd] fixed-effect). You can interact two variables using \code{^} with
 the following syntax: \code{cluster = ~var1^var2} or \code{cluster = "var1^var2"}.}
 
-\item{.vcov}{A function to be used to compute the standard-errors of each fixest object. You can
-pass extra arguments to this function using the argument \code{.vcov_args}. See the example.}
-
-\item{.vcov_args}{A list containing arguments to be passed to the function \code{.vcov}.}
+\item{.vcov_args}{A list containing arguments to be passed to the function \code{vcov}.}
 
 \item{digits}{Integer or character scalar. Default is 4 and represents the number of significant
 digits to be displayed for the coefficients and standard-errors. To apply rounding instead of

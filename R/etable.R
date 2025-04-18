@@ -793,7 +793,7 @@
 #'
 #'
 etable = function(..., vcov = NULL, stage = 2, agg = NULL,
-                  se = NULL, ssc = NULL, cluster = NULL,
+                  se = NULL, ssc = NULL, cluster = NULL, .vcov_args = NULL,
                   digits = 4, digits.stats = 5, tex,
                   fitstat = NULL, title = NULL, coefstat = "se", ci = 0.95,
                   se.row = NULL, se.below = NULL,
@@ -933,7 +933,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
   # vcov
   vcov = oldargs_to_vcov(se, cluster, vcov)
 
-  if(is_function_in_it(vcov) && missnull(.vcov_args)){
+  if (is_function_in_it(vcov) && missnull(.vcov_args)) {
     vcov_fun = if(is.function(vcov)) vcov else vcov[[1]]
     .vcov_args = catch_fun_args(vcov_fun, dots, exclude_args = "vcov", erase_args = TRUE)
     for(var in intersect(names(.vcov_args), names(dots))) dots[[var]] = NULL

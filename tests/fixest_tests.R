@@ -987,6 +987,16 @@ test(attr(est_HC3$se, "type"), "HC3")
 est_tab <- etable(est_HC3)
 test(any(grepl("HC3", est_tab$est)), TRUE)
 
+# Passing functions
+test(
+  summary(est, vcov = \(x) sandwich::vcovHC(x, type = "HC3"))$se,
+  summary(est, vcov = sandwich::vcovHC, .vcov_args = list(type = "HC3"))$se
+)
+# Confirming these work 
+temp <- etable(est, vcov = \(x) sandwich::vcovHC(x, type = "HC3"))
+temp <- etable(est, vcov = sandwich::vcovHC, .vcov_args = list(type = "HC3"))
+
+
 # deprecated `.vcov` still works
 est_.vcov <- summary(est, .vcov = vcov_HC3)
 test(est_.vcov$se, est_HC3$se)
@@ -1013,6 +1023,13 @@ est_multi_.vcov <- summary(est_multi, .vcov = vcovs_HC3)
 test(est_multi_.vcov[[1]]$se, est_multi_HC3[[1]]$se)
 etable(est_multi, .vcov = vcovs_HC3)
 
+
+# TEMP
+setFixest_fml(..ctrl = ~ poly(Wind, 2) + poly(Temp, 2))
+est_c0 = feols(Ozone ~ Solar.R, data = airquality)
+est_c1 = feols(Ozone ~ Solar.R + ..ctrl, data = airquality)
+est_c2 = feols(Ozone ~ Solar.R + Solar.R^2 + ..ctrl, data = airquality)
+etable(est_c0, est_c1, est_c2, vcov = sandwich::vcovHC)
 
 
 
