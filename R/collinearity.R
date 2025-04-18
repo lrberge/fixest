@@ -29,9 +29,9 @@ collinear_set = function(x, tol = 1e-6, nthreads = getFixest_nthreads(),
   
   # we need to scale x so that the results can be interpreted
   X = scale(x)
-  is_cst = attr(X, "scaled:scale") == 0
-  if(any(is_cst)){
-    X[, is_cst] = 1
+  is_constant = attr(X, "scaled:scale") == 0
+  if(any(is_constant)){
+    X[, is_constant] = 1
   }
   
   XtX = Xty = crossprod(X)
@@ -50,9 +50,8 @@ collinear_set = function(x, tol = 1e-6, nthreads = getFixest_nthreads(),
     is_col = stat < tol
     
     if(out.full){
-      df = data.frame(var = vars[i], collin = is_col, 
-                                 stat = stat, 
-                                 collin.min_norm = est$collin.min_norm)
+      df = data.frame(var = vars[i], collin = is_col, max_abs_resid = stat, 
+                      collin.min_norm = est$collin.min_norm)
       df$est = list(est)
       res_full[[i]] = df
     } else {
