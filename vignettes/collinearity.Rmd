@@ -2,8 +2,23 @@
 title: "On collinearity"
 author: "Laurent Bergé"
 date: "`r Sys.Date()`"
-output: 
-  html_document
+output:
+  html_document:
+    theme: journal
+    highlight: haddock
+    number_sections: yes
+    toc: yes
+    toc_depth: 3
+    toc_float:
+      collapsed: yes
+      smooth_scroll: no
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+vignette: > 
+  %\VignetteIndexEntry{fixest introduction} 
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
@@ -16,7 +31,7 @@ Collinearity is the pebble that inevitably enters the shoe of any applied econom
 If you know what collinearity is, how software deal with it, and how it affects your coefficients, you're fine! If you're not described by the previous sentence, then two cases when you encounter collinearity.
 Either you're lucky, and nothing happens or just a few unimportant coefficients become meaningless. Either you're unlucky and... well, your main results are wrong and your paper should be retracted.
 
-Without further ado, let's try to remove chance from the econometrics process and try to undestand what collinearity is and how to deal with it. 
+Without further ado, let's try to remove chance from the econometrics process and try to understand what collinearity is and how to deal with it. 
 
 
 # What collinearity is
@@ -152,7 +167,7 @@ The model we estimate is:
 
 $$ y_{it} = \alpha_i + \beta_t + \gamma \times woman_{it} + \theta \times harassed_{it} + \epsilon_{it} $$
 
-This time the model is not misspecified since both $woman_{it}$ and $harassed_{it}$ present variations that cannot be explained by scientist and time fixed-effects alone.
+This time the model is not misspecified since both $woman_{it}$ and $harassed_{it}$ present variations that cannot be explained by scientist and time fixed-effects alone (although the identification of the gender gap will hinge only on the scientists reporting a variation in $woman_{it}$).
 
 **Sneaky misspecification.** One problem arises if the variable $harassed$ contains missing values and if, after removing observation with missing values, there is no more within-scientist variation in the variable $woman_{it}$. In that case, the variable $woman$ ends up in the collinear set when the variable $harassed$ is included in the model. This is not a misspecified model *per se*, but purely a data problem: the data does not support the model specification. 
 
@@ -282,7 +297,7 @@ lm(y ~ I(x + 1e7), df) |> coef()
 
 Contrary to `feols`, for a translation of 1,000,000 `lm` does not remove the variable and gives the right result. However, the behavior becomes similar to that of `feols` when we apply a translation of $10^7$. A notable difference between the two routines is that there is no explicit message from `lm` (but this is displayed in `lm`'s `summary`).
 
-**Bottom line.** Collinearity detection and fixing is a numerical problem and as such is subject to the ususal pitfall of these, in particular precision problems. Always be wary when variables are removed: if there is no theoretical reason for removal then there might be a data problem. In general, ensuring that the variables have a reasonable numerical range is a good idea.
+**Bottom line.** Collinearity detection and fixing is a numerical problem and as such is subject to the ususal pitfall of these, in particular precision problems. Always be wary when variables are removed: if there is no theoretical reason for removal then there might be a data problem. In general, ensuring that the variables have a reasonable numerical range is a good idea. Do not hesitate to re-scale the variables with a large range.
 
 ## When automatic removal is good {#subsec_removal_good}
 
