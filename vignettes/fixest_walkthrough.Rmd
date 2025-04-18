@@ -435,9 +435,11 @@ feols(y ~ x1 | id, base_did, vcov = function(x) sandwich::vcovHC(x, type = "HC1"
 # Instrumental variables
 
 Two stage least square estimations can be performed by simply adding in the formula the link between the endogenous and the instrumental variables. 
-Let's have an example using the Fulton fish market data (Angrist, Grady, and Imbens 2000). 
-This data consists of daily recordings of the price and quantity of fish sold in this NYC market.
-The paper uses the sea weather as a "supply shifter" to estimate the demand elasticity.
+Let's have an example using the Fulton fish market data ([Angrist, Grady, and Imbens 2000](https://academic.oup.com/restud/article-abstract/67/3/499/1547484?redirectedFrom=fulltext&login=false)). 
+This data consists of daily recordings of the price and quantity of fish sold in the NYC market.
+We want to estimate quantity/price but are facing the well-known simultaneity problem from supply and demand being jointly determined. 
+The paper uses the sea weather (measured in `speed2` and `wave2`) as a "supply shifter" to estimate the demand elasticity.
+
 
 ```{r}
 data(fulton)
