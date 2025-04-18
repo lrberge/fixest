@@ -2826,18 +2826,20 @@ obs = function(x){
 }
 
 #' @rdname obs
+#' @param object A `fixest` object.
+#' @param ... Ignored
 #' @export
-case.names.fixest = function(x){
-  check_arg(x, "class(fixest)")
+case.names.fixest = function(object, ...){
+  check_arg(object, "class(fixest)")
 
-  if(isTRUE(x$lean)){
+  if(isTRUE(object$lean)){
     stop("obs() does not work with models estimated with 'lean = TRUE'.")
   }
 
-  id = 1:x$nobs_origin
+  id = 1:object$nobs_origin
 
-  for(i in seq_along(x$obs_selection)){
-    id = id[x$obs_selection[[i]]]
+  for(i in seq_along(object$obs_selection)){
+    id = id[object$obs_selection[[i]]]
   }
 
   return(id)
