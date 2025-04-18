@@ -463,11 +463,18 @@ summary.fixest_multi = function(object, type = "short", vcov = NULL, se = NULL,
   dots = list(...)
 
   check_set_arg(type, "match(short, long, compact, se_compact, se_long)")
+  
   # .vcov is now deprecated
-  if (".vcov" %in% names(dots)) {
-    assign("vcov", dots[[".vcov"]])
-    warning("Argument '.vcov' is deprecated. Use 'vcov' instead.", immediate. = TRUE) 
+  if(".vcov" %in% names(dots)){
+    if(is.null(getOption("fixest_deprec_arg_.vcov"))){
+      warning("The argument '.vcov' is deprecated. Please use 'vcov' instead.")
+      options(fixest_deprec_arg_.vcov = TRUE)
+    }
+    vcov = dots[[".vcov"]]
+    attr(vcov, "deparsed_arg") = fetch_arg_deparse(".vcov")
+    dots[[".vcov"]] = NULL
   }
+  
   check_arg(vcov, "NULL | matrix | list | function")
 
   if(!missing(type) || is.null(attr(object, "print_request"))){

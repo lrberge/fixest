@@ -536,9 +536,14 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL,
   }
 
   # .vcov is now deprecated
-  if (".vcov" %in% names(dots) && is.null(vcov)) {
-    assign("vcov", dots[[".vcov"]])
-    warning("Argument '.vcov' is deprecated. Use 'vcov' instead.", immediate. = TRUE) 
+  if(".vcov" %in% names(dots) && is.null(vcov)){
+    if(is.null(getOption("fixest_deprec_arg_.vcov"))){
+      warning("The argument '.vcov' is deprecated. Please use 'vcov' instead.")
+      options(fixest_deprec_arg_.vcov = TRUE)
+    }
+    vcov = dots[[".vcov"]]
+    attr(vcov, "deparsed_arg") = fetch_arg_deparse(".vcov")
+    dots[[".vcov"]] = NULL
   }
 
   # we need this to save the summary flags

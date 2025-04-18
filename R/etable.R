@@ -914,8 +914,12 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
   }
 
   if(".vcov" %in% names(dots)){
-    warning("Argument '.vcov' is deprecated. Use 'vcov' instead.")
+    if(is.null(getOption("fixest_deprec_arg_.vcov"))){
+      warning("The argument '.vcov' is deprecated. Please use 'vcov' instead.")
+      options(fixest_deprec_arg_.vcov = TRUE)
+    }
     vcov = dots[[".vcov"]]
+    attr(vcov, "deparsed_arg") = fetch_arg_deparse(".vcov")
     dots[[".vcov"]] = NULL
   }
 
