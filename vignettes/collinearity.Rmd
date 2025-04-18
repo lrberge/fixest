@@ -16,7 +16,7 @@ output:
     toc: yes
     toc_depth: 3
 vignette: > 
-  %\VignetteIndexEntry{on collinearity} 
+  %\VignetteIndexEntry{On collinearity} 
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
