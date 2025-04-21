@@ -44,6 +44,8 @@ sparse_model_matrix(mpg ~ i(vs) | gear^cyl, data = mtcars, type = c("rhs", "fixe
 
 - default for the argument `collin.tol` increased from `1e-10` to `1e-9`.
 
+- requires stringmagic >= 1.2.0
+
 ## Bugs
 
 - fix bug when several scalars to be evaluated from the calling environment are included in the formula of the regression
