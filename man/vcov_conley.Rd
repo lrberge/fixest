@@ -29,7 +29,7 @@ representing the longitude. The longitude must be in [-180, 180], [0, 360] or [-
 
 \item{cutoff}{The distance cutoff, in km. You can express the cutoff in miles by writing the
 number in character form and adding "mi" as a suffix: cutoff = "100mi" would be 100 miles. If
-missing, a rule of thumb is used to deduce the cutoff.}
+missing, a rule of thumb is used to deduce the cutoff, see details.}
 
 \item{pixel}{A positive numeric scalar, default is 0. If a positive number, the coordinates of
 each observation are pooled into \code{pixel} x \code{pixel} km squares. This lowers the precision but can
@@ -72,6 +72,17 @@ by the user.
 
 The function \code{conley} does not compute VCOVs directly but is meant to be used in the argument
 \code{vcov} of \code{fixest} functions (e.g. in \code{\link{vcov.fixest}} or even in the estimation calls).
+
+If the cutoff is missing, a rule of thumb is used to deduce a sensible cutoff.
+The algorithm is as follows:
+\itemize{
+\item all observations are sorted according to their latitude and their longitude (latitude major)
+\item for each observation we take the minimum distance across the three units with the closest latitude
+\item we do the same when sorting this time by longitude first and latitude second (longitude major)
+\item the cutoff is the sum of the median of these two distances (lat. major and lon. major)
+This cutoff is provided only for convenience but should be an appropriate first guess.
+With this cutoff, about 50\% of units have at least around 8 neighbors.
+}
 }
 \examples{
 
