@@ -1301,7 +1301,7 @@ dof = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, cluster.df = 
 #' # Using approximate hatvalues
 #' vcov_hetero(est, "hc3", exact = FALSE, p = 500)
 #'
-#'
+#' @export
 vcov_hetero = function(x, type = "hc1", exact = TRUE, p = 500, ssc = NULL){
   # User-level function to compute clustered SEs
   # typically we only do checking and reshaping here

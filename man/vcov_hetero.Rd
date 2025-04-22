@@ -40,7 +40,6 @@ vcov_hetero(est, "hc3", ssc = ssc(adj = FALSE))
 # Using approximate hatvalues
 vcov_hetero(est, "hc3", exact = FALSE, p = 500)
 
-
 }
 \references{
 Cameron AC, Gelbach JB, Miller DL (2011). "Robust Inference with Multiway Clustering." \emph{Journal of Business & Economic Statistics}, 29(2), 238-249. doi:10.1198/jbes.2010.07136.
