@@ -19,7 +19,6 @@ esttable(
   se = NULL,
   ssc = NULL,
   cluster = NULL,
-  .vcov = NULL,
   .vcov_args = NULL,
   digits = 4,
   digits.stats = 5,
@@ -70,7 +69,6 @@ esttex(
   se = NULL,
   ssc = NULL,
   cluster = NULL,
-  .vcov = NULL,
   .vcov_args = NULL,
   digits = 4,
   digits.stats = 5,
@@ -256,7 +254,7 @@ log_etable(type = "pdflatex")
 \code{\link{feols}} or \code{\link{feglm}}). Note that any other type of element is discarded. Note that you can
 give a list of \code{fixest} objects.}
 
-\item{vcov, .vcov}{Versatile argument to specify the VCOV. In general, it is either a character
+\item{vcov}{Versatile argument to specify the VCOV. In general, it is either a character
 scalar equal to a VCOV type, either a formula of the form: \code{vcov_type ~ variables}. The
 VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway",
 "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts

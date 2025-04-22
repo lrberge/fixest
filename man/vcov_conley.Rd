@@ -80,9 +80,10 @@ The algorithm is as follows:
 \item for each observation we take the minimum distance across the three units with the closest latitude
 \item we do the same when sorting this time by longitude first and latitude second (longitude major)
 \item the cutoff is the sum of the median of these two distances (lat. major and lon. major)
-This cutoff is provided only for convenience but should be an appropriate first guess.
-With this cutoff, about 50\% of units have at least around 8 neighbors.
 }
+
+This cutoff is provided only for convenience but should be an appropriate first guess.
+With this cutoff, about 50\% of units should have at least around 8 neighbors.
 }
 \examples{
 
