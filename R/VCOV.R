@@ -1284,13 +1284,12 @@ dof = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, cluster.df = 
 #' Laurent Berge and Kyle Butts
 #'
 #' @references
-#' Cameron AC, Gelbach JB, Miller DL (2011). "Robust Inference with Multiway Clustering." *Journal of Business & Economic Statistics*, 29(2), 238-249. doi:10.1198/jbes.2010.07136.
+#' MacKinnon, J. G. (2012). "Thirty years of heteroscedasticity-robust inference." Recent Advances and Future Directions in Causality, Predic-tion, and Specification Analysis, pp. 437--461. https://doi.org/10.1007/978-1-4614-1653-1_17
 #'
 #' @examples
-#'
+#' 
 #' base = iris
 #' names(base) = c("y", "x1", "x2", "x3", "species")
-#' base$clu = rep(1:5, 30)
 #'
 #' est = feols(y ~ x1 | species, base)
 #'
@@ -1301,7 +1300,6 @@ dof = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, cluster.df = 
 #' # Using approximate hatvalues
 #' vcov_hetero(est, "hc3", exact = FALSE, p = 500)
 #'
-#' @export
 vcov_hetero = function(x, type = "hc1", exact = TRUE, p = 500, ssc = NULL){
   # User-level function to compute clustered SEs
   # typically we only do checking and reshaping here

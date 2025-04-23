@@ -2832,7 +2832,7 @@ obs = function(x){
 #' @rdname obs
 #' @param object A `fixest` object.
 #' @param ... Ignored
-#' @export
+#'
 case.names.fixest = function(object, ...){
   check_arg(object, "class(fixest)")
 

@@ -42,7 +42,7 @@ vcov_hetero(est, "hc3", exact = FALSE, p = 500)
 
 }
 \references{
-Cameron AC, Gelbach JB, Miller DL (2011). "Robust Inference with Multiway Clustering." \emph{Journal of Business & Economic Statistics}, 29(2), 238-249. doi:10.1198/jbes.2010.07136.
+MacKinnon, J. G. (2012). "Thirty years of heteroscedasticity-robust inference." Recent Advances and Future Directions in Causality, Predic-tion, and Specification Analysis, pp. 437--461. https://doi.org/10.1007/978-1-4614-1653-1_17
 }
 \author{
 Laurent Berge and Kyle Butts
