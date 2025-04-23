@@ -29,11 +29,14 @@
 #' sparse_model_matrix(est)
 #' sparse_model_matrix(wt ~ i(vs) + hp | cyl, mtcars)
 #'
-#' @export
 sparse_model_matrix = function(object, data, type = "rhs", na.rm = TRUE,  collin.rm = NULL, combine = TRUE, ...) {
   # We evaluate the formula with the past call
   # type: lhs, rhs, fixef, iv.endo, iv.inst, iv.rhs1, iv.rhs2
   # if fixef => return a DF
+
+  if (!requireNamespace("Matrix")) {
+    stop("sparse_model_matrix method requires the Matrix package.")
+  }
 
   # Checking the arguments
   if (is_user_level_call()) {
