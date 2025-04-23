@@ -1886,7 +1886,7 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
         if(isFALSE(info$is_inter_fact)){
 
           # First case: regular variable. species::setosa
-          if(any(info$coef_names %in% all_vars)){
+          if(any(info$coef_names_full %in% all_vars)){
             i_running = i_running + 1
 
             if(i.select == i_running){
