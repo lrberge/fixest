@@ -5822,7 +5822,9 @@ fix_pkgwdown_path = function(){
     my_file = file(f, "r", encoding = "UTF-8")
     text = readLines(f)
     close(my_file)
-    if(any(grepl("../../../", text, fixed = TRUE))){
+    # April 2025: now pkg down write absolute paths
+    pat = "<img[^\"]+=\"[^\"]+/fixest/[^\"]+\\.[[:alpha:]]{3,4}\""
+    if(any(grepl(pat, text))){
       # We embed the images directly: safer
 
       # A) we get the path
@@ -5831,11 +5833,11 @@ fix_pkgwdown_path = function(){
       
       done = FALSE
 
-      pat = "<img.+\\.\\./.+/fixest/.+/images/"
       qui = which(grepl(pat, text))
       for(i in qui){
         if(!done){
           message("Fixing pkgdown paths (", gsub(".+/", "", f), ").")
+          done = TRUE
         }
         # ex: line = "<img src = \"../../../Google drive/fixest/fixest/vignettes/images/etable/etable_tex_2021-12-02_1.05477838.png\">"
         line = text[i]
