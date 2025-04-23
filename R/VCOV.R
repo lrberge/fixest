@@ -1012,24 +1012,14 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
     # below for consistency => should *not* be triggered
     K = max(K, length(object$coefficients) + 1)
   }
+  
+  ss_adj = ifelse(ssc$adj, (n - 1) / (n - K), 1)
 
-  # TODO: There never is an attr "ss_adj". I think this can be safely removed?
-  # Small sample adjustment
-  ss_adj = attr(vcov_noAdj, "ss_adj")
-  if(!is.null(ss_adj)){
-    if(is.function(ss_adj)){
-      ss_adj = ss_adj(n = n, K = K)
-    }
-    attr(vcov_noAdj, "ss_adj") = NULL
-  } else {
-    ss_adj = ifelse(ssc$adj, (n - 1) / (n - K), 1)
-
-    # TODO: think about this? It's not standard to apply ss_adj, but don't like removing the option from the user?
-    # Don't apply ss_adj to hc2/hc3 since they are small-sample adjusted already!
-    # if (vcov %in% c("hc2", "hc3")) {
-    #   ss_adj = 1
-    # }
-  }
+  # TODO: think about this? It's not standard to apply ss_adj, but don't like removing the option from the user?
+  # Don't apply ss_adj to hc2/hc3 since they are small-sample adjusted already!
+  # if (vcov %in% c("hc2", "hc3")) {
+  #   ss_adj = 1
+  # }
 
   vcov_mat = vcov_noAdj * ss_adj
 
