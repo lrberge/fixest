@@ -1,9 +1,9 @@
 
-# fixest 0.12.2
+# fixest 0.13.0
 
 ## New Features
 
-- Add the ability to create sparse model matrices from regression objects and formula in a memory-efficient way.
+- add the ability to create sparse model matrices from regression objects and formula in a memory-efficient way.
 
 ```R
 est = feols(mpg ~ drat | cyl, mtcars)
@@ -47,6 +47,8 @@ sparse_model_matrix(mpg ~ i(vs) | gear^cyl, data = mtcars, type = c("rhs", "fixe
 - requires stringmagic >= 1.2.0
 
 ## Bugs
+
+- fux bug in `predict` when the data of origin was missing. Thanks to @grantmcdermott, #544
 
 - fix bug when several scalars to be evaluated from the calling environment are included in the formula of the regression
 
