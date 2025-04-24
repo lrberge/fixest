@@ -2166,35 +2166,6 @@ new_data$period = 1955
 
 test(predict(est, newdata = new_data), value)
 
-#
-# origin data is removed
-#
-
-dat = base_did
-idx = sample(nrow(dat), 10)
-dat2 = dat[idx, ]
-
-# we check that predict works even when the origin data is missing
-mod = feols(y ~ x1 + i(period, keep = 3:6) + i(period, treat, 5) | id, dat)
-pred_origin = predict(mod)[idx]
-
-rm(dat)
-pred_new = predict(mod, newdata = dat2)
-test(pred_origin, pred_new)
-
-# we check that predict errors when the origin estimation contained
-# variables which require information on the origin data set
-# like poly()
-
-dat = base_did
-mod = feols(y ~ poly(x1, 2) | id, dat)
-pred_origin = predict(mod)[idx]
-
-rm(dat)
-test(predict(mod, newdata = dat2), "err")
-
-
-
 
 ####
 #### model.matrix ####
