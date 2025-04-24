@@ -2756,7 +2756,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
     # dropping names
     value_fixef = as.vector(value_fixef)
   }
-  
+
   #
   # 2) Linear values
   #
