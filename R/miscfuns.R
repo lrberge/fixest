@@ -4192,23 +4192,67 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml,
 
     # if lean = TRUE, we should be avoiding that
     # => I don't know of a solution yet...
+    
+    # April 2025:
+    # For predict to work on estimations which:
+    #   * had poly(x, k) or similar as variables
+    #   * the original data does not exist any more
+    # it would be nice to plug in the attributes of the model.frame directly
+    # into the estimation object.
+    # Problme: it will add some run time at the data creation step
+    # 
+    # Current solution: make `newdata` work when `data` does not exist.
+    # but error when it contains "predvars" variables
+    #   
 
     if(length(fml) == 3) fml = fml[c(1, 3)]
 
     # We apply model.frame to the original data
-    data = fetch_data(object, "To apply `model.matrix.fixest`, ")
+    data = fetch_data(object, no_error = TRUE)
+    
+    was_error = FALSE
+    error_msg = ""
+    if(inherits(data, "error")){
+      # we try again and diagnose if it's important or not
+      error_msg = data
+      was_error = TRUE
+      data = newdata
+    }
 
     panel__meta__info = set_panel_meta_info(object, data)
 
     mf = model.frame(fml, data, na.action = na.pass)
 
-    rm(panel__meta__info) # needed, so that when the data is recreated for real
+    # needed, so that the data is recreated for real
+    # (note: when creating the lags, l() and co fetch panel__meta__info in the upper frames)
+    rm(panel__meta__info)
 
     t_mf = terms(mf)
     xlev = .getXlevels(t_mf, mf)
-
-    if(!identical(attr(t_mf,"variables"), attr(t_mf,"predvars")) || length(xlev) > 0){
-      mf = model.frame(t_mf, newdata, xlev = xlev, na.action = na.pass)
+    
+    has_special_vars = !identical(attr(t_mf,"variables"), attr(t_mf,"predvars"))
+    if(has_special_vars || length(xlev) > 0){
+      
+      if(was_error && has_special_vars){
+        
+        call_var = attr(t_mf,"variables")
+        call_predvar = attr(t_mf,"predvars")
+        
+        all_pblm = c()
+        for(i in seq_along(call_var)){
+          if(!identical(call_var[[i]], call_predvar[[i]])){
+            fun_call = call_var[[i]]
+            all_pblm = c(all_pblm, as.character(fun_call[[1]])[[1]])
+          }
+        }
+        
+        all_pblm = unique(all_pblm)
+        
+        stop_up("The estimation contained variables based on functions which require information on the original data set to be constructed (the function{$s, enum.bq ? all_pblm}).\n", error_msg)
+      } else {
+        mf = model.frame(t_mf, newdata, xlev = xlev, na.action = na.pass)
+      }
+      
     } else {
       mf = NULL
     }
@@ -4823,7 +4867,7 @@ set_defaults = function(opts_name){
 
 }
 
-fetch_data = function(x, prefix = "", suffix = ""){
+fetch_data = function(x, prefix = "", suffix = "", no_error = FALSE){
   # x: fixest estimation
   # We try different strategies:
   # 0) the data has been saved at estimation time with `data.save = TRUE`
@@ -4894,9 +4938,15 @@ fetch_data = function(x, prefix = "", suffix = ""){
   }
 
   data_name = charShorten(deparse(x$call$data)[1], 15)
-  stop_up(begin, " fetch the data in the enviroment where the estimation was made, but the data does not seem to be there any more (btw it was {bq ? data_name}). ", suffix)
-
-
+  
+  msg = sma(begin, " fetch the data in the enviroment where the estimation was made, but the data does not seem to be there any more (btw it was {bq ? data_name}). ", suffix)
+  
+  if(no_error){
+    class(msg) = "error"
+    return(msg)
+  }
+  
+  stop_up(msg)
 }
 
 is_large_object = function(x){
