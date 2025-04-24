@@ -3807,11 +3807,6 @@ etable_internal_latex = function(info){
       notes_intro = paste0(gsub("^@", "", notes[1]), " ")
       notes = notes[-1]
     }
-    
-    # we start with a newline if there is no option for the tablenotes env.
-    if(is.null(notes_intro) || nchar(notes_intro) == 0){
-      notes_intro = "\n"
-    }
 
     if(length(notes) > 0){
       notes = dict_apply(notes, dict)
@@ -3826,8 +3821,7 @@ etable_internal_latex = function(info){
 
         # The note intro is placed right after the } so that you can pass options
         # like [flushleft]
-        info_notes = paste0("\n\\begin{tablenotes}", notes_intro, 
-                            notes,
+        info_notes = paste0("\n\\begin{tablenotes}", notes_intro, notes,
                             "\n\\end{tablenotes}\n")
       } else {
         info_notes = paste0("\n", notes_intro, paste0(notes, collapse = "\\\\\n"), "\n")
