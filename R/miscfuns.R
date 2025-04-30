@@ -4920,7 +4920,7 @@ fetch_data = function(x, prefix = "", suffix = "", no_error = FALSE){
 
   # 3) Global environment
 
-  if(!identical(parent.env(x$call_env), .GlobalEnv)){
+  if(!isTRUE(x$lean) && !identical(parent.env(x$call_env), .GlobalEnv)){
     # ...and again
     try(data <- eval(x$call$data, .GlobalEnv), silent = TRUE)
 
