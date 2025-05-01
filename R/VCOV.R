@@ -992,7 +992,10 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
   ####
 
 
-  if(any(diag(vcov_mat) < 0) && vcov_fix){
+  if(vcov_fix){
+    eigenvalues = eigen(X, symmetric = TRUE, only.values = TRUE)
+
+    if (any(eigenvalues < 1e-10))
     # We 'fix' it
     all_attr = attributes(vcov_mat)
     vcov_mat = mat_posdef_fix(vcov_mat)

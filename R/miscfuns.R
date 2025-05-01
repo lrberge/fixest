@@ -6782,9 +6782,9 @@ mat_posdef_fix = function(X, tol = 1e-10){
   # X must be a symmetric matrix
   # We don't check it
 
-  if(any(diag(X) < tol)){
-    e = eigen(X, symmetric = TRUE)
-
+  e  = eigen(X, symmetric = TRUE)
+  # Should already be TRUE if this function is called, but in case someone else wants to use it, does not hurt to check.
+  if (any(e$values < tol)){
     if (is.complex(e$values)) {
       attr(X, "is_complex") = TRUE
     } else {
