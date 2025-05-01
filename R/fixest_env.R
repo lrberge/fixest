@@ -2038,6 +2038,12 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
       msgNA_iv = paste0("IV: ", numberFormatNormal(n_NA_iv[1]), "/", numberFormatNormal(n_NA_iv[2]))
     }
 
+    # Number of instruments must be >= Number of endogenous variables
+    n_inst = ncol(iv.mat)
+    n_endo = ncol(iv_lhs_mat)
+    if (n_inst < n_endo) {
+      stopi("The number of instruments ({n ? n_inst}) must be as large as the number of endogenous variables ({n ? n_endo}).")
+    }
   }
 
 
