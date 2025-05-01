@@ -993,7 +993,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 
 
   if(vcov_fix){
-    eigenvalues = eigen(X, symmetric = TRUE, only.values = TRUE)
+    eigenvalues = eigen(vcov_mat, symmetric = TRUE, only.values = TRUE)
 
     if (any(eigenvalues < 1e-10))
     # We 'fix' it
