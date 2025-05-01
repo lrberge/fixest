@@ -908,6 +908,13 @@ etable(summary(est_iv, stage = 1:2))
 
 setFixest_vcov(reset = TRUE)
 
+# Check the number of instruments
+test(
+  feols(y ~ x1 | x_endo_1 + x_endo_2 ~ x_inst_1, base),
+  "err"
+)
+
+
 ####
 #### ... VCOV at estimation ####
 ####
