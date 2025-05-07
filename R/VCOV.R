@@ -995,22 +995,22 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
   if(vcov_fix){
     eigenvalues = eigen(vcov_mat, symmetric = TRUE, only.values = TRUE)
 
-    if (any(eigenvalues < 1e-10))
-    # We 'fix' it
-    all_attr = attributes(vcov_mat)
-    vcov_mat = mat_posdef_fix(vcov_mat)
-    is_complex = isTRUE(attr(vcov_mat, "is_complex"))
+    if (any(eigenvalues < 1e-10)) {
+      # We 'fix' it
+      all_attr = attributes(vcov_mat)
+      vcov_mat = mat_posdef_fix(vcov_mat)
+      is_complex = isTRUE(attr(vcov_mat, "is_complex"))
 
-    if (is_complex) {
-      # we should never have a complex VCOV, but just in case...
-      message("The VCOV matrix could not be fixed since its eigenvalues were complex. The complex standard-errors are reported for information purposes.")
-      vcov_mat = as.complex(vcov_mat)
-    } else {
-      message("Variance contained negative values in the diagonal and was 'fixed' (a la Cameron, Gelbach & Miller 2011).")
+      if (is_complex) {
+        # we should never have a complex VCOV, but just in case...
+        message("The VCOV matrix could not be fixed since its eigenvalues were complex. The complex standard-errors are reported for information purposes.")
+        vcov_mat = as.complex(vcov_mat)
+      } else {
+        message("Variance contained negative values in the diagonal and was 'fixed' (a la Cameron, Gelbach & Miller 2011).")
+      }
+
+      attributes(vcov_mat) = all_attr
     }
-
-    attributes(vcov_mat) = all_attr
-
   }
 
   if(is_attr){
