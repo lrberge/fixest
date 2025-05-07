@@ -1568,7 +1568,8 @@ degrees_freedom_iid = function(x, type){
   }
 
   # To handle errors (rare but can happen)
-  if(any(diag(vcov) < 1e-10)){
+  eigenvalues = eigen(vcov, symmetric = TRUE, only.values = TRUE)$values
+  if(any(eigenvalues < 0)){
     vcov = mat_posdef_fix(vcov)
   }
 
