@@ -1270,6 +1270,17 @@ est_feols = feols(y ~ x | grp + tm, data=d)
 test(se(est_feols, se = "st")["x"], se(est_lm)["x"])
 
 #
+# Heteroskedasticity-robust
+#
+
+se_white_lm_HC1 = sqrt(vcovHC(est_lm, type = "HC1")["x", "x"])
+se_white_lm_HC0 = sqrt(vcovHC(est_lm, type = "HC0")["x", "x"])
+
+test(se(est_feols, se = "hetero"), se_white_lm_HC1)
+test(se(est_feols, se = "hetero", ssc = ssc(adj = FALSE, cluster.adj = FALSE)), se_white_lm_HC0)
+
+
+#
 # Clustered
 #
 
@@ -1282,16 +1293,6 @@ test(se(est_feols, ssc = ssc(fixef.K = "full")), se_CL_grp_lm_HC1)
 test(se(est_feols, ssc = ssc(adj = FALSE, fixef.K = "full")), se_CL_grp_lm_HC0)
 
 #
-# Heteroskedasticity-robust
-#
-
-se_white_lm_HC1 = sqrt(vcovHC(est_lm, type = "HC1")["x", "x"])
-se_white_lm_HC0 = sqrt(vcovHC(est_lm, type = "HC0")["x", "x"])
-
-test(se(est_feols, se = "hetero"), se_white_lm_HC1)
-test(se(est_feols, se = "hetero", ssc = ssc(adj = FALSE, cluster.adj = FALSE)), se_white_lm_HC0)
-
-#
 # Two way
 #
 
@@ -1300,6 +1301,75 @@ se_CL_2w_lm    = sqrt(vcovCL(est_lm, cluster = ~ grp + tm, type = "HC1")["x", "x
 se_CL_2w_feols = se(est_feols, se = "twoway")
 
 test(se(est_feols, se = "twoway", ssc = ssc(fixef.K = "full", cluster.df = "conv")), se_CL_2w_lm)
+
+# 
+# HC2/HC3
+#
+
+# HC2/HC3
+base = iris
+base$w = runif(nrow(base))
+
+est_feols = feols(Sepal.Length ~ Sepal.Width | Species, base)
+est_lm = lm(Sepal.Length ~ Sepal.Width + factor(Species), base)
+
+test(
+  vcov(est_feols, "hc2", ssc = ssc(adj = FALSE, cluster.adj = FALSE)),
+  sandwich::vcovHC(est_lm, "HC2")["Sepal.Width", "Sepal.Width"]
+)
+
+test(
+  vcov(est_feols, "hc3", ssc = ssc(adj = FALSE, cluster.adj = FALSE)),
+  sandwich::vcovHC(est_lm, "HC3")["Sepal.Width", "Sepal.Width"]
+)
+
+# HC2/HC3 with weights
+base = iris
+base$w = runif(nrow(base))
+
+est_feols = feols(Sepal.Length ~ Sepal.Width | Species, base, weights = ~ w)
+est_lm = lm(Sepal.Length ~ Sepal.Width + factor(Species), base, weights = base$w)
+
+test(
+  vcov(est_feols, "hc2", ssc = ssc(adj = FALSE, cluster.adj = FALSE)),
+  sandwich::vcovHC(est_lm, "HC2")["Sepal.Width", "Sepal.Width"]
+)
+
+test(
+  vcov(est_feols, "hc3", ssc = ssc(adj = FALSE, cluster.adj = FALSE)),
+  sandwich::vcovHC(est_lm, "HC3")["Sepal.Width", "Sepal.Width"]
+)
+
+# HC2/HC3 with GLM
+base$Sepal.Length = floor(base$Sepal.Length)
+est_feglm = feglm(
+  Sepal.Length ~ Sepal.Width | Species, base, 
+  "poisson", weights = ~ w
+)
+est_glm = glm(
+  Sepal.Length ~ Sepal.Width + factor(Species), base, 
+  family = poisson(), weights = base$w
+)
+
+test(
+  vcov(est_feglm, "hc2", ssc = ssc(adj = FALSE, cluster.adj = FALSE)),
+  sandwich::vcovHC(est_glm, "HC2")["Sepal.Width", "Sepal.Width"]
+)
+test(
+  vcov(est_feglm, "hc3", ssc = ssc(adj = FALSE, cluster.adj = FALSE)),
+  sandwich::vcovHC(est_glm, "HC3")["Sepal.Width", "Sepal.Width"]
+)
+
+# Fail when P_ii = 1
+base$Species = as.character(base$Species)
+base[1, "Species"] = "foo"
+
+est_pii_singular = feols(Sepal.Length ~ Sepal.Width | Species, base)
+
+test(
+  vcov(est_pii_singular, "hc2"), "err"
+)
+
 
 #
 # Checking the calls work properly
@@ -1890,6 +1960,35 @@ test(hatvalues(feglm_logit), hatvalues(glm_logit))
 glm_probit  = glm(y_bin ~ x1 + x2, family = binomial("probit"), base)
 feglm_probit = feglm(y_bin ~ x1 + x2, base, binomial("probit"))
 test(hatvalues(feglm_probit), hatvalues(glm_probit))
+
+# Fixed effects
+fm_fe  = lm(y ~ x1 + x2 + factor(species), base)
+ffm_fe = feols(y ~ x1 + x2 | species, base)
+test(hatvalues(ffm_fe), hatvalues(fm_fe))
+
+base = iris
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+base$y_int = as.integer(base$y)
+base$y_bin = 1 * (base$y > mean(base$y))
+glm_logit  = glm(y_bin ~ x1 + x2 + factor(species), family = poisson(), base)
+feglm_logit = feglm(y_bin ~ x1 + x2 + factor(species), base, poisson())
+test(hatvalues(feglm_logit), hatvalues(glm_logit), tol = 1e-8)
+
+# `exact = FALSE` approximately matches hatvalues
+fm_fe  = lm(y ~ x1 + x2 + factor(species), base)
+ffm_fe = feols(y ~ x1 + x2 | species, base)
+
+# I set seed just to prevent low low probability failures
+set.seed(1)
+test(mean(hatvalues(ffm_fe, exact = FALSE, p = 500)), mean(hatvalues(fm_fe)), tol = 0.01)
+
+# Detect leverage of 1 (P_ii = 1)
+base$species = as.character(base$species)
+base[1, "species"] = "foo"
+est_pii_singular = feols(y ~ x1 | species, base)
+test(hatvalues(est_pii_singular)[1], 1.0)
+
+
 
 
 ####

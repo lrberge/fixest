@@ -4,10 +4,14 @@
 \alias{hatvalues.fixest}
 \title{Hat values for \code{fixest} objects}
 \usage{
-\method{hatvalues}{fixest}(model, ...)
+\method{hatvalues}{fixest}(model, exact = TRUE, p = 1000, ...)
 }
 \arguments{
 \item{model}{A fixest object. For instance from feols or feglm.}
+
+\item{exact}{Logical scalar, default is \code{TRUE}. Whether the diagonals of the projection matrix should be calculated exactly. If \code{FALSE}, then it will be approximated using a JLA algorithm. See details. Unless you have a very large number of observations, it is recommended to keep the default value.}
+
+\item{p}{Numeric scala, default is 1000. This is only used when \code{exact == FALSE}. This determined the number of bootstrap samples used to estimate the projection matrix.}
 
 \item{...}{Not currently used.}
 }
@@ -15,22 +19,23 @@
 Returns a vector of the same length as the number of observations used in the estimation.
 }
 \description{
-Computes the hat values for \code{\link{feols}} or \code{\link{feglm}} estimations. Only works when
-there are no fixed-effects.
+Computes the hat values for \code{\link{feols}} or \code{\link{feglm}} estimations.
 }
 \details{
-Hat values are not available for \code{\link[=femlm]{fenegbin}}, \code{\link{femlm}}
-and \code{\link{feNmlm}} estimations.
+Hat values are not available for \code{\link[=femlm]{fenegbin}}, \code{\link{femlm}} and \code{\link{feNmlm}} estimations.
 
-When there are fixed-effects, the hat values of the reduced form are different from the
-hat values of the full model. And we cannot get costlessly the hat values of the full model
-from the reduced form. It would require to reestimate the model with the
-fixed-effects as regular variables.
+Hat values for generalized linear model are disussed in Belsley, Kuh and Welsch (1980), Cook and Weisberg (1982), etc.
+
+When \code{exact == FALSE}, the Johnson-Lindenstrauss approximation (JLA) algorithm is used which approximates the diagonals of the projection matrix. For more precision (but longer time), increase the value of \code{p}. See Kline, Saggio, and Sølvsten (2020) for details.
 }
 \examples{
 
 est = feols(Petal.Length ~ Petal.Width + Sepal.Width, iris)
 head(hatvalues(est))
 
-
+}
+\references{
+Belsley, D. A., Kuh, E. and Welsch, R. E. (1980). \emph{Regression Diagnostics}. New York: Wiley.
+Cook, R. D. and Weisberg, S. (1982). \emph{Residuals and Influence in Regression}. London: Chapman and Hall.
+Kline, P., Saggio R., and Sølvsten, M. (2020). \emph{Leave‐Out Estimation of Variance Components}. Econometrica.
 }

@@ -59,7 +59,7 @@ S3method(tstat, fixest)
 S3method(tstat, fixest_multi)
 
 # VCOV funs
-export(vcov_cluster, vcov_DK, vcov_NW, vcov_conley)
+export(vcov_hetero, vcov_cluster, vcov_DK, vcov_NW, vcov_conley)
 
 # Data manipulation
 export(n_unik, osize, sample_df, fdim)

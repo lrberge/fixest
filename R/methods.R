@@ -4064,31 +4064,36 @@ deviance.fixest = function(object, ...){
 
 #' Hat values for `fixest` objects
 #'
-#' Computes the hat values for [`feols`] or [`feglm`] estimations. Only works when 
-#' there are no fixed-effects.
+#' Computes the hat values for [`feols`] or [`feglm`] estimations. 
 #'
 #' @param model A fixest object. For instance from feols or feglm.
+#' @param exact Logical scalar, default is `TRUE`. Whether the diagonals of the projection matrix should be calculated exactly. If `FALSE`, then it will be approximated using a JLA algorithm. See details. Unless you have a very large number of observations, it is recommended to keep the default value.
+#' @param p Numeric scala, default is 1000. This is only used when `exact == FALSE`. This determined the number of bootstrap samples used to estimate the projection matrix.
 #' @param ... Not currently used.
 #'
 #' @details
-#' Hat values are not available for [`fenegbin`][fixest::femlm], [`femlm`] 
-#' and [`feNmlm`] estimations.
-#'
-#' When there are fixed-effects, the hat values of the reduced form are different from the 
-#' hat values of the full model. And we cannot get costlessly the hat values of the full model 
-#' from the reduced form. It would require to reestimate the model with the 
-#' fixed-effects as regular variables.
-#'
-#' @return
-#' Returns a vector of the same length as the number of observations used in the estimation.
-#'
+#' Hat values are not available for [`fenegbin`][fixest::femlm], [`femlm`] and [`feNmlm`] estimations.
+#' 
+#' Hat values for generalized linear model are disussed in Belsley, Kuh and Welsch (1980), Cook and Weisberg (1982), etc.
+#' 
+#' When `exact == FALSE`, the Johnson-Lindenstrauss approximation (JLA) algorithm is used which approximates the diagonals of the projection matrix. For more precision (but longer time), increase the value of `p`. See Kline, Saggio, and Sølvsten (2020) for details.
+#' 
+#' 
+#' @references
+#' Belsley, D. A., Kuh, E. and Welsch, R. E. (1980). *Regression Diagnostics*. New York: Wiley.
+#' Cook, R. D. and Weisberg, S. (1982). *Residuals and Influence in Regression*. London: Chapman and Hall.
+#' Kline, P., Saggio R., and Sølvsten, M. (2020). *Leave‐Out Estimation of Variance Components*. Econometrica.
+#' 
 #' @examples
 #'
 #' est = feols(Petal.Length ~ Petal.Width + Sepal.Width, iris)
 #' head(hatvalues(est))
 #'
+#' @return
+#' Returns a vector of the same length as the number of observations used in the estimation.
 #'
-hatvalues.fixest = function(model, ...){
+#'
+hatvalues.fixest = function(model, exact = TRUE, p = 1000, ...){
   # Only works for feglm/feols objects + no fixed-effects
   # When there are fixed-effects the hatvalues of the reduced form is different from
   #  the hatvalues of the full model. And we cannot get costlessly the hatvalues of the full
@@ -4100,32 +4105,185 @@ hatvalues.fixest = function(model, ...){
     stop("The method 'hatvalues.fixest' cannot be applied to 'lean' fixest objects. Please re-estimate with 'lean = FALSE'.")
   }
 
+  if (!is.null(model$iv)) {
+    stop("The method 'hatvalues.fixest' cannot be applied to IV models.")
+  }
+
   if(is_user_level_call()){
     validate_dots()
   }
 
   method = model$method_type
-  family = model$family
-
-  msg = "hatvalues.fixest: 'hatvalues' is not implemented for estimations with fixed-effects."
-
-  # An error is in fact nicer than a message + NA return due to the interplay with sandwich
-  if(!is.null(model$fixef_id)){
-    stop(msg)
-  }
-
-  if(method == "feols"){
-    X = model.matrix(model)
-
-    res = cpp_diag_XUtX(X, model$cov.iid / model$sigma2)
-
-  } else if(method == "feglm"){
-    XW = model.matrix(model) * sqrt(model$irls_weights)
-    res = cpp_diag_XUtX(XW, model$cov.iid)
-
-  } else {
+  if (!(method %in% c("feols", "feglm"))) {
     stop("'hatvalues' is currently not implemented for function ", method, ".")
   }
+
+
+  # Fast path: no fixed effects means we already have (X'X)^{-1}
+  if (is.null(model$fixef_id)) {
+    if(method == "feols"){
+      X = model.matrix(model)
+  
+      res = cpp_diag_XUtX(X, model$cov.iid / model$sigma2)
+  
+    } else if(method == "feglm"){
+      XW = model.matrix(model) * sqrt(model$irls_weights)
+      res = cpp_diag_XUtX(XW, model$cov.iid)
+  
+    } else {
+      stop("'hatvalues' is currently not implemented for function ", method, ".")
+    }
+    return(res)
+  }
+
+  # Slower path: Fixed-effects
+  # 
+  # Outline: Blockwise Formula for Projection Matrix
+  # https://en.wikipedia.org/wiki/Projection_matrix#Blockwise_formula
+  # Part 1: fixed effects
+  # Part 2: slope vars (demeaned by fixed effects)
+  # Part 3: rhs vars (demeaned by fixed effects and slope vars)
+  # Sum the three parts to get the projection matrix
+  P_ii_list = list()
+  mats = list()
+  mats$fixef = sparse_model_matrix(model, type = "fixef", collin.rm = TRUE,sortCols = FALSE)
+
+  # Check for slope.vars and move to seperate matrix
+  if (!is.null(model$slope_flag)) {
+    slope_var_cols = which(
+      grepl("\\[\\[", colnames(mats$fixef))
+    )
+    mats$slope_vars = mats$fixef[, slope_var_cols]
+    mats$fixef = mats$fixef[, -slope_var_cols]
+  }
+
+  # Get weights
+  if (method == "feols") {
+    weights = model$weights
+  } else {
+    weights = model$irls_weights
+  }
+
+  if (!is.null(model$fixef_vars)) {
+    # for `demean`
+    f = model.matrix(model, type = "fixef")
+    f = subset(f, select = model$fixef_vars)
+
+    # Matrix of fixed effects times weights
+    if (!is.null(weights)) mats$fixef = mats$fixef * sqrt(weights)
+
+    # Demean X by FEs and slope_vars
+    if (is.null(model$onlyFixef) & method == "feols") {
+      mats$rhs = demean(model)[, -1, drop = FALSE] 
+      if (!is.null(weights)) mats$rhs = mats$rhs * sqrt(weights)
+    }
+    if (is.null(model$onlyFixef) & method == "feglm") {
+      mats$rhs = demean(
+        model.matrix(model, "rhs"),
+        f,
+        weights = weights
+      )
+      if (!is.null(weights)) mats$rhs = mats$rhs * sqrt(weights)
+    }
+
+    # Demean slope_vars by FEs
+    if (!is.null(mats$slope_vars)) {
+      mats$slope_vars = demean(
+        as.matrix(mats$slope_vars), 
+        f, 
+        weights = weights
+      ) 
+      if (!is.null(weights)) mats$slope_vars = mats$slope_vars * sqrt(weights)
+    }
+
+  } else if (is.null(model$onlyFixef)) {
+    mats$rhs = sparse_model_matrix(
+      model, type = c("rhs"), 
+      collin.rm = TRUE, na.rm = TRUE
+    )
+
+    if (!is.null(weights)) mats$rhs = mats$rhs * sqrt(weights)
+  }
+
+
+  # Caclulate P_ii's
+  if (!is.null(mats$fixef)) {
+    # https://stackoverflow.com/questions/39533785/how-to-compute-diagx-solvea-tx-efficiently-without-taking-matrix-i
+    U = Matrix::chol(Matrix::crossprod(mats$fixef))
+    Z = Matrix::solve(Matrix::t(U), Matrix::t(mats$fixef))
+    P_ii_list$fixef = Matrix::colSums(Z ^ 2)
+  }
+
+  # Note: This might fail if looking at too large of a matrix
+  if (exact == TRUE) {
+      if (!is.null(mats$slope_vars)) { 
+          Z = Matrix::solve(
+            Matrix::crossprod(mats$slope_vars), 
+            Matrix::t(mats$slope_vars)
+          )
+          # P_ii = diag(X %*% Z) = rowSums(X * Z)
+          P_ii_list$slope_vars = Matrix::rowSums(
+            mats$slope_vars * Matrix::t(Z)
+          )
+      }
+
+      if (!is.null(mats$rhs)) {
+          tXXinv = model$cov.iid 
+          if (method == "feols") tXXinv = tXXinv / model$sigma2
+
+          P_ii_list$rhs = Matrix::rowSums(
+            mats$rhs * Matrix::t(tXXinv %*% Matrix::t(mats$rhs))
+          )
+      }
+  } else {
+    # Theory: https://cs-people.bu.edu/evimaria/cs565/achlioptas.pdf
+    n = model$nobs
+
+    if (!is.null(mats$slope_vars)) { 
+      P_ii_list$slope_vars = rep(0, n)
+      tSS = Matrix::crossprod(mats$slope_vars)
+      tS = Matrix::t(mats$slope_vars)
+    }
+    if (!is.null(mats$rhs)) { 
+      P_ii_list$rhs = rep(0, n)
+      tXX = Matrix::crossprod(mats$rhs)
+      tX = Matrix::t(mats$rhs)
+    }
+
+    for (j in 1:p) {
+      # Rademacher Weights (-1, 1)
+      Rp_j <- matrix(
+        (stats::runif(n) > 0.5) * 2 - 1,
+        # Uncomment for speed-up
+        # rademacher::sample_rademacher(n), 
+        nrow = 1, ncol = n
+      )
+
+      if (!is.null(mats$slope_vars)) {
+        tS_Rp_j <- Matrix::tcrossprod(tS, Rp_j)
+
+        Zj <- Matrix::solve(tSS, tS_Rp_j)
+        P_ii_list$slope_vars = 
+          P_ii_list$slope_vars + 
+          as.numeric(mats$slope_vars %*% Zj)^2 / p
+      }
+
+      if (!is.null(mats$rhs)) { 
+        tX_Rp_j <- Matrix::tcrossprod(tX, Rp_j)
+
+        Zj <- Matrix::solve(tXX, tX_Rp_j)
+        P_ii_list$rhs = 
+          P_ii_list$rhs + 
+          as.numeric(mats$rhs %*% Zj)^2 / p
+      }
+    }
+  }
+
+  P_ii = Reduce("+", P_ii_list)
+
+  return(P_ii)
+
+
 
   res
 }
