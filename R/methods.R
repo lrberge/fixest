@@ -388,7 +388,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #' coefficients only.) Logical, default is `FALSE`. If `TRUE`, then the bounded coefficients 
 #' (if any) are treated as unrestricted coefficients and their S.E. is computed (otherwise 
 #' it is not).
-#' @param vcov_fix Logical scalar, default is `TRUE`. If the VCOV ends up not being 
+#' @param vcov_fix Logical scalar, default is `FALSE`. If the VCOV ends up not being 
 #' positive definite, whether to "fix" it using an eigenvalue decomposition 
 #' (a la Cameron, Gelbach & Miller 2011).
 #' Since vcov should be PSD asymptotically, this might be a sign of a problem 
@@ -518,7 +518,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #'
 summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL,
                           stage = NULL, lean = FALSE, agg = NULL, forceCovariance = FALSE,
-                          se = NULL, keepBounded = FALSE, n = 1000, vcov_fix = TRUE,
+                          se = NULL, keepBounded = FALSE, n = 1000, vcov_fix = FALSE,
                           nthreads = getFixest_nthreads(), ...){
 
   # computes the clustered SEs and returns the modified vcov and coeftable
