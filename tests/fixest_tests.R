@@ -2650,6 +2650,17 @@ est_fe = feols(y ~ x1 | fe, base)
 fitstat(est_fe, ~ wf)
 
 
+# fitstat works with `split` and `lean` (https://github.com/lrberge/fixest/issues/566)
+est_split = feols(y ~ x1, base, fsplit = ~fe)
+est_split_lean = feols(y ~ x1, base, fsplit = ~fe, lean = TRUE)
+for (i in seq_len(length(est_split))) {
+  test(
+    fitstat(est_split[[i]], ~ my)$my, 
+    fitstat(est_split_lean[[i]], ~ my)$my
+  )
+}
+
+
 ####
 #### confint ####
 ####
