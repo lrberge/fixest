@@ -36,9 +36,12 @@ Newey-West and Driscoll-Kraay. The default for the time series Newey-West is com
 \item{ssc}{An object returned by the function \code{\link{ssc}}. It specifies how to perform the small
 sample correction.}
 
-\item{vcov_fix}{Logical scalar, default is \code{TRUE}. If the VCOV ends up not being
+\item{vcov_fix}{Logical scalar, default is \code{FALSE}. If the VCOV ends up not being
 positive definite, whether to "fix" it using an eigenvalue decomposition
-(a la Cameron, Gelbach & Miller 2011).}
+(a la Cameron, Gelbach & Miller 2011).
+Since vcov should be PSD asymptotically, this might be a sign of a problem
+with using the asymptotic approximation (e.g. too few units in clusters).
+If a problem is detected, the function will print a message to inform you.}
 
 \item{unit}{A character scalar or a one sided formula giving the name of the
 variable representing the units of the panel.}

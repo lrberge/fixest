@@ -17,7 +17,7 @@
   se = NULL,
   keepBounded = FALSE,
   n = 1000,
-  vcov_fix = TRUE,
+  vcov_fix = FALSE,
   nthreads = getFixest_nthreads(),
   ...
 )
@@ -103,9 +103,12 @@ it is not).}
 \item{n}{Integer, default is 1000. Number of coefficients to display when the print method
 is used.}
 
-\item{vcov_fix}{Logical scalar, default is \code{TRUE}. If the VCOV ends up not being
+\item{vcov_fix}{Logical scalar, default is \code{FALSE}. If the VCOV ends up not being
 positive definite, whether to "fix" it using an eigenvalue decomposition
-(a la Cameron, Gelbach & Miller 2011).}
+(a la Cameron, Gelbach & Miller 2011).
+Since vcov should be PSD asymptotically, this might be a sign of a problem
+with using the asymptotic approximation (e.g. too few units in clusters).
+If a problem is detected, the function will print a message to inform you.}
 
 \item{nthreads}{The number of threads. Can be: a) an integer lower than, or equal to,
 the maximum number of threads; b) 0: meaning all available threads will be used;

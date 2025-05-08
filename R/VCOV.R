@@ -206,7 +206,7 @@
 #'
 vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr = FALSE, 
                        forceCovariance = FALSE, keepBounded = FALSE, 
-                       nthreads = getFixest_nthreads(), vcov_fix = TRUE, ...){
+                       nthreads = getFixest_nthreads(), vcov_fix = FALSE, ...){
   # computes the clustered vcov
 
   check_arg(attr, "logical scalar")
@@ -991,23 +991,28 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
   #### ... vcov attributes ####
   ####
 
-
-  if(any(diag(vcov_mat) < 0) && vcov_fix){
+  # After discussing, we decided that since this test is relatively cheap, we will do it every time. 
+  # We will warn even if `vcov_fix == FALSE`.
+  eigenvalues = eigen(vcov_mat, symmetric = TRUE, only.values = TRUE)$values
+  
+  if (any(eigenvalues < 1e-10)) {
     # We 'fix' it
-    all_attr = attributes(vcov_mat)
-    vcov_mat = mat_posdef_fix(vcov_mat)
-    is_complex = isTRUE(attr(vcov_mat, "is_complex"))
+    if (vcov_fix) {
+      all_attr = attributes(vcov_mat)
+      vcov_mat = mat_posdef_fix(vcov_mat)
+      is_complex = isTRUE(attr(vcov_mat, "is_complex"))
+      attributes(vcov_mat) = all_attr
 
-    if (is_complex) {
-      # we should never have a complex VCOV, but just in case...
-      message("The VCOV matrix could not be fixed since its eigenvalues were complex. The complex standard-errors are reported for information purposes.")
-      vcov_mat = as.complex(vcov_mat)
+      if (is_complex) {
+        # we should never have a complex VCOV, but just in case...
+        warning("\nNOTE: The VCOV matrix could not be fixed since its eigenvalues were complex. The complex standard-errors are reported for information purposes.\n", call. = FALSE)
+        vcov_mat = as.complex(vcov_mat)
+      } else {
+        warning("\nNOTE: The VCOV matrix is not positive semi-definite. It was 'fixed' (a la Cameron, Gelbach & Miller 2011), but take care with interpreting the results. See `?vcov` for more details.\n", call. = FALSE)
+      } 
     } else {
-      message("Variance contained negative values in the diagonal and was 'fixed' (a la Cameron, Gelbach & Miller 2011).")
+      warning("\nNOTE: The VCOV matrix is not positive semi-definite. ake care with interpreting the results and consider correcting this via the `vcov_fix` argument.  See `?vcov` for more details.\n", call. = FALSE)
     }
-
-    attributes(vcov_mat) = all_attr
-
   }
 
   if(is_attr){
