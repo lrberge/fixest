@@ -701,7 +701,13 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
       res_all[[type]] = BIC(x)
 
     } else if(type == "rmse"){
-      res_all[[type]] = if(!is.null(x$ssr)) sqrt(x$ssr / x$nobs) else sqrt(cpp_ssq(resid(x)) / x$nobs)
+      ssr = if(!is.null(x$ssr)) x$ssr else cpp_ssq(resid(x))
+      if (!is.null(x$weights)) {
+        rmse = sqrt(x$ssr / sum(x$weights))
+      } else {
+        rmse = sqrt(x$ssr / x$nobs)
+      }
+      res_all[[type]] = rmse
 
     } else if(type == "g"){
       my_vcov = x$cov.scaled
