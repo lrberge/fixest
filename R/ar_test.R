@@ -147,9 +147,15 @@ ar_test = function(object, beta0 = NULL, vcov = NULL, ...) {
   
   # Store y_tilde in a temporary column with unique name
   temp_y_name <- "..ar_y_tilde"
-  # Ensure uniqueness if column already exists
-  while (temp_y_name %in% names(data)) {
+  # Ensure uniqueness if column already exists (with a maximum of 100 attempts)
+  attempt <- 0
+  while (temp_y_name %in% names(data) && attempt < 100) {
     temp_y_name <- paste0("..ar_y_tilde_", sample.int(1e6, 1))
+    attempt <- attempt + 1
+  }
+  if (temp_y_name %in% names(data)) {
+    stop("Could not create a unique temporary column name in the data. ",
+         "This is unexpected - please report this issue.")
   }
   data[[temp_y_name]] <- y_tilde
   
@@ -215,7 +221,10 @@ ar_test = function(object, beta0 = NULL, vcov = NULL, ...) {
     # This handles cases where instruments are expanded (e.g., factor variables)
     inst_formula_vars <- all.vars(fml_iv[[3]])
     for (v in inst_formula_vars) {
-      matches <- grep(paste0("^", v, "$|^", v, "::"), ar_coef_names, value = TRUE)
+      # Escape special regex characters in variable name
+      v_escaped <- gsub("([\\^$*+?{}\\[\\]()|.])", "\\\\\\1", v)
+      pattern <- paste0("^", v_escaped, "($|::)")
+      matches <- grep(pattern, ar_coef_names, value = TRUE)
       inst_in_fit <- c(inst_in_fit, matches)
     }
     inst_in_fit <- unique(inst_in_fit)
