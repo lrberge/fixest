@@ -1,6 +1,6 @@
 #----------------------------------------------#
-# Author: Laurent Berge (+ AI-assisted development)
-# Date creation: 2024
+# Author: Dianyi Yang (+ AI)
+# Date creation: Wed Nov 26 23:11:00 2025
 # ~: Anderson-Rubin test for IV models
 #----------------------------------------------#
 
