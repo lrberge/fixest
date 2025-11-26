@@ -15,6 +15,8 @@ export(extralines_register)
 # misc funs
 export(collinearity)
 export(r2, fitstat, fitstat_register, wald)
+# AR test
+export(ar_test, ar_confint)
 export(fixest_startup_msg)
 export(check_conv_feols)
 export(demeaning_algo)
@@ -74,6 +76,8 @@ export(esttex, esttable)
 # Base methods
 S3method(print, fixest)
 S3method(print, fixest_fitstat)
+S3method(print, fixest_ar)
+S3method(print, fixest_ar_confint)
 S3method(print, vec_n_unik)
 S3method(print, list_n_unik)
 S3method(print, osize)

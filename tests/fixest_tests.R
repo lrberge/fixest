@@ -3167,6 +3167,83 @@ test(dim(fixest_data(est_mult)), dim(base))
 test(nrow(fixest_data(est_mult, "esti")), 45)
 
 
+####
+#### Anderson-Rubin test ####
+####
+
+chunk("AR test")
+
+# Simple IV example with known DGP
+set.seed(42)
+n = 500
+z = rnorm(n)
+x = 0.5 * z + rnorm(n)  # moderate instrument strength
+true_beta = 0.8
+y = 1 + true_beta * x + rnorm(n)
+data_ar = data.frame(y = y, x = x, z = z, cl = rep(1:50, each = 10))
+
+# Basic IV estimation
+est_iv_ar = feols(y ~ 1 | x ~ z, data = data_ar)
+
+# Test 1: AR test should run without error
+ar_res = ar_test(est_iv_ar)
+test("fixest_ar" %in% class(ar_res), TRUE)
+
+# Test 2: AR test with beta0 = 0 (null should be rejected since true_beta = 0.8)
+ar_res_null = ar_test(est_iv_ar, beta0 = 0)
+test(ar_res_null$beta0, 0)
+test(ar_res_null$pvalue < 0.05, TRUE)  # should reject
+
+# Test 3: AR test with beta0 close to true value (should not reject)
+ar_res_true = ar_test(est_iv_ar, beta0 = true_beta)
+test(ar_res_true$pvalue > 0.05, TRUE)  # should not reject
+
+# Test 4: AR test returns correct structure
+test(is.numeric(ar_res$stat), TRUE)
+test(is.numeric(ar_res$pvalue), TRUE)
+test(is.numeric(ar_res$df1), TRUE)
+test(is.numeric(ar_res$df2), TRUE)
+test(ar_res$method, "Anderson-Rubin test")
+
+# Test 5: AR test with clustered SEs
+est_iv_cl = feols(y ~ 1 | x ~ z, data = data_ar, vcov = ~cl)
+ar_res_cl = ar_test(est_iv_cl)
+test("fixest_ar" %in% class(ar_res_cl), TRUE)
+
+# Test 6: AR test should error on non-IV model
+est_ols = feols(y ~ x, data = data_ar)
+test(ar_test(est_ols), "err")
+
+# Test 7: ar_confint should work for single endogenous variable
+ar_ci = ar_confint(est_iv_ar, grid_range = c(0, 2), n_grid = 20)
+test("fixest_ar_confint" %in% class(ar_ci), TRUE)
+test(ar_ci$point_est > 0, TRUE)  # point estimate should be positive
+test(nrow(ar_ci$intervals) >= 1, TRUE)  # should have at least one interval
+
+# Test 8: IV with controls and fixed effects
+data_ar$w = rnorm(n)  # exogenous control
+data_ar$fe = rep(1:5, each = 100)  # fixed effect
+est_iv_fe = feols(y ~ w | fe | x ~ z, data = data_ar)
+ar_res_fe = ar_test(est_iv_fe)
+test("fixest_ar" %in% class(ar_res_fe), TRUE)
+
+# Test 9: Multiple instruments  
+data_ar$z2 = 0.3 * x + rnorm(n, sd = 0.8)
+est_iv_2inst = feols(y ~ 1 | x ~ z + z2, data = data_ar)
+ar_res_2inst = ar_test(est_iv_2inst)
+test("fixest_ar" %in% class(ar_res_2inst), TRUE)
+
+# Test 10: ar_confint errors with multiple endogenous vars
+data_ar$x2 = 0.3 * z + rnorm(n)
+est_iv_2endo = feols(y ~ 1 | x + x2 ~ z + z2, data = data_ar)
+test(ar_confint(est_iv_2endo), "err")  # should error with multiple endo vars
+
+# Test 11: Verify print methods work without error
+print(ar_res)
+print(ar_ci)
+
+
+
 
 
 

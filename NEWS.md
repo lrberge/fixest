@@ -3,6 +3,8 @@
 
 ## New features
 
+- Added Anderson-Rubin (AR) weak-IV robust test for `feols` IV models via `ar_test()`. This test is robust to weak instruments and can be used to test hypotheses about endogenous variable coefficients. The function `ar_confint()` is also provided to compute AR confidence intervals by inverting the test.
+
 - `etable`: arguments `extralines` and `headers` are more robust and the behavior is slightly modified. You can now position the values using integer indexes which give the columns position, inseadof column spans. It also errors more gracefully. This change is retro compatible. 
 
 - in multiple estimations in which at least one estimation contains only missing values: no error is thrown any more
