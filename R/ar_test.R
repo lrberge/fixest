@@ -26,7 +26,6 @@
 #'
 #' @details
 #' The Anderson-Rubin (AR) test is a weak-instrument robust test for the null 
-
 #' hypothesis H0: beta = beta0, where beta is the vector of coefficients on the 
 #' endogenous variables.
 #'
@@ -123,15 +122,9 @@ ar_test = function(object, beta0 = NULL, vcov = NULL, ...) {
     beta0 <- rep(0, n_endo)
   } else {
     check_arg(beta0, "numeric vector no na")
-    if (length(beta0) == 1 && n_endo > 1) {
-      # If scalar beta0 provided but multiple endogenous vars, error
-      stop("Argument `beta0` has length 1 but there are ", n_endo, 
-           " endogenous variables (", paste(endo_names, collapse = ", "), "). ",
-           "Please provide a vector of length ", n_endo, ".")
-    }
     if (length(beta0) != n_endo) {
       stop("Argument `beta0` has length ", length(beta0), " but there are ", 
-           n_endo, " endogenous variables. ",
+           n_endo, " endogenous variables (", paste(endo_names, collapse = ", "), "). ",
            "Please provide a vector of length ", n_endo, ".")
     }
   }
@@ -152,8 +145,12 @@ ar_test = function(object, beta0 = NULL, vcov = NULL, ...) {
   # Compute transformed outcome: y* = y - X * beta0
   y_tilde <- as.numeric(y_vec - endo_mat %*% beta0)
   
-  # Store y_tilde in a temporary column
-  temp_y_name <- paste0("..ar_y_tilde_", sample.int(1e6, 1))
+  # Store y_tilde in a temporary column with unique name
+  temp_y_name <- "..ar_y_tilde"
+  # Ensure uniqueness if column already exists
+  while (temp_y_name %in% names(data)) {
+    temp_y_name <- paste0("..ar_y_tilde_", sample.int(1e6, 1))
+  }
   data[[temp_y_name]] <- y_tilde
   
   # Build the AR regression formula
@@ -181,7 +178,7 @@ ar_test = function(object, beta0 = NULL, vcov = NULL, ...) {
   
   # Build the new formula: y_tilde ~ controls + instruments | FE
   new_fml_str <- paste0(temp_y_name, " ~ ", controls_str, " + ", inst_str, fe_str)
-  new_fml <- as.formula(new_fml_str, env = parent.frame())
+  new_fml <- as.formula(new_fml_str)
   
   # Get weights if present
   weights_val <- NULL
@@ -214,21 +211,14 @@ ar_test = function(object, beta0 = NULL, vcov = NULL, ...) {
   inst_in_fit <- intersect(ar_coef_names, inst_names)
   
   if (length(inst_in_fit) == 0) {
-    # Instruments may have different names due to expansion
-    # Try matching without the "fit_" prefix or similar transformations
-    inst_in_fit <- ar_coef_names[ar_coef_names %in% inst_names]
-    
-    if (length(inst_in_fit) == 0) {
-      # Try a more flexible approach
-      # The instruments should be the new coefficients compared to a model without them
-      # For now, let's assume they're the last n_inst coefficients or use the iv formula vars
-      inst_formula_vars <- all.vars(fml_iv[[3]])
-      for (v in inst_formula_vars) {
-        matches <- grep(paste0("^", v, "$|^", v, "::"), ar_coef_names, value = TRUE)
-        inst_in_fit <- c(inst_in_fit, matches)
-      }
-      inst_in_fit <- unique(inst_in_fit)
+    # Try a more flexible approach using the instrument formula variables
+    # This handles cases where instruments are expanded (e.g., factor variables)
+    inst_formula_vars <- all.vars(fml_iv[[3]])
+    for (v in inst_formula_vars) {
+      matches <- grep(paste0("^", v, "$|^", v, "::"), ar_coef_names, value = TRUE)
+      inst_in_fit <- c(inst_in_fit, matches)
     }
+    inst_in_fit <- unique(inst_in_fit)
   }
   
   if (length(inst_in_fit) == 0) {
@@ -475,9 +465,12 @@ ar_confint = function(object, level = 0.95, grid = NULL, grid_range = NULL,
     }
     
     # Check if intervals extend to grid boundaries (possibly unbounded)
+    # Only check the boundaries of the extreme intervals
+    # First interval's lower bound: check if it touches the grid minimum
     if (intervals[1, "lower"] == min(grid)) {
       intervals[1, "lower"] <- -Inf
     }
+    # Last interval's upper bound: check if it touches the grid maximum
     if (intervals[n_intervals, "upper"] == max(grid)) {
       intervals[n_intervals, "upper"] <- Inf
     }
