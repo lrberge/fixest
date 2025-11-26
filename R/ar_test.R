@@ -195,8 +195,8 @@ ar_test = function(object, beta0 = NULL, vcov = NULL, ...) {
   # Get vcov specification - use original if not specified
   if (is.null(vcov)) {
     # Try to get the vcov from the summarized object
-    if (!is.null(object$cov.scaled)) {
-      vcov <- attr(object$cov.scaled, "type")
+    if (!is.null(object$summary_flags$vcov)) {
+      vcov <- object$summary_flags$vcov
       if (is.null(vcov)) vcov <- "iid"
     } else {
       vcov <- "iid"
