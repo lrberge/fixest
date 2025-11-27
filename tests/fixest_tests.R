@@ -3198,47 +3198,61 @@ test(ar_res_null$pvalue < 0.05, TRUE)  # should reject
 ar_res_true = ar_test(est_iv_ar, beta0 = true_beta)
 test(ar_res_true$pvalue > 0.05, TRUE)  # should not reject
 
-# Test 4: AR test returns correct structure
+# Test 4: AR test returns correct structure (now includes dist field)
 test(is.numeric(ar_res$stat), TRUE)
 test(is.numeric(ar_res$pvalue), TRUE)
 test(is.numeric(ar_res$df1), TRUE)
-test(is.numeric(ar_res$df2), TRUE)
 test(ar_res$method, "Anderson-Rubin test")
+test(ar_res$dist %in% c("F", "Chi-squared"), TRUE)
 
-# Test 5: AR test with clustered SEs
+# Test 5: AR test with iid should use F distribution and include CI by default
+test(ar_res$dist, "F")
+test(!is.null(ar_res$ci), TRUE)  # CI should be included for iid + single endo
+
+# Test 6: AR test with clustered SEs should use Chi-squared
 est_iv_cl = feols(y ~ 1 | x ~ z, data = data_ar, vcov = ~cl)
 ar_res_cl = ar_test(est_iv_cl)
 test("fixest_ar" %in% class(ar_res_cl), TRUE)
+test(ar_res_cl$dist, "Chi-squared")
+test(is.na(ar_res_cl$df2), TRUE)  # df2 should be NA for Chi-squared
 
-# Test 6: AR test should error on non-IV model
+# Test 7: AR test should error on non-IV model
 est_ols = feols(y ~ x, data = data_ar)
 test(ar_test(est_ols), "err")
 
-# Test 7: ar_confint should work for single endogenous variable
-ar_ci = ar_confint(est_iv_ar, grid_range = c(0, 2), n_grid = 20)
+# Test 8: ar_confint should work for single endogenous variable
+ar_ci = ar_confint(est_iv_ar)
 test("fixest_ar_confint" %in% class(ar_ci), TRUE)
-test(ar_ci$point_est > 0, TRUE)  # point estimate should be positive
-test(nrow(ar_ci$intervals) >= 1, TRUE)  # should have at least one interval
+test(ar_ci$point_est > 0, TRUE)
+test(nrow(ar_ci$intervals) >= 1, TRUE)
 
-# Test 8: IV with controls and fixed effects
-data_ar$w = rnorm(n)  # exogenous control
-data_ar$fe = rep(1:5, each = 100)  # fixed effect
+# Test 9: IV with controls and fixed effects
+data_ar$w = rnorm(n)
+data_ar$fe = rep(1:5, each = 100)
 est_iv_fe = feols(y ~ w | fe | x ~ z, data = data_ar)
 ar_res_fe = ar_test(est_iv_fe)
 test("fixest_ar" %in% class(ar_res_fe), TRUE)
 
-# Test 9: Multiple instruments  
+# Test 10: Multiple instruments  
 data_ar$z2 = 0.3 * x + rnorm(n, sd = 0.8)
 est_iv_2inst = feols(y ~ 1 | x ~ z + z2, data = data_ar)
 ar_res_2inst = ar_test(est_iv_2inst)
 test("fixest_ar" %in% class(ar_res_2inst), TRUE)
 
-# Test 10: ar_confint errors with multiple endogenous vars
+# Test 11: ar_confint errors with multiple endogenous vars
 data_ar$x2 = 0.3 * z + rnorm(n)
 est_iv_2endo = feols(y ~ 1 | x + x2 ~ z + z2, data = data_ar)
-test(ar_confint(est_iv_2endo), "err")  # should error with multiple endo vars
+test(ar_confint(est_iv_2endo), "err")
 
-# Test 11: Verify print methods work without error
+# Test 12: ar_test with ci=TRUE should compute CI even for non-iid
+ar_res_cl_ci = ar_test(est_iv_cl, ci = TRUE)
+test(!is.null(ar_res_cl_ci$ci), TRUE)
+
+# Test 13: ar_test with ci=FALSE should not compute CI
+ar_res_no_ci = ar_test(est_iv_ar, ci = FALSE)
+test(is.null(ar_res_no_ci$ci), TRUE)
+
+# Test 14: Verify print methods work without error
 print(ar_res)
 print(ar_ci)
 
