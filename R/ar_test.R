@@ -489,52 +489,35 @@
     n_roots <- length(roots)
     
     if (g_values[1] <= 0) {
-      # Left edge is accepted
-      # Intervals: (-Inf or grid_min, root1], [root2, root3], ..., [rootN, Inf or grid_max]
-      # Number of intervals = (n_roots + 1) / 2 rounded up
-      
-      # Check if extends to left boundary
-      left_unbounded <- (grid[1] == grid_range[1])
-      right_unbounded <- (grid[n_grid] == grid_range[2]) && 
-                         (g_values[n_grid] <= 0)
-      
-      # Build interval list
+      # Left edge is accepted - first interval starts at -Inf
       interval_list <- list()
       
-      # First interval
+      # First interval: from -Inf to first root
       if (n_roots >= 1) {
-        lower <- if (left_unbounded) -Inf else grid_range[1]
-        interval_list[[1]] <- c(lower, roots[1])
+        interval_list[[1]] <- c(-Inf, roots[1])
       }
       
-      # Middle intervals (pairs of roots where acceptance resumes)
+      # Subsequent intervals: pairs of roots (entry, exit)
       if (n_roots >= 2) {
         for (j in seq(2, n_roots, by = 2)) {
           if (j + 1 <= n_roots) {
             interval_list[[length(interval_list) + 1]] <- c(roots[j], roots[j + 1])
-          } else if (j == n_roots) {
-            # Last root, check if extends to right
-            upper <- if (right_unbounded) Inf else grid_range[2]
-            interval_list[[length(interval_list) + 1]] <- c(roots[j], upper)
+          } else {
+            # Odd root at end - extends to infinity
+            interval_list[[length(interval_list) + 1]] <- c(roots[j], Inf)
           }
         }
       }
       
     } else {
-      # Left edge is rejected
-      # Intervals: [root1, root2], [root3, root4], ...
-      
-      right_unbounded <- (grid[n_grid] == grid_range[2]) && 
-                         (g_values[n_grid] <= 0)
-      
+      # Left edge is rejected - intervals start at roots
       interval_list <- list()
       for (j in seq(1, n_roots, by = 2)) {
         if (j + 1 <= n_roots) {
           interval_list[[length(interval_list) + 1]] <- c(roots[j], roots[j + 1])
         } else {
-          # Odd number of roots, last one extends to right
-          upper <- if (right_unbounded) Inf else grid_range[2]
-          interval_list[[length(interval_list) + 1]] <- c(roots[j], upper)
+          # Odd number of roots - last interval extends to infinity
+          interval_list[[length(interval_list) + 1]] <- c(roots[j], Inf)
         }
       }
     }
