@@ -27,7 +27,7 @@
     arg_names <- rep("", length(call_list))
   }
 
-  allowed <- c("fml", "data", "vcov", "se")
+  allowed <- c("fml", "data", "vcov", "se", "weights")
   extras <- character(0)
   unnamed_seen <- 0L
 
@@ -338,6 +338,13 @@
   n <- length(y)
   L <- ncol(inst_mat) # number of instruments
 
+  # Get weights (numeric vector or NULL)
+  w <- object$weights
+  has_weights <- !is.null(w)
+  if (has_weights) {
+    sqrt_w <- sqrt(w)
+  }
+
   # Check for fixed effects - if present, we need to demean
   has_fe <- !is.null(object$fixef_vars)
 
@@ -368,6 +375,7 @@
       }
 
       # Demean using the internal algorithm
+      # Note: cpp_demean handles weighted demeaning for FE
       all_vars_dm <- cpp_demean(
         all_vars,
         fixef_id,
@@ -386,14 +394,26 @@
       z_star <- all_vars_dm[, 2 + seq_len(L)]
 
       # If there are exogenous controls, also partial them out from the residuals
+      # For weighted case, we transform by sqrt(w) before QR decomposition
       if (!is.null(exo_mat) && ncol(exo_mat) > 0) {
         exo_dm <- all_vars_dm[, (2 + L + 1):ncol(all_vars_dm), drop = FALSE]
         # Further residualize y_star, d_star, z_star with respect to exo_dm
-        # Using QR decomposition
-        qr_exo <- qr(exo_dm)
-        y_star <- qr.resid(qr_exo, y_star)
-        d_star <- qr.resid(qr_exo, d_star)
-        z_star <- qr.resid(qr_exo, z_star)
+        # Using QR decomposition (weighted by transforming with sqrt(w))
+        if (has_weights) {
+          exo_dm_w <- exo_dm * sqrt_w
+          y_star_w <- y_star * sqrt_w
+          d_star_w <- d_star * sqrt_w
+          z_star_w <- z_star * sqrt_w
+          qr_exo <- qr(exo_dm_w)
+          y_star <- qr.resid(qr_exo, y_star_w) / sqrt_w
+          d_star <- qr.resid(qr_exo, d_star_w) / sqrt_w
+          z_star <- qr.resid(qr_exo, z_star_w) / sqrt_w
+        } else {
+          qr_exo <- qr(exo_dm)
+          y_star <- qr.resid(qr_exo, y_star)
+          d_star <- qr.resid(qr_exo, d_star)
+          z_star <- qr.resid(qr_exo, z_star)
+        }
       }
 
       # Adjust degrees of freedom for FE
@@ -402,42 +422,97 @@
     } else {
       # No FE, just partial out exogenous controls (including intercept)
       if (!is.null(exo_mat) && ncol(exo_mat) > 0) {
-        qr_exo <- qr(exo_mat) # exo_mat should be the full design
-        y_star <- qr.resid(qr_exo, y)
-        d_star <- qr.resid(qr_exo, endo_mat[, 1])
-        z_star <- qr.resid(qr_exo, inst_mat)
+        # For weighted case, transform by sqrt(w) before QR decomposition
+        if (has_weights) {
+          exo_mat_w <- exo_mat * sqrt_w
+          y_w <- y * sqrt_w
+          d_w <- endo_mat[, 1] * sqrt_w
+          z_w <- inst_mat * sqrt_w
+          qr_exo <- qr(exo_mat_w)
+          y_star <- qr.resid(qr_exo, y_w) / sqrt_w
+          d_star <- qr.resid(qr_exo, d_w) / sqrt_w
+          z_star <- qr.resid(qr_exo, z_w) / sqrt_w
+        } else {
+          qr_exo <- qr(exo_mat)
+          y_star <- qr.resid(qr_exo, y)
+          d_star <- qr.resid(qr_exo, endo_mat[, 1])
+          z_star <- qr.resid(qr_exo, inst_mat)
+        }
         k <- qr_exo$rank # rank, not ncol(exo_mat)+1
       } else {
         # No FE, no controls - just demean for intercept
-        y_star <- y - mean(y)
-        d_star <- endo_mat[, 1] - mean(endo_mat[, 1])
-        z_star <- sweep(inst_mat, 2, colMeans(inst_mat))
+        if (has_weights) {
+          # Use weighted means
+          w_sum <- sum(w)
+          y_wmean <- sum(w * y) / w_sum
+          d_wmean <- sum(w * endo_mat[, 1]) / w_sum
+          z_wmeans <- colSums(w * inst_mat) / w_sum
+          y_star <- y - y_wmean
+          d_star <- endo_mat[, 1] - d_wmean
+          z_star <- sweep(inst_mat, 2, z_wmeans)
+        } else {
+          y_star <- y - mean(y)
+          d_star <- endo_mat[, 1] - mean(endo_mat[, 1])
+          z_star <- sweep(inst_mat, 2, colMeans(inst_mat))
+        }
         k <- 1
       }
     }
   } else {
     # No FE, no controls - just demean for intercept
-    y_star <- y - mean(y)
-    d_star <- endo_mat[, 1] - mean(endo_mat[, 1])
-    z_star <- sweep(inst_mat, 2, colMeans(inst_mat))
+    if (has_weights) {
+      # Use weighted means
+      w_sum <- sum(w)
+      y_wmean <- sum(w * y) / w_sum
+      d_wmean <- sum(w * endo_mat[, 1]) / w_sum
+      z_wmeans <- colSums(w * inst_mat) / w_sum
+      y_star <- y - y_wmean
+      d_star <- endo_mat[, 1] - d_wmean
+      z_star <- sweep(inst_mat, 2, z_wmeans)
+    } else {
+      y_star <- y - mean(y)
+      d_star <- endo_mat[, 1] - mean(endo_mat[, 1])
+      z_star <- sweep(inst_mat, 2, colMeans(inst_mat))
+    }
     k <- 1 # just intercept
   }
 
   # Compute the quadratic coefficients
-  # S_DD = sum(D*^2), S_YY = sum(Y*^2), S_DY = sum(D* * Y*)
-  S_DD <- sum(d_star^2)
-  S_YY <- sum(y_star^2)
-  S_DY <- sum(d_star * y_star)
+  # For weighted case, use weighted sums: sum(w * x^2) instead of sum(x^2)
+  if (has_weights) {
+    S_DD <- sum(w * d_star^2)
+    S_YY <- sum(w * y_star^2)
+    S_DY <- sum(w * d_star * y_star)
+  } else {
+    S_DD <- sum(d_star^2)
+    S_YY <- sum(y_star^2)
+    S_DY <- sum(d_star * y_star)
+  }
 
   # P_Y = projection of Y* onto Z*, P_D = projection of D* onto Z*
-  qr_z <- qr(z_star)
-  L <- qr_z$rank # instead of ncol(inst_mat) at the top
-  P_Y <- qr.fitted(qr_z, y_star)
-  P_D <- qr.fitted(qr_z, d_star)
-
-  S_PDD <- sum(P_D^2)
-  S_PYY <- sum(P_Y^2)
-  S_PDY <- sum(P_D * P_Y)
+  # For weighted case, transform by sqrt(w) before QR decomposition
+  if (has_weights) {
+    z_star_w <- z_star * sqrt_w
+    y_star_w <- y_star * sqrt_w
+    d_star_w <- d_star * sqrt_w
+    qr_z <- qr(z_star_w)
+    L <- qr_z$rank
+    # Get weighted projections (in weighted space)
+    P_Y_w <- qr.fitted(qr_z, y_star_w)
+    P_D_w <- qr.fitted(qr_z, d_star_w)
+    # Compute weighted sums of squared projections
+    S_PDD <- sum(P_D_w^2)
+    S_PYY <- sum(P_Y_w^2)
+    S_PDY <- sum(P_D_w * P_Y_w)
+  } else {
+    qr_z <- qr(z_star)
+    L <- qr_z$rank
+    P_Y <- qr.fitted(qr_z, y_star)
+    P_D <- qr.fitted(qr_z, d_star)
+    S_PDD <- sum(P_D^2)
+    S_PYY <- sum(P_Y^2)
+    S_PDY <- sum(P_D * P_Y)
+  }
 
   # Critical value
   alpha <- 1 - level

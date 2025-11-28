@@ -3256,6 +3256,20 @@ test(is.null(ar_res_no_ci$ci), TRUE)
 print(ar_res)
 print(ar_ci)
 
+# Test 15: AR test with weights should use exact CI (not numeric)
+data_ar$wgt = runif(n, 0.5, 2)
+est_iv_wgt = feols(y ~ 1 | x ~ z, data = data_ar, weights = ~wgt)
+ar_res_wgt = ar_test(est_iv_wgt)
+test("fixest_ar" %in% class(ar_res_wgt), TRUE)
+# Check that CI is computed and is exact (not numeric)
+test(!is.null(ar_res_wgt$ci), TRUE)
+test(ar_res_wgt$ci$exact, TRUE)
+
+# Test 16: ar_confint with weights should also work
+ar_ci_wgt = ar_confint(est_iv_wgt)
+test("fixest_ar_confint" %in% class(ar_ci_wgt), TRUE)
+test(ar_ci_wgt$exact, TRUE)
+
 
 
 
