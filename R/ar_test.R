@@ -5,6 +5,50 @@
 #----------------------------------------------#
 
 # =============================================================================
+# INTERNAL HELPERS
+# =============================================================================
+
+#' Identify additional arguments beyond those supported by the exact AR CI
+#' @keywords internal
+.ar_exact_extra_args = function(object) {
+  call_obj <- object$call
+
+  if (is.null(call_obj)) {
+    return("call_missing")
+  }
+
+  call_list <- as.list(call_obj)[-1]
+  if (length(call_list) == 0) {
+    return(character(0))
+  }
+
+  arg_names <- names(call_list)
+  if (is.null(arg_names)) {
+    arg_names <- rep("", length(call_list))
+  }
+
+  allowed <- c("fml", "data", "vcov", "se")
+  extras <- character(0)
+  unnamed_seen <- 0L
+
+  for (nm in arg_names) {
+    if (!nzchar(nm)) {
+      unnamed_seen <- unnamed_seen + 1L
+      # Allow up to two unnamed positional arguments (formula, data)
+      if (unnamed_seen <= 2L) {
+        next
+      }
+      extras <- c(extras, paste0("positional#", unnamed_seen))
+    } else if (!(nm %in% allowed)) {
+      extras <- c(extras, nm)
+    }
+  }
+
+  unique(extras)
+}
+
+
+# =============================================================================
 # INTERNAL CORE FUNCTION
 # =============================================================================
 
@@ -32,7 +76,7 @@
 #' \item{inst_tested}{Instrument coefficients actually tested.}
 #'
 #' @keywords internal
-.ar_test_core = function(object, beta0, vcov = NULL, ...) {
+.ar_test_core = function(object, beta0, vcov = NULL, orig_call = NULL, ...) {
   # Get endogenous variable names and instrument names
   endo_names <- object$iv_endo_names
   inst_names <- object$iv_inst_names_xpd # expanded instrument names
@@ -116,28 +160,62 @@
   }
 
   # Determine vcov specification
-  # If not specified, try to get from original object
-  if (is.null(vcov)) {
-    if (!is.null(object$cov.scaled)) {
-      vcov <- attr(object$cov.scaled, "type")
-    }
-    if (is.null(vcov)) {
-      vcov <- "iid"
-    }
+  # We want to preserve the original call's `vcov` argument (which may be
+  # an expression like "hetero" or a formula) unless the user provided an
+  # explicit `vcov` to this function. Avoid using the human-readable
+  # attribute `attr(object$cov.scaled, "type")` here because it contains
+  # descriptive text (e.g. "Heteroskedasticity-robust") that `feols()`
+  # does not accept as a `vcov` argument.
+  vcov_provided <- !missing(vcov) && !is.null(vcov)
+  vcov_arg_to_pass <- NULL
+
+  if (vcov_provided) {
+    vcov_arg_to_pass <- vcov
+  } else if (!is.null(object$call) && !is.null(object$call$vcov)) {
+    # Use the original call's vcov expression if available
+    vcov_arg_to_pass <- object$call$vcov
+  } else if (!is.null(object$cov.scaled)) {
+    # Fall back to the canonical name if available (but not the descriptive attr)
+    # Use 'iid' as final fallback
+    vcov_arg_to_pass <- "iid"
+  } else {
+    vcov_arg_to_pass <- "iid"
   }
 
   # Run the AR regression - inherit settings from original object where possible
-  ar_fit <- feols(
-    new_fml,
-    data = data,
-    weights = weights_val,
-    vcov = vcov,
-    notes = FALSE,
-    ...
-  )
+  # Prefer to reuse an original call (provided via `orig_call` or from the
+  # model object) so we preserve options like weights, vcov, and other args.
+  if (is.null(orig_call)) orig_call <- object$call
+
+  if (is.call(orig_call) && length(orig_call) > 0) {
+    call_to_eval <- as.call(orig_call)
+    call_to_eval[[1]] <- as.name("feols")
+    call_to_eval$fml <- new_fml
+    call_to_eval$data <- as.name("data")
+    call_to_eval$vcov <- vcov_arg_to_pass
+    call_to_eval$notes <- FALSE
+
+    dots <- list(...)
+    if (length(dots) > 0) {
+      for (nm in names(dots)) {
+        if (nzchar(nm)) call_to_eval[[nm]] <- dots[[nm]]
+      }
+    }
+
+    ar_fit <- eval(call_to_eval)
+  } else {
+    ar_fit <- feols(
+      new_fml,
+      data = data,
+      weights = weights_val,
+      vcov = vcov_arg_to_pass,
+      notes = FALSE,
+      ...
+    )
+  }
 
   # Summarize to ensure we have the VCOV
-  ar_fit_sum <- summary(ar_fit, vcov = vcov, ...)
+  ar_fit_sum <- summary(ar_fit, vcov = vcov_arg_to_pass, ...)
 
   # Get the coefficient names in the AR regression that correspond to instruments
   ar_coef_names <- names(ar_fit_sum$coefficients)
@@ -470,6 +548,7 @@
   vcov = NULL,
   n_grid = 200,
   tol = 1e-8,
+  orig_call = NULL,
   ...
 ) {
   # Get point estimate and SE for grid construction
@@ -483,6 +562,7 @@
   }
 
   point_est <- object$coefficients[endo_coef_name]
+  # Summaries should use the same VCOV logic as the AR test core
   obj_sum <- summary(object, vcov = vcov, ...)
   se_est <- se(obj_sum)[endo_coef_name]
 
@@ -492,7 +572,13 @@
 
   # Get the critical value
   # First, run one AR test to determine distribution type
-  test_result <- .ar_test_core(object, beta0 = point_est, vcov = vcov, ...)
+  test_result <- .ar_test_core(
+    object,
+    beta0 = point_est,
+    vcov = vcov,
+    orig_call = orig_call,
+    ...
+  )
 
   if (test_result$dist == "F") {
     crit <- qf(level, df1 = test_result$df1, df2 = test_result$df2)
@@ -503,7 +589,13 @@
   # Evaluate g(beta0) = stat(beta0) - crit on the coarse grid
   g_values <- numeric(n_grid)
   for (i in seq_along(grid)) {
-    ar_res <- .ar_test_core(object, beta0 = grid[i], vcov = vcov, ...)
+    ar_res <- .ar_test_core(
+      object,
+      beta0 = grid[i],
+      vcov = vcov,
+      orig_call = orig_call,
+      ...
+    )
     g_values[i] <- ar_res$stat - crit
   }
 
@@ -524,7 +616,13 @@
     roots <- numeric(length(sign_changes))
 
     g_func <- function(beta0) {
-      ar_res <- .ar_test_core(object, beta0 = beta0, vcov = vcov, ...)
+      ar_res <- .ar_test_core(
+        object,
+        beta0 = beta0,
+        vcov = vcov,
+        orig_call = orig_call,
+        ...
+      )
       ar_res$stat - crit
     }
 
@@ -623,11 +721,12 @@
 #'   details on available options.
 #' @param level Numeric scalar between 0 and 1. The confidence level for the
 #'   optional confidence interval. Default is 0.95.
-#' @param ci Logical or NULL. Whether to compute an AR confidence interval.
+#' @param ci Logical, NULL, or the string "numeric". Whether to compute an AR confidence interval.
 #'   If `NULL` (default):
 #'   - Returns CI if vcov is "iid" AND there is exactly one endogenous variable
 #'   - Does not return CI otherwise
 #'   If `TRUE`: Attempts to compute CI (warns if not possible with multiple endo vars)
+#'   If `"numeric"` (the string): Forces numeric inversion of the AR test to compute the confidence interval, even if the exact method is not available.
 #'   If `FALSE`: Does not compute CI
 #' @param ... Additional arguments passed to [`summary.fixest`].
 #'
@@ -765,8 +864,13 @@ ar_test = function(
   }
   names(beta0) <- endo_names
 
-  # Run the core test
-  core_result <- .ar_test_core(object, beta0 = beta0, vcov = vcov, ...)
+  # Determine whether the exact CI is allowed: requires iid, single endo, and
+  # no extra arguments (weights, clusters, demean, etc.) in the original call.
+  extra_args <- .ar_exact_extra_args(object)
+  allow_exact_ci <- length(extra_args) == 0
+
+  # Run the core test (pass original call so internal call can reuse options)
+  core_result <- .ar_test_core(object, beta0 = beta0, vcov = vcov, orig_call = object$call, ...)
 
   # Build the result object
   res <- list(
@@ -784,34 +888,46 @@ ar_test = function(
     model = object
   )
 
-  # Decide whether to compute CI
-  compute_ci <- FALSE
-
+  # Determine whether to compute CI
   if (is.null(ci)) {
-    # Default: compute CI only if iid and single endo var
-    if (core_result$is_iid && n_endo == 1) {
-      compute_ci <- TRUE
+    # Default: compute CI only if iid, single endo, and exact CI allowed
+    if (core_result$is_iid && n_endo == 1 && allow_exact_ci) {
+      ci <- TRUE
+    } else {
+      ci <- FALSE
     }
-  } else if (isTRUE(ci)) {
+  } else if (ci != FALSE) {
     if (n_endo > 1) {
       warning(
         "Cannot compute AR confidence interval for models with multiple ",
         "endogenous variables. Returning test result only."
       )
-    } else {
-      compute_ci <- TRUE
+      ci <- FALSE
     }
   }
-  # If ci = FALSE, compute_ci stays FALSE
 
   # Compute CI if requested
-  if (compute_ci) {
-    if (core_result$is_iid) {
+  if (ci != FALSE) {
+    if (core_result$is_iid && allow_exact_ci && ci != "numeric") {
       # Use exact closed-form CI
       ci_result <- .ar_ci_exact_iid(object, level = level)
     } else {
       # Use numeric inversion
-      ci_result <- .ar_ci_numeric(object, level = level, vcov = vcov, ...)
+      if (core_result$is_iid && !allow_exact_ci) {
+        warning(
+          "Exact AR confidence interval requires a simple feols call with only ",
+          "fml, data, vcov, optionally se. Additional arguments (",
+          paste(extra_args, collapse = ", "),
+          ") detected; falling back to numeric inversion."
+        )
+      }
+      ci_result <- .ar_ci_numeric(
+        object,
+        level = level,
+        vcov = vcov,
+        orig_call = object$call,
+        ...
+      )
     }
     res$ci <- ci_result
   }
