@@ -3173,32 +3173,47 @@ test(nrow(fixest_data(est_mult, "esti")), 45)
 
 chunk("AR test")
 
-# Simple IV example with known DGP
-set.seed(42)
-n = 500
-z = rnorm(n)
-x = 0.5 * z + rnorm(n)  # moderate instrument strength
-true_beta = 0.8
-y = 1 + true_beta * x + rnorm(n)
-data_ar = data.frame(y = y, x = x, z = z, cl = rep(1:50, each = 10))
+# Realistic IV DGP with endogeneity (validated against ivmodel package)
+# Expected values from ivmodel package:
+#   With beta0=1: F=5.647947, df1=1, df2=97, p=0.019439
+#   CI: [1.2562, 2.5130]
+#   Weighted CI: [1.2147, 2.8270]
+set.seed(123)
+gamma = 0.5
+beta = 2
+n = 100
 
-# Basic IV estimation
-est_iv_ar = feols(y ~ 1 | x ~ z, data = data_ar)
+e_1 = rnorm(n, mean = 0, sd = 1)
+z = rnorm(n, mean = 0, sd = 1)
+x = gamma * z + e_1
+w = rnorm(n, mean = 0, sd = 1)
+e_2 = rnorm(n, mean = 0, sd = 1) + 0.8 * e_1  # correlated errors create endogeneity
+y = beta * x + w + e_2
 
-# Test 1: AR test should run without error
+data_ar = data.frame(y = y, x = x, z = z, w = w)
+
+# Basic IV estimation with exogenous control
+est_iv_ar = feols(y ~ w | x ~ z, data = data_ar)
+
+# Test 1: AR test should run without error and return correct class
 ar_res = ar_test(est_iv_ar)
 test("fixest_ar" %in% class(ar_res), TRUE)
 
-# Test 2: AR test with beta0 = 0 (null should be rejected since true_beta = 0.8)
+# Test 2: AR test with beta0 = 1 (validated against ivmodel package)
+# ivmodel gives: F=5.647947, df1=1, df2=97, p=0.019439
+ar_res_1 = ar_test(est_iv_ar, beta0 = 1)
+test(ar_res_1$beta0, 1)
+test(round(ar_res_1$stat, 6), 5.647947)
+test(ar_res_1$df1, 1)
+test(ar_res_1$df2, 97)
+test(round(ar_res_1$pvalue, 6), 0.019439)
+
+# Test 3: AR test with beta0 = 0 (should reject since true beta = 2)
 ar_res_null = ar_test(est_iv_ar, beta0 = 0)
 test(ar_res_null$beta0, 0)
 test(ar_res_null$pvalue < 0.05, TRUE)  # should reject
 
-# Test 3: AR test with beta0 close to true value (should not reject)
-ar_res_true = ar_test(est_iv_ar, beta0 = true_beta)
-test(ar_res_true$pvalue > 0.05, TRUE)  # should not reject
-
-# Test 4: AR test returns correct structure (now includes dist field)
+# Test 4: AR test returns correct structure
 test(is.numeric(ar_res$stat), TRUE)
 test(is.numeric(ar_res$pvalue), TRUE)
 test(is.numeric(ar_res$df1), TRUE)
@@ -3209,66 +3224,82 @@ test(ar_res$dist %in% c("F", "Chi-squared"), TRUE)
 test(ar_res$dist, "F")
 test(!is.null(ar_res$ci), TRUE)  # CI should be included for iid + single endo
 
-# Test 6: AR test with clustered SEs should use Chi-squared
-est_iv_cl = feols(y ~ 1 | x ~ z, data = data_ar, vcov = ~cl)
+# Test 6: Verify exact CI values (validated against ivmodel package)
+# ivmodel CI: [1.2562, 2.5130]
+test(round(ar_res$ci$intervals[1, "lower"], 4), 1.2562)
+test(round(ar_res$ci$intervals[1, "upper"], 4), 2.5130)
+test(ar_res$ci$exact, TRUE)
+
+# Test 7: Numeric CI should match exact CI
+ar_res_numeric = ar_test(est_iv_ar, beta0 = 1, ci = "numeric")
+test(round(ar_res_numeric$ci$intervals[1, "lower"], 4), 1.2562)
+test(round(ar_res_numeric$ci$intervals[1, "upper"], 4), 2.5130)
+test(ar_res_numeric$ci$exact, FALSE)
+
+# Test 8: AR test with clustered SEs should use Chi-squared
+data_ar$cl = rep(1:10, each = 10)
+est_iv_cl = feols(y ~ w | x ~ z, data = data_ar, vcov = ~cl)
 ar_res_cl = ar_test(est_iv_cl)
 test("fixest_ar" %in% class(ar_res_cl), TRUE)
 test(ar_res_cl$dist, "Chi-squared")
 test(is.na(ar_res_cl$df2), TRUE)  # df2 should be NA for Chi-squared
 
-# Test 7: AR test should error on non-IV model
-est_ols = feols(y ~ x, data = data_ar)
+# Test 9: AR test should error on non-IV model
+est_ols = feols(y ~ x + w, data = data_ar)
 test(ar_test(est_ols), "err")
 
-# Test 8: ar_confint should work for single endogenous variable
+# Test 10: ar_confint should work for single endogenous variable
 ar_ci = ar_confint(est_iv_ar)
 test("fixest_ar_confint" %in% class(ar_ci), TRUE)
 test(ar_ci$point_est > 0, TRUE)
 test(nrow(ar_ci$intervals) >= 1, TRUE)
 
-# Test 9: IV with controls and fixed effects
-data_ar$w = rnorm(n)
-data_ar$fe = rep(1:5, each = 100)
+# Test 11: IV with fixed effects
+data_ar$fe = rep(1:5, each = 20)
 est_iv_fe = feols(y ~ w | fe | x ~ z, data = data_ar)
 ar_res_fe = ar_test(est_iv_fe)
 test("fixest_ar" %in% class(ar_res_fe), TRUE)
 
-# Test 10: Multiple instruments  
+# Test 12: Multiple instruments
 data_ar$z2 = 0.3 * x + rnorm(n, sd = 0.8)
-est_iv_2inst = feols(y ~ 1 | x ~ z + z2, data = data_ar)
+est_iv_2inst = feols(y ~ w | x ~ z + z2, data = data_ar)
 ar_res_2inst = ar_test(est_iv_2inst)
 test("fixest_ar" %in% class(ar_res_2inst), TRUE)
 
-# Test 11: ar_confint errors with multiple endogenous vars
+# Test 13: ar_confint errors with multiple endogenous vars
 data_ar$x2 = 0.3 * z + rnorm(n)
-est_iv_2endo = feols(y ~ 1 | x + x2 ~ z + z2, data = data_ar)
+est_iv_2endo = feols(y ~ w | x + x2 ~ z + z2, data = data_ar)
 test(ar_confint(est_iv_2endo), "err")
 
-# Test 12: ar_test with ci=TRUE should compute CI even for non-iid
+# Test 14: ar_test with ci=TRUE should compute CI even for non-iid
 ar_res_cl_ci = ar_test(est_iv_cl, ci = TRUE)
 test(!is.null(ar_res_cl_ci$ci), TRUE)
 
-# Test 13: ar_test with ci=FALSE should not compute CI
+# Test 15: ar_test with ci=FALSE should not compute CI
 ar_res_no_ci = ar_test(est_iv_ar, ci = FALSE)
 test(is.null(ar_res_no_ci$ci), TRUE)
 
-# Test 14: Verify print methods work without error
+# Test 16: Verify print methods work without error
 print(ar_res)
 print(ar_ci)
 
-# Test 15: AR test with weights should use exact CI (not numeric)
-data_ar$wgt = runif(n, 0.5, 2)
-est_iv_wgt = feols(y ~ 1 | x ~ z, data = data_ar, weights = ~wgt)
-ar_res_wgt = ar_test(est_iv_wgt)
+# Test 17: AR test with weights (validated against ivmodel package)
+# ivmodel weighted CI: [1.2147, 2.8270]
+est_iv_wgt = feols(y ~ w | x ~ z, data = data_ar, weights = ~exp(z))
+ar_res_wgt = ar_test(est_iv_wgt, beta0 = 1, ci = TRUE)
 test("fixest_ar" %in% class(ar_res_wgt), TRUE)
-# Check that CI is computed and is exact (not numeric)
 test(!is.null(ar_res_wgt$ci), TRUE)
-test(ar_res_wgt$ci$exact, TRUE)
+test(ar_res_wgt$ci$intervals[1, "lower"], 1.2147, ~1e-4)
+test(ar_res_wgt$ci$intervals[1, "upper"], 2.8270, ~1e-4)
 
-# Test 16: ar_confint with weights should also work
+# Test 18: Weighted numeric CI should match
+ar_res_wgt_numeric = ar_test(est_iv_wgt, beta0 = 1, ci = "numeric")
+test(ar_res_wgt_numeric$ci$intervals[1, "lower"], 1.2147, ~1e-4)
+test(ar_res_wgt_numeric$ci$intervals[1, "upper"], 2.8270, ~1e-4)
+
+# Test 19: ar_confint with weights should also work
 ar_ci_wgt = ar_confint(est_iv_wgt)
 test("fixest_ar_confint" %in% class(ar_ci_wgt), TRUE)
-test(ar_ci_wgt$exact, TRUE)
 
 
 
