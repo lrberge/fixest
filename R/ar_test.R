@@ -166,6 +166,31 @@
   # attribute `attr(object$cov.scaled, "type")` here because it contains
   # descriptive text (e.g. "Heteroskedasticity-robust") that `feols()`
   # does not accept as a `vcov` argument.
+  #
+  # When the original estimation was called with `vcov = ~cluster_id`, the
+  # expression stored in the call is a raw language object (class `call`).
+  # `feols()` and `vcov.fixest()` expect an actual formula object, so we
+  # coerce such calls back to formulas before reusing them.
+  as_formula_if_needed <- function(expr) {
+    if (is.null(expr) || inherits(expr, "formula")) {
+      return(expr)
+    }
+
+    if (!is.call(expr) || length(expr) == 0L) {
+      return(expr)
+    }
+
+    if (!identical(expr[[1]], as.name("~"))) {
+      return(expr)
+    }
+
+    env_linear <- environment(object$fml_all$linear)
+    if (is.null(env_linear)) {
+      env_linear <- parent.frame()
+    }
+
+    as.formula(expr, env = env_linear)
+  }
   vcov_provided <- !missing(vcov) && !is.null(vcov)
   vcov_arg_to_pass <- NULL
 
@@ -181,6 +206,8 @@
   } else {
     vcov_arg_to_pass <- "iid"
   }
+
+  vcov_arg_to_pass <- as_formula_if_needed(vcov_arg_to_pass)
 
   # Run the AR regression - inherit settings from original object where possible
   # Prefer to reuse an original call (provided via `orig_call` or from the
