@@ -192,34 +192,22 @@
     as.formula(expr, env = env_linear)
   }
   vcov_provided <- !missing(vcov) && !is.null(vcov)
-  vcov_arg_to_pass <- NULL
-
-  if (vcov_provided) {
-    vcov_arg_to_pass <- vcov
-  } else if (!is.null(object$call) && !is.null(object$call$vcov)) {
-    # Use the original call's vcov expression if available
-    vcov_arg_to_pass <- object$call$vcov
-  } else if (!is.null(object$cov.scaled)) {
-    # Fall back to the canonical name if available (but not the descriptive attr)
-    # Use 'iid' as final fallback
-    vcov_arg_to_pass <- "iid"
-  } else {
-    vcov_arg_to_pass <- "iid"
-  }
-
-  vcov_arg_to_pass <- as_formula_if_needed(vcov_arg_to_pass)
 
   # Run the AR regression - inherit settings from original object where possible
   # Prefer to reuse an original call (provided via `orig_call` or from the
   # model object) so we preserve options like weights, vcov, and other args.
-  if (is.null(orig_call)) orig_call <- object$call
+  if (is.null(orig_call)) {
+    orig_call <- object$call
+  }
 
   if (is.call(orig_call) && length(orig_call) > 0) {
     call_to_eval <- as.call(orig_call)
     call_to_eval[[1]] <- as.name("feols")
     call_to_eval$fml <- new_fml
     call_to_eval$data <- as.name("data")
-    call_to_eval$vcov <- vcov_arg_to_pass
+    if (vcov_provided) {
+      call_to_eval$vcov <- vcov
+    }
     call_to_eval$notes <- FALSE
 
     dots <- list(...)
@@ -235,14 +223,13 @@
       new_fml,
       data = data,
       weights = weights_val,
-      vcov = vcov_arg_to_pass,
       notes = FALSE,
       ...
     )
   }
 
   # Summarize to ensure we have the VCOV
-  ar_fit_sum <- summary(ar_fit, vcov = vcov_arg_to_pass, ...)
+  ar_fit_sum <- summary(ar_fit, ...)
 
   # Get the coefficient names in the AR regression that correspond to instruments
   ar_coef_names <- names(ar_fit_sum$coefficients)
