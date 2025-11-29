@@ -3289,13 +3289,13 @@ est_iv_wgt = feols(y ~ w | x ~ z, data = data_ar, weights = ~exp(z))
 ar_res_wgt = ar_test(est_iv_wgt, beta0 = 1, ci = TRUE)
 test("fixest_ar" %in% class(ar_res_wgt), TRUE)
 test(!is.null(ar_res_wgt$ci), TRUE)
-test(ar_res_wgt$ci$intervals[1, "lower"], 1.2147, ~1e-4)
-test(ar_res_wgt$ci$intervals[1, "upper"], 2.8270, ~1e-4)
+test(round(ar_res_wgt$ci$intervals[1, "lower"], 4), 1.2147)
+test(round(ar_res_wgt$ci$intervals[1, "upper"], 4), 2.8270)
 
 # Test 18: Weighted numeric CI should match
 ar_res_wgt_numeric = ar_test(est_iv_wgt, beta0 = 1, ci = "numeric")
-test(ar_res_wgt_numeric$ci$intervals[1, "lower"], 1.2147, ~1e-4)
-test(ar_res_wgt_numeric$ci$intervals[1, "upper"], 2.8270, ~1e-4)
+test(round(ar_res_wgt_numeric$ci$intervals[1, "lower"], 4), 1.2147)
+test(round(ar_res_wgt_numeric$ci$intervals[1, "upper"], 4), 2.8270)
 
 # Test 19: ar_confint with weights should also work
 ar_ci_wgt = ar_confint(est_iv_wgt)
