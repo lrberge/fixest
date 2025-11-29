@@ -953,13 +953,19 @@ ar_test = function(
   }
   names(beta0) <- endo_names
 
-  # Determine whether the exact CI is allowed: requires iid, single endo, and
+  # Determine whether the exact CI is allowed: requires iid, single endo, no fixed effects and
   # no extra arguments (weights, clusters, demean, etc.) in the original call.
   extra_args <- .ar_exact_extra_args(object)
-  allow_exact_ci <- length(extra_args) == 0
+  allow_exact_ci <- length(extra_args) == 0 && is.null(object$fixef_id)
 
   # Run the core test (pass original call so internal call can reuse options)
-  core_result <- .ar_test_core(object, beta0 = beta0, vcov = vcov, orig_call = object$call, ...)
+  core_result <- .ar_test_core(
+    object,
+    beta0 = beta0,
+    vcov = vcov,
+    orig_call = object$call,
+    ...
+  )
 
   # Build the result object
   res <- list(
