@@ -812,10 +812,10 @@
 #'   optional confidence interval. Default is 0.95.
 #' @param ci Logical, NULL, or the string "numeric". Whether to compute an AR confidence interval.
 #'   If `NULL` (default):
-#'   - Returns CI if vcov is "iid" AND there is exactly one endogenous variable
+#'   - Returns CI if vcov is "iid" AND there is exactly one endogenous variable with no fixed effects
 #'   - Does not return CI otherwise
 #'   If `TRUE`: Attempts to compute CI (warns if not possible with multiple endo vars)
-#'   If `"numeric"` (the string): Forces numeric inversion of the AR test to compute the confidence interval, even if the exact method is not available.
+#'   If `"numeric"` (the string): Forces numeric inversion of the AR test to compute the confidence interval, even if the exact method is available.
 #'   If `FALSE`: Does not compute CI
 #' @param ... Additional arguments passed to [`summary.fixest`].
 #'
