@@ -837,10 +837,10 @@
 #' F-distribution. For non-iid errors (heteroskedastic, clustered, etc.),
 #' a Chi-squared asymptotic distribution is used.
 #'
-#' When `ci = TRUE` (or by default for iid with single endo var):
-#' - For iid errors with a single endogenous variable, an exact closed-form
+#' When `ci = TRUE` (or by default for iid with single endo var and no fixed effects),:
+#' - For iid errors with a single endogenous variable and no fixed effects, an exact closed-form
 #'   AR confidence interval is computed using the quadratic formula.
-#' - For non-iid errors, the CI is computed by numerically inverting the AR test.
+#' - For non-iid errors with a single endogenous variable, the CI is computed by numerically inverting the AR test.
 #'
 #' @return
 #' An object of class `fixest_ar` containing:
