@@ -35,6 +35,6 @@ BugReports: https://github.com/lrberge/fixest/issues
 URL: https://lrberge.github.io/fixest/, https://github.com/lrberge/fixest
 VignetteBuilder: knitr
 LazyData: true
-RoxygenNote: 7.3.2.9000
+RoxygenNote: 7.3.3
 Roxygen: list(markdown = TRUE)
 Encoding: UTF-8
