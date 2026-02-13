@@ -2089,7 +2089,24 @@ coefplot_prms = function(all_models, vcov = NULL, se, ci_low, ci_high, x, x.shif
       # avoids bug with IVs => problem if user names the variables that way
       is_IV = FALSE
       if(isTRUE(object$iv) && identical(object$iv_stage, 2)){
-        all_vars = gsub("^fit_", "", all_vars)
+        iv_fit_names = object[["iv_endo_names_fit"]]
+        if(is.character(iv_fit_names) && length(iv_fit_names) > 0){
+          # Restrict renaming to fitted endogenous terms only.
+          # This avoids altering user variables that simply start with "fit_".
+          is_fit = all_vars %in% iv_fit_names
+          if(any(is_fit)){
+            all_vars_fit = all_vars[is_fit]
+            # fit_x:var -> var (single ':'), but keep names like fit_user::2 unchanged here.
+            all_vars_fit = sub("^fit_[^:]+:(?!:)", "", all_vars_fit, perl = TRUE)
+            # For fitted terms still starting with fit_ (e.g. fit_x2::2), remove the prefix.
+            all_vars_fit = sub("^fit_", "", all_vars_fit)
+            all_vars[is_fit] = all_vars_fit
+          }
+        } else {
+          # Legacy fallback for old objects without iv_endo_names_fit.
+          all_vars = sub("^fit_[^:]+:(?!:)", "", all_vars, perl = TRUE)
+          all_vars = sub("^fit_", "", all_vars)
+        }
         names(estimate) = all_vars
       }
 
@@ -2852,8 +2869,6 @@ setFixest_coefplot = function(style, horiz = FALSE, dict = getFixest_dict(), kee
 getFixest_coefplot = function(){
   getOption("fixest_coefplot")
 }
-
-
 
 
 

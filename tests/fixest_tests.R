@@ -2000,6 +2000,35 @@ res_sunab = feols(y ~ x1 + sunab(year_treated, year, bin.rel = "bin::2"), base_s
 iplot(res_sunab)
 test(length(coef(res_sunab)), 12)
 
+# IV + sunab + interacted fitted regressor
+set.seed(20260213)
+n_id = 200L
+never_cohort = 100L
+dt_sunab_iv = expand.grid(id = 1:n_id, rel_time = -2:2)
+dt_sunab_iv$high_growth = as.integer(dt_sunab_iv$id <= n_id / 2L)
+dt_sunab_iv$cohort = ifelse(dt_sunab_iv$high_growth == 1L, 0L, never_cohort)
+dt_sunab_iv$x = rnorm(nrow(dt_sunab_iv))
+dt_sunab_iv$id_fe = rnorm(n_id)[dt_sunab_iv$id]
+dt_sunab_iv$y = 0.08 * dt_sunab_iv$x * (dt_sunab_iv$rel_time >= 0L) * dt_sunab_iv$high_growth + dt_sunab_iv$id_fe + rnorm(nrow(dt_sunab_iv), sd = 0.25)
+
+res_sunab_iv = feols(y ~ 1 | x:sunab(cohort, rel_time, ref.p = -1, ref.c = never_cohort, no_agg = TRUE) ~ sunab(cohort, rel_time, ref.p = -1, ref.c = never_cohort, no_agg = TRUE), dt_sunab_iv)
+iv_sunab_iplot_ok = tryCatch({
+  iplot(res_sunab_iv)
+  TRUE
+}, error = function(e) FALSE)
+test(iv_sunab_iplot_ok, TRUE)
+
+# IV with an exogenous i() variable whose name starts with "fit_"
+set.seed(1)
+base$fit_user = sample(1:3, nrow(base), TRUE)
+res_iv_fit_user = feols(y ~ i(fit_user) | x2 ~ x3, base)
+iv_fit_user_iplot_ok = tryCatch({
+  iplot(res_iv_fit_user)
+  TRUE
+}, error = function(e) FALSE)
+test(iv_fit_user_iplot_ok, TRUE)
+base$fit_user = NULL
+
 
 ####
 #### bin ####
@@ -3173,11 +3202,6 @@ est_mult = feols(y ~ x1 + x2, base, split = ~species)
 test(dim(fixest_data(est_mult)), dim(base))
 
 test(nrow(fixest_data(est_mult, "esti")), 45)
-
-
-
-
-
 
 
 
