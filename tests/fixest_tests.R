@@ -2579,6 +2579,8 @@ test(names(m_lhs_rhs_fixef), c("y1", "fit_x2", "x1", "species"))
 #### sparse_model_matrix ####
 ####
 
+chunk("Sparse model matrix")
+
 # unit tests: i(..., sparse = TRUE) 
 x <- c(1, 1, 3, 1, 3)
 sp1 <- i(x, sparse = TRUE)
@@ -2712,6 +2714,7 @@ test(nrow(sm_lag), nobs(res_lag))
 # Interacted fixef
 res = feols(y1 ~ x1 + x2 + x3 | species^fe2, base)
 sm_ife = sparse_model_matrix(res, data = base, type = "fixef", collin.rm = FALSE)
+test(ncol(sm_ife), 45)
 
 # fixef
 res = feols(y1 ~ x1 + x2 + x3 | species + fe2, base)
@@ -2824,6 +2827,19 @@ test(coef(est_add_iv), coef(est_add_iv_noup))
 est_clu = update(est, vcov = ~species)
 est_clu = feols(y ~ x1 | species, base)
 test(se(est_add_fe), se(est_add_fe_noup))
+
+# No warnings when using use_calling_env = FALSE
+# https://github.com/lrberge/fixest/issues/618
+est_to_update = feols(mpg ~ hp, data = mtcars)
+update_is_silent <- tryCatch(
+  {
+    update(est_to_update, data = mtcars, use_calling_env = FALSE)
+    TRUE 
+  },
+  error = function(e) FALSE,
+  warning = function(e) FALSE
+)
+test(update_is_silent, TRUE)
 
 #
 # FE estimation
@@ -2966,15 +2982,25 @@ names(base) = c("y", "x1", "x_endo_1", "x_inst_1", "fe")
 set.seed(2)
 base$x_inst_2 = 0.2 * base$y + 0.2 * base$x_endo_1 + rnorm(150, sd = 0.5)
 base$x_endo_2 = 0.2 * base$y - 0.2 * base$x_inst_1 + rnorm(150, sd = 0.5)
+base$w = sample(c(0.5, 0.25), nrow(base), replace = TRUE)
+base$cl_var = rep(1:50, 3) # using `fe` to cluster causes a vcov PSD warning
+
 
 # Checking a basic estimation
 est_iv = feols(y ~ x1 | x_endo_1 + x_endo_2 ~ x_inst_1 + x_inst_2, base)
 
-fitstat(est_iv, ~ f + ivf + ivf2 + wald + ivwald + ivwald2 + wh + sargan + rmse + g + n + ll + sq.cor + r2)
+fitstat(est_iv, ~ f + ivf + ivf2 + wald + ivwald + ivwald2 + wh + sargan + kpr + rmse + g + n + ll + sq.cor + r2)
+test(c(length(est_iv$iv_first_stage), est_iv$iv_n_inst), c(2, 2)) # kpr relies on accessing these
+
+est_iv_uneven = feols(y ~ x1 | x_endo_1 ~ x_inst_1 + x_inst_2, base, cluster = "cl_var")
+fitstat(est_iv_uneven, ~ f + ivf + ivf2 + wald + ivwald + ivwald2 + wh + sargan + kpr + rmse + g + n + ll + sq.cor + r2)
 
 est_fe = feols(y ~ x1 | fe, base)
-
 fitstat(est_fe, ~ wf)
+
+# https://github.com/lrberge/fixest/issues/584
+est_weighted = feols(y ~ x1 | fe, base, weights = ~w)
+fitstat(est_weighted, ~ rmse)
 
 # fitstat works with `split` and `lean` (https://github.com/lrberge/fixest/issues/566)
 est_split = feols(y ~ x1, base, fsplit = ~fe)

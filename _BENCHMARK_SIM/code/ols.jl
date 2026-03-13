@@ -1,0 +1,65 @@
+# If you are running Julia for the first time, please read Readme.md
+# 
+
+# estimation
+using CSV
+using DataFrames
+using FixedEffectModels
+
+all_results = DataFrame(n = Int[], id_rep = Int[], dgp = String[], 
+                        n_fe = Int[], method = String[], time = Float64[])
+
+for n_obs in [1e4, 1e5, 1e6, 1e7]
+  println("n = 1e$(Int(log10(n_obs)))")
+  
+  for id_rep in [1, 2, 3]
+    println(" rep = $(id_rep)")
+    
+    # loading the data 
+    filename = "./data/data_n-1e$(Int(log10(n_obs)))_rep-$id_rep.gz";
+    base = CSV.read(filename, DataFrame);
+    
+    for dgp in ["simple", "difficult"]
+      print("  dgp = $(dgp)")
+    
+      for n_fe in [2, 3]
+        print(".")
+        
+        # setting up the formula
+        if dgp == "simple"
+          if n_fe == 2
+            fml = @formula(y ~ x1 + x2 + fe(indiv_id) + fe(firm_id))
+          else
+            fml = @formula(y ~ x1 + x2 + fe(indiv_id) + fe(firm_id) + fe(year))
+          end
+        elseif dgp == "difficult"
+          if n_fe == 2
+            fml = @formula(y ~ x1 + x2 + fe(indiv_id) + fe(firm_id_difficult))
+          else
+            fml = @formula(y ~ x1 + x2 + fe(indiv_id) + fe(firm_id_difficult) + fe(year))
+          end
+        end
+        
+        #
+        # FixedEffectModels.reg
+        #
+        
+        time_start = time()
+        est = reg(base, fml, progress_bar = false);
+        time_reg = time() - time_start
+        
+        
+        #
+        # saving
+        #
+        
+        push!(all_results, (n_obs, id_rep, dgp, n_fe, "FixedEffectModels.reg", time_reg))
+        
+      end
+      println("")
+    end
+  end
+end
+
+
+CSV.write("results/results_ols_jl.csv", all_results)

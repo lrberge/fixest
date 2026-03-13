@@ -111,18 +111,23 @@ sparse_model_matrix = function(object, data, type = "rhs", sample = "estimation"
 
   # Allows passage of formula to sparse_model_matrix. A bit inefficient, but it works.
   isFormula = FALSE
-  split_fml = NULL
   if (inherits(object, "formula")) {
-    split_fml = fml_split_internal(object)
+    fml_parts = get_fml_parts(object, parts_as_formula = TRUE)
     if (isTRUE(collin.rm)) {
       message("Formula passed to sparse_model_matrix with collin.rm == TRUE. Estimating feols with formula.")
       object = feols(object, data = data)
-    } else if (length(split_fml) == 3) {
+    } else if (!is.null(fml_parts$inst_fml)) {
       message("Formula passed to sparse_model_matrix with an iv formula. Estimating feols with formula.")
       object = feols(object, data = data)
     } else {
       isFormula = TRUE
     }
+  } 
+
+  # na.rm = FALSE doesn't work with type = "fixef" (which FE col gets NA?)
+  if (("fixef" %in% type & !na.rm)) {
+    # na.rm = TRUE
+    message("na.rm = FALSE doesn't work with type = 'fixef'. It has been set to TRUE.")
   }
 
   # Panel setup
@@ -132,45 +137,26 @@ sparse_model_matrix = function(object, data, type = "rhs", sample = "estimation"
 
   # The formulas
   if (isFormula) {
-    fml_linear = split_fml[[1]]
-
-    fml_0 = attr(stats::terms(fml_linear), "intercept") == 0
-    fake_intercept = !is.null(split_fml[[2]]) | fml_0
+    fml_parts = get_fml_parts(object, parts_as_formula = TRUE)
   } else {
-    fml_linear = formula(object, type = "linear")
-
-    # we kick out the intercept if there is presence of fixed-effects
-    fml_0 = attr(stats::terms(fml_linear), "intercept") == 0
-    fake_intercept = !is.null(object$fixef_vars) && !(!is.null(object$slope_flag) && all(object$slope_flag < 0)) 
-    fake_intercept = fake_intercept | fml_0
-  }
-
+    fml_parts = get_fml_parts(formula(object), parts_as_formula = TRUE)
+  }  
+  fml_0 = attr(stats::terms(fml_parts$exo_fml), "intercept") == 0
+  # we kick out the intercept if there is presence of fixed-effects
+  fake_intercept = !is.null(fml_parts$fe_fml) | fml_0
   res = list()
 
   if ("lhs" %in% type) {
-    lhs_text = deparse_long(fml_linear[[2]])
-    lhs = eval(fml_linear[[2]], data) 
+    lhs = eval(fml_parts$y_fml[[2]], data) 
     lhs = Matrix::Matrix(lhs, sparse = TRUE, ncol = 1)
-
-    colnames(lhs) = lhs_text
+    colnames(lhs) = deparse_long(fml_parts$y_fml[[2]])
 
     res[["lhs"]] = lhs
   }
 
   if ("rhs" %in% type && !isTRUE(object$onlyFixef)) {
-
-    fml = fml_linear
-
-    if (isFormula && (length(split_fml) == 3)) {
-      fml_iv = split_fml[[3]]
-      fml = .xpd(..lhs ~ ..endo + ..rhs, ..lhs = fml[[2]], ..endo = fml_iv[[2]], ..rhs = fml[[3]])
-    } else if (isTRUE(object$iv)) {
-      fml_iv = object$fml_all$iv
-      fml = .xpd(..lhs ~ ..endo + ..rhs, ..lhs = fml[[2]], ..endo = fml_iv[[2]], ..rhs = fml[[3]])
-    }
-
+    fml = .xpd(~ ..endo + ..rhs, ..rhs = fml_parts$exo_fml, ..endo = fml_parts$endo_fml)
     vars = attr(stats::terms(fml), "term.labels")
-
     linear.mat = vars_to_sparse_mat(vars = vars, data = data, object = object, 
                                     collin.rm = collin.rm, type = "rhs", 
                                     add_intercept = !fake_intercept)
@@ -180,18 +166,10 @@ sparse_model_matrix = function(object, data, type = "rhs", sample = "estimation"
 
   if ("fixef" %in% type) {
 
-    if (isFormula && (length(split_fml) < 2)) {
-      mat_FE = NULL
-    } else if (!isFormula & length(object$fixef_id) == 0) {
+    if (is.null(fml_parts$fe_fml)) {
       mat_FE = NULL
     } else { 
-
-      if (isFormula) {
-        fixef_fml = .xpd(~ ..fe, ..fe = split_fml[[2]])
-      } else {
-        fixef_fml = object$fml_all$fixef
-      }
-
+      fixef_fml = .xpd(~ ..fe, ..fe = fml_parts$fe_fml)
       fixef_terms_full = fixef_terms(fixef_fml)
       fe_vars = fixef_terms_full$fe_vars
       slope_var_list = fixef_terms_full$slope_vars_list
@@ -334,7 +312,7 @@ sparse_model_matrix = function(object, data, type = "rhs", sample = "estimation"
   # IV
   #
   if ("iv.endo" %in% type) {
-    fml = object$iv_endo_fml
+    fml = .xpd(~ ..endo, ..endo = fml_parts$endo_fml)
     vars = attr(stats::terms(fml), "term.labels")
     endo.mat = vars_to_sparse_mat(vars = vars, data = data, object, 
                                   collin.rm = collin.rm, type = "iv.endo")
@@ -343,7 +321,7 @@ sparse_model_matrix = function(object, data, type = "rhs", sample = "estimation"
   }
 
   if ("iv.inst" %in% type) {
-    fml = object$fml_all$iv
+    fml = .xpd(~ ..inst, ..inst = fml_parts$inst_fml)
     vars = attr(stats::terms(fml), "term.labels")
     inst.mat = vars_to_sparse_mat(vars = vars, data = data, object, 
                                   collin.rm = collin.rm, type = "iv.inst")
@@ -352,8 +330,7 @@ sparse_model_matrix = function(object, data, type = "rhs", sample = "estimation"
   }
 
   if ("iv.exo" %in% type) {
-
-    fml = object$fml_all$linear
+    fml = .xpd(~ ..exo, ..exo = fml_parts$exo_fml)
     vars = attr(stats::terms(fml), "term.labels")
     exo.mat = vars_to_sparse_mat(vars = vars, data = data, object = object, 
                                  collin.rm = collin.rm, type = "iv.exo", 
@@ -363,23 +340,18 @@ sparse_model_matrix = function(object, data, type = "rhs", sample = "estimation"
   }
 
   if ("iv.rhs1" %in% type) {
-    fml = object$fml
-    if (object$iv_stage == 2) {
-      fml_iv = object$fml_all$iv
-      fml = .xpd(..lhs ~ ..inst + ..rhs, ..lhs = fml[[2]], ..inst = fml_iv[[3]], ..rhs = fml[[3]])
-    }
-    
+    fml = .xpd(~ ..inst + ..rhs, ..rhs = fml_parts$exo_fml, ..inst = fml_parts$inst_fml)
     vars = attr(stats::terms(fml), "term.labels")
     iv_rhs1 = vars_to_sparse_mat(vars = vars, data = data, object = object, 
-                                 collin.rm = collin.rm, type = "iv.rhs1", 
-                                 add_intercept = !fake_intercept)
+                                    collin.rm = collin.rm, type = "iv.rhs1", 
+                                    add_intercept = !fake_intercept)
 
     res[["iv.rhs1"]] = iv_rhs1
   }
 
   if ("iv.rhs2" %in% type) {
     # Second stage
-    if (!object$iv_stage == 2) {
+    if (!isFormula && !object$iv_stage == 2) {
       stop("In model.matrix, the type 'iv.rhs2' is only valid for second stage IV models. This estimation is the first stage.")
     }
 
@@ -394,7 +366,7 @@ sparse_model_matrix = function(object, data, type = "rhs", sample = "estimation"
 
     # II) we create the variables
     fml = object$fml
-    fml = .xpd(..lhs ~ ..fit + ..rhs, ..lhs = fml[[2]], ..fit = fit_vars, ..rhs = fml[[3]])
+    fml = .xpd(~ ..fit + ..rhs, ..fit = fit_vars, ..rhs = fml_parts$exo_fml)
     vars = attr(stats::terms(fml), "term.labels")
     iv_rhs2 = vars_to_sparse_mat(vars = vars, data = data, object = object, 
                                  collin.rm = collin.rm, type = "iv.rhs2", 
@@ -700,7 +672,7 @@ vars_to_sparse_mat = function(vars, data, collin.rm = FALSE, object = NULL,
 
       exo = lapply(object$iv_first_stage, function(x) names(stats::coef(x)))
       exo = unique(unlist(exo, use.names = FALSE))
-
+ 
       inst = setdiff(exo, names(object$coefficients))
     }
     
@@ -733,7 +705,6 @@ vars_to_sparse_mat = function(vars, data, collin.rm = FALSE, object = NULL,
       coef_names = names(object$coefficients)
       add_intercept = "(Intercept)" %in% coef_names
     }
-
     keep = colnames(mat) %in% coef_names
     if (length(keep) == 0) {
       mat = NULL
@@ -750,4 +721,91 @@ vars_to_sparse_mat = function(vars, data, collin.rm = FALSE, object = NULL,
   }
 
   return(mat)
+}
+
+get_fml_parts <- function(formula, parts_as_formula = FALSE) {
+  has_lhs <- !is_rhs_only(formula)
+  fml_split_tilde <- sm_fml_breaker(formula, "~")
+
+  res <- list(
+    y_fml = NULL,
+    exo_fml = NULL,
+    fe_fml = NULL,
+    endo_fml = NULL,
+    inst_fml = NULL
+  )
+
+  # LHS
+  if (has_lhs) {
+    res$y_fml <- fml_split_tilde[[length(fml_split_tilde)]]
+    # Drop y and treat everything as RHS only formula
+    fml_split_tilde <- fml_split_tilde[-length(fml_split_tilde)]
+  }
+
+  # OLS
+  if (length(fml_split_tilde) == 1) {
+    fml_split <- sm_fml_breaker(fml_split_tilde[[1]], "|")
+    if (length(fml_split) == 2) {
+      res$exo_fml <- fml_split[[2]]
+      res$fe_fml <- fml_split[[1]]
+    } else {
+      res$exo_fml <- fml_split[[1]]
+    }
+  }
+
+  # IV
+  if (length(fml_split_tilde) == 2) {
+    res$inst_fml <- fml_split_tilde[[1]]
+
+    # This works b/c we know there is an IV
+    fml_W_T_split <- sm_fml_breaker(fml_split_tilde[[2]], "|")
+    if (length(fml_W_T_split) == 3) {
+      res$endo_fml <- fml_W_T_split[[1]]
+      res$fe_fml <- fml_W_T_split[[2]]
+      res$exo_fml <- fml_W_T_split[[3]]
+    } else {
+      res$endo_fml <- fml_W_T_split[[1]]
+      res$exo_fml <- fml_W_T_split[[2]]
+    }
+  }
+
+  if (parts_as_formula) { 
+    res = lapply(res, function(rhs) {
+      if (is.null(rhs)) return(NULL)
+      fml <- ~.
+      fml[[2]] <- rhs
+      return(fml)
+    })
+  }
+  return(res)
+}
+
+is_rhs_only <- function(fml) {
+  # e.g. fml = ~ x
+  if (length(fml) == 2) {
+    return(TRUE)
+  }
+  # e.g. fml = ~ x | t ~ z
+  if (length(fml[[2]]) == 2) {
+    return(TRUE)
+  }
+  return(FALSE)
+}
+
+# fml_breaker but works with RHS only
+sm_fml_breaker <- function(fml, op) {
+  res <- list()
+  k <- 1
+  while (is_operator(fml, op) & length(fml) == 3) {
+    res[[k]] <- fml[[3]]
+    k <- k + 1
+    fml <- fml[[2]]
+  }
+
+  if (length(fml) == 2) {
+    res[[k]] <- fml[[2]]
+  } else {
+    res[[k]] <- fml
+  }
+  res
 }

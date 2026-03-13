@@ -1,0 +1,5 @@
+"method","type","time"
+"fixest::feols","base",12.8457159996033
+"fixest::feols","varying-slopes",8.53815507888794
+"fixest::feols","multiple-y",13.2533440589905
+"fixest::feols","multiple-vcov",9.33769607543945

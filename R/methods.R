@@ -393,6 +393,9 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #' Since the VCOV should be PSD asymptotically, this might be a sign of a problem 
 #' with using the asymptotic approximation (e.g. too few units in clusters).
 #' If a problem is detected, the function will print a message to inform you. 
+#' Note that a message informs the user **only if** the regularized PD matrix is 
+#' substantially different than the original non PD one (i.e. at least one difference
+#' between the two greated than 1e-8).
 #' @param n Integer, default is 1000. Number of coefficients to display when the print method 
 #' is used.
 #' @param ... Only used if the argument `vcov` is provided and is a function: extra arguments 
@@ -3250,7 +3253,7 @@ update.fixest = function(object, fml.update = NULL, fml = NULL, nframes = 1,
 
   # new call: call_clear
   call_clear = call_old
-  for(arg in setdiff(names(call_new)[-1], c("fml.update", "nframes", "evaluate", "object"))){
+  for(arg in setdiff(names(call_new)[-1], c("fml.update", "nframes", "evaluate", "object", "use_calling_env"))){
     if(is.null(call_new[[arg]])){
       # for some raeson, it wouldn't work if call_new[[arg]] is NULL
       call_clear[[arg]] = NULL

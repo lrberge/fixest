@@ -1,0 +1,7 @@
+[deps]
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+DuckDB = "d2f5444f-75bc-4fdf-ac35-56f514c445e1"
+FixedEffectModels = "9d5cd8c9-2029-5cab-9928-427838db53e3"
+Parquet = "626c502c-15b0-58ad-a749-f091afb673ae"
+Vcov = "ec2bfdc2-55df-4fc9-b9ae-4958c2cf2486"

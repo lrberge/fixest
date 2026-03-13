@@ -1,0 +1,5 @@
+method,type,time
+FixedEffectModels::reg,base,17.65499997138977
+FixedEffectModels::reg,varying-slopes,15.82800006866455
+FixedEffectModels::reg,multiple-y,33.2739999294281
+FixedEffectModels::reg,multiple-vcov,36.348000049591064

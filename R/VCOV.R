@@ -416,6 +416,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
   extra_args = NULL
   if(inherits(vcov, "fixest_vcov_request")){
     if(!is.null(vcov$ssc)) ssc = vcov$ssc
+    if(!is.null(vcov$vcov_fix)) vcov_fix = vcov$vcov_fix
     var_names_all = vcov$var_names_all
     var_values_all = vcov$vcov_vars
     extra_args = vcov$extra_args
@@ -874,29 +875,44 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
   #### ... vcov attributes ####
   ####
 
-  # After discussing, we decided that since this test is relatively cheap, we will do it every time. 
-  # We will warn even if `vcov_fix == FALSE`.
+  # After discussing, we decided that since this test is relatively cheap, we will do it every time.
   eigenvalues = eigen(vcov_mat, symmetric = TRUE, only.values = TRUE)$values
-  if (any(eigenvalues < 1e-12)) {
-    # We 'fix' it
-    if (vcov_fix) {
-      all_attr = attributes(vcov_mat)
-      vcov_mat = mat_posdef_fix(vcov_mat)
-      is_complex = isTRUE(attr(vcov_mat, "is_complex"))
-      attributes(vcov_mat) = all_attr
-
-      if (is_complex) {
-        # we should never have a complex VCOV, but just in case...
-        warning("The VCOV matrix could not be fixed since its eigenvalues were complex. The complex standard-errors are reported for information purposes.", call. = FALSE)
-        vcov_mat = as.complex(vcov_mat)
-      } else if(!isFALSE(dots$warn)){
-        warning("The VCOV matrix is not positive semi-definite and was 'fixed' (see ?vcov).", 
-                call. = FALSE)
-      } 
-    } else if(!isFALSE(dots$warn)){
-      warning("The VCOV matrix is not positive semi-definite (see ?vcov).", 
-              call. = FALSE)
+  if(any(eigenvalues <= 0)){
+    # We 'fix' it by regularizing the VCOV
+    # NOTA: we ALWAYS fix even if vcov_fix = FALSE
+    #       => we only report a warning if the changes are "noticeable" 
+    
+    all_attr = attributes(vcov_mat)
+    fixed_vcov = mat_posdef_fix(vcov_mat)
+    
+    noticeable_change = max(abs(vcov_mat - fixed_vcov)) > 1e-8
+    
+    if(vcov_fix){
+      # we always turn it into positive definite even if the change is not noticeable
+      # because other software down the road may expect PD
+      is_complex = isTRUE(attr(fixed_vcov, "is_complex"))
+      attributes(fixed_vcov) = all_attr
+      vcov_mat = fixed_vcov
     }
+    
+    if(noticeable_change){
+      if(vcov_fix){
+        if(is_complex){
+          # we should never have a complex VCOV, but just in case...
+          warning("The VCOV matrix could not be fixed since its eigenvalues were complex. The complex standard-errors are reported for information purposes.", call. = FALSE)
+          vcov_mat = as.complex(vcov_mat)
+          
+        } else if(!isFALSE(dots$warn)){
+          warning("The VCOV matrix is not positive definite and was 'fixed' (see ?vcov).", 
+                  call. = FALSE)
+          
+        } 
+      } else if(!isFALSE(dots$warn)){
+        warning("The VCOV matrix is not positive definite (see ?vcov).", call. = FALSE)
+      }
+    }
+    
+    
   }
 
   if(is_attr){
@@ -1167,7 +1183,7 @@ vcov_hetero = function(x, type = "hc1", exact = TRUE, boot.size = NULL,
   use_request = IS_REQUEST
 
   extra_args = list(exact = exact, boot.size = boot.size)
-  vcov_request = list(vcov = type, ssc = ssc, extra_args = extra_args)
+  vcov_request = list(vcov = type, ssc = ssc, vcov_fix = vcov_fix, extra_args = extra_args)
   class(vcov_request) = "fixest_vcov_request"
 
 
@@ -1320,9 +1336,9 @@ vcov_cluster = function(x, cluster = NULL, ssc = NULL, vcov_fix = TRUE){
 
   }
 
-  if(use_request || !is.null(ssc)){
+  if(use_request || !is.null(ssc) || isFALSE(vcov_fix)){
     vcov_request = list(vcov = vcov, vcov_vars = vcov_vars,
-              var_names_all = var_names_all, ssc = ssc)
+              var_names_all = var_names_all, ssc = ssc, vcov_fix = vcov_fix)
     class(vcov_request) = "fixest_vcov_request"
 
   } else {
@@ -1455,9 +1471,9 @@ vcov_DK = function(x, time = NULL, lag = NULL, ssc = NULL, vcov_fix = TRUE){
   # recreating the call
   vcov = .xpd(lhs = "dk", rhs = time)
 
-  if(!is.null(lag) || !is.null(ssc)){
+  if(!is.null(lag) || !is.null(ssc) || isFALSE(vcov_fix)){
     extra_args = list(lag = lag)
-    vcov_request = list(vcov = vcov, ssc = ssc, extra_args = extra_args)
+    vcov_request = list(vcov = vcov, ssc = ssc, extra_args = extra_args, vcov_fix = vcov_fix)
     class(vcov_request) = "fixest_vcov_request"
   } else {
     # Everything can fit into a vcov formula
@@ -1510,9 +1526,9 @@ vcov_NW = function(x, unit = NULL, time = NULL, lag = NULL, ssc = NULL, vcov_fix
   # recreating the call
   vcov = .xpd(lhs = "nw", rhs = c(unit, time))
 
-  if(!is.null(lag) || !is.null(ssc)){
+  if(!is.null(lag) || !is.null(ssc) || isFALSE(vcov_fix)){
     extra_args = list(lag = lag)
-    vcov_request = list(vcov = vcov, ssc = ssc, extra_args = extra_args)
+    vcov_request = list(vcov = vcov, ssc = ssc, extra_args = extra_args, vcov_fix = vcov_fix)
     class(vcov_request) = "fixest_vcov_request"
   } else {
     # Everything can fit into a vcov formula
@@ -1646,7 +1662,7 @@ vcov_conley = function(x, lat = NULL, lon = NULL, cutoff = NULL, pixel = 0,
   vcov = .xpd(lhs = "conley", rhs = c(lat, lon))
 
   extra_args = list(cutoff = cutoff, pixel = pixel, distance = distance)
-  vcov_request = list(vcov = vcov, ssc = ssc, extra_args = extra_args)
+  vcov_request = list(vcov = vcov, ssc = ssc, vcov_fix = vcov_fix, extra_args = extra_args)
   class(vcov_request) = "fixest_vcov_request"
 
   if(IS_REQUEST){

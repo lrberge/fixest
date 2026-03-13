@@ -1,0 +1,4 @@
+method,type,time
+pyfixest.feols,base,26.011361100001523
+pyfixest.feols,multiple-y,41.416772700000365
+pyfixest.feols,multiple-vcov,41.08795210000062

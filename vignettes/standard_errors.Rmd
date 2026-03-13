@@ -204,7 +204,7 @@ Now for clustered SEs:
 se_lm_firm    = se(vcovCL(est_lm, cluster = ~firm, type = "HC1"))["capital"]
 se_plm_firm   = se(vcovHC(est_plm, cluster = "group"))["capital"]
 se_stata_firm = 0.06328129    # vce(cluster firm)
-se_feols_firm = se(est_feols, vcov = "cluster")
+se_feols_firm = se(est_feols, vcov = ~firm)
 
 rbind(se_lm_firm, se_plm_firm, se_stata_firm, se_feols_firm)
 ```
@@ -215,11 +215,11 @@ Now let's see how to replicate the standard-errors from `lm` and `plm`:
 
 ```{r}
 # How to get the lm version
-se_feols_firm_lm = se(est_feols, ssc = ssc(K.fixef = "full"))
+se_feols_firm_lm = se(est_feols, vcov = ~firm, ssc = ssc(K.fixef = "full"))
 rbind(se_lm_firm, se_feols_firm_lm)
 
 # How to get the plm version
-se_feols_firm_plm = se(est_feols, ssc = ssc(K.fixef = "none", G.adj = FALSE))
+se_feols_firm_plm = se(est_feols, vcov = ~firm, ssc = ssc(K.fixef = "none", G.adj = FALSE))
 rbind(se_plm_firm, se_feols_firm_plm)
 ```
 
@@ -296,13 +296,13 @@ se_lfe_firm = se(est_lfe)
 rbind(se_lfe_firm, se_feols_firm)
 
 # You have to provide a custom VCOV to replicate lfe's VCOV
-my_vcov = vcov(est_feols, ssc = ssc(K.adj = FALSE))
+my_vcov = vcov(est_feols, vcov = ~firm, ssc = ssc(K.adj = FALSE))
 se(est_feols, vcov = my_vcov * 199/198) # Note that there are 200 observations
 
 # Differently from feols, the SEs in lfe are different if year is not a FE:
 # => now SEs are identical.
 rbind(se(felm(inv ~ capital + factor(year) | firm | 0 | firm, Grunfeld))["capital"],
-      se(feols(inv ~ capital + factor(year) | firm, Grunfeld))["capital"])
+      se(feols(inv ~ capital + factor(year) | firm, Grunfeld), vcov = ~firm)["capital"])
 
 # Now with two-way clustered standard-errors
 est_lfe_2way  = felm(inv ~ capital | firm + year | 0 | firm + year, Grunfeld)
