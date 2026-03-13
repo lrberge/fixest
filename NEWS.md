@@ -1,5 +1,16 @@
 
+
 # fixest 0.13.3
+
+## Bug fixes
+
+- vcov: fig bug in the message when `vcov_fix = FALSE` and the matrix is found to be non postive definite. Reported by @MatthieuStigler.
+
+- `etable`: fix bug when extralines or headers was single valued (fixes #399)
+
+- fix bug leading to R crach when the dependent variable contained only missing values (reported by @Orgron, #603)
+
+- `update.fixest()` and `update.fixest_multi()` no longer throw a warning if `use_calling_env` is used (#619, @etiennebacher).
 
 ## New features
 
@@ -7,11 +18,11 @@
 
 - in multiple estimations in which at least one estimation contains only missing values: no error is thrown any more
 
-## Bug fixes
+## Changes
 
-- `etable`: fix bug when extralines or headers was single valued (fixes #399)
+- VCOV: the test for non positive definite (PD) matrices becomes `x <= 0` to avoid overfixing. This leads to a less aggressive matrix regularization. Even if the effect of fixing was negligible, the messages were annoying. Thanks to @MatthieuStigler for pushing this.
 
-- fix bug leading to R crach when the dependent variable contained only missing values (reported by @Orgron, #603)
+- VCOV: when the VCOV is not PD, the user is informed only if the regularized PD matrix is noticeably different (at least one difference larger than `1e-8`).
 
 # fixest 0.13.2
 
