@@ -591,7 +591,7 @@ replace_target_with_expr = function(expr, target, replacement){
   return(expr)
 }
 
-fixest_upadte_formula = function(fml_new, fml_old){
+fixest_update_formula = function(fml_new, fml_old){
   
   all_parts_old = fml_split(fml_old)
   all_parts_new = fml_split(fml_new)
@@ -651,7 +651,7 @@ fixest_upadte_formula = function(fml_new, fml_old){
     
   }
   
-  fml_iv = iv_old
+  fml_iv = NULL
   if(!is.null(iv_new)){
     if(identical(iv_new[[2]], 0)){
       # y ~ . | . | 0

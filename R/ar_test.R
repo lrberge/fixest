@@ -85,161 +85,34 @@
   # Name beta0 for clarity
   names(beta0) <- endo_names
 
-  # Fetch the data
   data <- fetch_data(object, "To apply AR test, ")
-
-  # Apply obs_selection to filter data to the estimation sample
-  # obs_selection may contain indices for subset selection and/or 
-  # negative indices for removed observations (obsRemoved)
-  if (length(object$obs_selection) > 0) {
-    for (obs in object$obs_selection) {
-      data <- data[obs, , drop = FALSE]
-    }
-  }
+  data = data[obs(object), , drop = FALSE]
 
   # Get the dependent variable
   fml_linear <- formula(object, type = "linear")
   y_vec <- eval(fml_linear[[2]], data)
 
-  # Get the endogenous variable matrix
-  endo_mat <- model.matrix(
-    object,
-    data = data,
-    type = "iv.endo",
-    collin.rm = FALSE
-  )
-
   # Compute transformed outcome: y* = y - X * beta0
-  y_tilde <- as.numeric(y_vec - endo_mat %*% beta0)
-
-  # Store y_tilde in a temporary column with unique name
-  temp_y_name <- "..ar_y_tilde"
-  # Ensure uniqueness if column already exists (with a maximum of 100 attempts)
-  attempt <- 0
-  while (temp_y_name %in% names(data) && attempt < 100) {
-    temp_y_name <- paste0("..ar_y_tilde_", sample.int(1e6, 1))
-    attempt <- attempt + 1
-  }
-  if (temp_y_name %in% names(data)) {
-    stop(
-      "Could not create a unique temporary column name in the data. ",
-      "This is unexpected - please report this issue."
-    )
-  }
-  data[[temp_y_name]] <- y_tilde
-
-  # Build the AR regression formula
-  # We need: y_tilde ~ controls + instruments | fixed_effects
-
-  # Get the exogenous controls part (the linear formula RHS)
-  fml_linear_rhs <- object$fml_all$linear
-  if (length(fml_linear_rhs) == 3) {
-    controls_str <- deparse_long(fml_linear_rhs[[3]])
+  if (all(beta0 == 0)) {
+    # fast path if beta0 is all zeros
+    y_tilde <- y_vec
   } else {
-    controls_str <- "1"
-  }
-
-  # Get the instrument formula RHS
-  fml_iv <- object$fml_all$iv
-  inst_str <- deparse_long(fml_iv[[3]])
-
-  # Get the fixed effects part if any
-  fml_fe <- object$fml_all$fixef
-  if (!is.null(fml_fe)) {
-    fe_str <- paste0(" | ", deparse_long(fml_fe[[2]]))
-  } else {
-    fe_str <- ""
-  }
-
-  # Build the new formula: y_tilde ~ controls + instruments | FE
-  new_fml_str <- paste0(
-    temp_y_name,
-    " ~ ",
-    controls_str,
-    " + ",
-    inst_str,
-    fe_str
-  )
-  new_fml <- as.formula(new_fml_str)
-
-  # Get weights if present
-  weights_val <- NULL
-  if (!is.null(object$weights)) {
-    weights_val <- object$weights
-  }
-
-  # Determine vcov specification
-  # We want to preserve the original call's `vcov` argument (which may be
-  # an expression like "hetero" or a formula) unless the user provided an
-  # explicit `vcov` to this function. Avoid using the human-readable
-  # attribute `attr(object$cov.scaled, "type")` here because it contains
-  # descriptive text (e.g. "Heteroskedasticity-robust") that `feols()`
-  # does not accept as a `vcov` argument.
-  #
-  # When the original estimation was called with `vcov = ~cluster_id`, the
-  # expression stored in the call is a raw language object (class `call`).
-  # `feols()` and `vcov.fixest()` expect an actual formula object, so we
-  # coerce such calls back to formulas before reusing them.
-  as_formula_if_needed <- function(expr) {
-    if (is.null(expr) || inherits(expr, "formula")) {
-      return(expr)
-    }
-
-    if (!is.call(expr) || length(expr) == 0L) {
-      return(expr)
-    }
-
-    if (!identical(expr[[1]], as.name("~"))) {
-      return(expr)
-    }
-
-    env_linear <- environment(object$fml_all$linear)
-    if (is.null(env_linear)) {
-      env_linear <- parent.frame()
-    }
-
-    as.formula(expr, env = env_linear)
-  }
-  vcov_provided <- !missing(vcov) && !is.null(vcov)
-
-  # Run the AR regression - inherit settings from original object where possible
-  # Prefer to reuse an original call (provided via `orig_call` or from the
-  # model object) so we preserve options like weights, vcov, and other args.
-  if (is.null(orig_call)) {
-    orig_call <- object$call
-  }
-
-  if (is.call(orig_call) && length(orig_call) > 0) {
-    call_to_eval <- as.call(orig_call)
-    call_to_eval[[1]] <- as.name("feols")
-    call_to_eval$fml <- new_fml
-    call_to_eval$data <- as.name("data")
-    call_to_eval$weights <- as.name("weights_val")
-    if (vcov_provided) {
-      call_to_eval$vcov <- vcov
-    }
-    call_to_eval$notes <- FALSE
-
-    dots <- list(...)
-    if (length(dots) > 0) {
-      for (nm in names(dots)) {
-        if (nzchar(nm)) call_to_eval[[nm]] <- dots[[nm]]
-      }
-    }
-
-    ar_fit <- eval(call_to_eval)
-  } else {
-    ar_fit <- feols(
-      new_fml,
+    # Get the endogenous variable matrix
+    endo_mat <- model.matrix(
+      object,
       data = data,
-      weights = weights_val,
-      notes = FALSE,
-      ...
+      type = "iv.endo",
+      collin.rm = FALSE
     )
-  }
 
-  # Summarize to ensure we have the VCOV
-  ar_fit_sum <- summary(ar_fit, ...)
+    y_tilde <- as.numeric(y_vec - endo_mat %*% beta0)
+  }
+  data[["..ar_y_tilde"]] <- y_tilde
+
+  # Build the AR regression formula:
+  # We need: y_tilde ~ controls + instruments | fixed_effects
+  new_fml <- formula(object, fml.build = ..ar_y_tilde ~ .indep + .inst | .fixef)
+  ar_fit_sum <- update(object, fml = new_fml, data = data, use_calling_env = FALSE)
 
   # Get the coefficient names in the AR regression that correspond to instruments
   ar_coef_names <- names(ar_fit_sum$coefficients)
@@ -249,7 +122,7 @@
 
   if (length(inst_in_fit) == 0) {
     # Try a more flexible approach using the instrument formula variables
-    inst_formula_vars <- all.vars(fml_iv[[3]])
+    inst_formula_vars <- all.vars(object$fml_all$iv[[3]])
     for (v in inst_formula_vars) {
       v_escaped <- gsub("([\\^$*+?{}\\[\\]()|.])", "\\\\\\1", v)
       pattern <- paste0("^", v_escaped, "($|::)")
@@ -331,15 +204,9 @@
 #'
 #' @keywords internal
 .ar_ci_exact_iid = function(object, level = 0.95) {
-  # Fetch data
-  data <- fetch_data(object, "To compute AR CI, ")
 
-  # Apply obs_selection to filter data to the estimation sample
-  if (length(object$obs_selection) > 0) {
-    for (obs in object$obs_selection) {
-      data <- data[obs, , drop = FALSE]
-    }
-  }
+  data = fetch_data(object, "To compute AR CI, ")
+  data = data[obs(object), , drop = FALSE]
 
   # Get y, endogenous variable, and instruments
   fml_linear <- formula(object, type = "linear")
@@ -1193,176 +1060,3 @@ print.fixest_ar = function(x, ...) {
   }
 }
 
-
-# =============================================================================
-# BACKWARD COMPATIBLE ar_confint (now a wrapper)
-# =============================================================================
-
-#' Anderson-Rubin confidence interval for IV models
-#'
-#' @description
-#' Computes Anderson-Rubin confidence intervals by inverting the AR test.
-#' These confidence intervals are robust to weak instruments.
-#'
-#' Note: This function is provided for backward compatibility. The recommended
-#' approach is to use `ar_test(object, ci = TRUE)` which integrates the test
-#' and confidence interval computation.
-#'
-#' @param object A `fixest` object obtained from [`feols`] with an IV specification.
-#' @param level Numeric scalar between 0 and 1. The confidence level. Default is 0.95.
-#' @param vcov Versatile argument to specify the VCOV. See [`ar_test`] for details.
-#' @param ... Additional arguments passed to [`ar_test`].
-#'
-#' @details
-#' This function only supports models with a single endogenous variable. For models
-#' with multiple endogenous variables, the confidence region is multi-dimensional
-#' and cannot be easily represented.
-#'
-#' For iid errors, an exact closed-form confidence interval is computed.
-#' For non-iid errors (clustered, heteroskedastic, etc.), the confidence interval
-#' is computed by numerically inverting the AR test.
-#'
-#' Note that AR confidence intervals may be:
-#' \itemize{
-#'   \item Empty (if the model is severely misspecified)
-#'   \item Unbounded (if instruments are very weak)
-#'   \item Disconnected (consisting of multiple disjoint intervals)
-#' }
-#'
-#' @return
-#' An object of class `fixest_ar_confint` containing:
-#' \item{level}{The confidence level used.}
-#' \item{method}{"AR".}
-#' \item{exact}{Logical, TRUE if exact closed-form was used.}
-#' \item{intervals}{A matrix with columns "lower" and "upper" giving the
-#'   confidence interval(s). Each row is a separate interval (in case of
-#'   disconnected regions).}
-#' \item{endo_name}{The name of the endogenous variable.}
-#' \item{point_est}{The 2SLS point estimate.}
-#' \item{model}{The original `feols` IV object.}
-#'
-#' @seealso
-#' [`ar_test`] for the Anderson-Rubin test with integrated CI computation.
-#'
-#' @examples
-#' # Simple IV example
-#' set.seed(123)
-#' n <- 500
-#' z <- rnorm(n)
-#' x <- 0.5 * z + rnorm(n)
-#' y <- 1 + 0.8 * x + rnorm(n)
-#' data <- data.frame(y = y, x = x, z = z)
-#'
-#' # IV estimation
-#' est <- feols(y ~ 1 | x ~ z, data = data)
-#'
-#' # AR confidence interval (exact for iid)
-#' ar_confint(est)
-#'
-#' # With clustered SEs (numeric inversion)
-#' data$cl <- rep(1:50, each = 10)
-#' est_cl <- feols(y ~ 1 | x ~ z, data = data, vcov = ~cl)
-#' ar_confint(est_cl)
-#'
-#' @export
-ar_confint = function(object, level = 0.95, vcov = NULL, ...) {
-  # Input validation
-  check_arg(object, "class(fixest)")
-  check_arg(level, "numeric scalar GT{0} LT{1}")
-
-  # Check that object is an IV model
-  if (!isTRUE(object$iv)) {
-    stop(
-      "The `ar_confint` function requires an IV model. ",
-      "Please provide a `feols` object estimated with an IV formula."
-    )
-  }
-
-  # Currently only support single endogenous variable
-  endo_names <- object$iv_endo_names
-  if (length(endo_names) > 1) {
-    stop(
-      "The `ar_confint` function currently only supports models with a single ",
-      "endogenous variable. This model has ",
-      length(endo_names),
-      " endogenous variables: ",
-      paste(endo_names, collapse = ", "),
-      "."
-    )
-  }
-
-  endo_name <- endo_names[1]
-
-  # Get point estimate
-  coef_names <- names(object$coefficients)
-  endo_coef_name <- paste0("fit_", endo_name)
-  if (!endo_coef_name %in% coef_names) {
-    endo_coef_name <- endo_name
-  }
-
-  if (!endo_coef_name %in% coef_names) {
-    stop(
-      "Could not find the coefficient for the endogenous variable '",
-      endo_name,
-      "' in the model."
-    )
-  }
-
-  point_est <- object$coefficients[endo_coef_name]
-
-  # Determine vcov type
-  if (is.null(vcov)) {
-    if (!is.null(object$cov.scaled)) {
-      vcov_type <- attr(object$cov.scaled, "type")
-    } else {
-      vcov_type <- "iid"
-    }
-  } else {
-    # Run a quick test to determine the effective vcov type
-    test_result <- .ar_test_core(object, beta0 = 0, vcov = vcov, ...)
-    vcov_type <- test_result$vcov_type
-  }
-
-  is_iid <- identical(vcov_type, "IID") ||
-    identical(vcov_type, "iid") ||
-    identical(tolower(as.character(vcov_type)), "iid")
-
-  # Compute CI
-  if (is_iid) {
-    ci_result <- .ar_ci_exact_iid(object, level = level)
-  } else {
-    ci_result <- .ar_ci_numeric(object, level = level, vcov = vcov, ...)
-  }
-
-  res <- list(
-    level = level,
-    method = ci_result$method,
-    exact = ci_result$exact,
-    intervals = ci_result$intervals,
-    endo_name = endo_name,
-    point_est = unname(point_est),
-    model = object
-  )
-
-  class(res) <- "fixest_ar_confint"
-
-  return(res)
-}
-
-
-#' @rdname ar_confint
-#' @export
-print.fixest_ar_confint = function(x, ...) {
-  cat(
-    "2SLS point estimate: ",
-    format(x$point_est, digits = 4),
-    "\n\n",
-    sep = ""
-  )
-  .print_ar_ci(
-    list(level = x$level, exact = x$exact, intervals = x$intervals),
-    x$endo_name
-  )
-
-  invisible(x)
-}
