@@ -1340,7 +1340,11 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
           fit_no_inst = ols_fit(iv_lhs_demean[[i]], X_demean, w = weights, correct_0w = FALSE,
                                 collin.tol = collin.tol, nthreads = nthreads,
                                 xwx = iv_products$XtX, xwy = ZXtu[[i]][-(1:K)])
-          my_res$ssr_no_inst = cpp_ssq(fit_no_inst$residuals, weights)
+          if(!is.null(fit_no_inst$all_removed)){
+            my_res$ssr_no_inst = cpp_ssq(iv_lhs_demean[[i]], weights)
+          } else {
+            my_res$ssr_no_inst = cpp_ssq(fit_no_inst$residuals, weights)
+          }
         }
         
         my_res$iv_stage = 1
@@ -1438,7 +1442,11 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
         fit_no_endo = ols_fit(y_demean, X_demean, w = weights, correct_0w = FALSE,
                               collin.tol = collin.tol, nthreads = nthreads,
                               xwx = XtX, xwy = Xty)
-        res_second_stage$ssr_no_endo = cpp_ssq(fit_no_endo$residuals, weights)
+        if(!is.null(fit_no_endo$all_removed)){
+          res_second_stage$ssr_no_endo = cpp_ssq(y_demean, weights)
+        } else {
+          res_second_stage$ssr_no_endo = cpp_ssq(fit_no_endo$residuals, weights)
+        }
       }
 
     } else {
@@ -1502,7 +1510,11 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
                                 collin.tol = collin.tol, nthreads = nthreads,
                                 xwx = ZXtZX[-(1:K + is_int), -(1:K + is_int), drop = FALSE],
                                 xwy = ZXtu[[i]][-(1:K + is_int)])
-          my_res$ssr_no_inst = cpp_ssq(fit_no_inst$residuals, weights)
+          if(!is.null(fit_no_inst$all_removed)){
+            my_res$ssr_no_inst = cpp_ssr_null(iv_lhs[[i]], weights)
+          } else {
+            my_res$ssr_no_inst = cpp_ssq(fit_no_inst$residuals, weights)
+          }
         } else {
           my_res$ssr_no_inst = cpp_ssr_null(iv_lhs[[i]], weights)
         }
@@ -1600,7 +1612,11 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
         fit_no_endo = ols_fit(y, X, w = weights, correct_0w = FALSE,
                               collin.tol = collin.tol, nthreads = nthreads,
                               xwx = XtX, xwy = Xty)
-        res_second_stage$ssr_no_endo = cpp_ssq(fit_no_endo$residuals, weights)
+        if(!is.null(fit_no_endo$all_removed)){
+          res_second_stage$ssr_no_endo = cpp_ssr_null(y, weights)
+        } else {
+          res_second_stage$ssr_no_endo = cpp_ssq(fit_no_endo$residuals, weights)
+        }
       } else {
         res_second_stage$ssr_no_endo = cpp_ssr_null(y, weights)
       }
