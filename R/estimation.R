@@ -55,6 +55,8 @@
 #' over 50, it may be worth playing around with it. Please read the documentation of the 
 #' function [`demeaning_algo`]. Be aware that there is no clear guidance on how to change the 
 #' settings, it's more a matter of try-and-see.
+#' @param demeaner Character scalar, either `"MAP"` (default) or `"within"`. The default uses
+#' fixest's internal demeaning algorithm. `"within"` uses `withinr::solve_batch`.
 #'
 #' @details
 #' The method used to demean each variable along the fixed-effects is based on Berge (2018), since 
@@ -508,7 +510,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
                  ssc, panel.id, panel.time.step = NULL, 
                  panel.duplicate.method = "none", 
                  fixef, fixef.rm = "perfect_fit", fixef.tol = 1e-6,
-                 fixef.iter = 10000, fixef.algo = NULL,
+                 fixef.iter = 10000, fixef.algo = NULL, demeaner = "MAP",
                  collin.tol = 1e-9, nthreads = getFixest_nthreads(),
                  lean = FALSE, verbose = 0, warn = TRUE, notes = getFixest_notes(),
                  only.coef = FALSE, data.save = FALSE,
@@ -561,7 +563,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
                 panel.duplicate.method = panel.duplicate.method, 
                 fixef = fixef, fixef.rm = fixef.rm,
                 fixef.tol = fixef.tol, fixef.iter = fixef.iter, 
-                fixef.algo = fixef.algo, collin.tol = collin.tol,
+                fixef.algo = fixef.algo, demeaner = demeaner, collin.tol = collin.tol,
                 nthreads = nthreads, lean = lean, verbose = verbose, warn = warn,
                 notes = notes, only.coef = only.coef, data.save = data.save,
                 fixef.keep_names = fixef.keep_names, demeaned = demeaned,
@@ -1046,36 +1048,31 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
           fixef_id_list = get("fixef_id_list", my_env)
           
           fixef.algo = get("fixef.algo", env)
+          demeaner = get("demeaner", env)
 
           slope_flag = get("slope_flag", my_env)
           slope_vars = get("slope_variables", my_env)
 
           if(mem.clean) gc()
           
-          vars_demean = cpp_demean(my_lhs, X_all, weights, iterMax = fixef.iter,
-                                   diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
-                                   fe_id_list = fixef_id_list, table_id_I = fixef_table_vector,
-                                   slope_flag_Q = slope_flag, slope_vars_list = slope_vars,
-                                   r_init = init, nthreads = nthreads, 
-                                   algo_extraProj = fixef.algo$extraProj, 
-                                   algo_iter_warmup = fixef.algo$iter_warmup, 
-                                   algo_iter_projAfterAcc = fixef.algo$iter_projAfterAcc, 
-                                   algo_iter_grandAcc = fixef.algo$iter_grandAcc)
+          vars_demean = fixest_demean(my_lhs, X_all, weights, iterMax = fixef.iter,
+                                      diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
+                                      fe_id_list = fixef_id_list, table_id_I = fixef_table_vector,
+                                      slope_flag_Q = slope_flag, slope_vars_list = slope_vars,
+                                      r_init = init, nthreads = nthreads,
+                                      fixef.algo = fixef.algo, demeaner = demeaner)
 
           X_demean = vars_demean$X_demean
           y_demean = vars_demean$y_demean
 
           if(do_iv){
             
-            iv_vars_demean = cpp_demean(iv_lhs, iv.mat, weights, iterMax = fixef.iter,
-                                        diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
-                                        fe_id_list = fixef_id_list, table_id_I = fixef_table_vector,
-                                        slope_flag_Q = slope_flag, slope_vars_list = slope_vars,
-                                        r_init = init, nthreads = nthreads,
-                                        algo_extraProj = fixef.algo$extraProj, 
-                                        algo_iter_warmup = fixef.algo$iter_warmup, 
-                                        algo_iter_projAfterAcc = fixef.algo$iter_projAfterAcc, 
-                                        algo_iter_grandAcc = fixef.algo$iter_grandAcc)
+            iv_vars_demean = fixest_demean(iv_lhs, iv.mat, weights, iterMax = fixef.iter,
+                                           diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
+                                           fe_id_list = fixef_id_list, table_id_I = fixef_table_vector,
+                                           slope_flag_Q = slope_flag, slope_vars_list = slope_vars,
+                                           r_init = init, nthreads = nthreads,
+                                           fixef.algo = fixef.algo, demeaner = demeaner)
 
             iv.mat_demean = iv_vars_demean$X_demean
             iv_lhs_demean = iv_vars_demean$y_demean
@@ -1254,29 +1251,24 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
         fixef_id_list = get("fixef_id_list", env)
         
         fixef.algo = get("fixef.algo", env)
+        demeaner = get("demeaner", env)
 
         slope_flag = get("slope_flag", env)
         slope_vars = get("slope_variables", env)
 
-        vars_demean = cpp_demean(y, X, weights, iterMax = fixef.iter,
-                                 diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
-                                 fe_id_list = fixef_id_list, table_id_I = fixef_table_vector,
-                                 slope_flag_Q = slope_flag, slope_vars_list = slope_vars,
-                                 r_init = init, nthreads = nthreads,
-                                 algo_extraProj = fixef.algo$extraProj, 
-                                 algo_iter_warmup = fixef.algo$iter_warmup, 
-                                 algo_iter_projAfterAcc = fixef.algo$iter_projAfterAcc, 
-                                 algo_iter_grandAcc = fixef.algo$iter_grandAcc)
-
-        iv_vars_demean = cpp_demean(iv_lhs, iv.mat, weights, iterMax = fixef.iter,
+        vars_demean = fixest_demean(y, X, weights, iterMax = fixef.iter,
                                     diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
                                     fe_id_list = fixef_id_list, table_id_I = fixef_table_vector,
                                     slope_flag_Q = slope_flag, slope_vars_list = slope_vars,
                                     r_init = init, nthreads = nthreads,
-                                    algo_extraProj = fixef.algo$extraProj, 
-                                    algo_iter_warmup = fixef.algo$iter_warmup, 
-                                    algo_iter_projAfterAcc = fixef.algo$iter_projAfterAcc, 
-                                    algo_iter_grandAcc = fixef.algo$iter_grandAcc)
+                                    fixef.algo = fixef.algo, demeaner = demeaner)
+
+        iv_vars_demean = fixest_demean(iv_lhs, iv.mat, weights, iterMax = fixef.iter,
+                                       diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
+                                       fe_id_list = fixef_id_list, table_id_I = fixef_table_vector,
+                                       slope_flag_Q = slope_flag, slope_vars_list = slope_vars,
+                                       r_init = init, nthreads = nthreads,
+                                       fixef.algo = fixef.algo, demeaner = demeaner)
 
         X_demean = vars_demean$X_demean
         y_demean = vars_demean$y_demean
@@ -1711,6 +1703,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
     
     # control over the demeaning algorithm
     fixef.algo = get("fixef.algo", env)  
+    demeaner = get("demeaner", env)
 
     slope_flag = get("slope_flag", env)
     slope_vars = get("slope_variables", env)
@@ -1721,15 +1714,12 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
       gc()
     }
 
-    vars_demean = cpp_demean(y, X, weights, iterMax = fixef.iter,
-                             diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
-                             fe_id_list = fixef_id_list, table_id_I = fixef_table_vector,
-                             slope_flag_Q = slope_flag, slope_vars_list = slope_vars,
-                             r_init = init, nthreads = nthreads,
-                             algo_extraProj = fixef.algo$extraProj, 
-                             algo_iter_warmup = fixef.algo$iter_warmup, 
-                             algo_iter_projAfterAcc = fixef.algo$iter_projAfterAcc, 
-                             algo_iter_grandAcc = fixef.algo$iter_grandAcc)
+    vars_demean = fixest_demean(y, X, weights, iterMax = fixef.iter,
+                                diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
+                                fe_id_list = fixef_id_list, table_id_I = fixef_table_vector,
+                                slope_flag_Q = slope_flag, slope_vars_list = slope_vars,
+                                r_init = init, nthreads = nthreads,
+                                fixef.algo = fixef.algo, demeaner = demeaner)
     
     y_demean = vars_demean$y_demean
     if(onlyFixef){
@@ -2245,7 +2235,7 @@ check_conv = function(y, X, fixef_id_list, slope_flag, slope_vars, weights, full
 feols.fit = function(y, X, fixef_df, vcov, offset, split, fsplit, split.keep, split.drop,
                      cluster, se, ssc, weights,
                      subset, fixef.rm = "perfect_fit", fixef.tol = 1e-6, fixef.iter = 10000,
-                     fixef.algo = NULL, collin.tol = 1e-9,
+                     fixef.algo = NULL, demeaner = "MAP", collin.tol = 1e-9,
                      nthreads = getFixest_nthreads(), lean = FALSE,
                      warn = TRUE, notes = getFixest_notes(), mem.clean = FALSE, verbose = 0,
                      only.env = FALSE, only.coef = FALSE, env, ...){
@@ -2265,7 +2255,7 @@ feols.fit = function(y, X, fixef_df, vcov, offset, split, fsplit, split.keep, sp
                          cluster = cluster, se = se, ssc = ssc,
                          weights = weights, subset = subset, fixef.rm = fixef.rm,
                          fixef.tol = fixef.tol, fixef.iter = fixef.iter, 
-                         fixef.algo = fixef.algo, collin.tol = collin.tol,
+                         fixef.algo = fixef.algo, demeaner = demeaner, collin.tol = collin.tol,
                          nthreads = nthreads, lean = lean, warn = warn, notes = notes,
                          mem.clean = mem.clean, verbose = verbose, only.coef = only.coef,
                          origin = "feols.fit",
@@ -2479,7 +2469,7 @@ feglm = function(fml, data, family = "gaussian", vcov, offset, weights, subset, 
                  panel.time.step = NULL, panel.duplicate.method = "none",
                  start = NULL,
                  etastart = NULL, mustart = NULL, fixef, fixef.rm = "perfect_fit",
-                 fixef.tol = 1e-6, fixef.iter = 10000, fixef.algo = NULL, 
+                 fixef.tol = 1e-6, fixef.iter = 10000, fixef.algo = NULL, demeaner = "MAP",
                  collin.tol = 1e-9,
                  glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(),
                  lean = FALSE, warn = TRUE, notes = getFixest_notes(), verbose = 0,
@@ -2505,7 +2495,7 @@ feglm = function(fml, data, family = "gaussian", vcov, offset, weights, subset, 
                          linear.start = start,
                          etastart=etastart, mustart = mustart, fixef = fixef,
                          fixef.rm = fixef.rm, fixef.tol = fixef.tol,
-                         fixef.iter = fixef.iter, fixef.algo = fixef.algo,
+                         fixef.iter = fixef.iter, fixef.algo = fixef.algo, demeaner = demeaner,
                          collin.tol = collin.tol,
                          glm.iter = glm.iter, glm.tol = glm.tol,
                          nthreads = nthreads, lean = lean, warn = warn, notes = notes,
@@ -2545,7 +2535,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
                      fsplit, split.keep, split.drop, cluster, se, ssc, 
                      weights, subset, start = NULL,
                      etastart = NULL, mustart = NULL, fixef.rm = "perfect_fit",
-                     fixef.tol = 1e-6, fixef.iter = 10000, fixef.algo = NULL, 
+                     fixef.tol = 1e-6, fixef.iter = 10000, fixef.algo = NULL, demeaner = "MAP",
                      collin.tol = 1e-9,
                      glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(),
                      lean = FALSE, warn = TRUE, notes = getFixest_notes(), mem.clean = FALSE,
@@ -2578,6 +2568,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
     if(missing(fixef.tol)) fixef.tol = get("fixef.tol", env)
     if(missing(fixef.iter)) fixef.iter = get("fixef.iter", env)
     if(missing(fixef.algo)) fixef.algo = get("fixef.algo", env)
+    if(missing(demeaner)) demeaner = get("demeaner", env)
     if(missing(collin.tol)) collin.tol = get("collin.tol", env)
     if(missing(glm.iter)) glm.iter = get("glm.iter", env)
     if(missing(glm.tol)) glm.tol = get("glm.tol", env)
@@ -2618,7 +2609,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
                          se = se, ssc = ssc, linear.start = start,
                          etastart = etastart, mustart = mustart, fixef.rm = fixef.rm,
                          fixef.tol = fixef.tol, fixef.iter = fixef.iter,
-                         fixef.algo = fixef.algo,
+                         fixef.algo = fixef.algo, demeaner = demeaner,
                          collin.tol = collin.tol, glm.iter = glm.iter,
                          glm.tol = glm.tol, notes = notes, mem.clean = mem.clean,
                          only.coef = only.coef,
@@ -3610,7 +3601,7 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
                   cluster, se, ssc, panel.id, panel.time.step = NULL, 
                   panel.duplicate.method = "none", start = NULL, etastart = NULL,
                   mustart = NULL, fixef, fixef.rm = "perfect_fit", fixef.tol = 1e-6,
-                  fixef.iter = 10000, fixef.algo = NULL,
+                  fixef.iter = 10000, fixef.algo = NULL, demeaner = "MAP",
                   collin.tol = 1e-9, glm.iter = 25, glm.tol = 1e-8,
                   nthreads = getFixest_nthreads(), lean = FALSE, 
                   warn = TRUE, notes = getFixest_notes(),
@@ -3634,7 +3625,7 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
                   panel.duplicate.method = panel.duplicate.method,
                   start = start, etastart = etastart, mustart = mustart, fixef = fixef,
                   fixef.rm = fixef.rm, fixef.tol = fixef.tol, fixef.iter = fixef.iter,
-                  fixef.algo = fixef.algo,
+                  fixef.algo = fixef.algo, demeaner = demeaner,
                   collin.tol = collin.tol, glm.iter = glm.iter, glm.tol = glm.tol,
                   nthreads = nthreads, lean = lean, warn = warn, notes = notes,
                   verbose = verbose, fixef.keep_names = fixef.keep_names, mem.clean = mem.clean,
@@ -5230,10 +5221,6 @@ multi_fixef = function(env, estfun){
   return(res_multi)
 
 }
-
-
-
-
 
 
 

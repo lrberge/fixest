@@ -20,7 +20,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
                       lean = FALSE, verbose = 0, theta.init, fixef.tol = 1e-5,
                       fixef.iter = 10000, collin.tol = 1e-14, deriv.iter = 5000,
                       deriv.tol = 1e-4, glm.iter = 25, glm.tol = 1e-8, etastart, mustart,
-                      fixef.algo = NULL,
+                      fixef.algo = NULL, demeaner = "MAP",
                       warn = TRUE, notes = getFixest_notes(), fixef.keep_names, demeaned = FALSE,
                       origin_bis = NULL, origin = "feNmlm", mc_origin, mc_origin_bis, mc_origin_ter,
                       computeModel0 = FALSE, weights = NULL, only.coef = FALSE,
@@ -82,8 +82,8 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
   feNmlm_args = c("NL.fml", "NL.start", "lower", "upper", "NL.start.init", 
                   "jacobian.method", "useHessian", "hessian.args")
   feglm_args = c("family", "weights", "glm.iter", "glm.tol", "etastart", "mustart", 
-                 "collin.tol", "fixef.algo")
-  feols_args = c("weights", "demeaned", "collin.tol", "fixef.algo")
+                 "collin.tol", "fixef.algo", "demeaner")
+  feols_args = c("weights", "demeaned", "collin.tol", "fixef.algo", "demeaner")
   internal_args = c("debug")
 
   deprec_new_old = c("fixef.keep_names" = "combine.quick")
@@ -291,6 +291,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
     if(is.null(fixef.algo)){
       fixef.algo = demeaning_algo(internal = TRUE)
     }
+    check_set_arg(demeaner, "match(MAP, within)")
   }
 
   check_set_arg(fixef.rm, "match(singletons, infinite_coef, perfect_fit, none)")
@@ -3058,6 +3059,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
   # => because in multiple FE estimations, isFixef  = FALSE
   # In any case there is no extra burden
   assign("fixef.algo", fixef.algo, env)
+  assign("demeaner", demeaner, env)
 
 
   #
@@ -3197,7 +3199,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
 
   res = list(nobs = nobs, nobs_origin = nobs_origin, fml = fml_linear, call = mc_origin,
              call_env = call_env, method = origin, method_type = origin_type, 
-             fixef.algo = fixef.algo)
+             fixef.algo = fixef.algo, demeaner = demeaner)
   
   if(data.save){
     res$data = data
@@ -4742,4 +4744,3 @@ split_select = function(items, keep, drop){
 
   which(items %in% res)
 }
-

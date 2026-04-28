@@ -2375,7 +2375,7 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
                   sample = "estimation",
                   nthreads = getFixest_nthreads(), notes = getFixest_notes(),
                   iter = 2000, tol = 1e-6, 
-                  fixef.reorder = TRUE, fixef.algo = NULL,
+                  fixef.reorder = TRUE, fixef.algo = NULL, demeaner = "MAP",
                   na.rm = TRUE, as.matrix = is.atomic(X),
                   im_confident = FALSE, ...) {
 
@@ -2411,6 +2411,7 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
     check_arg(notes, "logical scalar")
     check_set_arg(sample, "match(original, estimation)")
     check_arg("NULL class(demeaning_algo)", fixef.algo)
+    check_set_arg(demeaner, "match(MAP, within)")
 
     validate_dots(valid_args = "fe_info", stop = TRUE)
     dots = list(...)
@@ -2812,15 +2813,12 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
     X = 0
   }
 
-  vars_demean = cpp_demean(y, X, weights, iterMax = iter,
-                           diffMax = tol, r_nb_id_Q = fixef_sizes,
-                           fe_id_list = all_index_info$index, table_id_I = fixef_table_vector,
-                           slope_flag_Q = slope.flag, slope_vars_list = slope.vars,
-                           r_init = 0, nthreads = nthreads, 
-                           algo_extraProj = fixef.algo$extraProj, 
-                           algo_iter_warmup = fixef.algo$iter_warmup, 
-                           algo_iter_projAfterAcc = fixef.algo$iter_projAfterAcc, 
-                           algo_iter_grandAcc = fixef.algo$iter_grandAcc)
+  vars_demean = fixest_demean(y, X, weights, iterMax = iter,
+                              diffMax = tol, r_nb_id_Q = fixef_sizes,
+                              fe_id_list = all_index_info$index, table_id_I = fixef_table_vector,
+                              slope_flag_Q = slope.flag, slope_vars_list = slope.vars,
+                              r_init = 0, nthreads = nthreads,
+                              fixef.algo = fixef.algo, demeaner = demeaner)
 
   # Internal call
   if(fe_info){
@@ -3465,6 +3463,163 @@ demeaning_algo = function(extraProj = 0, iter_warmup = 15, iter_projAfterAcc = 4
   class(res) = "demeaning_algo"
   
   res
+}
+
+fixest_demean = function(y, X_raw, r_weights, iterMax, diffMax, r_nb_id_Q,
+                         fe_id_list, table_id_I, slope_flag_Q, slope_vars_list,
+                         r_init, nthreads, fixef.algo, demeaner = "MAP"){
+
+  call_cpp_demean = function(){
+    cpp_demean(y, X_raw, r_weights, iterMax, diffMax, r_nb_id_Q,
+               fe_id_list, table_id_I, slope_flag_Q, slope_vars_list,
+               r_init, nthreads,
+               algo_extraProj = fixef.algo$extraProj,
+               algo_iter_warmup = fixef.algo$iter_warmup,
+               algo_iter_projAfterAcc = fixef.algo$iter_projAfterAcc,
+               algo_iter_grandAcc = fixef.algo$iter_grandAcc)
+  }
+
+  # For one-way fixed effects, always use the cpp_demean backend.
+  if(demeaner == "MAP" || length(r_nb_id_Q) == 1){
+    return(call_cpp_demean())
+  }
+
+  if(!requireNamespace("withinr", quietly = TRUE)){
+    stop("Using demeaner = \"within\" requires the package 'withinr'. ",
+         "Install it with install.packages(\"withinr\").")
+  }
+
+  if(any(slope_flag_Q != 0)){
+    stop("demeaner = \"within\" does not support varying slopes. ",
+         "Use demeaner = \"MAP\" for models with varying slopes.")
+  }
+
+  get_mat_info = function(x, single_obs = FALSE){
+    if(is.list(x)){
+      K = 0
+      n = 0
+      L = length(x)
+      if(L > 0){
+        for(i in seq_len(L)){
+          xx = x[[i]]
+          dx = dim(xx)
+          if(is.null(dx)){
+            n_tmp = length(xx)
+            K_tmp = 1
+          } else {
+            n_tmp = dx[1]
+            K_tmp = dx[2]
+          }
+          if(i == 1){
+            n = n_tmp
+          }
+          K = K + K_tmp
+        }
+      }
+      return(list(n = n, K = K, is_list = TRUE))
+    }
+
+    dx = dim(x)
+    if(is.null(dx)){
+      n = length(x)
+      K = 1
+    } else {
+      n = dx[1]
+      K = dx[2]
+    }
+
+    if(!single_obs && n == 1 && K == 1){
+      n = 0
+      K = 0
+    }
+
+    list(n = n, K = K, is_list = FALSE)
+  }
+
+  info_y = get_mat_info(y, single_obs = FALSE)
+  info_X = get_mat_info(X_raw, single_obs = FALSE)
+
+  n_obs = if(info_y$K > 0) info_y$n else info_X$n
+  if(n_obs == 0 || n_obs == 1){
+    info_y = get_mat_info(y, single_obs = TRUE)
+    info_X = get_mat_info(X_raw, single_obs = TRUE)
+    n_obs = if(info_y$K > 0) info_y$n else info_X$n
+  }
+
+  useY = info_y$K > 0
+  useX = info_X$K > 0
+  n_vars_y = info_y$K
+  n_vars_X = info_X$K
+  is_y_list = useY && (info_y$is_list || n_vars_y > 1)
+
+  X_mat = NULL
+  if(useX){
+    X_mat = as.matrix(X_raw)
+  }
+
+  y_mat = NULL
+  if(useY){
+    y_mat = if(info_y$is_list) do.call("cbind", y) else as.matrix(y)
+  }
+
+  Y = NULL
+  if(useX && useY){
+    Y = cbind(X_mat, y_mat)
+  } else if(useX){
+    Y = X_mat
+  } else if(useY){
+    Y = y_mat
+  } else {
+    Y = matrix(0, nrow = 1, ncol = 1)
+  }
+
+  categories = do.call("cbind", fe_id_list)
+  if(!is.matrix(categories)){
+    categories = matrix(categories, ncol = 1)
+  }
+
+  w = if(length(r_weights) == 1) NULL else r_weights
+
+  result = withinr::solve_batch(categories, Y, weights = w,
+                                tol = diffMax, maxiter = as.integer(iterMax))
+
+  dm = as.matrix(result$demeaned)
+  n_vars = n_vars_X + n_vars_y
+  if(ncol(dm) != n_vars && n_vars == 1){
+    dm = matrix(dm, ncol = 1)
+  } else if(ncol(dm) != n_vars && n_vars > 1){
+    stop("Internal error in demeaner = \"within\": unexpected number of output columns.")
+  }
+
+  if(useX){
+    X_demean = dm[, seq_len(n_vars_X), drop = FALSE]
+    colnames(X_demean) = colnames(X_mat)
+  } else {
+    X_demean = matrix(0, nrow = 1, ncol = 1)
+  }
+
+  if(!useY){
+    y_demean = 0
+  } else if(is_y_list){
+    y_idx = (n_vars_X + 1):(n_vars_X + n_vars_y)
+    y_demean = lapply(y_idx, function(i) dm[, i])
+  } else {
+    y_demean = dm[, n_vars_X + 1]
+  }
+
+  iter_raw = result$iterations
+  if(is.null(iter_raw)){
+    iterations = rep.int(0L, n_vars)
+  } else {
+    iterations = as.integer(iter_raw)
+    if(length(iterations) == 1L){
+      iterations = rep.int(iterations, n_vars)
+    } else if(length(iterations) != n_vars){
+      iterations = rep.int(as.integer(max(iterations)), n_vars)
+    }
+  }
+
+  list(X_demean = X_demean, y_demean = y_demean, iterations = iterations, means = 0)
 }
 
 #### ------------- ####
@@ -7495,9 +7650,10 @@ setFixest_estimation = function(data = NULL, panel.id = NULL, fixef.rm = "perfec
                                 fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10,
                                 lean = FALSE, verbose = 0, warn = TRUE, fixef.keep_names = NULL,
                                 demeaned = FALSE, mem.clean = FALSE, glm.iter = 25,
-                                glm.tol = 1e-8, data.save = FALSE, reset = FALSE){
+                                glm.tol = 1e-8, demeaner = "MAP", data.save = FALSE, reset = FALSE){
 
   check_set_arg(fixef.rm, "match(singletons, infinite_coef, perfect_fit, none)")
+  check_set_arg(demeaner, "match(MAP, within)")
   check_arg(fixef.tol, collin.tol, glm.tol, "numeric scalar GT{0}")
   check_arg(fixef.iter, glm.iter, "integer scalar GE{1}")
   check_arg(verbose, "integer scalar GE{0}")
@@ -7593,11 +7749,6 @@ getFixest_multi = function(){
 
   x
 }
-
-
-
-
-
 
 
 
