@@ -3583,6 +3583,11 @@ fixest_demean = function(y, X_raw, r_weights, iterMax, diffMax, r_nb_id_Q,
   result = withinr::solve_batch(categories, Y, weights = w,
                                 tol = diffMax, maxiter = as.integer(iterMax))
 
+  if(!all(result$converged)){
+    warning("withinr::solve_batch did not converge for all variables. ",
+            "Consider increasing fixef.iter or using demeaner = \"MAP\".")
+  }
+
   dm = as.matrix(result$demeaned)
   n_vars = n_vars_X + n_vars_y
   if(ncol(dm) != n_vars && n_vars == 1){
