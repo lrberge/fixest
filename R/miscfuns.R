@@ -3494,90 +3494,18 @@ fixest_demean = function(y, X_raw, r_weights, iterMax, diffMax, r_nb_id_Q,
          "Use demeaner = \"MAP\" for models with varying slopes.")
   }
 
-  get_mat_info = function(x, single_obs = FALSE){
-    if(is.list(x)){
-      K = 0
-      n = 0
-      L = length(x)
-      if(L > 0){
-        for(i in seq_len(L)){
-          xx = x[[i]]
-          dx = dim(xx)
-          if(is.null(dx)){
-            n_tmp = length(xx)
-            K_tmp = 1
-          } else {
-            n_tmp = dx[1]
-            K_tmp = dx[2]
-          }
-          if(i == 1){
-            n = n_tmp
-          }
-          K = K + K_tmp
-        }
-      }
-      return(list(n = n, K = K, is_list = TRUE))
-    }
+  is_y_list = is.list(y)
+  has_y = is_y_list || (is.numeric(y) && length(y) > 1)
+  has_X = is.numeric(X_raw) && length(X_raw) > 1
 
-    dx = dim(x)
-    if(is.null(dx)){
-      n = length(x)
-      K = 1
-    } else {
-      n = dx[1]
-      K = dx[2]
-    }
+  y_mat = if(is_y_list) do.call(cbind, y) else if(has_y) as.matrix(y) else NULL
+  X_mat = if(has_X) as.matrix(X_raw) else NULL
+  n_y = NCOL(y_mat)
+  n_X = NCOL(X_mat)
 
-    if(!single_obs && n == 1 && K == 1){
-      n = 0
-      K = 0
-    }
+  Y = cbind(X_mat, y_mat)
 
-    list(n = n, K = K, is_list = FALSE)
-  }
-
-  info_y = get_mat_info(y, single_obs = FALSE)
-  info_X = get_mat_info(X_raw, single_obs = FALSE)
-
-  n_obs = if(info_y$K > 0) info_y$n else info_X$n
-  if(n_obs == 0 || n_obs == 1){
-    info_y = get_mat_info(y, single_obs = TRUE)
-    info_X = get_mat_info(X_raw, single_obs = TRUE)
-    n_obs = if(info_y$K > 0) info_y$n else info_X$n
-  }
-
-  useY = info_y$K > 0
-  useX = info_X$K > 0
-  n_vars_y = info_y$K
-  n_vars_X = info_X$K
-  is_y_list = useY && (info_y$is_list || n_vars_y > 1)
-
-  X_mat = NULL
-  if(useX){
-    X_mat = as.matrix(X_raw)
-  }
-
-  y_mat = NULL
-  if(useY){
-    y_mat = if(info_y$is_list) do.call("cbind", y) else as.matrix(y)
-  }
-
-  Y = NULL
-  if(useX && useY){
-    Y = cbind(X_mat, y_mat)
-  } else if(useX){
-    Y = X_mat
-  } else if(useY){
-    Y = y_mat
-  } else {
-    Y = matrix(0, nrow = 1, ncol = 1)
-  }
-
-  categories = do.call("cbind", fe_id_list)
-  if(!is.matrix(categories)){
-    categories = matrix(categories, ncol = 1)
-  }
-
+  categories = do.call(cbind, fe_id_list)
   w = if(length(r_weights) == 1) NULL else r_weights
 
   result = withinr::solve_batch(categories, Y, weights = w,
@@ -3588,43 +3516,25 @@ fixest_demean = function(y, X_raw, r_weights, iterMax, diffMax, r_nb_id_Q,
             "Consider increasing fixef.iter or using demeaner = \"MAP\".")
   }
 
-  dm = as.matrix(result$demeaned)
-  n_vars = n_vars_X + n_vars_y
-  if(ncol(dm) != n_vars && n_vars == 1){
-    dm = matrix(dm, ncol = 1)
-  } else if(ncol(dm) != n_vars && n_vars > 1){
-    stop("Internal error in demeaner = \"within\": unexpected number of output columns.")
-  }
+  dm = result$demeaned
 
-  if(useX){
-    X_demean = dm[, seq_len(n_vars_X), drop = FALSE]
+  if(has_X){
+    X_demean = dm[, seq_len(n_X), drop = FALSE]
     colnames(X_demean) = colnames(X_mat)
   } else {
-    X_demean = matrix(0, nrow = 1, ncol = 1)
+    X_demean = 0
   }
 
-  if(!useY){
+  if(!has_y){
     y_demean = 0
   } else if(is_y_list){
-    y_idx = (n_vars_X + 1):(n_vars_X + n_vars_y)
-    y_demean = lapply(y_idx, function(i) dm[, i])
+    y_demean = lapply((n_X + 1):(n_X + n_y), function(i) dm[, i])
   } else {
-    y_demean = dm[, n_vars_X + 1]
+    y_demean = dm[, n_X + 1]
   }
 
-  iter_raw = result$iterations
-  if(is.null(iter_raw)){
-    iterations = rep.int(0L, n_vars)
-  } else {
-    iterations = as.integer(iter_raw)
-    if(length(iterations) == 1L){
-      iterations = rep.int(iterations, n_vars)
-    } else if(length(iterations) != n_vars){
-      iterations = rep.int(as.integer(max(iterations)), n_vars)
-    }
-  }
-
-  list(X_demean = X_demean, y_demean = y_demean, iterations = iterations, means = 0)
+  list(X_demean = X_demean, y_demean = y_demean,
+       iterations = as.integer(result$iterations), means = 0)
 }
 
 #### ------------- ####
