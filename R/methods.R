@@ -3352,7 +3352,7 @@ update.fixest = function(object, fml.update = NULL, fml = NULL, nframes = 1,
   if(!is.null(fml)){
     fml_new = fml
   } else if(!is.null(fml.update)){
-    fml_new = fixest_upadte_formula(fml.update, fml_new)
+    fml_new = fixest_update_formula(fml.update, fml_new)
   }
 
   #
@@ -3560,7 +3560,7 @@ formula.fixest = function(x, type = "full", fml.update = NULL,
   
   if(!is.null(fml.update)){
     fml_old = merge_fml(x$fml_all$linear, x$fml_all$fixef, x$fml_all$iv)
-    res = fixest_upadte_formula(fml.update, fml_old)
+    res = fixest_update_formula(fml.update, fml_old)
     
     return(res)
     
@@ -3588,7 +3588,7 @@ formula.fixest = function(x, type = "full", fml.update = NULL,
     }
     
     fml_old = merge_fml(fml_main, fml_fixef, fml_iv)
-    res = fixest_upadte_formula(fml.build, fml_old)
+    res = fixest_update_formula(fml.build, fml_old)
     
     vars = all.vars(res)
     if(".lhs" %in% vars){
