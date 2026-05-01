@@ -322,7 +322,7 @@ is_fml_inside = function(fml){
 }
 
 
-merge_fml = function(fml_linear, fml_fixef = NULL, fml_iv = NULL){
+fml_merge = function(fml_linear, fml_fixef = NULL, fml_iv = NULL){
 
   is_fe = length(fml_fixef) > 0
   is_iv = length(fml_iv) > 0

@@ -1209,7 +1209,7 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
             if(!is.null(x$fixef_terms)){
               newdata = cbind(newdata, as.data.frame(x$slope_variables))
             }
-            new_fml = merge_fml(y ~ 1, x$fml_all$fixef)
+            new_fml = fml_merge(y ~ 1, x$fml_all$fixef)
             res_fe = feglm(fml = new_fml, data = newdata, glm.tol = 1e-2, fixef.tol = 1e-3, family = x$family$family, weights = x$weights, offset = x$offset)
 
             ll_fe_only = logLik(res_fe)
@@ -1603,7 +1603,7 @@ r2 = function(x, type = "all", full_names = FALSE){
           newdata = cbind(newdata, as.data.frame(x$slope_variables))
         }
         # Fe/slope only formula
-        new_fml = merge_fml(y ~ 1, x$fml_all$fixef)
+        new_fml = fml_merge(y ~ 1, x$fml_all$fixef)
 
         # x$family$family is also normal
         res_fe = feglm(fml = new_fml, data = newdata, glm.tol = 1e-2, 
