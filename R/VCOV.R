@@ -519,7 +519,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
             stop("To compute a clustered VCOV from a '.fit' estimation, you need to provide the variables over which to cluster with the function vcov_cluster(). E.g. vcov = vcov_cluster(cluster = df) with df a data.frame containing the clusters. Or make a regular estimation, i.e. not from '.fit'.")
           }
           if(!n_FE %in% n_patterns){
-            stop("To compute a clustered VCOV from a '.fit' estimation, you need to provide the variables over which to cluster with the function vcov = vcov_cluster(cluster = df), with df a data.frmae containing the clusters. Or make a regular estimation, i.e. not from '.fit'.")
+            stop("To compute a clustered VCOV from a '.fit' estimation, you need to provide the variables over which to cluster with the function vcov = vcov_cluster(cluster = df), with df a data.frame containing the clusters. Or make a regular estimation, i.e. not from '.fit'.")
           }
         } else {
           stop("The estimations from '.fit' methods don't support ", vcov_select$vcov_label, " VCOVs. To use them, perform a regular estimation instead.")
@@ -1356,7 +1356,7 @@ vcov_cluster = function(x, cluster = NULL, ssc = NULL, vcov_fix = TRUE){
 
       # Some further checking
       if(!is.atomic(vcov_vars[[1]])){
-        stop("If the argument 'cluster' it to be a list, it must be made of atomic vectors representing the vectors on which to cluster. Currently its first element is of class '", class(vcov_vars[[1]])[1], "'.")
+        stop("If the argument 'cluster' is to be a list, it must be made of atomic vectors representing the vectors on which to cluster. Currently its first element is of class '", class(vcov_vars[[1]])[1], "'.")
       }
 
     }
@@ -2180,7 +2180,7 @@ vcov_newey_west_internal = function(bread, scores, vars, ssc, n, K,
     dup = cpp_find_duplicates(unit_ro, time_ro)
 
     if(dup$n_dup > 0){
-      stop("In vcov.fixest, Newey-West VCOV cannot be computed: there are (unit x time) duplicates. You have to sort that out first, eg by creating new units free of duplicates or dropping duplicates. Or you can use a Driscoll-Kraay VCOV for which duplicates does not matter.", call. = FALSE)
+      stop("In vcov.fixest, Newey-West VCOV cannot be computed: there are (unit x time) duplicates. You have to sort that out first, eg by creating new units free of duplicates or dropping duplicates. Or you can use a Driscoll-Kraay VCOV for which duplicates do not matter.", call. = FALSE)
     }
 
     scores_ro = scores[my_order, , drop = FALSE]
@@ -2193,7 +2193,7 @@ vcov_newey_west_internal = function(bread, scores, vars, ssc, n, K,
   } else {
 
     if(max(time) < length(time)){
-      stop("In vcov.fixest, Newey-West VCOV cannot be computed: there are time duplicates. You may provide a panel identifier (if relevant) to sort that out. Or you can use a Driscoll-Kraay VCOV for which duplicates does not matter.", call. = FALSE)
+      stop("In vcov.fixest, Newey-West VCOV cannot be computed: there are time duplicates. You may provide a panel identifier (if relevant) to sort that out. Or you can use a Driscoll-Kraay VCOV for which duplicates do not matter.", call. = FALSE)
     }
 
     my_order = order(time)
