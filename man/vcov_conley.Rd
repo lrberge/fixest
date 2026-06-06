@@ -47,7 +47,7 @@ By default the VCOV is multiplied by (N - 1) / (N - K) with N the number of
 observations and K the number of parameters.
 To remove this adjustment, use \code{ssc=ssc(K.adj = FALSE)}.}
 
-\item{vcov_fix}{Logical scalar, default is \code{FALSE}. If the VCOV ends up not being
+\item{vcov_fix}{Logical scalar, default is \code{TRUE}. If the VCOV ends up not being
 positive definite, whether to "fix" it using an eigenvalue decomposition
 (a la Cameron, Gelbach & Miller 2011).
 Since the VCOV should be PSD asymptotically, this might be a sign of a problem
@@ -55,7 +55,7 @@ with using the asymptotic approximation (e.g. too few units in clusters).
 If a problem is detected, the function will print a message to inform you.
 Note that a message informs the user \strong{only if} the regularized PD matrix is
 substantially different than the original non PD one (i.e. at least one difference
-between the two greated than 1e-8).}
+between the two greater than 1e-8).}
 }
 \value{
 If the first argument is a \code{fixest} object, then a VCOV is returned (i.e. a symmetric matrix).
