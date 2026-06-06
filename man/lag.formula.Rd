@@ -95,7 +95,7 @@ base_dup = data.frame(id = rep(1:2, each = 4),
 try(lag(x~id+time, 1, base_dup))
 
 
-# Error is bypassed, lag corresponds to first occurence of (id, time)
+# Error is bypassed, lag corresponds to first occurrence of (id, time)
 lag(x~id+time, 1, base_dup, duplicate.method = "first")
 
 

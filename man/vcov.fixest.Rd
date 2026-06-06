@@ -235,7 +235,7 @@ se(vcov(est_geo, vcov_conley(lat = "lat", lon = "long", cutoff = 100)))
 # -------------------|
 # By default the latitude and longitude are directly fetched in the data based
 # on pattern matching. So you don't have to specify them.
-# Furhter, an automatic cutoff is deduced by default.
+# Further, an automatic cutoff is deduced by default.
 
 # The following works:
 se(vcov(est_geo, "conley"))
