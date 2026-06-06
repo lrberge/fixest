@@ -53,7 +53,7 @@ summary(gravity, vcov = "twoway", ssc = ssc(K.adj = FALSE, G.adj = FALSE))
 
 The argument `vcov` can be equal to either: `"iid"`, `"hetero"`, `"cluster"`, `"twoway"`, `"NW"`, `"DK"`, or `"conley"`.
 
-If `vcov = "iid"`, then the standard-errors are based on the assumption that the errors are non correlated and homoskedastic. If `vcov = "hetero"`, this corresponds to the classic hereoskedasticity-robust standard-errors (White correction), where it is assumed that the errors are non correlated but the variance of their generative law may vary. 
+If `vcov = "iid"`, then the standard-errors are based on the assumption that the errors are non correlated and homoskedastic. If `vcov = "hetero"`, this corresponds to the classic heteroskedasticity-robust standard-errors (White correction), where it is assumed that the errors are non correlated but the variance of their generative law may vary. 
 
 If `vcov = "cluster"`, then arbitrary correlation of the errors within clusters is accounted for. Same for `vcov = "twoway"`: arbitrary correlation within each of the two clusters is accounted for. 
 

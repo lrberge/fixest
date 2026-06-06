@@ -28,7 +28,7 @@ The type of standard-errors to use by default for estimations with \emph{one} fi
 fixed-effects.}
 
 \item{panel}{Character scalar equal to either: \code{"iid"} (default), \code{"hetero"}, \code{"cluster"}, or
-\code{"driscoll_kraaay"}. The type of standard-errors to use by default for estimations with the
+\code{"driscoll_kraay"}. The type of standard-errors to use by default for estimations with the
 argument \code{panel.id} set up. Note that panel has precedence over the presence of fixed-effects.}
 
 \item{all}{Character scalar equal to either: \code{"iid"}, or \code{"hetero"} (or \code{"cluster"} if

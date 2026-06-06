@@ -26,7 +26,7 @@ Note that the case is ignored.}
 \item{ssc}{An object returned by the function \code{\link{ssc}}. It specifies how to perform the small
 sample correction. Note that this argument is only used in \code{"HC1"} which accepts
 ssc arguments starting with \code{"K"}. In that case when \code{ssc(K.adj = FALSE)},
-it leads to "HC0". The argument \code{ssc} is ignored for \code{HC2} and \code{HC2} VCOVs.}
+it leads to "HC0". The argument \code{ssc} is ignored for \code{HC2} and \code{HC3} VCOVs.}
 
 \item{vcov_fix}{Logical scalar, default is \code{FALSE}. If the VCOV ends up not being
 positive definite, whether to "fix" it using an eigenvalue decomposition
@@ -55,7 +55,7 @@ Computes the heteroskedasticity-robust VCOV of \code{fixest} objects.
 A custom small sample correction can be applied to the HC1 VCOV using the \code{\link{ssc}} argument
 and function. By default an adjustment of N/(N-K) is applied to the VCOV, with N the number of
 observations and K the number of parameters. If \code{ssc(K.adj = FALSE)}, meaning that there is
-no adjustment, this leads to the HC0 VCOV. Finally ssc's arguemnts
+no adjustment, this leads to the HC0 VCOV. Finally ssc's arguments
 K.fixef and K.exact determine how to account for the parameters associated to the fixed-effects
 (if the estimation contains fixed-effects).
 }

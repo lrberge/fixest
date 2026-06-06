@@ -199,7 +199,7 @@ summary(est, DK(3) ~ period)
 
 est_panel = feols(y ~ x1, base_did, panel.id = ~id + period)
 
-# Both methods, NM and DK, now work automatically
+# Both methods, NW and DK, now work automatically
 summary(est_panel, "NW")
 summary(est_panel, "DK")
 

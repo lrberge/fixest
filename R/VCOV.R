@@ -73,8 +73,7 @@
 #' #
 #' # Heteroskedasticity-robust VCOV
 #' #
-#'
-#' # By default the VCOV assumes iid errors:
+#' # Heteroskedasticity-robust (White) standard errors:
 #' se(vcov(est, "hetero"))
 #'
 #' # => note that it also accepts vcov = "White" and vcov = "HC1" as aliases.
@@ -155,7 +154,7 @@
 #'
 #' est_panel = feols(y ~ x1, base_did, panel.id = ~id + period)
 #'
-#' # Both methods, NM and DK, now work automatically
+#' # Both methods, NW and DK, now work automatically
 #' se(vcov(est_panel, "NW"))
 #' se(vcov(est_panel, "DK"))
 #'
@@ -176,7 +175,7 @@
 #'
 #' # Alternative way:
 #'
-#' # -> using the vcov_DK function
+#' # -> using the vcov_conley function
 #' se(vcov(est_geo, vcov_conley(lat = "lat", lon = "long", cutoff = 100)))
 #'
 #' # -------------------|
@@ -184,7 +183,7 @@
 #' # -------------------|
 #' # By default the latitude and longitude are directly fetched in the data based
 #' # on pattern matching. So you don't have to specify them.
-#' # Furhter, an automatic cutoff is deduced by default.
+#' # Further, an automatic cutoff is deduced by default.
 #'
 #' # The following works:
 #' se(vcov(est_geo, "conley"))
@@ -1150,13 +1149,13 @@ ssc = function(K.adj = TRUE, K.fixef = "nonnested", K.exact = FALSE,
 #' @param ssc An object returned by the function [`ssc`]. It specifies how to perform the small 
 #' sample correction. Note that this argument is only used in `"HC1"` which accepts 
 #' ssc arguments starting with `"K"`. In that case when `ssc(K.adj = FALSE)`, 
-#' it leads to "HC0". The argument `ssc` is ignored for `HC2` and `HC2` VCOVs.
+#' it leads to "HC0". The argument `ssc` is ignored for `HC2` and `HC3` VCOVs.
 #'
 #' @section Small sample correction:
 #' A custom small sample correction can be applied to the HC1 VCOV using the [`ssc`] argument 
 #' and function. By default an adjustment of N/(N-K) is applied to the VCOV, with N the number of
 #' observations and K the number of parameters. If `ssc(K.adj = FALSE)`, meaning that there is 
-#' no adjustment, this leads to the HC0 VCOV. Finally ssc's arguemnts
+#' no adjustment, this leads to the HC0 VCOV. Finally ssc's arguments
 #' K.fixef and K.exact determine how to account for the parameters associated to the fixed-effects 
 #' (if the estimation contains fixed-effects).
 #' 
@@ -2452,7 +2451,7 @@ oldargs_to_vcov = function(se, cluster, vcov){
   if(missnull(cluster)){
     vcov = se
 
-  } else if(!se %in% c("cluster", "twoway", "threeway", "frouway")){
+  } else if(!se %in% c("cluster", "twoway", "threeway", "fourway")){
     stop_up("The VCOV requested with the argument se = '", se, "' is not compatible with the use of the argument 'cluster' (i.e. you have to choose!).")
 
   } else {
@@ -3105,7 +3104,7 @@ getFixest_ssc = function(vcov_name = NULL){
 #' `"twoway"`. The type of standard-errors to use by default for estimations with *two or more* 
 #' fixed-effects.
 #' @param panel Character scalar equal to either: `"iid"` (default), `"hetero"`, `"cluster"`, or 
-#' `"driscoll_kraaay"`. The type of standard-errors to use by default for estimations with the 
+#' `"driscoll_kraay"`. The type of standard-errors to use by default for estimations with the 
 #' argument `panel.id` set up. Note that panel has precedence over the presence of fixed-effects.
 #' @param all Character scalar equal to either: `"iid"`, or `"hetero"` (or `"cluster"` if 
 #' the argument `no_FE` is provided). 

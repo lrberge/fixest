@@ -124,8 +124,7 @@ se(vcov(est, "iid"))
 #
 # Heteroskedasticity-robust VCOV
 #
-
-# By default the VCOV assumes iid errors:
+# Heteroskedasticity-robust (White) standard errors:
 se(vcov(est, "hetero"))
 
 # => note that it also accepts vcov = "White" and vcov = "HC1" as aliases.
@@ -206,7 +205,7 @@ se(vcov(est, vcov_DK(time = "period", lag = 3)))
 
 est_panel = feols(y ~ x1, base_did, panel.id = ~id + period)
 
-# Both methods, NM and DK, now work automatically
+# Both methods, NW and DK, now work automatically
 se(vcov(est_panel, "NW"))
 se(vcov(est_panel, "DK"))
 
@@ -227,7 +226,7 @@ se(vcov(est_geo, conley(100) ~ lat + long))
 
 # Alternative way:
 
-# -> using the vcov_DK function
+# -> using the vcov_conley function
 se(vcov(est_geo, vcov_conley(lat = "lat", lon = "long", cutoff = 100)))
 
 # -------------------|
@@ -235,7 +234,7 @@ se(vcov(est_geo, vcov_conley(lat = "lat", lon = "long", cutoff = 100)))
 # -------------------|
 # By default the latitude and longitude are directly fetched in the data based
 # on pattern matching. So you don't have to specify them.
-# Furhter, an automatic cutoff is deduced by default.
+# Further, an automatic cutoff is deduced by default.
 
 # The following works:
 se(vcov(est_geo, "conley"))

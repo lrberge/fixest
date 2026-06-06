@@ -54,6 +54,11 @@ Useful links:
 \author{
 \strong{Maintainer}: Laurent Berge \email{laurent.berge@u-bordeaux.fr}
 
+Authors:
+\itemize{
+  \item Laurent Berge \email{laurent.berge@u-bordeaux.fr}
+}
+
 Other contributors:
 \itemize{
   \item Sebastian Krantz [contributor]
