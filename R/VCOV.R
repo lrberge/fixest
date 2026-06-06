@@ -1070,19 +1070,19 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 #' attributes(vcov(est, attr = TRUE))[c("ssc", "df.K")]
 #'
 #'
-#' # K.fixef = FALSE
+#' # K.fixef = "none"
 #' #  => adjustment K = 1 (i.e. only x)
 #' summary(est, ssc = ssc(K.fixef = "none"))
 #' attr(vcov(est, ssc = ssc(K.fixef = "none"), attr = TRUE), "df.K")
 #'
 #'
-#' # K.fixef = TRUE
+#' # K.fixef = "full"
 #' #  => adjustment K = 1 + 3 + 5 - 1 (i.e. x + fe1 + fe2 - 1 restriction)
 #' summary(est, ssc = ssc(K.fixef = "full"))
 #' attr(vcov(est, ssc = ssc(K.fixef = "full"), attr = TRUE), "df.K")
 #'
 #'
-#' # K.fixef = TRUE & K.exact = TRUE
+#' # K.fixef = "full" & K.exact = TRUE
 #' #  => adjustment K = 1 + 3 + 5 - 2 (i.e. x + fe1 + fe2 - 2 restrictions)
 #' summary(est, ssc = ssc(K.fixef = "full", K.exact = TRUE))
 #' attr(vcov(est, ssc = ssc(K.fixef = "full", K.exact = TRUE), attr = TRUE), "df.K")
