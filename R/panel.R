@@ -577,7 +577,7 @@ d__expand = function(x, k = 1, fill){
 #' try(lag(x~id+time, 1, base_dup))
 #'
 #'
-#' # Error is bypassed, lag corresponds to first occurence of (id, time)
+#' # Error is bypassed, lag corresponds to first occurrence of (id, time)
 #' lag(x~id+time, 1, base_dup, duplicate.method = "first")
 #'
 #'

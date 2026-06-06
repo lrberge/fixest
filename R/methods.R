@@ -4446,7 +4446,7 @@ hatvalues.fixest = function(model, exact = TRUE, boot.size = 1000, ...){
   
   mats$fixef = sparse_model_matrix(model, type = "fixef", collin.rm = TRUE, sortCols = FALSE)
 
-  # Check for slope.vars and move to seperate matrix
+  # Check for slope.vars and move to separate matrix
   if (!is.null(model$slope_flag)) {
     slope_var_cols = which(
       grepl("\\[\\[", colnames(mats$fixef))
