@@ -7,415 +7,415 @@
 
 #' Estimations table (export the results of multiples estimations to a DF or to Latex)
 #'
-#' Aggregates the results of multiple estimations and displays them in the form of either a Latex 
-#' table or a `data.frame`. Note that you will need the `booktabs` package for the Latex table to 
+#' Aggregates the results of multiple estimations and displays them in the form of either a Latex
+#' table or a `data.frame`. Note that you will need the `booktabs` package for the Latex table to
 #' render properly. See [`setFixest_etable`] to set the default values, and [`style.tex`] to customize Latex output.
 #'
 #' @inheritParams summary.fixest
 #' @inheritParams setFixest_nthreads
 #'
-#' @param ... Used to capture different `fixest` estimation objects (obtained with [`femlm`], 
-#' [`feols`] or [`feglm`]). Note that any other type of element is discarded. Note that you can 
+#' @param ... Used to capture different `fixest` estimation objects (obtained with [`femlm`],
+#' [`feols`] or [`feglm`]). Note that any other type of element is discarded. Note that you can
 #' give a list of `fixest` objects.
-#' @param vcov Versatile argument to specify the VCOV. 
+#' @param vcov Versatile argument to specify the VCOV.
 #' In general, it is either a character scalar equal to a VCOV type, either a formula of the form:
-#'  vcov_type ~ variables. The VCOV types implemented are: "iid", "hetero" (or "HC1"), 
-#' "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". 
-#' It also accepts object from vcov_cluster, vcov_NW, NW, vcov_DK, DK, vcov_conley and conley. 
-#' It also accepts covariance matrices computed externally. 
-#' Finally it accepts functions to compute the covariances. 
+#'  vcov_type ~ variables. The VCOV types implemented are: "iid", "hetero" (or "HC1"),
+#' "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley".
+#' It also accepts object from vcov_cluster, vcov_NW, NW, vcov_DK, DK, vcov_conley and conley.
+#' It also accepts covariance matrices computed externally.
+#' Finally it accepts functions to compute the covariances.
 #' See the vcov documentation in the vignette.
-#' You can pass several VCOVs (as above) if you nest them into a list. 
+#' You can pass several VCOVs (as above) if you nest them into a list.
 #' If the number of VCOVs equals the number of models, each VCOV is mapped to the appropriate model.
 #' If there is one model and several VCOVs, or if the first element of the list is equal to
 #' `"each"` or `"times"`, then the estimations will be replicated and the results
 #' for each estimation and each VCOV will be reported.
-#' @param digits Integer or character scalar. Default is 4 and represents the number of significant 
-#' digits to be displayed for the coefficients and standard-errors. To apply rounding instead of 
-#' significance use, e.g., `digits = "r3"` which will round at the first 3 decimals. If character, 
-#' it must be of the form `"rd"` or `"sd"` with `d` a digit (`r` is for round and `s` is for 
-#' significance). For the number of digits for the fit statistics, use `digits.stats`. Note that 
-#' when significance is used it does not exactly display the number of significant digits: see 
+#' @param digits Integer or character scalar. Default is 4 and represents the number of significant
+#' digits to be displayed for the coefficients and standard-errors. To apply rounding instead of
+#' significance use, e.g., `digits = "r3"` which will round at the first 3 decimals. If character,
+#' it must be of the form `"rd"` or `"sd"` with `d` a digit (`r` is for round and `s` is for
+#' significance). For the number of digits for the fit statistics, use `digits.stats`. Note that
+#' when significance is used it does not exactly display the number of significant digits: see
 #' details for its exact meaning.
-#' @param digits.stats Integer or character scalar. Default is 5 and represents the number of 
-#' significant digits to be displayed for the fit statistics. To apply rounding instead of 
-#' significance use, e.g., `digits = "r3"` which will round at the first 3 decimals. If character, 
-#' it must be of the form `"rd"` or `"sd"` with `d` a digit (`r` is for round and `s` is for 
-#' significance). Note that when significance is used it does not exactly display the number of 
+#' @param digits.stats Integer or character scalar. Default is 5 and represents the number of
+#' significant digits to be displayed for the fit statistics. To apply rounding instead of
+#' significance use, e.g., `digits = "r3"` which will round at the first 3 decimals. If character,
+#' it must be of the form `"rd"` or `"sd"` with `d` a digit (`r` is for round and `s` is for
+#' significance). Note that when significance is used it does not exactly display the number of
 #' significant digits: see details for its exact meaning.
-#' @param tex Logical: whether the results should be a data.frame or a Latex table. By default, 
-#' this argument is `TRUE` if the argument `file` (used for exportation) is not missing; it is 
+#' @param tex Logical: whether the results should be a data.frame or a Latex table. By default,
+#' this argument is `TRUE` if the argument `file` (used for exportation) is not missing; it is
 #' equal to `FALSE` otherwise.
-#' @param fitstat A character vector or a one sided formula (both with only lowercase letters). A 
-#' vector listing which fit statistics to display. The valid types are 'n', 'll', 'aic', 'bic' and 
-#' r2 types like 'r2', 'pr2', 'war2', etc (see all valid types in [`r2`]). Also accepts valid types 
-#' from the function [`fitstat`]. The default value depends on the models to display. Example of 
-#' use: `fitstat=c('n', 'cor2', 'ar2', 'war2')`, or `fitstat=~n+cor2+ar2+war2` using a formula. You 
-#' can use the dot to refer to default values:` ~ . + ll` would add the log-likelihood to the 
+#' @param fitstat A character vector or a one sided formula (both with only lowercase letters). A
+#' vector listing which fit statistics to display. The valid types are 'n', 'll', 'aic', 'bic' and
+#' r2 types like 'r2', 'pr2', 'war2', etc (see all valid types in [`r2`]). Also accepts valid types
+#' from the function [`fitstat`]. The default value depends on the models to display. Example of
+#' use: `fitstat=c('n', 'cor2', 'ar2', 'war2')`, or `fitstat=~n+cor2+ar2+war2` using a formula. You
+#' can use the dot to refer to default values:` ~ . + ll` would add the log-likelihood to the
 #' default fit statistics.
 #' @param caption (Tex only.) Character scalar. The caption of the Latex table.
-#' @param float (Tex only.) Logical. By default, if the argument `caption` or `label` is provided, 
+#' @param float (Tex only.) Logical. By default, if the argument `caption` or `label` is provided,
 #' it is set to `TRUE`. Otherwise, it is set to `FALSE`.
-#' @param se.below Logical or `NULL` (default). Should the standard-errors be displayed below the 
+#' @param se.below Logical or `NULL` (default). Should the standard-errors be displayed below the
 #' coefficients? If `NULL`, then this is `TRUE` for Latex and `FALSE` otherwise.
-#' @param se.row Logical scalar, default is `NULL`. Whether should be displayed the row with the 
-#' type of standard-error for each model. When `tex = FALSE`, the default is `TRUE`. 
-#' When `tex = FALSE`, the row is showed only when there is a table-footer and the types of 
+#' @param se.row Logical scalar, default is `NULL`. Whether should be displayed the row with the
+#' type of standard-error for each model. When `tex = FALSE`, the default is `TRUE`.
+#' When `tex = FALSE`, the row is showed only when there is a table-footer and the types of
 #' standard-errors differ across models.
-#' @param keep Character vector. This element is used to display only a subset of variables. This 
-#' should be a vector of regular expressions (see [`base::regex`] help for more info). Each 
-#' variable satisfying any of the regular expressions will be kept. This argument is applied post 
-#' aliasing (see argument `dict`). 
+#' @param keep Character vector. This element is used to display only a subset of variables. This
+#' should be a vector of regular expressions (see [`base::regex`] help for more info). Each
+#' variable satisfying any of the regular expressions will be kept. This argument is applied post
+#' aliasing (see argument `dict`).
 #' Use the argument `keep_raw` for the same effect before aliasing.
-#' 
-#' Example: you have the variable `x1` to `x55` and want to display 
-#' only `x1` to `x9`, then you could use `keep = "x[[:digit:]]$"`. If the first character is an 
-#' exclamation mark, the effect is reversed (e.g. keep = "!Constant" means: every variable that 
+#'
+#' Example: you have the variable `x1` to `x55` and want to display
+#' only `x1` to `x9`, then you could use `keep = "x[[:digit:]]$"`. If the first character is an
+#' exclamation mark, the effect is reversed (e.g. keep = "!Constant" means: every variable that
 #' does not contain \dQuote{Constant} is kept). See details.
-#' @param drop Character vector. This element is used if some variables are not to be displayed. 
-#' This should be a vector of regular expressions (see [`base::regex`] help for more info). Each 
-#' variable satisfying any of the regular expressions will be discarded. This argument is applied 
-#' post aliasing (see argument `dict`). 
+#' @param drop Character vector. This element is used if some variables are not to be displayed.
+#' This should be a vector of regular expressions (see [`base::regex`] help for more info). Each
+#' variable satisfying any of the regular expressions will be discarded. This argument is applied
+#' post aliasing (see argument `dict`).
 #' Use the argument `drop_raw` for the same effect before aliasing.
-#' 
-#' Example: you have the variable `x1` to `x55` and want to 
-#' display only `x1` to `x9`, then you could use `drop = "x[[:digit:]]{2}`". If the first character 
-#' is an exclamation mark, the effect is reversed (e.g. drop = "!Constant" means: every variable 
+#'
+#' Example: you have the variable `x1` to `x55` and want to
+#' display only `x1` to `x9`, then you could use `drop = "x[[:digit:]]{2}`". If the first character
+#' is an exclamation mark, the effect is reversed (e.g. drop = "!Constant" means: every variable
 #' that does not contain \dQuote{Constant} is dropped). See details.
-#' @param order Character vector. This element is used if the user wants the variables to be 
-#' ordered in a certain way. This should be a vector of regular expressions (see [`base::regex`] 
-#' help for more info). The variables satisfying the first regular expression will be placed first, 
-#' then the order follows the sequence of regular expressions. This argument is applied post 
+#' @param order Character vector. This element is used if the user wants the variables to be
+#' ordered in a certain way. This should be a vector of regular expressions (see [`base::regex`]
+#' help for more info). The variables satisfying the first regular expression will be placed first,
+#' then the order follows the sequence of regular expressions. This argument is applied post
 #' aliasing (see argument `dict`). Use the argument `order_raw` for the same effect before aliasing.
-#' 
-#' Example: you have the following variables: `month1` to `month6`, 
-#' then `x1` to `x5`, then `year1` to `year6`. If you want to display first the x's, then the 
-#' years, then the months you could use: `order = c("x", "year")`. If the first character is an 
-#' exclamation mark, the effect is reversed (e.g. order = "!Constant" means: every variable that 
+#'
+#' Example: you have the following variables: `month1` to `month6`,
+#' then `x1` to `x5`, then `year1` to `year6`. If you want to display first the x's, then the
+#' years, then the months you could use: `order = c("x", "year")`. If the first character is an
+#' exclamation mark, the effect is reversed (e.g. order = "!Constant" means: every variable that
 #' does not contain \dQuote{Constant} goes first).  See details.
 #' @param keep_raw Character vector. This element is used to display only a subset of variables.
-#' This should be a vector of regular expressions (see [`base::regex`] help for more info). Each 
-#' variable satisfying any of the regular expressions will be kept. This argument is applied before 
-#' aliasing (see argument `dict`). 
+#' This should be a vector of regular expressions (see [`base::regex`] help for more info). Each
+#' variable satisfying any of the regular expressions will be kept. This argument is applied before
+#' aliasing (see argument `dict`).
 #' Use the argument `keep` for the same effect after aliasing.
-#' 
-#' Example: you have the variable `x1` to `x55` and want to display 
-#' only `x1` to `x9`, then you could use `keep = "x[[:digit:]]$"`. If the first character is an 
-#' exclamation mark, the effect is reversed (e.g. keep_raw = "!Intercept" means: 
+#'
+#' Example: you have the variable `x1` to `x55` and want to display
+#' only `x1` to `x9`, then you could use `keep = "x[[:digit:]]$"`. If the first character is an
+#' exclamation mark, the effect is reversed (e.g. keep_raw = "!Intercept" means:
 #' every variable that does not contain \dQuote{Intercept} is kept). See details.
-#' @param drop_raw Character vector. This element is used if some variables are not to 
-#' be displayed. 
-#' This should be a vector of regular expressions (see [`base::regex`] help for more info). Each 
-#' variable satisfying any of the regular expressions will be discarded. This argument is applied 
-#' before aliasing (see argument `dict`). 
+#' @param drop_raw Character vector. This element is used if some variables are not to
+#' be displayed.
+#' This should be a vector of regular expressions (see [`base::regex`] help for more info). Each
+#' variable satisfying any of the regular expressions will be discarded. This argument is applied
+#' before aliasing (see argument `dict`).
 #' Use the argument `drop` for the same effect after aliasing.
-#' 
-#' Example: you have the variable `x1` to `x55` and want to 
-#' display only `x1` to `x9`, then you could use `drop = "x[[:digit:]]{2}`". If the first character 
-#' is an exclamation mark, the effect is reversed (e.g. drop_raw = "!Intercept" means: 
+#'
+#' Example: you have the variable `x1` to `x55` and want to
+#' display only `x1` to `x9`, then you could use `drop = "x[[:digit:]]{2}`". If the first character
+#' is an exclamation mark, the effect is reversed (e.g. drop_raw = "!Intercept" means:
 #' every variable that does not contain \dQuote{Intercept} is dropped). See details.
-#' @param order_raw Character vector. This element is used if the user wants the variables to be 
-#' ordered in a certain way. This should be a vector of regular expressions (see [`base::regex`] 
-#' help for more info). The variables satisfying the first regular expression will be placed first, 
-#' then the order follows the sequence of regular expressions. This argument is applied post 
-#' aliasing (see argument `dict`). 
+#' @param order_raw Character vector. This element is used if the user wants the variables to be
+#' ordered in a certain way. This should be a vector of regular expressions (see [`base::regex`]
+#' help for more info). The variables satisfying the first regular expression will be placed first,
+#' then the order follows the sequence of regular expressions. This argument is applied post
+#' aliasing (see argument `dict`).
 #' Use the argument `order` for the same effect after aliasing.
-#' 
-#' Example: you have the following variables: `month1` to `month6`, 
-#' then `x1` to `x5`, then `year1` to `year6`. If you want to display first the x's, then the 
-#' years, then the months you could use: `order = c("x", "year")`. If the first character is an 
-#' exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that 
+#'
+#' Example: you have the following variables: `month1` to `month6`,
+#' then `x1` to `x5`, then `year1` to `year6`. If you want to display first the x's, then the
+#' years, then the months you could use: `order = c("x", "year")`. If the first character is an
+#' exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that
 #' does not contain \dQuote{Intercept} goes first).  See details.
-#' @param dict A named character vector or a logical scalar. It changes the original variable names 
-#' to the ones contained in the `dict`ionary. E.g. to change the variables named `a` and `b3` to 
-#' (resp.) \dQuote{$log(a)$} and to \dQuote{$bonus^3$}, use `dict=c(a="$log(a)$",b3="$bonus^3$")`. 
-#' By default, it is equal to `getFixest_dict()`, a default dictionary which can be set with 
-#' [`setFixest_dict`]. You can use `dict = FALSE` to disable it. By default `dict` modifies the 
-#' entries in the global dictionary, to disable this behavior, use "reset" as the first element 
+#' @param dict A named character vector or a logical scalar. It changes the original variable names
+#' to the ones contained in the `dict`ionary. E.g. to change the variables named `a` and `b3` to
+#' (resp.) \dQuote{$log(a)$} and to \dQuote{$bonus^3$}, use `dict=c(a="$log(a)$",b3="$bonus^3$")`.
+#' By default, it is equal to `getFixest_dict()`, a default dictionary which can be set with
+#' [`setFixest_dict`]. You can use `dict = FALSE` to disable it. By default `dict` modifies the
+#' entries in the global dictionary, to disable this behavior, use "reset" as the first element
 #' (ex: `dict=c("reset", mpg="Miles per gallon")`).
-#' @param coef.sub A character vector, default is `NULL`. Modifications to be applied to the 
+#' @param coef.sub A character vector, default is `NULL`. Modifications to be applied to the
 #' final coefficient names (after the dictionary is applied). It only affect the coefficients
 #' and not the fixed-effects (use `dict` for that).
-#' Each element of this vector 
-#' should be of the form "pat => new" or "pat". If "pat => new", this means that the 
-#' regular expression pattern "pat" will be replaced with "new". If "pat", this means that the 
-#' regex pattern "pat" will be removed. You can apply 
-#' [stringmagic flags](https://lrberge.github.io/stringmagic/articles/ref_regex_flags.html) at 
+#' Each element of this vector
+#' should be of the form "pat => new" or "pat". If "pat => new", this means that the
+#' regular expression pattern "pat" will be replaced with "new". If "pat", this means that the
+#' regex pattern "pat" will be removed. You can apply
+#' [stringmagic flags](https://lrberge.github.io/stringmagic/articles/ref_regex_flags.html) at
 #' the beginning of the patterns, e.g. "i/pat" ignores the case.
-#' 
+#'
 #' This internal function applying the changes is [`string_clean`][stringmagic::string_clean].
-#' Ex: say you have two coefficients named "genderF" and "oldTRUE". Then using 
-#' `coef.sub=c("gender => Gender = ", "TRUE")` renames the coefficients into 
+#' Ex: say you have two coefficients named "genderF" and "oldTRUE". Then using
+#' `coef.sub=c("gender => Gender = ", "TRUE")` renames the coefficients into
 #' "Gender = F" and "old".
-#' @param file A character scalar. If provided, the Latex (or data frame) table will be saved in a 
-#' file whose path is `file`. If you provide this argument, then a Latex table will be exported, to 
+#' @param file A character scalar. If provided, the Latex (or data frame) table will be saved in a
+#' file whose path is `file`. If you provide this argument, then a Latex table will be exported, to
 #' export a regular `data.frame`, use argument `tex = FALSE`.
-#' @param replace Logical, default is `FALSE`. Only used if option `file` is used. Should the 
+#' @param replace Logical, default is `FALSE`. Only used if option `file` is used. Should the
 #' exported table be written in a new file that replaces any existing file?
-#' @param create_dirs Logical, default is `FALSE`. Only used if when some file needs to be 
-#' created (e.g. when `file` or `export` is used). By default, i.e. when `FALSE`, 
-#' if the parent directory does not exist, the containing folders are created 
-#' up to the grand parent. 
+#' @param create_dirs Logical, default is `FALSE`. Only used if when some file needs to be
+#' created (e.g. when `file` or `export` is used). By default, i.e. when `FALSE`,
+#' if the parent directory does not exist, the containing folders are created
+#' up to the grand parent.
 #' If `TRUE`, all containing folders are recursively created.
-#' @param convergence Logical, default is missing. Should the convergence state of the algorithm be 
-#' displayed? By default, convergence information is displayed if at least one model did not 
+#' @param convergence Logical, default is missing. Should the convergence state of the algorithm be
+#' displayed? By default, convergence information is displayed if at least one model did not
 #' converge.
-#' @param signif.code Named numeric vector, used to provide the significance codes with respect to 
-#' the p-value of the coefficients. Default is `c("***"=0.01, "**"=0.05, "*"=0.10)` for a Latex 
-#' table and `c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)` for a data.frame (to conform with R's 
-#' default). To suppress the significance codes, use `signif.code=NA` or `signif.code=NULL`. Can 
+#' @param signif.code Named numeric vector, used to provide the significance codes with respect to
+#' the p-value of the coefficients. Default is `c("***"=0.01, "**"=0.05, "*"=0.10)` for a Latex
+#' table and `c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)` for a data.frame (to conform with R's
+#' default). To suppress the significance codes, use `signif.code=NA` or `signif.code=NULL`. Can
 #' also be equal to `"letters"`, then the default becomes `c("a"=0.01, "b"=0.05, "c"=0.10)`.
 #' @param label (Tex only.) Character scalar. The label of the Latex table.
-#' @param headers Character vector or list. Adds one or more header lines in the table. A header 
-#' line can be represented by a character vector or a named list. 
+#' @param headers Character vector or list. Adds one or more header lines in the table. A header
+#' line can be represented by a character vector or a named list.
 #' This argument can be many things, **please have a look at the dedicated help section**;
 #' a simplified description follows.
-#' If a named list, each element of the list represents a line, the names of the list are 
+#' If a named list, each element of the list represents a line, the names of the list are
 #' the row names and the values are the content of the cells.
-#' A line can be represented by: i) a character vector, ii) a list of the form 
-#' `list("value1" = nb1, "value2" = nb2, etc)`. In the list form, numeric numbers 
-#' represent spans and integers represent absolute positions. 
-#' Example: `headers=lits(Gender = list("M"=2, "F"=3))` will create a 
-#' row with 2 times "M" and three time "F" (this is identical to 
-#' `headers=list(Gender = c("M", "M", "F", "F", "F"))`). 
-#' You can stack header lines within a list, in that case the 
-#' list names will be displayed in the leftmost cell. 
-#' Example: `headers=list(Gender=list("M"=2, "F"=3), Country="US")` will create two header lines. 
-#' When `tex = TRUE`, you can add a rule to separate groups by using `":_:"` somewhere in the row 
-#' name (ex: `headers=list(":_:Gender"=list("M"=2, "F"=3))`. You can monitor the placement by 
-#' inserting a special character in the row name: "^" means at the top, "-" means in the middle 
-#' (default) and "_" means at the bottom. Example: `headers=list("_Country"="US")` will add the 
-#' country row as the very last header row (after the model row). Finally, you can use the special 
-#' value "auto" to include automatic headers when the data contains split sample estimations. By 
+#' A line can be represented by: i) a character vector, ii) a list of the form
+#' `list("value1" = nb1, "value2" = nb2, etc)`. In the list form, numeric numbers
+#' represent spans and integers represent absolute positions.
+#' Example: `headers=lits(Gender = list("M"=2, "F"=3))` will create a
+#' row with 2 times "M" and three time "F" (this is identical to
+#' `headers=list(Gender = c("M", "M", "F", "F", "F"))`).
+#' You can stack header lines within a list, in that case the
+#' list names will be displayed in the leftmost cell.
+#' Example: `headers=list(Gender=list("M"=2, "F"=3), Country="US")` will create two header lines.
+#' When `tex = TRUE`, you can add a rule to separate groups by using `":_:"` somewhere in the row
+#' name (ex: `headers=list(":_:Gender"=list("M"=2, "F"=3))`. You can monitor the placement by
+#' inserting a special character in the row name: "^" means at the top, "-" means in the middle
+#' (default) and "_" means at the bottom. Example: `headers=list("_Country"="US")` will add the
+#' country row as the very last header row (after the model row). Finally, you can use the special
+#' value "auto" to include automatic headers when the data contains split sample estimations. By
 #' default it is equal to `list("auto")`. You can use `.()` instead of `list()`.
-#' @param fixef_sizes (Tex only.) Logical, default is `FALSE`. If `TRUE` and fixed-effects were 
+#' @param fixef_sizes (Tex only.) Logical, default is `FALSE`. If `TRUE` and fixed-effects were
 #' used in the models, then the number of "units" per fixed-effect dimension is also displayed.
-#' @param fixef_sizes.simplify Logical, default is `TRUE`. Only used if `fixef_sizes = TRUE`. If 
-#' `TRUE`, the fixed-effects sizes will be displayed in parentheses instead of in a separate line 
+#' @param fixef_sizes.simplify Logical, default is `TRUE`. Only used if `fixef_sizes = TRUE`. If
+#' `TRUE`, the fixed-effects sizes will be displayed in parentheses instead of in a separate line
 #' if there is no ambiguity (i.e. if the size is constant across models).
-#' @param family Logical, default is missing. Whether to display the families of the models. By 
+#' @param family Logical, default is missing. Whether to display the families of the models. By
 #' default this line is displayed when at least two models are from different families.
-#' @param keepFactors Logical, default is `TRUE`. If `FALSE`, then factor variables are displayed 
+#' @param keepFactors Logical, default is `TRUE`. If `FALSE`, then factor variables are displayed
 #' as fixed-effects and no coefficient is shown.
-#' @param powerBelow (Tex only.) Integer, default is -5. A coefficient whose value is below 
-#' `10**(powerBelow+1)` is written with a power in Latex. For example `0.0000456` would be written 
+#' @param powerBelow (Tex only.) Integer, default is -5. A coefficient whose value is below
+#' `10**(powerBelow+1)` is written with a power in Latex. For example `0.0000456` would be written
 #' `4.56$\\times 10^{-5}$` by default. Setting `powerBelow = -6` would lead to `0.00004` in Latex.
-#' @param interaction.combine Character scalar, defaults to `" $\\times$ "` for Tex and to `" x "` 
-#' otherwise. When the estimation contains interactions, then the variables names (after aliasing) 
-#' are combined with this argument. For example: if `dict = c(x1="Wind", x2="Rain")` and you have 
-#' the following interaction `x1:x2`, then it will be renamed (by default) 
+#' @param interaction.combine Character scalar, defaults to `" $\\times$ "` for Tex and to `" x "`
+#' otherwise. When the estimation contains interactions, then the variables names (after aliasing)
+#' are combined with this argument. For example: if `dict = c(x1="Wind", x2="Rain")` and you have
+#' the following interaction `x1:x2`, then it will be renamed (by default)
 #' `Wind $\\times$ Rain` -- using `interaction.combine = "*"` would lead to `Wind*Rain`.
-#' @param interaction.order Character vector of regular expressions. Only affects variables that 
-#' are interacted like x1 and x2 in `feols(y ~ x1*x2, data)`. You can change the order in which the 
-#' interacted variables are displayed: e.g. `interaction.order = "x2"` would lead to "x2 x x1" 
-#' instead of "x1 x x2". Please look at the argument 'order' and the dedicated section in the help 
+#' @param interaction.order Character vector of regular expressions. Only affects variables that
+#' are interacted like x1 and x2 in `feols(y ~ x1*x2, data)`. You can change the order in which the
+#' interacted variables are displayed: e.g. `interaction.order = "x2"` would lead to "x2 x x1"
+#' instead of "x1 x x2". Please look at the argument 'order' and the dedicated section in the help
 #' page for more information.
-#' @param i.equal Character scalar, defaults to `" $=$ "` when `tex = TRUE` and `" = "` otherwise. 
-#' Only affects factor variables created with the function [`i`], tells how the variable should be 
-#' linked to its value. For example if you have the `Species` factor from the `iris` data set, by 
-#' default the display of the variable is `Species = Setosa`, etc. If `i.equal = ": "` the display 
+#' @param i.equal Character scalar, defaults to `" $=$ "` when `tex = TRUE` and `" = "` otherwise.
+#' Only affects factor variables created with the function [`i`], tells how the variable should be
+#' linked to its value. For example if you have the `Species` factor from the `iris` data set, by
+#' default the display of the variable is `Species = Setosa`, etc. If `i.equal = ": "` the display
 #' becomes `Species: Setosa`.
-#' @param depvar Logical, default is `TRUE`. Whether a first line containing the dependent 
+#' @param depvar Logical, default is `TRUE`. Whether a first line containing the dependent
 #' variables should be shown.
-#' @param coefstat One of `"se"` (default), `"tstat"`, `"pvalue"`, or `"confint"`. The statistic to report for 
-#' each coefficient: the standard-error, the t-statistics, the p-value, 
+#' @param coefstat One of `"se"` (default), `"tstat"`, `"pvalue"`, or `"confint"`. The statistic to report for
+#' each coefficient: the standard-error, the t-statistics, the p-value,
 #' or the confidence interval. You can adjust the confidence interval with the argument `ci`.
-#' @param ci Level of the confidence interval, defaults to `0.95`. Only used if 
+#' @param ci Level of the confidence interval, defaults to `0.95`. Only used if
 #' `coefstat = confint`.
-#' @param style.tex An object created by the function [`style.tex`]. It represents the style of the 
+#' @param style.tex An object created by the function [`style.tex`]. It represents the style of the
 #' Latex table, see the documentation of [`style.tex`].
-#' @param style.df An object created by the function [`style.df`] It represents the style of the 
+#' @param style.df An object created by the function [`style.df`] It represents the style of the
 #' data frame returned (if `tex = FALSE`), see the documentation of [`style.df`].
-#' @param notes (Tex only.) Character vector. If provided, a `"notes"` section will be added at the 
-#' end right after the end of the table, containing the text of this argument. If it is a vector, 
-#' it will be collapsed with new lines. If `tpt = TRUE`, the behavior is different: each element of 
-#' the vector is an item. If the first element of the vector starts with `"@"`, then it will be 
-#' included verbatim, and in case of `tpt = TRUE`, right before the first item. If that element is 
-#' provided, it will replace the value defined in `style.tex(notes.intro)` or 
+#' @param notes (Tex only.) Character vector. If provided, a `"notes"` section will be added at the
+#' end right after the end of the table, containing the text of this argument. If it is a vector,
+#' it will be collapsed with new lines. If `tpt = TRUE`, the behavior is different: each element of
+#' the vector is an item. If the first element of the vector starts with `"@"`, then it will be
+#' included verbatim, and in case of `tpt = TRUE`, right before the first item. If that element is
+#' provided, it will replace the value defined in `style.tex(notes.intro)` or
 #' `style.tex(notes.tpt.intro)`.
-#' @param group A list. The list elements should be vectors of regular expressions. For each 
-#' elements of this list: A new line in the table is created, all variables that are matched by the 
-#' regular expressions are discarded (same effect as the argument `drop`) and `TRUE` or `FALSE` 
-#' will appear in the model cell, depending on whether some of the previous variables were found in 
-#' the model. 
-#' Example: `group=list("Controls: personal traits"=c("gender", "height", "weight"))` 
-#' will create an new line with `"Controls: personal traits"` in the leftmost cell, all three 
-#' variables gender, height and weight are discarded, `TRUE` appearing in each model containing at 
-#' least one of the three variables (the style of `TRUE`/`FALSE` is governed by the argument 
-#' `yesNo`). You can control the placement of the new row by using 1 or 2 special characters at the 
-#' start of the row name. 
-#' The meaning of these special characters are: 1) `"^"`: coef., `"-"`: fixed-effect, 
-#' `"_"`: stats, section; 2) `"^"`: 1st, `"_"`: last, row. 
-#' For example: `group=list("_^Controls"=stuff)` will place the line at the top of the 'stats' 
-#' section, and using `group=list("^_Controls"=stuff)` will make the row appear at the bottom of 
+#' @param group A list. The list elements should be vectors of regular expressions. For each
+#' elements of this list: A new line in the table is created, all variables that are matched by the
+#' regular expressions are discarded (same effect as the argument `drop`) and `TRUE` or `FALSE`
+#' will appear in the model cell, depending on whether some of the previous variables were found in
+#' the model.
+#' Example: `group=list("Controls: personal traits"=c("gender", "height", "weight"))`
+#' will create an new line with `"Controls: personal traits"` in the leftmost cell, all three
+#' variables gender, height and weight are discarded, `TRUE` appearing in each model containing at
+#' least one of the three variables (the style of `TRUE`/`FALSE` is governed by the argument
+#' `yesNo`). You can control the placement of the new row by using 1 or 2 special characters at the
+#' start of the row name.
+#' The meaning of these special characters are: 1) `"^"`: coef., `"-"`: fixed-effect,
+#' `"_"`: stats, section; 2) `"^"`: 1st, `"_"`: last, row.
+#' For example: `group=list("_^Controls"=stuff)` will place the line at the top of the 'stats'
+#' section, and using `group=list("^_Controls"=stuff)` will make the row appear at the bottom of
 #' the coefficients section. For details, see the dedicated section.
-#' @param extralines A vector, a list or a one sided formula. The list elements should be either a 
-#' vector representing the value of each cell, a list of the form 
-#' `list("item1" = nb1, "item2" = nb2, etc)`, or a function. 
-#' This argument can be many things, **please have a look at the dedicated help section**; 
-#' a simplified description follows. For each elements of this list: A new line in the table is 
-#' created, the list name being the row name and the vector being the content of the cells. 
-#' Example: `extralines=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))` will create an new line 
-#' with `"Sub-sample"` in the leftmost cell, the vector filling the content of the cells for the 
-#' three models. You can control the placement of the new row by using 1 or 2 special characters at 
-#' the start of the row name. The meaning of these special characters are: 
-#' 1) `"^"`: coef., `"-"`: fixed-effect, `"_"`: stats, section; 
+#' @param extralines A vector, a list or a one sided formula. The list elements should be either a
+#' vector representing the value of each cell, a list of the form
+#' `list("item1" = nb1, "item2" = nb2, etc)`, or a function.
+#' This argument can be many things, **please have a look at the dedicated help section**;
+#' a simplified description follows. For each elements of this list: A new line in the table is
+#' created, the list name being the row name and the vector being the content of the cells.
+#' Example: `extralines=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))` will create an new line
+#' with `"Sub-sample"` in the leftmost cell, the vector filling the content of the cells for the
+#' three models. You can control the placement of the new row by using 1 or 2 special characters at
+#' the start of the row name. The meaning of these special characters are:
+#' 1) `"^"`: coef., `"-"`: fixed-effect, `"_"`: stats, section;
 #' 2) `"^"`: 1st, `"_"`: last, row.
-#' For example: `extralines=list("__Controls"=stuff)` will place the line at the bottom of the 
-#' stats section, and using `extralines=list("^^Controls"=stuff)` will make the row appear at the 
-#' top of the 'coefficients' section. For details, see the dedicated section. You can use `.()` 
+#' For example: `extralines=list("__Controls"=stuff)` will place the line at the bottom of the
+#' stats section, and using `extralines=list("^^Controls"=stuff)` will make the row appear at the
+#' top of the 'coefficients' section. For details, see the dedicated section. You can use `.()`
 #' instead of `list()`.
-#' @param fixef.group Logical scalar or list (default is `NULL`). If equal to `TRUE`, then all 
-#' fixed-effects always appearing jointly in models will be grouped in one row. If a list, its 
-#' elements must be character vectors of regular expressions and the list names will be the row 
-#' names. For ex. `fixef.group=list("Dates fixed-effects"="Month|Day")` will remove the `"Month"` 
-#' and `"Day"` fixed effects from the display and replace them with a single row named 
-#' "Dates fixed-effects". You can monitor the placement of the new row with two special characters 
-#' telling where to place the row within a section: first in which section it should appear: 
-#' `"^"` (coef.), `"-"` (fixed-effects), or `"_"` (stat.) section; 
-#' then whether the row should be `"^"` (first), or `"_"` (last). These two special characters must 
+#' @param fixef.group Logical scalar or list (default is `NULL`). If equal to `TRUE`, then all
+#' fixed-effects always appearing jointly in models will be grouped in one row. If a list, its
+#' elements must be character vectors of regular expressions and the list names will be the row
+#' names. For ex. `fixef.group=list("Dates fixed-effects"="Month|Day")` will remove the `"Month"`
+#' and `"Day"` fixed effects from the display and replace them with a single row named
+#' "Dates fixed-effects". You can monitor the placement of the new row with two special characters
+#' telling where to place the row within a section: first in which section it should appear:
+#' `"^"` (coef.), `"-"` (fixed-effects), or `"_"` (stat.) section;
+#' then whether the row should be `"^"` (first), or `"_"` (last). These two special characters must
 #' appear first in the row names. Please see the dedicated section
-#' @param placement (Tex only.) Character string giving the position of the float in Latex. Default 
-#' is "htbp". It must consist of only the characters 'h', 't', 'b', 'p', 'H' and '!'. 
-#' Reminder: h: here; t: top; b: bottom; p: float page; H: definitely here; 
-#' !: prevents Latex to look for other positions. Note that it can be equal to the empty string 
+#' @param placement (Tex only.) Character string giving the position of the float in Latex. Default
+#' is "htbp". It must consist of only the characters 'h', 't', 'b', 'p', 'H' and '!'.
+#' Reminder: h: here; t: top; b: bottom; p: float page; H: definitely here;
+#' !: prevents Latex to look for other positions. Note that it can be equal to the empty string
 #' (and you'll get the default placement).
-#' @param drop.section Character vector which can be of length 0 (i.e. equal to `NULL`). Can 
-#' contain the values "coef", "fixef", "slopes" or "stats". It would drop, respectively, the 
-#' coefficients section, fixed-effects section, the variables with varying slopes section or the 
+#' @param drop.section Character vector which can be of length 0 (i.e. equal to `NULL`). Can
+#' contain the values "coef", "fixef", "slopes" or "stats". It would drop, respectively, the
+#' coefficients section, fixed-effects section, the variables with varying slopes section or the
 #' fit statistics section.
-#' @param reset (`setFixest_etable` only.) Logical, default is `FALSE`. If `TRUE`, this will reset 
+#' @param reset (`setFixest_etable` only.) Logical, default is `FALSE`. If `TRUE`, this will reset
 #' all the default values that were already set by the user in previous calls.
 #' @param .vcov_args A list containing arguments to be passed to the function `vcov`.
-#' @param poly_dict Character vector, default is `c("", " square", " cube")`. When raw polynomials 
-#' (`x^2`, etc) are used, the variables are automatically renamed and `poly_dict` rules the display 
-#' of the power. For powers greater than the number of elements of the vector, the value displayed 
+#' @param poly_dict Character vector, default is `c("", " square", " cube")`. When raw polynomials
+#' (`x^2`, etc) are used, the variables are automatically renamed and `poly_dict` rules the display
+#' of the power. For powers greater than the number of elements of the vector, the value displayed
 #' is `$^{pow}$` in Latex and `^ pow` in the R console.
-#' @param postprocess.tex A function that will postprocess the character vector defining the latex 
-#' table. Only when `tex = TRUE`. By default it is equal to `NULL`, meaning that there is no 
+#' @param postprocess.tex A function that will postprocess the character vector defining the latex
+#' table. Only when `tex = TRUE`. By default it is equal to `NULL`, meaning that there is no
 #' postprocessing. When `tex = FALSE`, see the argument `postprocess.df`. See details.
-#' @param postprocess.df A function that will postprocess.tex the resulting data.frame. Only when 
-#' `tex = FALSE`. By default it is equal to `NULL`, meaning that there is no postprocessing. When 
+#' @param postprocess.df A function that will postprocess.tex the resulting data.frame. Only when
+#' `tex = FALSE`. By default it is equal to `NULL`, meaning that there is no postprocessing. When
 #' `tex = TRUE`, see the argument `postprocess.tex`.
-#' @param fit_format Character scalar, default is `"__var__"`. Only used in the presence of IVs. By 
-#' default the endogenous regressors are named `fit_varname` in the second stage. The format of the 
-#' endogenous regressor to appear in the table is governed by `fit_format`. For instance, by 
-#' default, the prefix `"fit_"` is removed, leading to only `varname` to appear. 
+#' @param fit_format Character scalar, default is `"__var__"`. Only used in the presence of IVs. By
+#' default the endogenous regressors are named `fit_varname` in the second stage. The format of the
+#' endogenous regressor to appear in the table is governed by `fit_format`. For instance, by
+#' default, the prefix `"fit_"` is removed, leading to only `varname` to appear.
 #' If `fit_format = "$\\\\hat{__var__$"}`, then `"$\\hat{varname$"}` will appear in the table.
-#' @param coef.just (DF only.) Either `"."`, `"("`, `"l"`, `"c"` or `"r"`, default is `NULL`. 
-#' How the coefficients should be justified. If `NULL` then they are right aligned if 
-#' `se.below = FALSE` and aligned to the dot if `se.below = TRUE`. The keywords stand 
+#' @param coef.just (DF only.) Either `"."`, `"("`, `"l"`, `"c"` or `"r"`, default is `NULL`.
+#' How the coefficients should be justified. If `NULL` then they are right aligned if
+#' `se.below = FALSE` and aligned to the dot if `se.below = TRUE`. The keywords stand
 #' respectively for dot-, parenthesis-, left-, center- and right-aligned.
-#' @param meta (Tex only.) A one-sided formula that shall contain the following elements: 
-#' date or time, sys, author, comment and call. Default is `NULL`. This argument is a shortcut to 
-#' controlling the meta information that can be displayed in comments before the table. Typically 
-#' if the element is in the formula, it means that the argument will be equal to `TRUE`. 
-#' Example: `meta = ~time+call` is equivalent to `meta.time = TRUE` and `meta.call = TRUE`. 
-#' The "author" and "comment" elements are a bit special. Using `meta = ~author("Mark")` is 
-#' equivalent to `meta.author = "Mark"` while `meta=~author` is equiv. to `meta.author = TRUE`. 
-#' The "comment" must be used with a character string inside: 
-#' `meta = ~comment("this is a comment")`. The order in the formula controls the order of 
+#' @param meta (Tex only.) A one-sided formula that shall contain the following elements:
+#' date or time, sys, author, comment and call. Default is `NULL`. This argument is a shortcut to
+#' controlling the meta information that can be displayed in comments before the table. Typically
+#' if the element is in the formula, it means that the argument will be equal to `TRUE`.
+#' Example: `meta = ~time+call` is equivalent to `meta.time = TRUE` and `meta.call = TRUE`.
+#' The "author" and "comment" elements are a bit special. Using `meta = ~author("Mark")` is
+#' equivalent to `meta.author = "Mark"` while `meta=~author` is equiv. to `meta.author = TRUE`.
+#' The "comment" must be used with a character string inside:
+#' `meta = ~comment("this is a comment")`. The order in the formula controls the order of
 #' appearance of the meta elements. It also has precedence over the `meta.XX` arguments.
-#' @param meta.time (Tex only.) Either a logical scalar (default is `FALSE`) or "time" or "date". 
-#' Whether to include the time (if `TRUE` or "time") or the date (if "date") of creation of the 
+#' @param meta.time (Tex only.) Either a logical scalar (default is `FALSE`) or "time" or "date".
+#' Whether to include the time (if `TRUE` or "time") or the date (if "date") of creation of the
 #' table in a comment right before the table.
-#' @param meta.sys (Tex only.) A logical scalar, default is `FALSE`. Whether to include system 
+#' @param meta.sys (Tex only.) A logical scalar, default is `FALSE`. Whether to include system
 #' information (from `Sys.info()`) in a comment right before the table.
-#' @param meta.author (Tex only.) A logical scalar (default is `FALSE`) or a character vector. If 
-#' `TRUE` then the identity of the author (deduced from the system user in `Sys.info()`) is 
-#' inserted in a comment right before the table. If a character vector, then it should contain 
-#' author names that will be inserted as comments before the table, prefixed with `"Created by:"`. 
+#' @param meta.author (Tex only.) A logical scalar (default is `FALSE`) or a character vector. If
+#' `TRUE` then the identity of the author (deduced from the system user in `Sys.info()`) is
+#' inserted in a comment right before the table. If a character vector, then it should contain
+#' author names that will be inserted as comments before the table, prefixed with `"Created by:"`.
 #' For free-form comments see the argument `meta.comment`.
-#' @param meta.comment (Tex only.) A character vector containing free-form comments to be inserted 
+#' @param meta.comment (Tex only.) A character vector containing free-form comments to be inserted
 #' right before the table.
-#' @param meta.call (Tex only.) Logical scalar, default is `FALSE`. If `TRUE` then the call to the 
+#' @param meta.call (Tex only.) Logical scalar, default is `FALSE`. If `TRUE` then the call to the
 #' function is inserted right before the table in a comment.
-#' @param view Logical, default is `FALSE`. If `TRUE`, then the table generated in Latex by 
-#' `etable` and then is displayed in the viewer pane. Note that for this option to work you need 
-#' i) pdflatex or the R package `tinytex`, ii) imagemagick and ghostscript, or the 
+#' @param view Logical, default is `FALSE`. If `TRUE`, then the table generated in Latex by
+#' `etable` and then is displayed in the viewer pane. Note that for this option to work you need
+#' i) pdflatex or the R package `tinytex`, ii) imagemagick and ghostscript, or the
 #' R package `pdftools`. All three software must be installed and on the path.
 #' @param x An object returned by `etable`.
-#' @param tpt (Tex only.) Logical scalar, default is FALSE. Whether to use the `threeparttable` 
+#' @param tpt (Tex only.) Logical scalar, default is FALSE. Whether to use the `threeparttable`
 #' environment. If so, the `notes` will be integrated into the `tablenotes` environment.
-#' @param arraystretch (Tex only.) A numeric scalar, default is `NULL`. If provided, 
-#' the command `\\renewcommand*{\\arraystretch{x}}` is inserted, replacing `x` by the value of 
-#' `arraystretch`. The changes are specific to the current table and do not affect the rest of the 
+#' @param arraystretch (Tex only.) A numeric scalar, default is `NULL`. If provided,
+#' the command `\\renewcommand*{\\arraystretch{x}}` is inserted, replacing `x` by the value of
+#' `arraystretch`. The changes are specific to the current table and do not affect the rest of the
 #' document.
-#' @param fontsize (Tex only.) A character scalar, default is `NULL`. Can be equal to `tiny`, 
-#' `scriptsize`, `footnotesize`, `small`, `normalsize`, `large`, or `Large`. The change affect the 
+#' @param fontsize (Tex only.) A character scalar, default is `NULL`. Can be equal to `tiny`,
+#' `scriptsize`, `footnotesize`, `small`, `normalsize`, `large`, or `Large`. The change affect the
 #' table only (and not the rest of the document).
-#' @param adjustbox (Tex only.) A logical, numeric or character scalar, default is `NULL`. If not 
-#' `NULL`, the table is inserted within the `adjustbox` environment. By default the options are 
-#' `width = 1\\textwidth, center` (if `TRUE`). A numeric value changes the value before 
-#' `\\textwidth`. You can also add a character of the form `"x tw"` or `"x th"` with `x` a number 
-#' and where tw (th) stands for text-width (text-height). Finally any other character value is 
+#' @param adjustbox (Tex only.) A logical, numeric or character scalar, default is `NULL`. If not
+#' `NULL`, the table is inserted within the `adjustbox` environment. By default the options are
+#' `width = 1\\textwidth, center` (if `TRUE`). A numeric value changes the value before
+#' `\\textwidth`. You can also add a character of the form `"x tw"` or `"x th"` with `x` a number
+#' and where tw (th) stands for text-width (text-height). Finally any other character value is
 #' passed verbatim as an `adjustbox` option.
-#' @param tabular (Tex only.) Character scalar equal to "normal" (default), `"*"` or `"X"`. 
+#' @param tabular (Tex only.) Character scalar equal to "normal" (default), `"*"` or `"X"`.
 #' Represents the type of tabular environment to use: either `tabular`, `tabular*` or `tabularx`.
-#' @param export Character scalar giving the path to a PNG file to be created, default is `NULL`. 
-#' If provided, the Latex table will be converted to PNG and copied to the `export` location. Note 
-#' that for this option to work you need a working distribution of `pdflatex`, `imagemagick` and 
+#' @param export Character scalar giving the path to a PNG file to be created, default is `NULL`.
+#' If provided, the Latex table will be converted to PNG and copied to the `export` location. Note
+#' that for this option to work you need a working distribution of `pdflatex`, `imagemagick` and
 #' `ghostscript`, or the R packages `tinytex` and `pdftools`.
-#' @param markdown Character scalar giving the location of a directory, or a logical scalar. 
-#' Default is `NULL`. This argument only works in Rmarkdown documents, when knitting the document. 
-#' If provided: two behaviors depending on context. A) if the output document is Latex, the table 
-#' is exported in Latex. B) if the output document is not Latex, the table will be exported to PNG 
-#' at the desired location and inserted in the document via a markdown link. If equal to `TRUE`, 
-#' the default location of the PNGs is a temporary folder for `R > 4.0.0`, 
+#' @param markdown Character scalar giving the location of a directory, or a logical scalar.
+#' Default is `NULL`. This argument only works in Rmarkdown documents, when knitting the document.
+#' If provided: two behaviors depending on context. A) if the output document is Latex, the table
+#' is exported in Latex. B) if the output document is not Latex, the table will be exported to PNG
+#' at the desired location and inserted in the document via a markdown link. If equal to `TRUE`,
+#' the default location of the PNGs is a temporary folder for `R > 4.0.0`,
 #' or to `"images/etable/"` for earlier versions.
-#' @param view.cache Logical, default is `TRUE`. Only used when `view = TRUE`. 
+#' @param view.cache Logical, default is `TRUE`. Only used when `view = TRUE`.
 #' Whether the PNGs of the tables should be cached.
-#' @param type Character scalar equal to 'pdflatex' (default), 'magick', 'dir' or 'tex'. 
-#' Which log file to report; if 'tex', the full source code of the tex file is returned, 
+#' @param type Character scalar equal to 'pdflatex' (default), 'magick', 'dir' or 'tex'.
+#' Which log file to report; if 'tex', the full source code of the tex file is returned,
 #' if 'dir': the directory of the log files is returned.
-#' @param highlight List containing coefficients to highlight. 
+#' @param highlight List containing coefficients to highlight.
 #' Highlighting is of the form `.("options1" = "coefs1", "options2" = "coefs2", etc)`.
-#' The coefficients to be highlighted can be written in three forms: 1) row, eg `"x1"` will 
-#' highlight the full row of the variable `x1`; 
-#' 2) cells, use `'@'` after the coefficient name to 
-#' give the column, it accepts ranges, eg `"x1@2, 4-6, 8"` will highlight only the columns 
-#' 2, 4, 5, 6, and 8 of the variable `x1`; 3) range, by giving the top-left and 
-#' bottom-right values separated with a semi-colon, eg `"x1@2 ; x3@5"` will highlight 
-#' from the column 2 of `x1` to the 5th column of `x3`. Coefficient names are partially 
-#' matched, use a `'%'` first to refer to the original name (before dictionary) and 
+#' The coefficients to be highlighted can be written in three forms: 1) row, eg `"x1"` will
+#' highlight the full row of the variable `x1`;
+#' 2) cells, use `'@'` after the coefficient name to
+#' give the column, it accepts ranges, eg `"x1@2, 4-6, 8"` will highlight only the columns
+#' 2, 4, 5, 6, and 8 of the variable `x1`; 3) range, by giving the top-left and
+#' bottom-right values separated with a semi-colon, eg `"x1@2 ; x3@5"` will highlight
+#' from the column 2 of `x1` to the 5th column of `x3`. Coefficient names are partially
+#' matched, use a `'%'` first to refer to the original name (before dictionary) and
 #' use `'@'` first to use a regular expression. You can add a vector of row/cell/range.
-#' The options are a comma-separated list of items. By default the highlighting is done 
-#' with a frame (a thick box) around the coefficient, use `'rowcol'` to highlight with a 
-#' row color instead. Here are the other options: `'se'` to highlight the standard-errors too; 
-#' `'square'` to have a square box (instead of rounded); `'thick1'` to `'thick6'` 
-#' to monitor the width of the box; `'sep0'` to `'sep9'` to monitor the inner spacing. 
+#' The options are a comma-separated list of items. By default the highlighting is done
+#' with a frame (a thick box) around the coefficient, use `'rowcol'` to highlight with a
+#' row color instead. Here are the other options: `'se'` to highlight the standard-errors too;
+#' `'square'` to have a square box (instead of rounded); `'thick1'` to `'thick6'`
+#' to monitor the width of the box; `'sep0'` to `'sep9'` to monitor the inner spacing.
 #' Finally the remaining option is the color: simply add an R color (it must be a valid R color!).
-#'  You can use `"color!alpha"` with "alpha" a number between 0 to 100 to change 
+#'  You can use `"color!alpha"` with "alpha" a number between 0 to 100 to change
 #' the alpha channel of the color.
-#' 
-#' To be able to use use the highlighting feature, you need the 
-#' following lines in your latex preamble: `\\usepackage{tikz}` and 
+#'
+#' To be able to use use the highlighting feature, you need the
+#' following lines in your latex preamble: `\\usepackage{tikz}` and
 #' `\\usetikzlibrary{matrix, shapes, arrows, fit, tikzmark}`
-#' @param coef.style Named list containing styles to be applied to the coefficients. It must be of 
-#' the form `.("style1" = "coefs1", "style2" = "coefs2", etc)`. The style must contain the 
-#' string `":coef:"` (or `":coef_se:"` to style both the coefficient and its standard-error). 
-#' The string `:coef:` will be replaced verbatim by the coefficient value. For example use 
-#' `"\\textbf{:coef:}"` to put the coefficient in bold. Note that markdown markup is enabled 
-#' so `"**:coef:**"` would also put it in bold. The coefficients to be styled can be written 
-#' in three forms: 1) row, eg `"x1"` will style the full row of the variable `x1`; 2) cells, 
-#' use `'@'` after the coefficient name to give the column, it accepts ranges, 
-#' eg `"x1@2, 4-6, 8"` will style only the columns 2, 4, 5, 6, and 8 of the variable `x1`; 
-#' 3) range, by giving the top-left and bottom-right values separated with a semi-colon, 
-#' eg `"x1@2 ; x3@5"` will style from the column 2 of `x1` to the 5th column of `x3`. 
-#' Coefficient names are partially matched, use a `'%'` first to refer to the original name 
-#' (before dictionary) and use `'@'` first to use a regular expression. You can add a 
+#' @param coef.style Named list containing styles to be applied to the coefficients. It must be of
+#' the form `.("style1" = "coefs1", "style2" = "coefs2", etc)`. The style must contain the
+#' string `":coef:"` (or `":coef_se:"` to style both the coefficient and its standard-error).
+#' The string `:coef:` will be replaced verbatim by the coefficient value. For example use
+#' `"\\textbf{:coef:}"` to put the coefficient in bold. Note that markdown markup is enabled
+#' so `"**:coef:**"` would also put it in bold. The coefficients to be styled can be written
+#' in three forms: 1) row, eg `"x1"` will style the full row of the variable `x1`; 2) cells,
+#' use `'@'` after the coefficient name to give the column, it accepts ranges,
+#' eg `"x1@2, 4-6, 8"` will style only the columns 2, 4, 5, 6, and 8 of the variable `x1`;
+#' 3) range, by giving the top-left and bottom-right values separated with a semi-colon,
+#' eg `"x1@2 ; x3@5"` will style from the column 2 of `x1` to the 5th column of `x3`.
+#' Coefficient names are partially matched, use a `'%'` first to refer to the original name
+#' (before dictionary) and use `'@'` first to use a regular expression. You can add a
 #' vector of row/cell/range.
-#' @param page.width Character scalar equal to `'fit'` (default), `'a4'` or `'us'`; or a 
-#' single Latex measure (like `'17cm'`) or a double one (like `"21, 2cm"`). Only used when 
-#' the Latex table is to be viewed (`view = TRUE`), exported (`export != NULL`) or displayed 
-#' in Rmarkdown (`markdown != NULL`). It represents the text width of the page in which the 
-#' Latex table will be inserted. By default, `'fit'`, the page fits exactly the table (i.e. 
-#' text width = table width). If `'a4'` or `'us'`, two times 2cm is removed from the page 
-#' width to account for margins. Providing a page width and a margin width, like in 
-#' `"17in, 1in"`, enables a correct display of the argument `adjustbox`. Note that the 
+#' @param page.width Character scalar equal to `'fit'` (default), `'a4'` or `'us'`; or a
+#' single Latex measure (like `'17cm'`) or a double one (like `"21, 2cm"`). Only used when
+#' the Latex table is to be viewed (`view = TRUE`), exported (`export != NULL`) or displayed
+#' in Rmarkdown (`markdown != NULL`). It represents the text width of the page in which the
+#' Latex table will be inserted. By default, `'fit'`, the page fits exactly the table (i.e.
+#' text width = table width). If `'a4'` or `'us'`, two times 2cm is removed from the page
+#' width to account for margins. Providing a page width and a margin width, like in
+#' `"17in, 1in"`, enables a correct display of the argument `adjustbox`. Note that the
 #' margin width represent the width of a single side margin (and hence will be doubled).
-#' @param div.class Character scalar, default is `"etable"`. Only used in Rmarkdown documents 
-#' when `markdown = TRUE`. The table in an image format is embedded in a `<div>` container, 
+#' @param div.class Character scalar, default is `"etable"`. Only used in Rmarkdown documents
+#' when `markdown = TRUE`. The table in an image format is embedded in a `<div>` container,
 #' and that container is of class `div.class`.
 #'
 #'
@@ -424,24 +424,24 @@
 #'
 #' The function `esttable` is equivalent to the function `etable` with argument `tex = FALSE`.
 #'
-#' To display the table, you will need the Latex package `booktabs` which contains 
+#' To display the table, you will need the Latex package `booktabs` which contains
 #' the `\\toprule`, `\\midrule` and `\\bottomrule` commands.
 #'
-#' You can permanently change the way your table looks in Latex by using `setFixest_etable`. 
-#' The following vignette gives an example as well as illustrates how to use the `style` and 
+#' You can permanently change the way your table looks in Latex by using `setFixest_etable`.
+#' The following vignette gives an example as well as illustrates how to use the `style` and
 #' postprocessing functions: [Exporting estimation tables](https://lrberge.github.io/fixest/articles/exporting_tables.html).
 #'
-#' When the argument `postprocess.tex` is not missing, two additional tags will 
-#' be included in the character vector returned by `etable`: 
-#' `"%start:tab\\n"` and `"%end:tab\\n"`. These can be used 
-#' to identify the start and end of the tabular and are useful to insert code 
+#' When the argument `postprocess.tex` is not missing, two additional tags will
+#' be included in the character vector returned by `etable`:
+#' `"%start:tab\\n"` and `"%end:tab\\n"`. These can be used
+#' to identify the start and end of the tabular and are useful to insert code
 #' within the `table` environment.
-#' 
+#'
 #' @section Latex dependencies:
-#' 
+#'
 #' Some features require specific Latex dependencies, these are:
-#' 
-#' - always needed: `\\usepackage{booktabs}`, `\\usepackage{array}`, 
+#'
+#' - always needed: `\\usepackage{booktabs}`, `\\usepackage{array}`,
 #' `\\usepackage{multirow}`, `\\usepackage{amsmath}`, `\\usepackage{amssymb}`
 #' - if there are line break within cells: `\\usepackage{makecell}`
 #' - if the tabularx environment is used: `\\usepackage{tabularx}`
@@ -451,9 +451,9 @@
 #' - if you highlight cells with a box: `\\usepackage{tikz}` and
 #'  `\\usetikzlibrary{matrix, shapes, arrows, fit, tikzmark}`
 #' - if you highlight rows using the background color: `\\usepackage{colortbl}`
-#' 
+#'
 #' Here is a summary:
-#' 
+#'
 #' \preformatted{
 #' \% required
 #' \\usepackage{booktabs}
@@ -461,7 +461,7 @@
 #' \\usepackage{multirow}
 #' \\usepackage{amsmath}
 #' \\usepackage{amssymb}
-#' 
+#'
 #' \% optional, dependent on context
 #' \\usepackage{makecell}
 #' \\usepackage{tabularx}
@@ -475,224 +475,224 @@
 #'
 #' @section How does `digits` handle the number of decimals displayed?:
 #'
-#' The default display of decimals is the outcome of an algorithm. Let's take the example 
+#' The default display of decimals is the outcome of an algorithm. Let's take the example
 #' of `digits = 3` which "kind of" requires 3 significant digits to be displayed.
 #'
-#' For numbers greater than 1 (in absolute terms), their integral part is 
-#' always displayed and the number of decimals shown is equal to `digits` 
-#' minus the number of digits in the integral part. 
-#' This means that `12.345` will be displayed as `12.3`. 
-#' If the number of decimals should be 0, then a single decimal is displayed 
-#' to suggest that the number is not whole. This means that `1234.56` will 
+#' For numbers greater than 1 (in absolute terms), their integral part is
+#' always displayed and the number of decimals shown is equal to `digits`
+#' minus the number of digits in the integral part.
+#' This means that `12.345` will be displayed as `12.3`.
+#' If the number of decimals should be 0, then a single decimal is displayed
+#' to suggest that the number is not whole. This means that `1234.56` will
 #' be displayed as `1234.5`. Note that if the number is whole, no decimals are shown.
 #'
-#' For numbers lower than 1 (in absolute terms), the number of decimals displayed is equal 
-#' to `digits` except if there are only 0s in which case the first significant 
-#' digit is shown. 
-#' This means that `0.01234` will be displayed as `0.012` (first rule), 
+#' For numbers lower than 1 (in absolute terms), the number of decimals displayed is equal
+#' to `digits` except if there are only 0s in which case the first significant
+#' digit is shown.
+#' This means that `0.01234` will be displayed as `0.012` (first rule),
 #' and that 0.000123 will be displayed as `0.0001` (second rule).
 #'
 #' @section Arguments keep, drop and order:
-#' The arguments `keep`, `drop` and `order` use regular expressions. If you are not aware 
-#' of regular expressions, I urge you to learn it, since it is an extremely powerful way 
+#' The arguments `keep`, `drop` and `order` use regular expressions. If you are not aware
+#' of regular expressions, I urge you to learn it, since it is an extremely powerful way
 #' to manipulate character strings (and it exists across most programming languages).
 #'
-#' For example drop = "Wind" would drop any variable whose name contains "Wind". Note that 
-#' variables such as "Temp:Wind" or "StrongWind" do contain "Wind", so would be dropped. 
-#' To drop only the variable named "Wind", you need to use 
-#' `drop = "^Wind$"` (with "^" meaning beginning, resp. "$" meaning end, 
+#' For example drop = "Wind" would drop any variable whose name contains "Wind". Note that
+#' variables such as "Temp:Wind" or "StrongWind" do contain "Wind", so would be dropped.
+#' To drop only the variable named "Wind", you need to use
+#' `drop = "^Wind$"` (with "^" meaning beginning, resp. "$" meaning end,
 #' of the string => this is the language of regular expressions).
 #'
-#' Although you can combine several regular expressions in a single character 
+#' Although you can combine several regular expressions in a single character
 #' string using pipes, `drop` also accepts a vector of regular expressions.
 #'
-#' You can use the special character "!" (exclamation mark) to reverse the effect 
-#' of the regular expression (this feature is specific to this function). 
+#' You can use the special character "!" (exclamation mark) to reverse the effect
+#' of the regular expression (this feature is specific to this function).
 #' For example `drop = "!Wind"` would drop any variable that does not contain "Wind".
 #'
 #' By default, the regular expressions are checked against the variables after
 #' they have been renamed with the dictionary (argument `dict`).
 #' You can use the `*_raw` versions of drop/keep/order to apply the regular
 #' expressions on the original variable names.
-#' Note that alternatively you can use the special character "%" (percentage) at the 
-#' beginning of drop/keep/order's regular expressions to refer to the original variable name. 
-#' For example, you have a variable named `"Month6"`, 
-#' and use a dictionary `dict = c(Month6="June")`. 
-#' Thus the variable will be displayed as `"June"`. 
+#' Note that alternatively you can use the special character "%" (percentage) at the
+#' beginning of drop/keep/order's regular expressions to refer to the original variable name.
+#' For example, you have a variable named `"Month6"`,
+#' and use a dictionary `dict = c(Month6="June")`.
+#' Thus the variable will be displayed as `"June"`.
 #' If you want to delete that variable, you can use either `drop="June"`, `drop_raw="Month6"`,
 #' or `drop="%Month6"`.
 #'
-#' The argument `order` takes in a vector of regular expressions, the order will follow the 
-#' elements of this vector. The vector gives a list of priorities, 
-#' on the left the elements with highest priority. 
-#' For example, order = c("Wind", "!Inter", "!Temp") would give highest priorities to 
-#' the variables containing "Wind" (which would then appear first), 
-#' second highest priority is the variables not containing "Inter", last, 
-#' with lowest priority, the variables not containing "Temp". 
-#' If you had the following variables: (Intercept), Temp:Wind, Wind, Temp you 
+#' The argument `order` takes in a vector of regular expressions, the order will follow the
+#' elements of this vector. The vector gives a list of priorities,
+#' on the left the elements with highest priority.
+#' For example, order = c("Wind", "!Inter", "!Temp") would give highest priorities to
+#' the variables containing "Wind" (which would then appear first),
+#' second highest priority is the variables not containing "Inter", last,
+#' with lowest priority, the variables not containing "Temp".
+#' If you had the following variables: (Intercept), Temp:Wind, Wind, Temp you
 #' would end up with the following order: Wind, Temp:Wind, Temp, (Intercept).
-#' 
+#'
 #' @section The argument `headers`:
-#' 
+#'
 #' Use the argument `headers` to add one or more lines in the header (top part of the table).
-#' It accepts a list where each element of the list is a line, the names of the list 
+#' It accepts a list where each element of the list is a line, the names of the list
 #' (if provided) are the row name.
-#' 
-#' The content (not the row name) of each line can be defined in two ways: 
+#'
+#' The content (not the row name) of each line can be defined in two ways:
 #' 1) a character vector, or 2) a list.
-#' 
-#' 1) If a vector, it should represent the values taken by each cell. Note that if the 
-#' length of the vector is smaller than the number of models, its values are 
-#' recycled across models, but the length of the vector is required to be a 
+#'
+#' 1) If a vector, it should represent the values taken by each cell. Note that if the
+#' length of the vector is smaller than the number of models, its values are
+#' recycled across models, but the length of the vector is required to be a
 #' divisor of the number of models.
 #'
-#' 2) If a list, it should be of the form `list("item1" = nb1, "item2" = nb2, etc)`. 
+#' 2) If a list, it should be of the form `list("item1" = nb1, "item2" = nb2, etc)`.
 #' Numbers given as integers represent column positions.
 #' For exemple: `list("A" = 2L, "B" = 3L)` leads
 #' to `c("", "A", "B")`.
-#' 
+#'
 #' Numbers in 'double' format (the default number format in `R`) represent spans.
-#' For example: `list("A"=2, "B"=3)` leads to `c("A", "A", "B", "B", "B")`. 
-#' Note that if the number of items is 1, you don't need to add `= 1`. 
-#' For example: `list("A"=2, "B")` is valid and leads to `c("A", "A", "B")`. 
+#' For example: `list("A"=2, "B"=3)` leads to `c("A", "A", "B", "B", "B")`.
+#' Note that if the number of items is 1, you don't need to add `= 1`.
+#' For example: `list("A"=2, "B")` is valid and leads to `c("A", "A", "B")`.
 #' The spans can be larger than the number of models (to fill all columns).
-#' 
+#'
 #' The resolution of spans or column positions is done from left to right.
 #' The spans always start at the rightmost unfilled column on the right.
 #' For example: `list("A" = 2L, "B" = 2)` lead to `c("", "A", "B", "B")`.
 #' Another example: `list("B" = 3, "A" = 2L)` leads to `c("B", "A", "B")`.
-#' 
+#'
 #' Note that contrary to the vector (see point `1)`) the values provided are
-#' not recycled, instead the right side is filled with empty columns. 
+#' not recycled, instead the right side is filled with empty columns.
 #' The only exception is when multiple VCOVs in the `vcov` argument leads to the repetition
 #' of models, and in that case the values are recycled accordingly (if that does make sense).
-#' 
+#'
 #'
 #' @section The argument `extralines`:
 #'
-#' The argument `extralines` adds well... extra lines to the table. 
+#' The argument `extralines` adds well... extra lines to the table.
 #' It accepts either a list, or a one-sided formula.
 #'
-#' For each line, you can define the values taken by each cell using 4 different ways: 
+#' For each line, you can define the values taken by each cell using 4 different ways:
 #' 1) a vector, 2) a list, 3) a function, and 4) a formula.
 #'
-#' 1) If a vector, it should represent the values taken by each cell. Note that if the 
-#' length of the vector is smaller than the number of models, its values are 
-#' recycled across models, but the length of the vector is required to be a 
+#' 1) If a vector, it should represent the values taken by each cell. Note that if the
+#' length of the vector is smaller than the number of models, its values are
+#' recycled across models, but the length of the vector is required to be a
 #' divisor of the number of models.
 #'
-#' 2) If a list, it should be of the form `list("item1" = nb1, "item2" = nb2, etc)`. 
+#' 2) If a list, it should be of the form `list("item1" = nb1, "item2" = nb2, etc)`.
 #' Numbers given as integers represent column positions.
 #' For exemple: `list("A" = 2L, "B" = 3L)` leads
 #' to `c("", "A", "B")`.
-#' 
+#'
 #' Numbers in 'double' format (the default number format in `R`) represent spans.
-#' For example: `list("A"=2, "B"=3)` leads to `c("A", "A", "B", "B", "B")`. 
-#' Note that if the number of items is 1, you don't need to add `= 1`. 
-#' For example: `list("A"=2, "B")` is valid and leads to `c("A", "A", "B")`. 
+#' For example: `list("A"=2, "B"=3)` leads to `c("A", "A", "B", "B", "B")`.
+#' Note that if the number of items is 1, you don't need to add `= 1`.
+#' For example: `list("A"=2, "B")` is valid and leads to `c("A", "A", "B")`.
 #' The spans can be larger than the number of models (to fill all columns).
-#' 
+#'
 #' The resolution of spans or column positions is done from left to right.
 #' The spans always start at the rightmost unfilled column on the right.
 #' For example: `list("A" = 2L, "B" = 2)` lead to `c("", "A", "B", "B")`.
 #' Another example: `list("B" = 3, "A" = 2L)` leads to `c("B", "A", "B")`.
-#' 
+#'
 #' Note that contrary to the vector (see point 1)) the values provided are
-#' not recycled, instead the right side is filled with empty columns. 
+#' not recycled, instead the right side is filled with empty columns.
 #' The only exception is when multiple VCOVs in the `vcov` argument leads to the repetition
 #' of models, and in that case the values are recycled accordingly (if that does make sense).
 #'
-#' 3) If a function, it will be applied to each model and should return a scalar (`NA` values 
+#' 3) If a function, it will be applied to each model and should return a scalar (`NA` values
 #' returned are accepted).
 #'
-#' 4) If a formula, it must be one-sided and the elements in the formula must represent either 
-#' `extralines` macros, either fit statistics (i.e. valid types of 
-#' the function [`fitstat`]). 
-#' One new line will be added for each element of the formula. 
+#' 4) If a formula, it must be one-sided and the elements in the formula must represent either
+#' `extralines` macros, either fit statistics (i.e. valid types of
+#' the function [`fitstat`]).
+#' One new line will be added for each element of the formula.
 #' To register `extralines` macros, you must first register them in [`extralines_register`].
 #'
-#' Finally, you can combine as many lines as wished by nesting them in a list. 
-#' The names of the nesting list are the row titles (values in the leftmost cell). 
+#' Finally, you can combine as many lines as wished by nesting them in a list.
+#' The names of the nesting list are the row titles (values in the leftmost cell).
 #' For example `extralines = list(~r2, Controls = TRUE, Group = list("A"=2, "B"))` will
 #'  add three lines, the titles of which are "R2", "Controls" and "Group".
 #'
 #'
 #' @section Controlling the placement of extra lines:
 #'
-#' The arguments `group`, `extralines` and `fixef.group` allow to add customized lines in the 
-#' table. They can be defined via a list where the list name will be the row name. 
-#' By default, the placement of the extra line is right after the coefficients 
-#' (except for `fixef.group`, covered in the last paragraph). 
-#' For instance, `group = list("Controls" = "x[[:digit:]]")` will create a 
+#' The arguments `group`, `extralines` and `fixef.group` allow to add customized lines in the
+#' table. They can be defined via a list where the list name will be the row name.
+#' By default, the placement of the extra line is right after the coefficients
+#' (except for `fixef.group`, covered in the last paragraph).
+#' For instance, `group = list("Controls" = "x[[:digit:]]")` will create a
 #' line right after the coefficients telling which models contain the control variables.
 #'
-#' But the placement can be customized. The previous example (of the controls) will 
+#' But the placement can be customized. The previous example (of the controls) will
 #' be used for illustration (the mechanism for `extralines` and `fixef.group` is identical).
 #'
-#' The row names accept 2 special characters at the very start. 
-#' The first character tells in which section the line should appear: 
-#' it can be equal to `"^"`, `"-"`, or `"_"`, meaning respectively 
-#' the coefficients, the fixed-effects and the statistics section 
-#' (which typically appear at the top, mid and bottom of the table). 
-#' The second one governs the placement of the new line within 
+#' The row names accept 2 special characters at the very start.
+#' The first character tells in which section the line should appear:
+#' it can be equal to `"^"`, `"-"`, or `"_"`, meaning respectively
+#' the coefficients, the fixed-effects and the statistics section
+#' (which typically appear at the top, mid and bottom of the table).
+#' The second one governs the placement of the new line within
 #' the section: it can be equal to `"^"`, meaning first line, or `"_"`, meaning last line.
 #'
-#' Let's have some examples. Using the previous example, writing `"_^Controls"` 
-#' would place the new line at the top of the statistics section. 
-#' Writing `"-_Controls"` places it as the last row of 
-#' the fixed-effects section; `"^^Controls"` at the top row of 
+#' Let's have some examples. Using the previous example, writing `"_^Controls"`
+#' would place the new line at the top of the statistics section.
+#' Writing `"-_Controls"` places it as the last row of
+#' the fixed-effects section; `"^^Controls"` at the top row of
 #' the coefficients section; etc...
 #'
-#' The second character is optional, the default placement being in the bottom. 
+#' The second character is optional, the default placement being in the bottom.
 #' This means that `"_Controls"` would place it at the bottom of the statistics section.
 #'
-#' The placement in `fixef.group` is defined similarly, only the default 
-#' placement is different. 
+#' The placement in `fixef.group` is defined similarly, only the default
+#' placement is different.
 #' Its default placement is at the top of the fixed-effects section.
 #'
 #' @section Escaping special Latex characters:
 #'
-#' By default on all instances (with the notable exception of the elements of [`style.tex`]) 
-#' special Latex characters are escaped. This means that 
-#' `caption="Exports in million $."` will be exported as 
-#' `"Exports in million \\$."`: the dollar sign will be escaped. 
+#' By default on all instances (with the notable exception of the elements of [`style.tex`])
+#' special Latex characters are escaped. This means that
+#' `caption="Exports in million $."` will be exported as
+#' `"Exports in million \\$."`: the dollar sign will be escaped.
 #' This is true for the following characters: &, `$`, %, _, ^ and #.
 #'
-#' Note, importantly, that equations are NOT escaped. This means that 
-#' `caption="Functional form $a_i \\times x^b$, variation in %."` will be displayed as: 
-#' `"Functional form $a_i \\times x^b$, variation in \\%."`: only the 
+#' Note, importantly, that equations are NOT escaped. This means that
+#' `caption="Functional form $a_i \\times x^b$, variation in %."` will be displayed as:
+#' `"Functional form $a_i \\times x^b$, variation in \\%."`: only the
 #' last percentage will be escaped.
 #'
-#' If for some reason you don't want the escaping to take place, the arguments `headers` and 
-#' `extralines` are the only ones allowing that. To disable escaping, add the special token 
-#' ":tex:" in the row names. 
-#' Example: in `headers=list(":tex:Row title"="weird & & %\\n tex stuff\\\\")`, 
-#' the elements will be displayed verbatim. Of course, since it can easily ruin your table, 
+#' If for some reason you don't want the escaping to take place, the arguments `headers` and
+#' `extralines` are the only ones allowing that. To disable escaping, add the special token
+#' ":tex:" in the row names.
+#' Example: in `headers=list(":tex:Row title"="weird & & %\\n tex stuff\\\\")`,
+#' the elements will be displayed verbatim. Of course, since it can easily ruin your table,
 #' it is only recommended to super users.
 #'
 #' @section Markdown markup:
 #'
-#' Within anything that is Latex-escaped (see previous section), you can use a markdown-style 
-#' markup to put the text in italic and/or bold. Use `*text*`, `**text**` or `***text***` to 
-#' put some text in, respectively, italic (with `\\textit`), 
+#' Within anything that is Latex-escaped (see previous section), you can use a markdown-style
+#' markup to put the text in italic and/or bold. Use `*text*`, `**text**` or `***text***` to
+#' put some text in, respectively, italic (with `\\textit`),
 #' bold (with `\\textbf`) and italic-bold.
 #'
-#' The markup can be escaped by using an backslash first. For example `"***This: \\***, are 
+#' The markup can be escaped by using an backslash first. For example `"***This: \\***, are
 #' three stars***"` will leave the three stars in the middle untouched.
 #'
 #' @return
-#' If `tex = TRUE`, the lines composing the Latex table are returned invisibly while 
+#' If `tex = TRUE`, the lines composing the Latex table are returned invisibly while
 #' the table is directly prompted on the console.
 #'
-#' If `tex = FALSE`, the data.frame is directly returned. If the argument `file` is 
+#' If `tex = FALSE`, the data.frame is directly returned. If the argument `file` is
 #' not missing, the `data.frame` is printed and returned invisibly.
 #'
 #' @seealso
 #' For styling the table: [`setFixest_etable`], [`style.tex`], [`style.df`].
-#' 
-#' See also the main estimation functions [`femlm`], [`feols`] or [`feglm`]. 
-#' Use [`summary.fixest`] 
-#' to see the results with the appropriate standard-errors, [`fixef.fixest`] to extract the 
+#'
+#' See also the main estimation functions [`femlm`], [`feols`] or [`feglm`].
+#' Use [`summary.fixest`]
+#' to see the results with the appropriate standard-errors, [`fixef.fixest`] to extract the
 #' fixed-effects coefficients.
 #'
 #' @author
@@ -742,14 +742,14 @@
 #' # We can use the argument keep_raw to make reference to the original names.
 #'
 #' etable(est1, est2, dict = dict, keep_raw = "Month")
-#' 
+#'
 #' # Alternatively, we can use the special character '%' to make reference to the original names
 #' etable(est1, est2, dict = dict, keep = "%Month")
-#' 
+#'
 #' #
 #' # coef.sub
 #' #
-#' 
+#'
 #' # Let's use a regular expression to add parentheses around Month, in its product with Wind
 #' # [NOTA: this is a complex example just to illustrate how to use a regex with coef.sub]
 #' etable(est1, est2, coef.sub =  "x M(.+)$ => x (M\\1)")
@@ -1006,7 +1006,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
                   se.row = NULL, se.below = NULL,
                   keep = NULL, drop = NULL, order = NULL,
                   keep_raw = NULL, drop_raw = NULL, order_raw = NULL,
-                  dict = TRUE, coef.sub = NULL, file = NULL, replace = TRUE, 
+                  dict = TRUE, coef.sub = NULL, file = NULL, replace = TRUE,
                   create_dirs = FALSE, convergence = NULL,
                   signif.code = NULL, label = NULL, float = NULL,
                   headers = list("auto"), fixef_sizes = FALSE,
@@ -1121,7 +1121,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
     signif.code = dots$signifCode
     dots$signifCode = NULL
   }
-  
+
   if("title" %in% names(dots)){
     if(is.null(getOption("fixest_etable_arg_title"))){
       # I replace title with caption, 2025-07-09
@@ -1147,7 +1147,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
   if(.up == 2){
     # it's pain in the necky
     sysOrigin = sys.parent()
-    mc = match.call(definition = sys.function(sysOrigin), call = sys.call(sysOrigin), 
+    mc = match.call(definition = sys.function(sysOrigin), call = sys.call(sysOrigin),
                     expand.dots = FALSE)
     dots_call = mc[["..."]]
   } else {
@@ -1168,9 +1168,9 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
   # Arguments that can be set globally
   opts = getOption("fixest_etable")
 
-  args_global = c("postprocess.tex", "postprocess.df", "view", "markdown", 
+  args_global = c("postprocess.tex", "postprocess.df", "view", "markdown",
                   "page.width", "div.class")
-  
+
   for(arg in setdiff(args_global, names(mc))){
     if(arg %in% names(opts)){
       assign(arg, opts[[arg]])
@@ -1274,14 +1274,14 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
       signif.code = signif.code, coefstat = coefstat,
       ci = ci, caption = caption, float = float, headers = headers,
       keepFactors = keepFactors, tex = TEX, useSummary = useSummary,
-      dots_call = dots_call, powerBelow = powerBelow, 
+      dots_call = dots_call, powerBelow = powerBelow,
       dict = dict, coef.sub = coef.sub,
       interaction.combine = interaction.combine, interaction.order = interaction.order,
       i.equal = i.equal, convergence = convergence,
-      family = family, 
+      family = family,
       keep = keep, drop = drop, order = order,
       keep_raw = keep_raw, drop_raw = drop_raw, order_raw = order_raw,
-      file = file, 
+      file = file,
       label = label, fixef_sizes = fixef_sizes,
       fixef_sizes.simplify = fixef_sizes.simplify,
       depvar = depvar, style.tex = style.tex, style.df = style.df,
@@ -1371,7 +1371,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
   if(is_file){
     # Create directory if it doesn't exist
     check_set_path(file, "w", create_dirs = create_dirs)
-    
+
     error_sender(sink(file = file, append = !replace),
                  "Argument 'file': error when creating the document in ", file)
 
@@ -1473,8 +1473,8 @@ gen_etable_aliases = function(){
   # Now the two have been merged into etable
   # I like it much better
   # I wanted to deprecate them, but maintainance with that function is very easy
-  
-  # NOTA: I do this to avoid a discrepancy btw the current dev version 
+
+  # NOTA: I do this to avoid a discrepancy btw the current dev version
   # and the package being installed
   file = "./R/etable.R"
   if(!file.exists(file)) return()
@@ -1491,7 +1491,7 @@ gen_etable_aliases = function(){
   #
   # esttable
   #
-  
+
   esttable_def = "esttable = function("
   coll = paste0(", \n", strrep(" ", nchar(esttable_def)))
 
@@ -1508,7 +1508,7 @@ gen_etable_aliases = function(){
   etable_call = paste0(arg_name[qui_df][-1], " = ", arg_name[qui_df][-1], collapse = coll_bis)
 
   esttable_fun = paste0(esttable_def, esttable_args, "){\n\n",
-                        "  etable(...", coll_bis, etable_call, coll_bis, 
+                        "  etable(...", coll_bis, etable_call, coll_bis,
                         "tex = FALSE", coll_bis, ".up = 2)\n}")
 
   esttable_rox = "#' @describeIn etable Exports the results of multiple `fixest` estimations in a Latex table."
@@ -1516,7 +1516,7 @@ gen_etable_aliases = function(){
   #
   # esttex
   #
-  
+
   esttex_def = "esttex = function("
   coll = paste0(", \n", strrep(" ", nchar(esttex_def)))
 
@@ -1532,7 +1532,7 @@ gen_etable_aliases = function(){
                       "tex = TRUE", coll_bis, ".up = 2)\n}")
 
   esttex_rox = "#' @describeIn etable Exports the results of multiple `fixest` estimations in a Latex table."
-  
+
   # Writing the functions
   intro = c("# Do not edit by hand\n# => aliases to the function etable")
 
@@ -1544,15 +1544,15 @@ gen_etable_aliases = function(){
 
 results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
                                  agg = NULL, .vcov_args = NULL, digits = 4,
-                                 digits.stats = 5, fitstat_all, se.row = NULL, 
-                                 se.below = NULL, 
+                                 digits.stats = 5, fitstat_all, se.row = NULL,
+                                 se.below = NULL,
                                  dict, coef.sub,
                                  signif.code = c("***"=0.01, "**"=0.05, "*"=0.10),
                                  coefstat = "se", ci = 0.95, label, headers, caption,
                                  float = FALSE, replace = TRUE, keepFactors = FALSE,
                                  tex = FALSE, useSummary, dots_call, powerBelow = -5,
                                  interaction.combine, interaction.order, i.equal,
-                                 convergence, family, 
+                                 convergence, family,
                                  keep, drop, order, keep_raw, drop_raw, order_raw,
                                  file, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE,
                                  depvar = FALSE, style.tex = NULL, style.df=NULL,
@@ -1587,7 +1587,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
   #
   # Setting the default
   #
-  
+
   opts = getOption("fixest_etable")
   sysOrigin = sys.parent(.up)
   if(length(opts) > 0){
@@ -1648,7 +1648,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
   if(length(caption) > 1){
     caption = paste0(caption, collapse = "")
   }
-  
+
   check_set_arg(coefstat, "match(se, tstat, confint, pvalue)")
 
 
@@ -1712,23 +1712,23 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
     show_depvar = depvar
   }
 
-  check_arg(keep, drop, order, keep_raw, drop_raw, order_raw, 
+  check_arg(keep, drop, order, keep_raw, drop_raw, order_raw,
             "character vector no na NULL",
             .message = "The arg. '__ARG__' must be a vector of regular expressions (see help(regex)).")
-  
+
   # we assign *_raw to the regular ones using the % markup
   if(length(keep_raw) > 0){
     keep = c(keep, paste0("%", keep_raw))
   }
-  
+
   if(length(drop_raw) > 0){
     drop = c(drop, paste0("%", drop_raw))
   }
-  
+
   if(length(order_raw) > 0){
     order = c(order, paste0("%", order_raw))
   }
-  
+
   check_arg(coef.sub, "character vector no na NULL")
 
   check_arg(file, label, interaction.combine, i.equal, "NULL character scalar")
@@ -1807,18 +1807,18 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
   if(isTex){
     if(nchar(placement) > 0){
       p_split = strsplit(placement, "")[[1]]
-      check_value(p_split, "strict multi charin(h, t, b, p, H, !)", 
+      check_value(p_split, "strict multi charin(h, t, b, p, H, !)",
                   .message = "Argument 'placement' must be a character string containing only the following characters: 'h', 't', 'b', 'p', 'H', and '!'.")
     }
   }
 
   check_set_arg(drop.section, "NULL multi match(coef, fixef, slopes, stats)")
-  
+
   check_arg(group, "NULL named list l0")
   if(is.null(group)){
     group = list()
   }
-  
+
   check_arg(extralines, "NULL list l0 | os formula | vector")
   if(is.null(extralines)){
     extralines = list()
@@ -1945,7 +1945,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
 
               author_txt = paste0(author_txt, user_login, ", ", user_rest)
             } else {
-              author_txt = sma("{author_txt}{user_all[1]} (login), {user_all[2]} (user), ", 
+              author_txt = sma("{author_txt}{user_all[1]} (login), {user_all[2]} (user), ",
                                "{user_all[3]} (effective_user)")
             }
           }
@@ -1985,7 +1985,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
 
   # default values for dict
   dict = setup_dict(dict)
-  
+
   # formatting the names of the models
   dots_names = names(dots_call)
   if(!is.null(dots_names)){
@@ -2002,7 +2002,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
   n_dots = length(dots)
 
   if(n_dots == 0) stop_up("Not any estimation as argument.")
-  
+
   info_models = flatten_list_of_models(dots, dots_call)
   all_models = info_models$all_models
   model_names = info_models$model_names
@@ -2011,7 +2011,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
   if(length(all_models) == 0) stop_up("Not any 'fixest' model as argument!")
 
   n_models = n_models_origin = length(all_models)
-  
+
   # auto headers => we quickly scan the headers to see if the user asked for auto headers
   # we also prepare the format of the headers variables
   # only when we know the real number of models we expand the headers
@@ -2035,8 +2035,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
           # ex: headers = list("M"=2, "F"=2)
           # or list("M", "F" = 2)
           if(is.numeric(headers[[1]]) || # case list("M" = 2, "F" = 3)
-             (!is.null(names(headers)) && nchar(names(headers)[1]) == 0 && 
-              is.character(headers[[1]]))){ 
+             (!is.null(names(headers)) && nchar(names(headers)[1]) == 0 &&
+              is.character(headers[[1]]))){
             # CASE 1: list("M", "F" = 2), only one row
             # CASE 2: list("sample" = "all", "control" = TRUE), two rows
             if(!is.null(names(headers)) && all(nchar(names(headers)) > 0)){
@@ -2099,7 +2099,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
   IS_EACH = FALSE
   if(!missnull(vcov) && identical(class(vcov), "list") && length(vcov) > 1){
     IS_MULTI_VCOV = TRUE
-    
+
     vcov_names = names(vcov)
     is_vcov_names = !is.null(vcov_names)
     vcov_1 = vcov[[1]]
@@ -2140,13 +2140,13 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
         }
 
         mega_models[[i]] = all_models[[id_mod[i]]]
-        
+
         current_vcov = vcov[[id_vcov[i]]]
         if(is_vcov_names && (is.function(current_vcov) || is.numeric(current_vcov))){
           current_vcov = list(current_vcov)
           names(current_vcov) = vcov_names[id_vcov[i]]
         }
-        
+
         mega_vcov[[i]] = current_vcov
       }
 
@@ -2175,21 +2175,21 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
       vcov = mega_vcov
 
     } else {
-      check_value(vcov, "list len(value)", .value = n_models, 
+      check_value(vcov, "list len(value)", .value = n_models,
                   .message = "If 'vcov' is a list, it must be of the same length as the number of models, or you should add the 'each' or 'times' keyword as the first element of the list.")
     }
   }
-  
+
   # headers => we have a garantee that it is a named list (see preparation above) w/t auto headers
   # => we expand the header elements now that we know the number of models
   if(length(headers) > 0){
     for(i in seq_along(headers)){
       # expand_list_vector: list("A"=2, "B") => c("A", "A", "B")
-      headers[[i]] = expand_list_vector(headers[[i]], n_models, n_models_origin, 
+      headers[[i]] = expand_list_vector(headers[[i]], n_models, n_models_origin,
                                         "headers", IS_EACH)
     }
   }
-  
+
   # we add the auto headers
   auto_headers_clean = list()
   if(length(auto_headers) > 0){
@@ -2240,7 +2240,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
     vcov_name = deparse_long(mc$vcov)
 
     if(missnull(.vcov_args)) .vcov_args = list()
-    check_set_arg(.vcov_args, "list", 
+    check_set_arg(.vcov_args, "list",
                   .message = "The argument '.vcov_args' must be a list of arguments to be passed to the function in 'vcov'.")
   }
 
@@ -2254,7 +2254,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
     if(length(stage) > 1){
       # Multiple for sure
       is_mult = TRUE
-    } else if(1 %in% stage && any(sapply(all_models[qui_iv], 
+    } else if(1 %in% stage && any(sapply(all_models[qui_iv],
                                          function(x) length(x$iv_endo_names) > 1))){
       # Means we have multiple end, so svl first stages
       is_mult = TRUE
@@ -2350,7 +2350,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
   if(length(headers) == 0){
     isHeaders = FALSE
   } else {
-    
+
     n_all = lengths(headers)
 
     if(any(n_models %% n_all != 0)){
@@ -2433,8 +2433,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
   if(is.null(el_names)) el_names = character(length(extralines))
   el_names = uniquify_names(el_names)
   for(i in seq_along(extralines)){
-    check_value(extralines[[i]], "vector | function | os formula | list", 
-                .message = sma("The elements of argument 'extralines' must be vectors of ", 
+    check_value(extralines[[i]], "vector | function | os formula | list",
+                .message = sma("The elements of argument 'extralines' must be vectors of ",
                                "length {n_models}, logical scalars, functions, one-sided formulas,",
                                " or lists."),
                 .value = n_models)
@@ -2515,32 +2515,32 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
   #
   # ... fitstat ####
   #
-  
+
   fitstat_default = NULL
   if("fitstat" %in% names(opts)){
     # there is a default fitstat
-    fitstat_default = opts$fitstat 
+    fitstat_default = opts$fitstat
     if(is.null(fitstat_all)){
       fitstat_all = opts$fitstat
     }
-    
+
     if(inherits(fitstat_default, "formula")){
       fitstat_default = gsub(" ", "", strsplit(deparse_long(fitstat_default[[2]]), "+", fixed = TRUE)[[1]])
     }
-    
+
   }
 
   if(missnull(fitstat_all)){
     # => do default
     fitstat_all = "."
 
-  } else if(isFALSE(fitstat_all) || (length(fitstat_all) == 1 && 
+  } else if(isFALSE(fitstat_all) || (length(fitstat_all) == 1 &&
                                      (is.na(fitstat_all) || fitstat_all == ""))){
     fitstat_all = NULL
     drop.section = c(drop.section, "stats")
 
   } else if(inherits(fitstat_all, "formula")){
-    check_arg(fitstat_all, "os formula", 
+    check_arg(fitstat_all, "os formula",
               .message = "Argument 'fitstat' must be a one sided formula (or a character vector) containing valid types from the function fitstat (see details in ?fitstat).")
 
     fitstat_all = .xpd(fitstat_all, frame = parent.frame(.up))
@@ -2550,24 +2550,24 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
     fitstat_all = unique(fitstat_all)
 
   } else {
-    check_arg(fitstat_all, "character vector no na", 
+    check_arg(fitstat_all, "character vector no na",
               .message = "Argument 'fitstat' must be a one sided formula (or a character vector) containing valid types from the function fitstat (see details in ?fitstat).")
 
   }
-  
+
   if("." %in% fitstat_all){
-    
+
     if(length(fitstat_default) > 0){
       i = which(fitstat_all == ".")[1]
       fitstat_all = replace_at(fitstat_all, fitstat_default, i)
     }
-    
+
     if("." %in% fitstat_all){
       # Default values:
       #   - if all OLS: typical R2
       #   - if any non-OLS: pseudo R2 + squared cor.
       is_ols = sapply(all_models, function(x) x$method_type == "feols")
-      
+
       if(all(is_ols)){
         if(any(sapply(all_models, function(x) "fixef_vars" %in% names(x)))){
           # means any FE model
@@ -2584,7 +2584,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
       if(any(sapply(all_models, function(x) !is.null(x$theta)))){
         fitstat_default = c(fitstat_default, "theta")
       }
-      
+
       fitstat_default = setdiff(fitstat_default, fitstat_all)
 
       if(length(fitstat_default) > 0){
@@ -2592,7 +2592,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
         fitstat_all = replace_at(fitstat_all, fitstat_default, i)
       }
     }
-    
+
   }
 
   fitstat_all = tolower(fitstat_all)
@@ -2612,7 +2612,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
   pblm = setdiff(fitstat_all, fitstat_type_allowed)
   if(length(pblm) > 0){
     stop_up("Argument `fitstat` must be a one sided formula (or a character vector) ",
-            "containing valid types from the function fitstat ", 
+            "containing valid types from the function fitstat ",
             "(see details in `?fitstat` or use `fitstat(show_types = TRUE)`). ",
             "The type{$s, enum.q, is ? pblm} not valid.")
   }
@@ -2655,7 +2655,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
     # family
     family = x$family
     if(x$method %in% c("femlm", "feNmlm")){
-      fam = switch(family, poisson = "Poisson", negbin = "Neg. Bin.", 
+      fam = switch(family, poisson = "Poisson", negbin = "Neg. Bin.",
                    gaussian = "Gaussian", logit = "Logit")
     } else if(x$method %in% c("feglm", "feglm.fit")){
       if(family$family == "poisson" && family$link == "log"){
@@ -2674,6 +2674,14 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
       fam = "Poisson"
     } else if(x$method == "fenegbin"){
       fam = "Neg. Bin."
+    } else if(x$method == "ferols") {
+        cap <- function(x) {
+            paste0(toupper(substr(x, 1, 1)), substring(x, 2))
+        }
+        fam = paste0(
+            "Robust M (", cap(x$robust$family), " ",
+            round(100*x$robust$efficiency), "% efficiency)"
+        )
     }
     family_list[[m]] = fam
 
@@ -2682,7 +2690,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
 
     a = x$coeftable
     if(is.null(a)){
-      a = data.frame(coef = NA_real_, se = NA_real_, tstat = NA_real_, 
+      a = data.frame(coef = NA_real_, se = NA_real_, tstat = NA_real_,
                      pvalue = NA_real_, row.names = "TO_BE_REMOVED")
     } else if(!is.data.frame(a)){
       class(a) = NULL
@@ -2781,9 +2789,9 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
         slope_format = style$slopes.format
         slope_var_full = c()
         for(i in seq_along(slope_vars_name)){
-          slope_var_full[i] = gsub("__slope__", slope_fe_name[i], 
-                                   gsub("__var__", slope_vars_name[i], 
-                                        slope_format, fixed = TRUE), 
+          slope_var_full[i] = gsub("__slope__", slope_fe_name[i],
+                                   gsub("__var__", slope_vars_name[i],
+                                        slope_format, fixed = TRUE),
                                    fixed = TRUE)
         }
 
@@ -2809,7 +2817,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
     #
     # Now we rename the variables
     #
-    
+
     var = var_origin = row.names(a)
     # renaming
     if(TRUE){
@@ -3099,12 +3107,12 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
         if(!grepl("::", x, fixed = TRUE)) return(fitstat_dict[x])
 
         xx = strsplit(x, "::")[[1]]
-        
+
         var = dict_apply(xx[2], dict)
         if(isTex){
           var = escape_latex(var)
         }
-        
+
         res = paste0(fitstat_dict[xx[1]], ", ", var)
 
         res
@@ -3315,7 +3323,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
         } else {
           msg = sma("some groups lead to inconsistent rows (the {nth?i} one defined by ")
         }
-        warn_up("In 'fixef.group', ", msg, deparse_long(fixef.group[[i]]), 
+        warn_up("In 'fixef.group', ", msg, deparse_long(fixef.group[[i]]),
                 ").\nTo create inconsistent rows: use drop.section = 'fixef' combined with the arghument 'extralines'.")
       }
 
@@ -3324,28 +3332,28 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
   }
 
   res = list(se_type_list = se_type_list, var_list = var_list, coef_list = coef_list,
-             coef_below = coef_below, se.row = se.row, sd_below = sd_below, 
+             coef_below = coef_below, se.row = se.row, sd_below = sd_below,
              depvar_list = depvar_list,
              obs_list = obs_list, convergence_list = convergence_list, fe_names = fe_names,
              is_fe = is_fe, nb_fe = nb_fe, slope_flag_list = slope_flag_list,
              slope_names = slope_names, useSummary = useSummary, model_names = model_names,
              family_list = family_list, fitstat_list = fitstat_list, headers = headers,
-             isHeaders = isHeaders, caption = caption, convergence = convergence, 
+             isHeaders = isHeaders, caption = caption, convergence = convergence,
              family = family,
-             keep = keep, drop = drop, order = order, 
-             file = file, label = label, 
+             keep = keep, drop = drop, order = order,
+             file = file, label = label,
              se.below = se.below,
-             signif.code = signif.code, fixef_sizes = fixef_sizes, 
+             signif.code = signif.code, fixef_sizes = fixef_sizes,
              fixef_sizes.simplify = fixef_sizes.simplify,
-             depvar = depvar, useSummary = useSummary, dict = dict, 
-             coef.sub = coef.sub, yesNo = yesNo, 
+             depvar = depvar, useSummary = useSummary, dict = dict,
+             coef.sub = coef.sub, yesNo = yesNo,
              add_signif = add_signif,
-             float = float, coefstat = coefstat, ci = ci, style = style, 
+             float = float, coefstat = coefstat, ci = ci, style = style,
              notes = notes, group = group,
              extralines = extralines, placement = placement, drop.section = drop.section,
-             tex_tag = tex_tag, fun_format = fun_format, coef.just = coef.just, 
+             tex_tag = tex_tag, fun_format = fun_format, coef.just = coef.just,
              meta = meta_txt,
-             tpt = tpt, arraystretch = arraystretch, adjustbox = adjustbox, 
+             tpt = tpt, arraystretch = arraystretch, adjustbox = adjustbox,
              fontsize = fontsize,
              tabular = tabular, highlight = highlight, coef.style = coef.style,
              caption.number = caption.number)
@@ -3355,7 +3363,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
 
 etable_internal_latex = function(info){
   # Internal function to display the latex table
-  
+
   n_models = length(info$depvar_list)
   # Getting the information
   se_type_list = info$se_type_list
@@ -3494,7 +3502,7 @@ etable_internal_latex = function(info){
   space = if(style$no_border) "@{}" else ""
   if(tabular == "normal"){
     tabular_begin = paste0("\\begin{tabular}{", space, "l",
-                           strrep("c", n_models), 
+                           strrep("c", n_models),
                            space, "}\n", style$line.top)
 
     tabular_end = "\\end{tabular}\n"
@@ -3637,18 +3645,18 @@ etable_internal_latex = function(info){
 
     if((!is.null(keep) || !is.null(drop)) && length(group) == 0){
       if(!is.null(keep) && !any(grepl("^%", keep))){
-        msg = paste0(" In particular, to 'keep' variables using their original names ", 
+        msg = paste0(" In particular, to 'keep' variables using their original names ",
                      "(before dict is applied), use use the argument `keep_raw`. ",
                      "E.g. keep_raw = {Q ? keep[1]}")
       } else if(!is.null(drop) && !any(grepl("^%", drop))){
         msg = paste0(" In particular, to 'drop' variables using their original names ",
-                     "(before dict is applied), use the argument `drop_raw`. ", 
+                     "(before dict is applied), use the argument `drop_raw`. ",
                      "E.g. drop_raw = {Q ? drop[1]}")
       } else {
         msg = ""
       }
 
-      stop_up("Not any variable was selected, please reframe your keep/drop arguments.", 
+      stop_up("Not any variable was selected, please reframe your keep/drop arguments.",
               msg, "\n To drop the coefficients section, use the argument drop.section = 'coef'.")
     }
 
@@ -3781,19 +3789,19 @@ etable_internal_latex = function(info){
       }
 
       if(any(is_complex)){
-        fe_names_nbItems = paste0(style$fixef_sizes.prefix, fe_names_raw[is_complex], 
+        fe_names_nbItems = paste0(style$fixef_sizes.prefix, fe_names_raw[is_complex],
                                   style$fixef_sizes.suffix)
         all_nb_FEs = cbind(fe_names_nbItems, all_nb_FEs[is_complex, , drop = FALSE])
-        nb_FE_lines = paste0(paste0(apply(all_nb_FEs, 1, paste0, collapse = " & "), 
-                                    collapse="\\\\\n"), 
+        nb_FE_lines = paste0(paste0(apply(all_nb_FEs, 1, paste0, collapse = " & "),
+                                    collapse="\\\\\n"),
                              "\\\\\n")
       }
 
     }
 
     all_fe = cbind(fe_names, all_fe)
-    FE_lines = paste0(paste0(apply(all_fe, 1, paste0, collapse = " & "), 
-                             collapse="\\\\\n"), 
+    FE_lines = paste0(paste0(apply(all_fe, 1, paste0, collapse = " & "),
+                             collapse="\\\\\n"),
                       "\\\\\n")
 
   } else {
@@ -3831,8 +3839,8 @@ etable_internal_latex = function(info){
     # Matrix with yes/no information
     all_slopes = matrix(c(slope_flag_list, recursive = TRUE), nrow = length(slope_names))
     all_slopes = cbind(slope_names, all_slopes)
-    slope_lines = paste0(paste0(apply(all_slopes, 1, paste0, collapse = " & "), 
-                                collapse = "\\\\\n"), 
+    slope_lines = paste0(paste0(apply(all_slopes, 1, paste0, collapse = " & "),
+                                collapse = "\\\\\n"),
                          "\\\\\n")
 
   } else {
@@ -3942,7 +3950,7 @@ etable_internal_latex = function(info){
         } else if(coefstat == "pvalue"){
           coefstat_sentence = " co-variance matrix, p-values in parentheses"
         } else {
-          coefstat_sentence = paste0(" co-variance matrix, ", round(ci*100), 
+          coefstat_sentence = paste0(" co-variance matrix, ", round(ci*100),
                                      "\\% confidence intervals in brackets")
         }
         info_SE_footer = paste0(bottom_line, foot_intro, my_se,
@@ -3950,8 +3958,8 @@ etable_internal_latex = function(info){
 
         if(add_signif){
           info_SE_footer = paste0(info_SE_footer, foot_intro, "Signif. Codes: ",
-                                  paste(names(signif.code), signif.code, sep=": ", 
-                                        collapse = ", "), 
+                                  paste(names(signif.code), signif.code, sep=": ",
+                                        collapse = ", "),
                                   "}}\\\\\n")
         }
 
@@ -3965,7 +3973,7 @@ etable_internal_latex = function(info){
           coefstat_sentence = "Co-variance"
         }
 
-        info_muli_se = paste0(coefstat_sentence, " & ", 
+        info_muli_se = paste0(coefstat_sentence, " & ",
                               paste(all_se_type, collapse = " & "), "\\\\\n")
 
         if(add_signif){
@@ -3974,7 +3982,7 @@ etable_internal_latex = function(info){
                                         sep = ": ", collapse = ", "),
                                   "}}\\\\\n")
         } else {
-          myAmpLine = paste0(paste0(rep(" ", length(depvar_list) + 1), 
+          myAmpLine = paste0(paste0(rep(" ", length(depvar_list) + 1),
                                     collapse = " & "), "\\tabularnewline\n")
           info_SE_footer = paste0(bottom_line, myAmpLine, "\\\\\n")
         }
@@ -4035,7 +4043,7 @@ etable_internal_latex = function(info){
         fit = sapply(fitstat_list, function(x) x[[fit_id]])
         if(all(is.na(fit))) next
         fit[is.na(fit)] = ""
-        stat_lines = paste0(stat_lines, fit_names[fit_id], " & ", 
+        stat_lines = paste0(stat_lines, fit_names[fit_id], " & ",
                             paste0(fit, collapse = " & "), "\\\\\n")
       }
     }
@@ -4054,7 +4062,7 @@ etable_internal_latex = function(info){
       notes_intro = paste0(gsub("^@", "", notes[1]), " ")
       notes = notes[-1]
     }
-    
+
     # we start with a newline if there is no option for the tablenotes env.
     if(is.null(notes_intro) || nchar(notes_intro) == 0){
       notes_intro = "\n"
@@ -4073,7 +4081,7 @@ etable_internal_latex = function(info){
 
         # The note intro is placed right after the } so that you can pass options
         # like [flushleft]
-        info_notes = paste0("\n\\begin{tablenotes}", notes_intro, 
+        info_notes = paste0("\n\\begin{tablenotes}", notes_intro,
                             notes,
                             "\n\\end{tablenotes}\n")
       } else {
@@ -4376,18 +4384,18 @@ etable_internal_df = function(info){
 
     if((!is.null(keep) || !is.null(drop)) && length(group) == 0){
       if(!is.null(keep) && !any(grepl("^%", keep))){
-        msg = paste0(" In particular, to 'keep' variables using their original names ", 
+        msg = paste0(" In particular, to 'keep' variables using their original names ",
                      "(before dict is applied), use use the argument `keep_raw`. ",
                      "E.g. keep_raw = {Q ? keep[1]}")
       } else if(!is.null(drop) && !any(grepl("^%", drop))){
         msg = paste0(" In particular, to 'drop' variables using their original names ",
-                     "(before dict is applied), use the argument `drop_raw`. ", 
+                     "(before dict is applied), use the argument `drop_raw`. ",
                      "E.g. drop_raw = {Q ? drop[1]}")
       } else {
         msg = ""
       }
 
-      stop_up("Not any variable was selected, please reframe your keep/drop arguments.", msg, 
+      stop_up("Not any variable was selected, please reframe your keep/drop arguments.", msg,
               "\n To drop the coefficients section, use the argument drop.section = 'coef'.")
     }
 
@@ -4399,7 +4407,7 @@ etable_internal_df = function(info){
     res = NULL
 
   } else {
-    
+
     # coefficient names
     coef_names = all_vars
     if(length(coef.sub) > 0){
@@ -4412,7 +4420,7 @@ etable_internal_df = function(info){
                 "You can add flags, e.g. to ignore case \"i/pat\", see ?stringmagic::string_clean.")
       }
     }
-    
+
     se.below = info$se.below
     if(se.below){
       coef_below = info$coef_below
@@ -4464,7 +4472,7 @@ etable_internal_df = function(info){
 
     res = coef_mat
   }
-  
+
   #
   # Group
   #
@@ -4895,13 +4903,13 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat,
   check_set_arg(coefstat, "match")
   check_arg(ci, "numeric scalar GT{0.5} LT{1}")
 
-  check_arg("logical scalar", 
+  check_arg("logical scalar",
             se.below, fixef_sizes, fixef_sizes.simplify,
             float, family, depvar, reset, view)
 
   check_arg(keep, drop, order, "character vector no na NULL",
             .message = "The arg. '__ARG__' must be a vector of regular expressions (see help(regex)).")
-  
+
   check_set_arg(signif.code, "NULL NA | match(letters) | named numeric vector no na GE{0} LE{1}")
 
   check_arg(interaction.order, "NULL character scalar")
@@ -4920,7 +4928,7 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat,
   if(!missing(placement)){
     if(nchar(placement) == 0) stop("Argument 'placement' cannot be the empty string.")
     p_split = strsplit(placement, "")[[1]]
-    check_value(p_split, "strict multi charin(h, t, b, p, H, !)", 
+    check_value(p_split, "strict multi charin(h, t, b, p, H, !)",
                 .message = "Argument 'placement' must be a character string containing only the following characters: 'h', 't', 'b', 'p', 'H', and '!'.")
   }
 
@@ -5006,7 +5014,7 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat,
   for(v in args_default){
     opts[[v]] = eval(as.name(v))
   }
-  
+
   # we always save view.cache
   opts[["view.cache"]] = view.cache
 
@@ -5041,108 +5049,108 @@ getFixest_etable = function(){
 #'
 #' @inheritParams etable
 #'
-#' @param main Either "base", "aer" or "qje". Defines the basic style to start from. The styles 
+#' @param main Either "base", "aer" or "qje". Defines the basic style to start from. The styles
 #' "aer" and "qje" are almost identical and only differ on the top/bottom lines.
-#' @param depvar.title A character scalar. The title of the line of the dependent variables 
-#' (defaults to `"Dependent variable(s):"` if `main = "base"` (the 's' appears only if just one 
+#' @param depvar.title A character scalar. The title of the line of the dependent variables
+#' (defaults to `"Dependent variable(s):"` if `main = "base"` (the 's' appears only if just one
 #' variable) and to `""` if `main = "aer"`).
-#' @param model.title A character scalar. The title of the line of the models (defaults to 
+#' @param model.title A character scalar. The title of the line of the models (defaults to
 #' `"Model:"` if `main = "base"` and to `""` if `main = "aer"`).
-#' @param model.format A character scalar. The value to appear on top of each column. It defaults 
-#' to `"(1)"`. Note that 1, i, I, a and A are special characters: if found, their values will be 
+#' @param model.format A character scalar. The value to appear on top of each column. It defaults
+#' to `"(1)"`. Note that 1, i, I, a and A are special characters: if found, their values will be
 #' automatically incremented across columns.
-#' @param line.top A character scalar equal to `"simple"`, `"double"`, or anything else. The line 
-#' at the top of the table (defaults to `"double"` if `main = "base"` and to `"simple"` if 
-#' `main = "aer"`). `"simple"` is equivalent to `"\\toprule"`, and `"double"` to 
+#' @param line.top A character scalar equal to `"simple"`, `"double"`, or anything else. The line
+#' at the top of the table (defaults to `"double"` if `main = "base"` and to `"simple"` if
+#' `main = "aer"`). `"simple"` is equivalent to `"\\toprule"`, and `"double"` to
 #' `"\\tabularnewline \\midrule \\midrule"`.
-#' @param line.bottom A character scalar equal to `"simple"`, `"double"`, or anything else. The 
-#' line at the bottom of the table (defaults to `"double"` if `main = "base"` and to `"simple"` 
-#' if `main = "aer"`). `"simple"` is equivalent to `"\\bottomrule"`, and `"double"` to 
+#' @param line.bottom A character scalar equal to `"simple"`, `"double"`, or anything else. The
+#' line at the bottom of the table (defaults to `"double"` if `main = "base"` and to `"simple"`
+#' if `main = "aer"`). `"simple"` is equivalent to `"\\bottomrule"`, and `"double"` to
 #' `"\\midrule \\midrule & \\tabularnewline"`.
-#' @param var.title A character scalar. The title line appearing before the variables (defaults to 
-#' `"\\midrule \\emph{Variables}"` if `main = "base"` and to `"\\midrule"` if `main = "aer"`). 
-#' Note that the behavior of `var.title = " "` (a space) is different from `var.title = ""` 
-#' (the empty string): in the first case you will get an empty row, while in the second case 
-#' you get no empty row. To get a line without an empty row, use `"\\midrule"` (and not 
+#' @param var.title A character scalar. The title line appearing before the variables (defaults to
+#' `"\\midrule \\emph{Variables}"` if `main = "base"` and to `"\\midrule"` if `main = "aer"`).
+#' Note that the behavior of `var.title = " "` (a space) is different from `var.title = ""`
+#' (the empty string): in the first case you will get an empty row, while in the second case
+#' you get no empty row. To get a line without an empty row, use `"\\midrule"` (and not
 #' `"\\midrule "`!--the space!).
-#' @param fixef.title A character scalar. The title line appearing before the fixed-effects 
-#' (defaults to `"\\midrule \\emph{Fixed-effects}"` if `main = "base"` and to `" "` if 
-#' `main = "aer"`). Note that the behavior of `fixef.title = " "` (a space) is different from 
-#' `fixef.title = ""` (the empty string): in the first case you will get an empty row, while in the 
-#' second case you get no empty row. To get a line without an empty row, use `"\\midrule"` 
+#' @param fixef.title A character scalar. The title line appearing before the fixed-effects
+#' (defaults to `"\\midrule \\emph{Fixed-effects}"` if `main = "base"` and to `" "` if
+#' `main = "aer"`). Note that the behavior of `fixef.title = " "` (a space) is different from
+#' `fixef.title = ""` (the empty string): in the first case you will get an empty row, while in the
+#' second case you get no empty row. To get a line without an empty row, use `"\\midrule"`
 #' (and not `"\\midrule "`!--the space!).
-#' @param fixef.prefix A prefix to add to the fixed-effects names. Defaults to `""` 
+#' @param fixef.prefix A prefix to add to the fixed-effects names. Defaults to `""`
 #' (i.e. no prefix).
-#' @param fixef.suffix A suffix to add to the fixed-effects names. Defaults to `""` if 
+#' @param fixef.suffix A suffix to add to the fixed-effects names. Defaults to `""` if
 #' `main = "base"`) and to `"fixed-effects"` if `main = "aer"`).
-#' @param fixef.where Either "var" or "stats". Where to place the fixed-effects lines? 
-#' Defaults to `"var"`, i.e. just after the variables, if `main = "base"`) and to 
+#' @param fixef.where Either "var" or "stats". Where to place the fixed-effects lines?
+#' Defaults to `"var"`, i.e. just after the variables, if `main = "base"`) and to
 #' `"stats"`, i.e. just after the statistics, if `main = "aer"`).
-#' @param slopes.title A character scalar. The title line appearing before the variables with 
-#' varying slopes (defaults to `"\\midrule \\emph{Varying Slopes}"` if `main = "base"` 
-#' and to `""` if `main = "aer"`). Note that the behavior of `slopes.title = " "` (a space) 
-#' is different from `slopes.title = ""` (the empty string): in the first case you will get 
-#' an empty row, while in the second case you get no empty row. To get a line without an 
+#' @param slopes.title A character scalar. The title line appearing before the variables with
+#' varying slopes (defaults to `"\\midrule \\emph{Varying Slopes}"` if `main = "base"`
+#' and to `""` if `main = "aer"`). Note that the behavior of `slopes.title = " "` (a space)
+#' is different from `slopes.title = ""` (the empty string): in the first case you will get
+#' an empty row, while in the second case you get no empty row. To get a line without an
 #' empty row, use `"\\midrule"` (and not `"\\midrule "`!--the space!).
-#' @param slopes.format Character scalar representing the format of the slope variable name. 
-#' There are two special characters: "__var__" and "__slope__", placeholers for the variable 
-#' and slope names. Defaults to `"__var__ (__slope__)"` if `main = "base"`) and 
+#' @param slopes.format Character scalar representing the format of the slope variable name.
+#' There are two special characters: "__var__" and "__slope__", placeholers for the variable
+#' and slope names. Defaults to `"__var__ (__slope__)"` if `main = "base"`) and
 #' to `"__var__ $\\times $ __slope__"` if `main = "aer"`).
 #' @param fixef_sizes.prefix A prefix to add to the fixed-effects names. Defaults to `"# "`.
-#' @param fixef_sizes.suffix A suffix to add to the fixed-effects names. Defaults 
+#' @param fixef_sizes.suffix A suffix to add to the fixed-effects names. Defaults
 #' to `""` (i.e. no suffix).
-#' @param stats.title A character scalar. The title line appearing before the statistics 
-#' (defaults to `"\\midrule \\emph{Fit statistics"}` if `main = "base"` and to `" "` 
-#' if `main = "aer"`). Note that the behavior of `stats.title = " "` (a space) is different 
-#' from `stats.title = ""` (the empty string): in the first case you will get an empty row, 
-#' while in the second case you get no empty row. To get a line without an empty row, 
+#' @param stats.title A character scalar. The title line appearing before the statistics
+#' (defaults to `"\\midrule \\emph{Fit statistics"}` if `main = "base"` and to `" "`
+#' if `main = "aer"`). Note that the behavior of `stats.title = " "` (a space) is different
+#' from `stats.title = ""` (the empty string): in the first case you will get an empty row,
+#' while in the second case you get no empty row. To get a line without an empty row,
 #' use `"\\midrule"` (and not `"\\midrule "`!--the space!).
-#' @param notes.intro A character scalar. Some tex code appearing just before the notes, 
+#' @param notes.intro A character scalar. Some tex code appearing just before the notes,
 #' defaults to `"\\par \\raggedright \n"`.
-#' @param tablefoot A logical scalar. Whether or not to display a footer within the table. 
+#' @param tablefoot A logical scalar. Whether or not to display a footer within the table.
 #' Defaults to `TRUE` if `main = "base"`) and `FALSE` if `main = "aer"`).
-#' @param tablefoot.value A character scalar. The notes to be displayed in the footer. 
-#' Defaults to `"default"` if `main = "base"`, which leads to custom footers informing on 
+#' @param tablefoot.value A character scalar. The notes to be displayed in the footer.
+#' Defaults to `"default"` if `main = "base"`, which leads to custom footers informing on
 #' the type of standard-error and significance codes, depending on the estimations.
-#' @param yesNo A character vector of length 1 or 2. Defaults to `"Yes"` if `main = "base"` 
-#' and to `"$\\checkmark$"` if `main = "aer"` (from package `amssymb`). This is the message 
-#' displayed when a given fixed-effect is (or is not) included in a regression. 
+#' @param yesNo A character vector of length 1 or 2. Defaults to `"Yes"` if `main = "base"`
+#' and to `"$\\checkmark$"` if `main = "aer"` (from package `amssymb`). This is the message
+#' displayed when a given fixed-effect is (or is not) included in a regression.
 #' If `yesNo` is of length 1, then the second element is the empty string.
-#' @param interaction.combine Character scalar, defaults to `" $\\times$ "`. When the estimation 
-#' contains interactions, then the variables names (after aliasing) are combined with this 
-#' argument. For example: if `dict = c(x1="Wind", x2="Rain")` and you have the following 
-#' interaction `x1:x2`, then it will be renamed (by default) `Wind $\\times$ Rain` -- using 
+#' @param interaction.combine Character scalar, defaults to `" $\\times$ "`. When the estimation
+#' contains interactions, then the variables names (after aliasing) are combined with this
+#' argument. For example: if `dict = c(x1="Wind", x2="Rain")` and you have the following
+#' interaction `x1:x2`, then it will be renamed (by default) `Wind $\\times$ Rain` -- using
 #' `interaction.combine = "*"` would lead to `Wind*Rain`.
-#' @param i.equal Character scalar, defaults to `" $=$ "`. Only affects factor variables created 
-#' with the function [`i`], tells how the variable should be linked to its value. For example if 
-#' you have the Species factor from the iris data set, by default the display of the variable is 
+#' @param i.equal Character scalar, defaults to `" $=$ "`. Only affects factor variables created
+#' with the function [`i`], tells how the variable should be linked to its value. For example if
+#' you have the Species factor from the iris data set, by default the display of the variable is
 #' `Species $=$ Setosa`, etc. If `i.equal = ": "` the display becomes `Species: Setosa`.
-#' @param notes.tpt.intro Character scalar. Only used if `tpt = TRUE`, it is some tex code that is 
-#' passed before any `threeparttable` item (can be used for, typically, the font size). Default is 
+#' @param notes.tpt.intro Character scalar. Only used if `tpt = TRUE`, it is some tex code that is
+#' passed before any `threeparttable` item (can be used for, typically, the font size). Default is
 #' the empty string.
-#' @param depvar.style Character scalar equal to either `" "` (default), `"*"` (italic), `"**"` 
+#' @param depvar.style Character scalar equal to either `" "` (default), `"*"` (italic), `"**"`
 #' (bold), `"***"` (italic-bold). How the name of the dependent variable should be displayed.
 #' @param no_border Logical, default is `FALSE`. Whether to remove any side border to the table (typically adds `@\{\` to the sides of the tabular).
-#' @param caption.after Character scalar. Tex code that will be placed right after the caption. 
+#' @param caption.after Character scalar. Tex code that will be placed right after the caption.
 #' Defaults to `""` for `main = "base"` and `"\\medskip"` for `main = "aer"`.
-#' @param rules_width Character vector of length 1 or 2. This vector gives the width of the 
-#' `booktabs` rules: the first element the heavy-width, the second element the light-width. NA 
-#' values mean no modification. If of length 1, only the heavy rules are modified. The width are in 
+#' @param rules_width Character vector of length 1 or 2. This vector gives the width of the
+#' `booktabs` rules: the first element the heavy-width, the second element the light-width. NA
+#' values mean no modification. If of length 1, only the heavy rules are modified. The width are in
 #' Latex units (ex: `"0.1 em"`, etc).
-#' @param signif.code Named numeric vector, used to provide the significance codes with respect to 
-#' the p-value of the coefficients. Default is `c("***"=0.01, "**"=0.05, "*"=0.10)`. To suppress 
-#' the significance codes, use `signif.code=NA` or `signif.code=NULL`. Can also be equal to 
+#' @param signif.code Named numeric vector, used to provide the significance codes with respect to
+#' the p-value of the coefficients. Default is `c("***"=0.01, "**"=0.05, "*"=0.10)`. To suppress
+#' the significance codes, use `signif.code=NA` or `signif.code=NULL`. Can also be equal to
 #' `"letters"`, then the default becomes `c("a"=0.01, "b"=0.05, "c"=0.10)`.
 #'
 #' @details
-#' The `\\checkmark` command, used in the "aer" style (in argument `yesNo`), is in the 
+#' The `\\checkmark` command, used in the "aer" style (in argument `yesNo`), is in the
 #' `amssymb` package.
 #'
-#' The commands `\\toprule`, `\\midrule` and `\\bottomrule` are in the `booktabs` package. 
-#' You can set the width of the top/bottom rules with `\\setlength\\heavyrulewidth\{wd\}`, 
+#' The commands `\\toprule`, `\\midrule` and `\\bottomrule` are in the `booktabs` package.
+#' You can set the width of the top/bottom rules with `\\setlength\\heavyrulewidth\{wd\}`,
 #' and of the midrule with `\\setlength\\lightrulewidth\{wd\}`.
 #'
-#' Note that all titles (`depvar.title`, `depvar.title`, etc) are not escaped, so they 
+#' Note that all titles (`depvar.title`, `depvar.title`, etc) are not escaped, so they
 #' must be valid Latex expressions.
 #'
 #' @return
@@ -5192,8 +5200,8 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
   check_set_arg(line.top, line.bottom, "match(simple, double) | character scalar")
 
   check_arg("character scalar", depvar.title, model.title, var.title)
-  check_arg("character scalar", 
-            fixef.title, fixef.prefix, fixef.suffix, 
+  check_arg("character scalar",
+            fixef.title, fixef.prefix, fixef.suffix,
             slopes.title, slopes.format)
   check_arg("character scalar", fixef_sizes.prefix, fixef_sizes.suffix, stats.title)
   check_arg("character scalar", notes.intro, interaction.combine, i.equal)
@@ -5299,54 +5307,54 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
 #'
 #'  @inheritParams etable
 #'
-#' @param depvar.title Character scalar. Default is `"Dependent Var.:"`. 
+#' @param depvar.title Character scalar. Default is `"Dependent Var.:"`.
 #' The row name of the dependent variables.
-#' @param fixef.title Character scalar. Default is `"Fixed-Effects:"`. The header preceding the 
+#' @param fixef.title Character scalar. Default is `"Fixed-Effects:"`. The header preceding the
 #' fixed-effects. If equal to the empty string, then this line is removed.
-#' @param fixef.line A single character. Default is `"-"`. A character that will be used to create 
-#' a line of separation for the fixed-effects header. Used only if `fixef.title` is not the empty 
+#' @param fixef.line A single character. Default is `"-"`. A character that will be used to create
+#' a line of separation for the fixed-effects header. Used only if `fixef.title` is not the empty
 #' string.
-#' @param fixef.prefix Character scalar. Default is `""`. A prefix to appear 
+#' @param fixef.prefix Character scalar. Default is `""`. A prefix to appear
 #' before each fixed-effect name.
-#' @param fixef.suffix Character scalar. Default is `""`. A suffix to appear 
+#' @param fixef.suffix Character scalar. Default is `""`. A suffix to appear
 #' after each fixed-effect name.
-#' @param slopes.title Character scalar. Default is `"Varying Slopes:"`. The header preceding the 
+#' @param slopes.title Character scalar. Default is `"Varying Slopes:"`. The header preceding the
 #' variables with varying slopes. If equal to the empty string, then this line is removed.
-#' @param slopes.line Character scalar. Default is `"-"`. A character that will be used to create a 
-#' line of separation for the variables with varying slopes header. Used only if `slopes.line` is 
+#' @param slopes.line Character scalar. Default is `"-"`. A character that will be used to create a
+#' line of separation for the variables with varying slopes header. Used only if `slopes.line` is
 #' not the empty string.
-#' @param slopes.format Character scalar. Default is `"__var__ (__slope__)"`. The format of the 
-#' name of the varying slopes. The values `__var__` and `__slope__` are special characters that 
+#' @param slopes.format Character scalar. Default is `"__var__ (__slope__)"`. The format of the
+#' name of the varying slopes. The values `__var__` and `__slope__` are special characters that
 #' will be replaced by the value of the variable name and slope name, respectively.
-#' @param stats.title Character scalar. Default is `"_"`. The header preceding the statistics 
-#' section. If equal to the empty string, then this line is removed. If equal to single character 
+#' @param stats.title Character scalar. Default is `"_"`. The header preceding the statistics
+#' section. If equal to the empty string, then this line is removed. If equal to single character
 #' (like in the default), then this character will be expanded to take the full column width.
-#' @param stats.line Character scalar. Default is `"_"`. A character that will be used to create a 
+#' @param stats.line Character scalar. Default is `"_"`. A character that will be used to create a
 #' line of separation for the statistics header. Used only if `stats.title` is not the empty string.
-#' @param yesNo Character vector of length 1 or 2. Default is `c("Yes", "No")`. Used to inform on 
-#' the presence or absence of fixed-effects in the estimation. If of length 1, then automatically 
+#' @param yesNo Character vector of length 1 or 2. Default is `c("Yes", "No")`. Used to inform on
+#' the presence or absence of fixed-effects in the estimation. If of length 1, then automatically
 #' the second value is considered as the empty string.
-#' @param headers.sep Logical, default is `TRUE`. Whether to add a line of separation between the 
+#' @param headers.sep Logical, default is `TRUE`. Whether to add a line of separation between the
 #' headers and the coefficients.
-#' @param interaction.combine Character scalar, defaults to `" x "`. When the estimation contains 
-#' interactions, then the variables names (after aliasing) are combined with this argument. For 
-#' example: if `dict = c(x1="Wind", x2="Rain")` and you have the following interaction `x1:x2`, 
-#' then it will be renamed (by default) `Wind x Rain` -- using `interaction.combine = "*"` would 
+#' @param interaction.combine Character scalar, defaults to `" x "`. When the estimation contains
+#' interactions, then the variables names (after aliasing) are combined with this argument. For
+#' example: if `dict = c(x1="Wind", x2="Rain")` and you have the following interaction `x1:x2`,
+#' then it will be renamed (by default) `Wind x Rain` -- using `interaction.combine = "*"` would
 #' lead to `Wind*Rain`.
-#' @param i.equal Character scalar, defaults to `" = "`. Only affects factor variables created with 
-#' the function [`i`], tells how the variable should be linked to its value. For example if you 
-#' have the Species factor from the iris data set, by default the display of the variable is 
+#' @param i.equal Character scalar, defaults to `" = "`. Only affects factor variables created with
+#' the function [`i`], tells how the variable should be linked to its value. For example if you
+#' have the Species factor from the iris data set, by default the display of the variable is
 #' `Species = Setosa`, etc. If `i.equal = ": "` the display becomes `Species: Setosa`.
-#' @param default Logical, default is `FALSE`. If `TRUE`, all the values not provided by the user 
+#' @param default Logical, default is `FALSE`. If `TRUE`, all the values not provided by the user
 #' are set to their default.
-#' @param signif.code Named numeric vector, used to provide the significance codes with respect to 
-#' the p-value of the coefficients. Default is `c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)`. To 
-#' suppress the significance codes, use `signif.code=NA` or `signif.code=NULL`. Can also be equal 
+#' @param signif.code Named numeric vector, used to provide the significance codes with respect to
+#' the p-value of the coefficients. Default is `c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)`. To
+#' suppress the significance codes, use `signif.code=NA` or `signif.code=NULL`. Can also be equal
 #' to `"letters"`, then the default becomes `c("a"=0.01, "b"=0.05, "c"=0.10)`.
 #'
 #' @details
-#' The title elements (`depvar.title`, `fixef.title`, `slopes.title` and `stats.title`) will be the 
-#' row names of the returned data.frame. Therefore keep in mind that any two of them should not be 
+#' The title elements (`depvar.title`, `fixef.title`, `slopes.title` and `stats.title`) will be the
+#' row names of the returned data.frame. Therefore keep in mind that any two of them should not be
 #' identical (since identical row names are forbidden in data.frames).
 #'
 #' @return
@@ -5420,12 +5428,12 @@ style.df = function(depvar.title = "Dependent Var.:", fixef.title = "Fixed-Effec
 
 #' Register `extralines` macros to be used in `etable`
 #'
-#' This function is used to create `extralines` (which is an argument of [`etable`]) macros 
+#' This function is used to create `extralines` (which is an argument of [`etable`]) macros
 #' that can be easily summoned in [`etable`].
 #'
 #' @param type A character scalar giving the type-name.
 #' @param fun A function to be applied to a `fixest` estimation. It must return a scalar.
-#' @param alias A character scalar. This is the alias to be used in lieu of the type name to 
+#' @param alias A character scalar. This is the alias to be used in lieu of the type name to
 #' form the row name.
 #'
 #' @details
@@ -5500,7 +5508,7 @@ print.etable_tex = function(x, ...){
 #' @rdname etable
 print.etable_df = function(x, ...){
   # Almost equivalent to print.data.frame
-  # we're more flexible with row names since we use the first column as row names 
+  # we're more flexible with row names since we use the first column as row names
   # (and hence allow repetition)
 
   signif.code = attr(x, "signif")
@@ -5663,7 +5671,7 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL, create
       export_markdown = png_name = normalizePath(all_files[id_all == id][1], "/")
     }
   }
-  
+
   if(!is.null(export)){
     export_path = check_set_path(export, "w, dir", create_dirs = create_dirs, up = up)
   }
@@ -5786,7 +5794,7 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL, create
     warn_msg = NULL
     ok_cmd_tex = TRUE && DO_CMD
     if(DO_CMD){
-      outcome = suppressWarnings(system2("pdflatex", 
+      outcome = suppressWarnings(system2("pdflatex",
                                          sma("-halt-on-error -interaction=nonstopmode {draft}",
                                              " etable.tex"),
                                          "etable_shell_pdf.log", "etable_shell_pdf.err"))
@@ -5796,7 +5804,7 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL, create
       } else if(outcome == 1){
 
         # Sometimes recompiling works!!!
-        outcome = suppressWarnings(system2("pdflatex", 
+        outcome = suppressWarnings(system2("pdflatex",
                                            sma("-halt-on-error -interaction=nonstopmode ",
                                                "{draft} etable.tex"),
                                            "etable_shell_pdf.log", "etable_shell_pdf.err"))
@@ -5809,7 +5817,7 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL, create
     }
 
     if(ok_cmd_tex && do_rerun){
-      outcome = suppressWarnings(system2("pdflatex", 
+      outcome = suppressWarnings(system2("pdflatex",
                                          "-halt-on-error -interaction=nonstopmode etable.tex",
                                          "etable_shell_pdf.log", "etable_shell_pdf.err"))
 
@@ -5835,7 +5843,7 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL, create
       }
 
       info_compile = try(suppressMessages(tinytex::pdflatex("etable.tex",
-                                                            clean = FALSE, 
+                                                            clean = FALSE,
                                                             min_times = 1 + do_rerun)))
       if(inherits(info_compile, "try-error")){
         warn_up("pdflatex: error when compiling -- sorry! Check the log file with `log_etable('pdflatex')`.")
@@ -5851,7 +5859,7 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL, create
     ok_cmd_magick = TRUE && DO_CMD
     warn_msg = NULL
     if(DO_CMD){
-      outcome = suppressWarnings(system2("magick", 
+      outcome = suppressWarnings(system2("magick",
                                          sma("-density 600 etable.pdf -colorspace RGB {png_name}"),
                                          "etable_shell_magick.log", "etable_shell_magick.err"))
 
@@ -5882,7 +5890,7 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL, create
 
       pdftools::pdf_convert("etable.pdf", dpi = 600, verbose = FALSE,
                             filenames = sma("{png_name}_%d.%s"))
-      
+
       old_name = sma("{png_name}_1.png")
       file.rename(old_name, png_name)
     }
@@ -5903,17 +5911,17 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL, create
       # hence we copy the file there if necessary
 
       tmp_dir = normalizePath(tempdir(), "/")
-      
+
       if(normalizePath(getwd(), "/") != tmp_dir){
         old_name = png_name
         png_name = gsub(".+/", "", png_name)
         file.copy(old_name, file.path(tmp_dir, png_name))
         setwd(tmp_dir)
       }
-      
+
       URI = knitr::image_uri(png_name)
       html_file = viewer_html_template(URI)
-      
+
       writeLines(html_file, "etable.html")
 
       my_viewer("etable.html")
@@ -5940,7 +5948,7 @@ check_set_path = function(x, type = "", create_dirs = TRUE, up = 0){
   # - if file: creates the parent dir if the grand parent exists
   # - if dir: creates the dir only if grand parent exists
   # - create_dirs == TRUE: create all folders
-  # 
+  #
 
   set_up(up + 1)
 
@@ -5974,17 +5982,17 @@ check_set_path = function(x, type = "", create_dirs = TRUE, up = 0){
     stop_up("Argument '", x_dp, "' should be a path to a ", msg,
             " that exists. \n  Problem: '", path, "' does not exist.")
   }
-  
+
   #
   # write
   #
-  
+
   # if is_dir => we create it
   # else we create the parent dir
 
   path_parent = dirname(path)
   if(nchar(path_parent) == 0) path_parent = "."
-  
+
   if(!create_dirs && !dir.exists(path_parent)){
     path_grand_parent = dirname(path_parent)
     if(!dir.exists(path_grand_parent)){
@@ -5996,10 +6004,10 @@ check_set_path = function(x, type = "", create_dirs = TRUE, up = 0){
                 "\nMaybe use the argument `create_dirs = TRUE`?")
       }
     }
-    
+
     create_dirs = TRUE
   }
-  
+
   # we create everyone
   if(create_dirs){
     if(is_dir){
@@ -6018,7 +6026,7 @@ viewer_html_template = function(uri){
 <html> <head>
 
 <style>
-  
+
 body {
   background-color: #fafafa;
 }
@@ -6112,7 +6120,7 @@ fix_pkgwdown_path = function(){
       # A) we get the path
       # B) we transform to URI
       # C) we replace the line
-      
+
       done = FALSE
 
       qui = which(grepl(pat, text))
@@ -6329,7 +6337,7 @@ highlight_apply = function(highlight, coef_mat, coef_names){
     }
 
     tex_color = error_sender(col2rgb(color),
-                             "In the argument 'highlight', the color, in the name of the ", 
+                             "In the argument 'highlight', the color, in the name of the ",
                              n_th(i), " element (equal to '", color,
                              "'), could not be converted to RGB. ")
     tex_color = paste0(as.vector(tex_color), collapse = ", ")
@@ -6594,7 +6602,7 @@ coef_pos_parse = function(x, coef_names, n_models, i, arg_name){
 
     # new DSB power
     x_txt = paste0("c(", gsub("-", ":", x_pos), ")")
-    x_call = error_sender(str2lang(x_txt), 
+    x_call = error_sender(str2lang(x_txt),
                           "In argument '", arg_name, "' the position in '", x,
                           "' is not valid. Please have a look at the help/example.",
                           up = 4)
@@ -7141,21 +7149,21 @@ expand_list_vector = function(x, n_models, n_models_origin, argname, is_each = F
   # we transform list("A" = 2, "B", "C" = 3) into c("A", "A", "B", "C", "C", "C")
 
   x_names = names(x)
-  
+
   if(is.atomic(x)){
     # c("a", "a", "c") => recycled
     x_new = x
     n_x = length(x)
-    
+
     if(n_x > n_models){
       row = capture.output(dput(x))
       stop_up("The argument {bq ? argname} represents rows. Currently, there are {n ? n_models} columns.\n",
               "Problem: the input below contains {n_x} elements (> {n ? n_models}):\n",
               "{row}")
     }
-    
+
     if(n_x < n_models){
-      
+
       if(n_models %% n_x != 0){
         row = capture.output(dput(x))
         stop_up("In {bq ? argname}, the number of elements must be a divisor of the number of models.\n",
@@ -7167,39 +7175,39 @@ expand_list_vector = function(x, n_models, n_models_origin, argname, is_each = F
       } else {
         x_new = rep(x, n_models/n_x)
       }
-      
+
     }
-    
+
   } else if(is.null(x_names)){
     # list("m", "f") => not recycled
     x_new = unlist(x)
-    
+
     n_x_new = length(x_new)
-    
+
     if(n_x_new > n_models){
       row = capture.output(dput(x))
       stop_up("The argument {bq ? argname} represents rows. Currently, there are {n ? n_models} columns.\n",
               "Problem: the input below contains {n_x_new} elements (> {n ? n_models}):\n",
               "{row}")
     }
-    
+
     if(n_x_new < n_models_origin){
       x_new = c(x_new, rep(NA_character_, n_models_origin - length(x_new)))
     }
-    
+
   } else {
     # ex: list("M", "F"=2)
-    
+
     x_new = c()
     for(j in seq_along(x)){
 
       if(nchar(x_names[j]) == 0){
         x_new = c(x_new, x[[j]])
-        
+
       } else {
-        
+
         n = x[[j]]
-        
+
         if(!is.numeric(n)){
           row = capture.output(dput(x))
           stop_up("The argument {bq ?argname} is a list of rows. A row can be of the form:\n",
@@ -7209,33 +7217,33 @@ expand_list_vector = function(x, n_models, n_models_origin, argname, is_each = F
                   "Problem, the current row below is not of the form above:\n",
                   "{row}")
         }
-        
+
         if(is.integer(n)){
           x_new[n] = x_names[j]
-          
+
         } else {
           n_adj = max(min(n, n_models - length(x_new)), 0)
           x_new = c(x_new, rep(x_names[j], n_adj))
         }
-        
+
       }
     }
-    
+
     if(length(x_new) < n_models_origin){
       x_new = c(x_new, rep(NA_character_, n_models_origin - length(x_new)))
     }
-    
+
   }
-  
+
   if(is.list(x_new)){
     x_new = as.character(x_new)
   }
-  
+
   x_new[is.na(x_new)] = ""
-  
+
   n_x_new = length(x_new)
   if(n_x_new < n_models){
-    
+
     if(n_x_new == n_models_origin){
       # we recycle
       if(is_each){
@@ -7244,7 +7252,7 @@ expand_list_vector = function(x, n_models, n_models_origin, argname, is_each = F
         x_new = rep(x, n_models/n_x_new)
       }
     }
-    
+
   }
 
   return(x_new)
@@ -7317,7 +7325,7 @@ check_set_adjustbox = function(adjustbox, up = 0){
     adj_nbr = gsub("[^[:digit:]\\.]", "", adjustbox)
 
     if(!is_numeric_in_char(adj_nbr)){
-      stop_up("The number in the argument 'adjustbox' (equal to '", adjustbox, 
+      stop_up("The number in the argument 'adjustbox' (equal to '", adjustbox,
               "') could not be parsed. Please revise.")
     }
 
@@ -7373,7 +7381,7 @@ tag_gen = function(){
 check_set_page_width = function(page.width, up = 0){
 
   set_up(up + 1)
-  check_set_value(page.width, 
+  check_set_value(page.width,
                    "match(fit, a4, us) | vector(character, numeric) GT{0} len(1, 2) no NA")
 
   if(isTRUE(attr(page.width, "no-margin"))){
@@ -7444,7 +7452,7 @@ path_to_relative = function(dest, orig = "."){
   # dest = "C:/Users/berge028/Google Drive/R_packages/automake/automake/NAMESPACE"
 
   # I'm not sure it works perfectly well on linux...
-  
+
   dest = normalizePath(dest, "/", mustWork = FALSE)
   orig = normalizePath(orig, "/", mustWork = FALSE)
 
