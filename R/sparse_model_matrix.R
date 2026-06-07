@@ -16,7 +16,7 @@
 #' @param na.rm Default is `FALSE`. Should observations with NAs be removed from the matrix?
 #' @param collin.rm Logical scalar. Whether to remove variables that were 
 #' found to be collinear during the estimation. Beware: it does not perform a 
-#' collinearity check and bases on the `coef(object)`. 
+#' collinearity check and based on the `coef(object)`. 
 #' Default is TRUE if object is a `fixest` object, or `FALSE` if object is a formula.
 #' @param combine Logical scalar, default is `TRUE`. Whether to combine each 
 #' resulting sparse matrix.

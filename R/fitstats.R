@@ -366,7 +366,7 @@ fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
           stop("In the argument 'alias': only the main type can be implicitly set and should come first (they are several implicitly defined atm). Please explicitly use names for each type/subtype you want.")
 
         } else if(is_0 != 1){
-          stop("In the argument 'alias': only the main type can be implicitly set and should come first (it is currenly not first). Please explicitly use names for each type/subtype you want.")
+          stop("In the argument 'alias': only the main type can be implicitly set and should come first (it is currently not first). Please explicitly use names for each type/subtype you want.")
 
         }
 

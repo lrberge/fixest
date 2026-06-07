@@ -1951,9 +1951,9 @@ pvalue.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
 
 
 
-#' Extracts the number of observations form a `fixest` object
+#' Extracts the number of observations from a `fixest` object
 #'
-#' This function simply extracts the number of observations form a `fixest` object, 
+#' This function simply extracts the number of observations from a `fixest` object, 
 #' obtained using the functions [`femlm`], [`feols`] or [`feglm`].
 #'
 #' @inheritParams summary.fixest
@@ -1970,7 +1970,7 @@ pvalue.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
 #' Laurent Berge
 #'
 #' @return
-#' It returns an interger.
+#' It returns an integer.
 #'
 #' @examples
 #'
@@ -1986,9 +1986,9 @@ nobs.fixest = function(object, ...){
   object$nobs
 }
 
-#' Akaike's an information criterion
+#' Akaike information criterion
 #'
-#' This function computes the AIC (Akaike's, an information criterion) from a `fixest` estimation.
+#' This function computes the AIC (Akaike's information criterion) from a `fixest` estimation.
 #'
 #' @inheritParams nobs.fixest
 #'

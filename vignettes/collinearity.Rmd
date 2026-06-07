@@ -193,20 +193,20 @@ In this section we first detail how most software remove collinear variables and
 In general the process of collinearity fixing by variable removal is as follows:
 
 * for each explanatory variable, from left to right, *following the order of the variables given by the user* (this is important):
-  * check wether the current variable is positive to a collinearity test with the variables previously done:
+  * check whether the current variable is positive to a collinearity test with the variables previously done:
     * if collinear: remove it
     * else: continue
 
 It is important to stress that we are not talking about *mathematical collinearity* but only about *numerical collinearity* which are two different beasts. 
-Indeed, the results of collinearity detection and fixing depend on the rountines' algorithms. This means that two different routines can lead to different results due to their diverging algorithms -- although this should be the excteption rather than the rule.
+Indeed, the results of collinearity detection and fixing depend on the routines' algorithms. This means that two different routines can lead to different results due to their diverging algorithms -- although this should be the exception rather than the rule.
 
 Let us give two examples. In `R`, the function `lm` uses a QR decomposition of the matrix $X$ to solve the OLS problem. Linear dependencies (collinearity) are resolved during the QR decomposition. 
-Differently from `lm`, the function `feols` from `fixest` resolves collinearity during a Cholesky decompostion of the matrix $X^\prime X$. While there are major advantages in terms of speed to use this method, it is known to be inferior to the QR method for collinearity detection because using $X^\prime X$ instead of $X$ reduces numeric precision. 
+Differently from `lm`, the function `feols` from `fixest` resolves collinearity during a Cholesky decomposition of the matrix $X^\prime X$. While there are major advantages in terms of speed to use this method, it is known to be inferior to the QR method for collinearity detection because using $X^\prime X$ instead of $X$ reduces numeric precision.
 In the vast majority of cases however, the two methods are equivalent and provide similar results.
 
 ## Collinearity is a numerical problem
 
-To nail the fact that collinearity fixing in econometrics sowftare is a numerical problem, we give the following example. Consider the OLS estimation of this simple model:
+To nail the fact that collinearity fixing in econometrics software is a numerical problem, we give the following example. Consider the OLS estimation of this simple model:
 
 $$ y = \alpha + \beta x + \epsilon $$
 
@@ -297,7 +297,7 @@ lm(y ~ I(x + 1e7), df) |> coef()
 
 Contrary to `feols`, for a translation of 1,000,000 `lm` does not remove the variable and gives the right result. However, the behavior becomes similar to that of `feols` when we apply a translation of $10^7$. A notable difference between the two routines is that there is no explicit message from `lm` (but this is displayed in `lm`'s `summary`).
 
-**Bottom line.** Collinearity detection and fixing is a numerical problem and as such is subject to the ususal pitfall of these, in particular precision problems. Always be wary when variables are removed: if there is no theoretical reason for removal then there might be a data problem. In general, ensuring that the variables have a reasonable numerical range is a good idea. Do not hesitate to re-scale the variables with a large range.
+**Bottom line.** Collinearity detection and fixing is a numerical problem and as such is subject to the usual pitfall of these, in particular precision problems. Always be wary when variables are removed: if there is no theoretical reason for removal then there might be a data problem. In general, ensuring that the variables have a reasonable numerical range is a good idea. Do not hesitate to re-scale the variables with a large range.
 
 ## When automatic removal is good {#subsec_removal_good}
 

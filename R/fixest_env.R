@@ -704,7 +704,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
           msg_builder = function(var_pblm, type, qui){
             msg = ""
             if(any(type[qui] == "var")){
-              msg = " Note that fixest does not accept variables from the global enviroment, they must be in the data set"
+              msg = " Note that fixest does not accept variables from the global environment, they must be in the data set"
               extra = "."
               if(!all(type[qui] == "var")){
                 extra = paste0(" (it concerns ", enumerate_items(var_pblm[qui][type[qui] == "var"]), ").")

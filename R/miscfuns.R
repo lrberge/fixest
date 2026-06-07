@@ -4959,7 +4959,7 @@ fetch_data = function(x, prefix = "", suffix = "", no_error = FALSE){
 
   data_name = charShorten(deparse(x$call$data)[1], 15)
   
-  msg = sma(begin, " fetch the data in the enviroment where the estimation was made, but the data does not seem to be there any more (btw it was {bq ? data_name}). ", suffix)
+  msg = sma(begin, " fetch the data in the environment where the estimation was made, but the data does not seem to be there any more (btw it was {bq ? data_name}). ", suffix)
   
   if(no_error){
     class(msg) = "error"
