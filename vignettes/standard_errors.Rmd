@@ -22,7 +22,7 @@ library(fixest)
 setFixest_nthreads(1)
 ```
 
-It is an euphemism to say that standard-errors are a critical element of your estimations: literally your paper's results depend on them. It is therefore unfortunate that no conventional "best" way exists to compute them. 
+It is a euphemism to say that standard-errors are a critical element of your estimations: literally your paper's results depend on them. It is therefore unfortunate that no conventional "best" way exists to compute them. 
 
 For example, when performing the exact same estimation across various software, it is not uncommon to obtain different standard-errors. If your first thought is: there must be a bug... well, put that thought aside because there ain't no bug. It often boils down to the choices the developer made regarding small sample correction which, maybe surprisingly, has many degrees of freedom when it comes to implementation. 
 
@@ -53,7 +53,7 @@ summary(gravity, vcov = "twoway", ssc = ssc(K.adj = FALSE, G.adj = FALSE))
 
 The argument `vcov` can be equal to either: `"iid"`, `"hetero"`, `"cluster"`, `"twoway"`, `"NW"`, `"DK"`, or `"conley"`.
 
-If `vcov = "iid"`, then the standard-errors are based on the assumption that the errors are non correlated and homoskedastic. If `vcov = "hetero"`, this corresponds to the classic hereoskedasticity-robust standard-errors (White correction), where it is assumed that the errors are non correlated but the variance of their generative law may vary. 
+If `vcov = "iid"`, then the standard-errors are based on the assumption that the errors are non correlated and homoskedastic. If `vcov = "hetero"`, this corresponds to the classic heteroskedasticity-robust standard-errors (White correction), where it is assumed that the errors are non correlated but the variance of their generative law may vary. 
 
 If `vcov = "cluster"`, then arbitrary correlation of the errors within clusters is accounted for. Same for `vcov = "twoway"`: arbitrary correlation within each of the two clusters is accounted for. 
 
@@ -99,7 +99,7 @@ When standard-errors are corrected for serial correlation, the corresponding adj
 
 #### Yet more details
 
-You're already fed up about about these details? I'm sorry but there's more, so far you've only seen the main arguments! I now come to detail three more elements: `K.exact`, `G.df` and `t.df`.
+You're already fed up about these details? I'm sorry but there's more, so far you've only seen the main arguments! I now come to detail three more elements: `K.exact`, `G.df` and `t.df`.
 
 Argument `K.exact` is only relevant when there are two or more fixed-effects. By default all the fixed-effects coefficients are accounted for when computing the degrees of freedom. In general this is fine, but in some situations it may overestimate the number of estimated coefficients. Why? Because some of the fixed-effects may be collinear, the effective number of coefficients being lower. Let's illustrate that with an example. Consider the following set of fixed-effects:
 
@@ -225,7 +225,7 @@ rbind(se_plm_firm, se_feols_firm_plm)
 
 #### HAC SEs
 
-And finally let's look at Newey-West and Driscoll-Kray standard-errors:
+And finally let's look at Newey-West and Driscoll-Kraay standard-errors:
 ```{r}
 #
 # Newey-west
@@ -382,7 +382,7 @@ which changes the way the default standard-errors are computed when the estimati
 
 I wish to thank Karl Dunkle Werner, Grant McDermott and Ivo Welch for raising the issue and for helpful discussions. Any error is of course my own.
 
-Cameron AC, Gelbach JB, Miller DL (2011). "[Robust Inference with Multiway Clustering](https://www.nber.org/papers/t0327)", Journal of Business & Ecomomic Statistics, 29(2), 238–249.
+Cameron AC, Gelbach JB, Miller DL (2011). "[Robust Inference with Multiway Clustering](https://www.nber.org/papers/t0327)", Journal of Business & Economic Statistics, 29(2), 238–249.
 
 Kauermann G, Carroll RJ (2001). "[A Note on the Efficiency of Sandwich Covariance Matrix Estimation](https://doi.org/10.1198/016214501753382309)", Journal of the American Statistical Association, 96(456), 1387–1396.
 
