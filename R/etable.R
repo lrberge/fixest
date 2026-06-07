@@ -175,8 +175,8 @@
 #' A line can be represented by: i) a character vector, ii) a list of the form 
 #' `list("value1" = nb1, "value2" = nb2, etc)`. In the list form, numeric numbers 
 #' represent spans and integers represent absolute positions. 
-#' Example: `headers=lits(Gender = list("M"=2, "F"=3))` will create a 
-#' row with 2 times "M" and three time "F" (this is identical to 
+#' Example: `headers=list(Gender = list("M"=2, "F"=3))` will create a 
+#' row with 2 times "M" and three times "F" (this is identical to 
 #' `headers=list(Gender = c("M", "M", "F", "F", "F"))`). 
 #' You can stack header lines within a list, in that case the 
 #' list names will be displayed in the leftmost cell. 

@@ -45,7 +45,7 @@
 #' you can use the special value `"bin::digit"` to group every `digit` element. 
 #' For example if `x` represent years, using `bin="bin::2"` create bins of two years. 
 #' Using `"!bin::digit"` groups every digit consecutive values starting from the first value. 
-#' Using `"!!bin::digit"` is the same bu starting from the last value. In both cases, 
+#' Using `"!!bin::digit"` is the same but starting from the last value. In both cases, 
 #' `x` is not required to be numeric.
 #' @param bin.rel A list or a vector defining which values to bin. Only applies to the 
 #' relative periods and *not* the cohorts. Please refer to the help of the argument 
