@@ -87,7 +87,7 @@ does not contain \dQuote{Constant} is kept). See details.}
 
 \item{ci_level}{Scalar between 0 and 1: the level of the CI. By default it is equal to 0.95.}
 
-\item{pt.pch}{The patch of the coefficient estimates. Default is 1 (circle).}
+\item{pt.pch}{The pch of the coefficient estimates. Default is 1 (circle).}
 
 \item{pt.bg}{The background color of the point estimate (when the \code{pt.pch} is
 in 21 to 25). Defaults to NULL.}
@@ -104,7 +104,7 @@ with \code{pt.col} and \code{ci.col}.}
 
 \item{ci.col}{The color of the confidence intervals. Default is equal to the argument \code{col}.}
 
-\item{lwd}{General line with. Default is 1.}
+\item{lwd}{General line width. Default is 1.}
 
 \item{pt.lwd}{The line width of the coefficient estimates. Default is equal to
 the other argument \code{lwd}.}

@@ -257,8 +257,8 @@ graph. Note that if it is the case, then the argument \code{x} MUST be numeric.}
 \item{plot_prms}{A named list. It may contain additionnal parameters to be passed
 to the plot.}
 
-\item{pch}{The patch of the coefficient estimates. Default is 1 (circle).
-This is an alias to tha argument \code{pt.pch}.}
+\item{pch}{The pch of the coefficient estimates. Default is 1 (circle).
+This is an alias to the argument \code{pt.pch}.}
 
 \item{col}{The color of the points and the confidence intervals. Default is 1
 ("black"). Note that you can set the colors separately for each of them
@@ -269,17 +269,17 @@ with \code{pt.col} and \code{ci.col}.}
 \item{lty}{The line type of the confidence intervals. Default is 1.
 This is an alias to the argument \code{ci.lty}.}
 
-\item{lwd}{General line with. Default is 1.}
+\item{lwd}{General line width. Default is 1.}
 
 \item{ylim}{Numeric vector of length 2 which gives the limits of the plotting region for
 the y-axis. The default is \code{NULL}, which means that it is automatically defined.
-Use the argument \code{ylim.add} to simply increase or decrese the default limits.}
+Use the argument \code{ylim.add} to simply increase or decrease the default limits.}
 
 \item{xlim}{Numeric vector of length 2 which gives the limits of the plotting region for
 the x-axis. The default is \code{NULL}, which means that it is automatically defined.
-Use the argument \code{xlim.add} to simply increase or decrese the default limits.}
+Use the argument \code{xlim.add} to simply increase or decrease the default limits.}
 
-\item{pt.pch}{The patch of the coefficient estimates. Default is 1 (circle).}
+\item{pt.pch}{The pch of the coefficient estimates. Default is 1 (circle).}
 
 \item{pt.bg}{The background color of the point estimate (when the \code{pt.pch} is
 in 21 to 25). Defaults to NULL.}

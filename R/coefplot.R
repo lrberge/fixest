@@ -54,13 +54,13 @@
 #' graph. Note that if it is the case, then the argument `x` MUST be numeric.
 #' @param xlim Numeric vector of length 2 which gives the limits of the plotting region for
 #' the x-axis. The default is `NULL`, which means that it is automatically defined.
-#' Use the argument `xlim.add` to simply increase or decrese the default limits.
+#' Use the argument `xlim.add` to simply increase or decrease the default limits.
 #' @param ylim Numeric vector of length 2 which gives the limits of the plotting region for
 #' the y-axis. The default is `NULL`, which means that it is automatically defined.
-#' Use the argument `ylim.add` to simply increase or decrese the default limits.
-#' @param pch The patch of the coefficient estimates. Default is 1 (circle). 
-#' This is an alias to tha argument `pt.pch`.
-#' @param pt.pch The patch of the coefficient estimates. Default is 1 (circle).
+#' Use the argument `ylim.add` to simply increase or decrease the default limits.
+#' @param pch The pch of the coefficient estimates. Default is 1 (circle). 
+#' This is an alias to the argument `pt.pch`.
+#' @param pt.pch The pch of the coefficient estimates. Default is 1 (circle).
 #' @param cex Numeric, default is 1. Expansion factor for the points
 #' @param pt.cex The size of the coefficient estimates. Default is the other argument `cex`.
 #' @param col The color of the points and the confidence intervals. Default is 1 
@@ -68,7 +68,7 @@
 #' with `pt.col` and `ci.col`.
 #' @param pt.col The color of the coefficient estimates. Default is equal to the argument `col`.
 #' @param ci.col The color of the confidence intervals. Default is equal to the argument `col`.
-#' @param lwd General line with. Default is 1.
+#' @param lwd General line width. Default is 1.
 #' @param lty The line type of the confidence intervals. Default is 1. 
 #' This is an alias to the argument `ci.lty`.
 #' @param pt.lwd The line width of the coefficient estimates. Default is equal to 
