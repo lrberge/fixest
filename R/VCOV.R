@@ -2946,7 +2946,7 @@ print.ssc_type = function(x, ...){
 #' "iid", "hetero", "cluster", "twoway", "newey", "driscoll", "conley".
 #' 
 #' @return 
-#' This functions invisibly returns the list of old settings, a list of class `setFixest_ssc`.
+#' This function invisibly returns the list of old settings, a list of class `setFixest_ssc`.
 #' 
 #' @seealso 
 #' [`vcov.fixest`], [`ssc`], [`getFixest_ssc`]
@@ -3094,7 +3094,7 @@ getFixest_ssc = function(vcov_name = NULL){
 
 #' Sets the default type of standard errors to be used
 #'
-#' This functions defines or extracts the default type of standard-errors to computed in 
+#' This function defines or extracts the default type of standard-errors to be computed in 
 #' `fixest` [`summary`][fixest::summary.fixest], and [`vcov`][fixest::vcov.fixest].
 #'
 #' @param no_FE Character scalar equal to either: `"iid"` (default), or `"hetero"`. The type 
@@ -3105,11 +3105,11 @@ getFixest_ssc = function(vcov_name = NULL){
 #' `"twoway"`. The type of standard-errors to use by default for estimations with *two or more* 
 #' fixed-effects.
 #' @param panel Character scalar equal to either: `"iid"` (default), `"hetero"`, `"cluster"`, or 
-#' `"driscoll_kraaay"`. The type of standard-errors to use by default for estimations with the 
+#' `"driscoll_kraay"`. The type of standard-errors to use by default for estimations with the 
 #' argument `panel.id` set up. Note that panel has precedence over the presence of fixed-effects.
 #' @param all Character scalar equal to either: `"iid"`, or `"hetero"` (or `"cluster"` if 
 #' the argument `no_FE` is provided). 
-#' By default is is `NULL`. If provided, it sets all the SEs to that value. 
+#' By default it is `NULL`. If provided, it sets all the SEs to that value. 
 #' @param reset Logical, default is `FALSE`. Whether to reset to the default values.
 #'
 #' @return

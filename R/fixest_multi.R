@@ -808,7 +808,7 @@ print.fixest_multi = function(x, type = "etable", ...){
 #' Its default value can be modified with the function [`setFixest_multi`].
 #'
 #' @details
-#' The order with we we use the keys matter. Every time a key `sample`, `lhs`, `rhs`, 
+#' The order in which we use the keys matters. Every time a key `sample`, `lhs`, `rhs`, 
 #' `fixef` or `iv` is used, a reordering is performed to consider the leftmost-side key 
 #' to be the new root.
 #'

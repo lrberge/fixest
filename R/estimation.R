@@ -281,7 +281,7 @@
 #' \item{obs_selection}{(When relevant.) List containing vectors of integers. It represents the sequential selection of observation vis a vis the original data set.}
 #' \item{collin.var}{(When relevant.) Vector containing the variables removed because of collinearity.}
 #' \item{collin.coef}{(When relevant.) Vector of coefficients, where the values of the variables removed because of collinearity are NA.}
-#' \item{collin.min_norm}{The minimal diagonal value of the Cholesky decomposition. Small values indicate possible presence collinearity.}
+#' \item{collin.min_norm}{The minimal diagonal value of the Cholesky decomposition. Small values indicate possible presence of collinearity.}
 #' \item{y_demeaned}{Only when `demeaned = TRUE`: the centered dependent variable.}
 #' \item{X_demeaned}{Only when `demeaned = TRUE`: the centered explanatory variable.}
 #'

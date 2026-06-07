@@ -900,7 +900,7 @@ unpanel = function(x){
 #'
 #' @return
 #' It returns a `fixest_panel` data base, with the attributes allowing to create 
-#' lags/leads properly bookkeeped.
+#' lags/leads properly bookkept.
 #'
 #' @author
 #' Laurent Berge
