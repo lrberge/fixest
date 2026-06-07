@@ -4363,7 +4363,7 @@ deviance.fixest = function(object, ...){
 #' @details
 #' Hat values are not available for [`fenegbin`][fixest::femlm], [`femlm`] and [`feNmlm`] estimations.
 #' 
-#' Hat values for generalized linear model are disussed in Belsley, Kuh and Welsch (1980), Cook and Weisberg (1982), etc.
+#' Hat values for generalized linear model are discussed in Belsley, Kuh and Welsch (1980), Cook and Weisberg (1982), etc.
 #' 
 #' When `exact == FALSE`, the Johnson-Lindenstrauss approximation (JLA) algorithm is used which approximates the diagonals of the projection matrix. For more precision (but longer time), increase the value of `boot.size`. See Kline, Saggio, and Sølvsten (2020) for details.
 #' 
@@ -4371,7 +4371,7 @@ deviance.fixest = function(object, ...){
 #' @references
 #' Belsley, D. A., Kuh, E. and Welsch, R. E. (1980). *Regression Diagnostics*. New York: Wiley.
 #' Cook, R. D. and Weisberg, S. (1982). *Residuals and Influence in Regression*. London: Chapman and Hall.
-#' Kline, P., Saggio R., and Sølvsten, M. (2020). *Leave‐Out Estimation of Variance Components*. Econometrica.
+#' Kline, P., Saggio, R., and Sølvsten, M. (2020). *Leave‐Out Estimation of Variance Components*. Econometrica.
 #' 
 #' @examples
 #'
