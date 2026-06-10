@@ -7,9 +7,12 @@
 
 - fix bug in `xpd`: variable completion with `..` suffix now works when after an underscore (e.g. `xpd(~var_.., data = data.frame(var_1=1, var_2=2))`)
 
+- fix bug in estimations with multiple RHSs where the part containing the variables common to all estimations is made of only variables equal to 0
+
 ## Vignettes
 
 - consolidate the two `etable` vignettes (`exporting_tables` and `etable_new_features`) into a single document. By GMD, #648.
+
 
 # fixest 0.14.1
 

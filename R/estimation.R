@@ -2116,7 +2116,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
     # coeftable
     zvalue = coef/se
     pvalue = 2*pt(-abs(zvalue), max(n - df_k, 1))
-
+    
     coeftable = data.frame("Estimate"=coef, "Std. Error"=se, "t value"=zvalue, "Pr(>|t|)"=pvalue)
     names(coeftable) = c("Estimate", "Std. Error", "t value",  "Pr(>|t|)")
     row.names(coeftable) = names(coef)
@@ -4969,7 +4969,7 @@ multi_split = function(env, fun){
       my_env = reshape_env(env)
       my_res = fun(env = my_env)
     } else {
-      my_res = fun(env = reshape_env(env, obs2keep = which(split == i)))
+      my_res = fun(env = reshape_env(env, obs2keep = which(split == i), rm_0s = TRUE))
     }
 
     res_all[[I]] = my_res
