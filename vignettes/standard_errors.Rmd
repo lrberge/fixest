@@ -19,15 +19,13 @@ library(fixest)
 setFixest_nthreads(1)
 ```
 
-# Inference of Coefficients in (Generalized) Linear Models
+This vignette discusses how the `fixest` package computes the standard-errors of coefficients obtained from (generalized) linear regressions (i.e. from `feols`, `feglm`/`fepois`). Please note that here we don't discuss much the *why*, but mostly the *how*.  For an introduction to the topic, see the paper by [Zeileis, Koll and Graham (2020)](https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf). 
 
-This vignette focuses on conducting inference on the coefficients from a regression in the `fixest` package, either from `feols` or `feglm`/`fepois`.
-The first part of this vignette describes how standard-errors are computed in `fixest`'s estimations. 
+The first part of this vignette describes the main ways standard-errors can be computed in `fixest`'s estimations. 
 
-The second part of this vignette discusses the nitty-gritty details about the possible choices surrounding small sample correction. 
-Please note that here we don't discuss the *why*, but only the *how*. 
-For a thorough introduction to the topic, see the excellent paper by [Zeileis, Koll and Graham (2020)](https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf). 
-The second part illustrates how to replicate some standard-errors obtained from other estimation methods with `fixest`. 
+The second part discusses the nitty-gritty details about the possible choices surrounding small sample correction. 
+
+The third part illustrates how to replicate standard-errors obtained from estimation methods of other software. 
 
 
 ## Review of theory
@@ -73,7 +71,7 @@ The elements $\sigma_{i,j}$ denote the covariance between unit $i$ and unit $j$'
 
 A few common cases: 
 
-- "Independent": If we think the error terms are independent across observations, then $\sigma_{i,j} = 0$ when $i \neq j$ and $\Sigma$ is a diagonal matrix. 
+- "Non-correlated": If we think the error terms are non-correlated across observations, then $\sigma_{i,j} = 0$ when $i \neq j$ and $\Sigma$ is a diagonal matrix. 
   - If $\sigma_i^2 = \sigma^2$, this is called homoskedastic errors.
   - If $\sigma_i^2$ is allowed to vary, this is called heteroskedastic errors.
 
@@ -94,14 +92,12 @@ where $w_{i,j}$ is a weight term (depending on the choice of `vcov` estimator).
 For example, if we are using "HC1" standard errors, then $w_{i,i} = 1$ and $w_{i,j} = 0$ whenever $i \neq j$. 
 For clustered standard errors, we use: $w_{i, j} = 1 / N_{c(i)}$ whenever $c(i) = c(j)$ and $w_{i,j} = 0$ otherwise.
 
-Since we use $\hat{\varepsilon}_i$ instead of the true $\varepsilon_i$, it turns out that our standard error estimates will typically be too small (while good for stars, this is bad for high-quality science). 
+Since we use $\hat{\varepsilon}_i$ instead of the true $\varepsilon_i$, it turns out that our standard error estimates will typically be too small. 
 This problem is that the residuals tend to be "too small" because they are in-sample prediction errors (regressions overfit the sample).
 This problem is particularly large when the sample size is too "small". 
 Usually, we apply a "small-sample correction" to make the standard errors slightly larger.
 These corrections are usually "ad hoc" and can vary from package to package. 
-For this reason, we delay discussion to the end of the vignette ([there be dragons](https://en.wikipedia.org/wiki/Here_be_dragons)).
-
-
+For this reason, we delay discussion to the end of the vignette ([hic sunt leones](https://en.wikipedia.org/wiki/Here_be_dragons)).
 
 
 #### FWL for variance-covariance matrix
@@ -139,13 +135,14 @@ There are two components defining the standard-errors in `fixest`. The main type
 
 ### The argument `vcov`
 
-The argument `vcov` takes many arguments. can be equal to either: `"iid"`, `"hetero"`/`"HC1"`, `"HC2"`, `"HC3"`, `"cluster"`, `"twoway"`, `"NW"`, `"DK"`, or `"conley"`.
+There are three main ways to specify the VCOV using the argument `vcov`: 1) with a character string, 2) with a formula, 3) with a `vcov_*` function. 
+When a character string, the argument `vcov` can be equal to either: `"iid"`, `"hetero"`/`"HC1"`, `"HC2"`, `"HC3"`, `"cluster"`, `"twoway"`, `"NW"`, `"DK"`, or `"conley"`. 
 
 #### Classical standard errors
 
 For classical standard errors, set `vcov = "iid"`.
-This assume that $\sigma_i^2 = \sigma^2$, i.e. the errors are non correlated and homoskedastic. 
-This is the default primarily for speed of estimation, but in practice it is not recommended as homoskedasticity is not likely to hold in settings.
+This assumes that $\sigma_i^2 = \sigma^2$, i.e. the errors are non-correlated and homoskedastic. 
+This is the default primarily for speed of estimation, but in practice it is never recommended as homoskedasticity is not likely to hold.
 
 #### Heteroskedasticity-robust standard errors
 
@@ -229,7 +226,7 @@ etable(est, est_bboot_se)
 ```
 
 
-### The argument `ssc` 
+## Small sample correction
 
 As discussed above, plugging in residuals from a regression to estimate the variance of the true error term will create standard error estimates that are too small. 
 The small sample correction aims to "correct" this problem by increasing the estimate $\tilde{V}$ by some factor that is $\geq 1$ and approaches $1$ as the sample gets larger.
@@ -282,9 +279,9 @@ Using the data from the previous example, here the standard-errors are clustered
 
 When standard-errors are corrected for serial correlation, the corresponding adjustment applied is $G_{time} / (G_{time} - 1)$.
 
-#### Yet more details
+### Yet more details
 
-You're already fed up about about these details? I'm sorry but there's more, so far you've only seen the main arguments! I now come to detail three more elements: `K.exact`, `G.df` and `t.df`.
+We now detail three more elements: `K.exact`, `G.df` and `t.df`.
 
 Argument `K.exact` is only relevant when there are two or more fixed-effects. By default all the fixed-effects coefficients are accounted for when computing the degrees of freedom. In general this is fine, but in some situations it may overestimate the number of estimated coefficients. Why? Because some of the fixed-effects may be collinear, the effective number of coefficients being lower. Let's illustrate that with an example. Consider the following set of fixed-effects:
 
@@ -301,7 +298,6 @@ Now instead of having a specific adjustment for each matrix, there is only one a
 Argument `t.df` is only relevant when standard-errors are clustered. It affects the way the *p-value* and *confidence intervals* are computed. It can be equal to: either `"conventional"`, or `"min"` (the default). 
 By default, when standard-errors are clustered, the degrees of freedom used in the Student t distribution is equal to the minimum cluster size (among all clusters used to cluster the VCOV) minus one. 
 If `t.df="conventional"`, the degrees of freedom used to find the p-value from the Student t distribution is equal to the number of observations minus the number of estimated coefficients.
-
 
 
 

@@ -13,6 +13,7 @@
 
 - consolidate the two `etable` vignettes (`exporting_tables` and `etable_new_features`) into a single document. By GMD, #648.
 
+- add theory to the VCOV vignette, plus many other changes. By Kyle Butts.
 
 # fixest 0.14.1
 
