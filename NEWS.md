@@ -15,6 +15,12 @@
 
 - add theory to the VCOV vignette, plus many other changes. By Kyle Butts.
 
+- new cheat sheet vignette containing quick reference tables
+
+## Other
+
+- new README.md, with more recent benchmarks
+
 # fixest 0.14.1
 
 ## Bug fixes
