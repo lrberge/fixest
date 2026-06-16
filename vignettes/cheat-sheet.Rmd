@@ -1,5 +1,5 @@
 ---
-title: "Cheat cheat tables"
+title: "Cheat sheets"
 author: "Laurent Bergé"
 date: "`r Sys.Date()`"
 output:
@@ -16,12 +16,12 @@ output:
     toc: yes
     toc_depth: 3
 vignette: > 
-  %\VignetteIndexEntry{Cheat sheet tables} 
+  %\VignetteIndexEntry{Cheat sheets} 
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-This document presents several cheat sheet tables, mostly related to the manipulation of the formula in a fixest estimation.
+This document presents five quick reference tables: 4 are related to the specification of the formula, and one to the VCOVs. The PDF version is [here](reference/figures/cheat-sheet.pdf).
 
 ## Inserting fixed-effects in a fixest estimation
 

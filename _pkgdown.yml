@@ -11,13 +11,11 @@ articles:
     navbar: ~
     contents:
       - fixest_walkthrough
+      - cheat-sheet
       - multiple_estimations
       - standard_errors
       - exporting_tables
       - collinearity
-  - title: Cheat sheet
-    contents:
-      - cheat-sheet-tables
 
 development:
   mode: auto
