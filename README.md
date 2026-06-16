@@ -1,5 +1,5 @@
 
-# fixest: A fast and user-friendly econometric estimations
+# fixest: fast and user-friendly econometric estimations
 
 <a href="https://cran.r-project.org/web/checks/check_results_fixest.html"><img src="https://badges.cranchecks.info/worst/fixest.svg" alt="CRAN status"></a>
 <a href="https://fastverse.r-universe.dev"><img src="https://fastverse.r-universe.dev/badges/fixest" alt="Version_ROpensci"></a>
