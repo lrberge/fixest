@@ -156,7 +156,7 @@ Benchmarks should never be taken at face value given that the timings depend on 
 ![](https://github.com/lrberge/fixest/blob/master/vignettes/images/readme/bench_poisson_simple.png?raw=true)
 ![](https://github.com/lrberge/fixest/blob/master/vignettes/images/readme/bench_poisson_difficult.png?raw=true)
 
-Please refer to "Section 8 Benchmarks" of the [fixest paper](https://arxiv.org/abs/2601.21749) for details on the setup. The code to run the benchmarks is [on zenodo](https://zenodo.org/records/20704145). See "Section 8.2 NYC taxi data" for a benchmark highlighting `fixest`-specific features.
+Please refer to "Section 8 Benchmarks" of the [fixest paper](https://arxiv.org/abs/2601.21749) for details on the setup. The code to run the benchmarks is [on zenodo](https://zenodo.org/records/20704145). See "Section 8.2 NYC taxi data" for a benchmark highlighting `fixest`-specific features with a large real-world data set.
 
 Across the board, it is safe to say that `fixest` is one of the fastest tools out there to perform econometric estimations with fixed-effects. Julia's [`FixedEffectModels`](https://github.com/FixedEffects/FixedEffectModels.jl) is very close and might be faster on specific contexts. Even if python's [`pyfixest`](https://github.com/py-econometrics/pyfixest) is slower on these benchmarks, this is likely to change in the close future: Recently the `pyfixest` team, led by Alex Fisher, has been very active in the development of new demeaning algorithms and have come up with new, and very creative, solutions. In particular for 3+ fixed-effects with difficult convergence properties, you should [check it out](https://pyfixest.org/how-to/demeaner-backends.html) if interested.
 
@@ -164,7 +164,7 @@ Across the board, it is safe to say that `fixest` is one of the fastest tools ou
 
 The development of `fixest` has been inspired and pushed forward by many existing software. In particular, the formula syntax with the pipe to separate the fixed-effects from the independent variables is not from me but from Simen Gaure's [`lfe`](https://cran.r-project.org/package=lfe). I learned a lot on R-language manipulation by perusing the source code of Achim Zeileis' [`Formula`](https://cran.r-project.org/package=Formula) package. I was spurred to improve `fixest`'s algorithms by a sane (yet intense!) competition: first by `lfe`, then by Julia's `FixedEffectModels`.
 
-I am truly indebted to the community who, with countless and often of very high quality bug reports, has tremendously improved the robustness of the software.
+I am truly indebted to the community who, with countless -- and often of very high quality -- bug reports, has tremendously improved the robustness of the software.
 
 Big thanks to the direct contributors (esp. Grant, Kyle, Sebastian) for taking the time to contribute to this project with their expertise.
 
