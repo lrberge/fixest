@@ -1403,11 +1403,11 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
     res_tex = res_tex[!res_tex %in% c("%start:tab\n", "%end:tab\n")]
 
     res_tex = tex.nice(res_tex, n_models) # we wait after PP to nicify
-
+    
     path = make_png(res_tex)
-
+    
     if(is_md){
-      if(!knitr::is_latex_output()){
+      if(!knitr::is_latex_output() && !is.null(path)){
         # we insert the URI directly
         URI = knitr::image_uri(path)
         catma('<div class = "{div.class}"><img src = "{URI}"></div>\n')
