@@ -4,12 +4,16 @@
 # ~: debug tools
 #------------------------------------------------------------------------------#
 
+debug_path = function(filename){
+  wd = getOption("fixest_onload_WD", ".")
+  file.path(wd, filename)
+}
 
 debug_msg = function(...){
   # writes a message in debug.txt
   msg = sma(..., .envir = parent.frame())
   message(msg)
-  f = file("./../debug.txt", "a")
+  f = file(debug_path("./../debug.txt"), "a")
   writeLines(msg, f)
   close(f)
 }
@@ -28,21 +32,21 @@ debug_save = function(path = NULL, up = 0){
   
   check_arg(path, "NULL path create")
   if(is.null(path)){
-    path = "./../debug.RData"
+    path = debug_path("./../debug.RData")
   }
   
   save(list = names(env), envir = env, file = path)
 }
 
 debug_clear = function(){
-  unlink("./../debug.RData")
+  unlink(debug_path("./../debug.RData"))
 }
 
 debug_load = function(path = NULL, env = parent.frame(), return_env = FALSE){
   
   check_arg(path, "NULL path create")
   if(is.null(path)){
-    path = "./../debug.RData"
+    path = debug_path("./../debug.RData")
   }
   
   if(return_env){
@@ -61,7 +65,7 @@ debug_any_variable_different_from_saved = function(path = NULL, ignore = charact
   
   check_arg(path, "NULL path create")
   if(is.null(path)){
-    path = "./../debug.RData"
+    path = debug_path("./../debug.RData")
   }
   
   if(!file.exists(path)){

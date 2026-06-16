@@ -81,6 +81,7 @@ if(is.factor(data.frame(x = "bonjour")$x)){
   options("fixest_notes" = TRUE)
   options("fixest_print" = list(type = "table"))
   options("fixest_fl_authorized" = FALSE)
+  options("fixest_onload_WD" = normalizePath("."))
 
   setFixest_coefplot("all", reset = TRUE)
   setFixest_etable()
