@@ -58,25 +58,30 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="fixest-a-fast-and-feature-rich-framework-for-econometric-estimations">fixest: A fast and feature-rich framework for econometric estimations<a class="anchor" aria-label="anchor" href="#fixest-a-fast-and-feature-rich-framework-for-econometric-estimations"></a>
+<div class="page-header"><h1 id="fixest-a-fast-and-user-friendly-econometric-estimations">fixest: A fast and user-friendly econometric estimations<a class="anchor" aria-label="anchor" href="#fixest-a-fast-and-user-friendly-econometric-estimations"></a>
 </h1></div>
 <p><a href="https://cran.r-project.org/web/checks/check_results_fixest.html" class="external-link"><img src="https://badges.cranchecks.info/worst/fixest.svg" alt="CRAN status"></a> <a href="https://fastverse.r-universe.dev" class="external-link"><img src="https://fastverse.r-universe.dev/badges/fixest" alt="Version_ROpensci"></a> <a href="https://CRAN.R-project.org/package=fixest" class="external-link"><img src="https://www.r-pkg.org/badges/version/fixest" alt="Version"></a> <a href="https://ipub.com/dev-corner/apps/r-package-downloads/" class="external-link"> <img src="https://cranlogs.r-pkg.org/badges/fixest" alt="Downloads"></a></p>
-<p>fixest is an R package for fast and flexible econometric estimations. It provides a unified framework for applied research, with comprehensive support for a diverse class of models: ordinary least squares (OLS), instrumental variables (IV), generalized linear models (GLM), maximum likelihood (ML), and difference-in-differences (DiD).</p>
+<p><code>fixest</code> is an R package offering fast and flexible econometric estimations. It provides a unified framework for applied research, with comprehensive support for a diverse class of models: ordinary least squares (OLS), instrumental variables (IV), generalized linear models (GLM), maximum likelihood (ML), and difference-in-differences (DiD).</p>
+<div class="section level2">
+<h2 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
+</h2>
 <p>A few features: - super fast - large array of models (OLS, IV, GLM, ML) with a consistent syntax throughout - highly optimised handling of fixed-effects - 6 built-in family of VCOVs for inference - run multiple estimations with minimal typing, at dazzling speed - integrated panel features (lead/lag/diff) - top notch error handling to facilitate the user’s life - programmatic formula manipulation with built-in interpolation and macro variables - compatible with &gt; 20 <code>base</code>/<code>stats</code> methods augmented with numerous options (<code>predict</code>, etc) - methods to extract parts of the, possibly multiple, results (<code>coeftable</code>, <code>se</code>, <code>pvalue</code>, <code>tstat</code>) - easy reporting of multiple results on the console, or in publication-ready Latex tables - coefficient plots, including event-study graphs</p>
-<p>If you are new to fixest, you may be interested in the <code>fixest</code> article (<a href="https://arxiv.org/abs/2601.21749" class="external-link uri">https://arxiv.org/abs/2601.21749</a>) or the <a href="https://CRAN.R-project.org/package=fixest/vignettes/fixest_walkthrough.html" class="external-link">introductory walk-through</a>. If you are coming from Stata, the stata2R website is highly relevant: <a href="https://stata2r.github.io/fixest/" class="external-link uri">https://stata2r.github.io/fixest/</a>.</p>
-<p>For more details, there are four dedicated guides: to the <a href="https://cran.r-project.org/web/packages/fixest/vignettes/standard_errors.html" class="external-link">standard-errors</a>, to <a href="https://cran.r-project.org/web/packages/fixest/vignettes/collinearity.html" class="external-link">collinearity</a>, to <a href="https://cran.r-project.org/web/packages/fixest/vignettes/multiple_estimations.html" class="external-link">multiple estimations</a>, to the <a href="https://cran.r-project.org/web/packages/fixest/vignettes/exporting_tables.html" class="external-link">exportation of tables</a>.</p>
-<div class="section level4">
-<h4 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
-</h4>
+<p>If you are new to fixest, you may be interested in the <code>fixest</code> article (<a href="https://arxiv.org/abs/2601.21749" class="external-link uri">https://arxiv.org/abs/2601.21749</a>) or the <a href="https://CRAN.R-project.org/package=fixest/vignettes/fixest_walkthrough.html" class="external-link">introductory walk-through</a>.</p>
+<p>If you are coming from Stata, the stata2R website is highly relevant: <a href="https://stata2r.github.io/fixest/" class="external-link uri">https://stata2r.github.io/fixest/</a>.</p>
+<p>For more details, there are four dedicated guides: to the <a href="https://cran.r-project.org/web/packages/fixest/vignettes/standard_errors.html" class="external-link">standard-errors</a>, to <a href="https://cran.r-project.org/web/packages/fixest/vignettes/collinearity.html" class="external-link">collinearity</a>, to <a href="https://cran.r-project.org/web/packages/fixest/vignettes/multiple_estimations.html" class="external-link">multiple estimations</a>, to the <a href="https://cran.r-project.org/web/packages/fixest/vignettes/exporting_tables.html" class="external-link">exportation of tables</a>. Quickly find how to specify the formula/VCOV with this <a href="https://lrberge.github.io/fixest/articles/cheat-sheet.html">cheat sheet</a>.</p>
+</div>
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># To install from CRAN:</span></span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"fixest"</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co"># To install the latest stable development release:</span></span>
 <span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"fixest"</span>, <span class="at">repos =</span> <span class="at">ropensci =</span> <span class="st">'https://fastverse.r-universe.dev'</span>)</span></code></pre></div>
 </div>
-<div class="section level4">
-<h4 id="quickstart">Quickstart<a class="anchor" aria-label="anchor" href="#quickstart"></a>
-</h4>
+<div class="section level2">
+<h2 id="quickstart">Quickstart<a class="anchor" aria-label="anchor" href="#quickstart"></a>
+</h2>
 <p>In this example, we use the built-in <code>airquality</code> data set to estimate the effect of solar radiations and temperature on ozone concentration.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lrberge.github.io/fixest/">fixest</a></span><span class="op">)</span></span>

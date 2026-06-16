@@ -21,7 +21,9 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-This document presents five quick reference tables: 4 are related to the specification of the formula, and one to the VCOVs. The PDF version is [here](reference/figures/cheat-sheet.pdf).
+This document presents five quick reference tables: 4 are related to the specification of the formula, and one to the VCOVs. The PDF version is [here](../reference/figures/cheat-sheet.pdf).
+
+<!-- On the location of the PDF, we need a path relative to the document. Note that by default, pkgdown imports all the contents in 'pkgroot/man/figures', which is where I placed the `cheat-sheet.pdf`. -->
 
 ## Inserting fixed-effects in a fixest estimation
 

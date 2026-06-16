@@ -1,5 +1,5 @@
 
-# fixest: A fast and feature-rich framework for econometric estimations
+# fixest: A fast and user-friendly econometric estimations
 
 <a href="https://cran.r-project.org/web/checks/check_results_fixest.html"><img src="https://badges.cranchecks.info/worst/fixest.svg" alt="CRAN status"></a>
 <a href="https://fastverse.r-universe.dev"><img src="https://fastverse.r-universe.dev/badges/fixest" alt="Version_ROpensci"></a>
@@ -7,10 +7,12 @@
 <a href="https://ipub.com/dev-corner/apps/r-package-downloads/"> <img src="https://cranlogs.r-pkg.org/badges/fixest" alt = "Downloads"> </a>
 
 
-fixest is an R package for fast and flexible econometric estimations. It provides a unified
+`fixest` is an R package offering fast and flexible econometric estimations. It provides a unified
 framework for applied research, with comprehensive support for a diverse class of models:
 ordinary least squares (OLS), instrumental variables (IV), generalized linear models (GLM), maximum
 likelihood (ML), and difference-in-differences (DiD).
+
+## Features
 
 A few features:
 - super fast
@@ -27,11 +29,12 @@ A few features:
 - coefficient plots, including event-study graphs
 
 If you are new to fixest, you may be interested in the `fixest` article (https://arxiv.org/abs/2601.21749) or the [introductory walk-through](https://CRAN.R-project.org/package=fixest/vignettes/fixest_walkthrough.html). 
+
 If you are coming from Stata, the stata2R website is highly relevant: https://stata2r.github.io/fixest/.
 
-For more details, there are four dedicated guides: to the [standard-errors](https://cran.r-project.org/web/packages/fixest/vignettes/standard_errors.html), to [collinearity](https://cran.r-project.org/web/packages/fixest/vignettes/collinearity.html), to [multiple estimations](https://cran.r-project.org/web/packages/fixest/vignettes/multiple_estimations.html), to the [exportation of tables](https://cran.r-project.org/web/packages/fixest/vignettes/exporting_tables.html).
+For more details, there are four dedicated guides: to the [standard-errors](https://cran.r-project.org/web/packages/fixest/vignettes/standard_errors.html), to [collinearity](https://cran.r-project.org/web/packages/fixest/vignettes/collinearity.html), to [multiple estimations](https://cran.r-project.org/web/packages/fixest/vignettes/multiple_estimations.html), to the [exportation of tables](https://cran.r-project.org/web/packages/fixest/vignettes/exporting_tables.html). Quickly find how to specify the formula/VCOV with this [cheat sheet](https://lrberge.github.io/fixest/articles/cheat-sheet.html).
 
-#### Installation
+## Installation
 
 ```R
 # To install from CRAN:
@@ -41,7 +44,7 @@ install.packages("fixest")
 install.packages("fixest", repos = ropensci = 'https://fastverse.r-universe.dev')
 ```
 
-#### Quickstart
+## Quickstart
 
 In this example, we use the built-in `airquality` data set to estimate the effect of solar radiations and temperature on ozone concentration.
 
