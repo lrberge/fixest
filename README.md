@@ -21,7 +21,7 @@ A few features:
 - integrated panel features (lead/lag/diff)
 - top notch error handling to facilitate the user's life
 - programmatic formula manipulation with built-in interpolation and macro variables
-- compatible 20 `stats` methods augmented with numerous options (`predict`, `model.matrix`, etc)
+- compatible with > 20 `base`/`stats` methods augmented with numerous options (`predict`, etc)
 - methods to extract parts of the, possibly multiple, results (`coeftable`, `se`, `pvalue`, `tstat`)
 - easy reporting of multiple results on the console, or in publication-ready Latex tables
 - coefficient plots, including event-study graphs
@@ -29,7 +29,7 @@ A few features:
 If you are new to fixest, you may be interested in the `fixest` article (https://arxiv.org/abs/2601.21749) or the [introductory walk-through](https://CRAN.R-project.org/package=fixest/vignettes/fixest_walkthrough.html). 
 If you are coming from Stata, the stata2R website is highly relevant: https://stata2r.github.io/fixest/.
 
-For more details, there are four dedicated guides: to the [VCOV](https://cran.r-project.org/web/packages/fixest/vignettes/standard_errors.html), to [collinearity](https://cran.r-project.org/web/packages/fixest/vignettes/collinearity.html), to [multiple estimations](https://cran.r-project.org/web/packages/fixest/vignettes/multiple_estimations.html), to the [exportation of tables](https://cran.r-project.org/web/packages/fixest/vignettes/exporting_tables.Rmd).
+For more details, there are four dedicated guides: to the [standard-errors](https://cran.r-project.org/web/packages/fixest/vignettes/standard_errors.html), to [collinearity](https://cran.r-project.org/web/packages/fixest/vignettes/collinearity.html), to [multiple estimations](https://cran.r-project.org/web/packages/fixest/vignettes/multiple_estimations.html), to the [exportation of tables](https://cran.r-project.org/web/packages/fixest/vignettes/exporting_tables.html).
 
 #### Installation
 
@@ -64,7 +64,7 @@ feols(Ozone ~ Solar.R + Temp, airquality)
 #> RMSE: 23.2   Adj. R2: 0.501249
 ```
 
-We add as controls the month and the day. We treat these variables as fixed-effects, that is categorical variables for which we do not report the coefficients.
+We add as controls the month and the day. We treat these variables as fixed-effects, that is categorical variables for which we do not report the estimated coefficients.
 
 ```R
 feols(Ozone ~ Solar.R + Temp | Month + Day, airquality)
@@ -110,6 +110,7 @@ etable(est_multi)
 Let's report the same results but with clustered standard-errors:
 
 ```R
+# we use the `vocv` argument to change the standard-errors
 etable(est_multi, vcov = vcov_cluster("Month"))
 #>                      est_multi.1      est_multi.2
 #> Dependent Var.:            Ozone            Ozone
@@ -145,16 +146,23 @@ legend("topleft", col = 1:5, lty = 1, lwd = 2, legend = paste0("Month = ", 5:9))
 
 ## Benchmarks
 
-Please refer to "Section 8 Benchmarks" of the fixest paper for details on the setup. The code to run the benchmarks can be found [on zenodo](https://zenodo.org/records/20704145).
+Benchmarks should never be taken at face value given that the timings depend on many parameters: the hardware, the software versions installed, and the specific numerical setups. However, with these caveats in mind, they can still be informative. Below is a set of benchmarks on simulated data with simple/difficult fixed-effects convergence properties, run on 12 January 2026 with up to date software at that time:
 
+![](https://github.com/lrberge/fixest/blob/master/vignettes/images/readme/bench_ols_simple.png?raw=true)
+![](https://github.com/lrberge/fixest/blob/master/vignettes/images/readme/bench_ols_difficult.png?raw=true)
+![](https://github.com/lrberge/fixest/blob/master/vignettes/images/readme/bench_poisson_simple.png?raw=true)
+![](https://github.com/lrberge/fixest/blob/master/vignettes/images/readme/bench_poisson_difficult.png?raw=true)
 
+Please refer to "Section 8 Benchmarks" of the [fixest paper](https://arxiv.org/abs/2601.21749) for details on the setup. The code to run the benchmarks is on [on zenodo](https://zenodo.org/records/20704145). See "Section 8.2 NYC taxi data" for a benchmark highlighting `fixest`-specific features.
 
-`fixest` is the Here are the results of January 2026 benchmarks:
-
+Across the board, it is safe to say that `fixest` is one of the fastest tools out there to perform econometric estimations with fixed-effects. Julia's [FixedEffectModels](https://github.com/FixedEffects/FixedEffectModels.jl) is very close and might be faster on specific contexts. Even if python's [pyfixest](https://github.com/py-econometrics/pyfixest) is slower on these benchmarks, this is likely to change in the close future: Recently the pyfixest team, led by Alex Fisher, has been very active in the development of new demeaning algorithms and have come up with new, and very creative, solutions. In particular for 3+ fixed-effects with difficult convergence properties, you should [check it out](https://pyfixest.org/how-to/demeaner-backends.html) if interested.
 
 ## Acknowledgements
 
-Of course the development of `fixest` has been inspired and pushed forward by (almost all) these (great) packages used in the benchmarking and I am deeply indebted to their authors. Although `fixest` contains many features, some are still uncovered and you should definitely have a look at these packages. 
+The development of `fixest` has been inspired and pushed forward by many existing software. In particular, the formula syntax with the pipe to separate the fixed-effects from the independent variables is not from me but from Simen Gaure's [lfe](https://cran.r-project.org/package=lfe). I learned a lot on R-language manipulation by perusing the source code of Achim Zeileis' [Formula](https://cran.r-project.org/package=Formula) package. I was spurred to improve `fixest`'s algorithms by a sane (yet intense!) competition: first by lfe, then by Julia's FixedEffectModels.
 
+I am truly indebted to the community who, with countless and often of very high quality bug reports, has tremendously improved the robustness of the software.
+
+Big thanks to the direct contributors (esp. Kyle, Grant, Sebastian) for taking the time to contribute to this project with their expertise.
 
 
