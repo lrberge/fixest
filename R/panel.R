@@ -141,6 +141,15 @@ panel_setup = function(data, panel.id, time.step = NULL, duplicate.method = "non
     }
   }
 
+  if(length(time) == 0){
+    res = list(order_it = integer(0), order_inv = integer(0),
+               id_sorted = integer(0), time_sorted = integer(0),
+               na_flag = na_flag, panel.id = panel.id,
+               time.step = time.step, duplicate.method = duplicate.method)
+    if(na_flag) res$is_na = is_na
+    return(res)
+  }
+
   # Creation of the indexes
   id = to_index_internal(id)
   time_full = to_index_internal(time, add_items = TRUE, sorted = TRUE)
@@ -228,7 +237,8 @@ panel_setup = function(data, panel.id, time.step = NULL, duplicate.method = "non
   }
 
   res = list(order_it = order_it, order_inv = order_inv, id_sorted = id_sorted, 
-             time_sorted = time_sorted, na_flag = na_flag, panel.id = panel.id)
+             time_sorted = time_sorted, na_flag = na_flag, panel.id = panel.id,
+             time.step = time.step, duplicate.method = duplicate.method)
   
   if(na_flag) res$is_na = is_na
   res
@@ -828,6 +838,84 @@ panel = function(data, panel.id, time.step = NULL, duplicate.method = "none"){
 }
 
 
+panel_subset = function(info, select, data = NULL, from_fixest = FALSE){
+  panel_vars = all.vars(info$panel.id)
+  if(!is.null(data) && inherits(data, "data.frame") && nrow(data) > 0 &&
+     all(panel_vars %in% names(data))){
+    time.step = info$time.step
+    duplicate.method = info$duplicate.method
+    if(is.null(duplicate.method)){
+      duplicate.method = "none"
+    }
+
+    new_info = panel_setup(data, panel.id = info$panel.id, time.step = time.step,
+                           duplicate.method = duplicate.method,
+                           from_fixest = from_fixest)
+    new_info$call = info$call
+    return(new_info)
+  }
+
+  id = info$id_sorted[info$order_inv]
+  time = info$time_sorted[info$order_inv]
+
+  if(info$na_flag == FALSE){
+    id = id[select]
+    time = time[select]
+  } else {
+    id_tmp = time_tmp = rep(NA, length(info$is_na))
+    id_tmp[!info$is_na] = id
+    time_tmp[!info$is_na] = time
+    id = id_tmp[select]
+    time = time_tmp[select]
+  }
+
+  is_na = is.na(id) | is.na(time)
+  na_flag = FALSE
+  if(any(is_na)){
+    na_flag = TRUE
+    id = id[!is_na]
+    time = time[!is_na]
+  }
+
+  time.step = info$time.step
+  if(length(time) > 0 && !is.null(time.step)){
+    if(time.step == "unitary"){
+      time_unik = sort(unique(time))
+
+      if(length(time_unik) == 1){
+        time = rep(0L, length(time))
+      } else {
+        all_steps = unique(diff(time_unik))
+        my_step = cpp_pgcd(all_steps)
+        time_unik_new = (time_unik - min(time_unik)) / my_step
+        time = time_unik_new[match(time, time_unik)]
+      }
+
+    } else if(time.step %in% c("consecutive", "within.consecutive")){
+      time = to_index_internal(time, sorted = TRUE)
+    }
+  }
+
+  time = as.integer(time)
+  order_it = order(id, time)
+  order_inv = order(order_it)
+  time_sorted = time[order_it]
+  if(identical(time.step, "within.consecutive")){
+    time_sorted = seq_along(time_sorted)
+  }
+
+  new_info = list(order_it = order_it, order_inv = order_inv,
+                  id_sorted = id[order_it], time_sorted = time_sorted,
+                  na_flag = na_flag, panel.id = info$panel.id, call = info$call,
+                  time.step = info$time.step,
+                  duplicate.method = info$duplicate.method)
+
+  if(na_flag) new_info$is_na = is_na
+
+  new_info
+}
+
+
 #' Dissolves a `fixest` panel
 #'
 #' Transforms a `fixest_panel` object into a regular data.frame.
@@ -1022,39 +1110,7 @@ unpanel = function(x){
       select = i
     }
 
-    # we modify the indexes
-    id = info$id_sorted[info$order_inv]
-    time = info$time_sorted[info$order_inv]
-
-    if(info$na_flag == FALSE){
-      id = id[select]
-      time = time[select]
-    } else{
-      # We don't forget to add the NAs!
-      id_tmp = time_tmp = rep(NA, info$is_na)
-      id_tmp[!info$is_na] = id
-      time_tmp[!info$is_na] = time
-      id = id_tmp[select]
-      time = time_tmp[select]
-    }
-
-    is_na = is.na(id) | is.na(time)
-    na_flag = FALSE
-    if(any(is_na)){
-      na_flag = TRUE
-      id = id[!is_na]
-      time = time[!is_na]
-    }
-
-    order_it = order(id, time)
-    order_inv = order(order_it)
-
-    new_info = list(order_it = order_it, order_inv = order_inv,
-                    id_sorted = id[order_it], time_sorted = time[order_it],
-                    na_flag = na_flag, panel.id = info$panel.id, call = info$call)
-
-    if(na_flag) new_info$is_na = is_na
-    attr(res, "panel_info") = new_info
+    attr(res, "panel_info") = panel_subset(info, select, res)
   }
 
   return(res)
@@ -1287,13 +1343,6 @@ set_panel_meta_info = function(object, newdata){
 
   panel__meta__info
 }
-
-
-
-
-
-
-
 
 
 

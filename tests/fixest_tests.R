@@ -649,6 +649,59 @@ for(depvar in c("y", "y_na", "y_0")){
 
 cat("done.\n\n")
 
+base_subset_panel = data.frame(
+  id = rep(1:4, each = 3),
+  id2 = rep(c("a", "b"), each = 6),
+  period = rep(1:3, 4),
+  x = c(3, 5, 7, 1, 4, 9, 2, 8, 6, 5, 3, 4),
+  y = c(5, 2, 9, 3, 6, 8, 4, 7, 1, 8, 5, 6)
+)
+base_subset_keep = base_subset_panel$period %in% c(1, 3)
+est_panel_presubset = feols(
+  y ~ l(x),
+  base_subset_panel[base_subset_keep, ],
+  panel.id = ~ id + period
+)
+
+for(panel_id in list(~ id + period, ~ id^id2 + period, ~ paste(id, id2) + period)){
+  test(
+    coef(feols(y ~ l(x), base_subset_panel,
+               subset = ~ period %in% c(1, 3), panel.id = panel_id)),
+    coef(feols(y ~ l(x), base_subset_panel[base_subset_keep, ],
+               panel.id = panel_id))
+  )
+}
+
+panel_subset_object = panel(base_subset_panel, ~ id + period)
+est_panel_object_subset = feols(
+  y ~ l(x),
+  panel_subset_object[panel_subset_object$period %in% c(1, 3), ]
+)
+test(coef(est_panel_object_subset), coef(est_panel_presubset))
+
+panel_subset_projected_gap = panel_subset_object[
+  panel_subset_object$period %in% c(1, 3),
+  c("y", "x")
+]
+test(coef(feols(y ~ l(x), panel_subset_projected_gap)), coef(est_panel_object_subset))
+
+panel_subset_projected = panel_subset_object[1:10, c("y", "x")]
+test(names(panel_subset_projected), c("y", "x"))
+test(
+  coef(feols(y ~ l(x), panel_subset_projected)),
+  coef(feols(y ~ l(x), panel_subset_object[1:10, ]))
+)
+
+panel_subset_empty = panel_subset_object[FALSE, ]
+test(nrow(panel_subset_empty), 0)
+test(inherits(panel_subset_empty, "fixest_panel"), TRUE)
+test(length(attr(panel_subset_empty, "panel_info")$id_sorted), 0)
+
+panel_subset_na = panel_subset_object[NA_integer_, ]
+test(nrow(panel_subset_na), 1)
+test(attr(panel_subset_na, "panel_info")$is_na, TRUE)
+test(length(attr(panel_subset_na, "panel_info")$id_sorted), 0)
+
 #
 # Data table
 #
@@ -3253,13 +3306,6 @@ est_mult = feols(y ~ x1 + x2, base, split = ~species)
 test(dim(fixest_data(est_mult)), dim(base))
 
 test(nrow(fixest_data(est_mult, "esti")), 45)
-
-
-
-
-
-
-
 
 
 

@@ -1125,6 +1125,9 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
 
         additional_vars = collect_vars(NL.fml, offset, weights, split, fsplit)
         complete_vars = c(complete_vars, additional_vars)
+        if(isPanel){
+          complete_vars = c(complete_vars, all.vars(panel__meta__info$panel.id))
+        }
 
         complete_vars = intersect(unique(complete_vars), names(data))
 
@@ -1133,6 +1136,15 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
 
       # We add subset to the obs selected
       obs_selection = list(subset = subset)
+
+      if(isPanel){
+        if(isFit){
+          panel__meta__info = panel_subset(panel__meta__info, subset)
+        } else {
+          panel__meta__info = panel_subset(panel__meta__info, subset, data,
+                                           from_fixest = TRUE)
+        }
+      }
 
     } else if(!is.null(mc_origin$subset)){
       dp = deparse_long(mc_origin$subset)
@@ -4882,4 +4894,3 @@ split_select = function(items, keep, drop){
 
   which(items %in% res)
 }
-
