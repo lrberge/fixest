@@ -297,7 +297,7 @@ lm(y ~ I(x + 1e7), df) |> coef()
 
 Contrary to `feols`, for a translation of 1,000,000 `lm` does not remove the variable and gives the right result. However, the behavior becomes similar to that of `feols` when we apply a translation of $10^7$. A notable difference between the two routines is that there is no explicit message from `lm` (but this is displayed in `lm`'s `summary`).
 
-**Bottom line.** Collinearity detection and fixing is a numerical problem and as such is subject to the ususal pitfall of these, in particular precision problems. Always be wary when variables are removed: if there is no theoretical reason for removal then there might be a data problem. In general, ensuring that the variables have a reasonable numerical range is a good idea. Do not hesitate to re-scale the variables with a large range.
+**Conclusion.** Always keep in mind that collinearity detection and fixing is a numerical problem: different algorithms can lead to different results.
 
 ## When automatic removal is good {#subsec_removal_good}
 

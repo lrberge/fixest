@@ -34,12 +34,11 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a></li>
+    <li><a class="dropdown-item" href="../articles/cheat-sheet.html">Cheat sheets</a></li>
     <li><a class="dropdown-item" href="../articles/multiple_estimations.html">Multiple estimations</a></li>
     <li><a class="dropdown-item" href="../articles/standard_errors.html">On Standard Errors</a></li>
     <li><a class="dropdown-item" href="../articles/exporting_tables.html">Exporting estimation tables</a></li>
     <li><a class="dropdown-item" href="../articles/collinearity.html">On collinearity</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -66,7 +65,7 @@
                         <h4 data-toc-skip class="author">Laurent
 Bergé</h4>
             
-            <h4 data-toc-skip class="date">2026-06-16</h4>
+            <h4 data-toc-skip class="date">2026-06-25</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/vignettes/collinearity.Rmd" class="external-link"><code>vignettes/collinearity.Rmd</code></a></small>
       <div class="d-none name"><code>collinearity.Rmd</code></div>
@@ -568,13 +567,9 @@ we apply a translation of
 A notable difference between the two routines is that there is no
 explicit message from <code>lm</code> (but this is displayed in
 <code>lm</code>’s <code>summary</code>).</p>
-<p><strong>Bottom line.</strong> Collinearity detection and fixing is a
-numerical problem and as such is subject to the ususal pitfall of these,
-in particular precision problems. Always be wary when variables are
-removed: if there is no theoretical reason for removal then there might
-be a data problem. In general, ensuring that the variables have a
-reasonable numerical range is a good idea. Do not hesitate to re-scale
-the variables with a large range.</p>
+<p><strong>Conclusion.</strong> Always keep in mind that collinearity
+detection and fixing is a numerical problem: different algorithms can
+lead to different results.</p>
 </div>
 <div class="section level3">
 <h3 id="subsec_removal_good">When automatic removal is good<a class="anchor" aria-label="anchor" href="#subsec_removal_good"></a>
