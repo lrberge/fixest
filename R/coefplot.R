@@ -639,7 +639,7 @@ coefplot = function(..., objects = NULL, style = NULL, se, ci_low, ci_high, df.t
     return(list(prms = prms, is_iplot = is_iplot, at = x_at, labels = x_labels))
   }
 
-  check_arg(plot_prms, "named list")
+  check_arg(plot_prms, "named list l0")
 
   ci_low = prms$ci_low
   ci_high = prms$ci_high
@@ -652,7 +652,7 @@ coefplot = function(..., objects = NULL, style = NULL, se, ci_low, ci_high, df.t
     prms$y = tmp
   }
 
-  check_arg(xlab, "NULL character vector")
+  check_arg(xlab, "NULL character vector l0")
   if(is.null(xlab) && is_iplot){
     xlab = "__i__"
   }
@@ -1186,7 +1186,7 @@ coefplot = function(..., objects = NULL, style = NULL, se, ci_low, ci_high, df.t
       }
     }
     
-    check_arg(zero.par, "logical scalar | named list")
+    check_arg(zero.par, "logical scalar | named list l0")
     if(!isFALSE(zero.par)){
       
       if(isTRUE(zero.par)){
@@ -1225,7 +1225,7 @@ coefplot = function(..., objects = NULL, style = NULL, se, ci_low, ci_high, df.t
 
     # Reference line
 
-    check_arg(ref.line, "logical scalar | numeric vector no na | charin(auto)")
+    check_arg(ref.line, "logical scalar | numeric vector no na len(1,) | charin(auto)")
 
     if(identical(ref.line, "auto")){
       ref.line = suggest_ref_line && length(unique(prms[prms$is_ref, "estimate_names_raw"])) == 1
@@ -2328,7 +2328,7 @@ coefplot_prms = function(all_models, vcov = NULL, se, ci_low, ci_high, x, x.shif
       } else {
         if(is.null(names(ref))){
           if(!is.character(ref) || length(ref) > 1){
-            check_arg(ref, "character scalar", .message = "Argument 'ref' must be either: a single character, either a list or a named integer vector of length 1 (The integer gives the position of the reference among the coefficients).")
+            check_arg(ref, "character scalar", .message = "Argument 'ref' must be either: a character scalar, a list or a named integer vector of length 1 (the integer gives the position of the reference among the coefficients).")
           } else {
             refname = ref
             ref = list()

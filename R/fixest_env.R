@@ -1944,7 +1944,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
     }
 
     # Checking the values of split.keep and split.drop
-    check_arg(split.keep, split.drop, "NULL character vector no na")
+    check_arg(split.keep, split.drop, "NULL character vector no na l0")
 
     if(delayed.subset){
       split = split[subset]
@@ -4814,8 +4814,8 @@ fixest_NA_results_IV = function(env_2nd_stage, res_first_stage, cause = NULL){
 
 split_select = function(items, keep, drop){
 
-  if(is.null(keep)){
-    if(is.null(drop)){
+  if(length(keep) == 0){
+    if(length(drop) == 0){
       return(seq_along(items))
     }
 
@@ -4849,7 +4849,7 @@ split_select = function(items, keep, drop){
     }
   }
 
-  if(!is.null(drop)){
+  if(length(drop) > 0){
     for(d in drop){
 
       if(d %in% res){

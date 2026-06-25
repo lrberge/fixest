@@ -194,7 +194,7 @@ bin = function(x, bin){
 
   bin = error_sender(eval_dot(bin), arg_name = "bin")
 
-  check_arg(bin, "list | vector mbt")
+  check_arg(bin, "list len(1,) | vector len(1,) mbt")
 
   varname = deparse(substitute(x))[1]
   bin_factor(bin, x, varname)
@@ -317,7 +317,7 @@ ref = function(x, ref){
   }
 
   ref = error_sender(eval_dot(ref), arg_name = "ref")
-  check_arg(ref, "list | vector mbt")
+  check_arg(ref, "list len(1,) | vector len(1,) mbt")
 
   varname = deparse(substitute(x))[1]
 
@@ -326,9 +326,9 @@ ref = function(x, ref){
     if(is.character(ref[1]) && grepl("^(cut|bin)", ref[1])){
       IS_SPECIAL = TRUE
       if(!is.numeric(x)){
-        stop(.dsb("To use the special binning `.[ref[1]]` the variable ",
-              "`.[varname]` must be numeric. Currently this is not the case ",
-              "(it is of class .[3KO, C?class(x)] instead)."))
+        stopi("To use the special binning `{bq ? ref[1]}` the variable ",
+              "{bq ? varname}` must be numeric. Currently this is not the case ",
+              "(it is of class {enum ? class(x)} instead).")
       }
     } else {
       ref = as.list(ref)
@@ -1487,7 +1487,7 @@ to_integer = function(..., inputs = NULL, sorted = FALSE, add_items = FALSE, ite
                       internal = FALSE){
 
   check_arg(sorted, add_items, items.list, na.valid, internal, "logical scalar")
-  check_arg(inputs, "NULL list")
+  check_arg(inputs, "NULL list len(1,)")
   if(!internal && is.null(inputs)){
     check_arg(..., "vector mbt")
   }

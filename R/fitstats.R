@@ -297,8 +297,8 @@ fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
 
   check_arg(type, "character scalar mbt")
   check_arg(fun, "function mbt")
-  check_arg(alias, "NULL character vector no na")
-  check_arg(subtypes, "NULL character vector no na")
+  check_arg(alias, "NULL character vector no na len(1,)")
+  check_arg(subtypes, "NULL character vector no na len(1,)")
 
   # We check the type is not conflicting
   existing_types = fitstat(give_types = TRUE)$types
@@ -1366,7 +1366,7 @@ wald = function(x, keep = NULL, drop = NULL, print = TRUE, vcov, se, cluster, ..
   #   * regex = restriction. No "=" => 0
 
   check_arg(x, "class(fixest)")
-  check_arg(keep, drop, "NULL character vector no na")
+  check_arg(keep, drop, "NULL character vector no na l0")
 
   if(isTRUE(x$onlyFixef)) return(NA)
 
@@ -1526,7 +1526,7 @@ r2 = function(x, type = "all", full_names = FALSE){
     stop("Only 'fixest' objects are supported.")
   }
 
-  check_arg(type, "character vector no na", 
+  check_arg(type, "character vector no na len(1,)", 
             .message = "Argument 'type' must be a character vector (e.g. type = c(\"cor2\", \"r2\", \"pr2\")). (a: adjused, p: pseudo, w: within.)")
 
   # type_allowed next => ("count", "acount") ?
@@ -1716,7 +1716,7 @@ degrees_freedom = function(x, type, vars = NULL, vcov = NULL, se = NULL, cluster
   check_arg(x, "class(fixest) mbt")
   check_set_arg(type, "match(k, resid, t)")
   check_arg(stage, "integer scalar GE{1} LE{2}")
-  check_arg(vars, "character vector no na")
+  check_arg(vars, "NULL character vector no na len(1,)")
 
   if(stage == 1 && isTRUE(x$is_iv) && x$iv_stage == 2){
     x = x$iv_first_stage[[1]]

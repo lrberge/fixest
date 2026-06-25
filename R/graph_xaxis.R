@@ -197,12 +197,12 @@ xaxis_labels = function(at, labels, line.min = 0, line.max = 2, minCex = 0.8,
 }
 
 # line: goes from 0 to 4 in a standard plot
-xaxis_biased = function(at, labels, angle, cex, line.min = 0, line.max = 2, 
+xaxis_biased = function(at, labels, angle = NULL, cex, line.min = 0, line.max = 2, 
                         yadj = 0.5, trunc = 20, trunc.method = "auto", 
                         only.params = FALSE, ylim = NULL, ...){
 
-  check_arg(angle, "null numeric vector no na")
-  check_arg(cex, "null numeric vector no na")
+  check_arg(angle, "null numeric vector no na l0")
+  check_arg(cex, "null numeric vector no na l0")
 
   if(line.max < line.min){
     message("xaxis_biased: line.max < line.min (i.e. ", line.max, " < ", line.min, ") line.max set to ", line.min, ".")
@@ -228,7 +228,7 @@ xaxis_biased = function(at, labels, angle, cex, line.min = 0, line.max = 2,
 
   # setting automatically the cex and angle
   DO_ALGO = FALSE
-  if(missnull(angle)){
+  if(length(angle) == 0){
     angle2check = c(45, 40, 35)
     DO_ALGO = TRUE
   } else {
@@ -236,7 +236,7 @@ xaxis_biased = function(at, labels, angle, cex, line.min = 0, line.max = 2,
     DO_ALGO = length(angle) > 1
   }
 
-  if(missnull(cex)){
+  if(length(cex) == 0){
     cex2check = c(1, 0.9, 0.8)
     DO_ALGO = TRUE
   } else {

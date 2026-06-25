@@ -174,11 +174,11 @@ sunab = function(cohort, period, ref.c = NULL, ref.p = -1, bin, bin.rel,
   # - add id or indiv argument, just to remove always treated
   # - add argument bin.p
 
-  check_arg(cohort, "mbt vector")
+  check_arg(cohort, "mbt vector len(1,)")
   check_arg(period, "mbt vector len(data)", .data = cohort)
-  check_arg(ref.c, "NULL vector no na")
+  check_arg(ref.c, "NULL vector no na l0")
   check_arg(att, no_agg, "logical scalar")
-  check_arg(bin, bin.c, bin.p, bin.rel, "NULL list | vector")
+  check_arg(bin, bin.c, bin.p, bin.rel, "NULL list len(1,) | vector len(1,)")
 
   cohort_name = deparse_long(substitute(cohort))
   period_name = deparse_long(substitute(period))

@@ -1644,7 +1644,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
   # Full control
   #
 
-  check_arg(caption, "NULL character vector no na ")
+  check_arg(caption, "NULL character vector no na l0")
   if(length(caption) > 1){
     caption = paste0(caption, collapse = "")
   }
@@ -1729,7 +1729,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
     order = c(order, paste0("%", order_raw))
   }
   
-  check_arg(coef.sub, "character vector no na NULL")
+  check_arg(coef.sub, "character vector no na l0 NULL")
 
   check_arg(file, label, interaction.combine, i.equal, "NULL character scalar")
 
@@ -1772,10 +1772,10 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
   highlight = error_sender(eval_dot(highlight, .up + 1), arg_name = "highlight", up = .up)
   coef.style = error_sender(eval_dot(coef.style, .up + 1), arg_name = "coef.style", up = .up)
 
-  check_arg(headers, "NULL character vector no na | NA | list")
+  check_arg(headers, "NULL character vector no na l0 | NA | list l0")
   if(is.null(headers)) headers = list()
 
-  check_arg(highlight, "NULL character vector no na | list")
+  check_arg(highlight, "NULL character vector no na l0 | list l0")
   if(is.character(highlight)){
     # We always want HL to be a list!
     # hl = "Petal.L>1-2"
@@ -1789,19 +1789,19 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
     }
   }
 
-  check_arg(coef.style, "NULL named list")
+  check_arg(coef.style, "NULL named list l0")
   if(is.null(coef.style)){
     coef.style = list()
   }
 
 
-  check_arg(poly_dict, "character vector no na")
+  check_arg(poly_dict, "character vector no na l0")
 
   check_arg(powerBelow, "integer scalar LE{-1}")
 
   check_arg(ci, "numeric scalar GT{0.5} LT{1}")
 
-  check_arg(dict, "NULL logical scalar | named character vector no na")
+  check_arg(dict, "NULL logical scalar | named character vector no na l0")
 
   check_arg(placement, "character scalar")
   if(isTex){
@@ -1819,8 +1819,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
     group = list()
   }
   
-  check_arg(extralines, "NULL list l0 | os formula | vector")
-  if(is.null(extralines)){
+  check_arg(extralines, "NULL list l0 | os formula | vector l0")
+  if(is.null(extralines) || length(extralines) == 0){
     extralines = list()
   }
   # we check it more in depth later
@@ -1898,8 +1898,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
 
     check_set_arg(meta.time, "NULL match(date, time) | logical scalar")
     check_arg(meta.call, meta.sys, "NULL logical scalar")
-    check_arg(meta.author, "NULL logical scalar | character vector no na")
-    check_arg(meta.comment, "NULL character vector no na")
+    check_arg(meta.author, "NULL logical scalar | character vector no na l0")
+    check_arg(meta.comment, "NULL character vector no na l0")
 
     for(meta_value in meta_order){
 
@@ -2550,7 +2550,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
     fitstat_all = unique(fitstat_all)
 
   } else {
-    check_arg(fitstat_all, "character vector no na", 
+    check_arg(fitstat_all, "character vector no na l0", 
               .message = "Argument 'fitstat' must be a one sided formula (or a character vector) containing valid types from the function fitstat (see details in ?fitstat).")
 
   }
@@ -4899,18 +4899,18 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat,
             se.below, fixef_sizes, fixef_sizes.simplify,
             float, family, depvar, reset, view)
 
-  check_arg(keep, drop, order, "character vector no na NULL",
+  check_arg(keep, drop, order, "NULL character vector no na l0",
             .message = "The arg. '__ARG__' must be a vector of regular expressions (see help(regex)).")
   
   check_set_arg(signif.code, "NULL NA | match(letters) | named numeric vector no na GE{0} LE{1}")
 
   check_arg(interaction.order, "NULL character scalar")
 
-  check_arg(notes, "character vector no na")
+  check_arg(notes, "character vector no na l0")
 
   check_arg(powerBelow, "integer scalar LE{-1}")
 
-  check_arg(dict, "NULL logical scalar | named character vector no na")
+  check_arg(dict, "NULL logical scalar | named character vector no na l0")
 
   check_set_arg(group, extralines, "NULL{list()} named list l0")
 
@@ -4938,8 +4938,8 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat,
   # meta
   check_set_arg(meta.time, "NULL match(date, time) | logical scalar")
   check_arg(meta.call, meta.sys, "NULL logical scalar")
-  check_arg(meta.author, "NULL logical scalar | character vector no na")
-  check_arg(meta.comment, "NULL character vector no na")
+  check_arg(meta.author, "NULL logical scalar | character vector no na l0")
+  check_arg(meta.comment, "NULL character vector no na l0")
 
   check_arg(view, view.cache, "logical scalar")
   check_arg(markdown, "NULL scalar(logical, character)")
@@ -5207,7 +5207,7 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
     }
   }
 
-  check_arg(tablefoot.value, "character vector no na")
+  check_arg(tablefoot.value, "character vector no na l0")
   check_arg(tablefoot, tpt, no_border, "logical scalar")
   check_set_arg(fixef.where, "match(var, stats)")
   check_set_arg(tabular, "match(normal, *, X)")

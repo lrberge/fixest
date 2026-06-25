@@ -9,6 +9,8 @@
 
 - fix bug in estimations with multiple RHSs where the part containing the variables common to all estimations is made of only variables equal to 0
 
+- ensure the code is compatible with dreamerr v1.4.0 (could lead to rare but undecipherable bugs). Reported by @MichaelChirico, #668.
+
 ## Vignettes
 
 - consolidate the two `etable` vignettes (`exporting_tables` and `etable_new_features`) into a single document. By GMD, #648.
