@@ -1574,11 +1574,11 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
 
   # Setting the default values (we take extra care for "style")
   if(tex){
-    check_arg(style.tex, "NULL class(fixest_style_tex)")
+    check_class(style.tex, "fixest_style_tex", null = TRUE)
     # The variable style will be changed via the defaults
     style_user = style.tex
   } else {
-    check_arg(style.df, "NULL class(fixest_style_df)")
+    check_class(style.df, "fixest_style_df", null = TRUE)
     # The variable style will be changed via the defaults
     style_user = style.df
   }
@@ -4926,7 +4926,7 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat,
 
   check_set_arg(drop.section, "NULL multi match(coef, fixef, slopes, stats)")
 
-  check_arg(style.tex, "NULL class(fixest_style_tex)")
+  check_class(style.tex, "fixest_style_tex", null = TRUE)
 
   check_arg(postprocess.tex, postprocess.df, "NULL function arg(1,)")
 
@@ -4985,7 +4985,7 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat,
 
   }
 
-  check_arg(style.df, "NULL class(fixest_style_df)")
+  check_class(style.df, "fixest_style_df", null = TRUE)
   if(length(style.df) > 0){
     # We ensure we always have ALL components provided
     if(length(opts$style.df) == 0){

@@ -2975,8 +2975,7 @@ setFixest_ssc = function(ssc_type = NULL, vcov_names = "iid"){
   
   check_arg(vcov_names, "character vector no na len(1,)")
   
-  check_arg(ssc_type, "NULL class(ssc_type, setFixest_ssc)", 
-            .message = "The argument 'ssc' must be an object created by the function ssc() or old options (obtained from setFixest_ssc()).")
+  check_class(ssc_type, c("ssc_type", "setFixest_ssc"), null = TRUE)
   
   # the old values
   old_opts = getOption("fixest_ssc", list())

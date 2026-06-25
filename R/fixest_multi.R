@@ -317,7 +317,7 @@ rep_df = function(x, times = 1, each = 1, ...){
 #'
 #'
 models = function(x, simplify = FALSE){
-  check_arg(x, "class(fixest_multi)")
+  check_class(x, "fixest_multi")
 
   res = attr(x, "tree")
   if(simplify){
@@ -379,7 +379,9 @@ models = function(x, simplify = FALSE){
 n_models = function(x, lhs = FALSE, rhs = FALSE, sample = FALSE, 
                     fixef = FALSE, iv = FALSE){
   
-  check_arg(x, "class(fixest_multi) mbt")
+  # below: just for the mbt
+  check_arg(x, "list l0 mbt", .message = "Argument `x` must be an object of class `fixest_multi`.")
+  check_class(x, "fixest_multi")
   check_arg("logical scalar", lhs, rhs, sample, fixef, iv)
   
   request = c(lhs = lhs, rhs = rhs, sample = sample, fixef = fixef, iv = iv)

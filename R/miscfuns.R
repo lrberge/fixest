@@ -6553,6 +6553,29 @@ check_set_digits = function(digits, up = 1){
   list(digits = digits, round = round)
 }
 
+check_class = function(x, all_classes, null = FALSE, up = 0){
+  # I create this function to overcome a compatibility problem with dreamerr v1.4.0
+  # sigh
+  # in v1.5.0 you can do
+  # check_arg(x, "NULL class(c1, c2)")
+  # => in v1.4.0 it does not work when x is an empty list
+  
+  up = up + 1
+  
+  if(null && is.null(x)){
+    return()
+  }
+  
+  if(inherits(x, all_classes)){
+    return()
+  }
+  
+  arg_name = deparse(substitute(x))
+  stop_up("The argument {arg_name} must be NULL or an object of class {enum ? all_classes}.\n",
+          "PROBLEM: it is of class {enum ? class(x)}.")
+  
+}
+
 get_vars = function(x){
   attr(terms(x), "term.labels")
 }
