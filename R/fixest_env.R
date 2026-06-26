@@ -3695,7 +3695,7 @@ assign_fixef_env = function(env, family, origin_type, fixef_id, fixef_sizes,
 }
 
 
-#' - rm_0s: whether to remove the variables that are only equal to 0
+# - rm_0s: whether to remove the variables that are only equal to 0
 reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs = TRUE,
                        assign_rhs = TRUE, fml_linear = NULL, fml_fixef = NULL, fml_iv_endo = NULL,
                        check_lhs = FALSE, assign_fixef = FALSE, rm_0s = FALSE){
