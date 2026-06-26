@@ -358,8 +358,8 @@ if (can_markdown) setFixest_etable(markdown = FALSE)
 
 The primary output targets for `etable` are regular R data frames and LaTeX. This still leaves a variety of other formats off the table, including `.html`, `.docx` and `.typ`. While we don't offer "native" support for these formats---and users may consider [alternative software](#other-tabling-software) if that suits their workflow---we do at least provide a workaround that covers most other cases. Specifically, we can **export `etable` objects as PNGs**, which then allows for easy inclusion in HTML, MS Word documents, etc. We explain how this works below, but please note that it requires the following software to be installed first:
 
- - `pdflatex` (shipped in most LaTeX distributions) **or** the R package [`tinytex`](https://cran.r-project.org/package=tinytex),
- - [imagemagick](https://www.imagemagick.org/) and [ghostscript](https://www.ghostscript.com/), **or** the R package [`pdftools`](https://cran.r-project.org/web/packages/pdftools/index.html).
+ - `pdflatex` (shipped in most LaTeX distributions) **or** the R package [`tinytex`](https://CRAN.R-project.org/package=tinytex),
+ - [imagemagick](https://imagemagick.org/) and [ghostscript](https://www.ghostscript.com/), **or** the R package [`pdftools`](https://CRAN.R-project.org/package=pdftools/index.html).
 
 ### Exporting tables as PNGs
 

@@ -5,6 +5,7 @@
 ^docs$
 ^vignettes/images$
 ^vignettes/etable_new_features.Rmd
+^vignettes/cheat-sheet.Rmd
 ^vignettes/.+html$
 ^inst/NEWS\.Rd$
 ^ONGOING_ISSUES\.md$

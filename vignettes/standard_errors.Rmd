@@ -154,7 +154,12 @@ This can be used with `vcov = "HC1"` or `vcov = "hetero"`.
 However, HC1 performs poorly for small samples.
 HC2 and HC3 work well in small samples, but can be quite costly to compute with large samples. 
 These can be used with `vcov = "HC2"` and `vcov = "HC3"`.
-See [James MacKinnon's review article](https://www.econ.queensu.ca/sites/econ.queensu.ca/files/qed_wp_1268.pdf) for a more detailed discussion.
+See James MacKinnon's review article for a more detailed discussion (MacKinnon, 2011, "Thirty Years of Heteroskedasticity-Robust Inference", QED Working Paper No. 1268).
+
+<!-- 
+pdf at: https://www.econ.queensu.ca/sites/econ.queensu.ca/files/qed_wp_1268.pdf
+The URL is valid, but cran rejected bc no response.... so alas for readers, no link
+ -->
 
 #### Cluster-robust standard errors
 

@@ -32,7 +32,7 @@ If you are new to `fixest`, you may be interested in the `fixest` article (https
 
 If you are coming from Stata, the stata2R website is highly relevant: https://stata2r.github.io/fixest/.
 
-For more details, there are four dedicated guides: to the [standard-errors](https://cran.r-project.org/web/packages/fixest/vignettes/standard_errors.html), to [collinearity](https://cran.r-project.org/web/packages/fixest/vignettes/collinearity.html), to [multiple estimations](https://cran.r-project.org/web/packages/fixest/vignettes/multiple_estimations.html), to the [exportation of tables](https://cran.r-project.org/web/packages/fixest/vignettes/exporting_tables.html). Quickly find how to specify the formula/VCOV with this [cheat sheet](https://lrberge.github.io/fixest/articles/cheat-sheet.html).
+For more details, there are four dedicated guides: to the [standard-errors](https://CRAN.R-project.org/package=fixest/vignettes/standard_errors.html), to [collinearity](https://CRAN.R-project.org/package=fixest/vignettes/collinearity.html), to [multiple estimations](https://CRAN.R-project.org/package=fixest/vignettes/multiple_estimations.html), to the [exportation of tables](https://CRAN.R-project.org/package=fixest/vignettes/exporting_tables.html). Quickly find how to specify the formula/VCOV with this [cheat sheet](https://lrberge.github.io/fixest/articles/cheat-sheet.html).
 
 ## Installation
 
