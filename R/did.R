@@ -100,6 +100,21 @@
 #'
 #' Binning can be done in many different ways: just remember that it is not because it is 
 #' possible that it does makes sense!
+#' 
+#' @section Estimation of staggered difference-in-difference models:
+#' 
+#' Consider the following example of staggered difference-in-difference. 
+#' You have a panel of persons, or more generically: 'units', who receive a treatment at different
+#' periods and you are interested in finding out the effect of the treatment on an outcome. 
+#' Further, you also want the effet to be net of individual differences and time differences.
+#' 
+#' To estimate this model, you would need to use the `sunab()` function with unit 
+#' and period fixed-effects. 
+#' For example, with `y` the outcome, `id` the unit identifier, 
+#' `year` the period, and `year_treated` the year the treatment is received, 
+#' the `fixest` formula looks like: 
+#' 
+#' `y ~ sunab(year_treated, year) | id + period`
 #'
 #' @author
 #' Laurent Berge
@@ -119,14 +134,14 @@
 #' table(base_stagg$time_to_treatment)
 #'
 #' # The DiD estimation
-#' res_sunab = feols(y ~ x1 + sunab(year_treated, year) | id + year, base_stagg)
+#' res_sunab = feols(y ~ sunab(year_treated, year) | id + year, base_stagg)
 #' etable(res_sunab)
 #'
 #' # By default the reference periods are the first year and the year before the treatment
 #' # i.e. ref.p = c(-1, .F); where .F is a shortcut for the first period.
 #' # Say you want to set as references the first three periods on top of -1
 #'
-#' res_sunab_3ref = feols(y ~ x1 + sunab(year_treated, year, ref.p = c(.F + 0:2, -1)) |
+#' res_sunab_3ref = feols(y ~ sunab(year_treated, year, ref.p = c(.F + 0:2, -1)) |
 #'                          id + year, base_stagg)
 #'
 #' # Display the two results
@@ -154,16 +169,16 @@
 #' # Binning can be done in many different ways
 #'
 #' # binning the cohort
-#' est_bin.c   = feols(y ~ x1 + sunab(year_treated, year, bin.c = 3:2) | id + year, base_stagg)
+#' est_bin.c   = feols(y ~ sunab(year_treated, year, bin.c = 3:2) | id + year, base_stagg)
 #'
 #' # binning the period
-#' est_bin.p   = feols(y ~ x1 + sunab(year_treated, year, bin.p = 3:1) | id + year, base_stagg)
+#' est_bin.p   = feols(y ~ sunab(year_treated, year, bin.p = 3:1) | id + year, base_stagg)
 #'
 #' # binning both the cohort and the period
-#' est_bin     = feols(y ~ x1 + sunab(year_treated, year, bin = 3:1) | id + year, base_stagg)
+#' est_bin     = feols(y ~ sunab(year_treated, year, bin = 3:1) | id + year, base_stagg)
 #'
 #' # binning the relative period, grouping every two years
-#' est_bin.rel = feols(y ~ x1 + sunab(year_treated, year, bin.rel = "bin::2") | id + year, base_stagg)
+#' est_bin.rel = feols(y ~ sunab(year_treated, year, bin.rel = "bin::2") | id + year, base_stagg)
 #'
 #' etable(est_bin.c, est_bin.p, est_bin, est_bin.rel, keep = "year")
 #'
