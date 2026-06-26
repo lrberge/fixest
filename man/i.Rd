@@ -4,7 +4,17 @@
 \alias{i}
 \title{Create, or interact variables with, factors}
 \usage{
-i(factor_var, var, ref, keep, bin, ref2, keep2, bin2, ...)
+i(
+  factor_var,
+  var,
+  ref = NULL,
+  keep = NULL,
+  bin = NULL,
+  ref2 = NULL,
+  keep2 = NULL,
+  bin2 = NULL,
+  ...
+)
 }
 \arguments{
 \item{factor_var}{A vector (of any type) that will be treated as a factor.

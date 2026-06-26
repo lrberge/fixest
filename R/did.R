@@ -433,8 +433,8 @@ sunab_att = function(cohort, period, ref.c = NULL, ref.p = -1){
 #' @param full Logical scalar, defaults to `FALSE`. If `TRUE`, then all coefficients 
 #' are returned, not only the aggregated coefficients.
 #' @param use_weights Logical, default is `TRUE`. If the estimation was weighted, 
-#' whether the aggregation should take into account the weights. Basically if the 
-#' weights reflected frequency it should be `TRUE`.
+#' whether the aggregation should take into account the weights. Basically it should 
+#' always be true unless you have a good reason to ignore the weights during aggregation.
 #' @param ... Arguments to be passed to [`summary.fixest`].
 #'
 #' @details
