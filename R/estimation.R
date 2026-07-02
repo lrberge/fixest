@@ -1349,32 +1349,33 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
         res_first_stage[[iv_lhs_names[i]]] = my_res
         
         # Checking errors
-        error_endo_no_variation = my_res$ssr < 1e-10
-        error_inst_no_expl = abs(my_res$ssr - my_res$ssr_no_inst) < 1e-10
+        # NaN ssr arises from demeaning non-convergence; isTRUE guards against NA in the if()
+        error_endo_no_variation = isTRUE(my_res$ssr < 1e-10)
+        error_inst_no_expl = isTRUE(abs(my_res$ssr - my_res$ssr_no_inst) < 1e-10)
         if(error_endo_no_variation || error_inst_no_expl){
           # we keep the information on this first stage => useful for reporting
-          
+
           if(error_endo_no_variation){
             msg = sma("[IV error] The endogenous variable {bq ? iv_lhs_names[i]} is ",
                       "fully explained by the exogenous variables and the instruments. ",
                       "Please revise the model.")
-            
+
           } else if(error_inst_no_expl){
-            msg = sma("[IV error] The instruments have 0 explanatory power ", 
+            msg = sma("[IV error] The instruments have 0 explanatory power ",
                       "for the endogenous variable {bq ? iv_lhs_names[i]}. ",
                       "Please revise the model.")
           }
-          
-          
+
+
           if(IN_MULTI){
             stack_multi_notes(msg)
             return(fixest_NA_results_IV(env, res_first_stage, msg))
-            
+
           } else {
             mema("[IV error] Problematic 1st stage results:")
             my_res$is_iv = FALSE
             print(my_res)
-            
+
             stopi("{msg}\nFor information, above are reported the results of the 1st stage estimation.")
           }
           
@@ -1513,33 +1514,34 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
         res_first_stage[[iv_lhs_names[i]]] = my_res
         
         # Checking errors
-        error_endo_no_variation = my_res$ssr < 1e-10
-        error_inst_no_expl = abs(my_res$ssr - my_res$ssr_no_inst) < 1e-10
+        # NaN ssr arises from demeaning non-convergence; isTRUE guards against NA in the if()
+        error_endo_no_variation = isTRUE(my_res$ssr < 1e-10)
+        error_inst_no_expl = isTRUE(abs(my_res$ssr - my_res$ssr_no_inst) < 1e-10)
         if(error_endo_no_variation || error_inst_no_expl){
           # we keep the information on this first stage => useful for reporting
-          
+
           if(error_endo_no_variation){
             msg = sma("[IV error] The endogenous variable {bq ? iv_lhs_names[i]} is ",
                       "fully explained by the exogenous variables and the instruments. ",
                       "Please revise the model.")
-            
+
           } else if(error_inst_no_expl){
-            msg = sma("[IV error] The instruments have 0 explanatory power ", 
+            msg = sma("[IV error] The instruments have 0 explanatory power ",
                       "for the endogenous variable {bq ? iv_lhs_names[i]}. ",
                       "Please revise the model.")
           }
-          
-          
+
+
           if(IN_MULTI){
             stack_multi_notes(msg)
             return(fixest_NA_results_IV(env, res_first_stage, msg))
-            
+
           } else {
-            
+
             mema("[IV error] Problematic 1st stage results:")
             my_res$is_iv = FALSE
             print(my_res)
-            
+
             stopi("{msg}\nFor information, above are reported the results of the 1st stage estimation.")
           }
           
