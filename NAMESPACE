@@ -18,6 +18,7 @@ export(r2, fitstat, fitstat_register, wald)
 export(fixest_startup_msg)
 export(check_conv_feols)
 export(demeaning_algo)
+export(MapDemeaner, LsmrDemeaner)
 # did
 export(did_means)
 # graph
@@ -74,6 +75,8 @@ export(esttex, esttable)
 
 # Base methods
 S3method(print, fixest)
+S3method(print, fixest_demeaner_map)
+S3method(print, fixest_demeaner_lsmr)
 S3method(print, fixest_fitstat)
 S3method(print, vec_n_unik)
 S3method(print, list_n_unik)
@@ -193,6 +196,5 @@ importFrom(methods, formalArgs)
 
 # Auto-exports::vcov_aliases
 export(NW, newey_west, DK, driscoll_kraay, conley)
-
 
 

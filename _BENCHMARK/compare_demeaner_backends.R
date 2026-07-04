@@ -77,13 +77,13 @@ elapsed_seconds = function(expr){
 }
 
 run_pair = function(label, fml, data, weights = NULL){
-  args = list(fml = fml, data = data, demeaner = "MAP")
+  args = list(fml = fml, data = data, demeaner = MapDemeaner())
   if(!is.null(weights)){
     args$weights = weights
   }
   map_run = elapsed_seconds(do.call(feols, args))
 
-  args$demeaner = "within"
+  args$demeaner = LsmrDemeaner(preconditioner = "additive")
   within_run = elapsed_seconds(do.call(feols, args))
 
   cat("\n==============================\n")
@@ -103,8 +103,9 @@ run_pair = function(label, fml, data, weights = NULL){
 main = function(){
   cfg = parse_args(commandArgs(trailingOnly = TRUE))
 
-  if(!requireNamespace("withinr", quietly = TRUE)){
-    stop("Package 'withinr' is required. Install it first.")
+  if(!requireNamespace("withinr", quietly = TRUE) ||
+     !exists("LsmrOptions", envir = asNamespace("withinr"), inherits = FALSE)){
+    stop("A current 'withinr' with LsmrOptions() is required. Install it first.")
   }
 
   load_fixest()

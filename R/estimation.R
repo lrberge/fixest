@@ -55,8 +55,9 @@
 #' over 50, it may be worth playing around with it. Please read the documentation of the 
 #' function [`demeaning_algo`]. Be aware that there is no clear guidance on how to change the 
 #' settings, it's more a matter of try-and-see.
-#' @param demeaner Character scalar, either `"MAP"` (default) or `"within"`. The default uses
-#' fixest's internal demeaning algorithm. `"within"` uses `withinr::solve_batch`.
+#' @param demeaner `NULL` (default) or a demeaning backend object created by
+#' [`MapDemeaner`] or [`LsmrDemeaner`]. If `NULL`, the native MAP backend is
+#' used with `fixef.tol`, `fixef.iter`, and `fixef.algo`.
 #'
 #' @details
 #' The method used to demean each variable along the fixed-effects is based on Berge (2018), since 
@@ -510,7 +511,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
                  ssc, panel.id, panel.time.step = NULL, 
                  panel.duplicate.method = "none", 
                  fixef, fixef.rm = "perfect_fit", fixef.tol = 1e-6,
-                 fixef.iter = 10000, fixef.algo = NULL, demeaner = "MAP",
+                 fixef.iter = 10000, fixef.algo = NULL, demeaner = NULL,
                  collin.tol = 1e-9, nthreads = getFixest_nthreads(),
                  lean = FALSE, verbose = 0, warn = TRUE, notes = getFixest_notes(),
                  only.coef = FALSE, data.save = FALSE,
@@ -2330,7 +2331,7 @@ check_conv = function(y, X, fixef_id_list, slope_flag, slope_vars, weights,
 feols.fit = function(y, X, fixef_df, vcov, offset, split, fsplit, split.keep, split.drop,
                      cluster, se, ssc, weights,
                      subset, fixef.rm = "perfect_fit", fixef.tol = 1e-6, fixef.iter = 10000,
-                     fixef.algo = NULL, demeaner = "MAP", collin.tol = 1e-9,
+                     fixef.algo = NULL, demeaner = NULL, collin.tol = 1e-9,
                      nthreads = getFixest_nthreads(), lean = FALSE,
                      warn = TRUE, notes = getFixest_notes(), mem.clean = FALSE, verbose = 0,
                      only.env = FALSE, only.coef = FALSE, env, ...){
@@ -2565,7 +2566,7 @@ feglm = function(fml, data, family = "gaussian", vcov, offset, weights, subset, 
                  panel.time.step = NULL, panel.duplicate.method = "none",
                  start = NULL,
                  etastart = NULL, mustart = NULL, fixef, fixef.rm = "perfect_fit",
-                 fixef.tol = 1e-6, fixef.iter = 10000, fixef.algo = NULL, demeaner = "MAP",
+                 fixef.tol = 1e-6, fixef.iter = 10000, fixef.algo = NULL,
                  collin.tol = 1e-9,
                  glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(),
                  lean = FALSE, warn = TRUE, notes = getFixest_notes(), verbose = 0,
@@ -2591,7 +2592,7 @@ feglm = function(fml, data, family = "gaussian", vcov, offset, weights, subset, 
                          linear.start = start,
                          etastart = etastart, mustart = mustart, fixef = fixef,
                          fixef.rm = fixef.rm, fixef.tol = fixef.tol,
-                         fixef.iter = fixef.iter, fixef.algo = fixef.algo, demeaner = demeaner,
+                         fixef.iter = fixef.iter, fixef.algo = fixef.algo,
                          collin.tol = collin.tol,
                          glm.iter = glm.iter, glm.tol = glm.tol,
                          nthreads = nthreads, lean = lean, warn = warn, notes = notes,
@@ -2632,7 +2633,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
                      fsplit, split.keep, split.drop, cluster, se, ssc, 
                      weights, subset, start = NULL,
                      etastart = NULL, mustart = NULL, fixef.rm = "perfect_fit",
-                     fixef.tol = 1e-6, fixef.iter = 10000, fixef.algo = NULL, demeaner = "MAP",
+                     fixef.tol = 1e-6, fixef.iter = 10000, fixef.algo = NULL,
                      collin.tol = 1e-9,
                      glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(),
                      lean = FALSE, warn = TRUE, notes = getFixest_notes(), mem.clean = FALSE,
@@ -2665,7 +2666,6 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
     if(missing(fixef.tol)) fixef.tol = get("fixef.tol", env)
     if(missing(fixef.iter)) fixef.iter = get("fixef.iter", env)
     if(missing(fixef.algo)) fixef.algo = get("fixef.algo", env)
-    if(missing(demeaner)) demeaner = get("demeaner", env)
     if(missing(collin.tol)) collin.tol = get("collin.tol", env)
     if(missing(glm.iter)) glm.iter = get("glm.iter", env)
     if(missing(glm.tol)) glm.tol = get("glm.tol", env)
@@ -2706,7 +2706,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
                          se = se, ssc = ssc, linear.start = start,
                          etastart = etastart, mustart = mustart, fixef.rm = fixef.rm,
                          fixef.tol = fixef.tol, fixef.iter = fixef.iter,
-                         fixef.algo = fixef.algo, demeaner = demeaner,
+                         fixef.algo = fixef.algo,
                          collin.tol = collin.tol, glm.iter = glm.iter,
                          glm.tol = glm.tol, notes = notes, mem.clean = mem.clean,
                          only.coef = only.coef,
@@ -3701,7 +3701,7 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
                   cluster, se, ssc, panel.id, panel.time.step = NULL, 
                   panel.duplicate.method = "none", start = NULL, etastart = NULL,
                   mustart = NULL, fixef, fixef.rm = "perfect_fit", fixef.tol = 1e-6,
-                  fixef.iter = 10000, fixef.algo = NULL, demeaner = "MAP",
+                  fixef.iter = 10000, fixef.algo = NULL,
                   collin.tol = 1e-9, glm.iter = 25, glm.tol = 1e-8,
                   nthreads = getFixest_nthreads(), lean = FALSE, 
                   warn = TRUE, notes = getFixest_notes(),
@@ -3725,7 +3725,7 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
                   panel.duplicate.method = panel.duplicate.method,
                   start = start, etastart = etastart, mustart = mustart, fixef = fixef,
                   fixef.rm = fixef.rm, fixef.tol = fixef.tol, fixef.iter = fixef.iter,
-                  fixef.algo = fixef.algo, demeaner = demeaner,
+                  fixef.algo = fixef.algo,
                   collin.tol = collin.tol, glm.iter = glm.iter, glm.tol = glm.tol,
                   nthreads = nthreads, lean = lean, warn = warn, notes = notes,
                   verbose = verbose, fixef.keep_names = fixef.keep_names, mem.clean = mem.clean,
@@ -5326,7 +5326,6 @@ multi_fixef = function(env, estfun){
   return(res_multi)
 
 }
-
 
 
 
