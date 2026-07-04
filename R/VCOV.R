@@ -938,7 +938,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
     attr(vcov_mat, "ssc") = ssc
     attr(vcov_mat, "df.K") = K
     
-    class(vcov_mat) = "fixest_vcov"
+    class(vcov_mat) = c("fixest_vcov", "matrix", "array")
   } else {
     # We clean the attributes
     all_attr = names(attributes(vcov_mat))
@@ -2975,8 +2975,7 @@ setFixest_ssc = function(ssc_type = NULL, vcov_names = "iid"){
   
   check_arg(vcov_names, "character vector no na len(1,)")
   
-  check_arg(ssc_type, "NULL class(ssc_type, setFixest_ssc)", 
-            .message = "The argument 'ssc' must be an object created by the function ssc() or old options (obtained from setFixest_ssc()).")
+  check_class(ssc_type, c("ssc_type", "setFixest_ssc"), null = TRUE)
   
   # the old values
   old_opts = getOption("fixest_ssc", list())
@@ -3049,7 +3048,7 @@ setFixest_ssc = function(ssc_type = NULL, vcov_names = "iid"){
 #' getFixest_ssc("iid")
 #' 
 #' # in a fresh session, the default for Newey West VCOVs is different:
-#' getFixest_ssc("NW")
+#'getFixest_ssc("NW")
 #' 
 getFixest_ssc = function(vcov_name = NULL){
   

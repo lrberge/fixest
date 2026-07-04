@@ -293,6 +293,23 @@ test(feols(y ~ 1 | endog ~ inst, df_poor_inst), "err")
 # we just check no error:
 feols(y ~ sw0(exo) | endog ~ inst, df_poor_inst)
 
+#
+# Only 0s
+
+df = mtcars
+df$mpg = 0
+df$disp[1:5] = NA
+df$hp[1:5] = NA
+# here we have NAs only in the SW part, which means that select_obs will be later activated 
+no_error = feols(cyl ~ mpg + sw0(disp), df)
+no_error = feols(cyl ~ sw0(disp) + mpg, df)
+
+# NAs at the beginning
+no_error = feols(cyl ~ hp + sw0(disp) + mpg, df)
+
+# only 0s in the SW part
+no_error = feols(cyl ~ disp + sw0(mpg), df)
+
 
 ####
 #### ... depvar removal ####
@@ -1230,6 +1247,10 @@ test(any(grepl("HC3", est_tab$est_multi_HC3.2)), TRUE)
 est_multi_.vcov <- summary(est_multi, .vcov = vcovs_HC3)
 test(est_multi_.vcov[[1]]$se, est_multi_HC3[[1]]$se)
 
+# we check matrix operations work on vcovs => we only check for no error
+V = vcov(est)
+det(V)
+V %*% 1:3
 
 
 ####

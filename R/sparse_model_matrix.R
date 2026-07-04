@@ -81,8 +81,6 @@ sparse_model_matrix = function(object, data, type = "rhs", sample = "estimation"
     stop("The type", enumerate_items(grep("^iv", type, value = TRUE), "s.is"), " only valid for IV estimations.")
   }
 
-  check_arg(subset, "logical scalar | character vector no na")
-
   if (missing(collin.rm)) {
     collin.rm = if (inherits(object, "formula")) FALSE else TRUE
   } else {

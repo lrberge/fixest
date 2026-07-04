@@ -1,4 +1,28 @@
 
+# fixest 0.14.2
+
+## Bug fixes
+
+- fix bug in vcov(): following v0.14.0, the returned object was a matrix of class `fixest_vcov` -- which led to problem for matrix operations as it didn't inherit the matrix class. Now fixed, thanks to @strengejacke, #652.
+
+- fix bug in `xpd`: variable completion with `..` suffix now works when after an underscore (e.g. `xpd(~var_.., data = data.frame(var_1=1, var_2=2))`)
+
+- fix bug in estimations with multiple RHSs where the part containing the variables common to all estimations is made of only variables equal to 0
+
+- ensure the code is compatible with dreamerr v1.4.0 (could lead to rare but undecipherable bugs). Reported by @MichaelChirico, #668.
+
+## Vignettes
+
+- consolidate the two `etable` vignettes (`exporting_tables` and `etable_new_features`) into a single document. By GMD, #648.
+
+- add theory to the VCOV vignette, plus many other changes. By Kyle Butts.
+
+- new cheat sheet vignette containing quick reference tables
+
+## Other
+
+- new README.md, with more recent benchmarks
+
 # fixest 0.14.1
 
 ## Bug fixes

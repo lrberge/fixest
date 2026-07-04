@@ -18,8 +18,8 @@ setup_multi = function(data, values, var = NULL, tree = NULL){
   # We also add the $model_info variable in each model
 
   # To remove after development
-  check_arg(data, "list")
-  check_arg(values, "named list")
+  check_arg(data, "list len(1,)")
+  check_arg(values, "named list len(1,)")
   check_arg(var, "NULL character vector no na")
   check_arg(tree, "NULL data.frame")
 
@@ -317,7 +317,7 @@ rep_df = function(x, times = 1, each = 1, ...){
 #'
 #'
 models = function(x, simplify = FALSE){
-  check_arg(x, "class(fixest_multi)")
+  check_class(x, "fixest_multi")
 
   res = attr(x, "tree")
   if(simplify){
@@ -379,7 +379,9 @@ models = function(x, simplify = FALSE){
 n_models = function(x, lhs = FALSE, rhs = FALSE, sample = FALSE, 
                     fixef = FALSE, iv = FALSE){
   
-  check_arg(x, "class(fixest_multi) mbt")
+  # below: just for the mbt
+  check_arg(x, "list l0 mbt", .message = "Argument `x` must be an object of class `fixest_multi`.")
+  check_class(x, "fixest_multi")
   check_arg("logical scalar", lhs, rhs, sample, fixef, iv)
   
   request = c(lhs = lhs, rhs = rhs, sample = sample, fixef = fixef, iv = iv)
@@ -1140,7 +1142,7 @@ coef.fixest_multi = function(object, keep, drop, order, collin = FALSE,
   # row: model
   # col: coefficient
 
-  check_arg(keep, drop, order, "NULL character vector no na")
+  check_arg(keep, drop, order, "NULL character vector no na l0")
   check_arg(collin, "logical scalar")
 
   res_list = list()
@@ -1238,7 +1240,7 @@ coefficients.fixest_multi <- coef.fixest_multi
 coeftable.fixest_multi = function(object, vcov = NULL, keep = NULL, drop = NULL, 
                                   order = NULL, long = FALSE, wide = FALSE, ...){
 
-  check_arg(keep, drop, order, "NULL character vector no na")
+  check_arg(keep, drop, order, "NULL character vector no na l0")
   check_arg(wide, "logical scalar | charin(se, pvalue, tstat)")
   check_arg(long, "logical scalar")
 
@@ -1329,7 +1331,7 @@ se.fixest_multi = function(object, vcov = NULL, keep = NULL, drop = NULL,
                            order = NULL, long = FALSE, ...){
   # Default is wide format => same as with coef
 
-  check_arg(keep, drop, order, "NULL character vector no na")
+  check_arg(keep, drop, order, "NULL character vector no na l0")
   check_arg(long, "logical scalar")
 
   mc = match.call()
@@ -1355,7 +1357,7 @@ tstat.fixest_multi = function(object, vcov = NULL, keep = NULL, drop = NULL,
                               order = NULL, long = FALSE, ...){
   # Default is wide format => same as with coef
 
-  check_arg(keep, drop, order, "NULL character vector no na")
+  check_arg(keep, drop, order, "NULL character vector no na l0")
   check_arg(long, "logical scalar")
 
   mc = match.call()
@@ -1381,7 +1383,7 @@ pvalue.fixest_multi = function(object, vcov = NULL, keep = NULL, drop = NULL,
                                order = NULL, long = FALSE, ...){
   # Default is wide format => same as with coef
 
-  check_arg(keep, drop, order, "NULL character vector no na")
+  check_arg(keep, drop, order, "NULL character vector no na l0")
   check_arg(long, "logical scalar")
 
   mc = match.call()

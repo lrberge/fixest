@@ -1955,7 +1955,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
     }
 
     # Checking the values of split.keep and split.drop
-    check_arg(split.keep, split.drop, "NULL character vector no na")
+    check_arg(split.keep, split.drop, "NULL character vector no na l0")
 
     if(delayed.subset){
       split = split[subset]
@@ -2500,14 +2500,14 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
   #
 
   if(debug) cat(" - NA Removal\n")
-
+  
   # NA & problem management
   if(length(obs2remove) > 0){
     # we kick out the problems (both NA related and fixef related)
 
     if(isLinear){
       # We drop only 0 variables (may happen for factors)
-      linear.mat = select_obs(linear.mat, -obs2remove, nthreads, na_rm_fixef = na_rm_fixef)
+      linear.mat = select_obs_rm0s(linear.mat, -obs2remove, nthreads, na_rm_fixef = na_rm_fixef)
 
       # useful for feNmlm
       linear.params = colnames(linear.mat)
@@ -2517,13 +2517,13 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
 
     if(Q == 0){
       # if Q > 0: done already when managing the fixed-effects
-      lhs = select_obs(lhs, -obs2remove)
+      lhs = select_obs_rm0s(lhs, -obs2remove)
     }
 
     if(do_iv){
-      iv_lhs = select_obs(iv_lhs, -obs2remove, na_rm_fixef = na_rm_fixef)
-      iv.mat = select_obs(iv.mat, -obs2remove, nthreads, varname = "instrument", 
-                          na_rm_fixef = na_rm_fixef)
+      iv_lhs = select_obs_rm0s(iv_lhs, -obs2remove, na_rm_fixef = na_rm_fixef)
+      iv.mat = select_obs_rm0s(iv.mat, -obs2remove, nthreads, varname = "instrument", 
+                               na_rm_fixef = na_rm_fixef)
     }
 
     if(isOffset){
@@ -2544,12 +2544,16 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
     
     if(multi_rhs){
       
-      linear_core = select_obs(linear_core, -obs2remove, nthreads, na_rm_fixef = na_rm_fixef)
-      rhs_sw = select_obs(rhs_sw, -obs2remove, nthreads, 
-                          varname = "explanatory variable",
-                          extra = " *in the step-wise part*",
-                          na_rm_fixef = na_rm_fixef,
-                          no_error = TRUE)
+      linear_core = select_obs_rm0s(linear_core, -obs2remove, nthreads, na_rm_fixef = na_rm_fixef)
+      
+      if(!is.null(attr(linear_core, "only-0"))){
+        warn_up(attr(linear_core, "only-0"))
+      }
+      
+      rhs_sw = select_obs_rm0s(rhs_sw, -obs2remove, nthreads, 
+                               varname = "explanatory variable",
+                               extra = " *in the step-wise part*",
+                               na_rm_fixef = na_rm_fixef)
       
       if(is_error(rhs_sw)){
         # we remove the stepwise part
@@ -3703,10 +3707,10 @@ assign_fixef_env = function(env, family, origin_type, fixef_id, fixef_sizes,
 }
 
 
-
+# - rm_0s: whether to remove the variables that are only equal to 0
 reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs = TRUE,
                        assign_rhs = TRUE, fml_linear = NULL, fml_fixef = NULL, fml_iv_endo = NULL,
-                       check_lhs = FALSE, assign_fixef = FALSE){
+                       check_lhs = FALSE, assign_fixef = FALSE, rm_0s = FALSE){
   # env: environment from an estimation
   # This functions reshapes the environment to perform the new estimation
   # either by selecting some observation (in split)
@@ -3895,13 +3899,13 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
             # in multiple RHS
             if(length(rhs) > 0){
               isLinear = TRUE
-              rhs = select_obs(rhs, obs2keep, nthreads)
+              rhs = select_obs(rhs, obs2keep, nthreads, rm_0s = rm_0s)
             }
             
           } else {
             if(length(rhs) > 1){
               isLinear = TRUE
-              rhs = select_obs(rhs, obs2keep, nthreads)
+              rhs = select_obs(rhs, obs2keep, nthreads, rm_0s = rm_0s)
             }
           }
           
@@ -3909,7 +3913,7 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
           
         } else if(length(rhs) > 1){
           isLinear = TRUE
-          rhs = select_obs(rhs, obs2keep, nthreads)
+          rhs = select_obs(rhs, obs2keep, nthreads, rm_0s = rm_0s)
 
           linear.params = colnames(rhs)
           nonlinear.params = get("nonlinear.params", env)
@@ -3960,7 +3964,7 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
 
         # RHS
         iv.mat = get("iv.mat", env)
-        iv.mat = select_obs(iv.mat, obs2keep, nthreads, varname = "instrument")
+        iv.mat = select_obs(iv.mat, obs2keep, nthreads)
         assign("iv.mat", iv.mat, new_env)
 
       }
@@ -4539,15 +4543,23 @@ extract_stepwise = function(fml, tms, all_vars = TRUE){
   return(res)
 }
 
-
+select_obs_rm0s = function(x, index, nthreads = 1, varname = "explanatory variable", 
+                           extra = "", na_rm_fixef = FALSE, do_error = TRUE){
+  # when there are variables, in the design matrix, only equal to 0, we remove them.
+  # We may also send an error.
+  # => this function is NOT used in reshape_env since we don't want errors there
+  # 
+  select_obs(x = x, index = index, nthreads = nthreads, varname = varname, 
+             extra = extra, na_rm_fixef = na_rm_fixef, 
+             rm_0s = TRUE, do_error = do_error)
+}
 
 # a = list(1:5, 6:10)
 # b = 1:5
 # d = list(matrix(1:10, 5, 2), 1, matrix(1:5, 5, 1))
 # select_obs(a, 1:2) ; select_obs(b, 1:2) ; select_obs(d, 1:2)
 select_obs = function(x, index, nthreads = 1, varname = "explanatory variable", 
-                      extra = "",
-                      na_rm_fixef = FALSE, no_error = FALSE){
+                      extra = "", na_rm_fixef = FALSE, do_error = FALSE, rm_0s = FALSE){
   # => selection of observations.
   # Since some objects can be of multiple types, this avoids code repetition and increases clarity.
 
@@ -4555,20 +4567,26 @@ select_obs = function(x, index, nthreads = 1, varname = "explanatory variable",
 
     if(is.matrix(x)){
       x = x[index, , drop = FALSE]
-
-      only_0 = cpp_check_only_0(x, nthreads)
-      if(all(only_0 == 1)){
-        full_msg = sma("After removing NAs{&na_rm_fixef; (or perfect fit fixed-effects)}, not a single {varname} is different from 0.")
-        if(no_error){
-          class(full_msg) = "try-error"
-          return(full_msg)
-        } else {
-          stop_up(full_msg, verbatim = TRUE)
+      
+      if(rm_0s){
+        only_0 = cpp_check_only_0(x, nthreads)
+        
+        if(all(only_0 == 1) && !do_error){
+          # if we don't want errors to pop, we need to keep at least one variable
+          # may later be removed bc of collinearity
+          only_0[1] = 0
         }
+        
+        if(all(only_0 == 1)){
+          # necessarily means do_error = TRUE
+          full_msg = sma("After removing NAs{&na_rm_fixef; (or perfect fit fixed-effects)}, not a single {varname} is different from 0.")
+          stop_up(full_msg, verbatim = TRUE)
 
-      } else if(any(only_0 == 1)){
-        x = x[, only_0 == 0, drop = FALSE]
+        } else if(any(only_0 == 1)){
+          x = x[, only_0 == 0, drop = FALSE]
+        }
       }
+      
 
     } else if(length(x) > 0){
       # We check the length because RHS = 1 means not linear (we don't want to subset on that)
@@ -4579,29 +4597,44 @@ select_obs = function(x, index, nthreads = 1, varname = "explanatory variable",
     x = x[index, , drop = FALSE]
 
   } else if(is.matrix(x[[1]]) || length(x[[1]]) == 1){
-    # Means RHS
+    # Means either:
+    # - a list of stepwise values
+    # - linear_core, a list with two elements: 'left' and 'right'
+    # 
+    # NOTA: the behavior of errors differ here
+    # => if do_error = TRUE, we do not stop(). Instead, we return an informative object which
+    # is later handled
+    # 
+    
+    is_linear_core = !is.null(names(x)) && names(x)[1] == "left"
+    
     is_error = FALSE
     index_pblm = integer()
     vars_pblm = character()
     for(i in seq_along(x)){
       if(length(x[[i]]) > 1){
         x[[i]] = x[[i]][index, , drop = FALSE]
-
-        only_0 = cpp_check_only_0(x[[i]], nthreads)
-        if(all(only_0 == 1)){
-          is_error = TRUE
-          vars_pblm = c(vars_pblm, colnames(x[[i]]))
-          index_pblm = i
+        
+        if(rm_0s){
+          only_0 = cpp_check_only_0(x[[i]], nthreads)
           
-          full_msg = sma("After removing NAs{&na_rm_fixef; (or perfect fit fixed-effects)}, not a single {varname}{extra} is different from 0.")
-          
-          if(!no_error){
-            stop_up(full_msg, verbatim = TRUE)
+          if(all(only_0 == 1) && !do_error){
+            # if we don't want errors to pop, we need to keep at least one variable
+            # may later be removed bc of collinearity
+            only_0[1] = 0
           }
+          
+          if(all(only_0 == 1)){
+            
+            is_error = TRUE
+            vars_pblm = c(vars_pblm, colnames(x[[i]]))
+            index_pblm = c(index_pblm, i)
 
-        } else if(any(only_0 == 1)){
-          x[[i]] = x[[i]][, only_0 == 0, drop = FALSE]
+          } else if(any(only_0 == 1)){
+            x[[i]] = x[[i]][, only_0 == 0, drop = FALSE]
+          }
         }
+        
       }
     }
     
@@ -4609,13 +4642,29 @@ select_obs = function(x, index, nthreads = 1, varname = "explanatory variable",
       
       vars_pblm = unique(vars_pblm)
       
+      if(is_linear_core){
+        # no error, we simply remove the columns + add information
+        for(i in index_pblm){
+          x[[i]] = 1
+        }
+        
+        full_msg = sma("After removing NAs{&na_rm_fixef; (or perfect fit fixed-effects)}, {&len(vars_pblm)>0;{Len?.};a} {varname}{$s?vars_pblm}{extra} {$are?vars_pblm} only 0s ({enum.bq ? vars_pblm}).")
+        attr(x, "only-0") = full_msg
+        return(x)
+      }
+      
       if(length(index_pblm) == length(x)){
         # All parts in the SW are 0
+        
+        full_msg = sma("After removing NAs{&na_rm_fixef; (or perfect fit fixed-effects)}, not a single {varname} is different from 0.")
+        
         class(full_msg) = "try-error"
         return(full_msg)
         
       } else {
         x = x[-index_pblm]
+        
+        full_msg = sma("After removing NAs{&na_rm_fixef; (or perfect fit fixed-effects)}, {&len(vars_pblm)>0;{Len?.};a} {varname}{$s?vars_pblm}{extra} {$are?vars_pblm} only 0s ({enum.bq ? vars_pblm}).")
         
         if(length(x) == 1 && length(x[[1]]) == 1){
           # just the intercept
@@ -4623,7 +4672,6 @@ select_obs = function(x, index, nthreads = 1, varname = "explanatory variable",
           return(full_msg)
         }
         
-        full_msg = sma("After removing NAs{&na_rm_fixef; (or perfect fit fixed-effects)}, {&len(vars_pblm)>0;{Len?.};a} {varname}{$s?vars_pblm}{extra} {$are?vars_pblm} only 0s ({enum.bq ? vars_pblm}).")
         attr(x, "only-0") = full_msg
         attr(x, "index_pblm") = index_pblm
         attr(x, "vars_pblm") = vars_pblm
@@ -4778,8 +4826,8 @@ fixest_NA_results_IV = function(env_2nd_stage, res_first_stage, cause = NULL){
 
 split_select = function(items, keep, drop){
 
-  if(is.null(keep)){
-    if(is.null(drop)){
+  if(length(keep) == 0){
+    if(length(drop) == 0){
       return(seq_along(items))
     }
 
@@ -4813,7 +4861,7 @@ split_select = function(items, keep, drop){
     }
   }
 
-  if(!is.null(drop)){
+  if(length(drop) > 0){
     for(d in drop){
 
       if(d %in% res){

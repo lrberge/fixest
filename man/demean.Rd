@@ -7,8 +7,8 @@
 demean(
   X,
   f,
-  slope.vars,
-  slope.flag,
+  slope.vars = NULL,
+  slope.flag = NULL,
   data,
   weights,
   sample = "estimation",

@@ -23,8 +23,8 @@ bit intricate sorry, please see the examples.}
 are returned, not only the aggregated coefficients.}
 
 \item{use_weights}{Logical, default is \code{TRUE}. If the estimation was weighted,
-whether the aggregation should take into account the weights. Basically if the
-weights reflected frequency it should be \code{TRUE}.}
+whether the aggregation should take into account the weights. Basically it should
+always be true unless you have a good reason to ignore the weights during aggregation.}
 
 \item{...}{Arguments to be passed to \code{\link{summary.fixest}}.}
 }

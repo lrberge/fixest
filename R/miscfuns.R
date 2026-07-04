@@ -1234,7 +1234,8 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
 #'
 #'
 #'
-i = function(factor_var, var, ref, keep, bin, ref2, keep2, bin2, ...){
+i = function(factor_var, var, ref = NULL, keep = NULL, bin = NULL, 
+             ref2 = NULL, keep2 = NULL, bin2 = NULL, ...){
   # Used to create interactions
 
   # Later: binning (bin = 1:3 // bin = list("a" = "[abc]")). Default name is bin name (eg "1:3")
@@ -1253,7 +1254,7 @@ i = function(factor_var, var, ref, keep, bin, ref2, keep2, bin2, ...){
   FROM_FIXEST = is_fixest_call()
 
   # General checks
-  check_arg(factor_var, "mbt vector")
+  check_arg(factor_var, "mbt vector len(1,)")
 
   # NOTA:
   # the user can use the prefix "i." to tell the algorithm to consider the
@@ -1362,7 +1363,8 @@ i = function(factor_var, var, ref, keep, bin, ref2, keep2, bin2, ...){
   }
 
   if(IS_INTER_FACTOR){
-    info = to_integer(f, var, add_items = TRUE, items.list = TRUE, sorted = TRUE, multi.join = "__%%__")
+    info = to_integer(f, var, add_items = TRUE, items.list = TRUE, sorted = TRUE, 
+                      multi.join = "__%%__")
   } else {
     info = to_integer(f, add_items = TRUE, items.list = TRUE, sorted = TRUE)
   }
@@ -1384,9 +1386,9 @@ i = function(factor_var, var, ref, keep, bin, ref2, keep2, bin2, ...){
     f_items = items
   }
 
-  check_arg(ref, "logical scalar | vector no na")
+  check_arg(ref, "NULL logical scalar | vector no na len(1,)")
 
-  check_arg(ref2, keep, keep2, "vector no na")
+  check_arg(ref2, keep, keep2, "NULL vector no na len(1,)")
 
   NO_ERROR = FALSE
   if(is_calling_fun("fixest_model_matrix_extra", full_search = TRUE, full_name = TRUE)){
@@ -1395,7 +1397,7 @@ i = function(factor_var, var, ref, keep, bin, ref2, keep2, bin2, ...){
 
   no_rm = TRUE
   id_drop = c()
-  if(!missing(ref)){
+  if(!missnull(ref)){
     if(isTRUE(ref)){
       # We always delete the first value
       # Que ce soit items ici est normal (et pas f_items)
@@ -1407,16 +1409,16 @@ i = function(factor_var, var, ref, keep, bin, ref2, keep2, bin2, ...){
   }
 
 
-  if(!missing(keep)){
+  if(!missnull(keep)){
     id_drop = c(id_drop, items_to_drop(f_items, keep, "factor_var", keep = TRUE, no_error = NO_ERROR))
   }
 
   if(IS_INTER_FACTOR){
-    if(!missing(ref2)){
+    if(!missnull(ref2)){
       id_drop = c(id_drop, items_to_drop(var_items, ref2, "var", no_error = NO_ERROR))
     }
 
-    if(!missing(keep2)){
+    if(!missnull(keep2)){
       id_drop = c(id_drop, items_to_drop(var_items, keep2, "var", keep = TRUE, no_error = NO_ERROR))
     }
   }
@@ -2097,7 +2099,7 @@ xpd = function(fml, ..., add = NULL, lhs = NULL, rhs = NULL, add.after_pipe = NU
       if(is.null(fml_dp)) fml_dp = deparse_long(fml)
 
       if(is_data){
-        check_arg(data, "character vector no na | matrix | data.frame")
+        check_arg(data, "character vector no na l0 | matrix | data.frame")
 
         if(is.matrix(data)){
           data = colnames(data)
@@ -2175,12 +2177,12 @@ xpd = function(fml, ..., add = NULL, lhs = NULL, rhs = NULL, add.after_pipe = NU
   }
 
   if(is_data){
-    var_to_complete = grep("[[:alnum:]]\\.\\.$", all.vars(fml), value = TRUE)
+    var_to_complete = grep("[[:alnum:]_]\\.\\.$", all.vars(fml), value = TRUE)
     n_var = length(var_to_complete)
     if(n_var > 0){
 
       if(is.null(data_vars)){
-        check_arg(data, "character vector no na | matrix | data.frame")
+        check_arg(data, "character vector no na l0 | matrix | data.frame")
 
         if(is.matrix(data)){
           data = colnames(data)
@@ -2371,7 +2373,7 @@ xpd = function(fml, ..., add = NULL, lhs = NULL, rhs = NULL, add.after_pipe = NU
 #'
 #'
 #'
-demean = function(X, f, slope.vars, slope.flag, data, weights,
+demean = function(X, f, slope.vars = NULL, slope.flag = NULL, data, weights,
                   sample = "estimation",
                   nthreads = getFixest_nthreads(), notes = getFixest_notes(),
                   iter = 2000, tol = 1e-6, 
@@ -2408,7 +2410,7 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
   # Step 1: formatting the input
   if(!im_confident){
 
-    check_arg(X, "numeric vmatrix | list | formula | class(fixest) mbt")
+    check_arg(X, "numeric vmatrix | list len(1,) | formula | class(fixest) mbt")
     check_arg(iter, "integer scalar GE{1}")
     check_arg(tol, "numeric scalar GT{0}")
     check_arg(notes, "logical scalar")
@@ -2562,9 +2564,9 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
     #
 
     if(!fe_done){
-      check_arg(f, "vmatrix | list mbt")
-      check_arg(slope.vars, "numeric vmatrix | list")
-      check_arg(slope.flag, "integer vector no na")
+      check_arg(f, "vmatrix | list len(1,) mbt")
+      check_arg(slope.vars, "NULL numeric vmatrix | list len(1,)")
+      check_arg(slope.flag, "NULL integer vector no na len(1,)")
 
       if(is.list(f)) {
         if(!is.data.frame(f)) {
@@ -3158,7 +3160,7 @@ rep.fixest = function(x, times = 1, each = 1, vcov, ...){
   # x can be either a list of fixest objects, either a fixest object
 
   check_arg(x, "class(fixest, fixest_list) mbt")
-  check_arg(times, "integer scalar GE{1} | integer vector no na GE{0}")
+  check_arg(times, "integer scalar GE{1} | integer vector no na GE{0} len(1,)")
   check_arg(each, "integer scalar GE{1} | logical scalar")
   check_arg(vcov, "class(list)")
 
@@ -3260,7 +3262,7 @@ rep.fixest_list = function(x, times = 1, each = 1, vcov, ...){
 #' @rdname rep.fixest
 .l = function(...){
 
-  check_arg(..., "mbt class(fixest) | list")
+  check_arg(..., "mbt class(fixest) | list len(1,)")
 
   dots = list(...)
   if(all(sapply(dots, function(x) inherits(x, "fixest")))){
@@ -5282,7 +5284,7 @@ bin_factor = function(bin, x, varname, no_error = FALSE){
   set_up(1)
 
   argname = deparse(substitute(bin))
-  check_arg(bin, "list | vector | os formula")
+  check_arg(bin, "list len(1,) | vector len(1,) | os formula")
 
   #
   # DSB expansion
@@ -5949,7 +5951,7 @@ flatten_list_of_models = function(dots, dots_call = NULL, accept_non_fixest = FA
 setup_dict = function(dict, check = FALSE){
   
   if(check){
-    check_arg(dict, "NULL logical scalar | named character vector no na")
+    check_arg(dict, "NULL logical scalar | named character vector no na l0")
   }
   
   dict_global = getFixest_dict()
@@ -6160,7 +6162,8 @@ par_fit = function(my_par, id){
 
 dict_apply = function(x, dict = NULL){
 
-  check_arg(dict, "NULL named character vector no na", .message = "The argument `dict` must be a dictionnary, ie a named vector (eg dict=c(\"old_name\"=\"new_name\")")
+  check_arg(dict, "NULL named character vector no na l0", 
+            .message = "The argument `dict` must be a dictionnary, ie a named vector (eg dict=c(\"old_name\"=\"new_name\")")
 
   if(missing(dict) || length(dict) == 0){
     return(x)
@@ -6197,7 +6200,7 @@ keep_apply = function(x, keep = NULL, logical = FALSE){
     }
   }
 
-  check_arg(keep, "character vector no na", 
+  check_arg(keep, "character vector no na l0", 
             .message = "The arg. `keep` must be a vector of regular expressions (see help(regex)).")
 
   res = x
@@ -6234,7 +6237,7 @@ drop_apply = function(x, drop = NULL){
     return(x)
   }
 
-  check_arg(drop, "character vector no na", 
+  check_arg(drop, "character vector no na l0", 
             .message = "The arg. `drop` must be a vector of regular expressions (see help(regex)). ")
 
   res = x
@@ -6268,7 +6271,7 @@ order_apply = function(x, order = NULL){
     return(x)
   }
 
-  check_arg(order, "character vector no na", 
+  check_arg(order, "character vector no na l0", 
             .message = "The arg. `order` must be a vector of regular expressions (see help(regex)). ")
 
   res = x
@@ -6592,7 +6595,7 @@ error_sender = function(expr, ..., clean, up = 0, arg_name){
 
 check_set_types = function(x, types, msg){
   arg_name = deparse(substitute(x))
-  check_arg(x, "os formula | character vector no na", .arg_name = arg_name, .up = 1)
+  check_arg(x, "os formula | character vector no na len(1,)", .arg_name = arg_name, .up = 1)
 
   if(inherits(x, "formula")){
     x = attr(terms(x), "term.labels")
@@ -6634,6 +6637,29 @@ check_set_digits = function(digits, up = 1){
   }
 
   list(digits = digits, round = round)
+}
+
+check_class = function(x, all_classes, null = FALSE, up = 0){
+  # I create this function to overcome a compatibility problem with dreamerr v1.4.0
+  # sigh
+  # in v1.5.0 you can do
+  # check_arg(x, "NULL class(c1, c2)")
+  # => in v1.4.0 it does not work when x is an empty list
+  
+  up = up + 1
+  
+  if(null && is.null(x)){
+    return()
+  }
+  
+  if(inherits(x, all_classes)){
+    return()
+  }
+  
+  arg_name = deparse(substitute(x))
+  stop_up("The argument {arg_name} must be NULL or an object of class {enum ? all_classes}.\n",
+          "PROBLEM: it is of class {enum ? class(x)}.")
+  
 }
 
 get_vars = function(x){
@@ -7407,7 +7433,7 @@ as.dict = function(x){
 #'
 setFixest_dict = function(dict = NULL, ..., reset = FALSE){
 
-  check_arg(dict, "NULL named character vector no na | character scalar")
+  check_arg(dict, "NULL named character vector no na l0 | character scalar")
 
   if(is.null(names(dict)) && !is.null(dict)){
     dict = error_sender(as.dict(dict), "In setFixest_dict, problem when coercing the dictionay with as.dict().")

@@ -1595,7 +1595,7 @@ coeftable.default = function(object, keep, drop, order, ...){
   # => there is tidy for that which is much better
   # I just created that method to handle fixest/fixest_multi more easily
 
-  check_arg(keep, drop, order, "NULL character vector no na")
+  check_arg(keep, drop, order, "NULL character vector no na l0")
 
   if(!any(grepl("summary", class(object)))){
     object_sum = try(summary(object, ...))
@@ -1641,7 +1641,7 @@ coeftable.default = function(object, keep, drop, order, ...){
 se.default = function(object, keep, drop, order, ...){
   # There is NO GARANTEE that it works
 
-  check_arg(keep, drop, order, "NULL character vector no na")
+  check_arg(keep, drop, order, "NULL character vector no na l0")
 
   mat = coeftable(object, keep = keep, drop = drop, order = order, ...)
 
@@ -1660,7 +1660,7 @@ se.default = function(object, keep, drop, order, ...){
 tstat.default = function(object, keep, drop, order, ...){
   # There is NO GARANTEE that it works
 
-  check_arg(keep, drop, order, "NULL character vector no na")
+  check_arg(keep, drop, order, "NULL character vector no na l0")
 
   mat = coeftable(object, keep = keep, drop = drop, order = order, ...)
 
@@ -1682,7 +1682,7 @@ tstat.default = function(object, keep, drop, order, ...){
 pvalue.default = function(object, keep, drop, order, ...){
   # There is NO GARANTEE that it works
 
-  check_arg(keep, drop, order, "NULL character vector no na")
+  check_arg(keep, drop, order, "NULL character vector no na l0")
 
   mat = coeftable(object, keep = keep, drop = drop, order = order, ...)
 
@@ -1705,7 +1705,7 @@ se.matrix = function(object, keep, drop, order, ...){
   # There is NO GARANTEE that it works
 
   check_arg(object, "square numeric matrix")
-  check_arg(keep, drop, order, "NULL character vector no na")
+  check_arg(keep, drop, order, "NULL character vector no na l0")
 
   vcov_diag = diag(object)
   vcov_diag[vcov_diag < 0] = NA
@@ -1842,7 +1842,7 @@ coeftable.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
                             keep = NULL, drop = NULL, order = NULL, list = FALSE, ...){
   # We don't explicitly refer to the other arguments
 
-  check_arg(keep, drop, order, "NULL character vector no na")
+  check_arg(keep, drop, order, "NULL character vector no na l0")
   check_arg(list, "logical scalar")
 
 
@@ -1885,7 +1885,7 @@ coeftable.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
 se.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
                      keep = NULL, drop = NULL, order = NULL, ...){
 
-  check_arg(keep, drop, order, "NULL character vector no na")
+  check_arg(keep, drop, order, "NULL character vector no na l0")
 
   mat = coeftable(object, vcov = vcov, ssc = ssc, cluster = cluster,
                   keep = keep, drop = drop, order = order, ...)
@@ -1906,7 +1906,7 @@ se.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
 tstat.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
                         keep = NULL, drop = NULL, order = NULL, ...){
 
-  check_arg(keep, drop, order, "NULL character vector no na")
+  check_arg(keep, drop, order, "NULL character vector no na l0")
 
   mat = coeftable(object, vcov = vcov, ssc = ssc, cluster = cluster,
                   keep = keep, drop = drop, order = order, ...)
@@ -1927,7 +1927,7 @@ tstat.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
 pvalue.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
                          keep = NULL, drop = NULL, order = NULL, ...){
 
-  check_arg(keep, drop, order, "NULL character vector no na")
+  check_arg(keep, drop, order, "NULL character vector no na l0")
 
   mat = coeftable(object, vcov = vcov, ssc = ssc, cluster = cluster,
                   keep = keep, drop = drop, order = order, ...)
@@ -2198,7 +2198,7 @@ logLik.fixest = function(object, ...){
 coef.fixest = coefficients.fixest = function(object, keep, drop, order,
                        collin = FALSE, agg = TRUE, ...){
 
-  check_arg(keep, drop, order, "NULL character vector no na")
+  check_arg(keep, drop, order, "NULL character vector no na l0")
   check_arg(collin, agg, "logical scalar")
 
   if(isTRUE(object$is_agg) && agg){
@@ -3845,7 +3845,7 @@ model.matrix.fixest = function(object, data = NULL, type = "rhs", sample = "esti
     stopi("The type{$s, enum.Q, is ! {'^iv'get ? type}} only valid for IV estimations.")
   }
 
-  check_arg(subset, "logical scalar | character vector no na")
+  check_arg(subset, "logical scalar | character vector no na l0")
   check_set_arg(sample, "match(estimation, original)")
   check_set_arg(na.rm, as.matrix, as.df, collin.rm, "logical scalar")
 

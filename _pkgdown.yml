@@ -11,14 +11,11 @@ articles:
     navbar: ~
     contents:
       - fixest_walkthrough
+      - cheat-sheet
       - multiple_estimations
       - standard_errors
-      - collinearity
-  - title: Export
-    navbar: Estimation tables
-    contents:
       - exporting_tables
-      - etable_new_features
+      - collinearity
 
 development:
   mode: auto

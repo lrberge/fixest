@@ -1,0 +1,48 @@
+---
+title: "Cheat sheets"
+author: "Laurent Bergé"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: journal
+    highlight: haddock
+    number_sections: yes
+    toc: yes
+    toc_depth: 3
+    toc_float:
+      collapsed: yes
+      smooth_scroll: no
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+vignette: > 
+  %\VignetteIndexEntry{Cheat sheets} 
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+This document presents five quick reference tables: 4 are related to the specification of the formula, and one to the VCOVs. The PDF version is [here](../reference/figures/cheat-sheet.pdf).
+
+<!-- On the location of the PDF, we need a path relative to the document. Note that by default, pkgdown imports all the contents in 'pkgroot/man/figures', which is where I placed the `cheat-sheet.pdf`. -->
+
+## Inserting fixed-effects in a fixest estimation
+
+![](https://github.com/lrberge/fixest/blob/master/vignettes/images/cheat-sheet/formula_fe.png?raw=true)
+
+## Performing 2SLS/IV estimations in feols.
+
+![](https://github.com/lrberge/fixest/blob/master/vignettes/images/cheat-sheet/formula_iv.png?raw=true)
+
+## Estimation with multiple left-hand-sides or multiple right-hand-sides
+
+![](https://github.com/lrberge/fixest/blob/master/vignettes/images/cheat-sheet/formula_interpolation.png?raw=true)
+
+## Variable interpolation in fixest formulas
+
+![](https://github.com/lrberge/fixest/blob/master/vignettes/images/cheat-sheet/formula_multiple.png?raw=true)
+
+## How to use fixest built-in VCOVs
+
+![](https://github.com/lrberge/fixest/blob/master/vignettes/images/cheat-sheet/vcov_builtin.png?raw=true)
+
+

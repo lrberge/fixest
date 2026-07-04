@@ -1,70 +1,257 @@
 ---
-title: "On standard-errors"
-author: "Laurent Berge"
+title: "On Standard Errors"
+author: "Laurent Bergé, Kyle Butts"
 date: "`r Sys.Date()`"
 output: 
   html_document:
     theme: journal
     highlight: haddock
 vignette: >
-  %\VignetteIndexEntry{On standard-errors}
+  %\VignetteIndexEntry{On Standard Errors}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(echo = TRUE, 
-                      eval = TRUE,
-                      comment = "#>")
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, comment = "#>")
 Sys.setenv(lang = "en")
-
 library(fixest)
 setFixest_nthreads(1)
 ```
 
-It is an euphemism to say that standard-errors are a critical element of your estimations: literally your paper's results depend on them. It is therefore unfortunate that no conventional "best" way exists to compute them. 
+This vignette discusses how the `fixest` package computes the standard-errors of coefficients obtained from (generalized) linear regressions (i.e. from `feols`, `feglm`/`fepois`). Please note that here we don't discuss much the *why*, but mostly the *how*.  For an introduction to the topic, see the paper by [Zeileis, Koll and Graham (2020)](https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf). 
 
-For example, when performing the exact same estimation across various software, it is not uncommon to obtain different standard-errors. If your first thought is: there must be a bug... well, put that thought aside because there ain't no bug. It often boils down to the choices the developer made regarding small sample correction which, maybe surprisingly, has many degrees of freedom when it comes to implementation. 
+The first part of this vignette describes the main ways standard-errors can be computed in `fixest`'s estimations. 
 
-Multiple definitions can create confusion and the purpose of this document is to lay bare the fiddly details of standard-error computation in this package.
+The second part discusses the nitty-gritty details about the possible choices surrounding small sample correction. 
 
-The first part of this vignette describes how standard-errors are computed in `fixest`'s estimations. In particular, it details all the possible choices surrounding small sample correction. Please note that here I don't discuss the *why*, but only the *how*. For a thorough introduction to the topic, see the excellent paper by [Zeileis, Koll and Graham (2020)](https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf). The second part illustrates how to replicate some standard-errors obtained from other estimation methods with `fixest`. 
+The third part illustrates how to replicate standard-errors obtained from estimation methods of other software. 
 
-This document applies to `fixest` version 0.14.0 or higher.
+
+## Review of theory
+
+The regression coefficient takes the form 
+$$
+  \hat{\beta} \equiv \left( X' X \right)^{-1} X' y,
+$$
+where $X$ is the $n \times K$ matrix of predictor variables for the sample and $y$ is the $n \times 1$ vector of the outcome variable.
+Plugging in the working model for $y$, yields
+
+$$
+  \hat{\beta} \equiv \left( X' X \right)^{-1} X' \left( X \beta_0 + \varepsilon \right),
+$$
+where $\beta_0$ corresponds to the population regression coefficent and $\varepsilon$ is the $n \times 1$ vector of prediction errors. 
+
+This yields:
+$$
+  \hat{\beta} - \beta_0 = \left( X' X \right)^{-1} X' \varepsilon.
+$$
+
+This immediately suggests the standard asymptotic distribution
+$$
+  \hat{\beta} \sim \mathcal{N} \left( \beta_0, \left( X' X \right)^{-1} X' \Sigma X \left( X' X \right)^{-1} \right),
+$$
+where $\Sigma = \mathbb{E} \left[ \varepsilon \varepsilon' \right]$ is the covariance matrix of the error term. 
+The matrix $\left( X' X \right)^{-1} X' \Sigma X \left( X' X \right)^{-1}$ is often called the "sandwich" form inspiring the name of the classic R package, [`sandwich`](https://sandwich.r-forge.r-project.org/articles/sandwich.html).
+Continuing with the name, $\left( X' X \right)^{-1}$ show up on each side and are called the "bread". 
+The bread is immediately estimated from the data. 
+The "meat", $X' \Sigma X$, on the other hand is the source of all the difficulties, since we do not observe the prediction error $\varepsilon$ directly.
+
+
+The matrix $\Sigma$ takes the form:
+$$
+  \Sigma = \begin{bmatrix}
+    \sigma_1^2 & \sigma_{1, 2} & \dots & \sigma{1, n} \\
+    \sigma_{2, 1} & \sigma_{2}^2 & \dots & \sigma{2, n} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    \sigma_{n, 1} & \sigma_{n, 2} & \dots & \sigma_{n}^2 \\
+  \end{bmatrix}.
+$$
+The elements $\sigma_{i,j}$ denote the covariance between unit $i$ and unit $j$'s error term: $\mathbb{E}[\varepsilon_i \varepsilon_j]$. 
+
+A few common cases: 
+
+- "Non-correlated": If we think the error terms are non-correlated across observations, then $\sigma_{i,j} = 0$ when $i \neq j$ and $\Sigma$ is a diagonal matrix. 
+  - If $\sigma_i^2 = \sigma^2$, this is called homoskedastic errors.
+  - If $\sigma_i^2$ is allowed to vary, this is called heteroskedastic errors.
+
+- "Clustering": If we think units belong to distinct clusters where errors can be correlated, i.e. $\sigma_{i,j} = 0$ when $c(i) \neq c(j)$ then $\Sigma$ is block-diagonal
+  - If we think there are multiple clusters, then we can use "multi-way clustering" 
+
+- "Autocorrelated": We might think observations "close together" have covariance, but that covariance decays with distance
+  - "temporally autocorrelated": if distance is measured over time for a given unit (panel or time-series)
+  - "spatially correlated": if distance is measured over space
+
+There is no general answer to which setting you might be in; hence all the discussion on "how do you cluster your standard errors" or "what standard errors are you showing".
+However, in general, we estimate standard errors by plugging in $\hat{\Sigma}$ into the sandwich form above.
+To estimate $\hat{\Sigma}$, we use our regression residuals, $\hat{\varepsilon}$:
+$$ 
+  \hat{\Sigma}_{i, j} = w_{i, j} \hat{\varepsilon}_i \hat{\varepsilon}_j, 
+$$
+where $w_{i,j}$ is a weight term (depending on the choice of `vcov` estimator).
+For example, if we are using "HC1" standard errors, then $w_{i,i} = 1$ and $w_{i,j} = 0$ whenever $i \neq j$. 
+For clustered standard errors, we use: $w_{i, j} = 1 / N_{c(i)}$ whenever $c(i) = c(j)$ and $w_{i,j} = 0$ otherwise.
+
+Since we use $\hat{\varepsilon}_i$ instead of the true $\varepsilon_i$, it turns out that our standard error estimates will typically be too small. 
+This problem is that the residuals tend to be "too small" because they are in-sample prediction errors (regressions overfit the sample).
+This problem is particularly large when the sample size is too "small". 
+Usually, we apply a "small-sample correction" to make the standard errors slightly larger.
+These corrections are usually "ad hoc" and can vary from package to package. 
+For this reason, we delay discussion to the end of the vignette ([hic sunt leones](https://en.wikipedia.org/wiki/Here_be_dragons)).
+
+
+#### FWL for variance-covariance matrix
+
+The Frisch-Waugh-Lovell theorem is central to the `fixest` package: we can first residualize fixed-effects from the matrix of predictors and then run a much simpler regression of $\tilde{y}$ on $\tilde{X}$ (with $\tilde{\cdot}$ representing the fixed-effect residualizing.
+What does this due to our estimation of the fixed-effects? 
+
+[Peng Ding](https://www.sciencedirect.com/science/article/abs/pii/S0167715220302480) shows that the standard Frisch-Waugh-Lovell logic applies to estimation of the variance-covariance matrix of regression coefficients (in most cases).
+That is, we can use 
+$$
+  \left( \tilde{X}' \tilde{X} \right)^{-1} \tilde{X}' \hat{\Sigma} \tilde{X} \left( \tilde{X}' \tilde{X} \right)^{-1}.
+$$
+As long as we remember to update our degrees of freedom correction to account for the fixed-effects, our estimates will be *identical* to the "full regression".
+Therefore, `fixest` is able to maintain its very fast estimation approach when estimating standard errors.^[This is true only if the estimator of $\hat{\Sigma}$ only depends on residuals and not the matrix $X$. This is not true of HC2/HC3 standard errors.]
+
+
+#### Generalized linear models
+
+For generalized linear models, a similar sandwich form arrives. 
+In `fixest`, the coefficients are estimated via a ["iterative weighted least squares"](https://en.wikipedia.org/wiki/Iteratively_reweighted_least_squares) procedure. 
+Therefore, we get a similar formula as before:
+$$
+  \hat{V}(\hat{\beta}) = (X' W X)^{-1} (X' \Sigma X) (X' W X)^{-1},
+$$
+where $W$ is a diagonal $n \times n$ matrix of "working weights". 
+Again, all the action comes into the matrix $\Sigma$.^[The $\Sigma$ is not the normal regression "residuals", but instead the *score* from the model: $(y_i - \hat{\mu}_i) \frac{\partial \eta_i}{\partial \mu_i}$. That is, it is the forecast error multiplied by the derivative of the link function.]
+Therefore, the exact same intuition from above can be used: select the choice of vcov based on how you think error terms might be correlated to one another. 
+
 
 
 ## How standard-errors are computed in `fixest`
 
 There are two components defining the standard-errors in `fixest`. The main type of standard-error is given by the argument `vcov`, the small sample correction is defined by the argument `ssc`.
 
-Here's an example, the explanations follow in the next two sections:
+
+### The argument `vcov`
+
+There are three main ways to specify the VCOV using the argument `vcov`: 1) with a character string, 2) with a formula, 3) with a `vcov_*` function. 
+When a character string, the argument `vcov` can be equal to either: `"iid"`, `"hetero"`/`"HC1"`, `"HC2"`, `"HC3"`, `"cluster"`, `"twoway"`, `"NW"`, `"DK"`, or `"conley"`. 
+
+#### Classical standard errors
+
+For classical standard errors, set `vcov = "iid"`.
+This assumes that $\sigma_i^2 = \sigma^2$, i.e. the errors are non-correlated and homoskedastic. 
+This is the default primarily for speed of estimation, but in practice it is never recommended as homoskedasticity is not likely to hold.
+
+#### Heteroskedasticity-robust standard errors
+
+There are a few options for heteroskedasticity-robust standard errors, named HC1, HC2, and HC3. 
+They all allow $\sigma_i^2$ to vary by $i$, but assumes non correlated errors across $i, j$.
+The HC1 estimator ([White 1980](https://www.econometricsociety.org/publications/econometrica/1980/05/01/heteroskedasticity-consistent-covariance-matrix-estimator-and)) is the fastest to calculate and works well with "large samples".
+This can be used with `vcov = "HC1"` or `vcov = "hetero"`.
+
+However, HC1 performs poorly for small samples.
+HC2 and HC3 work well in small samples, but can be quite costly to compute with large samples. 
+These can be used with `vcov = "HC2"` and `vcov = "HC3"`.
+See James MacKinnon's review article for a more detailed discussion (MacKinnon, 2011, "Thirty Years of Heteroskedasticity-Robust Inference", QED Working Paper No. 1268).
+
+<!-- 
+pdf at: https://www.econ.queensu.ca/sites/econ.queensu.ca/files/qed_wp_1268.pdf
+The URL is valid, but cran rejected bc no response.... so alas for readers, no link
+ -->
+
+#### Cluster-robust standard errors
+
+Cluster robust standard errors allow for correlation within a cluster (or multiple clusters). 
+This can be used by passing a one-sided formula, `vcov = ~ clust_var`, to specify the clustering variable.
+If `vcov = "cluster"` is used, fixest will use the first fixed-effect variable as the clustering variable (though it is often better to be explicit).
+
+For multi-way clustering (e.g. clustering a panel of students to be clustered by class and over time) can be done with `vcov = ~ clust1 + clust2`.
+Similarly, `vcov = "twoway"` will automatically use the first two fixed-effect variables.
+[Cameron and Miller (2015)](https://jhr.uwpress.org/content/50/2/317.short) write a practical guide to clustering that discusses this in more detail.
+
+Inference with a small number of clusters can be potentially problematic for classic clustering methods. 
+The intuition the "large N" we need for asymptotics to approximate the sample distribution well is  the number of groups $G$. 
+One solution to this is to use a small-sample correction and a $t$-distribution, but this can perform poorly if $G$ is very small.
+[MacKinnon and Webb (2020)](https://ideas.repec.org/p/qed/wpaper/1421.html) provide more detailed guidance on what to do in this case.
+
+[Abadie, Athey, Imbens, and Wooldridge (2023)](https://academic.oup.com/qje/article/138/1/1/6750017) provide a more detailed discussion of whether clustering is needed in causal inference methods. 
+
+
+#### Heteroskedasticity and auto-corrleation robust standard errors 
+
+In the context of time series, `vcov = "NW"` ([Newey and West (1987)](https://www.jstor.org/stable/1913610)) account for temporal correlation between the errors.
+For panel data, `vcov = "DK"` ([Driscoll and Kraay (1998)](https://www.jstor.org/stable/2646837)) account for temporal correlation between the errors.
+The two differing on how to account for heterogeneity between units. 
+Their implementation is based on [Millo (2017)](https://www.jstatsoft.org/article/view/v082i03).  
+
+In either case, the asymptotic framework requires the number of time-periods, $T$, to be large (regardless of the number of units in the panel context).
+If you have panel data but small $T$, clustering at the unit-level is preferabble. 
+The value of $T$ will be relevant in small-sample corrections, discussed below.
+
+
+#### Spatial-correlation robust standard errors
+
+Finally, `vcov = "conley"` accounts for spatial correlation of the errors based on [Conley (1999)](https://www.sciencedirect.com/science/article/pii/S0304407698000840).
+To account for spatial correlation, `fixest` needs to know the "x" and "y" coordinates.
+`fixest` tries to be smart and look for these in the dataset by column names, but if this fails, you need to use `vcov = vcov_conley(lat = "xname", lon = "yname")`.
+
+#### Other options
+
+`fixest` was designed with flexibility in mind. 
+It is possible to use other methods for estimation via the `vcov` argument.
+In this setting, a variance-covariance matrix can be "attached" to a `fixest` object using the `summary` function and this matrix will be used for post-estimation commands. 
+For example, we can estimate bootstrapped standard errors via `sandwich::vcovBS` or we could write a custom function that works with a fixest object.
+
 ```{r}
 library(fixest)
+est = feols(mpg ~ wt + hp, mtcars)
+
+## Simple function that computes a Bayesian bootstrap
+vcov_bboot = function(x, n_sim = 100) {
+  core_env = update(x, only.coef = TRUE, only.env = TRUE)
+  n_obs = x$nobs
+
+  res_all = vector("list", n_sim)
+  for (i in 1:n_sim) {
+    # est_env updates estimate using new weights
+    res_all[[i]] = est_env(env = core_env, weights = rexp(n_obs, rate = 1))
+  }
+
+  res = do.call(rbind, res_all)
+
+  # Could return just `var(res)` but the named list will display a nice name in `etable`
+  return(list("Bayesian Bootstrap" = var(res)))
+}
+
+set.seed(1)
+est_bboot_se = summary(est, vcov = vcov_bboot(est))
+etable(est, est_bboot_se)
+```
+
+
+## Small sample correction
+
+As discussed above, plugging in residuals from a regression to estimate the variance of the true error term will create standard error estimates that are too small. 
+The small sample correction aims to "correct" this problem by increasing the estimate $\tilde{V}$ by some factor that is $\geq 1$ and approaches $1$ as the sample gets larger.
+These corrections only make a meaninful adjustment when the sample is small (or the number of clusters is small), hence the name.
+
+The type of small sample correction applied is defined by the argument `ssc` which accepts only objects produced by the function `ssc`. 
+The main arguments of this function are `K.adj`, `K.fixef` and `G.adj`. Each of them is detailed below.
+
+Before we dive into the details, here is an example of modifying the small sample correction:
+```{r}
 data(trade)
-# OLS estimation
-gravity = feols(log(Euros) ~ log(dist_km) | Destination + Origin + Product + Year, trade)
+gravity = feols(
+  log(Euros) ~ log(dist_km) | Destination + Origin + Product + Year,
+  trade
+)
 # Two-way clustered SEs
 summary(gravity, vcov = "twoway")
 # Two-way clustered SEs, without small sample correction
 summary(gravity, vcov = "twoway", ssc = ssc(K.adj = FALSE, G.adj = FALSE))
 ```
-
-### The argument `vcov`
-
-The argument `vcov` can be equal to either: `"iid"`, `"hetero"`, `"cluster"`, `"twoway"`, `"NW"`, `"DK"`, or `"conley"`.
-
-If `vcov = "iid"`, then the standard-errors are based on the assumption that the errors are non correlated and homoskedastic. If `vcov = "hetero"`, this corresponds to the classic hereoskedasticity-robust standard-errors (White correction), where it is assumed that the errors are non correlated but the variance of their generative law may vary. 
-
-If `vcov = "cluster"`, then arbitrary correlation of the errors within clusters is accounted for. Same for `vcov = "twoway"`: arbitrary correlation within each of the two clusters is accounted for. 
-
-In the context of panel data or time series, `vcov = "NW"` (Newey-West, 1987) or `vcov = "DK"` (Driscoll-Kraay, 1998) account for temporal correlation between the errors; the two differing on how to account for heterogeneity between units. Their implementation is based on Millo (2017).  
-
-Finally, `vcov = "conley"` accounts for spatial correlation of the errors.
-
-### The argument `ssc`
-
-The type of small sample correction applied is defined by the argument `ssc` which accepts only objects produced by the function `ssc`. The main arguments of this function are `K.adj`, `K.fixef` and `G.adj`. Each of them is detailed below.
-
 
 Say you have $\tilde{V}$ the variance-covariance matrix (henceforth VCOV) before any small sample adjustment. Argument `K.adj` can be equal to `TRUE` or `FALSE`, leading to the following adjustment:
 
@@ -97,9 +284,9 @@ Using the data from the previous example, here the standard-errors are clustered
 
 When standard-errors are corrected for serial correlation, the corresponding adjustment applied is $G_{time} / (G_{time} - 1)$.
 
-#### Yet more details
+### Yet more details
 
-You're already fed up about about these details? I'm sorry but there's more, so far you've only seen the main arguments! I now come to detail three more elements: `K.exact`, `G.df` and `t.df`.
+We now detail three more elements: `K.exact`, `G.df` and `t.df`.
 
 Argument `K.exact` is only relevant when there are two or more fixed-effects. By default all the fixed-effects coefficients are accounted for when computing the degrees of freedom. In general this is fine, but in some situations it may overestimate the number of estimated coefficients. Why? Because some of the fixed-effects may be collinear, the effective number of coefficients being lower. Let's illustrate that with an example. Consider the following set of fixed-effects:
 
@@ -118,6 +305,7 @@ By default, when standard-errors are clustered, the degrees of freedom used in t
 If `t.df="conventional"`, the degrees of freedom used to find the p-value from the Student t distribution is equal to the number of observations minus the number of estimated coefficients.
 
 
+
 ## Replicating standard-errors from other methods
 
 This section illustrates how the results from `fixest` compares with the ones from other methods. It also shows how to replicate the latter from `fixest`.
@@ -125,12 +313,12 @@ This section illustrates how the results from `fixest` compares with the ones fr
 ```{r, eval = TRUE, include = FALSE}
 is_plm = requireNamespace("plm", quietly = TRUE)
 
-if(!is_plm){
+if (!is_plm) {
   knitr::opts_chunk$set(eval = FALSE)
   cat("Evaluation of the next chunks requires 'plm' which is not installed.")
 } else {
   knitr::opts_chunk$set(eval = TRUE)
-  
+
   library(plm)
   library(sandwich)
 }
@@ -154,14 +342,14 @@ library(plm)
 data(Grunfeld)
 
 # Estimations
-res_lm    = lm(inv ~ capital, Grunfeld)
+res_lm = lm(inv ~ capital, Grunfeld)
 res_feols = feols(inv ~ capital, Grunfeld)
 
 # Same standard-errors
 rbind(se(res_lm), se(res_feols))
 
 # Heteroskedasticity-robust covariance
-se_lm_hc    = sqrt(diag(vcovHC(res_lm, type = "HC1")))
+se_lm_hc = sqrt(diag(vcovHC(res_lm, type = "HC1")))
 se_feols_hc = se(res_feols, vcov = "hetero")
 rbind(se_lm_hc, se_feols_hc)
 ```
@@ -175,11 +363,19 @@ The most important differences arise in the presence of fixed-effects. Let's fir
 ```{r}
 
 # Estimations
-est_lm    = lm(inv ~ capital + as.factor(firm) + as.factor(year), Grunfeld)
-est_plm   = plm(inv ~ capital + as.factor(year), Grunfeld, 
-                index = c("firm", "year"), model = "within")
+est_lm = lm(inv ~ capital + as.factor(firm) + as.factor(year), Grunfeld)
+est_plm = plm(
+  inv ~ capital + as.factor(year),
+  Grunfeld,
+  index = c("firm", "year"),
+  model = "within"
+)
 # we use panel.id so that panel VCOVs can be applied directly
-est_feols = feols(inv ~ capital | firm + year, Grunfeld, panel.id = ~firm + year)
+est_feols = feols(
+  inv ~ capital | firm + year,
+  Grunfeld,
+  panel.id = ~ firm + year
+)
 
 #
 # "iid" standard-errors
@@ -189,7 +385,11 @@ est_feols = feols(inv ~ capital | firm + year, Grunfeld, panel.id = ~firm + year
 rbind(se(est_lm)["capital"], se(est_plm)["capital"], se(est_feols))
 
 # p-values:
-rbind(pvalue(est_lm)["capital"], pvalue(est_plm)["capital"], pvalue(est_feols, vcov = "iid"))
+rbind(
+  pvalue(est_lm)["capital"],
+  pvalue(est_plm)["capital"],
+  pvalue(est_feols, vcov = "iid")
+)
 
 ```
 
@@ -201,9 +401,9 @@ Now for clustered SEs:
 
 ```{r}
 # Clustered by firm
-se_lm_firm    = se(vcovCL(est_lm, cluster = ~firm, type = "HC1"))["capital"]
-se_plm_firm   = se(vcovHC(est_plm, cluster = "group"))["capital"]
-se_stata_firm = 0.06328129    # vce(cluster firm)
+se_lm_firm = se(vcovCL(est_lm, cluster = ~firm, type = "HC1"))["capital"]
+se_plm_firm = se(vcovHC(est_plm, cluster = "group"))["capital"]
+se_stata_firm = 0.06328129 # vce(cluster firm)
 se_feols_firm = se(est_feols, vcov = ~firm)
 
 rbind(se_lm_firm, se_plm_firm, se_stata_firm, se_feols_firm)
@@ -219,7 +419,11 @@ se_feols_firm_lm = se(est_feols, vcov = ~firm, ssc = ssc(K.fixef = "full"))
 rbind(se_lm_firm, se_feols_firm_lm)
 
 # How to get the plm version
-se_feols_firm_plm = se(est_feols, vcov = ~firm, ssc = ssc(K.fixef = "none", G.adj = FALSE))
+se_feols_firm_plm = se(
+  est_feols,
+  vcov = ~firm,
+  ssc = ssc(K.fixef = "none", G.adj = FALSE)
+)
 rbind(se_plm_firm, se_feols_firm_plm)
 ```
 
@@ -231,27 +435,25 @@ And finally let's look at Newey-West and Driscoll-Kray standard-errors:
 # Newey-west
 #
 
-se_plm_NW   = se(vcovNW(est_plm))["capital"]
+se_plm_NW = se(vcovNW(est_plm))["capital"]
 se_feols_NW = se(est_feols, vcov = "NW")
 
 rbind(se_plm_NW, se_feols_NW)
 
 # we can replicate plm's by changing the type of SSC:
-rbind(se_plm_NW, 
-      se(est_feols, vcov = NW ~ ssc(K.adj = FALSE, G.adj = FALSE)))
+rbind(se_plm_NW, se(est_feols, vcov = NW ~ ssc(K.adj = FALSE, G.adj = FALSE)))
 
 #
 # Driscoll-Kraay
 #
 
-se_plm_DK   = se(vcovSCC(est_plm))["capital"]
+se_plm_DK = se(vcovSCC(est_plm))["capital"]
 se_feols_DK = se(est_feols, vcov = "DK")
 
 rbind(se_plm_DK, se_feols_DK)
 
 # Replicating plm's
-rbind(se_plm_DK, 
-      se(est_feols, vcov = DK ~ ssc(K.adj = FALSE, G.adj = FALSE)))
+rbind(se_plm_DK, se(est_feols, vcov = DK ~ ssc(K.adj = FALSE, G.adj = FALSE)))
 
 ```
 
@@ -270,18 +472,22 @@ Here are the differences and similarities with `lfe`:
 ```{r, eval = TRUE, include = FALSE}
 is_lfe = requireNamespace("lfe", quietly = TRUE)
 is_lfe_plm = is_lfe && is_plm
-if(is_lfe){
-    # avoids ugly startup messages popping + does not require the use of the not very elegant suppressPackageStartupMessages
-    library(lfe)
+if (is_lfe) {
+  # avoids ugly startup messages popping + does not require the use of the not very elegant suppressPackageStartupMessages
+  library(lfe)
 }
 ```
 
 ```{r, eval = !is_lfe_plm, include = !is_lfe_plm, echo = FALSE}
-if(!is_lfe){
-  cat("The evaluation of the next chunks of code requires the package 'lfe' which is not installed")
+if (!is_lfe) {
+  cat(
+    "The evaluation of the next chunks of code requires the package 'lfe' which is not installed"
+  )
 } else {
-  cat("The evaluation of the next chunks of code requires the package 'plm' (for the data set) which is not installed.",
-    "\nThe code output is not reported.")
+  cat(
+    "The evaluation of the next chunks of code requires the package 'plm' (for the data set) which is not installed.",
+    "\nThe code output is not reported."
+  )
 }
 ```
 
@@ -297,16 +503,20 @@ rbind(se_lfe_firm, se_feols_firm)
 
 # You have to provide a custom VCOV to replicate lfe's VCOV
 my_vcov = vcov(est_feols, vcov = ~firm, ssc = ssc(K.adj = FALSE))
-se(est_feols, vcov = my_vcov * 199/198) # Note that there are 200 observations
+se(est_feols, vcov = my_vcov * 199 / 198) # Note that there are 200 observations
 
 # Differently from feols, the SEs in lfe are different if year is not a FE:
 # => now SEs are identical.
-rbind(se(felm(inv ~ capital + factor(year) | firm | 0 | firm, Grunfeld))["capital"],
-      se(feols(inv ~ capital + factor(year) | firm, Grunfeld), vcov = ~firm)["capital"])
+rbind(
+  se(felm(inv ~ capital + factor(year) | firm | 0 | firm, Grunfeld))["capital"],
+  se(feols(inv ~ capital + factor(year) | firm, Grunfeld), vcov = ~firm)[
+    "capital"
+  ]
+)
 
 # Now with two-way clustered standard-errors
-est_lfe_2way  = felm(inv ~ capital | firm + year | 0 | firm + year, Grunfeld)
-se_lfe_2way   = se(est_lfe_2way)
+est_lfe_2way = felm(inv ~ capital | firm + year | 0 | firm + year, Grunfeld)
+se_lfe_2way = se(est_lfe_2way)
 se_feols_2way = se(est_feols, vcov = "twoway")
 rbind(se_lfe_2way, se_feols_2way)
 
@@ -334,15 +544,23 @@ setFixest_ssc(ssc(K.adj = FALSE), "cluster")
 By default, the standard-errors are the standard ones (IID). You can change this behavior with, e.g.:
 
 ```{r}
-setFixest_vcov(no_FE = "iid", one_FE = "cluster", 
-               two_FE = "hetero", panel = "driscoll_kraay")
+setFixest_vcov(
+  no_FE = "iid",
+  one_FE = "cluster",
+  two_FE = "hetero",
+  panel = "driscoll_kraay"
+)
 ```
 
 which changes the way the default standard-errors are computed when the estimation contains no fixed-effects, one fixed-effect, two or more fixed-effects, or is a panel.
 
+
+
 ## Changelog
  
  - Version 0.14.0:
+
+   * More details on the general inference procedure and references for particular estimators added
  
    * The function `setFixest_ssc` becomes VCOV specific (before it was applied to all VCOVS). You can pass the names of the VCOVs to which it should apply using its second argument `vcov_names`.
 
@@ -378,19 +596,39 @@ which changes the way the default standard-errors are computed when the estimati
  
     * The default values for computing clustered standard-errors become similar to `reghdfe` to avoid cross-software confusion. That is, now by default `G.df = "min"` and `t.df = "min"` (whereas in the previous version it was `G.df = "conventional"` and `t.df = "conventional"`).
 
+
 ## References & acknowledgments
 
-I wish to thank Karl Dunkle Werner, Grant McDermott and Ivo Welch for raising the issue and for helpful discussions. Any error is of course my own.
+We wish to thank Karl Dunkle Werner, Grant McDermott and Ivo Welch for raising the issue and for helpful discussions. 
+Any errors are of course our own.
+
+Abadie, A., Athey, S., Imbens, G. W., & Wooldridge, J. M. (2023). "[When should you adjust standard errors for clustering?](https://academic.oup.com/qje/article/138/1/1/6750017)", The Quarterly Journal of Economics, 138(1), 1-35.
 
 Cameron AC, Gelbach JB, Miller DL (2011). "[Robust Inference with Multiway Clustering](https://www.nber.org/papers/t0327)", Journal of Business & Ecomomic Statistics, 29(2), 238–249.
 
+Colin Cameron, A., & Miller, D. L. (2015). "[A practitioner’s guide to cluster-robust inference](https://jhr.uwpress.org/content/50/2/317.short)", Journal of Human Resources, 50(2), 317-372.
+
+Conley, T. G. (1999). "[GMM Estimation With Cross Sectional Dependence](https://www.sciencedirect.com/science/article/pii/S0304407698000840)". Journal of Econometrics, 92(1), 1-45.
+
+Ding, P. (2021). "[The Frisch–Waugh–Lovell theorem for standard errors](https://www.sciencedirect.com/science/article/abs/pii/S0167715220302480)", Statistics & Probability Letters, 168, 108945.
+
+Driscoll, J. C., & Kraay, A. C. (1998). "[Consistent Covariance Matrix Estimation With Spatially Dependent Panel Data](https://www.jstor.org/stable/2646837)", Review of Economics and Statistics, 80(4), 549-560.
+
 Kauermann G, Carroll RJ (2001). "[A Note on the Efficiency of Sandwich Covariance Matrix Estimation](https://doi.org/10.1198/016214501753382309)", Journal of the American Statistical Association, 96(456), 1387–1396.
 
-MacKinnon JG, White H (1985). "Some heteroskedasticity-consistent covariance matrix estimators with improved finite sample properties" Journal of Econometrics, 29(3), 305–325.
+MacKinnon JG, White H (1985). "Some heteroskedasticity-consistent covariance matrix estimators with improved finite sample properties", Journal of Econometrics, 29(3), 305–325.
 
-Millo G (2017). "[Robust Standard Error Estimators for Panel Models: A Unifying Approach](https://doi.org/10.18637/jss.v082.i03)" Journal of Statistical Software, 82(3).
+MacKinnon, J. G. (2012). "[Thirty years of heteroskedasticity-robust inference](https://www.econ.queensu.ca/sites/econ.queensu.ca/files/qed_wp_1268.pdf)", In Recent advances and future directions in causality, prediction, and specification analysis: Essays in honor of Halbert L. White Jr (pp. 437-461). New York, NY: Springer New York.
 
-Zeileis A, Koll S, Graham N (2020). "[Various Versatile Variances: An Object-Oriented Implementation of Clustered Covariances in R](https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf)" Journal of Statistical Software, 95(1), 1–36.
+MacKinnon, J. G., & Webb, M. D. (2020). "[Clustering methods for statistical inference](https://ideas.repec.org/p/qed/wpaper/1421.html)", In Handbook of Labor, Human Resources and Population Economics, 1-37.
+
+Millo G (2017). "[Robust Standard Error Estimators for Panel Models: A Unifying Approach](https://doi.org/10.18637/jss.v082.i03)", Journal of Statistical Software, 82(3).
+
+Newey, W. K., West, K. D. (1986). "[A simple, positive semi-definite, heteroskedasticity and autocorrelationconsistent covariance matrix](https://www.jstor.org/stable/1913610)", Econometrica, 55(3), 703-708.
+
+White, H. (1980). "[A heteroskedasticity-consistent covariance matrix estimator and a direct test for heteroskedasticity](https://www.econometricsociety.org/publications/econometrica/1980/05/01/heteroskedasticity-consistent-covariance-matrix-estimator-and)", Econometrica, 817-838.
+
+Zeileis A, Koll S, Graham N (2020). "[Various Versatile Variances: An Object-Oriented Implementation of Clustered Covariances in R](https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf)", Journal of Statistical Software, 95(1), 1–36.
 
 
 

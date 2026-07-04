@@ -1,6 +1,6 @@
 ---
 title: 'Fast Fixed-Effects Estimation: Short Introduction'
-author: "Laurent Berge and Grant McDermott"
+author: "Laurent Bergé and Grant McDermott"
 date: "`r Sys.Date()`"
 output:
   html_document:

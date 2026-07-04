@@ -8,8 +8,8 @@
 <title>Fast Fixed-Effects Estimations • fixest</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Fast Fixed-Effects Estimations">
 <meta name="description" content="Fast and user-friendly estimation of econometric models with multiple fixed-effects. Includes ordinary least squares (OLS), instrumental variables (IV), generalized linear models (GLM), maximum likelihood estimation (ML), and the negative binomial. The core of the package is based on optimized parallel C++ code, scaling especially well for large data sets. The method to obtain the fixed-effects coefficients is based on Bergé, Butts, McDermott (2026) &lt;doi:10.48550/arXiv.2601.21749&gt;. Further provides tools to export and view the results of several estimations with intuitive design to change the standard-errors.">
 <meta property="og:description" content="Fast and user-friendly estimation of econometric models with multiple fixed-effects. Includes ordinary least squares (OLS), instrumental variables (IV), generalized linear models (GLM), maximum likelihood estimation (ML), and the negative binomial. The core of the package is based on optimized parallel C++ code, scaling especially well for large data sets. The method to obtain the fixed-effects coefficients is based on Bergé, Butts, McDermott (2026) &lt;doi:10.48550/arXiv.2601.21749&gt;. Further provides tools to export and view the results of several estimations with intuitive design to change the standard-errors.">
@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.14.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.14.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,13 +36,11 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a></li>
+    <li><a class="dropdown-item" href="articles/cheat-sheet.html">Cheat sheets</a></li>
     <li><a class="dropdown-item" href="articles/multiple_estimations.html">Multiple estimations</a></li>
-    <li><a class="dropdown-item" href="articles/standard_errors.html">On standard-errors</a></li>
-    <li><a class="dropdown-item" href="articles/collinearity.html">On collinearity</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Estimation tables</h6></li>
+    <li><a class="dropdown-item" href="articles/standard_errors.html">On Standard Errors</a></li>
     <li><a class="dropdown-item" href="articles/exporting_tables.html">Exporting estimation tables</a></li>
-    <li><a class="dropdown-item" href="articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a></li>
+    <li><a class="dropdown-item" href="articles/collinearity.html">On collinearity</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -60,52 +58,130 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="fixest-fast-and-user-friendly-fixed-effects-estimation">fixest: Fast and user-friendly fixed-effects estimation<a class="anchor" aria-label="anchor" href="#fixest-fast-and-user-friendly-fixed-effects-estimation"></a>
+<div class="page-header"><h1 id="fixest-fast-and-user-friendly-econometric-estimations">fixest: fast and user-friendly econometric estimations<a class="anchor" aria-label="anchor" href="#fixest-fast-and-user-friendly-econometric-estimations"></a>
 </h1></div>
 <p><a href="https://cran.r-project.org/web/checks/check_results_fixest.html" class="external-link"><img src="https://badges.cranchecks.info/worst/fixest.svg" alt="CRAN status"></a> <a href="https://fastverse.r-universe.dev" class="external-link"><img src="https://fastverse.r-universe.dev/badges/fixest" alt="Version_ROpensci"></a> <a href="https://CRAN.R-project.org/package=fixest" class="external-link"><img src="https://www.r-pkg.org/badges/version/fixest" alt="Version"></a> <a href="https://ipub.com/dev-corner/apps/r-package-downloads/" class="external-link"> <img src="https://cranlogs.r-pkg.org/badges/fixest" alt="Downloads"></a></p>
-<p>The <code>fixest</code> package offers a family of functions to perform estimations with multiple fixed-effects in both an OLS and a GLM context. Please refer to the <a href="https://CRAN.R-project.org/package=fixest/vignettes/fixest_walkthrough.html" class="external-link">introduction</a> for a walk-through.</p>
-<p>At the time of writing of this page (February 2020), <code>fixest</code> is the fastest existing method to perform fixed-effects estimations, often by orders of magnitude. See below for a benchmarking with the fastest alternative software.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># To install from CRAN:</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"fixest"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># To install the latest stable development release:</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"fixest"</span>, </span>
-<span>                 repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>ropensci <span class="op">=</span> <span class="st">'https://fastverse.r-universe.dev'</span>,</span>
-<span>                           CRAN <span class="op">=</span> <span class="st">'https://cloud.r-project.org'</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><code>fixest</code> is an R package offering fast and flexible econometric estimations. It provides a unified framework for applied research, with comprehensive support for a diverse class of models: ordinary least squares (OLS), instrumental variables (IV), generalized linear models (GLM), maximum likelihood (ML), and difference-in-differences (DiD).</p>
 <div class="section level2">
-<h2 id="benchmarking">Benchmarking<a class="anchor" aria-label="anchor" href="#benchmarking"></a>
+<h2 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
 </h2>
-<p>Here is a comparison of the performance of <code>fixest</code> functions to other state of the art methods to perform estimations with multiple fixed-effects. The results are reported in the five figures below. Package <code>fixest</code> (black lines) is consistently faster in all situations.</p>
-<p><img src="https://github.com/lrberge/fixest/blob/master/vignettes/images/benchmark_gaussian.png?raw=true"></p>
-<p><img src="https://github.com/lrberge/fixest/blob/master/vignettes/images/benchmark_difficult.png?raw=true"></p>
-<p><img src="https://github.com/lrberge/fixest/blob/master/vignettes/images/benchmark_poisson.png?raw=true"></p>
-<p><img src="https://github.com/lrberge/fixest/blob/master/vignettes/images/benchmark_negbin.png?raw=true"></p>
-<p><img src="https://github.com/lrberge/fixest/blob/master/vignettes/images/benchmark_logit.png?raw=true"></p>
-<div class="section level3">
-<h3 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
-</h3>
-<p>The benchmarking was performed as follows: In the OLS context, we estimate the following equation:</p>
-<!-- $$y_{ijk} = \alpha_i + \beta_j + \gamma_k + \delta x_{ijk} + \epsilon_{ijk}$$ -->
-<p><img src="https://github.com/lrberge/fixest/blob/master/vignettes/images/equation.PNG?raw=true"></p>
-<p>The same functional form (one variable, three fixed-effects) is estimated for the Poisson, the Negative Binomial and the Logit cases (with ad hoc modifications to fit each model). See Berge (2018) for more details on the setup.</p>
-<p>For the “difficult” benchmark (OLS only), the data is generated in a way that makes the convergence of the fixed-effects slow. The phenomenon of slow convergence is frequent for real micro-level data sets involving employee and firm fixed-effects for instance.</p>
-<p>Each estimation is replicated 10 times and the average computing time is reported in the figures.</p>
-<p>The alternative methods used for comparison are:</p>
-<ul>
-<li>OLS: felm (R: package <a href="https://github.com/sgaure/lfe" class="external-link">lfe</a>), <a href="https://github.com/sergiocorreia/reghdfe" class="external-link">reghdfe</a> (Stata) and <a href="https://github.com/FixedEffects/FixedEffectModels.jl" class="external-link">FixedEffectModels</a> (Julia)</li>
-<li>Poisson: glmmboot (R: package <a href="https://cran.r-project.org/package=glmmML" class="external-link">glmmML</a>), feglm (R: package <a href="https://github.com/amrei-stammann/alpaca" class="external-link">alpaca</a>) and <a href="https://github.com/sergiocorreia/ppmlhdfe" class="external-link">ppmlhdfe</a> (Stata)</li>
-<li>Negative Binomial: glm.nb (R: package MASS) and nbreg (Stata)</li>
-<li>Logit: glmmboot (R: package <a href="https://cran.r-project.org/package=glmmML" class="external-link">glmmML</a>), feglm (R: package <a href="https://github.com/amrei-stammann/alpaca" class="external-link">alpaca</a>) and logit (Stata)</li>
-</ul>
-<p>All the aforementioned packages were updated at the benchmarking date: February 2020.</p>
-<p>The code and data for the benchmarking can be found <a href="https://drive.google.com/drive/folders/1-1M_vLGduByk5P3qHl7AMBBl85RzHpv7?usp=sharing" class="external-link">in this folder</a>.</p>
+<p>A few features: - super fast - large array of models (OLS, IV, GLM, ML) with a consistent syntax throughout - highly optimised handling of fixed-effects - 6 built-in family of VCOVs for inference - run multiple estimations with minimal typing, at dazzling speed - integrated panel features (lead/lag/diff) - top notch error handling to facilitate the user’s life - programmatic formula manipulation with built-in interpolation and macro variables - compatible with &gt; 20 <code>base</code>/<code>stats</code> methods augmented with numerous options (<code>predict</code>, etc) - methods to extract parts of the, possibly multiple, results (<code>coeftable</code>, <code>se</code>, <code>pvalue</code>, <code>tstat</code>) - easy reporting of multiple results on the console, or in publication-ready Latex tables - coefficient plots, including event-study graphs</p>
+<p>If you are new to <code>fixest</code>, you may be interested in the <code>fixest</code> article (<a href="https://arxiv.org/abs/2601.21749" class="external-link uri">https://arxiv.org/abs/2601.21749</a>) or the <a href="https://CRAN.R-project.org/package=fixest/vignettes/fixest_walkthrough.html" class="external-link">introductory walk-through</a>.</p>
+<p>If you are coming from Stata, the stata2R website is highly relevant: <a href="https://stata2r.github.io/fixest/" class="external-link uri">https://stata2r.github.io/fixest/</a>.</p>
+<p>For more details, there are four dedicated guides: to the <a href="https://cran.r-project.org/web/packages/fixest/vignettes/standard_errors.html" class="external-link">standard-errors</a>, to <a href="https://cran.r-project.org/web/packages/fixest/vignettes/collinearity.html" class="external-link">collinearity</a>, to <a href="https://cran.r-project.org/web/packages/fixest/vignettes/multiple_estimations.html" class="external-link">multiple estimations</a>, to the <a href="https://cran.r-project.org/web/packages/fixest/vignettes/exporting_tables.html" class="external-link">exportation of tables</a>. Quickly find how to specify the formula/VCOV with this <a href="https://lrberge.github.io/fixest/articles/cheat-sheet.html">cheat sheet</a>.</p>
 </div>
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># To install from CRAN:</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"fixest"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co"># To install the latest stable development release:</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"fixest"</span>, <span class="at">repos =</span> <span class="at">ropensci =</span> <span class="st">'https://fastverse.r-universe.dev'</span>)</span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="quickstart">Quickstart<a class="anchor" aria-label="anchor" href="#quickstart"></a>
+</h2>
+<p>In this example, we use the built-in <code>airquality</code> data set to estimate the effect of solar radiations and temperature on ozone concentration.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lrberge.github.io/fixest/">fixest</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">airquality</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># OLS model: feols</span></span>
+<span><span class="fu"><a href="reference/feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="va">Temp</span>, <span class="va">airquality</span><span class="op">)</span></span>
+<span><span class="co">#&gt; NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span></span>
+<span><span class="co">#&gt; OLS estimation, Dep. Var.: Ozone</span></span>
+<span><span class="co">#&gt; Observations: 111</span></span>
+<span><span class="co">#&gt; Standard-errors: IID </span></span>
+<span><span class="co">#&gt;                Estimate Std. Error  t value   Pr(&gt;|t|)    </span></span>
+<span><span class="co">#&gt; (Intercept) -145.703155  18.446718 -7.89860 2.5293e-12 ***</span></span>
+<span><span class="co">#&gt; Solar.R        0.057110   0.025719  2.22053 2.8471e-02 *  </span></span>
+<span><span class="co">#&gt; Temp           2.278467   0.245996  9.26222 2.2156e-15 ***</span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
+<span><span class="co">#&gt; RMSE: 23.2   Adj. R2: 0.501249</span></span></code></pre></div>
+<p>We add as controls the month and the day. We treat these variables as fixed-effects, that is categorical variables for which we do not report the estimated coefficients.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="va">Temp</span> <span class="op">|</span> <span class="va">Month</span> <span class="op">+</span> <span class="va">Day</span>, <span class="va">airquality</span><span class="op">)</span></span>
+<span><span class="co">#&gt; NOTES: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span></span>
+<span><span class="co">#&gt;        0/2 fixed-effect singletons were removed (2 observations).</span></span>
+<span><span class="co">#&gt; OLS estimation, Dep. Var.: Ozone</span></span>
+<span><span class="co">#&gt; Observations: 109</span></span>
+<span><span class="co">#&gt; Fixed-effects: Month: 5,  Day: 29</span></span>
+<span><span class="co">#&gt; Standard-errors: IID </span></span>
+<span><span class="co">#&gt;         Estimate Std. Error t value   Pr(&gt;|t|)    </span></span>
+<span><span class="co">#&gt; Solar.R 0.040986   0.027355 1.49828 1.3831e-01    </span></span>
+<span><span class="co">#&gt; Temp    2.782978   0.381101 7.30246 2.6723e-10 ***</span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
+<span><span class="co">#&gt; RMSE: 16.5     Adj. R2: 0.643603</span></span>
+<span><span class="co">#&gt;              Within R2: 0.48899 </span></span></code></pre></div>
+<p>We now use the multiple estimations syntax to run the two previous models at once and display the results with <code>fixest</code>’s <code>etable</code>:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># sw0(): 'sw' means "stepwise", '0' means starting with the empty element</span></span>
+<span><span class="va">est_multi</span> <span class="op">=</span> <span class="fu"><a href="reference/feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="va">Temp</span> <span class="op">|</span> <span class="fu"><a href="reference/stepwise.html">sw0</a></span><span class="op">(</span><span class="va">Month</span> <span class="op">+</span> <span class="va">Day</span><span class="op">)</span>, <span class="va">airquality</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/etable.html">etable</a></span><span class="op">(</span><span class="va">est_multi</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                               x.1               x.2</span></span>
+<span><span class="co">#&gt; Dependent Var.:             Ozone             Ozone</span></span>
+<span><span class="co">#&gt;                                                    </span></span>
+<span><span class="co">#&gt; Constant        -145.7*** (18.45)                  </span></span>
+<span><span class="co">#&gt; Solar.R          0.0571* (0.0257)   0.0410 (0.0274)</span></span>
+<span><span class="co">#&gt; Temp            2.278*** (0.2460) 2.783*** (0.3811)</span></span>
+<span><span class="co">#&gt; Fixed-Effects:  ----------------- -----------------</span></span>
+<span><span class="co">#&gt; Month                          No               Yes</span></span>
+<span><span class="co">#&gt; Day                            No               Yes</span></span>
+<span><span class="co">#&gt; _______________ _________________ _________________</span></span>
+<span><span class="co">#&gt; S.E. type                     IID               IID</span></span>
+<span><span class="co">#&gt; Observations                  111               109</span></span>
+<span><span class="co">#&gt; R2                        0.51032           0.75580</span></span>
+<span><span class="co">#&gt; Within R2                      --           0.48899</span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
+<p>Let’s report the same results but with clustered standard-errors:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># we use the `vocv` argument to change the standard-errors</span></span>
+<span><span class="fu"><a href="reference/etable.html">etable</a></span><span class="op">(</span><span class="va">est_multi</span>, vcov <span class="op">=</span> <span class="fu"><a href="reference/vcov_cluster.html">vcov_cluster</a></span><span class="op">(</span><span class="st">"Month"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                      est_multi.1      est_multi.2</span></span>
+<span><span class="co">#&gt; Dependent Var.:            Ozone            Ozone</span></span>
+<span><span class="co">#&gt;                                                  </span></span>
+<span><span class="co">#&gt; Constant         -145.7* (32.70)                 </span></span>
+<span><span class="co">#&gt; Solar.R          0.0571 (0.0289)  0.0410 (0.0403)</span></span>
+<span><span class="co">#&gt; Temp            2.278** (0.3428) 2.783** (0.3395)</span></span>
+<span><span class="co">#&gt; Fixed-Effects:  ---------------- ----------------</span></span>
+<span><span class="co">#&gt; Month                         No              Yes</span></span>
+<span><span class="co">#&gt; Day                           No              Yes</span></span>
+<span><span class="co">#&gt; _______________ ________________ ________________</span></span>
+<span><span class="co">#&gt; S.E.: Clustered        by: Month        by: Month</span></span>
+<span><span class="co">#&gt; Observations                 111              109</span></span>
+<span><span class="co">#&gt; R2                       0.51032          0.75580</span></span>
+<span><span class="co">#&gt; Within R2                     --          0.48899</span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
+<p>Let’s split the sample by month and represent the coefficients for <code>Solar.R</code> and <code>Temp</code>.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">est_month</span> <span class="op">=</span> <span class="fu"><a href="reference/feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="va">Temp</span>, <span class="va">airquality</span>, split <span class="op">=</span> <span class="op">~</span><span class="va">Month</span><span class="op">)</span></span>
+<span><span class="co"># we use the argument `drop` to drop the Constant</span></span>
+<span><span class="fu"><a href="reference/coefplot.html">coefplot</a></span><span class="op">(</span><span class="va">est_month</span>, drop <span class="op">=</span> <span class="st">"Constant"</span><span class="op">)</span></span>
+<span><span class="co"># we add a legend representing the months</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"topleft"</span>, col <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, lty <span class="op">=</span> <span class="fl">1</span>, lwd <span class="op">=</span> <span class="fl">2</span>, legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Month = "</span>, <span class="fl">5</span><span class="op">:</span><span class="fl">9</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">## Note: You could obtain the legend programmatically with</span></span>
+<span><span class="co"># stringmagic::sma("{sample.var} = {sample}", .data = models(est_month))</span></span></code></pre></div>
+<p><img src="https://github.com/lrberge/fixest/blob/master/vignettes/images/readme/coefplot.png?raw=true"></p>
+</div>
+<div class="section level2">
+<h2 id="benchmarks">Benchmarks<a class="anchor" aria-label="anchor" href="#benchmarks"></a>
+</h2>
+<p>Benchmarks should never be taken at face value given that the timings depend on many parameters: the hardware, the software versions installed, and the specific numerical setups. However, with these caveats in mind, they can still be informative. Below is a set of benchmarks on simulated data with simple/difficult fixed-effects convergence properties, run on 12 January 2026 with up to date software at that time:</p>
+<p><img src="https://github.com/lrberge/fixest/blob/master/vignettes/images/readme/bench_ols_simple.png?raw=true"><img src="https://github.com/lrberge/fixest/blob/master/vignettes/images/readme/bench_ols_difficult.png?raw=true"><img src="https://github.com/lrberge/fixest/blob/master/vignettes/images/readme/bench_poisson_simple.png?raw=true"><img src="https://github.com/lrberge/fixest/blob/master/vignettes/images/readme/bench_poisson_difficult.png?raw=true"></p>
+<p>Please refer to “Section 8 Benchmarks” of the <a href="https://arxiv.org/abs/2601.21749" class="external-link">fixest paper</a> for details on the setup. The code to run the benchmarks is <a href="https://zenodo.org/records/20704145" class="external-link">on zenodo</a>. See “Section 8.2 NYC taxi data” for a benchmark highlighting <code>fixest</code>-specific features with a large real-world data set.</p>
+<p>Across the board, it is safe to say that <code>fixest</code> is one of the fastest tools out there to perform econometric estimations with fixed-effects. Julia’s <a href="https://github.com/FixedEffects/FixedEffectModels.jl" class="external-link"><code>FixedEffectModels</code></a> is very close and might be faster on specific contexts. Even if python’s <a href="https://github.com/py-econometrics/pyfixest" class="external-link"><code>pyfixest</code></a> is slower on these benchmarks, this is likely to change in the close future: Recently the <code>pyfixest</code> team, led by Alex Fisher, has been very active in the development of new demeaning algorithms and have come up with new, and very creative, solutions. In particular for 3+ fixed-effects with difficult convergence properties, you should <a href="https://pyfixest.org/how-to/demeaner-backends.html" class="external-link">check it out</a> if interested.</p>
 </div>
 <div class="section level2">
 <h2 id="acknowledgements">Acknowledgements<a class="anchor" aria-label="anchor" href="#acknowledgements"></a>
 </h2>
-<p>Of course the development of <code>fixest</code> has been inspired and pushed forward by (almost all) these (great) packages used in the benchmarking and I am deeply indebted to their authors. Although <code>fixest</code> contains many features, some are still uncovered and you should definitely have a look at these packages.</p>
+<p>The development of <code>fixest</code> has been inspired and pushed forward by many existing software. In particular, the formula syntax with the pipe to separate the fixed-effects from the independent variables is not from me but from Simen Gaure’s <a href="https://cran.r-project.org/package=lfe" class="external-link"><code>lfe</code></a>. I learned a lot on R-language manipulation by perusing the source code of Achim Zeileis’ <a href="https://cran.r-project.org/package=Formula" class="external-link"><code>Formula</code></a> package. I was spurred to improve <code>fixest</code>’s algorithms by a sane (yet intense!) competition: first by <code>lfe</code>, then by Julia’s <code>FixedEffectModels</code>.</p>
+<p>I am truly indebted to the community who, with countless – and often of very high quality – bug reports, has tremendously improved the robustness of the software.</p>
+<p>Big thanks to the direct contributors (esp. Grant, Kyle, Sebastian) for taking the time to contribute to this project with their expertise.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
@@ -151,7 +227,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>

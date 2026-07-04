@@ -100,6 +100,21 @@
 #'
 #' Binning can be done in many different ways: just remember that it is not because it is 
 #' possible that it does makes sense!
+#' 
+#' @section Estimation of staggered difference-in-difference models:
+#' 
+#' Consider the following example of staggered difference-in-difference. 
+#' You have a panel of persons, or more generically: 'units', who receive a treatment at different
+#' periods and you are interested in finding out the effect of the treatment on an outcome. 
+#' Further, you also want the effet to be net of individual differences and time differences.
+#' 
+#' To estimate this model, you would need to use the `sunab()` function with unit 
+#' and period fixed-effects. 
+#' For example, with `y` the outcome, `id` the unit identifier, 
+#' `year` the period, and `year_treated` the year the treatment is received, 
+#' the `fixest` formula looks like: 
+#' 
+#' `y ~ sunab(year_treated, year) | id + period`
 #'
 #' @author
 #' Laurent Berge
@@ -119,14 +134,14 @@
 #' table(base_stagg$time_to_treatment)
 #'
 #' # The DiD estimation
-#' res_sunab = feols(y ~ x1 + sunab(year_treated, year) | id + year, base_stagg)
+#' res_sunab = feols(y ~ sunab(year_treated, year) | id + year, base_stagg)
 #' etable(res_sunab)
 #'
 #' # By default the reference periods are the first year and the year before the treatment
 #' # i.e. ref.p = c(-1, .F); where .F is a shortcut for the first period.
 #' # Say you want to set as references the first three periods on top of -1
 #'
-#' res_sunab_3ref = feols(y ~ x1 + sunab(year_treated, year, ref.p = c(.F + 0:2, -1)) |
+#' res_sunab_3ref = feols(y ~ sunab(year_treated, year, ref.p = c(.F + 0:2, -1)) |
 #'                          id + year, base_stagg)
 #'
 #' # Display the two results
@@ -154,16 +169,16 @@
 #' # Binning can be done in many different ways
 #'
 #' # binning the cohort
-#' est_bin.c   = feols(y ~ x1 + sunab(year_treated, year, bin.c = 3:2) | id + year, base_stagg)
+#' est_bin.c   = feols(y ~ sunab(year_treated, year, bin.c = 3:2) | id + year, base_stagg)
 #'
 #' # binning the period
-#' est_bin.p   = feols(y ~ x1 + sunab(year_treated, year, bin.p = 3:1) | id + year, base_stagg)
+#' est_bin.p   = feols(y ~ sunab(year_treated, year, bin.p = 3:1) | id + year, base_stagg)
 #'
 #' # binning both the cohort and the period
-#' est_bin     = feols(y ~ x1 + sunab(year_treated, year, bin = 3:1) | id + year, base_stagg)
+#' est_bin     = feols(y ~ sunab(year_treated, year, bin = 3:1) | id + year, base_stagg)
 #'
 #' # binning the relative period, grouping every two years
-#' est_bin.rel = feols(y ~ x1 + sunab(year_treated, year, bin.rel = "bin::2") | id + year, base_stagg)
+#' est_bin.rel = feols(y ~ sunab(year_treated, year, bin.rel = "bin::2") | id + year, base_stagg)
 #'
 #' etable(est_bin.c, est_bin.p, est_bin, est_bin.rel, keep = "year")
 #'
@@ -174,11 +189,11 @@ sunab = function(cohort, period, ref.c = NULL, ref.p = -1, bin, bin.rel,
   # - add id or indiv argument, just to remove always treated
   # - add argument bin.p
 
-  check_arg(cohort, "mbt vector")
+  check_arg(cohort, "mbt vector len(1,)")
   check_arg(period, "mbt vector len(data)", .data = cohort)
-  check_arg(ref.c, "NULL vector no na")
+  check_arg(ref.c, "NULL vector no na l0")
   check_arg(att, no_agg, "logical scalar")
-  check_arg(bin, bin.c, bin.p, bin.rel, "NULL list | vector")
+  check_arg(bin, bin.c, bin.p, bin.rel, "NULL list len(1,) | vector len(1,)")
 
   cohort_name = deparse_long(substitute(cohort))
   period_name = deparse_long(substitute(period))
@@ -418,8 +433,8 @@ sunab_att = function(cohort, period, ref.c = NULL, ref.p = -1){
 #' @param full Logical scalar, defaults to `FALSE`. If `TRUE`, then all coefficients 
 #' are returned, not only the aggregated coefficients.
 #' @param use_weights Logical, default is `TRUE`. If the estimation was weighted, 
-#' whether the aggregation should take into account the weights. Basically if the 
-#' weights reflected frequency it should be `TRUE`.
+#' whether the aggregation should take into account the weights. Basically it should 
+#' always be true unless you have a good reason to ignore the weights during aggregation.
 #' @param ... Arguments to be passed to [`summary.fixest`].
 #'
 #' @details

@@ -432,7 +432,7 @@ l__expand = function(x, k = 1, fill){
   mc = match.call()
 
   if(missing(x)) stop("Argument 'x' cannot be missing.")
-  check_arg(k, "integer vector no na")
+  check_arg(k, "integer vector no na len(1,)")
   check_arg(fill, "NA | numeric scalar")
 
   mc_new = mc
@@ -464,7 +464,7 @@ f__expand = function(x, k = 1, fill){
   mc = match.call()
 
   if(missing(x)) stop("Argument 'x' cannot be missing.")
-  check_arg(k, "integer vector no na")
+  check_arg(k, "integer vector no na len(1,)")
   check_arg(fill, "NA | numeric scalar")
 
   mc_new = mc
@@ -497,7 +497,7 @@ d__expand = function(x, k = 1, fill){
   mc = match.call()
 
   if(missing(x)) stop("Argument 'x' cannot be missing.")
-  check_arg(k, "integer vector no na")
+  check_arg(k, "integer vector no na len(1,)")
   check_arg(fill, "NA | numeric scalar")
 
   mc_new = mc

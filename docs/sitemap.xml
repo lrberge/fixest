@@ -1,5 +1,6 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://lrberge.github.io/fixest/404.html</loc></url>
+<url><loc>https://lrberge.github.io/fixest/articles/cheat-sheet-tables.html</loc></url>
 <url><loc>https://lrberge.github.io/fixest/articles/collinearity.html</loc></url>
 <url><loc>https://lrberge.github.io/fixest/articles/etable_new_features.html</loc></url>
 <url><loc>https://lrberge.github.io/fixest/articles/exporting_tables.html</loc></url>
@@ -60,6 +61,7 @@
 <url><loc>https://lrberge.github.io/fixest/reference/fixest_startup_msg.html</loc></url>
 <url><loc>https://lrberge.github.io/fixest/reference/formula.fixest.html</loc></url>
 <url><loc>https://lrberge.github.io/fixest/reference/fulton.html</loc></url>
+<url><loc>https://lrberge.github.io/fixest/reference/getFixest_ssc.html</loc></url>
 <url><loc>https://lrberge.github.io/fixest/reference/hatvalues.fixest.html</loc></url>
 <url><loc>https://lrberge.github.io/fixest/reference/i.html</loc></url>
 <url><loc>https://lrberge.github.io/fixest/reference/index.html</loc></url>
@@ -75,10 +77,13 @@
 <url><loc>https://lrberge.github.io/fixest/reference/osize.html</loc></url>
 <url><loc>https://lrberge.github.io/fixest/reference/panel.html</loc></url>
 <url><loc>https://lrberge.github.io/fixest/reference/plot.fixest.fixef.html</loc></url>
+<url><loc>https://lrberge.github.io/fixest/reference/plot.fixest.html</loc></url>
 <url><loc>https://lrberge.github.io/fixest/reference/predict.fixest.html</loc></url>
 <url><loc>https://lrberge.github.io/fixest/reference/print.fixest.html</loc></url>
 <url><loc>https://lrberge.github.io/fixest/reference/print.fixest_fitstat.html</loc></url>
 <url><loc>https://lrberge.github.io/fixest/reference/print.fixest_multi.html</loc></url>
+<url><loc>https://lrberge.github.io/fixest/reference/print.fixest_vcov.html</loc></url>
+<url><loc>https://lrberge.github.io/fixest/reference/print.ssc_type.html</loc></url>
 <url><loc>https://lrberge.github.io/fixest/reference/r2.html</loc></url>
 <url><loc>https://lrberge.github.io/fixest/reference/ref.html</loc></url>
 <url><loc>https://lrberge.github.io/fixest/reference/rep.fixest.html</loc></url>
@@ -93,6 +98,7 @@
 <url><loc>https://lrberge.github.io/fixest/reference/setFixest_multi.html</loc></url>
 <url><loc>https://lrberge.github.io/fixest/reference/setFixest_notes.html</loc></url>
 <url><loc>https://lrberge.github.io/fixest/reference/setFixest_nthreads.html</loc></url>
+<url><loc>https://lrberge.github.io/fixest/reference/setFixest_ssc.html</loc></url>
 <url><loc>https://lrberge.github.io/fixest/reference/setFixest_vcov.html</loc></url>
 <url><loc>https://lrberge.github.io/fixest/reference/sigma.fixest.html</loc></url>
 <url><loc>https://lrberge.github.io/fixest/reference/sparse_model_matrix.html</loc></url>

@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>On standard-errors • fixest</title>
+<title>On Standard Errors • fixest</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="On standard-errors">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="On Standard Errors">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.13.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.14.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,12 +35,11 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short Introduction</a></li>
     <li><a class="dropdown-item" href="../articles/multiple_estimations.html">Multiple estimations</a></li>
-    <li><a class="dropdown-item" href="../articles/standard_errors.html">On standard-errors</a></li>
+    <li><a class="dropdown-item" href="../articles/standard_errors.html">On Standard Errors</a></li>
+    <li><a class="dropdown-item" href="../articles/exporting_tables.html">Exporting estimation tables</a></li>
     <li><a class="dropdown-item" href="../articles/collinearity.html">On collinearity</a></li>
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Estimation tables</h6></li>
-    <li><a class="dropdown-item" href="../articles/exporting_tables.html">Exporting estimation tables</a></li>
-    <li><a class="dropdown-item" href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a></li>
+    <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -63,11 +62,11 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>On standard-errors</h1>
-                        <h4 data-toc-skip class="author">Laurent
-Berge</h4>
+      <h1>On Standard Errors</h1>
+                        <h4 data-toc-skip class="author">Laurent Bergé,
+Kyle Butts</h4>
             
-            <h4 data-toc-skip class="date">2025-07-22</h4>
+            <h4 data-toc-skip class="date">2026-06-16</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/HEAD/vignettes/standard_errors.Rmd" class="external-link"><code>vignettes/standard_errors.Rmd</code></a></small>
       <div class="d-none name"><code>standard_errors.Rmd</code></div>
@@ -75,31 +74,222 @@ Berge</h4>
 
     
     
-<p>It is an euphemism to say that standard-errors are a critical element
-of your estimations: literally your paper’s results depend on them. It
-is therefore unfortunate that no conventional “best” way exists to
-compute them.</p>
-<p>For example, when performing the exact same estimation across various
-software, it is not uncommon to obtain different standard-errors. If
-your first thought is: there must be a bug… well, put that thought aside
-because there ain’t no bug. It often boils down to the choices the
-developer made regarding small sample correction which, maybe
-surprisingly, has many degrees of freedom when it comes to
-implementation.</p>
-<p>Multiple definitions can create confusion and the purpose of this
-document is to lay bare the fiddly details of standard-error computation
-in this package.</p>
-<p>The first part of this vignette describes how standard-errors are
-computed in <code>fixest</code>’s estimations. In particular, it details
-all the possible choices surrounding small sample correction. Please
-note that here I don’t discuss the <em>why</em>, but only the
-<em>how</em>. For a thorough introduction to the topic, see the
-excellent paper by <a href="https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf" class="external-link">Zeileis,
-Koll and Graham (2020)</a>. The second part illustrates how to replicate
-some standard-errors obtained from other estimation methods with
-<code>fixest</code>.</p>
-<p>This document applies to <code>fixest</code> version 0.10.0 or
-higher.</p>
+<p>This vignette discusses how the <code>fixest</code> package computes
+the standard-errors of coefficients obtained from (generalized) linear
+regressions (i.e. from <code>feols</code>,
+<code>feglm</code>/<code>fepois</code>). Please note that here we don’t
+discuss much the <em>why</em>, but mostly the <em>how</em>. For an
+introduction to the topic, see the paper by <a href="https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf" class="external-link">Zeileis,
+Koll and Graham (2020)</a>.</p>
+<p>The first part of this vignette describes the main ways
+standard-errors can be computed in <code>fixest</code>’s
+estimations.</p>
+<p>The second part discusses the nitty-gritty details about the possible
+choices surrounding small sample correction.</p>
+<p>The third part illustrates how to replicate standard-errors obtained
+from estimation methods of other software.</p>
+<div class="section level2">
+<h2 id="review-of-theory">Review of theory<a class="anchor" aria-label="anchor" href="#review-of-theory"></a>
+</h2>
+<p>The regression coefficient takes the form
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>β</mi><mo accent="true">̂</mo></mover><mo>≡</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>X</mi><mo>′</mo></msup><mi>X</mi><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mi>−</mi><mn>1</mn></mrow></msup><msup><mi>X</mi><mo>′</mo></msup><mi>y</mi><mo>,</mo></mrow><annotation encoding="application/x-tex">
+  \hat{\beta} \equiv \left( X' X \right)^{-1} X' y,
+</annotation></semantics></math> where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>X</mi><annotation encoding="application/x-tex">X</annotation></semantics></math>
+is the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>×</mo><mi>K</mi></mrow><annotation encoding="application/x-tex">n \times K</annotation></semantics></math>
+matrix of predictor variables for the sample and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>
+is the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>×</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n \times 1</annotation></semantics></math>
+vector of the outcome variable. Plugging in the working model for
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>,
+yields</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>β</mi><mo accent="true">̂</mo></mover><mo>≡</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>X</mi><mo>′</mo></msup><mi>X</mi><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mi>−</mi><mn>1</mn></mrow></msup><msup><mi>X</mi><mo>′</mo></msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><mi>ε</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">
+  \hat{\beta} \equiv \left( X' X \right)^{-1} X' \left( X \beta_0 + \varepsilon \right),
+</annotation></semantics></math> where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\beta_0</annotation></semantics></math>
+corresponds to the population regression coefficent and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ε</mi><annotation encoding="application/x-tex">\varepsilon</annotation></semantics></math>
+is the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>×</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n \times 1</annotation></semantics></math>
+vector of prediction errors.</p>
+<p>This yields:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>β</mi><mo accent="true">̂</mo></mover><mo>−</mo><msub><mi>β</mi><mn>0</mn></msub><mo>=</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>X</mi><mo>′</mo></msup><mi>X</mi><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mi>−</mi><mn>1</mn></mrow></msup><msup><mi>X</mi><mo>′</mo></msup><mi>ε</mi><mi>.</mi></mrow><annotation encoding="application/x-tex">
+  \hat{\beta} - \beta_0 = \left( X' X \right)^{-1} X' \varepsilon.
+</annotation></semantics></math></p>
+<p>This immediately suggests the standard asymptotic distribution
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>β</mi><mo accent="true">̂</mo></mover><mo>∼</mo><mi mathvariant="script">𝒩</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>β</mi><mn>0</mn></msub><mo>,</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>X</mi><mo>′</mo></msup><mi>X</mi><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mi>−</mi><mn>1</mn></mrow></msup><msup><mi>X</mi><mo>′</mo></msup><mi mathvariant="normal">Σ</mi><mi>X</mi><msup><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>X</mi><mo>′</mo></msup><mi>X</mi><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mi>−</mi><mn>1</mn></mrow></msup><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">
+  \hat{\beta} \sim \mathcal{N} \left( \beta_0, \left( X' X \right)^{-1} X' \Sigma X \left( X' X \right)^{-1} \right),
+</annotation></semantics></math> where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Σ</mi><mo>=</mo><mi mathvariant="double-struck">𝔼</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>ε</mi><msup><mi>ε</mi><mo>′</mo></msup><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">\Sigma = \mathbb{E} \left[ \varepsilon \varepsilon' \right]</annotation></semantics></math>
+is the covariance matrix of the error term. The matrix
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>X</mi><mo>′</mo></msup><mi>X</mi><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mi>−</mi><mn>1</mn></mrow></msup><msup><mi>X</mi><mo>′</mo></msup><mi mathvariant="normal">Σ</mi><mi>X</mi><msup><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>X</mi><mo>′</mo></msup><mi>X</mi><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mi>−</mi><mn>1</mn></mrow></msup></mrow><annotation encoding="application/x-tex">\left( X' X \right)^{-1} X' \Sigma X \left( X' X \right)^{-1}</annotation></semantics></math>
+is often called the “sandwich” form inspiring the name of the classic R
+package, <a href="https://sandwich.r-forge.r-project.org/articles/sandwich.html" class="external-link"><code>sandwich</code></a>.
+Continuing with the name,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>X</mi><mo>′</mo></msup><mi>X</mi><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mi>−</mi><mn>1</mn></mrow></msup><annotation encoding="application/x-tex">\left( X' X \right)^{-1}</annotation></semantics></math>
+show up on each side and are called the “bread”. The bread is
+immediately estimated from the data. The “meat”,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>X</mi><mo>′</mo></msup><mi mathvariant="normal">Σ</mi><mi>X</mi></mrow><annotation encoding="application/x-tex">X' \Sigma X</annotation></semantics></math>,
+on the other hand is the source of all the difficulties, since we do not
+observe the prediction error
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ε</mi><annotation encoding="application/x-tex">\varepsilon</annotation></semantics></math>
+directly.</p>
+<p>The matrix
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi mathvariant="normal">Σ</mi><annotation encoding="application/x-tex">\Sigma</annotation></semantics></math>
+takes the form:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Σ</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><msubsup><mi>σ</mi><mn>1</mn><mn>2</mn></msubsup></mtd><mtd columnalign="center" style="text-align: center"><msub><mi>σ</mi><mrow><mn>1</mn><mo>,</mo><mn>2</mn></mrow></msub></mtd><mtd columnalign="center" style="text-align: center"><mi>…</mi></mtd><mtd columnalign="center" style="text-align: center"><mi>σ</mi><mrow><mn>1</mn><mo>,</mo><mi>n</mi></mrow></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><msub><mi>σ</mi><mrow><mn>2</mn><mo>,</mo><mn>1</mn></mrow></msub></mtd><mtd columnalign="center" style="text-align: center"><msubsup><mi>σ</mi><mn>2</mn><mn>2</mn></msubsup></mtd><mtd columnalign="center" style="text-align: center"><mi>…</mi></mtd><mtd columnalign="center" style="text-align: center"><mi>σ</mi><mrow><mn>2</mn><mo>,</mo><mi>n</mi></mrow></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd><mtd columnalign="center" style="text-align: center"><mo>⋱</mo></mtd><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><msub><mi>σ</mi><mrow><mi>n</mi><mo>,</mo><mn>1</mn></mrow></msub></mtd><mtd columnalign="center" style="text-align: center"><msub><mi>σ</mi><mrow><mi>n</mi><mo>,</mo><mn>2</mn></mrow></msub></mtd><mtd columnalign="center" style="text-align: center"><mi>…</mi></mtd><mtd columnalign="center" style="text-align: center"><msubsup><mi>σ</mi><mi>n</mi><mn>2</mn></msubsup></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">
+  \Sigma = \begin{bmatrix}
+    \sigma_1^2 &amp; \sigma_{1, 2} &amp; \dots &amp; \sigma{1, n} \\
+    \sigma_{2, 1} &amp; \sigma_{2}^2 &amp; \dots &amp; \sigma{2, n} \\
+    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+    \sigma_{n, 1} &amp; \sigma_{n, 2} &amp; \dots &amp; \sigma_{n}^2 \\
+  \end{bmatrix}.
+</annotation></semantics></math> The elements
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">\sigma_{i,j}</annotation></semantics></math>
+denote the covariance between unit
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+and unit
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>’s
+error term:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="double-struck">𝔼</mi><mo stretchy="false" form="prefix">[</mo><msub><mi>ε</mi><mi>i</mi></msub><msub><mi>ε</mi><mi>j</mi></msub><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">\mathbb{E}[\varepsilon_i \varepsilon_j]</annotation></semantics></math>.</p>
+<p>A few common cases:</p>
+<ul>
+<li>“Non-correlated”: If we think the error terms are non-correlated
+across observations, then
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>σ</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\sigma_{i,j} = 0</annotation></semantics></math>
+when
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>≠</mo><mi>j</mi></mrow><annotation encoding="application/x-tex">i \neq j</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi mathvariant="normal">Σ</mi><annotation encoding="application/x-tex">\Sigma</annotation></semantics></math>
+is a diagonal matrix.
+<ul>
+<li>If
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>σ</mi><mi>i</mi><mn>2</mn></msubsup><mo>=</mo><msup><mi>σ</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\sigma_i^2 = \sigma^2</annotation></semantics></math>,
+this is called homoskedastic errors.</li>
+<li>If
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>σ</mi><mi>i</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">\sigma_i^2</annotation></semantics></math>
+is allowed to vary, this is called heteroskedastic errors.</li>
+</ul>
+</li>
+<li>“Clustering”: If we think units belong to distinct clusters where
+errors can be correlated,
+i.e. <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>σ</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\sigma_{i,j} = 0</annotation></semantics></math>
+when
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo><mo>≠</mo><mi>c</mi><mo stretchy="false" form="prefix">(</mo><mi>j</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">c(i) \neq c(j)</annotation></semantics></math>
+then
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi mathvariant="normal">Σ</mi><annotation encoding="application/x-tex">\Sigma</annotation></semantics></math>
+is block-diagonal
+<ul>
+<li>If we think there are multiple clusters, then we can use “multi-way
+clustering”</li>
+</ul>
+</li>
+<li>“Autocorrelated”: We might think observations “close together” have
+covariance, but that covariance decays with distance
+<ul>
+<li>“temporally autocorrelated”: if distance is measured over time for a
+given unit (panel or time-series)</li>
+<li>“spatially correlated”: if distance is measured over space</li>
+</ul>
+</li>
+</ul>
+<p>There is no general answer to which setting you might be in; hence
+all the discussion on “how do you cluster your standard errors” or “what
+standard errors are you showing”. However, in general, we estimate
+standard errors by plugging in
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi mathvariant="normal">Σ</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat{\Sigma}</annotation></semantics></math>
+into the sandwich form above. To estimate
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi mathvariant="normal">Σ</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat{\Sigma}</annotation></semantics></math>,
+we use our regression residuals,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>ε</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat{\varepsilon}</annotation></semantics></math>:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi mathvariant="normal">Σ</mi><mo accent="true">̂</mo></mover><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></msub><mo>=</mo><msub><mi>w</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></msub><msub><mover><mi>ε</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><msub><mover><mi>ε</mi><mo accent="true">̂</mo></mover><mi>j</mi></msub><mo>,</mo></mrow><annotation encoding="application/x-tex"> 
+  \hat{\Sigma}_{i, j} = w_{i, j} \hat{\varepsilon}_i \hat{\varepsilon}_j, 
+</annotation></semantics></math> where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>w</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">w_{i,j}</annotation></semantics></math>
+is a weight term (depending on the choice of <code>vcov</code>
+estimator). For example, if we are using “HC1” standard errors, then
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mrow><mi>i</mi><mo>,</mo><mi>i</mi></mrow></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">w_{i,i} = 1</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">w_{i,j} = 0</annotation></semantics></math>
+whenever
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>≠</mo><mi>j</mi></mrow><annotation encoding="application/x-tex">i \neq j</annotation></semantics></math>.
+For clustered standard errors, we use:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></msub><mo>=</mo><mn>1</mn><mi>/</mi><msub><mi>N</mi><mrow><mi>c</mi><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo></mrow></msub></mrow><annotation encoding="application/x-tex">w_{i, j} = 1 / N_{c(i)}</annotation></semantics></math>
+whenever
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>c</mi><mo stretchy="false" form="prefix">(</mo><mi>j</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">c(i) = c(j)</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">w_{i,j} = 0</annotation></semantics></math>
+otherwise.</p>
+<p>Since we use
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>ε</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><annotation encoding="application/x-tex">\hat{\varepsilon}_i</annotation></semantics></math>
+instead of the true
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ε</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\varepsilon_i</annotation></semantics></math>,
+it turns out that our standard error estimates will typically be too
+small. This problem is that the residuals tend to be “too small” because
+they are in-sample prediction errors (regressions overfit the sample).
+This problem is particularly large when the sample size is too “small”.
+Usually, we apply a “small-sample correction” to make the standard
+errors slightly larger. These corrections are usually “ad hoc” and can
+vary from package to package. For this reason, we delay discussion to
+the end of the vignette (<a href="https://en.wikipedia.org/wiki/Here_be_dragons" class="external-link">hic sunt
+leones</a>).</p>
+<div class="section level4">
+<h4 id="fwl-for-variance-covariance-matrix">FWL for variance-covariance matrix<a class="anchor" aria-label="anchor" href="#fwl-for-variance-covariance-matrix"></a>
+</h4>
+<p>The Frisch-Waugh-Lovell theorem is central to the <code>fixest</code>
+package: we can first residualize fixed-effects from the matrix of
+predictors and then run a much simpler regression of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>y</mi><mo accent="true">̃</mo></mover><annotation encoding="application/x-tex">\tilde{y}</annotation></semantics></math>
+on
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>X</mi><mo accent="true">̃</mo></mover><annotation encoding="application/x-tex">\tilde{X}</annotation></semantics></math>
+(with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mo>⋅</mo><mo accent="true">̃</mo></mover><annotation encoding="application/x-tex">\tilde{\cdot}</annotation></semantics></math>
+representing the fixed-effect residualizing. What does this due to our
+estimation of the fixed-effects?</p>
+<p><a href="https://www.sciencedirect.com/science/article/abs/pii/S0167715220302480" class="external-link">Peng
+Ding</a> shows that the standard Frisch-Waugh-Lovell logic applies to
+estimation of the variance-covariance matrix of regression coefficients
+(in most cases). That is, we can use
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mrow><mo stretchy="true" form="prefix">(</mo><msup><mover><mi>X</mi><mo accent="true">̃</mo></mover><mo>′</mo></msup><mover><mi>X</mi><mo accent="true">̃</mo></mover><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mi>−</mi><mn>1</mn></mrow></msup><msup><mover><mi>X</mi><mo accent="true">̃</mo></mover><mo>′</mo></msup><mover><mi mathvariant="normal">Σ</mi><mo accent="true">̂</mo></mover><mover><mi>X</mi><mo accent="true">̃</mo></mover><msup><mrow><mo stretchy="true" form="prefix">(</mo><msup><mover><mi>X</mi><mo accent="true">̃</mo></mover><mo>′</mo></msup><mover><mi>X</mi><mo accent="true">̃</mo></mover><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mi>−</mi><mn>1</mn></mrow></msup><mi>.</mi></mrow><annotation encoding="application/x-tex">
+  \left( \tilde{X}' \tilde{X} \right)^{-1} \tilde{X}' \hat{\Sigma} \tilde{X} \left( \tilde{X}' \tilde{X} \right)^{-1}.
+</annotation></semantics></math> As long as we remember to update our
+degrees of freedom correction to account for the fixed-effects, our
+estimates will be <em>identical</em> to the “full regression”.
+Therefore, <code>fixest</code> is able to maintain its very fast
+estimation approach when estimating standard errors.<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;This is true only if the estimator of
+&lt;math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"&gt;&lt;semantics&gt;&lt;mover&gt;&lt;mi mathvariant="normal"&gt;Σ&lt;/mi&gt;&lt;mo accent="true"&gt;̂&lt;/mo&gt;&lt;/mover&gt;&lt;annotation encoding="application/x-tex"&gt;\hat{\Sigma}&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;
+only depends on residuals and not the matrix
+&lt;math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"&gt;&lt;semantics&gt;&lt;mi&gt;X&lt;/mi&gt;&lt;annotation encoding="application/x-tex"&gt;X&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;.
+This is not true of HC2/HC3 standard errors.&lt;/p&gt;'><sup>1</sup></a></p>
+</div>
+<div class="section level4">
+<h4 id="generalized-linear-models">Generalized linear models<a class="anchor" aria-label="anchor" href="#generalized-linear-models"></a>
+</h4>
+<p>For generalized linear models, a similar sandwich form arrives. In
+<code>fixest</code>, the coefficients are estimated via a <a href="https://en.wikipedia.org/wiki/Iteratively_reweighted_least_squares" class="external-link">“iterative
+weighted least squares”</a> procedure. Therefore, we get a similar
+formula as before:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>V</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="prefix">(</mo><mover><mi>β</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mo stretchy="false" form="prefix">(</mo><msup><mi>X</mi><mo>′</mo></msup><mi>W</mi><mi>X</mi><msup><mo stretchy="false" form="postfix">)</mo><mrow><mi>−</mi><mn>1</mn></mrow></msup><mo stretchy="false" form="prefix">(</mo><msup><mi>X</mi><mo>′</mo></msup><mi mathvariant="normal">Σ</mi><mi>X</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="prefix">(</mo><msup><mi>X</mi><mo>′</mo></msup><mi>W</mi><mi>X</mi><msup><mo stretchy="false" form="postfix">)</mo><mrow><mi>−</mi><mn>1</mn></mrow></msup><mo>,</mo></mrow><annotation encoding="application/x-tex">
+  \hat{V}(\hat{\beta}) = (X' W X)^{-1} (X' \Sigma X) (X' W X)^{-1},
+</annotation></semantics></math> where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>W</mi><annotation encoding="application/x-tex">W</annotation></semantics></math>
+is a diagonal
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>×</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">n \times n</annotation></semantics></math>
+matrix of “working weights”. Again, all the action comes into the matrix
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi mathvariant="normal">Σ</mi><annotation encoding="application/x-tex">\Sigma</annotation></semantics></math>.<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;The
+&lt;math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"&gt;&lt;semantics&gt;&lt;mi mathvariant="normal"&gt;Σ&lt;/mi&gt;&lt;annotation encoding="application/x-tex"&gt;\Sigma&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;
+is not the normal regression “residuals”, but instead the &lt;em&gt;score&lt;/em&gt;
+from the model:
+&lt;math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"&gt;&lt;semantics&gt;&lt;mrow&gt;&lt;mo stretchy="false" form="prefix"&gt;(&lt;/mo&gt;&lt;msub&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mi&gt;i&lt;/mi&gt;&lt;/msub&gt;&lt;mo&gt;−&lt;/mo&gt;&lt;msub&gt;&lt;mover&gt;&lt;mi&gt;μ&lt;/mi&gt;&lt;mo accent="true"&gt;̂&lt;/mo&gt;&lt;/mover&gt;&lt;mi&gt;i&lt;/mi&gt;&lt;/msub&gt;&lt;mo stretchy="false" form="postfix"&gt;)&lt;/mo&gt;&lt;mfrac&gt;&lt;mrow&gt;&lt;mi&gt;∂&lt;/mi&gt;&lt;msub&gt;&lt;mi&gt;η&lt;/mi&gt;&lt;mi&gt;i&lt;/mi&gt;&lt;/msub&gt;&lt;/mrow&gt;&lt;mrow&gt;&lt;mi&gt;∂&lt;/mi&gt;&lt;msub&gt;&lt;mi&gt;μ&lt;/mi&gt;&lt;mi&gt;i&lt;/mi&gt;&lt;/msub&gt;&lt;/mrow&gt;&lt;/mfrac&gt;&lt;/mrow&gt;&lt;annotation encoding="application/x-tex"&gt;(y_i - \hat{\mu}_i) \frac{\partial \eta_i}{\partial \mu_i}&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;.
+That is, it is the forecast error multiplied by the derivative of the
+link function.&lt;/p&gt;'><sup>2</sup></a> Therefore,
+the exact same intuition from above can be used: select the choice of
+vcov based on how you think error terms might be correlated to one
+another.</p>
+</div>
+</div>
 <div class="section level2">
 <h2 id="how-standard-errors-are-computed-in-fixest">How standard-errors are computed in <code>fixest</code><a class="anchor" aria-label="anchor" href="#how-standard-errors-are-computed-in-fixest"></a>
 </h2>
@@ -107,13 +297,189 @@ higher.</p>
 <code>fixest</code>. The main type of standard-error is given by the
 argument <code>vcov</code>, the small sample correction is defined by
 the argument <code>ssc</code>.</p>
-<p>Here’s an example, the explanations follow in the next two
-sections:</p>
+<div class="section level3">
+<h3 id="the-argument-vcov">The argument <code>vcov</code><a class="anchor" aria-label="anchor" href="#the-argument-vcov"></a>
+</h3>
+<p>There are three main ways to specify the VCOV using the argument
+<code>vcov</code>: 1) with a character string, 2) with a formula, 3)
+with a <code>vcov_*</code> function. When a character string, the
+argument <code>vcov</code> can be equal to either: <code>"iid"</code>,
+<code>"hetero"</code>/<code>"HC1"</code>, <code>"HC2"</code>,
+<code>"HC3"</code>, <code>"cluster"</code>, <code>"twoway"</code>,
+<code>"NW"</code>, <code>"DK"</code>, or <code>"conley"</code>.</p>
+<div class="section level4">
+<h4 id="classical-standard-errors">Classical standard errors<a class="anchor" aria-label="anchor" href="#classical-standard-errors"></a>
+</h4>
+<p>For classical standard errors, set <code>vcov = "iid"</code>. This
+assumes that
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>σ</mi><mi>i</mi><mn>2</mn></msubsup><mo>=</mo><msup><mi>σ</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\sigma_i^2 = \sigma^2</annotation></semantics></math>,
+i.e. the errors are non-correlated and homoskedastic. This is the
+default primarily for speed of estimation, but in practice it is never
+recommended as homoskedasticity is not likely to hold.</p>
+</div>
+<div class="section level4">
+<h4 id="heteroskedasticity-robust-standard-errors">Heteroskedasticity-robust standard errors<a class="anchor" aria-label="anchor" href="#heteroskedasticity-robust-standard-errors"></a>
+</h4>
+<p>There are a few options for heteroskedasticity-robust standard
+errors, named HC1, HC2, and HC3. They all allow
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>σ</mi><mi>i</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">\sigma_i^2</annotation></semantics></math>
+to vary by
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>,
+but assumes non correlated errors across
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow><annotation encoding="application/x-tex">i, j</annotation></semantics></math>.
+The HC1 estimator (<a href="https://www.econometricsociety.org/publications/econometrica/1980/05/01/heteroskedasticity-consistent-covariance-matrix-estimator-and" class="external-link">White
+1980</a>) is the fastest to calculate and works well with “large
+samples”. This can be used with <code>vcov = "HC1"</code> or
+<code>vcov = "hetero"</code>.</p>
+<p>However, HC1 performs poorly for small samples. HC2 and HC3 work well
+in small samples, but can be quite costly to compute with large samples.
+These can be used with <code>vcov = "HC2"</code> and
+<code>vcov = "HC3"</code>. See <a href="https://www.econ.queensu.ca/sites/econ.queensu.ca/files/qed_wp_1268.pdf" class="external-link">James
+MacKinnon’s review article</a> for a more detailed discussion.</p>
+</div>
+<div class="section level4">
+<h4 id="cluster-robust-standard-errors">Cluster-robust standard errors<a class="anchor" aria-label="anchor" href="#cluster-robust-standard-errors"></a>
+</h4>
+<p>Cluster robust standard errors allow for correlation within a cluster
+(or multiple clusters). This can be used by passing a one-sided formula,
+<code>vcov = ~ clust_var</code>, to specify the clustering variable. If
+<code>vcov = "cluster"</code> is used, fixest will use the first
+fixed-effect variable as the clustering variable (though it is often
+better to be explicit).</p>
+<p>For multi-way clustering (e.g. clustering a panel of students to be
+clustered by class and over time) can be done with
+<code>vcov = ~ clust1 + clust2</code>. Similarly,
+<code>vcov = "twoway"</code> will automatically use the first two
+fixed-effect variables. <a href="https://jhr.uwpress.org/content/50/2/317.short" class="external-link">Cameron and Miller
+(2015)</a> write a practical guide to clustering that discusses this in
+more detail.</p>
+<p>Inference with a small number of clusters can be potentially
+problematic for classic clustering methods. The intuition the “large N”
+we need for asymptotics to approximate the sample distribution well is
+the number of groups
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>G</mi><annotation encoding="application/x-tex">G</annotation></semantics></math>.
+One solution to this is to use a small-sample correction and a
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>-distribution,
+but this can perform poorly if
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>G</mi><annotation encoding="application/x-tex">G</annotation></semantics></math>
+is very small. <a href="https://ideas.repec.org/p/qed/wpaper/1421.html" class="external-link">MacKinnon and Webb
+(2020)</a> provide more detailed guidance on what to do in this
+case.</p>
+<p><a href="https://academic.oup.com/qje/article/138/1/1/6750017" class="external-link">Abadie,
+Athey, Imbens, and Wooldridge (2023)</a> provide a more detailed
+discussion of whether clustering is needed in causal inference
+methods.</p>
+</div>
+<div class="section level4">
+<h4 id="heteroskedasticity-and-auto-corrleation-robust-standard-errors">Heteroskedasticity and auto-corrleation robust standard errors<a class="anchor" aria-label="anchor" href="#heteroskedasticity-and-auto-corrleation-robust-standard-errors"></a>
+</h4>
+<p>In the context of time series, <code>vcov = "NW"</code> (<a href="https://www.jstor.org/stable/1913610" class="external-link">Newey and West (1987)</a>)
+account for temporal correlation between the errors. For panel data,
+<code>vcov = "DK"</code> (<a href="https://www.jstor.org/stable/2646837" class="external-link">Driscoll and Kraay
+(1998)</a>) account for temporal correlation between the errors. The two
+differing on how to account for heterogeneity between units. Their
+implementation is based on <a href="https://www.jstatsoft.org/article/view/v082i03" class="external-link">Millo
+(2017)</a>.</p>
+<p>In either case, the asymptotic framework requires the number of
+time-periods,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>,
+to be large (regardless of the number of units in the panel context). If
+you have panel data but small
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>,
+clustering at the unit-level is preferabble. The value of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>
+will be relevant in small-sample corrections, discussed below.</p>
+</div>
+<div class="section level4">
+<h4 id="spatial-correlation-robust-standard-errors">Spatial-correlation robust standard errors<a class="anchor" aria-label="anchor" href="#spatial-correlation-robust-standard-errors"></a>
+</h4>
+<p>Finally, <code>vcov = "conley"</code> accounts for spatial
+correlation of the errors based on <a href="https://www.sciencedirect.com/science/article/pii/S0304407698000840" class="external-link">Conley
+(1999)</a>. To account for spatial correlation, <code>fixest</code>
+needs to know the “x” and “y” coordinates. <code>fixest</code> tries to
+be smart and look for these in the dataset by column names, but if this
+fails, you need to use
+<code>vcov = vcov_conley(lat = "xname", lon = "yname")</code>.</p>
+</div>
+<div class="section level4">
+<h4 id="other-options">Other options<a class="anchor" aria-label="anchor" href="#other-options"></a>
+</h4>
+<p><code>fixest</code> was designed with flexibility in mind. It is
+possible to use other methods for estimation via the <code>vcov</code>
+argument. In this setting, a variance-covariance matrix can be
+“attached” to a <code>fixest</code> object using the
+<code>summary</code> function and this matrix will be used for
+post-estimation commands. For example, we can estimate bootstrapped
+standard errors via <code><a href="https://sandwich.R-Forge.R-project.org/reference/vcovBS.html" class="external-link">sandwich::vcovBS</a></code> or we could write a
+custom function that works with a fixest object.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lrberge.github.io/fixest/">fixest</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">trade</span><span class="op">)</span></span>
-<span><span class="co"># OLS estimation</span></span>
-<span><span class="va">gravity</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">Euros</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">dist_km</span><span class="op">)</span> <span class="op">|</span> <span class="va">Destination</span> <span class="op">+</span> <span class="va">Origin</span> <span class="op">+</span> <span class="va">Product</span> <span class="op">+</span> <span class="va">Year</span>, <span class="va">trade</span><span class="op">)</span></span>
+<span><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">wt</span> <span class="op">+</span> <span class="va">hp</span>, <span class="va">mtcars</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Simple function that computes a Bayesian bootstrap</span></span>
+<span><span class="va">vcov_bboot</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">n_sim</span> <span class="op">=</span> <span class="fl">100</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">core_env</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span><span class="va">x</span>, only.coef <span class="op">=</span> <span class="cn">TRUE</span>, only.env <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>  <span class="va">n_obs</span> <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">nobs</span></span>
+<span></span>
+<span>  <span class="va">res_all</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></span><span class="op">(</span><span class="st">"list"</span>, <span class="va">n_sim</span><span class="op">)</span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">n_sim</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="co"># est_env updates estimate using new weights</span></span>
+<span>    <span class="va">res_all</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="fu"><a href="../reference/est_env.html">est_env</a></span><span class="op">(</span>env <span class="op">=</span> <span class="va">core_env</span>, weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Exponential.html" class="external-link">rexp</a></span><span class="op">(</span><span class="va">n_obs</span>, rate <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span></span>
+<span>  <span class="va">res</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">res_all</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="co"># Could return just `var(res)` but the named list will display a nice name in `etable`</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"Bayesian Bootstrap"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">var</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">est_bboot_se</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span>, vcov <span class="op">=</span> <span class="fu">vcov_bboot</span><span class="op">(</span><span class="va">est</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="va">est</span>, <span class="va">est_bboot_se</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt;                                est        est_bboot_se</span></span>
+<span><span class="co">#&gt; Dependent Var.:                mpg                 mpg</span></span>
+<span><span class="co">#&gt;                                                       </span></span>
+<span><span class="co">#&gt; Constant          37.23*** (1.599)    37.23*** (1.946)</span></span>
+<span><span class="co">#&gt; wt              -3.878*** (0.6327)  -3.878*** (0.6159)</span></span>
+<span><span class="co">#&gt; hp              -0.0318** (0.0090) -0.0318*** (0.0061)</span></span>
+<span><span class="co">#&gt; _______________ __________________ ___________________</span></span>
+<span><span class="co">#&gt; S.E. type                      IID  Bayesian Bootstrap</span></span>
+<span><span class="co">#&gt; Observations                    32                  32</span></span>
+<span><span class="co">#&gt; R2                         0.82679             0.82679</span></span>
+<span><span class="co">#&gt; Adj. R2                    0.81484             0.81484</span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre>
+</div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="small-sample-correction">Small sample correction<a class="anchor" aria-label="anchor" href="#small-sample-correction"></a>
+</h2>
+<p>As discussed above, plugging in residuals from a regression to
+estimate the variance of the true error term will create standard error
+estimates that are too small. The small sample correction aims to
+“correct” this problem by increasing the estimate
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>V</mi><mo accent="true">̃</mo></mover><annotation encoding="application/x-tex">\tilde{V}</annotation></semantics></math>
+by some factor that is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≥</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\geq 1</annotation></semantics></math>
+and approaches
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1</mn><annotation encoding="application/x-tex">1</annotation></semantics></math>
+as the sample gets larger. These corrections only make a meaninful
+adjustment when the sample is small (or the number of clusters is
+small), hence the name.</p>
+<p>The type of small sample correction applied is defined by the
+argument <code>ssc</code> which accepts only objects produced by the
+function <code>ssc</code>. The main arguments of this function are
+<code>K.adj</code>, <code>K.fixef</code> and <code>G.adj</code>. Each of
+them is detailed below.</p>
+<p>Before we dive into the details, here is an example of modifying the
+small sample correction:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">trade</span><span class="op">)</span></span>
+<span><span class="va">gravity</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">Euros</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">dist_km</span><span class="op">)</span> <span class="op">|</span> <span class="va">Destination</span> <span class="op">+</span> <span class="va">Origin</span> <span class="op">+</span> <span class="va">Product</span> <span class="op">+</span> <span class="va">Year</span>,</span>
+<span>  <span class="va">trade</span></span>
+<span><span class="op">)</span></span>
 <span><span class="co"># Two-way clustered SEs</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">gravity</span>, vcov <span class="op">=</span> <span class="st">"twoway"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt; OLS estimation, Dep. Var.: log(Euros)</span></span>
@@ -126,7 +492,7 @@ sections:</p>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
 <span><span class="co">#&gt; RMSE: 1.74337     Adj. R2: 0.705139</span></span>
 <span><span class="co">#&gt;                 Within R2: 0.219322</span></span></code></pre>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Two-way clustered SEs, without small sample correction</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">gravity</span>, vcov <span class="op">=</span> <span class="st">"twoway"</span>, ssc <span class="op">=</span> <span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>K.adj <span class="op">=</span> <span class="cn">FALSE</span>, G.adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt; OLS estimation, Dep. Var.: log(Euros)</span></span>
@@ -139,39 +505,6 @@ sections:</p>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
 <span><span class="co">#&gt; RMSE: 1.74337     Adj. R2: 0.705139</span></span>
 <span><span class="co">#&gt;                 Within R2: 0.219322</span></span></code></pre>
-<div class="section level3">
-<h3 id="the-argument-vcov">The argument <code>vcov</code><a class="anchor" aria-label="anchor" href="#the-argument-vcov"></a>
-</h3>
-<p>The argument <code>vcov</code> can be equal to either:
-<code>"iid"</code>, <code>"hetero"</code>, <code>"cluster"</code>,
-<code>"twoway"</code>, <code>"NW"</code>, <code>"DK"</code>, or
-<code>"conley"</code>.</p>
-<p>If <code>vcov = "iid"</code>, then the standard-errors are based on
-the assumption that the errors are non correlated and homoskedastic. If
-<code>vcov = "hetero"</code>, this corresponds to the classic
-hereoskedasticity-robust standard-errors (White correction), where it is
-assumed that the errors are non correlated but the variance of their
-generative law may vary.</p>
-<p>If <code>vcov = "cluster"</code>, then arbitrary correlation of the
-errors within clusters is accounted for. Same for
-<code>vcov = "twoway"</code>: arbitrary correlation within each of the
-two clusters is accounted for.</p>
-<p>In the context of panel data or time series, <code>vcov = "NW"</code>
-(Newey-West, 1987) or <code>vcov = "DK"</code> (Driscoll-Kraay, 1998)
-account for temporal correlation between the errors; the two differing
-on how to account for heterogeneity between units. Their implementation
-is based on Millo (2017).</p>
-<p>Finally, <code>vcov = "conley"</code> accounts for spatial
-correlation of the errors.</p>
-</div>
-<div class="section level3">
-<h3 id="the-argument-ssc">The argument <code>ssc</code><a class="anchor" aria-label="anchor" href="#the-argument-ssc"></a>
-</h3>
-<p>The type of small sample correction applied is defined by the
-argument <code>ssc</code> which accepts only objects produced by the
-function <code>ssc</code>. The main arguments of this function are
-<code>K.adj</code>, <code>K.fixef</code> and <code>G.adj</code>. I
-detail each of them below.</p>
 <p>Say you have
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>V</mi><mo accent="true">̃</mo></mover><annotation encoding="application/x-tex">\tilde{V}</annotation></semantics></math>
 the variance-covariance matrix (henceforth VCOV) before any small sample
@@ -195,7 +528,8 @@ standard-errors. The structure of the 10 observations data is:</p>
 <code>cluster</code>; e.g. <code>id</code> could represent US counties
 and <code>cluster</code> US states).</p>
 <p>The argument <code>K.fixef</code> can be equal to either
-<code>"none"</code>, <code>"nested"</code> or <code>"full"</code>. Then
+<code>"none"</code>, <code>"nonnested"</code> or <code>"full"</code>.
+Then
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
 will be computed as follows:</p>
 <p><img src="https://github.com/lrberge/fixest/blob/master/vignettes/images/SE/K_computation.png?raw=true"></p>
@@ -203,12 +537,12 @@ will be computed as follows:</p>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>K</mi><mrow><mi>v</mi><mi>a</mi><mi>r</mi><mi>s</mi></mrow></msub><annotation encoding="application/x-tex">K_{vars}</annotation></semantics></math>
 is the number of estimated coefficients associated to the variables.
 <code>K.fixef="none"</code> discards all fixed-effects coefficients.
-<code>K.fixef="nested"</code> discards all coefficients that are nested
-(here the 5 coefficients from <code>id</code>). Finally
+<code>K.fixef="nonnested"</code> discards all coefficients that are
+nested (here the 5 coefficients from <code>id</code>). Finally
 <code>K.fixef="full"</code> accounts for all fixed-effects coefficients
 (here 6: equal to 5 from <code>id</code>, plus 2 from <code>time</code>,
 minus one used as a reference [otherwise collinearity arise]). Note that
-if <code>K.fixef="nested"</code> and the standard-errors are
+if <code>K.fixef="nonnested"</code> and the standard-errors are
 <em>not</em> clustered, this is equivalent to using
 <code>K.fixef="full".</code></p>
 <p>The last argument of <code>ssc</code> is <code>G.adj</code>. This
@@ -236,14 +570,12 @@ and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>G</mi><mrow><mi>i</mi><mi>d</mi><mo>,</mo><mi>t</mi><mi>i</mi><mi>m</mi><mi>e</mi></mrow></msub><mo>=</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">G_{id,time}=10</annotation></semantics></math>.</p>
 <p>When standard-errors are corrected for serial correlation, the
 corresponding adjustment applied is
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>G</mi><mrow><mi>t</mi><mi>i</mi><mi>m</mi><mi>e</mi></mrow></msub><mi>/</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>G</mi><mrow><mi>t</mi><mi>i</mi><mi>m</mi><mi>e</mi></mrow></msub><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">G_{time} / (G_{time} - 1)</annotation></semantics></math>.</p>
-<div class="section level4">
-<h4 id="yet-more-details">Yet more details<a class="anchor" aria-label="anchor" href="#yet-more-details"></a>
-</h4>
-<p>You’re already fed up about about these details? I’m sorry but
-there’s more, so far you’ve only seen the main arguments! I now come to
-detail three more elements: <code>K.exact</code>, <code>G.df</code> and
-<code>t.df</code>.</p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>G</mi><mrow><mi>t</mi><mi>i</mi><mi>m</mi><mi>e</mi></mrow></msub><mi>/</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>G</mi><mrow><mi>t</mi><mi>i</mi><mi>m</mi><mi>e</mi></mrow></msub><mo>−</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">G_{time} / (G_{time} - 1)</annotation></semantics></math>.</p>
+<div class="section level3">
+<h3 id="yet-more-details">Yet more details<a class="anchor" aria-label="anchor" href="#yet-more-details"></a>
+</h3>
+<p>We now detail three more elements: <code>K.exact</code>,
+<code>G.df</code> and <code>t.df</code>.</p>
 <p>Argument <code>K.exact</code> is only relevant when there are two or
 more fixed-effects. By default all the fixed-effects coefficients are
 accounted for when computing the degrees of freedom. In general this is
@@ -272,11 +604,11 @@ becomes:</p>
 <p><img src="https://github.com/lrberge/fixest/blob/master/vignettes/images/SE/cluster_df_min.png?raw=true"></p>
 <p>Now instead of having a specific adjustment for each matrix, there is
 only one adjustment of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>G</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><mi>/</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>G</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">G_{min}/(G_{min}-1)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>G</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><mi>/</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>G</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><mo>−</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">G_{min}/(G_{min}-1)</annotation></semantics></math>
 where
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>G</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><annotation encoding="application/x-tex">G_{min}</annotation></semantics></math>
 is the minimum cluster size (here
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>G</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><mo>=</mo><mo>min</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>G</mi><mrow><mi>i</mi><mi>d</mi></mrow></msub><mo>,</mo><msub><mi>G</mi><mrow><mi>t</mi><mi>i</mi><mi>m</mi><mi>e</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">G_{min}=\min(G_{id},G_{time})</annotation></semantics></math>).</p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>G</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><mo>=</mo><mrow><mi mathvariant="normal">min</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>G</mi><mrow><mi>i</mi><mi>d</mi></mrow></msub><mo>,</mo><msub><mi>G</mi><mrow><mi>t</mi><mi>i</mi><mi>m</mi><mi>e</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">G_{min}=\min(G_{id},G_{time})</annotation></semantics></math>).</p>
 <p>Argument <code>t.df</code> is only relevant when standard-errors are
 clustered. It affects the way the <em>p-value</em> and <em>confidence
 intervals</em> are computed. It can be equal to: either
@@ -287,7 +619,6 @@ in the Student t distribution is equal to the minimum cluster size
 <code>t.df="conventional"</code>, the degrees of freedom used to find
 the p-value from the Student t distribution is equal to the number of
 observations minus the number of estimated coefficients.</p>
-</div>
 </div>
 </div>
 <div class="section level2">
@@ -302,14 +633,14 @@ replicate the latter from <code>fixest</code>.</p>
 <p>Using the Grunfeld data set from the <code>plm</code> package, here
 are some comparisons when the estimation doesn’t contain
 fixed-effects.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sandwich.R-Forge.R-project.org/" class="external-link">sandwich</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://cran.r-project.org/package=plm" class="external-link">plm</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">Grunfeld</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Estimations</span></span>
-<span><span class="va">res_lm</span>    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">inv</span> <span class="op">~</span> <span class="va">capital</span>, <span class="va">Grunfeld</span><span class="op">)</span></span>
+<span><span class="va">res_lm</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">inv</span> <span class="op">~</span> <span class="va">capital</span>, <span class="va">Grunfeld</span><span class="op">)</span></span>
 <span><span class="va">res_feols</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">inv</span> <span class="op">~</span> <span class="va">capital</span>, <span class="va">Grunfeld</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Same standard-errors</span></span>
@@ -317,9 +648,9 @@ fixed-effects.</p>
 <pre><code><span><span class="co">#&gt;      (Intercept)   capital</span></span>
 <span><span class="co">#&gt; [1,]    15.63927 0.0383394</span></span>
 <span><span class="co">#&gt; [2,]    15.63927 0.0383394</span></span></code></pre>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Heteroskedasticity-robust covariance</span></span>
-<span><span class="va">se_lm_hc</span>    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="fu"><a href="https://sandwich.R-Forge.R-project.org/reference/vcovHC.html" class="external-link">vcovHC</a></span><span class="op">(</span><span class="va">res_lm</span>, type <span class="op">=</span> <span class="st">"HC1"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">se_lm_hc</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="fu"><a href="https://sandwich.R-Forge.R-project.org/reference/vcovHC.html" class="external-link">vcovHC</a></span><span class="op">(</span><span class="va">res_lm</span>, type <span class="op">=</span> <span class="st">"HC1"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">se_feols_hc</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">res_feols</span>, vcov <span class="op">=</span> <span class="st">"hetero"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">se_lm_hc</span>, <span class="va">se_feols_hc</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt;             (Intercept)    capital</span></span>
@@ -334,13 +665,21 @@ similar results (same SEs, same p-values).</p>
 <p>The most important differences arise in the presence of
 fixed-effects. Let’s first compare “iid” standard-errors between
 <code>lm</code> and <code>plm</code>.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Estimations</span></span>
-<span><span class="va">est_lm</span>    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">inv</span> <span class="op">~</span> <span class="va">capital</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">firm</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">year</span><span class="op">)</span>, <span class="va">Grunfeld</span><span class="op">)</span></span>
-<span><span class="va">est_plm</span>   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/plm/man/plm.html" class="external-link">plm</a></span><span class="op">(</span><span class="va">inv</span> <span class="op">~</span> <span class="va">capital</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">year</span><span class="op">)</span>, <span class="va">Grunfeld</span>, </span>
-<span>                index <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"firm"</span>, <span class="st">"year"</span><span class="op">)</span>, model <span class="op">=</span> <span class="st">"within"</span><span class="op">)</span></span>
+<span><span class="va">est_lm</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">inv</span> <span class="op">~</span> <span class="va">capital</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">firm</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">year</span><span class="op">)</span>, <span class="va">Grunfeld</span><span class="op">)</span></span>
+<span><span class="va">est_plm</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/plm/man/plm.html" class="external-link">plm</a></span><span class="op">(</span></span>
+<span>  <span class="va">inv</span> <span class="op">~</span> <span class="va">capital</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">year</span><span class="op">)</span>,</span>
+<span>  <span class="va">Grunfeld</span>,</span>
+<span>  index <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"firm"</span>, <span class="st">"year"</span><span class="op">)</span>,</span>
+<span>  model <span class="op">=</span> <span class="st">"within"</span></span>
+<span><span class="op">)</span></span>
 <span><span class="co"># we use panel.id so that panel VCOVs can be applied directly</span></span>
-<span><span class="va">est_feols</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">inv</span> <span class="op">~</span> <span class="va">capital</span> <span class="op">|</span> <span class="va">firm</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">Grunfeld</span>, panel.id <span class="op">=</span> <span class="op">~</span><span class="va">firm</span> <span class="op">+</span> <span class="va">year</span><span class="op">)</span></span>
+<span><span class="va">est_feols</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span></span>
+<span>  <span class="va">inv</span> <span class="op">~</span> <span class="va">capital</span> <span class="op">|</span> <span class="va">firm</span> <span class="op">+</span> <span class="va">year</span>,</span>
+<span>  <span class="va">Grunfeld</span>,</span>
+<span>  panel.id <span class="op">=</span> <span class="op">~</span> <span class="va">firm</span> <span class="op">+</span> <span class="va">year</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">#</span></span>
 <span><span class="co"># "iid" standard-errors</span></span>
@@ -352,9 +691,13 @@ fixed-effects. Let’s first compare “iid” standard-errors between
 <span><span class="co">#&gt; [1,] 0.02597821</span></span>
 <span><span class="co">#&gt; [2,] 0.02597821</span></span>
 <span><span class="co">#&gt; [3,] 0.02597821</span></span></code></pre>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># p-values:</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="fu"><a href="../reference/coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">est_lm</span><span class="op">)</span><span class="op">[</span><span class="st">"capital"</span><span class="op">]</span>, <span class="fu"><a href="../reference/coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">est_plm</span><span class="op">)</span><span class="op">[</span><span class="st">"capital"</span><span class="op">]</span>, <span class="fu"><a href="../reference/coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="st">"iid"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="../reference/coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">est_lm</span><span class="op">)</span><span class="op">[</span><span class="st">"capital"</span><span class="op">]</span>,</span>
+<span>  <span class="fu"><a href="../reference/coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">est_plm</span><span class="op">)</span><span class="op">[</span><span class="st">"capital"</span><span class="op">]</span>,</span>
+<span>  <span class="fu"><a href="../reference/coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="st">"iid"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt;           capital</span></span>
 <span><span class="co">#&gt; [1,] 1.519204e-35</span></span>
 <span><span class="co">#&gt; [2,] 1.519204e-35</span></span>
@@ -366,12 +709,12 @@ also the case for Stata’s <code>xtreg</code>.</p>
 <h4 id="clustered-ses">Clustered SEs<a class="anchor" aria-label="anchor" href="#clustered-ses"></a>
 </h4>
 <p>Now for clustered SEs:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Clustered by firm</span></span>
-<span><span class="va">se_lm_firm</span>    <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="fu"><a href="https://sandwich.R-Forge.R-project.org/reference/vcovCL.html" class="external-link">vcovCL</a></span><span class="op">(</span><span class="va">est_lm</span>, cluster <span class="op">=</span> <span class="op">~</span><span class="va">firm</span>, type <span class="op">=</span> <span class="st">"HC1"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="st">"capital"</span><span class="op">]</span></span>
-<span><span class="va">se_plm_firm</span>   <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="fu"><a href="https://sandwich.R-Forge.R-project.org/reference/vcovHC.html" class="external-link">vcovHC</a></span><span class="op">(</span><span class="va">est_plm</span>, cluster <span class="op">=</span> <span class="st">"group"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="st">"capital"</span><span class="op">]</span></span>
-<span><span class="va">se_stata_firm</span> <span class="op">=</span> <span class="fl">0.06328129</span>    <span class="co"># vce(cluster firm)</span></span>
-<span><span class="va">se_feols_firm</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="st">"cluster"</span><span class="op">)</span></span>
+<span><span class="va">se_lm_firm</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="fu"><a href="https://sandwich.R-Forge.R-project.org/reference/vcovCL.html" class="external-link">vcovCL</a></span><span class="op">(</span><span class="va">est_lm</span>, cluster <span class="op">=</span> <span class="op">~</span><span class="va">firm</span>, type <span class="op">=</span> <span class="st">"HC1"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="st">"capital"</span><span class="op">]</span></span>
+<span><span class="va">se_plm_firm</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="fu"><a href="https://sandwich.R-Forge.R-project.org/reference/vcovHC.html" class="external-link">vcovHC</a></span><span class="op">(</span><span class="va">est_plm</span>, cluster <span class="op">=</span> <span class="st">"group"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="st">"capital"</span><span class="op">]</span></span>
+<span><span class="va">se_stata_firm</span> <span class="op">=</span> <span class="fl">0.06328129</span> <span class="co"># vce(cluster firm)</span></span>
+<span><span class="va">se_feols_firm</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="op">~</span><span class="va">firm</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">se_lm_firm</span>, <span class="va">se_plm_firm</span>, <span class="va">se_stata_firm</span>, <span class="va">se_feols_firm</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt;                  capital</span></span>
@@ -386,61 +729,63 @@ also identical to the one from Stata (from <code>fixest</code> version
 0.7.0 onwards).</p>
 <p>Now let’s see how to replicate the standard-errors from
 <code>lm</code> and <code>plm</code>:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># How to get the lm version</span></span>
-<span><span class="va">se_feols_firm_lm</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, ssc <span class="op">=</span> <span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>K.fixef <span class="op">=</span> <span class="st">"full"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">se_feols_firm_lm</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="op">~</span><span class="va">firm</span>, ssc <span class="op">=</span> <span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>K.fixef <span class="op">=</span> <span class="st">"full"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">se_lm_firm</span>, <span class="va">se_feols_firm_lm</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt;                     capital</span></span>
 <span><span class="co">#&gt; se_lm_firm       0.06493478</span></span>
-<span><span class="co">#&gt; se_feols_firm_lm 0.02597821</span></span></code></pre>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<span><span class="co">#&gt; se_feols_firm_lm 0.06493478</span></span></code></pre>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># How to get the plm version</span></span>
-<span><span class="va">se_feols_firm_plm</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, ssc <span class="op">=</span> <span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>K.fixef <span class="op">=</span> <span class="st">"none"</span>, G.adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">se_feols_firm_plm</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span></span>
+<span>  <span class="va">est_feols</span>,</span>
+<span>  vcov <span class="op">=</span> <span class="op">~</span><span class="va">firm</span>,</span>
+<span>  ssc <span class="op">=</span> <span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>K.fixef <span class="op">=</span> <span class="st">"none"</span>, G.adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">se_plm_firm</span>, <span class="va">se_feols_firm_plm</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt;                      capital</span></span>
 <span><span class="co">#&gt; se_plm_firm       0.05693726</span></span>
-<span><span class="co">#&gt; se_feols_firm_plm 0.02401083</span></span></code></pre>
+<span><span class="co">#&gt; se_feols_firm_plm 0.05693726</span></span></code></pre>
 </div>
 <div class="section level4">
 <h4 id="hac-ses">HAC SEs<a class="anchor" aria-label="anchor" href="#hac-ses"></a>
 </h4>
 <p>And finally let’s look at Newey-West and Driscoll-Kray
 standard-errors:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#</span></span>
 <span><span class="co"># Newey-west</span></span>
 <span><span class="co">#</span></span>
 <span></span>
-<span><span class="va">se_plm_NW</span>   <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/plm/man/vcovNW.html" class="external-link">vcovNW</a></span><span class="op">(</span><span class="va">est_plm</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="st">"capital"</span><span class="op">]</span></span>
+<span><span class="va">se_plm_NW</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/plm/man/vcovNW.html" class="external-link">vcovNW</a></span><span class="op">(</span><span class="va">est_plm</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="st">"capital"</span><span class="op">]</span></span>
 <span><span class="va">se_feols_NW</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="st">"NW"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">se_plm_NW</span>, <span class="va">se_feols_NW</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt;                capital</span></span>
 <span><span class="co">#&gt; se_plm_NW   0.08390222</span></span>
 <span><span class="co">#&gt; se_feols_NW 0.09313517</span></span></code></pre>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># we can replicate plm's by changing the type of SSC:</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">se_plm_NW</span>, </span>
-<span>      <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="va">NW</span> <span class="op">~</span> <span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>K.adj <span class="op">=</span> <span class="cn">FALSE</span>, G.adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">se_plm_NW</span>, <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="va">NW</span> <span class="op">~</span> <span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>K.adj <span class="op">=</span> <span class="cn">FALSE</span>, G.adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt;              capital</span></span>
 <span><span class="co">#&gt; se_plm_NW 0.08390222</span></span>
 <span><span class="co">#&gt;           0.08390222</span></span></code></pre>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#</span></span>
 <span><span class="co"># Driscoll-Kraay</span></span>
 <span><span class="co">#</span></span>
 <span></span>
-<span><span class="va">se_plm_DK</span>   <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/plm/man/vcovSCC.html" class="external-link">vcovSCC</a></span><span class="op">(</span><span class="va">est_plm</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="st">"capital"</span><span class="op">]</span></span>
+<span><span class="va">se_plm_DK</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/plm/man/vcovSCC.html" class="external-link">vcovSCC</a></span><span class="op">(</span><span class="va">est_plm</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="st">"capital"</span><span class="op">]</span></span>
 <span><span class="va">se_feols_DK</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="st">"DK"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">se_plm_DK</span>, <span class="va">se_feols_DK</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt;                capital</span></span>
 <span><span class="co">#&gt; se_plm_DK   0.08359734</span></span>
 <span><span class="co">#&gt; se_feols_DK 0.09279674</span></span></code></pre>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Replicating plm's</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">se_plm_DK</span>, </span>
-<span>      <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="va">DK</span> <span class="op">~</span> <span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>K.adj <span class="op">=</span> <span class="cn">FALSE</span>, G.adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">se_plm_DK</span>, <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="va">DK</span> <span class="op">~</span> <span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>K.adj <span class="op">=</span> <span class="cn">FALSE</span>, G.adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt;              capital</span></span>
 <span><span class="co">#&gt; se_plm_DK 0.08359734</span></span>
 <span><span class="co">#&gt;           0.08359734</span></span></code></pre>
@@ -458,7 +803,7 @@ and p-values are computed similarly to <code>reghdfe</code>, for both
 clustered and multiway clustered standard errors. So the comparison here
 focuses on <code>lfe</code>.</p>
 <p>Here are the differences and similarities with <code>lfe</code>:</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-econometrics/lfe" class="external-link">lfe</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># lfe: clustered by firm</span></span>
@@ -470,37 +815,43 @@ focuses on <code>lfe</code>.</p>
 <pre><code><span><span class="co">#&gt;                  capital</span></span>
 <span><span class="co">#&gt; se_lfe_firm   0.06016851</span></span>
 <span><span class="co">#&gt; se_feols_firm 0.06328129</span></span></code></pre>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># You have to provide a custom VCOV to replicate lfe's VCOV</span></span>
-<span><span class="va">my_vcov</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">est_feols</span>, ssc <span class="op">=</span> <span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>K.adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="va">my_vcov</span> <span class="op">*</span> <span class="fl">199</span><span class="op">/</span><span class="fl">198</span><span class="op">)</span> <span class="co"># Note that there are 200 observations</span></span></code></pre></div>
-<pre><code><span><span class="co">#&gt;    capital </span></span>
-<span><span class="co">#&gt; 0.02407139</span></span></code></pre>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># You have to provide a custom VCOV to replicate lfe's VCOV</span></span>
+<span><span class="va">my_vcov</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="op">~</span><span class="va">firm</span>, ssc <span class="op">=</span> <span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>K.adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="va">my_vcov</span> <span class="op">*</span> <span class="fl">199</span> <span class="op">/</span> <span class="fl">198</span><span class="op">)</span> <span class="co"># Note that there are 200 observations</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt;    capital </span></span>
+<span><span class="co">#&gt; 0.06016851 </span></span>
+<span><span class="co">#&gt; attr(,"vcov_type")</span></span>
+<span><span class="co">#&gt; [1] "Custom"</span></span></code></pre>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Differently from feols, the SEs in lfe are different if year is not a FE:</span></span>
 <span><span class="co"># =&gt; now SEs are identical.</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/lfe/man/felm.html" class="external-link">felm</a></span><span class="op">(</span><span class="va">inv</span> <span class="op">~</span> <span class="va">capital</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">year</span><span class="op">)</span> <span class="op">|</span> <span class="va">firm</span> <span class="op">|</span> <span class="fl">0</span> <span class="op">|</span> <span class="va">firm</span>, <span class="va">Grunfeld</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="st">"capital"</span><span class="op">]</span>,</span>
-<span>      <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">inv</span> <span class="op">~</span> <span class="va">capital</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">year</span><span class="op">)</span> <span class="op">|</span> <span class="va">firm</span>, <span class="va">Grunfeld</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="st">"capital"</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/lfe/man/felm.html" class="external-link">felm</a></span><span class="op">(</span><span class="va">inv</span> <span class="op">~</span> <span class="va">capital</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">year</span><span class="op">)</span> <span class="op">|</span> <span class="va">firm</span> <span class="op">|</span> <span class="fl">0</span> <span class="op">|</span> <span class="va">firm</span>, <span class="va">Grunfeld</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="st">"capital"</span><span class="op">]</span>,</span>
+<span>  <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">inv</span> <span class="op">~</span> <span class="va">capital</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">year</span><span class="op">)</span> <span class="op">|</span> <span class="va">firm</span>, <span class="va">Grunfeld</span><span class="op">)</span>, vcov <span class="op">=</span> <span class="op">~</span><span class="va">firm</span><span class="op">)</span><span class="op">[</span></span>
+<span>    <span class="st">"capital"</span></span>
+<span>  <span class="op">]</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt;         capital</span></span>
 <span><span class="co">#&gt; [1,] 0.06328129</span></span>
-<span><span class="co">#&gt; [2,] 0.02597821</span></span></code></pre>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<span><span class="co">#&gt; [2,] 0.06328129</span></span></code></pre>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Now with two-way clustered standard-errors</span></span>
-<span><span class="va">est_lfe_2way</span>  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/lfe/man/felm.html" class="external-link">felm</a></span><span class="op">(</span><span class="va">inv</span> <span class="op">~</span> <span class="va">capital</span> <span class="op">|</span> <span class="va">firm</span> <span class="op">+</span> <span class="va">year</span> <span class="op">|</span> <span class="fl">0</span> <span class="op">|</span> <span class="va">firm</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">Grunfeld</span><span class="op">)</span></span>
-<span><span class="va">se_lfe_2way</span>   <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_lfe_2way</span><span class="op">)</span></span>
+<span><span class="va">est_lfe_2way</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/lfe/man/felm.html" class="external-link">felm</a></span><span class="op">(</span><span class="va">inv</span> <span class="op">~</span> <span class="va">capital</span> <span class="op">|</span> <span class="va">firm</span> <span class="op">+</span> <span class="va">year</span> <span class="op">|</span> <span class="fl">0</span> <span class="op">|</span> <span class="va">firm</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">Grunfeld</span><span class="op">)</span></span>
+<span><span class="va">se_lfe_2way</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_lfe_2way</span><span class="op">)</span></span>
 <span><span class="va">se_feols_2way</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="st">"twoway"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">se_lfe_2way</span>, <span class="va">se_feols_2way</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt;                  capital</span></span>
 <span><span class="co">#&gt; se_lfe_2way   0.06213837</span></span>
 <span><span class="co">#&gt; se_feols_2way 0.06041290</span></span></code></pre>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># To obtain the same SEs, use G.df = "conventional"</span></span>
 <span><span class="va">sum_feols_2way_conv</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="va">twoway</span> <span class="op">~</span> <span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>G.df <span class="op">=</span> <span class="st">"conv"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">se_lfe_2way</span>, <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">sum_feols_2way_conv</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt;                capital</span></span>
 <span><span class="co">#&gt; se_lfe_2way 0.06213837</span></span>
 <span><span class="co">#&gt;             0.06213837</span></span></code></pre>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># We also obtain the same p-values</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="fu"><a href="../reference/coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">est_lfe_2way</span><span class="op">)</span>, <span class="fu"><a href="../reference/coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">sum_feols_2way_conv</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt;           capital</span></span>
@@ -516,16 +867,20 @@ computes them.</p>
 </h4>
 <p>Once you’ve found the preferred way to compute the standard-errors
 for your current project, you can set it permanently using the functions
-<code><a href="../reference/ssc.html">setFixest_ssc()</a></code> and <code><a href="../reference/setFixest_vcov.html">setFixest_vcov()</a></code>.</p>
-<p>For example, if you want to remove the small sample adjustment, just
-use:</p>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/ssc.html">setFixest_ssc</a></span><span class="op">(</span><span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>K.adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code><a href="../reference/setFixest_ssc.html">setFixest_ssc()</a></code> and <code><a href="../reference/setFixest_vcov.html">setFixest_vcov()</a></code>.</p>
+<p>For example, if you want to remove the small sample adjustment for
+the clustered standard-errors, use:</p>
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/setFixest_ssc.html">setFixest_ssc</a></span><span class="op">(</span><span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>K.adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>, <span class="st">"cluster"</span><span class="op">)</span></span></code></pre></div>
 <p>By default, the standard-errors are the standard ones (IID). You can
 change this behavior with, e.g.:</p>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/setFixest_vcov.html">setFixest_vcov</a></span><span class="op">(</span>no_FE <span class="op">=</span> <span class="st">"iid"</span>, one_FE <span class="op">=</span> <span class="st">"cluster"</span>, </span>
-<span>               two_FE <span class="op">=</span> <span class="st">"hetero"</span>, panel <span class="op">=</span> <span class="st">"driscoll_kraay"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/setFixest_vcov.html">setFixest_vcov</a></span><span class="op">(</span></span>
+<span>  no_FE <span class="op">=</span> <span class="st">"iid"</span>,</span>
+<span>  one_FE <span class="op">=</span> <span class="st">"cluster"</span>,</span>
+<span>  two_FE <span class="op">=</span> <span class="st">"hetero"</span>,</span>
+<span>  panel <span class="op">=</span> <span class="st">"driscoll_kraay"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p>which changes the way the default standard-errors are computed when
 the estimation contains no fixed-effects, one fixed-effect, two or more
 fixed-effects, or is a panel.</p>
@@ -535,6 +890,17 @@ fixed-effects, or is a panel.</p>
 <h2 id="changelog">Changelog<a class="anchor" aria-label="anchor" href="#changelog"></a>
 </h2>
 <ul>
+<li>
+<p>Version 0.14.0:</p>
+<ul>
+<li><p>More details on the general inference procedure and references
+for particular estimators added</p></li>
+<li><p>The function <code>setFixest_ssc</code> becomes VCOV specific
+(before it was applied to all VCOVS). You can pass the names of the
+VCOVs to which it should apply using its second argument
+<code>vcov_names</code>.</p></li>
+</ul>
+</li>
 <li>
 <p>Version 0.13.0:</p>
 <ul>
@@ -599,25 +965,56 @@ is, now by default <code>G.df = "min"</code> and
 <div class="section level2">
 <h2 id="references-acknowledgments">References &amp; acknowledgments<a class="anchor" aria-label="anchor" href="#references-acknowledgments"></a>
 </h2>
-<p>I wish to thank Karl Dunkle Werner, Grant McDermott and Ivo Welch for
-raising the issue and for helpful discussions. Any error is of course my
-own.</p>
+<p>We wish to thank Karl Dunkle Werner, Grant McDermott and Ivo Welch
+for raising the issue and for helpful discussions. Any errors are of
+course our own.</p>
+<p>Abadie, A., Athey, S., Imbens, G. W., &amp; Wooldridge, J. M. (2023).
+“<a href="https://academic.oup.com/qje/article/138/1/1/6750017" class="external-link">When
+should you adjust standard errors for clustering?</a>”, The Quarterly
+Journal of Economics, 138(1), 1-35.</p>
 <p>Cameron AC, Gelbach JB, Miller DL (2011). “<a href="https://www.nber.org/papers/t0327" class="external-link">Robust Inference with Multiway
 Clustering</a>”, Journal of Business &amp; Ecomomic Statistics, 29(2),
 238–249.</p>
+<p>Colin Cameron, A., &amp; Miller, D. L. (2015). “<a href="https://jhr.uwpress.org/content/50/2/317.short" class="external-link">A practitioner’s
+guide to cluster-robust inference</a>”, Journal of Human Resources,
+50(2), 317-372.</p>
+<p>Conley, T. G. (1999). “<a href="https://www.sciencedirect.com/science/article/pii/S0304407698000840" class="external-link">GMM
+Estimation With Cross Sectional Dependence</a>”. Journal of
+Econometrics, 92(1), 1-45.</p>
+<p>Ding, P. (2021). “<a href="https://www.sciencedirect.com/science/article/abs/pii/S0167715220302480" class="external-link">The
+Frisch–Waugh–Lovell theorem for standard errors</a>”, Statistics &amp;
+Probability Letters, 168, 108945.</p>
+<p>Driscoll, J. C., &amp; Kraay, A. C. (1998). “<a href="https://www.jstor.org/stable/2646837" class="external-link">Consistent Covariance Matrix
+Estimation With Spatially Dependent Panel Data</a>”, Review of Economics
+and Statistics, 80(4), 549-560.</p>
 <p>Kauermann G, Carroll RJ (2001). “<a href="https://doi.org/10.1198/016214501753382309" class="external-link">A Note on the
 Efficiency of Sandwich Covariance Matrix Estimation</a>”, Journal of the
 American Statistical Association, 96(456), 1387–1396.</p>
 <p>MacKinnon JG, White H (1985). “Some heteroskedasticity-consistent
-covariance matrix estimators with improved finite sample properties”
+covariance matrix estimators with improved finite sample properties”,
 Journal of Econometrics, 29(3), 305–325.</p>
+<p>MacKinnon, J. G. (2012). “<a href="https://www.econ.queensu.ca/sites/econ.queensu.ca/files/qed_wp_1268.pdf" class="external-link">Thirty
+years of heteroskedasticity-robust inference</a>”, In Recent advances
+and future directions in causality, prediction, and specification
+analysis: Essays in honor of Halbert L. White Jr (pp. 437-461). New
+York, NY: Springer New York.</p>
+<p>MacKinnon, J. G., &amp; Webb, M. D. (2020). “<a href="https://ideas.repec.org/p/qed/wpaper/1421.html" class="external-link">Clustering methods
+for statistical inference</a>”, In Handbook of Labor, Human Resources
+and Population Economics, 1-37.</p>
 <p>Millo G (2017). “<a href="https://doi.org/10.18637/jss.v082.i03" class="external-link">Robust Standard Error
-Estimators for Panel Models: A Unifying Approach</a>” Journal of
+Estimators for Panel Models: A Unifying Approach</a>”, Journal of
 Statistical Software, 82(3).</p>
+<p>Newey, W. K., West, K. D. (1986). “<a href="https://www.jstor.org/stable/1913610" class="external-link">A simple, positive
+semi-definite, heteroskedasticity and autocorrelationconsistent
+covariance matrix</a>”, Econometrica, 55(3), 703-708.</p>
+<p>White, H. (1980). “<a href="https://www.econometricsociety.org/publications/econometrica/1980/05/01/heteroskedasticity-consistent-covariance-matrix-estimator-and" class="external-link">A
+heteroskedasticity-consistent covariance matrix estimator and a direct
+test for heteroskedasticity</a>”, Econometrica, 817-838.</p>
 <p>Zeileis A, Koll S, Graham N (2020). “<a href="https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf" class="external-link">Various
 Versatile Variances: An Object-Oriented Implementation of Clustered
-Covariances in R</a>” Journal of Statistical Software, 95(1), 1–36.</p>
+Covariances in R</a>”, Journal of Statistical Software, 95(1), 1–36.</p>
 </div>
+
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
@@ -629,7 +1026,7 @@ Covariances in R</a>” Journal of Statistical Software, 95(1), 1–36.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>
