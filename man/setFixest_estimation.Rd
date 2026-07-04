@@ -20,6 +20,7 @@ setFixest_estimation(
   mem.clean = FALSE,
   glm.iter = 25,
   glm.tol = 1e-08,
+  demeaner = NULL,
   data.save = FALSE,
   reset = FALSE
 )
@@ -115,6 +116,10 @@ code to avoid memory issues.}
 \item{glm.iter}{Number of iterations of the glm algorithm. Default is 25.}
 
 \item{glm.tol}{Tolerance level for the glm algorithm. Default is \code{1e-8}.}
+
+\item{demeaner}{\code{NULL} (default) or a demeaning backend object created by
+\code{\link{MapDemeaner}} or \code{\link{LsmrDemeaner}}. If \code{NULL}, the native MAP backend is
+used with \code{fixef.tol} and \code{fixef.iter}.}
 
 \item{data.save}{Logical scalar, default is \code{FALSE}. If \code{TRUE}, the data used for
 the estimation is saved within the returned object. Hence later calls to predict(),
