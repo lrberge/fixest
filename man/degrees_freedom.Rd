@@ -59,11 +59,12 @@ blank with \code{vcov = "twoway"} (assuming \code{var1} [resp. \code{var2}] was
 the 1st [resp. 2nd] fixed-effect). You can interact two variables using \code{^} with
 the following syntax: \code{cluster = ~var1^var2} or \code{cluster = "var1^var2"}.}
 
-\item{ssc}{An object of class \code{ssc.type} obtained with the function \code{\link{ssc}}. Represents
-how the degree of freedom correction should be done.You must use the function \code{\link{ssc}}
+\item{ssc}{An object of class \code{ssc_type} obtained with the function \code{\link{ssc}}. Represents
+how the small sample correction should be done. You must use the function \code{\link{ssc}}
 for this argument. The arguments and defaults of the function \code{\link{ssc}} are:
 \code{K.adj = TRUE}, \code{K.fixef = "nonnested"}, \code{G.adj = TRUE}, \code{G.df = "min"},
-\code{t.df = "min"}, \verb{K.exact = FALSE)}. See the help of the function \code{\link{ssc}} for details.}
+\code{t.df = "min"}, \verb{K.exact = FALSE)}. See the help of the function \code{\link{ssc}} for details.
+Not all VCOV types are affected by this argument.}
 
 \item{stage}{Either 1 or 2. Only concerns IV regressions, which stage to look at.
 

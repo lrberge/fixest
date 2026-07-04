@@ -115,7 +115,7 @@ test = function(x, y, type = "=", tol = 1e-6){
   if(type  == "warn"){
     # we expect an warning
     m = tryCatch(x, warning = function(w) structure(conditionMessage(w), class = "try-warning"))
-    if(!"try-warning" %in% class(m)){
+    if(!inherits(m, "try-warning")){
       stop("Expected a warning that did not occur.")
       
     } else if(IS_Y && !grepl(tolower(y), tolower(m), fixed = TRUE)){
@@ -125,7 +125,7 @@ test = function(x, y, type = "=", tol = 1e-6){
   } else if(type == "err"){
     # we expect an error
     m = tryCatch(x, error = function(e) structure(conditionMessage(e), class = "try-error"))
-    if(!"try-error" %in% class(m)){
+    if(!inherits(m, "try-error")){
       stop("Expected an error that did not occur.")
       
     } else if(IS_Y && !grepl(tolower(y), tolower(m), fixed = TRUE)){
@@ -486,7 +486,7 @@ run_tests = function(chunk, from = 1, source = FALSE, use_devtools = TRUE){
 
   # E) Message
 
-  if("try-error" %in% class(my_eval)){
+  if(inherits(my_eval, "try-error")){
     line_fail = get("LINE_COUNTER", env)
     inside_loop = get("INSIDE_LOOP", env)
     

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.13.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.14.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,8 +48,8 @@
 <div class="section level4">
 <h4 id="compatibility-with-the-sandwich-package">Compatibility with the sandwich package<a class="anchor" aria-label="anchor" href="#compatibility-with-the-sandwich-package"></a></h4>
 <p>So far <code>fixest</code> objects are compatible with variances computed with the package <code>sandwich</code> with the following exceptions:</p>
-<ul><li><p><code>vcovHC</code> with <code>type = "HC4"</code>: The compatibility is only partial, i.e. it works for models without fixed-effects but breaks with fixed-effects estimations. This is because the hatvalues, needed for this kind of VCOV correction, are not defined when fixed-effects are used (actually I could make it compatible but the model would need to be reestimated with dummy variables, and this hardly squares with the idea of efficient fixed-effects estimation).</p></li>
-<li><p><code>vcovBS</code>, i.e. bootstraped standard-errors: Absolutely not compatible so far, but it will become compatible later (hopefully).</p></li>
+<ul><li>
+<code>vcovBS</code>, i.e. bootstraped standard-errors: Absolutely not compatible so far, but it will become compatible later (hopefully).</li>
 </ul></div>
 </div>
 

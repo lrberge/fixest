@@ -12,7 +12,7 @@
 \item{...}{Optionally, more fitted objects.}
 }
 \value{
-It return a numeric vector, with length the same as the number of objects taken as arguments.
+It returns a numeric vector, with length the same as the number of objects taken as arguments.
 }
 \description{
 This function computes the BIC (Bayesian information criterion) from a \code{fixest} estimation.

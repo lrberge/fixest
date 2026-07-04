@@ -26,7 +26,7 @@ or more fixed-effects (FE), ignored otherwise. For 3+ FEs, the algorithm is as f
 a) demeaning over the first two largest FEs only, until convergence, then
 b) demeaning over all FEs until convergence.
 To skip the demeaning over 2 FEs, use a very high value of \code{iter_warmup}. To go directly
-to the demeaning over 2 FEs, se \code{iter_warmup} to a value lower than or equal to 0.
+to the demeaning over 2 FEs, set \code{iter_warmup} to a value lower than or equal to 0.
 }}
 
 \item{iter_projAfterAcc}{Integer scalar, default is 40. After \code{iter_projAfterAcc} iterations
@@ -41,7 +41,7 @@ This settings controls a grand acceleration, which is instead for \code{f^k(X)} 
 \code{k} is the value of \code{iter_grandAcc} and \code{f^2(X)} is defined as \code{f(f(X))}
 (i.e. the function \code{f} applied \code{k} times). By default, an additional acceleration
 is performed for \code{h(X) = f^4(X)} every 8 iterations (2 times 4, equivalent to
-the iterationsthe time to gather \code{h(X)} and \code{h(h(X))}).}
+the iterations the time to gather \code{h(X)} and \code{h(h(X))}).}
 
 \item{internal}{Logical scalar, default is \code{FALSE}. If \code{TRUE}, no check on the arguments
 is performed and the returned object is a plain list. For internal use only.}
@@ -96,7 +96,7 @@ Finally in case of 3+ fixed-effects (FE), the convergence in general takes more 
 In cases of the absence of quick convergence, applying a first demeaning over the first
 two largest FEs before applying the demeaning over all FEs can improve convergence speed.
 This is controlled with the argument \code{iter_warmup} which gives the number of iterations
-over all the FEs to run before going to the 2 FEs demeaning. By default, the deameaning
+over all the FEs to run before going to the 2 FEs demeaning. By default, the demeaning
 over all FEs is run for 15 iterations before switching to the 2 FEs case.
 
 The above defaults are the outcome of extended empirical applications, and try to strike a

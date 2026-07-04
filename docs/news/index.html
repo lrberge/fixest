@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.13.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.14.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,7 +44,104 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.14.0" id="fixest-0140">fixest 0.14.0<a class="anchor" aria-label="anchor" href="#fixest-0140"></a></h2><p class="text-muted">CRAN release: 2026-03-18</p>
+<div class="section level3">
+<h3 id="bug-fixes-0-14-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-14-0"></a></h3>
+<ul><li><p>vcov: fix bug in the message when <code>vcov_fix = FALSE</code> and the matrix is found to be non postive definite. Reported by <a href="https://github.com/MatthieuStigler" class="external-link">@MatthieuStigler</a>.</p></li>
+<li><p><code>etable</code>: fix bug when <code>extralines</code> or <code>headers</code> was single valued (fixes <a href="https://github.com/lrberge/fixest/issues/399" class="external-link">#399</a>)</p></li>
+<li><p>fix bug leading to R crach when the dependent variable contained only missing values (reported by <a href="https://github.com/Orgron" class="external-link">@Orgron</a>, <a href="https://github.com/lrberge/fixest/issues/603" class="external-link">#603</a>)</p></li>
+<li><p><code><a href="../reference/update.fixest.html">update.fixest()</a></code> and <code><a href="../reference/update.fixest.html">update.fixest_multi()</a></code> no longer throw a warning if <code>use_calling_env</code> is used (<a href="https://github.com/lrberge/fixest/issues/619" class="external-link">#619</a>, <a href="https://github.com/etiennebacher" class="external-link">@etiennebacher</a>).</p></li>
+<li><p>improve detection of R-checks to avoid wrongly setting the number of cores to 1. Thanks to <a href="https://github.com/adamaltmejd" class="external-link">@adamaltmejd</a> for reporting, fixes <a href="https://github.com/lrberge/fixest/issues/625" class="external-link">#625</a>.</p></li>
+<li><p>fix major bug, leading R to crash, when i) an endogenous regressor is fully explained by the instruments + exogenous variables, or ii) the instruments have exactly 0 explanatory power. Reported by <a href="https://github.com/willwwang" class="external-link">@willwwang</a>, <a href="https://github.com/lrberge/fixest/issues/604" class="external-link">#604</a></p></li>
+<li><p>remove unwanted warnings when using VCOV HC2/HC3</p></li>
+<li><p>fix bug leading to an increase of 1 in the degrees of freedom in estimations involving multiple fixed-effects. Thanks to <a href="https://github.com/leostimpfle" class="external-link">@leostimpfle</a> for reporting (<a href="https://github.com/lrberge/fixest/issues/631" class="external-link">#631</a>).</p></li>
+<li><p>fix bug in the predict method when applied to split sample estimations with fixed-effects with some fixed-effects which were removed. Thanks to <a href="https://github.com/francescodelprato" class="external-link">@francescodelprato</a> for reporting (<a href="https://github.com/lrberge/fixest/issues/620" class="external-link">#620</a>).</p></li>
+<li><p><code>etable</code>: fix bug removing whitespaces in variable names (reported by <a href="https://github.com/etiennebacher" class="external-link">@etiennebacher</a>, <a href="https://github.com/lrberge/fixest/issues/608" class="external-link">#608</a>)</p></li>
+<li><p>interaction between <code><a href="../reference/panel.html">panel()</a></code> and <code>data.table</code>: fix bug preventing the print of the table. Reported by <a href="https://github.com/andrewbaxter439" class="external-link">@andrewbaxter439</a>, <a href="https://github.com/lrberge/fixest/issues/610" class="external-link">#610</a>.</p></li>
+<li><p><code>etable</code>: fix bug when the table contained 10+ columns in a tabularx environment. Thanks to <a href="https://github.com/MaelAstruc" class="external-link">@MaelAstruc</a>, <a href="https://github.com/lrberge/fixest/issues/637" class="external-link">#637</a></p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-features-0-14-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-14-0"></a></h3>
+<ul><li><p>THIS SOFTWARE FINALLY GETS A PROPER CITATION!!! Citation file updated, now points to the 2026 arxiv paper (<a href="https://arxiv.org/abs/2601.21749" class="external-link uri">https://arxiv.org/abs/2601.21749</a>).</p></li>
+<li><p><code>etable</code>: arguments <code>extralines</code> and <code>headers</code> are more robust and the behavior is slightly modified. You can now position the values using integer indexes which give the columns position, insead of column spans. It also errors more gracefully. This change is retro compatible.</p></li>
+<li><p><code>etable</code>: new arguments <code>keep_raw</code>, <code>drop_raw</code>, <code>order_raw</code> which have the same effect as keep/drop/order but refer explicitly to the original variable names before the dictionary is applied</p></li>
+<li><p><code>etable</code>: new argument <code>coef.sub</code> to apply arbitrary string substitutions on the final coefficient names</p></li>
+<li><p>in multiple estimations in which at least one estimation contains only missing values: no error is thrown any more</p></li>
+<li><p>in <code>coefplot</code>: the argument <code>zero</code> now adds 0 to the y-axis (instead of only turning highlighting on/off)</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="small-sample-correction-0-14-0">Small sample correction<a class="anchor" aria-label="anchor" href="#small-sample-correction-0-14-0"></a></h3>
+<ul><li><p>you can now set the SSC globally for each VCOV individually with <code>setFixest_ssc(ssc_type, vcov_names)</code> (before it was the same SSC for any VCOV)</p></li>
+<li><p>the documentation for each VCOV now contains how the small sample correction is applied</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="other-changes-0-14-0">Other changes<a class="anchor" aria-label="anchor" href="#other-changes-0-14-0"></a></h3>
+<ul><li><p>VCOV: the test for non positive definite (PD) matrices becomes <code>x &lt;= 0</code> to avoid overfixing. This leads to a less aggressive matrix regularization. Even if the effect of fixing was negligible, the messages were annoying. Thanks to <a href="https://github.com/MatthieuStigler" class="external-link">@MatthieuStigler</a> for pushing this.</p></li>
+<li><p>VCOV: when the VCOV is not PD, the user is informed only if the regularized PD matrix is noticeably different (at least one difference larger than <code>1e-8</code>).</p></li>
+<li><p>the <code>stats</code> method <code>logLik.fixest</code> now resembles <code>logLik.lm</code></p></li>
+<li><p>add <code>plot</code> method that mimics <code>coefplot</code>/<code>iplot</code> with auto switch when appropriate – thanks to an editor and to GMD for the idea!</p></li>
+<li><p>improve the display of the error messages in the main estimations</p></li>
+<li><p>improve the display of TSLS estimations (now always show the main dependent variable)</p></li>
+<li><p>in multiple estimations, when a model cannot be estimated, the cause of the problem is kept for reporting</p></li>
+<li><p>better handle PROTECT/UNPROTECT in to_index.cpp</p></li>
+<li><p>remove calls to Rf_error (reported by <a href="https://github.com/Enchufa2" class="external-link">@Enchufa2</a>, <a href="https://github.com/lrberge/fixest/issues/636" class="external-link">#636</a>)</p></li>
+<li><p>new method <code>print.fixest_vcov</code> to display the VCOV without showing its attributes (too many, it was ugly)</p></li>
+<li><p>in <code>vcov.fixest</code>, the argument <code>attr</code> is now equal to <code>TRUE</code> by default (following <code>print.fixest_vcov</code>)</p></li>
+<li><p>in <code>update.fixest</code>, the argument use_calling_env becomes context dependent (follows <a href="https://github.com/lrberge/fixest/issues/618" class="external-link">#618</a>)</p></li>
+<li><p>improve the startup message: i) remove false positives, ii) write the previous fixest version in the message, making it clearer which modifications the update entails</p></li>
+<li><p><code><a href="../reference/wald.html">wald()</a></code> now uses the effective sample size to compute the pvalue (it matters for clustered standard-errors with few clusters). Thanks to <a href="https://github.com/Oravishayrizi" class="external-link">@Oravishayrizi</a>, <a href="https://github.com/lrberge/fixest/issues/634" class="external-link">#634</a></p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="internals-0-14-0">Internals<a class="anchor" aria-label="anchor" href="#internals-0-14-0"></a></h3>
+<ul><li>OpenMP multithreading should now work out-of-the-box for CRAN Mac binary installations; please confirm with <code><a href="../reference/setFixest_nthreads.html">getFixest_nthreads()</a></code>. Previously, Mac users had to configure their <code>~/.R/Makevars</code> and install <code>fixest</code> from source to get multithreaded performance. Thanks to the <code>data.table</code> team for pioneering the configure script approach (<a href="https://github.com/lrberge/fixest/issues/615" class="external-link">#615</a>).</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.13.2" id="fixest-0132">fixest 0.13.2<a class="anchor" aria-label="anchor" href="#fixest-0132"></a></h2><p class="text-muted">CRAN release: 2025-09-08</p>
+<div class="section level3">
+<h3 id="bug-fixes-0-13-2">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-13-2"></a></h3>
+<ul><li>fix ad hoc bug with the reverse dependency <code>did2s</code> &lt; <code>1.0.2</code>
+</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.13.1" id="fixest-0131">fixest 0.13.1<a class="anchor" aria-label="anchor" href="#fixest-0131"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-0-13-1">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-13-1"></a></h3>
+<ul><li>fix bug in the package startup message</li>
+</ul></div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.13.0" id="fixest-0130">fixest 0.13.0<a class="anchor" aria-label="anchor" href="#fixest-0130"></a></h2>
+<div class="section level3">
+<h3 id="breaking-changes-0-13-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-13-0"></a></h3>
+<ul><li><p><strong>the new default VCOV is <code>iid</code> for all estimations</strong>. To change the default to the way it was, place <code>setFixest_vcov(all = "cluster", no_FE = "iid")</code> in your <code>.Rprofile</code>.</p></li>
+<li><p>the function <code>dof</code> is removed (it was deprecated and replaced with the function <code>ssc</code> since 2021)</p></li>
+<li><p>in <code>etable</code>, the argument <code>replace = TRUE</code> by default (it was <code>FALSE</code>)</p></li>
+<li>
+<p>the arguments of the function <code>ssc</code> are renamed:</p>
+<ul><li>
+<code>adj</code> =&gt; <code>K.adj</code>
+</li>
+<li>
+<code>fixef.K</code> =&gt; <code>K.fixef</code>
+</li>
+<li>
+<code>fixef.force_exact</code> =&gt; <code>K.exact</code>
+</li>
+<li>
+<code>cluster.adj</code> =&gt; <code>G.adj</code>
+</li>
+<li>
+<code>cluster.df</code> =&gt; <code>G.df</code>
+</li>
+</ul><p>Retro compatibility is ensured. Thanks to Kyle Butts and Grant McDermott for the brainstorm!</p>
+</li>
+<li><p>on <code>ssc</code>: argument <code>G.adj</code> does not apply to hetero standard-errors any more</p></li>
+<li><p>in the functions <code>coefplot</code> and <code>iplot</code>: the argument <code>object</code> is removed, now all models need to be passed in <code>...</code>. The dots do not accept arguments to summary methods any more. Retro-compatibility partly ensured.</p></li>
+<li><p>in all estimations, now the default is to remove all observations that are perfectly fit by the fixed-effects (this includes the singletons). To go back to the previous case, use the argument <code>fixef.rm="infinite_coef"</code>, or add the following command in your <code>.Rprofile</code>: <code>setFixest_estimation(fixef.rm = "infinite_coef")</code>.</p></li>
+<li><p>the argument <code>fixef.rm</code> is modified, the accepted values now become “singletons”, “infinite_coef”, “perfect_fit” (new default), or “none” (formerly it was “singleton”, “perfect”, “both”, “none”). It leads to the removal of i) fixed-effects associated to a single observation, ii) fixed-effects fitting perfectly the outcome and leading to infinite coefficients (in GLM families, e.g. think to only 0 outcomes in a Poisson estimation), iii) the observations removed in the first two cases, iv) no observations is removed. In any case: the point estimates (coefficients) do not vary depending on the value of this argument. The inference on the other hand may vary (that is the standard-errors of the coefficients may change).</p></li>
+</ul></div>
 <div class="section level3">
 <h3 id="new-features-0-13-0">New Features<a class="anchor" aria-label="anchor" href="#new-features-0-13-0"></a></h3>
 <ul><li><p>new VCOVs: heteroskedaticity-robust HC2 and HC3 VCOVs available thanks to <a href="https://github.com/kylebutts" class="external-link">@kylebutts</a></p></li>
@@ -121,34 +218,6 @@
 <h3 id="new-vignette-and-data-set-0-13-0">New vignette and data set<a class="anchor" aria-label="anchor" href="#new-vignette-and-data-set-0-13-0"></a></h3>
 <ul><li><p>add a new vignette on collinearity</p></li>
 <li><p>new data set <code>base_pub</code>, based on publication data from the Microsoft Academic Graph, used to illustrate the new vignette</p></li>
-</ul></div>
-<div class="section level3">
-<h3 id="breaking-changes-0-13-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-13-0"></a></h3>
-<ul><li><p><strong>the new default VCOV is <code>iid</code> for all estimations</strong>. To change the default to the way it was, place <code>setFixest_vcov(all = "cluster", no_FE = "iid")</code> in your <code>.Rprofile</code>.</p></li>
-<li><p>the function <code>dof</code> is removed (it was deprecated and replaced with the function <code>ssc</code> since 2021)</p></li>
-<li><p>in <code>etable</code>, the argument <code>replace = TRUE</code> by default (it was <code>FALSE</code>)</p></li>
-<li>
-<p>the arguments of the function <code>ssc</code> are renamed:</p>
-<ul><li>
-<code>adj</code> =&gt; <code>K.adj</code>
-</li>
-<li>
-<code>fixef.K</code> =&gt; <code>K.fixef</code>
-</li>
-<li>
-<code>fixef.force_exact</code> =&gt; <code>K.exact</code>
-</li>
-<li>
-<code>cluster.adj</code> =&gt; <code>G.adj</code>
-</li>
-<li>
-<code>cluster.df</code> =&gt; <code>G.df</code>
-</li>
-</ul><p>Retro compatibility is ensured. Thanks to Kyle Butts and Grant McDermott for the brainstorm!</p>
-</li>
-<li><p>in the functions <code>coefplot</code> and <code>iplot</code>: the argument <code>object</code> is removed, now all models need to be passed in <code>...</code>. The dots do not accept arguments to summary methods any more. Retro-compatibility partly ensured.</p></li>
-<li><p>in all estimations, now the default is to remove all observations that are perfectly fit by the fixed-effects (this includes the singletons). To go back to the previous case, use the argument <code>fixef.rm="infinite_coef"</code>, or add the following command in your <code>.Rprofile</code>: <code>setFixest_estimation(fixef.rm = "infinite_coef")</code>.</p></li>
-<li><p>the argument <code>fixef.rm</code> is modified, the accepted values now become “singletons”, “infinite_coef”, “perfect_fit” (new default), or “none” (formerly it was “singleton”, “perfect”, “both”, “none”). It leads to the removal of i) fixed-effects associated to a single observation, ii) fixed-effects fitting perfectly the outcome and leading to infinite coefficients (in GLM families, e.g. think to only 0 outcomes in a Poisson estimation), iii) the observations removed in the first two cases, iv) no observations is removed. In any case: the point estimates (coefficients) do not vary depending on the value of this argument. The inference on the other hand may vary (that is the standard-errors of the coefficients may change).</p></li>
 </ul></div>
 <div class="section level3">
 <h3 id="other-changes-0-13-0">Other changes<a class="anchor" aria-label="anchor" href="#other-changes-0-13-0"></a></h3>

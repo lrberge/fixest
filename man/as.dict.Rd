@@ -13,7 +13,7 @@ variable name, and on the right its definition. The separation between the varia
 definition must be a colon followed with a single space (i.e. ": "). You can stack definitions
 within a single line by making use of a semi colon: \code{"var1: def; var2: def"}. White spaces on
 the left and right are ignored. You can add commented lines with a \code{"#"}. Non-empty,
-non-commented lines that don't have the proper format witll raise an error.}
+non-commented lines that don't have the proper format will raise an error.}
 }
 \value{
 It returns a named character vector.

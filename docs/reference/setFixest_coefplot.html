@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.13.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.14.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -131,10 +131,12 @@ entries in the global dictionary, to disable this behavior, use "reset" as the f
 <dd><p>Character vector. This element is used to display only a subset of variables. This
 should be a vector of regular expressions (see <code><a href="https://rdrr.io/r/base/regex.html" class="external-link">base::regex</a></code> help for more info). Each
 variable satisfying any of the regular expressions will be kept. This argument is applied post
-aliasing (see argument <code>dict</code>). Example: you have the variable <code>x1</code> to <code>x55</code> and want to display
+aliasing (see argument <code>dict</code>).
+Use the argument <code>keep_raw</code> for the same effect before aliasing.</p>
+<p>Example: you have the variable <code>x1</code> to <code>x55</code> and want to display
 only <code>x1</code> to <code>x9</code>, then you could use <code>keep = "x[[:digit:]]$"</code>. If the first character is an
-exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that
-does not contain “Intercept” is kept). See details.</p></dd>
+exclamation mark, the effect is reversed (e.g. keep = "!Constant" means: every variable that
+does not contain “Constant” is kept). See details.</p></dd>
 
 
 <dt id="arg-ci-width">ci.width<a class="anchor" aria-label="anchor" href="#arg-ci-width"></a></dt>
@@ -206,13 +208,17 @@ vertical lines. Eg: <code>grid.par = list(vert = FALSE, col = "red", lwd = 2)</c
 
 
 <dt id="arg-zero">zero<a class="anchor" aria-label="anchor" href="#arg-zero"></a></dt>
-<dd><p>Logical, default is <code>TRUE</code>. Whether the 0-line should be emphasized.
-You can set the parameters of that line with the argument <code>zero.par</code>.</p></dd>
+<dd><p>Logical scalar, default is <code>TRUE</code>. Whether the 0 should be displayed
+in the limits of the y-axis.
+Note that you can set how this zero line looks like with the argument <code>zero.par</code>.</p></dd>
 
 
 <dt id="arg-zero-par">zero.par<a class="anchor" aria-label="anchor" href="#arg-zero-par"></a></dt>
-<dd><p>List. Parameters of the zero-line. The default values are
-<code>col = "black"</code> and <code>lwd = 1</code>. You can add any graphical parameter that will be passed
+<dd><p>A named list of graphical parameters or a logical scalar.
+This argument is a list containing the graphical parameters used to draw the zero-line.
+The default value is <code>list(col = "black", lwd = 1)</code> (it's the same if <code>TRUE</code>).
+Set it to <code>FALSE</code> to turn off the special emphasis of the zero line.
+You can add any graphical parameter that will be passed
 to <code><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">graphics::abline</a></code>. Example: <code>zero.par = list(col = "darkblue", lwd = 3)</code>.</p></dd>
 
 
@@ -240,13 +246,15 @@ Only used if <code>ci.join=TRUE</code>. By default it is equal to <code>list(lwd
 
 <dt id="arg-ci-fill">ci.fill<a class="anchor" aria-label="anchor" href="#arg-ci-fill"></a></dt>
 <dd><p>Logical default to <code>FALSE</code>. Whether to fill the confidence intervals
-with a color. If <code>TRUE</code>, then you can set the graphical parameters with the argument <code>ci.fill.par</code>.</p></dd>
+with a color. If <code>TRUE</code>, then you can set the graphical parameters
+with the argument <code>ci.fill.par</code>.</p></dd>
 
 
 <dt id="arg-ci-fill-par">ci.fill.par<a class="anchor" aria-label="anchor" href="#arg-ci-fill-par"></a></dt>
 <dd><p>A list of parameters to be passed to <code><a href="https://rdrr.io/r/graphics/polygon.html" class="external-link">graphics::polygon</a></code>.
 Only used if <code>ci.fill=TRUE</code>. By default it is equal to <code>list(col = "lightgray", alpha = 0.5)</code>.
-Note that <code>alpha</code> is a special parameter that adds transparency to the color (ranges from 0 to 1).</p></dd>
+Note that <code>alpha</code> is a special parameter that adds transparency to the color
+(ranges from 0 to 1).</p></dd>
 
 
 <dt id="arg-ref-line">ref.line<a class="anchor" aria-label="anchor" href="#arg-ref-line"></a></dt>
@@ -260,7 +268,8 @@ line will be drawn at that specific value.</p></dd>
 <dt id="arg-ref-line-par">ref.line.par<a class="anchor" aria-label="anchor" href="#arg-ref-line-par"></a></dt>
 <dd><p>List. Parameters of the vertical line on the reference. The
 default values are: <code>col = "black"</code> and <code>lty = 2</code>. You can add any graphical
-parameter that will be passed to <code><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">graphics::abline</a></code>. Eg: <code>ref.line.par = list(lty = 1, lwd = 3)</code>.</p></dd>
+parameter that will be passed to <code><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">graphics::abline</a></code>.
+Eg: <code>ref.line.par = list(lty = 1, lwd = 3)</code>.</p></dd>
 
 
 <dt id="arg-lab-cex">lab.cex<a class="anchor" aria-label="anchor" href="#arg-lab-cex"></a></dt>
@@ -349,7 +358,8 @@ with <code>__ci__</code> a special variable giving the value of the confidence i
 
 
 <dt id="arg-ylab">ylab<a class="anchor" aria-label="anchor" href="#arg-ylab"></a></dt>
-<dd><p>The label of the y-axis, default is <code>NULL</code>. Note that if <code>horiz =  FALSE</code>, it overrides the value of the argument <code>value.lab</code>.</p></dd>
+<dd><p>The label of the y-axis, default is <code>NULL</code>. Note that if
+<code>horiz = FALSE</code>, it overrides the value of the argument <code>value.lab</code>.</p></dd>
 
 
 <dt id="arg-xlab">xlab<a class="anchor" aria-label="anchor" href="#arg-xlab"></a></dt>

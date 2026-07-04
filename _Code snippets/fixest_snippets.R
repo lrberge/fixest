@@ -409,7 +409,7 @@ IS_weights_unit = function(index, base){
     if(!is.data.frame(index)){
         check_arg(base, "data.frame mbt", .message = "If the argument 'index' is not a data.frame, you must provide a data.frame in the argument 'base'.")
 
-        if("formula" %in% class(index)){
+        if(inherits(index, "formula")){
             check_arg(index, "formula var(data)", .data = base)
 
             index = model.frame(index, base)

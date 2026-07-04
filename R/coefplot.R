@@ -23,7 +23,7 @@
 #' @param objects A list of `fixest` estimation objects, or `NULL` (default). If provided, 
 #' the objects in `...` are ignored and the only coefficients reported are the ones in the
 #' argument `objects`.
-#' #' @param vcov Versatile argument to specify the VCOV. 
+#' @param vcov Versatile argument to specify the VCOV. 
 #' In general, it is either a character scalar equal to a VCOV type, either a formula of the form:
 #'  vcov_type ~ variables. The VCOV types implemented are: "iid", "hetero" (or "HC1"), 
 #' "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". 
@@ -31,8 +31,9 @@
 #' It also accepts covariance matrices computed externally. 
 #' Finally it accepts functions to compute the covariances. 
 #' See the vcov documentation in the vignette.
+#' 
 #' You can pass several VCOVs (as above) if you nest them into a list. 
-#' If the number of VCOVs equals the number of models, eahc VCOV is mapped to the appropriate model.
+#' If the number of VCOVs equals the number of models, each VCOV is mapped to the appropriate model.
 #' If there is one model and several VCOVs, or if the first element of the list is equal to
 #' `"each"` or `"times"`, then the estimations will be replicated and the results
 #' for each estimation and each VCOV will be reported.
@@ -82,10 +83,14 @@
 #' to [`graphics::abline`]. You also have two additional arguments: use `horiz = 
 #' FALSE` to disable the horizontal lines, and use `vert = FALSE` to disable the 
 #' vertical lines. Eg: `grid.par = list(vert = FALSE, col = "red", lwd = 2)`.
-#' @param zero Logical, default is `TRUE`. Whether the 0-line should be emphasized. 
-#' You can set the parameters of that line with the argument `zero.par`.
-#' @param zero.par List. Parameters of the zero-line. The default values are 
-#' `col = "black"` and `lwd = 1`. You can add any graphical parameter that will be passed 
+#' @param zero Logical scalar, default is `TRUE`. Whether the 0 should be displayed
+#' in the limits of the y-axis. 
+#' Note that you can set how this zero line looks like with the argument `zero.par`.
+#' @param zero.par A named list of graphical parameters or a logical scalar. 
+#' This argument is a list containing the graphical parameters used to draw the zero-line. 
+#' The default value is `list(col = "black", lwd = 1)` (it's the same if `TRUE`). 
+#' Set it to `FALSE` to turn off the special emphasis of the zero line.
+#' You can add any graphical parameter that will be passed 
 #' to [`graphics::abline`]. Example: `zero.par = list(col = "darkblue", lwd = 3)`.
 #' @param pt.join Logical, default is `FALSE`. If `TRUE`, then the coefficient estimates 
 #' are joined with a line.
@@ -113,7 +118,8 @@
 #' line will be drawn at that specific value.
 #' @param ref.line.par List. Parameters of the vertical line on the reference. The 
 #' default values are: `col = "black"` and `lty = 2`. You can add any graphical 
-#' parameter that will be passed to [`graphics::abline`]. Eg: `ref.line.par = list(lty = 1, lwd = 3)`.
+#' parameter that will be passed to [`graphics::abline`]. 
+#' Eg: `ref.line.par = list(lty = 1, lwd = 3)`.
 #' @param xlim.add A numeric vector of length 1 or 2. It represents an extension 
 #' factor of xlim, in percentage. Eg: `xlim.add = c(0, 0.5)` extends `xlim` of 50% 
 #' on the right. If of length 1, positive values represent the right, and negative 
@@ -138,10 +144,12 @@
 #' @param ci.join.par A list of parameters to be passed to [`graphics::lines`]. 
 #' Only used if `ci.join=TRUE`. By default it is equal to `list(lwd = lwd, col = col, lty = 2)`.
 #' @param ci.fill Logical default to `FALSE`. Whether to fill the confidence intervals 
-#' with a color. If `TRUE`, then you can set the graphical parameters with the argument `ci.fill.par`.
+#' with a color. If `TRUE`, then you can set the graphical parameters 
+#' with the argument `ci.fill.par`.
 #' @param ci.fill.par A list of parameters to be passed to [`graphics::polygon`]. 
 #' Only used if `ci.fill=TRUE`. By default it is equal to `list(col = "lightgray", alpha = 0.5)`. 
-#' Note that `alpha` is a special parameter that adds transparency to the color (ranges from 0 to 1).
+#' Note that `alpha` is a special parameter that adds transparency to the color 
+#' (ranges from 0 to 1).
 #' @param group A list, default is missing. Each element of the list reports the 
 #' coefficients to be grouped while the name of the element is the group name. Each 
 #' element of the list can be either: i) a character vector of length 1, ii) of 
@@ -184,8 +192,8 @@
 #' with `__ci__` a special variable giving the value of the confidence interval.
 #' @param xlab The label of the x-axis, default is `NULL`. Note that if `horiz = 
 #' TRUE`, it overrides the value of the argument `value.lab`.
-#' @param ylab The label of the y-axis, default is `NULL`. Note that if `horiz = 
-#' FALSE`, it overrides the value of the argument `value.lab`.
+#' @param ylab The label of the y-axis, default is `NULL`. Note that if 
+#' `horiz = FALSE`, it overrides the value of the argument `value.lab`.
 #' @param sub A subtitle, default is `NULL`.
 #' @param style A character scalar giving the style of the plot to be used. You 
 #' can set styles with the function [`setFixest_coefplot`], setting all the default 
@@ -226,6 +234,12 @@
 #'
 #' Note, importantly, that interactions of two factor variables are (in general) 
 #' disregarded since they would require a 3-D plot to be properly represented.
+#' 
+#' @section Mathematical expressions:
+#' 
+#' You can add [`plotmath`][grDevices::plotmath] mathematical expressions in the arguments
+#'  `main`, `sub`, `xlab`, or `ylab`. To do so, start the character string with an ampersand.
+#' For example main = "&lambda^2".
 #'
 #'
 #' @author
@@ -539,7 +553,7 @@ coefplot = function(..., objects = NULL, style = NULL, se, ci_low, ci_high, df.t
 
   old_style = style
   style = try(match.arg(style, choices = names(opts)), silent = TRUE)
-  if("try-error" %in% class(style)){
+  if(inherits(style, "try-error")){
     warning("Unknow style '", old_style, "', using default style instead.")
     style = "default"
   }
@@ -859,7 +873,7 @@ coefplot = function(..., objects = NULL, style = NULL, se, ci_low, ci_high, df.t
   # xlim
   if(!missnull(xlim)){
     check_arg(xlim, "numeric vector len(2) no na")
-    my_xlim = xlim
+    my_xlim = xlim 
   }
   
   if(!missnull(xlim.add)){
@@ -885,7 +899,19 @@ coefplot = function(..., objects = NULL, style = NULL, se, ci_low, ci_high, df.t
   if(!missnull(ylim)){
     check_arg(ylim, "numeric vector len(2) no na")
     my_ylim = ylim
+    
+  } else if(isTRUE(zero)){
+    # we add 0 to xlim
+    if(0 > my_ylim[2]){
+      my_ylim[2] = 0
+      
+    } else if(0 < my_ylim[1]){
+      my_ylim[1] = 0
+      
+    }
   }
+  
+  
 
   if(!missnull(ylim.add)){
     
@@ -1159,8 +1185,14 @@ coefplot = function(..., objects = NULL, style = NULL, se, ci_low, ci_high, df.t
         do.call("vgrid", grid.par)
       }
     }
-
-    if(zero){
+    
+    check_arg(zero.par, "logical scalar | named list")
+    if(!isFALSE(zero.par)){
+      
+      if(isTRUE(zero.par)){
+        zero.par = list(col = "black", lwd = 1)
+      }
+      
       listDefault(zero.par, "lwd", 1)
       listDefault(zero.par, "col", "black")
 
@@ -1799,7 +1831,7 @@ coefplot_prms = function(all_models, vcov = NULL, se, ci_low, ci_high, x, x.shif
                                  is_iplot = is_iplot, sep = sep, as.multiple = as.multiple), 
                    silent = TRUE)
 
-        if("try-error" %in% class(prms)){
+        if(inherits(prms, "try-error")){
           if(grepl("^[^\n]+(coefplot|iplot)", prms)){
             prms = stringmagic::string_clean(prms, "^[^\n]+\n")
           }
@@ -2088,7 +2120,7 @@ coefplot_prms = function(all_models, vcov = NULL, se, ci_low, ci_high, x, x.shif
 
       # avoids bug with IVs => problem if user names the variables that way
       is_IV = FALSE
-      if(isTRUE(object$iv) && identical(object$iv_stage, 2)){
+      if(isTRUE(object$is_iv) && identical(object$iv_stage, 2)){
         all_vars = gsub("^fit_", "", all_vars)
         names(estimate) = all_vars
       }
@@ -2857,14 +2889,103 @@ getFixest_coefplot = function(){
 
 
 
+####
+#### plot method ####
+####
 
 
 
+#' plot methods for `fixest` and `fixest_multi` objects
+#' 
+#' Plot method reporting the coefficient estimates and their confidence intervals. 
+#' This is a wrapper to the more complete functions [`coefplot`] and [`iplot`].
+#' 
+#' 
+#' @inheritParams coefplot
+#' @inheritSection etable Arguments keep, drop and order
+#' 
+#' @param x A `fixest` estimation, for example from [`feols`].
+#' @param ... Other arguments to be passed to [`coefplot`].
+#' 
+#' @details 
+#' By default `plot.fixest` runs [`coefplot`] unless the estimation includes 
+#' the function [`sunab`], in which case it uses [`iplot`].
+#' 
+#' The switch to `iplot` can be made with the argument `do_iplot = TRUE`.
+#' 
+#' @return 
+#' It returns invisibly the data used to create the graph.
+#' 
+#' @examples
+#' 
+#' #
+#' # Single estimation
+#' #
+#' 
+#' est = feols(Ozone ~ Temp + Solar.R, airquality)
+#' plot(est)
+#' 
+#' # focus only on the variables
+#' plot(est, drop = "Cons")
+#' 
+#' #
+#' # Multiple estimations
+#' #
+#' 
+#' est_mult = feols(Ozone ~ csw(Temp, Solar.R, Wind), airquality)
+#' plot(est_mult, drop = "Const")
+#' 
+#' #
+#' # DiD estimation: Sun & Abraham
+#' #
+#' 
+#' data(base_stagg)
+#' # The DiD estimation
+#' res_sunab = feols(y ~ x1 + sunab(year_treated, year) | id + year, base_stagg)
+#' plot(res_sunab)
+#' 
+#' 
+#' 
+#' 
+plot.fixest = function(x, vcov = NULL, add = FALSE, horiz = FALSE, do_iplot = NULL, 
+                       zero = TRUE, zero.par = TRUE, dict = NULL, 
+                       keep = NULL, drop = NULL, order = NULL, 
+                       ci.width = "1%", ci_level = 0.95, plot_prms = list(),
+                       ylim = NULL, xlim = NULL,
+                       pch = c(20, 17, 15, 21, 24, 22), col = 1:8, cex = 1, lty = 1, lwd = 1,
+                       pt.pch = pch, pt.bg = NULL, pt.cex = cex, pt.col = col, 
+                       ci.col = col, pt.lwd = lwd, ci.lwd = lwd, ci.lty = lty, 
+                       main = "Effect on __depvar__", 
+                       value.lab = "Estimate and __ci__ Conf. Int.",
+                       ylab = NULL, xlab = NULL, sub = NULL, ...){
+  
+  check_arg(do_iplot, "NULL logical scalar")
+  
+  if(is.null(do_iplot)){
+    do_iplot = FALSE
+    if(inherits(x, "fixest") && isTRUE(x$is_sunab)){
+      do_iplot = TRUE
+      
+    } else if(inherits(x, "fixest_multi") && isTRUE(x[[1]]$is_sunab)){
+      do_iplot = TRUE
+      
+    }
+  }
+  
+  coefplot(objects = x, vcov = vcov, add = add, horiz = horiz, do_iplot = do_iplot, 
+           zero = zero, zero.par = zero.par, 
+           dict = dict, keep = keep, drop = drop, order = order, ci.width = ci.width, 
+           ci_level = ci_level, plot_prms = plot_prms, ylim = ylim, 
+           xlim = xlim, pch = pch, col = col, cex = cex, lty = lty, lwd = lwd, 
+           pt.pch = pt.pch, pt.bg = pt.bg, pt.cex = pt.cex, pt.col = pt.col, 
+           ci.col = ci.col, pt.lwd = pt.lwd, ci.lwd = ci.lwd, ci.lty = ci.lty, 
+           main = main, value.lab = value.lab, ylab = ylab, xlab = xlab, sub = sub, 
+           ...)
+  
+}
 
-
-
-
-
+#' @describeIn plot.fixest
+plot.fixest_multi = plot.fixest
 
 
 

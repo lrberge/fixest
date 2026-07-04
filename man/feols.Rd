@@ -86,7 +86,7 @@ like in \code{y ~ x | x_endo1 + x_endo2 ~ x_inst1 + x_inst2}.
 Note that it should always be the last element, see details. Multiple estimations can be
 performed at once: for multiple dep. vars, wrap them in \code{c()}: ex \code{c(y1, y2)}.
 For multiple indep. vars, use the stepwise functions: ex \code{x1 + csw(x2, x3)}.
-The formula \code{fml = c(y1, y2) ~ x1 + cw0(x2, x3)} leads to 6 estimation, see details.
+The formula \code{fml = c(y1, y2) ~ x1 + csw0(x2, x3)} leads to 6 estimation, see details.
 Square brackets starting with a dot can be used to call global variables:
 \code{y.[i] ~ x.[1:2]} will lead to \code{y3 ~ x1 + x2} if \code{i} is equal
 to 3 in the current environment (see details in \code{\link{xpd}}).}
@@ -171,11 +171,12 @@ or \dQuote{fourway}? By default if there are clusters in the estimation:
 \code{se = "cluster"}, otherwise \code{se = "iid"}. Note that this argument is deprecated,
 you should use \code{vcov} instead.}
 
-\item{ssc}{An object of class \code{ssc.type} obtained with the function \code{\link{ssc}}. Represents
-how the degree of freedom correction should be done.You must use the function \code{\link{ssc}}
+\item{ssc}{An object of class \code{ssc_type} obtained with the function \code{\link{ssc}}. Represents
+how the small sample correction should be done. You must use the function \code{\link{ssc}}
 for this argument. The arguments and defaults of the function \code{\link{ssc}} are:
 \code{K.adj = TRUE}, \code{K.fixef = "nonnested"}, \code{G.adj = TRUE}, \code{G.df = "min"},
-\code{t.df = "min"}, \verb{K.exact = FALSE)}. See the help of the function \code{\link{ssc}} for details.}
+\code{t.df = "min"}, \verb{K.exact = FALSE)}. See the help of the function \code{\link{ssc}} for details.
+Not all VCOV types are affected by this argument.}
 
 \item{panel.id}{The panel identifiers. Can either be: i) a one sided formula
 (e.g. \code{panel.id = ~id+time}), ii) a character vector of length 2
@@ -189,7 +190,7 @@ or to a number. If \code{"unitary"}, then the largest common divisor between con
 time periods is used (typically if the time variable represents years, it will be 1).
 This method can apply only to integer (or convertible to integer) variables.
 If \code{"consecutive"}, then the time variable can be of any type: two successive
-time periods represent a lag of 1. If \code{"witihn.consecutive"} then \strong{within a given id},
+time periods represent a lag of 1. If \code{"within.consecutive"} then \strong{within a given id},
 two successive time periods represent a lag of 1. Finally, if the time variable is numeric,
 you can provide your own numeric time step.}
 
@@ -225,7 +226,7 @@ That means all observations that are perfectly explained by the FEs are removed.
 
 If "none": no observation is removed.
 
-Note that whathever the value of this options: the coefficient estimates
+Note that whatever the value of this options: the coefficient estimates
 will remain the same. It only affects inference (the standard-errors).
 
 The algorithm is recursive, meaning that, e.g. in the presence of several fixed-effects (FEs),
@@ -557,7 +558,7 @@ special feature unique to the \emph{left-hand-side} of \code{fixest} estimations
 Note that if the dependent variable is also on the right-hand-side, it is automatically
 removed from the set of explanatory variable.
 For example, feols(y ~ y + x, base) works as feols(y ~ x, base).
-This is particulary useful to batch multiple estimations with multiple left hand sides.
+This is particularly useful to batch multiple estimations with multiple left hand sides.
 }
 
 \section{Argument sliding}{

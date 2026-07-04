@@ -142,28 +142,9 @@ void IndexInputVector::initialize(const SEXP &x){
     }
     
   } else {
-    // we apply a conversion to a known type
+    // error
     
-    if(TYPEOF(x) == CHARSXP || TYPEOF(x) == LGLSXP || TYPEOF(x) == INTSXP || 
-      TYPEOF(x) == REALSXP || TYPEOF(x) == CPLXSXP || TYPEOF(x) == STRSXP || TYPEOF(x) == RAWSXP){
-      // we convert to character
-      SEXP call_as_character = PROTECT(Rf_lang2(Rf_install("as.character"), x));
-  
-      int any_error;
-      this->x_conv = PROTECT(R_tryEval(call_as_character, R_GlobalEnv, &any_error));
-
-      if(any_error){
-        Rf_error("In `to_index`, the vector to index was not standard (int or real, etc) and failed to be converted to character before applying indexation._n");
-      }
-      
-      // conversion succeeded
-      this->type = T_STR;
-      this->px_intptr = (intptr_t *) STRING_PTR_RO(this->x_conv);
-      this->is_protect = true;
-      
-    } else {
-      Rf_error("In `to_index`, the R vectors must be atomic. The current type is not valid.");
-    }    
+    Rcpp::stop("Internal error: Only vectors of type character, numeric, logical or factor can be converted to an index.");
     
   }
 }
@@ -924,18 +905,18 @@ std::vector<IndexInputVector> SEXP_to_vec_r_vector(const SEXP &x){
   if(TYPEOF(x) == VECSXP){
     K = Rf_length(x);
     for(int k=0; k<K; ++k){
-      IndexInputVector rvec(VECTOR_ELT(x, k));
+      IndexInputVector rvec{VECTOR_ELT(x, k)};
       all_vecs.push_back(rvec);
       
       if(k == 0){
         n = Rf_length(VECTOR_ELT(x, 0));
       } else if((size_t) Rf_length(VECTOR_ELT(x, k)) != n){
-        Rf_error("All the vectors to turn into an index must be of the same length. This is currently not the case.");
+        Rcpp::stop("All the vectors to turn into an index must be of the same length. This is currently not the case.");
       }
     }
     
   } else {
-    IndexInputVector rvec(x);
+    IndexInputVector rvec{x};
     all_vecs.push_back(rvec);
   }
   
@@ -987,7 +968,7 @@ void to_index_main(const std::vector<IndexInputVector> &all_vecs, IndexedVector 
   int n = all_vecs.at(0).size();
   
   if(n != output.size()){
-    Rf_error("Internal error `to_index_main`: The index size allocated in output is different from the input!");
+    Rcpp::stop("Internal error `to_index_main`: The index size allocated in output is different from the input!");
   }
   
   
@@ -1092,7 +1073,7 @@ void to_index_main(const std::vector<IndexInputVector> &all_vecs, IndexedVector 
   }
 }
  
-}
+} // end namespace indexthis
  
  
  // [[Rcpp::export]]
@@ -1117,8 +1098,8 @@ SEXP cpp_to_index(SEXP &x){
   //
   
   // we copy the first observations into an R vector
-  SEXP first_obs = indexthis::to_r_vector(index_info.get_firstobs());
-  SEXP table = indexthis::to_r_vector(index_info.get_table());
+  SEXP first_obs = PROTECT(indexthis::to_r_vector(index_info.get_firstobs()));
+  SEXP table = PROTECT(indexthis::to_r_vector(index_info.get_table()));
   
   // we save the results into a list
   SEXP res = PROTECT(Rf_allocVector(VECSXP, 3));
@@ -1129,14 +1110,7 @@ SEXP cpp_to_index(SEXP &x){
   // names
   Rf_setAttrib(res, R_NamesSymbol, indexthis::std_string_to_r_string({"index", "first_obs", "table"}));
     
-  UNPROTECT(2);
-  
-  // we unprotect if we have converted some vectors to character
-  for(const auto &v : all_vecs){
-    if(v.is_protect){
-      UNPROTECT(2);
-    }
-  }
+  UNPROTECT(4);
   
   return res;
   

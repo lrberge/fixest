@@ -9,7 +9,6 @@
 # Some functions are not trivial to test properly though
 
 library(fixest)
-library(sandwich)
 
 test = fixest:::test ; chunk = fixest:::chunk
 vcovClust = fixest:::vcovClust
@@ -282,6 +281,17 @@ res = fepois(y ~ 1 | fe, base_1obs, fixef.rm = "infinite")
 data(trade)
 test(feols(Euros ~ log(dist_km) | Destination + Origin + Product, 
            trade, fixef.iter = 1), "warn")
+
+# IV with ill defined instrument or endogenous regressors
+df_poor_endo = data.frame(y = runif(10), endog = 1, inst = rnorm(10), exo = rnorm(10))
+test(feols(y ~ 1 | endog ~ inst, df_poor_endo), "err")
+# we just check no error:
+feols(y ~ sw0(exo) | endog ~ inst, df_poor_endo)
+
+df_poor_inst = data.frame(y = runif(10), endog = rnorm(10), inst = 0, exo = rnorm(10))
+test(feols(y ~ 1 | endog ~ inst, df_poor_inst), "err")
+# we just check no error:
+feols(y ~ sw0(exo) | endog ~ inst, df_poor_inst)
 
 
 ####
@@ -668,8 +678,8 @@ base_panel = unpanel(pdat)
 est_pdat = feols(y ~ x1 | fe, pdat)
 est_panel = feols(y ~ x1 | fe, base_panel, panel.id = ~id+period)
 
-test(attr(vcov(est_pdat, attr = TRUE), "type"),
-     attr(vcov(est_panel, attr = TRUE), "type"))
+test(attr(vcov(est_pdat, attr = TRUE), "vcov_type"),
+     attr(vcov(est_panel, attr = TRUE), "vcov_type"))
 
 #
 # testing irregularities
@@ -1008,7 +1018,45 @@ test(length(est_lhs), 2)
 est_lhs = feols(..("mpg|wt") ~ disp | hp ~ qsec, data = mtcars)
 test(length(est_lhs), 2)
 
+# the right dof with SW FEs
+set.seed(42)
+df = data.frame(Y = rnorm(100), X1 = rnorm(100),
+                f1 = sample(1:5, 100, replace = TRUE), 
+                f2 = sample(1:4, 100, replace = TRUE))
+single_f1    = feols(Y ~ X1 | f1, data = df)
+single_f1_f2 = feols(Y ~ X1 | f1 + f2, data = df)
+multi_csw    = feols(Y ~ X1 | csw(f1, f2), data = df)
+multi_sw     = feols(Y ~ X1 | sw(f1, f1 + f2), data = df)
 
+test(single_f1$nparams, multi_csw[[1]]$nparams)
+test(single_f1$nparams, multi_sw[[1]]$nparams)
+
+test(single_f1_f2$nparams, multi_sw[[2]]$nparams)
+test(single_f1_f2$nparams, multi_sw[[2]]$nparams)
+
+# right dof when LHS is removed from RHS
+est = feols(c(Ozone, Temp) ~ Ozone + Wind, airquality)
+test(est[[1]]$nparams, 2)
+test(est[[2]]$nparams, 3)
+
+# Ensure the FEs names are handled correctly in split estimations
+# NOTA: in split estimations, the FEs are refactors wrt the initial full sample FE
+#       => this is a specific branch
+set.seed(0)
+N = 200; G = 10
+dt = data.frame(id = sample(1:50, N, TRUE), firm = sample(1:G, N, TRUE),
+                year = sample(1:5, N, TRUE), female = sample(0:1, N, TRUE),
+                x = rnorm(N), y = rnorm(N))
+
+est_split = feols(y ~ x | id + firm + year, dt, fsplit = ~ female)
+# predict for female
+p_split = predict(est_split[[3]], newdata = dt)
+
+# without split sample
+est_subset = feols(y ~ x | id + firm + year, dt, subset = ~ female == 1)
+p_subset = predict(est_subset, newdata = dt)
+
+test(p_split, p_subset)
 
 ####
 #### ... IV ####
@@ -1143,7 +1191,7 @@ chunk("custom vcov")
 est <- feols(mpg ~ i(cyl), mtcars)
 vcov_HC3 <- sandwich::vcovHC(est, type = "HC3")
 est_HC3 <- summary(est, vcov = list("HC3" = vcov_HC3))
-test(attr(est_HC3$se, "type"), "HC3")
+test(attr(est_HC3$se, "vcov_type"), "HC3")
 est_tab <- etable(est_HC3)
 test(any(grepl("HC3", est_tab[[2]])), TRUE)
 
@@ -1171,8 +1219,8 @@ est_multi_HC3 <- summary(est_multi, vcov = vcovs_HC3)
 test(vcov(est_multi_HC3[[1]]), vcovs_HC3[[1]])
 test(vcov(est_multi_HC3[[2]]), vcovs_HC3[[2]])
 
-test(attr(est_multi_HC3[[1]]$se, "type"), "HC3")
-test(attr(est_multi_HC3[[2]]$se, "type"), "HC3")
+test(attr(est_multi_HC3[[1]]$se, "vcov_type"), "HC3")
+test(attr(est_multi_HC3[[2]]$se, "vcov_type"), "HC3")
 
 est_tab <- etable(est_multi, est_multi_HC3)
 test(any(grepl("HC3", est_tab$est_multi_HC3.1)), TRUE)
@@ -1257,6 +1305,7 @@ test(feols(y ~ sw(x1, x2), base, only.coef = TRUE), "err")
 ####
 #### Standard-errors ####
 ####
+
 
 chunk("STANDARD ERRORS")
 
@@ -1416,8 +1465,8 @@ test(se(est_feols, se = "st")["x"], se(est_lm)["x"])
 # Heteroskedasticity-robust
 #
 
-se_white_lm_HC1 = sqrt(vcovHC(est_lm, type = "HC1")["x", "x"])
-se_white_lm_HC0 = sqrt(vcovHC(est_lm, type = "HC0")["x", "x"])
+se_white_lm_HC1 = sqrt(sandwich::vcovHC(est_lm, type = "HC1")["x", "x"])
+se_white_lm_HC0 = sqrt(sandwich::vcovHC(est_lm, type = "HC0")["x", "x"])
 
 test(se(est_feols, se = "hetero"), se_white_lm_HC1)
 test(se(est_feols, se = "hetero", ssc = ssc(K.adj = FALSE, G.adj = FALSE)), se_white_lm_HC0)
@@ -1428,8 +1477,8 @@ test(se(est_feols, se = "hetero", ssc = ssc(K.adj = FALSE, G.adj = FALSE)), se_w
 #
 
 # Clustered by grp
-se_CL_grp_lm_HC1 = sqrt(vcovCL(est_lm, cluster = d$grp, type = "HC1")["x", "x"])
-se_CL_grp_lm_HC0 = sqrt(vcovCL(est_lm, cluster = d$grp, type = "HC0")["x", "x"])
+se_CL_grp_lm_HC1 = sqrt(sandwich::vcovCL(est_lm, cluster = d$grp, type = "HC1")["x", "x"])
+se_CL_grp_lm_HC0 = sqrt(sandwich::vcovCL(est_lm, cluster = d$grp, type = "HC0")["x", "x"])
 
 # How to get the lm
 test(se(est_feols, ssc = ssc(K.fixef = "full")), se_CL_grp_lm_HC1)
@@ -1440,7 +1489,7 @@ test(se(est_feols, ssc = ssc(K.adj = FALSE, K.fixef = "full")), se_CL_grp_lm_HC0
 #
 
 # Clustered by grp & tm
-se_CL_2w_lm    = sqrt(vcovCL(est_lm, cluster = ~ grp + tm, type = "HC1")["x", "x"])
+se_CL_2w_lm    = sqrt(sandwich::vcovCL(est_lm, cluster = ~ grp + tm, type = "HC1")["x", "x"])
 se_CL_2w_feols = se(est_feols, se = "twoway")
 
 test(se(est_feols, se = "twoway", ssc = ssc(K.fixef = "full", G.df = "conv")), se_CL_2w_lm)
@@ -1527,11 +1576,11 @@ if(requireNamespace("plm", quietly = TRUE)){
   
   # NW
   se_plm_NW = se(plm::vcovNW(est_panel_plm))["capital"]
-  test(se(est_panel_feols, vcov = NW ~ ssc(adj = FALSE, cluster.adj = FALSE)), se_plm_NW)
+  test(se(est_panel_feols, vcov = NW ~ ssc(K.adj = FALSE, G.adj = FALSE)), se_plm_NW)
 
   # DK
   se_plm_DK = se(plm::vcovSCC(est_panel_plm))["capital"]
-  test(se(est_panel_feols, vcov = DK ~ ssc(adj = FALSE, cluster.adj = FALSE)), se_plm_DK)
+  test(se(est_panel_feols, vcov = DK ~ ssc(K.adj = FALSE, G.adj = FALSE)), se_plm_DK)
 }
 
 #
@@ -2169,26 +2218,26 @@ chunk("SANDWICH")
 
 # Compatibility with sandwich
 
-library(sandwich)
-
 data(base_did)
 est = feols(y ~ x1 + I(x1**2) + factor(id), base_did)
 
-test(vcov(est, cluster = ~id), vcovCL(est, cluster = ~id, type = "HC1"))
+test(vcov(est, cluster = ~id), sandwich::vcovCL(est, cluster = ~id, type = "HC1"))
 
 est_pois = fepois(as.integer(y) + 20 ~ x1 + I(x1**2) + factor(id), base_did)
 
-test(vcov(est_pois, cluster = ~id), vcovCL(est_pois, cluster = ~id, type = "HC1"))
+test(vcov(est_pois, cluster = ~id), sandwich::vcovCL(est_pois, cluster = ~id, type = "HC1"))
 
 # With FEs
 
 est = feols(y ~ x1 + I(x1**2) | id, base_did)
 
-test(vcov(est, cluster = ~id, ssc = ssc(K.adj = FALSE)), vcovCL(est, cluster = ~id))
+test(vcov(est, cluster = ~id, ssc = ssc(K.adj = FALSE)), 
+     sandwich::vcovCL(est, cluster = ~id))
 
 est_pois = fepois(as.integer(y) + 20 ~ x1 + I(x1**2) | id, base_did)
 
-test(vcov(est_pois, cluster = ~id, ssc = ssc(K.adj = FALSE)), vcovCL(est_pois, cluster = ~id))
+test(vcov(est_pois, cluster = ~id, ssc = ssc(K.adj = FALSE)), 
+     sandwich::vcovCL(est_pois, cluster = ~id))
 
 
 
@@ -2579,6 +2628,8 @@ test(names(m_lhs_rhs_fixef), c("y1", "fit_x2", "x1", "species"))
 #### sparse_model_matrix ####
 ####
 
+chunk("Sparse model matrix")
+
 # unit tests: i(..., sparse = TRUE) 
 x <- c(1, 1, 3, 1, 3)
 sp1 <- i(x, sparse = TRUE)
@@ -2712,6 +2763,7 @@ test(nrow(sm_lag), nobs(res_lag))
 # Interacted fixef
 res = feols(y1 ~ x1 + x2 + x3 | species^fe2, base)
 sm_ife = sparse_model_matrix(res, data = base, type = "fixef", collin.rm = FALSE)
+test(ncol(sm_ife), 45)
 
 # fixef
 res = feols(y1 ~ x1 + x2 + x3 | species + fe2, base)
@@ -2824,6 +2876,19 @@ test(coef(est_add_iv), coef(est_add_iv_noup))
 est_clu = update(est, vcov = ~species)
 est_clu = feols(y ~ x1 | species, base)
 test(se(est_add_fe), se(est_add_fe_noup))
+
+# No warnings when using use_calling_env = FALSE
+# https://github.com/lrberge/fixest/issues/618
+est_to_update = feols(mpg ~ hp, data = mtcars)
+update_is_silent <- tryCatch(
+  {
+    update(est_to_update, data = mtcars, use_calling_env = FALSE)
+    TRUE 
+  },
+  error = function(e) FALSE,
+  warning = function(e) FALSE
+)
+test(update_is_silent, TRUE)
 
 #
 # FE estimation
@@ -2966,15 +3031,25 @@ names(base) = c("y", "x1", "x_endo_1", "x_inst_1", "fe")
 set.seed(2)
 base$x_inst_2 = 0.2 * base$y + 0.2 * base$x_endo_1 + rnorm(150, sd = 0.5)
 base$x_endo_2 = 0.2 * base$y - 0.2 * base$x_inst_1 + rnorm(150, sd = 0.5)
+base$w = sample(c(0.5, 0.25), nrow(base), replace = TRUE)
+base$cl_var = rep(1:50, 3) # using `fe` to cluster causes a vcov PSD warning
+
 
 # Checking a basic estimation
 est_iv = feols(y ~ x1 | x_endo_1 + x_endo_2 ~ x_inst_1 + x_inst_2, base)
 
-fitstat(est_iv, ~ f + ivf + ivf2 + wald + ivwald + ivwald2 + wh + sargan + rmse + g + n + ll + sq.cor + r2)
+fitstat(est_iv, ~ f + ivf + ivf2 + wald + ivwald + ivwald2 + wh + sargan + kpr + rmse + g + n + ll + sq.cor + r2)
+test(c(length(est_iv$iv_first_stage), est_iv$iv_n_inst), c(2, 2)) # kpr relies on accessing these
+
+est_iv_uneven = feols(y ~ x1 | x_endo_1 ~ x_inst_1 + x_inst_2, base, cluster = "cl_var")
+fitstat(est_iv_uneven, ~ f + ivf + ivf2 + wald + ivwald + ivwald2 + wh + sargan + kpr + rmse + g + n + ll + sq.cor + r2)
 
 est_fe = feols(y ~ x1 | fe, base)
-
 fitstat(est_fe, ~ wf)
+
+# https://github.com/lrberge/fixest/issues/584
+est_weighted = feols(y ~ x1 | fe, base, weights = ~w)
+fitstat(est_weighted, ~ rmse)
 
 # fitstat works with `split` and `lean` (https://github.com/lrberge/fixest/issues/566)
 est_split = feols(y ~ x1, base, fsplit = ~fe)
@@ -2992,6 +3067,16 @@ for (i in seq_len(length(est_split))) {
     fitstat(est_split_lean[[i]], ~ my)$my
   )
 }
+
+
+# htest
+mult_htest = fitstat(est_iv, c("wald", "f", "r2", "f.p", "ivwald1"), htest = TRUE)
+test(inherits(mult_htest$wald, "htest"), TRUE)
+test(inherits(mult_htest$f, "htest"), TRUE)
+test(inherits(mult_htest$r2, "htest"), FALSE)
+test(inherits(mult_htest$f.p, "htest"), FALSE)
+test(inherits(mult_htest$`ivwald1::x_endo_1`, "htest"), TRUE)
+test(inherits(mult_htest$`ivwald1::x_endo_2`, "htest"), TRUE)
 
 
 ####

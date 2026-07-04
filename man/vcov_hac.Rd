@@ -33,15 +33,24 @@ variable representing the time.}
 Newey-West and Driscoll-Kraay. The default for the time series Newey-West is computed via
 \code{\link[sandwich:NeweyWest]{bwNeweyWest}} which implements the Newey and West 1994 method.}
 
-\item{ssc}{An object returned by the function \code{\link{ssc}}. It specifies how to perform the small
-sample correction.}
+\item{ssc}{An object of class \code{ssc_type} obtained with the function \code{\link{ssc}}.
+It specifies how to perform the small sample correction. See details.
+
+By default the VCOV is multiplied by (N - 1) / (N - K) * T / (T - 1), with N the number of
+observations, K the number of parameters and T the number of time periods.
+To remove the (N - 1) / (N - K) adjustment, use \code{ssc=ssc(K.adj = FALSE)}.
+To remove the T / (T - 1) adjustment, use \code{ssc=ssc(G.adj = FALSE)}.
+To remove both, use \code{ssc=ssc(K.adj = FALSE, G.adj = FALSE)}.}
 
 \item{vcov_fix}{Logical scalar, default is \code{FALSE}. If the VCOV ends up not being
 positive definite, whether to "fix" it using an eigenvalue decomposition
 (a la Cameron, Gelbach & Miller 2011).
 Since the VCOV should be PSD asymptotically, this might be a sign of a problem
 with using the asymptotic approximation (e.g. too few units in clusters).
-If a problem is detected, the function will print a message to inform you.}
+If a problem is detected, the function will print a message to inform you.
+Note that a message informs the user \strong{only if} the regularized PD matrix is
+substantially different than the original non PD one (i.e. at least one difference
+between the two greated than 1e-8).}
 
 \item{unit}{A character scalar or a one sided formula giving the name of the
 variable representing the units of the panel.}
@@ -69,6 +78,24 @@ or even in the estimation calls).
 Note that for Driscoll-Kraay VCOVs, to ensure its properties the number of periods should
 be long enough (a minimum of 20 periods or so).
 }
+\section{Small sample correction}{
+
+By default, for the Newey-West and the Driscoll-Kraay VCOVs, the VCOV is multiplied
+by (N - 1) / (N - K) * T / (T - 1), with N the number of observations, K the number of
+parameters and T the number of time periods.
+
+You can modify these adjustments with the argument \code{ssc}.
+To remove the (N - 1) / (N - K) adjustment, use \code{ssc=ssc(K.adj = FALSE)}.
+To remove the T / (T - 1) adjustment, use \code{ssc=ssc(G.adj = FALSE)}.
+To remove both, use \code{ssc=ssc(K.adj = FALSE, G.adj = FALSE)}.
+
+If the estimation contains fixed effects, you can modify how the number of parameters is computed
+with the arguments \code{K.fixef} and \code{K.exact} (see \code{\link{ssc}} for details).
+
+To compute the pvalue, the degrees of freedom of the t-stat is the number of time periods
+if \code{ssc=ssc(t.df = "min")} (default). To use N - K instead use \code{ssc=ssc(t.df="conventional")}.
+}
+
 \section{Lag selection}{
 
 

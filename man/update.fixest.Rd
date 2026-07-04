@@ -10,7 +10,7 @@
   fml.update = NULL,
   fml = NULL,
   nframes = 1,
-  use_calling_env = TRUE,
+  use_calling_env = NULL,
   evaluate = TRUE,
   ...
 )
@@ -49,11 +49,14 @@ used for the new estimation, without any modification.}
 Number of frames up the stack where to perform the evaluation of the updated call.
 By default, this is the parent frame.}
 
-\item{use_calling_env}{Logical scalar, default is \code{TRUE}. If \code{TRUE} then the evaluation
-of the call will be done within the environment that called the initial estimation.
+\item{use_calling_env}{Logical scalar, default is \code{NULL} (which means context-dependent).
+If \code{TRUE} then the evaluation of the call will be done within the environment
+that called the initial estimation. If \code{FALSE}, it will use the current environment.
+By default, i.e. when \code{NULL}, it is equal to \code{FALSE} if the argument \code{data} is provided and
+\code{TRUE} otherwise.
 This is mostly useful when the \code{fixest} object has been created through a custom
 function, so that the new evaluation can use the variables within the enclosure of
-the function.}
+that function.}
 
 \item{evaluate}{Logical, default is \code{TRUE}. If \code{FALSE}, only the updated call is returned.}
 

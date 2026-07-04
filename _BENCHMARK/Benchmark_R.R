@@ -33,7 +33,7 @@ library(fixest)
 # custom functions for time monitoring
 getime = function(x) (proc.time() - x)[[3]]
 # same + error handling (e.g. out of memory problems)
-getime_errcheck = function(x, y) ifelse("try-error" %in% class(y), NA, (proc.time() - x)[[3]])
+getime_errcheck = function(x, y) ifelse(inherits(y, "try-error"), NA, (proc.time() - x)[[3]])
 
 # observations + replication number
 all_n = 1000 * 10**(0:3)

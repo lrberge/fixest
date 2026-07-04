@@ -51,6 +51,7 @@ S3method(se, default)
 S3method(se, matrix)
 S3method(se, fixest)
 S3method(se, fixest_multi)
+S3method(se, fixest_vcov)
 S3method(pvalue, default)
 S3method(pvalue, fixest)
 S3method(pvalue, fixest_multi)
@@ -77,6 +78,8 @@ S3method(print, fixest_fitstat)
 S3method(print, vec_n_unik)
 S3method(print, list_n_unik)
 S3method(print, osize)
+S3method(print, fixest_vcov)
+S3method(print, ssc_type)
 S3method(summary, fixest.fixef)
 S3method(summary, fixest)
 S3method(summary, fixest_list)
@@ -134,6 +137,10 @@ S3method(residuals, fixest_multi)
 S3method(update, fixest_multi)
 S3method(formula, fixest_multi)
 
+# graphics method
+S3method(plot, fixest_multi)
+S3method(plot, fixest)
+
 # nlme method
 S3method(fixef, fixest)
 
@@ -156,7 +163,7 @@ importFrom(sandwich, estfun, bread, bwNeweyWest)
 export(estfun, bread)
 
 importFrom(stringmagic, string_magic_alias, cat_magic_alias, message_magic_alias,
-           string_any)
+           string_any, string_clean)
 
 importFrom(stats, cor, dnorm, lm, nlminb, optim,
 			     pnorm, qnorm, as.formula, var, sd, formula,

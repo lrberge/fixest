@@ -9,7 +9,7 @@ standard-errors. Useful mostly in combination with etable or coefplot."></head><
 
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.13.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.14.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -113,7 +113,7 @@ the arguments <code>times</code> and <code>each</code> are missing, then <code>t
 <span class="r-in"><span><span class="va">my_vcov</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">~</span> <span class="va">Month</span>, <span class="op">~</span> <span class="va">Day</span>, <span class="op">~</span> <span class="va">Day</span> <span class="op">+</span> <span class="va">Month</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">est</span>, vcov <span class="op">=</span> <span class="va">my_vcov</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The VCOV matrix is not positive semi-definite and was 'fixed' (see ?vcov).</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The VCOV matrix is not positive definite and was 'fixed' (see ?vcov).</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                         model 1.1          model 1.2         model 1.3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:             Ozone              Ozone             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                       </span>
@@ -130,7 +130,7 @@ the arguments <code>times</code> and <code>each</code> are missing, then <code>t
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="coefplot.html">coefplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">est</span>, vcov <span class="op">=</span> <span class="va">my_vcov</span><span class="op">)</span>, drop <span class="op">=</span> <span class="st">"Int"</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The VCOV matrix is not positive semi-definite and was 'fixed' (see ?vcov).</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The VCOV matrix is not positive definite and was 'fixed' (see ?vcov).</span>
 <span class="r-plt img"><img src="rep.fixest-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
@@ -141,7 +141,7 @@ the arguments <code>times</code> and <code>each</code> are missing, then <code>t
 <span class="r-msg co"><span class="r-pr">#&gt;</span> NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu">.l</span><span class="op">(</span><span class="va">est</span>, <span class="va">est_bis</span><span class="op">)</span>, vcov <span class="op">=</span> <span class="va">my_vcov</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The VCOV matrix is not positive semi-definite and was 'fixed' (see ?vcov).</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The VCOV matrix is not positive definite and was 'fixed' (see ?vcov).</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                         model 1.1         model 2.1          model 1.2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:             Ozone             Ozone              Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                       </span>
@@ -176,7 +176,7 @@ the arguments <code>times</code> and <code>each</code> are missing, then <code>t
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># using each</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu">.l</span><span class="op">(</span><span class="va">est</span>, <span class="va">est_bis</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">3</span>, vcov <span class="op">=</span> <span class="va">my_vcov</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The VCOV matrix is not positive semi-definite and was 'fixed' (see ?vcov).</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The VCOV matrix is not positive definite and was 'fixed' (see ?vcov).</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                         model 1.1          model 1.2         model 1.3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:             Ozone              Ozone             Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                       </span>

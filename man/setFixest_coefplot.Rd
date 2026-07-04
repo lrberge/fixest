@@ -75,10 +75,13 @@ entries in the global dictionary, to disable this behavior, use "reset" as the f
 \item{keep}{Character vector. This element is used to display only a subset of variables. This
 should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}} help for more info). Each
 variable satisfying any of the regular expressions will be kept. This argument is applied post
-aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display
+aliasing (see argument \code{dict}).
+Use the argument \code{keep_raw} for the same effect before aliasing.
+
+Example: you have the variable \code{x1} to \code{x55} and want to display
 only \code{x1} to \code{x9}, then you could use \code{keep = "x[[:digit:]]$"}. If the first character is an
-exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that
-does not contain \dQuote{Intercept} is kept). See details.}
+exclamation mark, the effect is reversed (e.g. keep = "!Constant" means: every variable that
+does not contain \dQuote{Constant} is kept). See details.}
 
 \item{ci.width}{The width of the extremities of the confidence intervals. Default is \code{0.1}.}
 
@@ -118,11 +121,15 @@ can set the display of the grid with the argument \code{grid.par}.}
 to \code{\link[graphics:abline]{graphics::abline}}. You also have two additional arguments: use \code{horiz =  FALSE} to disable the horizontal lines, and use \code{vert = FALSE} to disable the
 vertical lines. Eg: \code{grid.par = list(vert = FALSE, col = "red", lwd = 2)}.}
 
-\item{zero}{Logical, default is \code{TRUE}. Whether the 0-line should be emphasized.
-You can set the parameters of that line with the argument \code{zero.par}.}
+\item{zero}{Logical scalar, default is \code{TRUE}. Whether the 0 should be displayed
+in the limits of the y-axis.
+Note that you can set how this zero line looks like with the argument \code{zero.par}.}
 
-\item{zero.par}{List. Parameters of the zero-line. The default values are
-\code{col = "black"} and \code{lwd = 1}. You can add any graphical parameter that will be passed
+\item{zero.par}{A named list of graphical parameters or a logical scalar.
+This argument is a list containing the graphical parameters used to draw the zero-line.
+The default value is \code{list(col = "black", lwd = 1)} (it's the same if \code{TRUE}).
+Set it to \code{FALSE} to turn off the special emphasis of the zero line.
+You can add any graphical parameter that will be passed
 to \code{\link[graphics:abline]{graphics::abline}}. Example: \code{zero.par = list(col = "darkblue", lwd = 3)}.}
 
 \item{pt.join}{Logical, default is \code{FALSE}. If \code{TRUE}, then the coefficient estimates
@@ -140,11 +147,13 @@ with the argument \code{ci.join.par}.}
 Only used if \code{ci.join=TRUE}. By default it is equal to \code{list(lwd = lwd, col = col, lty = 2)}.}
 
 \item{ci.fill}{Logical default to \code{FALSE}. Whether to fill the confidence intervals
-with a color. If \code{TRUE}, then you can set the graphical parameters with the argument \code{ci.fill.par}.}
+with a color. If \code{TRUE}, then you can set the graphical parameters
+with the argument \code{ci.fill.par}.}
 
 \item{ci.fill.par}{A list of parameters to be passed to \code{\link[graphics:polygon]{graphics::polygon}}.
 Only used if \code{ci.fill=TRUE}. By default it is equal to \code{list(col = "lightgray", alpha = 0.5)}.
-Note that \code{alpha} is a special parameter that adds transparency to the color (ranges from 0 to 1).}
+Note that \code{alpha} is a special parameter that adds transparency to the color
+(ranges from 0 to 1).}
 
 \item{ref.line}{Logical or numeric, default is "auto", whose behavior depends
 on the situation. It is \code{TRUE} only if: i) interactions are plotted, ii) the
@@ -154,7 +163,8 @@ line will be drawn at that specific value.}
 
 \item{ref.line.par}{List. Parameters of the vertical line on the reference. The
 default values are: \code{col = "black"} and \code{lty = 2}. You can add any graphical
-parameter that will be passed to \code{\link[graphics:abline]{graphics::abline}}. Eg: \code{ref.line.par = list(lty = 1, lwd = 3)}.}
+parameter that will be passed to \code{\link[graphics:abline]{graphics::abline}}.
+Eg: \code{ref.line.par = list(lty = 1, lwd = 3)}.}
 
 \item{lab.cex}{The size of the labels of the coefficients. Default is missing.
 It is automatically set by an internal algorithm which can go as low as \code{lab.min.cex}
@@ -217,7 +227,8 @@ plot default with \code{\link{setFixest_coefplot}}).}
 appears on the x-axis. The default is equal to \code{"Estimate and __ci__ Conf. Int."},
 with \verb{__ci__} a special variable giving the value of the confidence interval.}
 
-\item{ylab}{The label of the y-axis, default is \code{NULL}. Note that if \code{horiz =  FALSE}, it overrides the value of the argument \code{value.lab}.}
+\item{ylab}{The label of the y-axis, default is \code{NULL}. Note that if
+\code{horiz = FALSE}, it overrides the value of the argument \code{value.lab}.}
 
 \item{xlab}{The label of the x-axis, default is \code{NULL}. Note that if \code{horiz =  TRUE}, it overrides the value of the argument \code{value.lab}.}
 

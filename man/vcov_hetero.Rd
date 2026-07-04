@@ -16,30 +16,50 @@ vcov_hetero(
 \arguments{
 \item{x}{A \code{fixest} object.}
 
-\item{type}{A string scalar. Either "HC1"/"HC2"/"HC3"}
+\item{type}{A string scalar equal to "HC1" (default), "HC2" or "HC3".
+Note that the case is ignored.}
 
 \item{exact}{Logical scalar, default is \code{TRUE}. Whether the diagonals of the projection matrix should be calculated exactly. If \code{FALSE}, then it will be approximated using a JLA algorithm. See details. Unless you have a very large number of observations, it is recommended to keep the default value.}
 
 \item{boot.size}{Integer scalar or \code{NULL}, default is 1000. This is only used when \code{exact == FALSE}. This determines the number of bootstrap samples used to estimate the projection matrix. If equal to \code{NULL}, it falls back to the default value of 1000.}
 
 \item{ssc}{An object returned by the function \code{\link{ssc}}. It specifies how to perform the small
-sample correction.}
+sample correction. Note that this argument is only used in \code{"HC1"} which accepts
+ssc arguments starting with \code{"K"}. In that case when \code{ssc(K.adj = FALSE)},
+it leads to "HC0". The argument \code{ssc} is ignored for \code{HC2} and \code{HC2} VCOVs.}
 
 \item{vcov_fix}{Logical scalar, default is \code{FALSE}. If the VCOV ends up not being
 positive definite, whether to "fix" it using an eigenvalue decomposition
 (a la Cameron, Gelbach & Miller 2011).
 Since the VCOV should be PSD asymptotically, this might be a sign of a problem
 with using the asymptotic approximation (e.g. too few units in clusters).
-If a problem is detected, the function will print a message to inform you.}
+If a problem is detected, the function will print a message to inform you.
+Note that a message informs the user \strong{only if} the regularized PD matrix is
+substantially different than the original non PD one (i.e. at least one difference
+between the two greated than 1e-8).}
 }
 \value{
 If the first argument is a \code{fixest} object, then a VCOV is returned (i.e. a symmetric matrix).
 
-If the first argument is not a \code{fixest} object, then a) implicitly the arguments are shifted to the left (i.e. \code{vcov_hetero("HC3")} is equivalent to \code{vcov_hetero(type = "HC3")} and b) a VCOV-\emph{request} is returned and NOT a VCOV. That VCOV-request can then be used in the argument \code{vcov} of various \code{fixest} functions (e.g. \code{\link{vcov.fixest}} or even in the estimation calls).
+If the first argument is not a \code{fixest} object, then a) implicitly the arguments are shifted
+to the left (i.e. \code{vcov_hetero("HC3")} is equivalent to \code{vcov_hetero(type = "HC3")} and b)
+a VCOV-\emph{request} is returned and NOT a VCOV. That VCOV-request can then
+be used in the argument \code{vcov} of various \code{fixest} functions (e.g. \code{\link{vcov.fixest}}
+or even in the estimation calls).
 }
 \description{
 Computes the heteroskedasticity-robust VCOV of \code{fixest} objects.
 }
+\section{Small sample correction}{
+
+A custom small sample correction can be applied to the HC1 VCOV using the \code{\link{ssc}} argument
+and function. By default an adjustment of N/(N-K) is applied to the VCOV, with N the number of
+observations and K the number of parameters. If \code{ssc(K.adj = FALSE)}, meaning that there is
+no adjustment, this leads to the HC0 VCOV. Finally ssc's arguemnts
+K.fixef and K.exact determine how to account for the parameters associated to the fixed-effects
+(if the estimation contains fixed-effects).
+}
+
 \examples{
 
 base = iris
@@ -48,8 +68,9 @@ names(base) = c("y", "x1", "x2", "x3", "species")
 est = feols(y ~ x1 | species, base)
 
 vcov_hetero(est, "hc1")
-vcov_hetero(est, "hc2", ssc = ssc(K.adj = FALSE))
-vcov_hetero(est, "hc3", ssc = ssc(K.adj = FALSE))
+vcov_hetero(est, "hc1", ssc = ssc(K.adj = FALSE))
+vcov_hetero(est, "hc2")
+vcov_hetero(est, "hc3")
 
 # Using approximate hatvalues
 vcov_hetero(est, "hc3", exact = FALSE, boot.size = 500)

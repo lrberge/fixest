@@ -157,7 +157,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
   if(!is.null(x$collin.var)){
     n_collin = length(x$collin.var)
     collinearity_msg = sma("... {n_collin} variable{#s, were} removed because of collinearity ({enum.3 ? x$collin.var}{&n_collin>3; [full set in $collin.var]})\n")
-    if(isTRUE(x$iv) && any(grepl("^fit_", x$collin.var))){
+    if(isTRUE(x$is_iv) && any(grepl("^fit_", x$collin.var))){
       if(!any(grepl("^fit_", names(x$coefficients)))){
         iv_msg = "NOTE: all endogenous regressors were removed.\n"
       } else {
@@ -186,7 +186,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
   coeftable = x$coeftable
 
   # The type of SE
-  se.type = attr(coeftable, "type")
+  se.type = attr(coeftable, "vcov_type")
   if(is.null(se.type)) se.type = "Custom"
 
   if(x$method_type == "feNmlm"){
@@ -210,12 +210,25 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
     half_line = "OLS estimation"
   }
 
-  if(isTRUE(x$iv)){
-    first_line = sma("TSLS estimation - Dep. Var.: {as.character(x$fml)[[2]]}\n",
-                     "                  Endo.    : {', 'c ? get_vars(x$iv_endo_fml)}\n",
-                     "                  Instr.   : {', 'c ? x$iv_inst_names}\n")
-    second_line = sma("{Nth.upper ? x$iv_stage} stage: Dep. Var.: ", as.character(x$fml)[[2]], "\n")
-    catma(first_line, second_line)
+  if(isTRUE(x$is_iv)){
+    
+    if(x$iv_stage == 1){
+      catma(
+        "TSLS estimation: First stage\n",
+        "|- D.V.   : {x$iv_main_dep_var}\n",
+        "|- Endo.  : {', 'c, swidth, '\n's, '\n\\|           'c ? get_vars(x$iv_endo_fml)}\n",
+        "|- Instr. : {', 'c, swidth, '\n's, '\n\\|           'c ? x$iv_inst_names}\n",
+        "Dep. Var.: {dp ? x$fml[[2]]}\n"
+      )
+    } else {
+      catma(
+        "TSLS estimation: Second stage\n",
+        "|- D.V.   : {x$iv_main_dep_var}\n",
+        "|- Endo.  : {', 'c, swidth, '\n's, '\n\\|           'c ? get_vars(x$iv_endo_fml)}\n",
+        "|- Instr. : {', 'c, swidth, '\n's, '\n\\|           'c ? x$iv_inst_names}\n",
+        "Dep. Var.: {x$iv_main_dep_var}\n"
+      )
+    }
   } else {
     depvar_name = as.character(x$fml)[[2]]
     sep_value = if(nchar(half_line) + nchar(depvar_name) <= 60) ", " else "\n"
@@ -280,8 +293,13 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
       print_coeftable(head(coeftable, n), lastLine = last_line)
     }
   }
-
+  
   if(isTRUE(x$NA_model)){
+    
+    if(!is.null(x$cause_NA_model)){
+      catma("{x$cause_NA_model}")
+    }
+    
     return(invisible())
   }
 
@@ -298,7 +316,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
           default_fit = c(default_fit, "wr2")
         }
 
-        if(isTRUE(x$iv)){
+        if(isTRUE(x$is_iv)){
           default_fit = c(default_fit, "ivf1", "wh", "sargan")
         }
 
@@ -370,11 +388,12 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #' and there are multiple endogenous regressors or if `stage` is of length 2, then an 
 #' object of class `fixest_multi` is returned.
 #' @param object A `fixest` object. Obtained using the functions [`femlm`], [`feols`] or [`feglm`].
-#' @param ssc An object of class `ssc.type` obtained with the function [`ssc`]. Represents 
-#' how the degree of freedom correction should be done.You must use the function [`ssc`] 
+#' @param ssc An object of class `ssc_type` obtained with the function [`ssc`]. Represents 
+#' how the small sample correction should be done. You must use the function [`ssc`] 
 #' for this argument. The arguments and defaults of the function [`ssc`] are: 
 #' `K.adj = TRUE`, `K.fixef = "nonnested"`, `G.adj = TRUE`, `G.df = "min"`, 
 #' `t.df = "min"`, `K.exact = FALSE)`. See the help of the function [`ssc`] for details.
+#' Not all VCOV types are affected by this argument.
 #' @param lean Logical, default is `FALSE`. Used to reduce the (memory) size of the summary object.
 #'  If `TRUE`, then all objects of length N (the number of observations) are removed 
 #' from the result. Note that some `fixest` methods may consequently not work when applied 
@@ -393,6 +412,9 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #' Since the VCOV should be PSD asymptotically, this might be a sign of a problem 
 #' with using the asymptotic approximation (e.g. too few units in clusters).
 #' If a problem is detected, the function will print a message to inform you. 
+#' Note that a message informs the user **only if** the regularized PD matrix is 
+#' substantially different than the original non PD one (i.e. at least one difference
+#' between the two greated than 1e-8).
 #' @param n Integer, default is 1000. Number of coefficients to display when the print method 
 #' is used.
 #' @param ... Only used if the argument `vcov` is provided and is a function: extra arguments 
@@ -525,6 +547,38 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL,
 
   if(isTRUE(object$onlyFixef) || isTRUE(object$NA_model)){
     # means that the estimation is done without variables
+    
+    # exception: asking for the 1st stage in NA models is natural
+    # => we abide
+    if(1 %in% stage){
+      stage_names = c()
+      res = list()
+      
+      for(s in seq_along(stage)){
+        if(stage[s] == 1){
+          for(i in seq_along(object$iv_first_stage)){
+            res[[length(res) + 1]] = object$iv_first_stage[[i]]
+            stage_names[length(stage_names) + 1] = paste0("First stage: ", 
+                                                          names(object$iv_first_stage)[i])
+          }
+
+        } else {
+          # We keep the information on clustering => matters for wald tests of 1st stage
+          res[[length(res) + 1]] = object
+          stage_names[length(stage_names) + 1] = "Second stage"
+        }
+      }
+
+      if(length(res) == 1){
+        return(res[[1]])
+      }
+
+      values = list("iv" = stage_names)
+      res_multi = setup_multi(res, values)
+      attr(res_multi, "print_request") = "long"
+      return(res_multi)
+    }
+    
     return(object)
   }
 
@@ -589,7 +643,7 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL,
 
 
   # IV
-  if(isTRUE(object$iv) && !isTRUE(dots$iv)){
+  if(isTRUE(object$is_iv) && !isTRUE(dots$iv)){
     stage = unique(stage)
     res = list()
 
@@ -708,7 +762,7 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL,
     colnames(coeftable) = colnames(object$coeftable)
   }
 
-  attr(coeftable, "type") = attr(se, "type") = attr(vcov, "type")
+  attr(coeftable, "vcov_type") = attr(se, "vcov_type") = attr(vcov, "vcov_type")
 
   object$cov.scaled = vcov
   object$coeftable = coeftable
@@ -767,7 +821,7 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL,
 
 
 #' @rdname summary.fixest
-summary.fixest_list = function(object, se, cluster, ssc = getFixest_ssc(), vcov = NULL, 
+summary.fixest_list = function(object, se, cluster, ssc = NULL, vcov = NULL, 
                                stage = 2, lean = FALSE, n, ...){
 
   dots = list(...)
@@ -782,7 +836,7 @@ summary.fixest_list = function(object, se, cluster, ssc = getFixest_ssc(), vcov 
     }
 
     # we unroll in case of IV
-    if("fixest_multi" %in% class(my_res)){
+    if(inherits(my_res, "fixest_multi")){
       for(j in seq_along(my_res)){
         res[[length(res) + 1]] = my_res[[j]]
       }
@@ -923,6 +977,55 @@ summary.fixest.fixef = function(object, n = 5, ...){
   }
 
 }
+
+
+####
+#### vcov ####
+####
+
+
+#' A print facility for the VCOVs from `fixest` objects.
+#' 
+#' Prints a VCOV obtained from `fixest`, on top of a regular matrix display, its main use is to: 
+#' i) report how the VCOV was computed, and ii) hide the information on attributes
+#' 
+#' 
+#' @param x A `fixest_vcov` object, obtained from [`vcov.fixest`].
+#' @param ... Not used.
+#' 
+#' @return 
+#' This function does not return anything.
+#' 
+#' @author 
+#' Laurent Berge
+#' 
+#' @examples 
+#' 
+#' # 1) fixest estimation
+#' est = feols(Petal.Length ~ Sepal.Width, iris)
+#' 
+#' # 2) print the VCOV; this method hides the attributes
+#' vcov(est)
+#' 
+#' # 3) showing the attributes if needed
+#' attributes(vcov(est))
+#' 
+#' 
+print.fixest_vcov = function(x, ...){
+  
+  if(!is.null(attr(x, "vcov_type"))){
+    cat("VCOV type: ", attr(x, "vcov_type"), "\n")
+  }
+  
+  x_clean = x
+  attributes(x_clean) = NULL
+  attr(x_clean, "dim") = dim(x)
+  dimnames(x_clean) = dimnames(x)
+  
+  print(x_clean)
+  
+}
+
 
 ####
 #### fixef ####
@@ -1631,7 +1734,10 @@ se.matrix = function(object, keep, drop, order, ...){
   se
 }
 
-
+#' @describeIn coeftable.default Extracts the standard-errors from a `fixest` VCOV matrix
+se.fixest_vcov = function(object, keep, drop, order, ...){
+  se.matrix(object = object, keep = keep, drop = drop, order = order)
+}
 
 #' Obtain various statistics from an estimation
 #'
@@ -1790,6 +1896,8 @@ se.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
 
   res = mat[, 2]
   names(res) = row.names(mat)
+  
+  attr(res, "vcov_type") = attr(mat, "vcov_type")
 
   res
 }
@@ -1809,6 +1917,8 @@ tstat.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
 
   res = mat[, 3]
   names(res) = row.names(mat)
+  
+  attr(res, "vcov_type") = attr(mat, "vcov_type")
 
   res
 }
@@ -1828,6 +1938,8 @@ pvalue.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
 
   res = mat[, 4]
   names(res) = row.names(mat)
+  
+  attr(res, "vcov_type") = attr(mat, "vcov_type")
 
   res
 }
@@ -1874,9 +1986,9 @@ nobs.fixest = function(object, ...){
   object$nobs
 }
 
-#' Aikake's an information criterion
+#' Akaike's an information criterion
 #'
-#' This function computes the AIC (Aikake's, an information criterion) from a `fixest` estimation.
+#' This function computes the AIC (Akaike's, an information criterion) from a `fixest` estimation.
 #'
 #' @inheritParams nobs.fixest
 #'
@@ -1892,11 +2004,11 @@ nobs.fixest = function(object, ...){
 #' You can have more information on this criterion on [`AIC`][stats::AIC].
 #'
 #' @return
-#' It return a numeric vector, with length the same as the number of objects taken as arguments.
+#' It returns a numeric vector, with length the same as the number of objects taken as arguments.
 #'
 #' @seealso
 #' See also the main estimation functions [`femlm`], [`feols`] or [`feglm`]. 
-#' Other statictics methods: [`BIC.fixest`], [`logLik.fixest`], [`nobs.fixest`].
+#' Other statistics methods: [`BIC.fixest`], [`logLik.fixest`], [`nobs.fixest`].
 #'
 #' @author
 #' Laurent Berge
@@ -1950,7 +2062,7 @@ AIC.fixest = function(object, ..., k = 2){
 #' You can have more information on this criterion on [`AIC`][stats::AIC].
 #'
 #' @return
-#' It return a numeric vector, with length the same as the number of objects taken as arguments.
+#' It returns a numeric vector, with length the same as the number of objects taken as arguments.
 #'
 #' @seealso
 #' See also the main estimation functions [`femlm`], [`feols`] or [`feglm`]. Other statistics functions: [`AIC.fixest`], [`logLik.fixest`].
@@ -2002,7 +2114,7 @@ BIC.fixest = function(object, ...){
 #' information on the likelihoods in the details of the function [`femlm`].
 #'
 #' @return
-#' It returns a numeric scalar.
+#' It returns an object of class [`logLik`][stats::logLik].
 #'
 #' @seealso
 #' See also the main estimation functions [`femlm`], [`feols`] or [`feglm`]. Other 
@@ -2022,8 +2134,9 @@ BIC.fixest = function(object, ...){
 #'
 #'
 logLik.fixest = function(object, ...){
-
-  if(object$method_type == "feols"){
+  
+  is_ols = object$method_type == "feols"
+  if(is_ols){
     # if the summary is 'lean', then no way we can compute that
     resid = object$residuals
     if(is.null(resid)) resid = NA
@@ -2034,6 +2147,11 @@ logLik.fixest = function(object, ...){
   } else {
     ll = object$loglik
   }
+  
+  attr(ll, "nall") = object$nobs
+  attr(ll, "nobs") = object$nobs
+  attr(ll, "df") = object$nparams + is_ols
+  class(ll) = "logLik"
 
   ll
 }
@@ -2580,7 +2698,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
     sample = "estimation"
   }
 
-  if(!is.matrix(newdata) && !"data.frame" %in% class(newdata)){
+  if(!is.matrix(newdata) && !inherits(newdata, "data.frame")){
     stop("Argument 'newdata' must be a data.frame.")
   }
 
@@ -2624,7 +2742,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
 
   # init fixed-effect values
   value_fixef = 0
-
+  
   fixef_vars = object$fixef_vars
   if(!is.null(fixef_vars)){
 
@@ -2788,7 +2906,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
   } else if(length(linear.varnames) > 0){
     # Checking all variables are there
 
-    if(isTRUE(object$iv) && object$iv_stage == 2){
+    if(isTRUE(object$is_iv) && object$iv_stage == 2){
       names(coef) = gsub("^fit_", "", names(coef))
       linear.varnames = c(linear.varnames, all_vars_with_i_prefix(object$fml_all$iv[[2]]))
       iv_fml = object$fml_all$iv
@@ -3092,8 +3210,8 @@ confint.fixest = function(object, parm, level = 0.95, vcov, se, cluster,
     res = data.frame(lower_bound, upper_bound, row.names = parm_use)
     names(res) = bound_names
   }
-
-  attr(res, "type") = attr(se_all, "type")
+  
+  attr(res, "vcov_type") = attr(coeftable, "vcov_type")
 
   res
 }
@@ -3125,11 +3243,14 @@ confint.fixest = function(object, parm, level = 0.95, vcov, se, cluster,
 #' `use_calling_env` is `FALSE`. 
 #' Number of frames up the stack where to perform the evaluation of the updated call. 
 #' By default, this is the parent frame.
-#' @param use_calling_env Logical scalar, default is `TRUE`. If `TRUE` then the evaluation 
-#' of the call will be done within the environment that called the initial estimation.
+#' @param use_calling_env Logical scalar, default is `NULL` (which means context-dependent).
+#' If `TRUE` then the evaluation of the call will be done within the environment 
+#' that called the initial estimation. If `FALSE`, it will use the current environment.
+#' By default, i.e. when `NULL`, it is equal to `FALSE` if the argument `data` is provided and 
+#' `TRUE` otherwise.
 #' This is mostly useful when the `fixest` object has been created through a custom 
 #' function, so that the new evaluation can use the variables within the enclosure of
-#' the function.
+#' that function.
 #' @param evaluate Logical, default is `TRUE`. If `FALSE`, only the updated call is returned.
 #' @param ... Other arguments to be passed to the functions [`femlm`], [`feols`] or [`feglm`].
 #'
@@ -3164,7 +3285,7 @@ confint.fixest = function(object, parm, level = 0.95, vcov, se, cluster,
 #' etable(est_pois, est_2, est_3, est_4)
 #'
 update.fixest = function(object, fml.update = NULL, fml = NULL, nframes = 1, 
-                         use_calling_env = TRUE, evaluate = TRUE, ...){
+                         use_calling_env = NULL, evaluate = TRUE, ...){
   # Update method
   # fml.update: update the formula
   # If 1) SAME DATA and 2) SAME dep.var, then we make initialisation
@@ -3172,7 +3293,8 @@ update.fixest = function(object, fml.update = NULL, fml = NULL, nframes = 1,
 
   check_arg(fml.update, fml, "NULL ts formula")
 
-  check_arg(use_calling_env, evaluate, "logical scalar")
+  check_arg(evaluate, "logical scalar")
+  check_arg(use_calling_env, "NULL logical scalar")
 
   if(isTRUE(object$is_fit)){
     stop("update method not available for `fixest` estimations obtained from fit methods.")
@@ -3201,6 +3323,16 @@ update.fixest = function(object, fml.update = NULL, fml = NULL, nframes = 1,
     call_new_names = names(call_new)
     problems = call_new[call_new_names == ""][-1]
     stop("In 'update.fixest' the arguments of '...' are passed to the function ", object$method, ", and must be named. Currently there are un-named arguments (e.g. '", deparse_long(problems[[1]]), "').")
+  }
+  
+  # calling env
+  if(is.null(use_calling_env)){
+    use_calling_env = TRUE
+    if(!is.null(dots$data)){
+      # We use the calling environment by default, unless the argument data
+      # is given explicitly
+      use_calling_env = FALSE
+    }
   }
   
   # Family information
@@ -3250,7 +3382,7 @@ update.fixest = function(object, fml.update = NULL, fml = NULL, nframes = 1,
 
   # new call: call_clear
   call_clear = call_old
-  for(arg in setdiff(names(call_new)[-1], c("fml.update", "nframes", "evaluate", "object"))){
+  for(arg in setdiff(names(call_new)[-1], c("fml.update", "nframes", "evaluate", "object", "use_calling_env"))){
     if(is.null(call_new[[arg]])){
       # for some raeson, it wouldn't work if call_new[[arg]] is NULL
       call_clear[[arg]] = NULL
@@ -3472,14 +3604,14 @@ formula.fixest = function(x, type = "full", fml.update = NULL,
     }
     
     if(".endo" %in% vars){
-      if(!isTRUE(x$iv)){
+      if(!isTRUE(x$is_iv)){
         stop("In the argument `fml.update`, the variable `.endo` is only accessible when `x` is an IV estimation, which is not the case here.")
       }
       res = replace_target_with_expr(res, quote(.endo), formula(x, "iv.endo")[[2]])
     }
     
     if(".inst" %in% vars){
-      if(!isTRUE(x$iv)){
+      if(!isTRUE(x$is_iv)){
         stop("In the argument `fml.update`, the variable `.inst` is only accessible when `x` is an IV estimation, which is not the case here.")
       }
       res = replace_target_with_expr(res, quote(.inst), formula(x, "iv.inst")[[2]])
@@ -3694,7 +3826,7 @@ model.matrix.fixest = function(object, data = NULL, type = "rhs", sample = "esti
   if(!missnull(data) && missing(type)){
     sc = sys.call()
     if(!"data" %in% names(sc)){
-      if(!is.null(data) && (is.character(data) || "formula" %in% class(data))){
+      if(!is.null(data) && (is.character(data) || inherits(data, "formula"))){
         # data is in fact the type
         type = data
         data = NULL
@@ -3709,7 +3841,7 @@ model.matrix.fixest = function(object, data = NULL, type = "rhs", sample = "esti
     stop("model.matrix method not available for fixest estimations obtained from fit methods.")
   }
 
-  if(any(grepl("^iv", type)) && !isTRUE(object$iv)){
+  if(any(grepl("^iv", type)) && !isTRUE(object$is_iv)){
     stopi("The type{$s, enum.Q, is ! {'^iv'get ? type}} only valid for IV estimations.")
   }
 
@@ -3738,7 +3870,7 @@ model.matrix.fixest = function(object, data = NULL, type = "rhs", sample = "esti
     data = as.data.frame(data)
   }
 
-  if(!"data.frame" %in% class(data)){
+  if(!inherits(data, "data.frame")){
     stop("The argument 'data' must be a data.frame or a matrix.")
   }
 
@@ -3768,7 +3900,7 @@ model.matrix.fixest = function(object, data = NULL, type = "rhs", sample = "esti
     fake_intercept = !is.null(object$fixef_vars) && !(!is.null(object$slope_flag) && all(object$slope_flag < 0))
 
     fml = fml_linear
-    if(isTRUE(object$iv)){
+    if(isTRUE(object$is_iv)){
       fml_iv = object$fml_all$iv
       fml = .xpd(..lhs ~ ..endo + ..rhs, 
                  ..lhs = fml[[2]], 
@@ -3908,7 +4040,7 @@ model.matrix.fixest = function(object, data = NULL, type = "rhs", sample = "esti
   if("iv.rhs1" %in% type){
     # First stage
 
-    if(!isTRUE(object$iv)){
+    if(!isTRUE(object$is_iv)){
       stop("In model.matrix, the type 'iv.rhs1' is only valid for IV models. This estimation is no IV.")
     }
 
@@ -3945,7 +4077,7 @@ model.matrix.fixest = function(object, data = NULL, type = "rhs", sample = "esti
   if("iv.rhs2" %in% type){
     # Second stage
 
-    if(!isTRUE(object$iv)){
+    if(!isTRUE(object$is_iv)){
       stop("In model.matrix, the type 'iv.rhs2' is only valid for second stage IV models. This estimation is not even IV.")
     }
 
@@ -4268,7 +4400,7 @@ hatvalues.fixest = function(model, exact = TRUE, boot.size = 1000, ...){
     stop("The method 'hatvalues.fixest' cannot be applied to 'lean' fixest objects. Please re-estimate with 'lean = FALSE'.")
   }
 
-  if (!is.null(model$iv)) {
+  if (!is.null(model$is_iv)) {
     stop("The method 'hatvalues.fixest' cannot be applied to IV models.")
   }
 

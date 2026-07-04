@@ -32,7 +32,7 @@ panel_setup = function(data, panel.id, time.step = NULL, duplicate.method = "non
   check_arg(panel.id, "character vector len(,2) no na | formula", 
             .message = "The argument 'panel.id' must be either: i) a one sided formula (e.g. ~id+time), ii) a character vector of length 2 (e.g. c('id', 'time'), or iii) a character scalar of two variables separated by a comma (e.g. 'id,time').")
 
-  if("formula" %in% class(panel.id)){
+  if(inherits(panel.id, "formula")){
     tm = terms_hat(panel.id)
     var_id_time = attr(tm, "term.labels")
     if(length(var_id_time) != 2){
@@ -384,13 +384,13 @@ l = function(x, k = 1, fill = NA){
         stop("We tried to lag a variable but the data set could not be fetched. This is an internal error to 'fixest'. It could be interesting to report this bug.")
       }
 
-      if(!"fixest_panel" %in% class(data_fixest_panel)){
+      if(!inherits(data_fixest_panel, "fixest_panel")){
         stopi("It seems l(), d() or f() has been called within a `fixest_panel` which is also a `data_table`.\nUnfortunately we could not get the data set.\nThis is an internal error: Could you report?")
       }
 
       meta_info = attr(data_fixest_panel, "panel_info")
     } else {
-      stop("Function l() (or f()) is only callable within 'fixest' estimations or within a variable creation with data.table (i.e. using ':=') where the data set is a 'fixest_panel' (obtained from panel()). Alternatively, you can use lag.formula().")
+      stop("Function l() (or f()) is only callable within 'fixest' estimations or within a variable creation with data.table (i.e. using ':=') where the data set is a 'fixest_panel' (obtained from panel()). Alternatively, you can use lag_fml().")
     }
   }
 
@@ -635,7 +635,7 @@ lag.formula = function(x, k = 1, data, time.step = NULL, fill = NA,
         stop("The variables of 'data' have no name (data is a matrix without column names).")
       }
       data = as.data.frame(data)
-    } else if("data.table" %in% class(data)){
+    } else if(inherits(data, "data.table")){
       data = as.data.frame(data)
     }
     existing_vars = names(data)
@@ -726,7 +726,7 @@ lag_fml = lag.formula
 #' time periods is used (typically if the time variable represents years, it will be 1). 
 #' This method can apply only to integer (or convertible to integer) variables. 
 #' If `"consecutive"`, then the time variable can be of any type: two successive 
-#' time periods represent a lag of 1. If `"witihn.consecutive"` then **within a given id**, 
+#' time periods represent a lag of 1. If `"within.consecutive"` then **within a given id**, 
 #' two successive time periods represent a lag of 1. Finally, if the time variable is numeric, 
 #' you can provide your own numeric time step.
 #' @param duplicate.method If several observations have the same id and time values, 
@@ -800,7 +800,7 @@ panel = function(data, panel.id, time.step = NULL, duplicate.method = "none"){
 
   if(missing(data)){
     stop("You must provide the argument 'data'.")
-  } else if(!"data.frame" %in% class(data)){
+  } else if(!inherits(data, "data.frame")){
     stop("Argument 'data' must be a data.frame.")
   }
 
@@ -814,7 +814,7 @@ panel = function(data, panel.id, time.step = NULL, duplicate.method = "none"){
 
   # R makes a shallow copy of data => need to do it differently with DT
 
-  if("data.table" %in% class(data) && requireNamespace("data.table", quietly=TRUE)){
+  if(inherits(data, "data.table") && requireNamespace("data.table", quietly=TRUE)){
     res = data.table::copy(data)
     data.table::setattr(res, "panel_info", meta_info)
     data.table::setattr(res, "class", c("fixest_panel", "data.table", "data.frame"))
@@ -865,7 +865,7 @@ panel = function(data, panel.id, time.step = NULL, duplicate.method = "none"){
 #'
 unpanel = function(x){
 
-  if("data.table" %in% class(x) && requireNamespace("data.table", quietly=TRUE)){
+  if(inherits(x, "data.table") && requireNamespace("data.table", quietly=TRUE)){
     data.table::setattr(x, "panel_info", NULL)
     data.table::setattr(x, "class", setdiff(class(x), "fixest_panel"))
 
@@ -944,12 +944,17 @@ unpanel = function(x){
 #'
 `[.fixest_panel` = function(x, i, j, ...){
   # we need to perform proper bookkeeping
+  
+  if(is_calling_fun("print.data.table", full_search = TRUE)){
+    res = "[.data.frame"(x, i, j, drop = FALSE)
+    return(res)
+  }
 
   info = attr(x, "panel_info")
   mc = match.call()
 
   IS_DT = FALSE
-  if("data.table" %in% class(x) && requireNamespace("data.table", quietly = TRUE)){
+  if(inherits(x, "data.table") && requireNamespace("data.table", quietly = TRUE)){
     IS_DT = TRUE
     # data.table is really hard to handle....
     # Not very elegant... but that's life!

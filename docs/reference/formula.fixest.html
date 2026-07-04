@@ -13,7 +13,7 @@ linear in parameters part, then this will be added in the formula in between I()
 
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.13.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.14.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -159,7 +159,7 @@ cannot be used at the same time.</p>
 <span class="r-in"><span><span class="co"># idem without the IVs nor the FEs</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/formula.html" class="external-link">formula</a></span><span class="op">(</span><span class="va">est</span>, <span class="st">"full.nofixef.noiv"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> y ~ x1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001a386c490b0&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x0000023c7cd757b0&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># the reduced form</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/formula.html" class="external-link">formula</a></span><span class="op">(</span><span class="va">est</span>, <span class="st">"iv.reduced"</span><span class="op">)</span></span></span>
@@ -168,27 +168,27 @@ cannot be used at the same time.</p>
 <span class="r-in"><span><span class="co"># the IV relation only</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/formula.html" class="external-link">formula</a></span><span class="op">(</span><span class="va">est</span>, <span class="st">"iv"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> endo ~ instr</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001a386c49e08&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x0000023c7cd76508&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># the dependent variable =&gt; onse-sided formula</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/formula.html" class="external-link">formula</a></span><span class="op">(</span><span class="va">est</span>, <span class="st">"lhs"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ~y</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001a386c490b0&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x0000023c7cd757b0&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># using update, we add x1^2 as an independent variable:</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/formula.html" class="external-link">formula</a></span><span class="op">(</span><span class="va">est</span>, fml.update <span class="op">=</span> <span class="va">.</span> <span class="op">~</span> <span class="va">.</span> <span class="op">+</span> <span class="va">x1</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> y ~ x1 + x1^2 | species | endo ~ instr</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001a386498e08&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x0000023c7c3b4040&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># using build, see the difference =&gt; the FEs and the IVs are not inherited</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/formula.html" class="external-link">formula</a></span><span class="op">(</span><span class="va">est</span>, fml.build <span class="op">=</span> <span class="va">.</span> <span class="op">~</span> <span class="va">.</span> <span class="op">+</span> <span class="va">x1</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> y ~ x1 + x1^2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001a38632a5f0&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x0000023c7c209ce8&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># we can use some special variables</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/formula.html" class="external-link">formula</a></span><span class="op">(</span><span class="va">est</span>, fml.build <span class="op">=</span> <span class="va">.</span> <span class="op">~</span> <span class="va">.endo</span> <span class="op">+</span> <span class="va">.indep</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> y ~ endo + x1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001a3861a8430&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x0000023c7c0b17e0&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

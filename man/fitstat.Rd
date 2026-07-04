@@ -13,17 +13,19 @@ fitstat(
   simplify = FALSE,
   verbose = TRUE,
   show_types = FALSE,
+  htest = FALSE,
   frame = parent.frame(),
   ...
 )
 }
 \arguments{
-\item{x}{A \code{fixest} estimation.}
+\item{x}{A \code{fixest} estimation, obtained for example from \code{\link{feols}}.}
 
-\item{type}{Character vector or one sided formula. The type of fit statistic to be computed.
-The classic ones are: n, rmse, r2, pr2, f, wald, ivf, ivwald. You have the full list in
-the details section or use \code{show_types = TRUE}. Further, you can register your own types
-with \code{\link{fitstat_register}}.}
+\item{type}{Character vector or one sided formula. No default.
+The type of fit statistic or tests to be computed.
+The classic ones are: \code{n}, \code{rmse}, \code{r2}, \code{pr2}, \code{f}, \code{wald}, \code{ivf}, \code{ivwald}.
+You have the full list in the details section or use \code{show_types = TRUE}.
+Further, you can register your own types with \code{\link{fitstat_register}}.}
 
 \item{vcov}{Versatile argument to specify the VCOV. In general, it is either a character
 scalar equal to a VCOV type, either a formula of the form: \code{vcov_type ~ variables}. The
@@ -46,21 +48,29 @@ blank with \code{vcov = "twoway"} (assuming \code{var1} [resp. \code{var2}] was
 the 1st [resp. 2nd] fixed-effect). You can interact two variables using \code{^} with
 the following syntax: \code{cluster = ~var1^var2} or \code{cluster = "var1^var2"}.}
 
-\item{ssc}{An object of class \code{ssc.type} obtained with the function \code{\link{ssc}}. Represents
-how the degree of freedom correction should be done.You must use the function \code{\link{ssc}}
+\item{ssc}{An object of class \code{ssc_type} obtained with the function \code{\link{ssc}}. Represents
+how the small sample correction should be done. You must use the function \code{\link{ssc}}
 for this argument. The arguments and defaults of the function \code{\link{ssc}} are:
 \code{K.adj = TRUE}, \code{K.fixef = "nonnested"}, \code{G.adj = TRUE}, \code{G.df = "min"},
-\code{t.df = "min"}, \verb{K.exact = FALSE)}. See the help of the function \code{\link{ssc}} for details.}
+\code{t.df = "min"}, \verb{K.exact = FALSE)}. See the help of the function \code{\link{ssc}} for details.
+Not all VCOV types are affected by this argument.}
 
 \item{simplify}{Logical, default is \code{FALSE}. By default a list is returned whose names are
 the selected types. If \code{simplify = TRUE} and only one type is selected, then the element
-is directly returned (ie will not be nested in a list).}
+is directly returned (i.e. will not be nested in a list).}
 
 \item{verbose}{Logical, default is \code{TRUE}. If \code{TRUE}, an object of class \code{fixest_fitstat}
 is returned (so its associated print method will be triggered). If \code{FALSE} a simple list
-is returned instead.}
+is returned instead (i.e. the same object without the class).}
 
-\item{show_types}{Logical, default is \code{FALSE}. If \code{TRUE}, only prompts all available types.}
+\item{show_types}{Logical, default is \code{FALSE}. If \code{TRUE}, this prompts all available types
+and nothing is returned.}
+
+\item{htest}{Logical scalar, default is \code{FALSE}. If \code{TRUE}, the results of tests are formatted
+according to the \code{htest} class (defined in the \code{stats} package),
+and the returned object is a simple list.
+If \code{FALSE}, the results of each test is a simple list but the object returned is of class
+\code{fixest_fitstat}.}
 
 \item{frame}{An environment in which to evaluate variables, default is \code{parent.frame()}.
 Only used if the argument \code{type} is a formula and some values in the formula have to be
@@ -69,17 +79,72 @@ extended with the dot square bracket operator. Mostly for internal use.}
 \item{...}{For internal use.}
 }
 \value{
-By default an object of class \code{fixest_fitstat} is returned. Using \code{verbose = FALSE}
-returns a simple a list. Finally, if only one type is selected, \code{simplify = TRUE}
-leads to the selected type to be returned.
+By default an object of class \code{fixest_fitstat} is returned.
+This object is a simple list containing the statistics/tests requested
+by the user.
+For example \code{fitstat(x, c("r2", "f"))} returns a list with two elements named \code{r2} and \code{f}.
+
+Each statistic from the \code{fixest_fitstat} object can be of two types:
+\enumerate{
+\item a list of numeric scalars whose elements depend on the type of fit statistic/test.
+For example the F-test, accessed with \code{f}, contains the elements
+\code{stat}, \code{p}, \code{df1}, and \code{df2}. The \code{wald} test contains the elements
+\code{stat}, \code{p}, \code{df1}, \code{df2} and \code{vcov}. The likelihood ratio, \code{lr}, contains the elements
+\code{stat}, \code{p}, \code{df}. Etc.
+
+\item a numeric scalar, for either: i) scalar fit statistics, like \code{r2} or \code{rmse},
+ii) when a specific element of a fit statistic is accessed, like e.g. \code{f.stat}
+which reports the \code{stat} element of the fit statistic \code{f}.
+}
+
+The types of fit statistics and their structure are detailed
+in the section \verb{Available types} of this documentation.
+
+The class \code{fixest_fitstat} has only a dedicated print method.
+
+If the argument \code{htest=TRUE}, the object returned is a plain list containing the requested
+statistics and each test is formatted according to the \code{htest} class from the \code{stats} package.
+\code{htest} objects are lists containing the following elements:
+\describe{
+\item{statistic}{A numeric scalar equal to test statistic.}
+\item{p.value}{A numeric scalar equal to the p-value of the test.}
+\item{parameter}{A list containing various parameters used to calculate the
+p-value and the statistic. It can be \code{df}, \code{df1}, \code{df2},  or \code{vcov}.}
+\item{alternative}{The alternative hypothesis.}
+\item{method}{The name of the test.}
+\item{data.name}{The estimation call on which the test is applied.}
+}
+
+Using \code{verbose = FALSE} removes the \code{fixest_fitstat} class from the returned object,
+turning it into a plain list (this is ignored when \code{htest=TRUE}).
+
+If only one type is selected, \code{simplify = TRUE} leads to the selected statistic to
+be directly returned (and hence is not nested inside a list).
+For example \code{fitstat(x, "r2", simplify = TRUE)} returns a simple scalar.
+
+If \code{show_types=TRUE}, this function returns instead a character vector with
+all the available types.
 }
 \description{
-Computes various fit statistics for \code{fixest} estimations.
+Computes various fit statistics or hypothesis tests for \code{fixest} estimations.
+These statistics can also be used within \code{\link{etable}} or set to be displayed when printing the
+model with \code{\link{setFixest_print}}.
+}
+\details{
+Any statistic available in \code{fitstat} can also be used directly in \code{\link{etable}} via its
+argument \code{fitstat}. For example \code{etable(est, fitstat = c("r2", "rmse"))} will report
+the R2 and the RMSE in the fit statistics section of the table.
+
+If one wants to change the default set of statistics reported when printing the model,
+this is possible with the function \code{\link{setFixest_print}} which accepts the argument \code{fitstat}.
+For example \code{setFixest_print(fitstat = ~r2 + f)} will report the R2 and the F-test
+for each estimation.
 }
 \section{Registering your own types}{
 
 
-You can register custom fit statistics with the function \code{fitstat_register}.
+You can register custom fit statistics with the function \code{\link{fitstat_register}}.
+These statistics can be anything. Please see its documentation.
 }
 
 \section{Available types}{
@@ -106,7 +171,7 @@ If you want to display only one of these, use their name after a dot: e.g. \code
 will give the statistic of the F-test, or \code{wf.p} will give the p-values of the F-test
 on the projected model (i.e. projected onto the fixed-effects).}
 \item{\code{wald}: }{Wald test of joint nullity of the coefficients. This test always excludes
-the intercept and the fixed-effects. These type returns the following values:
+the intercept and the fixed-effects. This type returns the following values:
 \code{stat}, \code{p}, \code{df1}, \code{df2} and \code{vcov}. The element \code{vcov} reports the way the VCOV
 matrix was computed since it directly influences this statistic.}
 \item{\code{ivf}, \code{ivf1}, \code{ivf2}, \code{ivfall}: }{These statistics are specific to IV estimations.
@@ -157,11 +222,17 @@ fitstat(gravity, "g", simplify = TRUE)
 # Some fit statistics
 fitstat(gravity, ~ rmse + r2 + wald + wf)
 
+# This is a simple list:
+names(fitstat(gravity, ~ rmse + r2 + wald + wf))
+
 # You can use them in etable
 etable(gravity, fitstat = ~ rmse + r2 + wald + wf)
 
 # For wald and wf, you could show the pvalue instead:
 etable(gravity, fitstat = ~ rmse + r2 + wald.p + wf.p)
+
+# You can display the tests with the htest format with htest=TRUE
+fitstat(gravity, ~ rmse + r2 + wald + wf, htest = TRUE)
 
 # Now let's display some statistics that are not built-in
 # => we use fitstat_register to create them
@@ -176,9 +247,6 @@ fitstat_register("t2w", function(x) tstat(x, se = "twow")[1], "t-stat (2-way)")
 
 # Now we can use these keywords in fitstat:
 etable(gravity, fitstat = ~ . + tstand + thc + t1w + t2w)
-
-# Note that the custom stats we created are can easily lead
-# to errors, but that's another story!
 
 
 }

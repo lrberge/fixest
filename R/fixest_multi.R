@@ -509,7 +509,7 @@ summary.fixest_multi = function(object, type = "etable", vcov = NULL, se = NULL,
 
     # In IV: multiple estimations can be returned
 
-    if("fixest_multi" %in% class(object[[1]])){
+    if(inherits(object[[1]], "fixest_multi")){
       tree = attr(object, "tree")
       object = setup_multi(object, tree = tree)
     }
@@ -620,7 +620,7 @@ summary.fixest_multi = function(object, type = "etable", vcov = NULL, se = NULL,
 #'
 #' @seealso
 #' The main fixest estimation functions: [`feols`], [`fepois`][fixest::feglm], 
-#' [`fenegbin`][fixest::femlm], [`feglm`], [`feNmlm`]. Tools for mutliple fixest 
+#' [`fenegbin`][fixest::femlm], [`feglm`], [`feNmlm`]. Tools for multiple fixest
 #' estimations: [`summary.fixest_multi`], [`print.fixest_multi`], [`as.list.fixest_multi`], 
 #' \code{\link[fixest]{sub-sub-.fixest_multi}}, \code{\link[fixest]{sub-.fixest_multi}}.
 #'
@@ -665,7 +665,7 @@ print.fixest_multi = function(x, type = "etable", ...){
   # Finding out the type of SEs
   if(is_short){
 
-    all_se = unique(unlist(sapply(x, function(x) attr(x$cov.scaled, "type"))))
+    all_se = unique(unlist(sapply(x, function(x) attr(x$cov.scaled, "vcov_type"))))
 
     if(length(all_se) > 1){
       cat("Standard-errors: mixed (use summary() with arg. 'vcov' to harmonize them) \n")
@@ -1514,7 +1514,7 @@ confint.fixest_multi = function(object, parm, level = 0.95, vcov = NULL, se = NU
   res = do.call(base::rbind, confint_all)
   res = cbind(mod_all, res)
 
-  attr(res, "type") = attr(confint_all[n_all > 0][[1]], "type")
+  attr(res, "vcov_type") = attr(confint_all[n_all > 0][[1]], "vcov_type")
 
   res
 }

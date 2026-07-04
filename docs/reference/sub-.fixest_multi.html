@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.13.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.14.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -162,10 +162,10 @@ estimations: <code><a href="summary.fixest_multi.html">summary.fixest_multi</a><
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Ozone            Ozone          Solar.R</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Constant        26.06*** (4.090) 41.22*** (6.910) 182.7*** (23.38)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1      -89.96* (35.56)                    -142.3 (205.4)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2        66.46 (39.66)                    -177.1 (233.1)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1                       215.9** (67.18)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2                         92.23 (63.43)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)1   -89.96* (35.56)                    -142.3 (205.4)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)2     66.46 (39.66)                    -177.1 (233.1)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)1                    215.9** (67.18)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)2                      92.23 (63.43)                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ ________________ ________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID              IID              IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                  26               26               27</span>
@@ -177,10 +177,10 @@ estimations: <code><a href="summary.fixest_multi.html">summary.fixest_multi</a><
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:          Solar.R          Ozone           Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Constant        191.6*** (37.62) 25.43* (7.310) 30.73** (6.188)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1                       91.24 (82.49)                </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2                      -43.18 (65.91)                </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1        124.1 (373.5)                 -6.996 (59.32)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2       -484.8 (322.7)                 121.6* (47.13)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)1                    91.24 (82.49)                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)2                   -43.18 (65.91)                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)1     124.1 (373.5)                 -6.996 (59.32)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)2    -484.8 (322.7)                 121.6* (47.13)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ ______________ _______________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID            IID             IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                  27              9               9</span>
@@ -192,10 +192,10 @@ estimations: <code><a href="summary.fixest_multi.html">summary.fixest_multi</a><
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:          Solar.R          Solar.R</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Constant        196.5*** (16.70) 161.7*** (37.25)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1       233.8. (129.0)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2       -51.86 (111.4)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1                         313.2 (344.5)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2                         78.76 (214.4)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)1    233.8. (129.0)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)2    -51.86 (111.4)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)1                      313.2 (344.5)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)2                      78.76 (214.4)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ ________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID              IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                  30               30</span>
@@ -211,10 +211,10 @@ estimations: <code><a href="summary.fixest_multi.html">summary.fixest_multi</a><
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Ozone            Ozone          Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Constant        26.06*** (4.090) 41.22*** (6.910) 25.43* (7.310)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1      -89.96* (35.56)                   91.24 (82.49)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2        66.46 (39.66)                  -43.18 (65.91)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1                       215.9** (67.18)               </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2                         92.23 (63.43)               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)1   -89.96* (35.56)                   91.24 (82.49)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)2     66.46 (39.66)                  -43.18 (65.91)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)1                    215.9** (67.18)               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)2                      92.23 (63.43)               </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ ________________ ______________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID              IID            IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                  26               26              9</span>
@@ -226,10 +226,10 @@ estimations: <code><a href="summary.fixest_multi.html">summary.fixest_multi</a><
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:           Ozone          Solar.R          Solar.R</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Constant        30.73** (6.188) 182.7*** (23.38) 191.6*** (37.62)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1                       -142.3 (205.4)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2                       -177.1 (233.1)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1      -6.996 (59.32)                     124.1 (373.5)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2      121.6* (47.13)                    -484.8 (322.7)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)1                    -142.3 (205.4)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)2                    -177.1 (233.1)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)1   -6.996 (59.32)                     124.1 (373.5)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)2   121.6* (47.13)                    -484.8 (322.7)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ _______________ ________________ ________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                   IID              IID              IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                  9               27               27</span>
@@ -241,10 +241,10 @@ estimations: <code><a href="summary.fixest_multi.html">summary.fixest_multi</a><
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:          Solar.R          Solar.R</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Constant        196.5*** (16.70) 161.7*** (37.25)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1       233.8. (129.0)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2       -51.86 (111.4)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1                         313.2 (344.5)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2                         78.76 (214.4)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)1    233.8. (129.0)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)2    -51.86 (111.4)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)1                      313.2 (344.5)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)2                      78.76 (214.4)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ ________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID              IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                  30               30</span>
@@ -260,8 +260,8 @@ estimations: <code><a href="summary.fixest_multi.html">summary.fixest_multi</a><
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Ozone          Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Constant        26.06*** (4.090) 25.43* (7.310)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1      -89.96* (35.56)  91.24 (82.49)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2        66.46 (39.66) -43.18 (65.91)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)1   -89.96* (35.56)  91.24 (82.49)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)2     66.46 (39.66) -43.18 (65.91)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ ______________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID            IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                  26              9</span>
@@ -277,10 +277,10 @@ estimations: <code><a href="summary.fixest_multi.html">summary.fixest_multi</a><
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Ozone            Ozone          Solar.R</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Constant        26.06*** (4.090) 41.22*** (6.910) 182.7*** (23.38)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1      -89.96* (35.56)                    -142.3 (205.4)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2        66.46 (39.66)                    -177.1 (233.1)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1                       215.9** (67.18)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2                         92.23 (63.43)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)1   -89.96* (35.56)                    -142.3 (205.4)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)2     66.46 (39.66)                    -177.1 (233.1)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)1                    215.9** (67.18)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)2                      92.23 (63.43)                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ ________________ ________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID              IID              IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                  26               26               27</span>
@@ -292,10 +292,10 @@ estimations: <code><a href="summary.fixest_multi.html">summary.fixest_multi</a><
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:          Solar.R</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Constant        191.6*** (37.62)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1        124.1 (373.5)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2       -484.8 (322.7)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)1                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)2                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)1     124.1 (373.5)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)2    -484.8 (322.7)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                  27</span>
@@ -311,10 +311,10 @@ estimations: <code><a href="summary.fixest_multi.html">summary.fixest_multi</a><
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Ozone          Solar.R</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Constant        26.06*** (4.090) 161.7*** (37.25)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1      -89.96* (35.56)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2        66.46 (39.66)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1                         313.2 (344.5)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2                         78.76 (214.4)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)1   -89.96* (35.56)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)2     66.46 (39.66)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)1                      313.2 (344.5)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)2                      78.76 (214.4)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ ________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID              IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                  26               30</span>

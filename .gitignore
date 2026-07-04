@@ -20,3 +20,7 @@ altdoc/freeze.rds
 _quarto/*
 !_quarto/_freeze/
 .DS_Store
+
+# Configure script outputs
+config.log
+src/Makevars

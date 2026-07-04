@@ -2,7 +2,7 @@
 % Please edit documentation in R/methods.R
 \name{AIC.fixest}
 \alias{AIC.fixest}
-\title{Aikake's an information criterion}
+\title{Akaike's an information criterion}
 \usage{
 \method{AIC}{fixest}(object, ..., k = 2)
 }
@@ -15,10 +15,10 @@
 classical AIC (i.e. \code{AIC=-2*LL+k*nparams}).}
 }
 \value{
-It return a numeric vector, with length the same as the number of objects taken as arguments.
+It returns a numeric vector, with length the same as the number of objects taken as arguments.
 }
 \description{
-This function computes the AIC (Aikake's, an information criterion) from a \code{fixest} estimation.
+This function computes the AIC (Akaike's, an information criterion) from a \code{fixest} estimation.
 }
 \details{
 The AIC is computed as:
@@ -41,7 +41,7 @@ BIC(res1, res2)
 }
 \seealso{
 See also the main estimation functions \code{\link{femlm}}, \code{\link{feols}} or \code{\link{feglm}}.
-Other statictics methods: \code{\link{BIC.fixest}}, \code{\link{logLik.fixest}}, \code{\link{nobs.fixest}}.
+Other statistics methods: \code{\link{BIC.fixest}}, \code{\link{logLik.fixest}}, \code{\link{nobs.fixest}}.
 }
 \author{
 Laurent Berge

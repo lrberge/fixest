@@ -1,0 +1,106 @@
+#!/usr/bin/env sh
+
+# Detect OpenMP support for fixest, following the approach from
+# data.table PR #7318 which handles the clang17/Xcode 16.3+
+# incompatibility where OpenMP compiles but fails to load at runtime
+# due to missing symbols (e.g. ___kmpc_dispatch_deinit) in the
+# R-bundled libomp.dylib.
+
+# Test program uses schedule(dynamic) to trigger ___kmpc_dispatch_deinit,
+# which is the symbol missing from the old macOS OpenMP runtime.
+# extern "C" prevents C++ name mangling so .C() can find the symbol.
+cat <<EOF > test-omp.cpp
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+extern "C" void test_openmp(int * result) {
+ int sum = 0;
+#ifdef _OPENMP
+ #pragma omp parallel for reduction(+:sum) num_threads(2) schedule(dynamic)
+ for (int i = 1; i <= 2; ++i) sum += i;
+#endif
+ *result = sum;
+}
+EOF
+
+test_openmp_variant () {
+  # Remove previous shared object to force relinking
+  "${R_HOME}"/bin/Rscript -e 'unlink(paste0("test-omp", .Platform$dynlib.ext))'
+
+  cxxflags="${PKG_CXXFLAGS:+${PKG_CXXFLAGS} }$1"
+  libs="${PKG_LIBS:+${PKG_LIBS} }$2"
+  printf "%s" "* checking if OpenMP works with CXXFLAGS='$cxxflags' LIBS='$libs'... "
+  if ! PKG_CXXFLAGS="$cxxflags" PKG_LIBS="$libs" "${R_HOME}"/bin/R CMD SHLIB --preclean --clean test-omp.cpp >>config.log 2>&1; then
+    echo "no"
+    return 1
+  fi
+
+  if ! "${R_HOME}"/bin/Rscript -e '
+dll <- paste0("test-omp", .Platform$dynlib.ext)
+dyn.load(dll)
+ans <- .C("test_openmp", ans = integer(1))$ans
+stopifnot(identical(ans, 3L))
+' >> config.log 2>&1; then
+    echo "no"
+    return 1
+  fi
+
+  export PKG_CXXFLAGS="${PKG_CXXFLAGS} ${1}"
+  export PKG_LIBS="${PKG_LIBS} ${2}"
+  export R_OPENMP_ENABLED=1
+  echo "yes"
+  return 0
+}
+
+detect_openmp () {
+  # Try in order: env/user-configured, R's SHLIB_OPENMP macros, plain -fopenmp
+  test_openmp_variant "" "" \
+  || test_openmp_variant '$(SHLIB_OPENMP_CXXFLAGS)' '$(SHLIB_OPENMP_CXXFLAGS)' \
+  || test_openmp_variant -fopenmp -fopenmp \
+  && return
+
+  case "$(uname)" in
+  Darwin)
+    # https://mac.r-project.org/openmp
+    test_openmp_variant "-Xclang -fopenmp" "-lomp" && return
+
+    if [ "$(uname -m)" = "arm64" ]; then
+      HOMEBREW_PREFIX=/opt/homebrew
+    else
+      HOMEBREW_PREFIX=/usr/local
+    fi
+    test -e "${HOMEBREW_PREFIX}/opt/libomp" \
+    && test_openmp_variant \
+      "-I${HOMEBREW_PREFIX}/opt/libomp/include -Xclang -fopenmp" \
+      "-L${HOMEBREW_PREFIX}/opt/libomp/lib -lomp" \
+    && return
+
+    if test -e /usr/local/lib/libomp.dylib \
+      && test_openmp_variant "-Xclang -fopenmp" "/usr/local/lib/libomp.dylib"; then
+      echo "*** Using the OpenMP runtime from /usr/local/lib/libomp.dylib."
+      echo "*** Please be careful when mixing the result with CRAN binaries."
+      return
+    fi
+
+    echo "*** All OpenMP tests failed and you're running macOS."
+    echo "*** Do you need an OpenMP runtime from <https://mac.r-project.org/openmp/>?"
+    ;;
+  esac
+
+  # No support for OpenMP available
+  export R_OPENMP_ENABLED=0
+}
+
+detect_openmp
+rm -f test-omp.* a.out
+
+if [ "${R_OPENMP_ENABLED}" = "0" ]; then
+  echo "***"
+  echo "*** OpenMP not supported! fixest will be single-threaded."
+  echo "***"
+fi
+
+# Substitute detected flags into Makevars template
+sed -e "s|@PKG_CXXFLAGS@|$PKG_CXXFLAGS|" -e "s|@PKG_LIBS@|$PKG_LIBS|" src/Makevars.in > src/Makevars
+
+exit 0

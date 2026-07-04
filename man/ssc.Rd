@@ -2,8 +2,6 @@
 % Please edit documentation in R/VCOV.R
 \name{ssc}
 \alias{ssc}
-\alias{setFixest_ssc}
-\alias{getFixest_ssc}
 \title{Governs the small sample correction in \code{fixest} VCOVs}
 \usage{
 ssc(
@@ -15,10 +13,6 @@ ssc(
   t.df = "min",
   ...
 )
-
-setFixest_ssc(ssc.type = ssc())
-
-getFixest_ssc()
 }
 \arguments{
 \item{K.adj}{Logical scalar, defaults to \code{TRUE}. Whether to apply a small sample adjustment of
@@ -31,18 +25,21 @@ the fixed-effects parameters are discarded, meaning the number of parameters (\c
 equal to the number of variables. If \code{"full"}, then the number of parameters is equal to
 the number of variables plus the number of fixed-effects. Finally, if \code{"nonnested"}, then
 the number of parameters is equal to the number of variables plus the number of
-fixed-effects that \emph{are not} nested in the clusters used to cluster the standard-errors.}
+fixed-effects that \emph{are not} nested in the clusters used to cluster the standard-errors.
+
+When the standard-errors are not clustered, \code{"nonnested"} is equivalent to \code{"full"}.}
 
 \item{K.exact}{Logical, default is \code{FALSE}. If there are 2 or more fixed-effects,
-these fixed-effects they can be irregular, meaning they can provide the same information.
+these fixed-effects can be irregular, meaning they can provide the same information.
 If so, the "real" number of parameters should be lower than the total number of
 fixed-effects. If \code{K.exact = TRUE}, then \code{\link{fixef.fixest}} is first run to
 determine the exact number of parameters among the fixed-effects. Mostly, panels of
 the type individual-firm require \code{K.exact = TRUE} (but it adds computational costs).}
 
 \item{G.adj}{Logical scalar, default is \code{TRUE}. How to make the small sample correction
-when clustering the standard-errors? If \code{TRUE} a \code{G/(G-1)} correction is performed with \code{G}
-the number of cluster values.}
+with cluster-like standard-errors? If \code{TRUE} a \code{G/(G-1)} correction is performed with \code{G}
+the number of cluster values. In the case of Newey-West or Driscoll-Kraay, \code{G} is the number
+of time periods.}
 
 \item{G.df}{Either "conventional" or "min" (default). Only relevant when the
 variance-covariance matrix is two-way clustered (or higher). It governs how the small
@@ -52,19 +49,20 @@ smallest G_i. If \code{G.df="conventional"} then the i-th "sandwich" matrix is a
 with G_i/(G_i-1) with G_i the number of unique clusters.}
 
 \item{t.df}{Either "conventional", "min" (default) or an integer scalar. Only relevant when
-the variance-covariance matrix is clustered. It governs how the p-values should be computed.
+the variance-covariance matrix is cluster-like. It governs how the p-values should be computed.
 By default, the degrees of freedom of the Student t distribution is equal to the minimum size
 of the clusters with which the VCOV has been clustered minus one. If \code{t.df="conventional"},
 then the degrees of freedom of the Student t distribution is equal to the number of
 observations minus the number of estimated variables. You can also pass a number to
-manually specify the DoF of the t-distribution.}
+manually specify the DoF of the t-distribution.
+
+In the case of Newey-West or Driscoll-Kraay, when \code{t.df="min"}, this leads to using
+the number of time periods minus one for the degrees of freedom of the t distribution.}
 
 \item{...}{Only used internally (to catch deprecated parameters).}
-
-\item{ssc.type}{An object of class \code{ssc.type} obtained with the function \code{\link{ssc}}.}
 }
 \value{
-It returns a \code{ssc.type} object.
+It returns a \code{ssc_type} object.
 }
 \description{
 Provides how the small sample correction should be calculated in \code{\link{vcov.fixest}}/\code{\link{summary.fixest}}.
@@ -150,11 +148,11 @@ attr(fixef(est), "references")
 # To permanently set the default ssc:
 #
 
-# eg no small sample adjustment:
-setFixest_ssc(ssc(K.adj = FALSE))
+# eg no small sample adjustment for iid VCOV:
+setFixest_ssc(ssc(K.adj = FALSE), "iid")
 
-# Factory default
-setFixest_ssc()
+# Restoring the default for all vcovs
+setFixest_ssc(vcov_names = "all")
 
 }
 \seealso{

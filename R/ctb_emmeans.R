@@ -67,7 +67,8 @@ emm_basis.fixest = function(object, trms, xlev, grid, ...) {
     assign = attr(X, "assign")
     X = X[, nm, drop = FALSE]
     bhat = as.numeric(bhat)
-    V = vcov(object, ...) # we're using fixest's method as it already allows vcov option
+    V = vcov(object, ..., attr = FALSE) 
+    # we're using fixest's method as it already allows vcov option
 
     # fixest handles rank deficiencies by tossing columns. Plus it seems hard to
     # recover the needed portion of X after the fixed effects are orthogonalized out.

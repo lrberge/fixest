@@ -1,17 +1,105 @@
 
-# fixest 0.13.3
-
-## New features
-
-- `etable`: arguments `extralines` and `headers` are more robust and the behavior is slightly modified. You can now position the values using integer indexes which give the columns position, inseadof column spans. It also errors more gracefully. This change is retro compatible. 
-
-- in multiple estimations in which at least one estimation contains only missing values: no error is thrown any more
+# fixest 0.14.1
 
 ## Bug fixes
 
-- `etable`: fix bug when extralines or headers was single valued (fixes #399)
+- fix bug in IV estimation when all exogenous regressors are removed from the estimation in the presence of fixed-effects. Reported by @adamaltmejd, #638
+
+- fix various typos in the documentation
+
+- fix bug in the error reporting for `femlm`/`fenegbin`/`fepois`. Thanks to @RobinDenz1 for reporting (fixes #646).
+
+## New features
+
+- `fitstat` gains the argument `htest` which formats the tests according to the htest class from the `stats` package
+
+## Other changes
+
+- improve the print method for TSLS
+
+- the documentation of `fitstat` is improved
+
+# fixest 0.14.0
+
+## Bug fixes
+
+- vcov: fix bug in the message when `vcov_fix = FALSE` and the matrix is found to be non postive definite. Reported by @MatthieuStigler.
+
+- `etable`: fix bug when `extralines` or `headers` was single valued (fixes #399)
 
 - fix bug leading to R crach when the dependent variable contained only missing values (reported by @Orgron, #603)
+
+- `update.fixest()` and `update.fixest_multi()` no longer throw a warning if `use_calling_env` is used (#619, @etiennebacher).
+
+- improve detection of R-checks to avoid wrongly setting the number of cores to 1. Thanks to @adamaltmejd for reporting, fixes #625.
+
+- fix major bug, leading R to crash, when i) an endogenous regressor is fully explained by the instruments + exogenous variables, or ii) the instruments have exactly 0 explanatory power. Reported by @willwwang, #604
+
+- remove unwanted warnings when using VCOV HC2/HC3
+
+- fix bug leading to an increase of 1 in the degrees of freedom in estimations involving multiple fixed-effects. Thanks to @leostimpfle for reporting (#631).
+
+- fix bug in the predict method when applied to split sample estimations with fixed-effects with some fixed-effects which were removed. Thanks to @francescodelprato for reporting (#620).
+
+- `etable`: fix bug removing whitespaces in variable names (reported by @etiennebacher, #608)
+
+- interaction between `panel()` and `data.table`: fix bug preventing the print of the table. Reported by @andrewbaxter439, #610.
+
+- `etable`: fix bug when the table contained 10+ columns in a tabularx environment. Thanks to @MaelAstruc, #637
+
+## New features
+
+- THIS SOFTWARE FINALLY GETS A PROPER CITATION!!! Citation file updated, now points to the 2026 arxiv paper (https://arxiv.org/abs/2601.21749).
+
+- `etable`: arguments `extralines` and `headers` are more robust and the behavior is slightly modified. You can now position the values using integer indexes which give the columns position, insead of column spans. It also errors more gracefully. This change is retro compatible. 
+
+- `etable`: new arguments `keep_raw`, `drop_raw`, `order_raw` which have the same effect as keep/drop/order but refer explicitly to the original variable names before the dictionary is applied
+
+- `etable`: new argument `coef.sub` to apply arbitrary string substitutions on the final coefficient names
+
+- in multiple estimations in which at least one estimation contains only missing values: no error is thrown any more
+
+- in `coefplot`: the argument `zero` now adds 0 to the y-axis (instead of only turning highlighting on/off)
+
+## Small sample correction
+
+- you can now set the SSC globally for each VCOV individually with `setFixest_ssc(ssc_type, vcov_names)` (before it was the same SSC for any VCOV)
+
+- the documentation for each VCOV now contains how the small sample correction is applied
+
+## Other changes
+
+- VCOV: the test for non positive definite (PD) matrices becomes `x <= 0` to avoid overfixing. This leads to a less aggressive matrix regularization. Even if the effect of fixing was negligible, the messages were annoying. Thanks to @MatthieuStigler for pushing this.
+
+- VCOV: when the VCOV is not PD, the user is informed only if the regularized PD matrix is noticeably different (at least one difference larger than `1e-8`).
+
+- the `stats` method `logLik.fixest` now resembles `logLik.lm`
+
+- add `plot` method that mimics `coefplot`/`iplot` with auto switch when appropriate -- thanks to an editor and to GMD for the idea!
+
+- improve the display of the error messages in the main estimations
+
+- improve the display of TSLS estimations (now always show the main dependent variable)
+
+- in multiple estimations, when a model cannot be estimated, the cause of the problem is kept for reporting
+
+- better handle PROTECT/UNPROTECT in to_index.cpp
+
+- remove calls to Rf_error (reported by @Enchufa2, #636)
+
+- new method `print.fixest_vcov` to display the VCOV without showing its attributes (too many, it was ugly)
+
+- in `vcov.fixest`, the argument `attr` is now equal to `TRUE` by default (following `print.fixest_vcov`)
+
+- in `update.fixest`, the argument use_calling_env becomes context dependent (follows #618)
+
+- improve the startup message: i) remove false positives, ii) write the previous fixest version in the message, making it clearer which modifications the update entails
+
+- `wald()` now uses the effective sample size to compute the pvalue (it matters for clustered standard-errors with few clusters). Thanks to @Oravishayrizi, #634
+
+## Internals
+
+- OpenMP multithreading should now work out-of-the-box for CRAN Mac binary installations; please confirm with `getFixest_nthreads()`. Previously, Mac users had to configure their `~/.R/Makevars` and install `fixest` from source to get multithreaded performance. Thanks to the `data.table` team for pioneering the configure script approach (#615).
 
 # fixest 0.13.2
 
@@ -44,6 +132,8 @@
   - `cluster.df` => `G.df`
   
   Retro compatibility is ensured. Thanks to Kyle Butts and Grant McDermott for the brainstorm!
+
+- on `ssc`: argument `G.adj` does not apply to hetero standard-errors any more
 
 - in the functions `coefplot` and `iplot`: the argument `object` is removed, now all models need to be passed in `...`. The dots do not accept arguments to summary methods any more. Retro-compatibility partly ensured.
 
@@ -141,7 +231,7 @@ feols(c(Ozone, Temp) ~ regex("!Day"), airquality)
 
 - add new method `formula.fixest_multi`
 
-- complete rewrite of the internal algorithm turning the fixed-effects into indexes, it is now: i) faster (much faster when combining mutliple fixed effects), ii) more consistent for character vectors
+- complete rewrite of the internal algorithm turning the fixed-effects into indexes, it is now: i) faster (much faster when combining multiple fixed effects), ii) more consistent for character vectors
 
 - new algorithm removing the fixed-effects from the estimation due to singletons or perfect fits: now the algorithm is recursive
 

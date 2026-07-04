@@ -21,7 +21,7 @@ or to a number. If \code{"unitary"}, then the largest common divisor between con
 time periods is used (typically if the time variable represents years, it will be 1).
 This method can apply only to integer (or convertible to integer) variables.
 If \code{"consecutive"}, then the time variable can be of any type: two successive
-time periods represent a lag of 1. If \code{"witihn.consecutive"} then \strong{within a given id},
+time periods represent a lag of 1. If \code{"within.consecutive"} then \strong{within a given id},
 two successive time periods represent a lag of 1. Finally, if the time variable is numeric,
 you can provide your own numeric time step.}
 

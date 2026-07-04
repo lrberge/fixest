@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.13.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.14.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -102,8 +102,11 @@ precise than triangular but is a bit more intensive computationally.</p></dd>
 
 
 <dt id="arg-ssc">ssc<a class="anchor" aria-label="anchor" href="#arg-ssc"></a></dt>
-<dd><p>An object returned by the function <code><a href="ssc.html">ssc</a></code>. It specifies how to perform the small
-sample correction.</p></dd>
+<dd><p>An object of class <code>ssc_type</code> obtained with the function <code><a href="ssc.html">ssc</a></code>.
+It specifies how to perform the small sample correction.</p>
+<p>By default the VCOV is multiplied by (N - 1) / (N - K) with N the number of
+observations and K the number of parameters.
+To remove this adjustment, use <code>ssc=ssc(K.adj = FALSE)</code>.</p></dd>
 
 
 <dt id="arg-vcov-fix">vcov_fix<a class="anchor" aria-label="anchor" href="#arg-vcov-fix"></a></dt>
@@ -112,7 +115,10 @@ positive definite, whether to "fix" it using an eigenvalue decomposition
 (a la Cameron, Gelbach &amp; Miller 2011).
 Since the VCOV should be PSD asymptotically, this might be a sign of a problem
 with using the asymptotic approximation (e.g. too few units in clusters).
-If a problem is detected, the function will print a message to inform you.</p></dd>
+If a problem is detected, the function will print a message to inform you.
+Note that a message informs the user <strong>only if</strong> the regularized PD matrix is
+substantially different than the original non PD one (i.e. at least one difference
+between the two greated than 1e-8).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -144,6 +150,16 @@ The algorithm is as follows:</p><ul><li><p>all observations are sorted according
 With this cutoff, about 50% of units should have at least around 8 neighbors.</p>
     </div>
     <div class="section level2">
+    <h2 id="small-sample-correction">Small sample correction<a class="anchor" aria-label="anchor" href="#small-sample-correction"></a></h2>
+
+
+<p>By default the VCOV is multiplied by (N - 1) / (N - K) with N the number of
+observations and K the number of parameters.
+To remove this adjustment, use <code>ssc=ssc(K.adj = FALSE)</code>.</p>
+<p>If the estimation contains fixed effects, you can modify how the number of parameters is computed
+with the arguments <code>K.fixef</code> and <code>K.exact</code> (see <code><a href="ssc.html">ssc</a></code> for details).</p>
+    </div>
+    <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Conley TG (1999). "GMM Estimation with Cross Sectional Dependence", <em>Journal of Econometrics</em>, 92, 1-45.</p>
     </div>
@@ -159,8 +175,8 @@ With this cutoff, about 50% of units should have at least around 8 neighbors.</p
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 1,000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Conley (100km) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)  881.625   108.9005  8.09569 1.6480e-15 ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> mag         -123.421    19.2323 -6.41737 2.1389e-10 ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)  881.625    108.955  8.09164 1.7002e-15 ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> mag         -123.421     19.242 -6.41416 2.1827e-10 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 209.6   Adj. R2: 0.052245</span>
@@ -168,9 +184,10 @@ With this cutoff, about 50% of units should have at least around 8 neighbors.</p
 <span class="r-in"><span><span class="co"># Post estimation</span></span></span>
 <span class="r-in"><span><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">depth</span> <span class="op">~</span> <span class="va">mag</span>, <span class="va">quakes</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">vcov_conley</span><span class="op">(</span><span class="va">est</span>, cutoff <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> VCOV type:  Conley (100km) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             (Intercept)        mag</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   11859.324 -1955.8155</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> mag           -1955.816   369.8824</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   11871.195 -1957.7733</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> mag           -1957.773   370.2527</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>

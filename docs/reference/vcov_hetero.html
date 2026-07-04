@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.13.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.14.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -69,7 +69,8 @@
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
-<dd><p>A string scalar. Either "HC1"/"HC2"/"HC3"</p></dd>
+<dd><p>A string scalar equal to "HC1" (default), "HC2" or "HC3".
+Note that the case is ignored.</p></dd>
 
 
 <dt id="arg-exact">exact<a class="anchor" aria-label="anchor" href="#arg-exact"></a></dt>
@@ -82,7 +83,9 @@
 
 <dt id="arg-ssc">ssc<a class="anchor" aria-label="anchor" href="#arg-ssc"></a></dt>
 <dd><p>An object returned by the function <code><a href="ssc.html">ssc</a></code>. It specifies how to perform the small
-sample correction.</p></dd>
+sample correction. Note that this argument is only used in <code>"HC1"</code> which accepts
+ssc arguments starting with <code>"K"</code>. In that case when <code>ssc(K.adj = FALSE)</code>,
+it leads to "HC0". The argument <code>ssc</code> is ignored for <code>HC2</code> and <code>HC2</code> VCOVs.</p></dd>
 
 
 <dt id="arg-vcov-fix">vcov_fix<a class="anchor" aria-label="anchor" href="#arg-vcov-fix"></a></dt>
@@ -91,13 +94,31 @@ positive definite, whether to "fix" it using an eigenvalue decomposition
 (a la Cameron, Gelbach &amp; Miller 2011).
 Since the VCOV should be PSD asymptotically, this might be a sign of a problem
 with using the asymptotic approximation (e.g. too few units in clusters).
-If a problem is detected, the function will print a message to inform you.</p></dd>
+If a problem is detected, the function will print a message to inform you.
+Note that a message informs the user <strong>only if</strong> the regularized PD matrix is
+substantially different than the original non PD one (i.e. at least one difference
+between the two greated than 1e-8).</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>If the first argument is a <code>fixest</code> object, then a VCOV is returned (i.e. a symmetric matrix).</p>
-<p>If the first argument is not a <code>fixest</code> object, then a) implicitly the arguments are shifted to the left (i.e. <code>vcov_hetero("HC3")</code> is equivalent to <code>vcov_hetero(type = "HC3")</code> and b) a VCOV-<em>request</em> is returned and NOT a VCOV. That VCOV-request can then be used in the argument <code>vcov</code> of various <code>fixest</code> functions (e.g. <code><a href="vcov.fixest.html">vcov.fixest</a></code> or even in the estimation calls).</p>
+<p>If the first argument is not a <code>fixest</code> object, then a) implicitly the arguments are shifted
+to the left (i.e. <code>vcov_hetero("HC3")</code> is equivalent to <code>vcov_hetero(type = "HC3")</code> and b)
+a VCOV-<em>request</em> is returned and NOT a VCOV. That VCOV-request can then
+be used in the argument <code>vcov</code> of various <code>fixest</code> functions (e.g. <code><a href="vcov.fixest.html">vcov.fixest</a></code>
+or even in the estimation calls).</p>
+    </div>
+    <div class="section level2">
+    <h2 id="small-sample-correction">Small sample correction<a class="anchor" aria-label="anchor" href="#small-sample-correction"></a></h2>
+
+
+<p>A custom small sample correction can be applied to the HC1 VCOV using the <code><a href="ssc.html">ssc</a></code> argument
+and function. By default an adjustment of N/(N-K) is applied to the VCOV, with N the number of
+observations and K the number of parameters. If <code>ssc(K.adj = FALSE)</code>, meaning that there is
+no adjustment, this leads to the HC0 VCOV. Finally ssc's arguemnts
+K.fixef and K.exact determine how to account for the parameters associated to the fixed-effects
+(if the estimation contains fixed-effects).</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -117,17 +138,25 @@ If a problem is detected, the function will print a message to inform you.</p></
 <span class="r-in"><span><span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">|</span> <span class="va">species</span>, <span class="va">base</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">vcov_hetero</span><span class="op">(</span><span class="va">est</span>, <span class="st">"hc1"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> VCOV type:  Heteroskedasticity-robust </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            x1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> x1 0.01127604</span>
-<span class="r-in"><span><span class="fu">vcov_hetero</span><span class="op">(</span><span class="va">est</span>, <span class="st">"hc2"</span>, ssc <span class="op">=</span> <span class="fu"><a href="ssc.html">ssc</a></span><span class="op">(</span>K.adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">vcov_hetero</span><span class="op">(</span><span class="va">est</span>, <span class="st">"hc1"</span>, ssc <span class="op">=</span> <span class="fu"><a href="ssc.html">ssc</a></span><span class="op">(</span>K.adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> VCOV type:  Heteroskedasticity-robust </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            x1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> x1 0.01097534</span>
+<span class="r-in"><span><span class="fu">vcov_hetero</span><span class="op">(</span><span class="va">est</span>, <span class="st">"hc2"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> VCOV type:  HC2 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            x1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> x1 0.01143592</span>
-<span class="r-in"><span><span class="fu">vcov_hetero</span><span class="op">(</span><span class="va">est</span>, <span class="st">"hc3"</span>, ssc <span class="op">=</span> <span class="fu"><a href="ssc.html">ssc</a></span><span class="op">(</span>K.adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">vcov_hetero</span><span class="op">(</span><span class="va">est</span>, <span class="st">"hc3"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> VCOV type:  HC3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            x1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> x1 0.01192059</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Using approximate hatvalues</span></span></span>
 <span class="r-in"><span><span class="fu">vcov_hetero</span><span class="op">(</span><span class="va">est</span>, <span class="st">"hc3"</span>, exact <span class="op">=</span> <span class="cn">FALSE</span>, boot.size <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> VCOV type:  HC3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           x1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> x1 0.0119263</span>
 <span class="r-in"><span></span></span>

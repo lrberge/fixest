@@ -10,7 +10,7 @@
   se = NULL,
   cluster,
   ssc = NULL,
-  attr = FALSE,
+  attr = TRUE,
   forceCovariance = FALSE,
   keepBounded = FALSE,
   nthreads = getFixest_nthreads(),
@@ -48,13 +48,14 @@ blank with \code{vcov = "twoway"} (assuming \code{var1} [resp. \code{var2}] was
 the 1st [resp. 2nd] fixed-effect). You can interact two variables using \code{^} with
 the following syntax: \code{cluster = ~var1^var2} or \code{cluster = "var1^var2"}.}
 
-\item{ssc}{An object of class \code{ssc.type} obtained with the function \code{\link{ssc}}. Represents
-how the degree of freedom correction should be done.You must use the function \code{\link{ssc}}
+\item{ssc}{An object of class \code{ssc_type} obtained with the function \code{\link{ssc}}. Represents
+how the small sample correction should be done. You must use the function \code{\link{ssc}}
 for this argument. The arguments and defaults of the function \code{\link{ssc}} are:
 \code{K.adj = TRUE}, \code{K.fixef = "nonnested"}, \code{G.adj = TRUE}, \code{G.df = "min"},
-\code{t.df = "min"}, \verb{K.exact = FALSE)}. See the help of the function \code{\link{ssc}} for details.}
+\code{t.df = "min"}, \verb{K.exact = FALSE)}. See the help of the function \code{\link{ssc}} for details.
+Not all VCOV types are affected by this argument.}
 
-\item{attr}{Logical, defaults to \code{FALSE}. Whether to include the attributes describing how
+\item{attr}{Logical, defaults to \code{TRUE}. Whether to include the attributes describing how
 the VCOV was computed.}
 
 \item{forceCovariance}{(Advanced users.) Logical, default is \code{FALSE}. In the peculiar case
@@ -78,7 +79,10 @@ positive definite, whether to "fix" it using an eigenvalue decomposition
 (a la Cameron, Gelbach & Miller 2011).
 Since the VCOV should be PSD asymptotically, this might be a sign of a problem
 with using the asymptotic approximation (e.g. too few units in clusters).
-If a problem is detected, the function will print a message to inform you.}
+If a problem is detected, the function will print a message to inform you.
+Note that a message informs the user \strong{only if} the regularized PD matrix is
+substantially different than the original non PD one (i.e. at least one difference
+between the two greated than 1e-8).}
 
 \item{...}{Other arguments to be passed to \code{\link{summary.fixest}}.
 
@@ -254,7 +258,8 @@ se(vcov(est, DK ~ period + ssc(K.adj = FALSE)))
 
 }
 \references{
-Ding, Peng, 2021, "The Frisch–Waugh–Lovell theorem for standard errors." Statistics & Probability Letters 168.
+Ding, Peng, 2021, "The Frisch–Waugh–Lovell theorem for standard errors."
+Statistics & Probability Letters 168.
 }
 \seealso{
 You can also compute VCOVs with the following functions: \code{\link{vcov_cluster}},

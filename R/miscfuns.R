@@ -584,7 +584,7 @@ collinearity = function(x, verbose){
 #' @param diff.inv Logical, default to `FALSE`. Whether to inverse the difference.
 #'
 #' @details
-#' By default, when the user tries to apply this function to nun-numeric variables, an error is raised. The exception is when the all variables are selected with the dot (like in `. ~ treat`. In this case, non-numeric variables are automatically omitted (with a message).
+#' By default, when the user tries to apply this function to non-numeric variables, an error is raised. The exception is when the all variables are selected with the dot (like in `. ~ treat`. In this case, non-numeric variables are automatically omitted (with a message).
 #'
 #' NAs are removed automatically: if the data contains NAs an information message will be prompted. First all observations containing NAs relating to the treatment or post variables are removed. Then if there are still NAs for the variables, they are excluded separately for each variable, and a new message detailing the NA breakup is prompted.
 #'
@@ -635,7 +635,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
   IS_INDIV = FALSE
   if(!missing(indiv)){
     IS_INDIV = TRUE
-    if("formula" %in% class(indiv)){
+    if(inherits(indiv, "formula")){
 
       check_arg(indiv, "os formula")
       indiv_varname = attr(terms(indiv), "term.labels")
@@ -654,7 +654,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
       }
 
       indiv_var = try(eval(str2lang(indiv_varname), base), silent = TRUE)
-      if("try-error" %in% class(indiv_var)){
+      if(inherits(indiv_var, "try-error")){
         stop("Evaluation of `indiv` raises and error:\n", indiv_var)
       }
     } else if(length(indiv) == 1 && is.character(indiv)){
@@ -682,7 +682,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
   #
 
   usePost = FALSE
-  if("formula" %in% class(fml_in)){
+  if(inherits(fml_in, "formula")){
     if(missing(base) || !is.data.frame(base)){
       stop("If you provide a formula, a data.frame must be given in argument `base`.")
     }
@@ -710,7 +710,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
     }
 
     treat_var = try(eval(fml[[3]], base), silent = TRUE)
-    if("try-error" %in% class(treat_var)){
+    if(inherits(treat_var, "try-error")){
       stop("Evaluation of the `treatment` variable raises and error: \n", treat_var)
     }
 
@@ -721,7 +721,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
       }
 
       post_var = try(eval(pipe[[2]], base), silent = TRUE)
-      if("try-error" %in% class(post_var)){
+      if(inherits(post_var, "try-error")){
         stop("Evaluation of the `post` variable raises and error: \n", treat_var)
       }
 
@@ -738,7 +738,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
       if(usePost) all_vars = setdiff(all_vars, as.character(pipe))
       if(IS_INDIV) all_vars = setdiff(all_vars, indiv_varname)
 
-      if("data.table" %in% class(base)){
+      if(inherits(base, "data.table")){
         mat_vars = as.data.frame(base[, all_vars, with = FALSE])
       } else {
         mat_vars = base[, all_vars, FALSE]
@@ -774,7 +774,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
       for(i in seq_along(var2eval)){
         var = var2eval[i]
         x_small = try(eval(parse(text=var), base_small), silent = TRUE)
-        if("try-error" %in% class(x_small)){
+        if(inherits(x_small, "try-error")){
           stop("Evaluation of the variable `", var, "` raises and error:\n", x_small)
         }
 
@@ -810,7 +810,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
       }
 
       # We exclude non numeric variables
-      if("data.frame" %in% class(mat_vars)){
+      if(inherits(mat_vars, "data.frame")){
         is_num = sapply(mat_vars, function(x) is.numeric(x) || is.logical(x))
         if(any(!is_num)){
           pblm = names(mat_vars)[!is_num]
@@ -2963,7 +2963,7 @@ case.names.fixest = function(object, ...){
 #' # Checking the convergence
 #' conv = check_conv_feols(est)
 #'
-#' # We can check that al values are close to 0
+#' # We can check that all values are close to 0
 #' summary(conv)
 #'
 #' summary(conv, "detail")
@@ -3011,8 +3011,8 @@ check_conv_feols = function(x){
   info = demean(x, fe_info = TRUE)
 
   res = check_conv(y = info$y, X = info$X, fixef_id_list = info$fixef_id_list,
-           slope_flag = info$slope_flag, slope_vars = info$slope_vars,
-           weights = info$weights, full = TRUE, fixef_names = fixef_names)
+                   slope_flag = info$slope_flag, slope_vars = info$slope_vars,
+                   weights = info$weights, full = TRUE, fixef_names = fixef_names)
 
   names(res) = info$varnames
 
@@ -3160,7 +3160,7 @@ rep.fixest = function(x, times = 1, each = 1, vcov, ...){
 
   # Checking the arguments
   IS_LIST = FALSE
-  if("fixest_list" %in% class(x)){
+  if(inherits(x, "fixest_list")){
     IS_LIST = TRUE
     class(x) = "list"
 
@@ -3255,7 +3255,7 @@ rep.fixest_list = function(x, times = 1, each = 1, vcov, ...){
   check_arg(..., "mbt class(fixest) | list")
 
   dots = list(...)
-  if(all(sapply(dots, function(x) "fixest" %in% class(x)))){
+  if(all(sapply(dots, function(x) inherits(x, "fixest")))){
     class(dots) = "fixest_list"
 
     return(dots)
@@ -3263,13 +3263,13 @@ rep.fixest_list = function(x, times = 1, each = 1, vcov, ...){
 
   if(length(dots) == 1){
 
-    if("fixest_multi" %in% class(dots[[1]])){
+    if(inherits(dots[[1]], "fixest_multi")){
       res = dots[[1]]
       class(res) = "fixest_list"
       return(res)
     }
 
-    if(all(sapply(dots[[1]], function(x) "fixest" %in% class(x)))){
+    if(all(sapply(dots[[1]], function(x) inherits(x, "fixest")))){
       res = dots[[1]]
       class(res) = "fixest_list"
       return(res)
@@ -3278,19 +3278,19 @@ rep.fixest_list = function(x, times = 1, each = 1, vcov, ...){
 
   res = list()
   for(i in seq_along(dots)){
-    if("fixest" %in% class(dots[[i]])){
+    if(inherits(dots[[i]], "fixest")){
       res[[length(res) + 1]] = dots[[i]]
     } else {
       obj = dots[[i]]
 
-      if("fixest_multi" %in% class(obj)){
+      if(inherits(obj, "fixest_multi")){
         for(j in seq_along(obj)){
           res[[length(res) + 1]] = obj[[j]]
         }
 
       } else {
         for(j in seq_along(obj)){
-          if(!"fixest" %in% class(obj[[j]])){
+          if(!inherits(obj[[j]], "fixest")){
             stop("In .l(...), each argument must be either a fixest object, or a list of fixest objects. Problem: The ", n_th(j), " element of the ", n_th(i), " argument (the latter being a list) is not a fixest object.")
           }
 
@@ -3376,7 +3376,7 @@ fixest_data = function(x, sample = "original"){
 #' a) demeaning over the first two largest FEs only, until convergence, then 
 #' b) demeaning over all FEs until convergence. 
 #' To skip the demeaning over 2 FEs, use a very high value of `iter_warmup`. To go directly
-#' to the demeaning over 2 FEs, se `iter_warmup` to a value lower than or equal to 0.
+#' to the demeaning over 2 FEs, set `iter_warmup` to a value lower than or equal to 0.
 #' @param iter_projAfterAcc Integer scalar, default is 40. After `iter_projAfterAcc` iterations
 #' of the standard algorithm, a simple projection is performed right after 
 #' the acceleration step. Use very high values to skip this step, or low values to apply this 
@@ -3388,7 +3388,7 @@ fixest_data = function(x, sample = "original"){
 #' `k` is the value of `iter_grandAcc` and `f^2(X)` is defined as `f(f(X))` 
 #' (i.e. the function `f` applied `k` times). By default, an additional acceleration 
 #' is performed for `h(X) = f^4(X)` every 8 iterations (2 times 4, equivalent to 
-#' the iterationsthe time to gather `h(X)` and `h(h(X))`).
+#' the iterations the time to gather `h(X)` and `h(h(X))`).
 #' @param internal Logical scalar, default is `FALSE`. If `TRUE`, no check on the arguments 
 #' is performed and the returned object is a plain list. For internal use only.
 #' 
@@ -3430,7 +3430,7 @@ fixest_data = function(x, sample = "original"){
 #' In cases of the absence of quick convergence, applying a first demeaning over the first
 #' two largest FEs before applying the demeaning over all FEs can improve convergence speed.
 #' This is controlled with the argument `iter_warmup` which gives the number of iterations
-#' over all the FEs to run before going to the 2 FEs demeaning. By default, the deameaning 
+#' over all the FEs to run before going to the 2 FEs demeaning. By default, the demeaning
 #' over all FEs is run for 15 iterations before switching to the 2 FEs case.  
 #' 
 #' The above defaults are the outcome of extended empirical applications, and try to strike a 
@@ -3541,6 +3541,28 @@ fixest_demean = function(y, X_raw, r_weights, iterMax, diffMax, r_nb_id_Q,
 #### Internal Funs ####
 ####
 
+invert_posdef_mat = function(x){
+  # x: symmetric posdef mat
+  # behavior: we do not throw error but rather we replace with NA values
+  
+  if(!is.matrix(x)){
+    x = as.matrix(x)
+  }
+  
+  info_inv = cpp_cholesky(x, tol = .Machine$double.xmin, nthreads = getFixest_nthreads())
+  
+  is_excluded = info_inv$id_excl
+  multicol = any(is_excluded)
+  
+  if(multicol){
+    x_inv = x * NA_real_
+    x_inv[!is_excluded, !is_excluded] = info_inv$XtX_inv
+  } else {
+    x_inv = info_inv$XtX_inv
+  }
+  
+  x_inv
+}
 
 # to avoid issues with packages redefining as.character.formula
 as.character.formula = function(x, ...) as.character.default(x, ...)
@@ -3594,7 +3616,7 @@ value2stringCall = function(value_raw, call = FALSE, check = FALSE, frame = NULL
   if(inherits(value_raw, "formula")){
     res = if(call) value_raw[[2]] else as.character(value_raw)[[2]]
 
-  } else if(any(c("call", "name") %in% class(value_raw))){
+  } else if(inherits(value_raw, c("call", "name"))){
     res = if(call) value_raw else deparse_long(value_raw)
 
   } else {
@@ -4638,7 +4660,7 @@ prepare_df = function(vars, data, fixef.keep_names = NA_integer_){
     data_list = try(eval(all_vars_call, data))
 
     # if error: we send it back to the main function
-    if("try-error" %in% class(data_list)){
+    if(inherits(data_list, "try-error")){
       return(data_list)
     }
 
@@ -6496,7 +6518,7 @@ trim_obs_removed = function(x, object){
 error_sender = function(expr, ..., clean, up = 0, arg_name){
   res = tryCatch(expr, error = function(e) structure(list(conditionCall(e), conditionMessage(e)), class = "try-error"))
 
-  if("try-error" %in% class(res)){
+  if(inherits(res, "try-error")){
     set_up(1 + up)
     msg = paste0(..., collapse = "")
 
@@ -6556,7 +6578,7 @@ check_set_types = function(x, types, msg){
   arg_name = deparse(substitute(x))
   check_arg(x, "os formula | character vector no na", .arg_name = arg_name, .up = 1)
 
-  if("formula" %in% class(x)){
+  if(inherits(x, "formula")){
     x = attr(terms(x), "term.labels")
   }
 
@@ -6602,25 +6624,25 @@ get_vars = function(x){
   attr(terms(x), "term.labels")
 }
 
-mat_posdef_fix = function(X, tol = 1e-12, check = FALSE){
+mat_posdef_fix = function(X, replacement = 1e-16, check = FALSE){
   # X must be a symmetric matrix
   # We don't check it
   
   if(check){
     eigval = eigen(X, symmetric = TRUE, only.values = TRUE)$values
-    if(all(eigval > tol)){
+    if(all(eigval > 0)){
       return(X)
     }
   }
 
   e = eigen(X, symmetric = TRUE)
   # Should already be TRUE if this function is called, but in case someone else wants to use it, does not hurt to check.
-  if (any(e$values < tol)){
-    if (is.complex(e$values)) {
+  if(any(e$values <= 0)){
+    if (is.complex(e$values)){
       attr(X, "is_complex") = TRUE
     } else {
       dm = dimnames(X)
-      X = tcrossprod(e$vectors %*% diag(pmax(e$values, tol), nrow(X)), e$vectors)
+      X = tcrossprod(e$vectors %*% diag(pmax(e$values, replacement), nrow(X)), e$vectors)
       dimnames(X) = dm
     }
   }
@@ -6987,12 +7009,14 @@ is_calling_fun = function(pattern, full_search = FALSE, full_name = FALSE){
   if(n_sc > 2){
 
     if(full_search){
+      # we remove the last call (the one calling `is_calling_fun()`)
+      sc_all = sc_all[-n_sc]
       fun_all = sapply(tail(sc_all, 13), function(x) deparse(x)[1])
 
       if(full_name){
         pattern = sma("^{pattern}\\(")
       }
-
+      
       res = any(grepl(pattern, fun_all))
     } else {
       if(grepl(".fixest", sc_all[[n_sc - 1]][[1]], fixed = TRUE)){
@@ -7253,7 +7277,7 @@ getFixest_nthreads = function(){
 #' definition must be a colon followed with a single space (i.e. ": "). You can stack definitions 
 #' within a single line by making use of a semi colon: `"var1: def; var2: def"`. White spaces on 
 #' the left and right are ignored. You can add commented lines with a `"#"`. Non-empty, 
-#' non-commented lines that don't have the proper format witll raise an error.
+#' non-commented lines that don't have the proper format will raise an error.
 #'
 #' @details
 #' This function is mostly used in combination with [`setFixest_dict`] to set the dictionary to be 

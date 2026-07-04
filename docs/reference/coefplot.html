@@ -11,7 +11,7 @@ interactions with factors or raw factors."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.13.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.14.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -208,20 +208,7 @@ and/or to the function <code>plot</code> or <code>lines</code> (if <code>add = T
 <dt id="arg-objects">objects<a class="anchor" aria-label="anchor" href="#arg-objects"></a></dt>
 <dd><p>A list of <code>fixest</code> estimation objects, or <code>NULL</code> (default). If provided,
 the objects in <code>...</code> are ignored and the only coefficients reported are the ones in the
-argument <code>objects</code>.
-#' @param vcov Versatile argument to specify the VCOV.
-In general, it is either a character scalar equal to a VCOV type, either a formula of the form:
-vcov_type ~ variables. The VCOV types implemented are: "iid", "hetero" (or "HC1"),
-"cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley".
-It also accepts object from vcov_cluster, vcov_NW, NW, vcov_DK, DK, vcov_conley and conley.
-It also accepts covariance matrices computed externally.
-Finally it accepts functions to compute the covariances.
-See the vcov documentation in the vignette.
-You can pass several VCOVs (as above) if you nest them into a list.
-If the number of VCOVs equals the number of models, eahc VCOV is mapped to the appropriate model.
-If there is one model and several VCOVs, or if the first element of the list is equal to
-<code>"each"</code> or <code>"times"</code>, then the estimations will be replicated and the results
-for each estimation and each VCOV will be reported.</p></dd>
+argument <code>objects</code>.</p></dd>
 
 
 <dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
@@ -260,8 +247,8 @@ vcov_type ~ variables. The VCOV types implemented are: "iid", "hetero" (or "HC1"
 It also accepts object from vcov_cluster, vcov_NW, NW, vcov_DK, DK, vcov_conley and conley.
 It also accepts covariance matrices computed externally.
 Finally it accepts functions to compute the covariances.
-See the vcov documentation in the vignette.
-You can pass several VCOVs (as above) if you nest them into a list.
+See the vcov documentation in the vignette.</p>
+<p>You can pass several VCOVs (as above) if you nest them into a list.
 If the number of VCOVs equals the number of models, eahc VCOV is mapped to the appropriate model.
 If there is one model and several VCOVs, or if the first element of the list is equal to
 <code>"each"</code> or <code>"times"</code>, then the estimations will be replicated and the results
@@ -310,20 +297,24 @@ entries in the global dictionary, to disable this behavior, use "reset" as the f
 <dd><p>Character vector. This element is used to display only a subset of variables. This
 should be a vector of regular expressions (see <code><a href="https://rdrr.io/r/base/regex.html" class="external-link">base::regex</a></code> help for more info). Each
 variable satisfying any of the regular expressions will be kept. This argument is applied post
-aliasing (see argument <code>dict</code>). Example: you have the variable <code>x1</code> to <code>x55</code> and want to display
+aliasing (see argument <code>dict</code>).
+Use the argument <code>keep_raw</code> for the same effect before aliasing.</p>
+<p>Example: you have the variable <code>x1</code> to <code>x55</code> and want to display
 only <code>x1</code> to <code>x9</code>, then you could use <code>keep = "x[[:digit:]]$"</code>. If the first character is an
-exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that
-does not contain “Intercept” is kept). See details.</p></dd>
+exclamation mark, the effect is reversed (e.g. keep = "!Constant" means: every variable that
+does not contain “Constant” is kept). See details.</p></dd>
 
 
 <dt id="arg-drop">drop<a class="anchor" aria-label="anchor" href="#arg-drop"></a></dt>
 <dd><p>Character vector. This element is used if some variables are not to be displayed.
 This should be a vector of regular expressions (see <code><a href="https://rdrr.io/r/base/regex.html" class="external-link">base::regex</a></code> help for more info). Each
 variable satisfying any of the regular expressions will be discarded. This argument is applied
-post aliasing (see argument <code>dict</code>). Example: you have the variable <code>x1</code> to <code>x55</code> and want to
+post aliasing (see argument <code>dict</code>).
+Use the argument <code>drop_raw</code> for the same effect before aliasing.</p>
+<p>Example: you have the variable <code>x1</code> to <code>x55</code> and want to
 display only <code>x1</code> to <code>x9</code>, then you could use <code>drop = "x[[:digit:]]{2}</code>". If the first character
-is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable
-that does not contain “Intercept” is dropped). See details.</p></dd>
+is an exclamation mark, the effect is reversed (e.g. drop = "!Constant" means: every variable
+that does not contain “Constant” is dropped). See details.</p></dd>
 
 
 <dt id="arg-order">order<a class="anchor" aria-label="anchor" href="#arg-order"></a></dt>
@@ -331,11 +322,12 @@ that does not contain “Intercept” is dropped). See details.</p></dd>
 ordered in a certain way. This should be a vector of regular expressions (see <code><a href="https://rdrr.io/r/base/regex.html" class="external-link">base::regex</a></code>
 help for more info). The variables satisfying the first regular expression will be placed first,
 then the order follows the sequence of regular expressions. This argument is applied post
-aliasing (see argument <code>dict</code>). Example: you have the following variables: <code>month1</code> to <code>month6</code>,
+aliasing (see argument <code>dict</code>). Use the argument <code>order_raw</code> for the same effect before aliasing.</p>
+<p>Example: you have the following variables: <code>month1</code> to <code>month6</code>,
 then <code>x1</code> to <code>x5</code>, then <code>year1</code> to <code>year6</code>. If you want to display first the x's, then the
 years, then the months you could use: <code>order = c("x", "year")</code>. If the first character is an
-exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that
-does not contain “Intercept” goes first).  See details.</p></dd>
+exclamation mark, the effect is reversed (e.g. order = "!Constant" means: every variable that
+does not contain “Constant” goes first).  See details.</p></dd>
 
 
 <dt id="arg-ci-width">ci.width<a class="anchor" aria-label="anchor" href="#arg-ci-width"></a></dt>
@@ -439,13 +431,17 @@ vertical lines. Eg: <code>grid.par = list(vert = FALSE, col = "red", lwd = 2)</c
 
 
 <dt id="arg-zero">zero<a class="anchor" aria-label="anchor" href="#arg-zero"></a></dt>
-<dd><p>Logical, default is <code>TRUE</code>. Whether the 0-line should be emphasized.
-You can set the parameters of that line with the argument <code>zero.par</code>.</p></dd>
+<dd><p>Logical scalar, default is <code>TRUE</code>. Whether the 0 should be displayed
+in the limits of the y-axis.
+Note that you can set how this zero line looks like with the argument <code>zero.par</code>.</p></dd>
 
 
 <dt id="arg-zero-par">zero.par<a class="anchor" aria-label="anchor" href="#arg-zero-par"></a></dt>
-<dd><p>List. Parameters of the zero-line. The default values are
-<code>col = "black"</code> and <code>lwd = 1</code>. You can add any graphical parameter that will be passed
+<dd><p>A named list of graphical parameters or a logical scalar.
+This argument is a list containing the graphical parameters used to draw the zero-line.
+The default value is <code>list(col = "black", lwd = 1)</code> (it's the same if <code>TRUE</code>).
+Set it to <code>FALSE</code> to turn off the special emphasis of the zero line.
+You can add any graphical parameter that will be passed
 to <code><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">graphics::abline</a></code>. Example: <code>zero.par = list(col = "darkblue", lwd = 3)</code>.</p></dd>
 
 
@@ -473,13 +469,15 @@ Only used if <code>ci.join=TRUE</code>. By default it is equal to <code>list(lwd
 
 <dt id="arg-ci-fill">ci.fill<a class="anchor" aria-label="anchor" href="#arg-ci-fill"></a></dt>
 <dd><p>Logical default to <code>FALSE</code>. Whether to fill the confidence intervals
-with a color. If <code>TRUE</code>, then you can set the graphical parameters with the argument <code>ci.fill.par</code>.</p></dd>
+with a color. If <code>TRUE</code>, then you can set the graphical parameters
+with the argument <code>ci.fill.par</code>.</p></dd>
 
 
 <dt id="arg-ci-fill-par">ci.fill.par<a class="anchor" aria-label="anchor" href="#arg-ci-fill-par"></a></dt>
 <dd><p>A list of parameters to be passed to <code><a href="https://rdrr.io/r/graphics/polygon.html" class="external-link">graphics::polygon</a></code>.
 Only used if <code>ci.fill=TRUE</code>. By default it is equal to <code>list(col = "lightgray", alpha = 0.5)</code>.
-Note that <code>alpha</code> is a special parameter that adds transparency to the color (ranges from 0 to 1).</p></dd>
+Note that <code>alpha</code> is a special parameter that adds transparency to the color
+(ranges from 0 to 1).</p></dd>
 
 
 <dt id="arg-ref">ref<a class="anchor" aria-label="anchor" href="#arg-ref"></a></dt>
@@ -506,7 +504,8 @@ line will be drawn at that specific value.</p></dd>
 <dt id="arg-ref-line-par">ref.line.par<a class="anchor" aria-label="anchor" href="#arg-ref-line-par"></a></dt>
 <dd><p>List. Parameters of the vertical line on the reference. The
 default values are: <code>col = "black"</code> and <code>lty = 2</code>. You can add any graphical
-parameter that will be passed to <code><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">graphics::abline</a></code>. Eg: <code>ref.line.par = list(lty = 1, lwd = 3)</code>.</p></dd>
+parameter that will be passed to <code><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">graphics::abline</a></code>.
+Eg: <code>ref.line.par = list(lty = 1, lwd = 3)</code>.</p></dd>
 
 
 <dt id="arg-lab-cex">lab.cex<a class="anchor" aria-label="anchor" href="#arg-lab-cex"></a></dt>
@@ -606,7 +605,8 @@ with <code>__ci__</code> a special variable giving the value of the confidence i
 
 
 <dt id="arg-ylab">ylab<a class="anchor" aria-label="anchor" href="#arg-ylab"></a></dt>
-<dd><p>The label of the y-axis, default is <code>NULL</code>. Note that if <code>horiz =  FALSE</code>, it overrides the value of the argument <code>value.lab</code>.</p></dd>
+<dd><p>The label of the y-axis, default is <code>NULL</code>. Note that if
+<code>horiz = FALSE</code>, it overrides the value of the argument <code>value.lab</code>.</p></dd>
 
 
 <dt id="arg-xlab">xlab<a class="anchor" aria-label="anchor" href="#arg-xlab"></a></dt>
@@ -662,6 +662,15 @@ but will (in most cases) work all the same, just try some numbers up until you
 disregarded since they would require a 3-D plot to be properly represented.</p>
     </div>
     <div class="section level2">
+    <h2 id="mathematical-expressions">Mathematical expressions<a class="anchor" aria-label="anchor" href="#mathematical-expressions"></a></h2>
+
+
+
+<p>You can add <code><a href="https://rdrr.io/r/grDevices/plotmath.html" class="external-link">plotmath</a></code> mathematical expressions in the arguments
+<code>main</code>, <code>sub</code>, <code>xlab</code>, or <code>ylab</code>. To do so, start the character string with an ampersand.
+For example main = "&amp;lambda^2".</p>
+    </div>
+    <div class="section level2">
     <h2 id="arguments-keep-drop-and-order">Arguments keep, drop and order<a class="anchor" aria-label="anchor" href="#arguments-keep-drop-and-order"></a></h2>
 
 
@@ -678,12 +687,17 @@ string using pipes, <code>drop</code> also accepts a vector of regular expressio
 <p>You can use the special character "!" (exclamation mark) to reverse the effect
 of the regular expression (this feature is specific to this function).
 For example <code>drop = "!Wind"</code> would drop any variable that does not contain "Wind".</p>
-<p>You can use the special character "%" (percentage) to make reference to the
-original variable name instead of the aliased name. For example, you have a
-variable named <code>"Month6"</code>, and use a dictionary <code>dict = c(Month6="June")</code>.
+<p>By default, the regular expressions are checked against the variables after
+they have been renamed with the dictionary (argument <code>dict</code>).
+You can use the <code>*_raw</code> versions of drop/keep/order to apply the regular
+expressions on the original variable names.
+Note that alternatively you can use the special character "%" (percentage) at the
+beginning of drop/keep/order's regular expressions to refer to the original variable name.
+For example, you have a variable named <code>"Month6"</code>,
+and use a dictionary <code>dict = c(Month6="June")</code>.
 Thus the variable will be displayed as <code>"June"</code>.
-If you want to delete that variable, you can use either <code>drop="June"</code>,
-or <code>drop="%Month6"</code> (which makes reference to its original name).</p>
+If you want to delete that variable, you can use either <code>drop="June"</code>, <code>drop_raw="Month6"</code>,
+or <code>drop="%Month6"</code>.</p>
 <p>The argument <code>order</code> takes in a vector of regular expressions, the order will follow the
 elements of this vector. The vector gives a list of priorities,
 on the left the elements with highest priority.
@@ -721,10 +735,10 @@ functions: e.g. <code><a href="feols.html">feols</a></code>, <code><a href="fegl
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># You can plot the two results at once</span></span></span>
 <span class="r-in"><span><span class="fu">coefplot</span><span class="op">(</span><span class="va">est</span>, <span class="va">est_std</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="coefplot-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># You could also use the argument vcov</span></span></span>
 <span class="r-in"><span><span class="fu">coefplot</span><span class="op">(</span><span class="va">est</span>, vcov <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"cluster"</span>, <span class="st">"iid"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="coefplot-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Alternatively, you can use the argument x.shift</span></span></span>
 <span class="r-in"><span><span class="co"># to do it sequentially:</span></span></span>
@@ -867,7 +881,7 @@ functions: e.g. <code><a href="feols.html">feols</a></code>, <code><a href="fegl
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
     </footer></div>

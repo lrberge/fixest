@@ -42,7 +42,7 @@ est = feols(y ~ x1 | species[x2] + FE[x3], base)
 # Checking the convergence
 conv = check_conv_feols(est)
 
-# We can check that al values are close to 0
+# We can check that all values are close to 0
 summary(conv)
 
 summary(conv, "detail")

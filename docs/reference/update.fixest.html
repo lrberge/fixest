@@ -11,7 +11,7 @@ fixest model. The data is obtained from the original call."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.13.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.14.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,7 +62,7 @@ This function updates the formulas and use previous starting values to estimate 
 <span>  fml.update <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  fml <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  nframes <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  use_calling_env <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  use_calling_env <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  evaluate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
@@ -115,11 +115,14 @@ By default, this is the parent frame.</p></dd>
 
 
 <dt id="arg-use-calling-env">use_calling_env<a class="anchor" aria-label="anchor" href="#arg-use-calling-env"></a></dt>
-<dd><p>Logical scalar, default is <code>TRUE</code>. If <code>TRUE</code> then the evaluation
-of the call will be done within the environment that called the initial estimation.
+<dd><p>Logical scalar, default is <code>NULL</code> (which means context-dependent).
+If <code>TRUE</code> then the evaluation of the call will be done within the environment
+that called the initial estimation. If <code>FALSE</code>, it will use the current environment.
+By default, i.e. when <code>NULL</code>, it is equal to <code>FALSE</code> if the argument <code>data</code> is provided and
+<code>TRUE</code> otherwise.
 This is mostly useful when the <code>fixest</code> object has been created through a custom
 function, so that the new evaluation can use the variables within the enclosure of
-the function.</p></dd>
+that function.</p></dd>
 
 
 <dt id="arg-evaluate">evaluate<a class="anchor" aria-label="anchor" href="#arg-evaluate"></a></dt>

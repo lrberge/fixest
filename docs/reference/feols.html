@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.13.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.14.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -245,11 +245,12 @@ you should use <code>vcov</code> instead.</p></dd>
 
 
 <dt id="arg-ssc">ssc<a class="anchor" aria-label="anchor" href="#arg-ssc"></a></dt>
-<dd><p>An object of class <code>ssc.type</code> obtained with the function <code><a href="ssc.html">ssc</a></code>. Represents
-how the degree of freedom correction should be done.You must use the function <code><a href="ssc.html">ssc</a></code>
+<dd><p>An object of class <code>ssc_type</code> obtained with the function <code><a href="ssc.html">ssc</a></code>. Represents
+how the small sample correction should be done. You must use the function <code><a href="ssc.html">ssc</a></code>
 for this argument. The arguments and defaults of the function <code><a href="ssc.html">ssc</a></code> are:
 <code>K.adj = TRUE</code>, <code>K.fixef = "nonnested"</code>, <code>G.adj = TRUE</code>, <code>G.df = "min"</code>,
-<code>t.df = "min"</code>, <code>K.exact = FALSE)</code>. See the help of the function <code><a href="ssc.html">ssc</a></code> for details.</p></dd>
+<code>t.df = "min"</code>, <code>K.exact = FALSE)</code>. See the help of the function <code><a href="ssc.html">ssc</a></code> for details.
+Not all VCOV types are affected by this argument.</p></dd>
 
 
 <dt id="arg-panel-id">panel.id<a class="anchor" aria-label="anchor" href="#arg-panel-id"></a></dt>
@@ -815,7 +816,6 @@ to visualize the results of multiple estimations. For plotting coefficients: see
 <span class="r-in"><span><span class="va">res</span> <span class="op">=</span> <span class="fu">feols</span><span class="op">(</span><span class="va">Sepal.Length</span> <span class="op">~</span> <span class="va">Sepal.Width</span> <span class="op">+</span> <span class="va">Petal.Length</span>, <span class="va">iris</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># You can specify clustered standard-errors in summary:</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span>, cluster <span class="op">=</span> <span class="op">~</span><span class="va">Species</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The VCOV matrix is not positive semi-definite and was 'fixed' (see ?vcov).</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> OLS estimation, Dep. Var.: Sepal.Length</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 150</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Clustered (Species) </span>
@@ -911,9 +911,9 @@ to visualize the results of multiple estimations. For plotting coefficients: see
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:                  y               f(y)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                      </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Constant         2.235*** (0.1577)  2.464*** (0.1697)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> l(x1,0)         0.9948*** (0.0532)    0.0081 (0.0584)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> l(x1,1)            0.0410 (0.0540)    0.0157 (0.0585)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> l(x1,-1)                           0.9940*** (0.0579)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> l(x1, 0)        0.9948*** (0.0532)    0.0081 (0.0584)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> l(x1, 1)           0.0410 (0.0540)    0.0157 (0.0585)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> l(x1, -1)                          0.9940*** (0.0579)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ __________________ __________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                      IID                IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                   972                864</span>
@@ -932,7 +932,7 @@ to visualize the results of multiple estimations. For plotting coefficients: see
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Now we can plot the result of the interaction with coefplot</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="coefplot.html">coefplot</a></span><span class="op">(</span><span class="va">est_did</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in strwidth(labels_trunc):</span> plot.new has not been called yet</span>
+<span class="r-plt img"><img src="feols-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="co"># You have many more example in coefplot help</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
@@ -949,10 +949,13 @@ to visualize the results of multiple estimations. For plotting coefficients: see
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># The second stage is the default</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res_iv</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> TSLS estimation - Dep. Var.: qty</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                   Endo.    : price</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                   Instr.   : speed2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Second stage: Dep. Var.: qty</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> TSLS estimation</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |- D.V.   : qty</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |- Endo.  : price</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |- Instr. : speed2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |=&gt; Second Stage</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |   Dep. Var.: qty</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 97</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: IID </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               Estimate Std. Error  t value Pr(&gt;|t|)    </span>
@@ -967,10 +970,13 @@ to visualize the results of multiple estimations. For plotting coefficients: see
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># To show the first stage:</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res_iv</span>, stage <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> TSLS estimation - Dep. Var.: price</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                   Endo.    : price</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                   Instr.   : speed2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> First stage: Dep. Var.: price</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> TSLS estimation</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |- D.V.   : qty</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |- Endo.  : price</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |- Instr. : speed2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |=&gt; First Stage</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |   Current Dep. Var.: price</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 97</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: IID </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
@@ -985,10 +991,13 @@ to visualize the results of multiple estimations. For plotting coefficients: see
 <span class="r-in"><span><span class="co"># To show both the first and second stages:</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res_iv</span>, stage <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> IV: First stage: price</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> TSLS estimation - Dep. Var.: price</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                   Endo.    : price</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                   Instr.   : speed2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> First stage: Dep. Var.: price</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> TSLS estimation</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |- D.V.   : qty</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |- Endo.  : price</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |- Instr. : speed2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |=&gt; First Stage</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |   Current Dep. Var.: price</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 97</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: IID </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
@@ -1001,10 +1010,13 @@ to visualize the results of multiple estimations. For plotting coefficients: see
 <span class="r-out co"><span class="r-pr">#&gt;</span> F-test (1st stage): stat = 3.7702, p = 0.055168, on 1 and 94 DoF.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> IV: Second stage</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> TSLS estimation - Dep. Var.: qty</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                   Endo.    : price</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                   Instr.   : speed2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Second stage: Dep. Var.: qty</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> TSLS estimation</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |- D.V.   : qty</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |- Endo.  : price</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |- Instr. : speed2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |=&gt; Second Stage</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |   Dep. Var.: qty</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 97</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: IID </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               Estimate Std. Error  t value Pr(&gt;|t|)    </span>
@@ -1153,10 +1165,10 @@ to visualize the results of multiple estimations. For plotting coefficients: see
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Ozone            Ozone          Solar.R</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Constant        29.85*** (4.625) 60.88*** (13.33) 186.0*** (27.22)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1      -180.2* (68.15)                    -101.5 (404.0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2        93.32 (55.69)                    -248.6 (327.3)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1                        436.1* (162.6)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2                         156.6 (107.7)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)1   -180.2* (68.15)                    -101.5 (404.0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)2     93.32 (55.69)                    -248.6 (327.3)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)1                     436.1* (162.6)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)2                      156.6 (107.7)                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ ________________ ________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID              IID              IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                  26               26               27</span>
@@ -1168,10 +1180,10 @@ to visualize the results of multiple estimations. For plotting coefficients: see
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:        Solar.R          Ozone            Ozone          Solar.R</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Constant        184.7* (72.53) 21.82. (9.489) 34.30*** (4.153) 187.8*** (16.47)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1                     167.0 (161.9)                    389.6. (194.9)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2                    -60.63 (92.54)                    -72.82 (156.4)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1     -306.2 (881.2)                   114.9 (62.21)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2     -823.0 (547.9)                  206.5* (80.00)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)1                  167.0 (161.9)                    389.6. (194.9)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)2                 -60.63 (92.54)                    -72.82 (156.4)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)1  -306.2 (881.2)                   114.9 (62.21)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)2  -823.0 (547.9)                  206.5* (80.00)                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ______________ ______________ ________________ ________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                  IID            IID              IID              IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                27              9                9               30</span>
@@ -1183,10 +1195,10 @@ to visualize the results of multiple estimations. For plotting coefficients: see
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:          Solar.R            Ozone          Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Constant        188.3*** (21.41) 49.81*** (5.519) 29.21. (16.07)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1                      -280.6** (84.25)               </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2                         58.00 (107.6)               </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1        575.6 (374.4)                  584.1* (265.9)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2        133.7 (364.0)                   14.19 (199.0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)1                   -280.6** (84.25)               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)2                      58.00 (107.6)               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)1     575.6 (374.4)                  584.1* (265.9)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)2     133.7 (364.0)                   14.19 (199.0)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ ________________ ______________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID              IID            IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                  30               26             26</span>
@@ -1198,10 +1210,10 @@ to visualize the results of multiple estimations. For plotting coefficients: see
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:          Solar.R         Solar.R            Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Constant        213.2*** (16.34) 172.3** (54.61) 49.73*** (6.150)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1       -144.1 (246.8)                 -289.3** (97.11)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2        8.709 (324.8)                    116.3 (90.00)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1                        835.0 (905.0)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2                       -107.3 (646.0)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)1    -144.1 (246.8)                 -289.3** (97.11)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)2     8.709 (324.8)                    116.3 (90.00)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)1                     835.0 (905.0)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)2                    -107.3 (646.0)                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ _______________ ________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID             IID              IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                  31              31               26</span>
@@ -1213,10 +1225,10 @@ to visualize the results of multiple estimations. For plotting coefficients: see
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:          Ozone          Solar.R          Solar.R</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Constant         26.13 (16.65) 170.3*** (15.84) 141.7*** (34.93)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1                      -78.92 (265.3)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2                       130.2 (250.9)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1     678.1* (326.0)                     610.4 (708.9)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2     -162.1 (188.3)                    -62.82 (420.1)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)1                   -78.92 (265.3)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)2                    130.2 (250.9)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)1  678.1* (326.0)                     610.4 (708.9)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)2  -162.1 (188.3)                    -62.82 (420.1)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ______________ ________________ ________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                  IID              IID              IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                26               28               28</span>
@@ -1228,10 +1240,10 @@ to visualize the results of multiple estimations. For plotting coefficients: see
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:             Ozone            Ozone          Solar.R</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Constant         32.49*** (3.007) 35.77*** (1.925) 168.0*** (14.94)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1     -151.1*** (39.27)                    -94.96 (195.7)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2       166.8** (45.94)                     28.00 (231.7)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1                       199.0*** (30.21)                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2                       160.5*** (32.36)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)1  -151.1*** (39.27)                    -94.96 (195.7)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)2    166.8** (45.94)                     28.00 (231.7)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)1                    199.0*** (30.21)                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)2                    160.5*** (32.36)                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ _________________ ________________ ________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                     IID              IID              IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                   29               29               30</span>
@@ -1243,10 +1255,10 @@ to visualize the results of multiple estimations. For plotting coefficients: see
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:          Solar.R</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Constant        166.5*** (15.32)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)1        204.8 (241.9)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp)2       -146.7 (256.4)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)1                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)2                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)1     204.8 (241.9)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Temp, 2)2    -146.7 (256.4)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                  30</span>
@@ -1307,8 +1319,8 @@ to visualize the results of multiple estimations. For plotting coefficients: see
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:            Ozone          Ozone</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Constant        29.85*** (4.625) 21.82. (9.489)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)1      -180.2* (68.15)  167.0 (161.9)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind)2        93.32 (55.69) -60.63 (92.54)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)1   -180.2* (68.15)  167.0 (161.9)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poly(Wind, 2)2     93.32 (55.69) -60.63 (92.54)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> _______________ ________________ ______________</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                    IID            IID</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations                  26              9</span>
@@ -1390,14 +1402,12 @@ to visualize the results of multiple estimations. For plotting coefficients: see
 <span class="r-in"><span><span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="va">iris</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">no_sliding</span> <span class="op">=</span> <span class="fu">feols</span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span>, <span class="va">base</span>, <span class="op">~</span><span class="va">species</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The VCOV matrix is not positive semi-definite and was 'fixed' (see ?vcov).</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># With sliding</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="setFixest_estimation.html">setFixest_estimation</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">base</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># ~species is implicitly deduced to be equal to 'vcov'</span></span></span>
 <span class="r-in"><span><span class="va">sliding</span> <span class="op">=</span> <span class="fu">feols</span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span>, <span class="op">~</span><span class="va">species</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The VCOV matrix is not positive semi-definite and was 'fixed' (see ?vcov).</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">no_sliding</span>, <span class="va">sliding</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                         no_sliding            sliding</span>

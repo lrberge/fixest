@@ -1605,6 +1605,15 @@ to_integer = function(..., inputs = NULL, sorted = FALSE, add_items = FALSE, ite
   # Creating the ID
   #
   
+  # conversion to character if needed => c++ code does not handle the conversion bc this is a pain
+  for(i in seq_along(dots)){
+    if(!is.numeric(dots[[i]]) && !is.logical(dots[[i]]) && 
+       !is.character(dots[[i]]) && !is.factor(dots[[i]])){
+      dots[[i]] = as.character(dots[[i]])
+    }
+  }
+  
+  
   info = cpp_to_index(dots)
   index = info$index
   if(sorted || add_items){

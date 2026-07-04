@@ -1,9 +1,14 @@
 
-bibentry(bibtype = "Article",
-title = "Efficient estimation of maximum likelihood models with multiple fixed-effects: the {R} package {FENmlm}",
-author = person("Laurent", "Berg\\'e"),
-year = 2018,
-journal = "CREA Discussion Papers",
-number = 13,
-textVersion = 'Berge L (2018). "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package
-FENmlm." CREA Discussion Papers.')
+bibentry(
+  bibtype = "Article",
+  title = "Fast and user-friendly econometrics estimations: {T}he {R} package fixest",
+  author = c(
+    person("Laurent R.", "Berg\\'e"), 
+    person("Kyle", "Butts"), 
+    person("Grant", "McDermott")
+  ),
+  year = 2026,
+  journal = "arXiv preprint arXiv:2601.21749",
+  doi = "10.48550/arXiv.2601.21749",
+  textVersion = "Bergé, LR, Butts, K, McDermott, G (2026). \"Fast and user-friendly econometrics estimations: The R package fixest.\" arXiv preprint 2601.21749."
+)

@@ -40,15 +40,22 @@ if the \code{cutoff} was expressed in miles, then \code{pixel} will also be in m
 (default) or "spherical". The latter case corresponds to the great circle distance and is more
 precise than triangular but is a bit more intensive computationally.}
 
-\item{ssc}{An object returned by the function \code{\link{ssc}}. It specifies how to perform the small
-sample correction.}
+\item{ssc}{An object of class \code{ssc_type} obtained with the function \code{\link{ssc}}.
+It specifies how to perform the small sample correction.
+
+By default the VCOV is multiplied by (N - 1) / (N - K) with N the number of
+observations and K the number of parameters.
+To remove this adjustment, use \code{ssc=ssc(K.adj = FALSE)}.}
 
 \item{vcov_fix}{Logical scalar, default is \code{FALSE}. If the VCOV ends up not being
 positive definite, whether to "fix" it using an eigenvalue decomposition
 (a la Cameron, Gelbach & Miller 2011).
 Since the VCOV should be PSD asymptotically, this might be a sign of a problem
 with using the asymptotic approximation (e.g. too few units in clusters).
-If a problem is detected, the function will print a message to inform you.}
+If a problem is detected, the function will print a message to inform you.
+Note that a message informs the user \strong{only if} the regularized PD matrix is
+substantially different than the original non PD one (i.e. at least one difference
+between the two greated than 1e-8).}
 }
 \value{
 If the first argument is a \code{fixest} object, then a VCOV is returned (i.e. a symmetric matrix).
@@ -88,6 +95,16 @@ The algorithm is as follows:
 This cutoff is provided only for convenience but should be an appropriate first guess.
 With this cutoff, about 50\% of units should have at least around 8 neighbors.
 }
+\section{Small sample correction}{
+
+By default the VCOV is multiplied by (N - 1) / (N - K) with N the number of
+observations and K the number of parameters.
+To remove this adjustment, use \code{ssc=ssc(K.adj = FALSE)}.
+
+If the estimation contains fixed effects, you can modify how the number of parameters is computed
+with the arguments \code{K.fixef} and \code{K.exact} (see \code{\link{ssc}} for details).
+}
+
 \examples{
 
 data(quakes)

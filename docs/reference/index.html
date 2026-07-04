@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.13.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.14.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -102,6 +102,12 @@
         <dd>Plots confidence intervals and point estimates</dd>
       </dl><dl><dt>
 
+          <code><a href="plot.fixest.html">plot(<i>&lt;fixest&gt;</i>)</a></code>
+
+        </dt>
+        <dd>plot methods for <code>fixest</code> and <code>fixest_multi</code> objects</dd>
+      </dl><dl><dt>
+
           <code><a href="style.df.html">style.df()</a></code>
 
         </dt>
@@ -155,7 +161,7 @@
         <dd>Extracts the coefficients table from an estimation</dd>
       </dl><dl><dt>
 
-          <code><a href="coeftable.default.html">coeftable(<i>&lt;default&gt;</i>)</a></code> <code><a href="coeftable.default.html">se(<i>&lt;default&gt;</i>)</a></code> <code><a href="coeftable.default.html">tstat(<i>&lt;default&gt;</i>)</a></code> <code><a href="coeftable.default.html">pvalue(<i>&lt;default&gt;</i>)</a></code> <code><a href="coeftable.default.html">se(<i>&lt;matrix&gt;</i>)</a></code>
+          <code><a href="coeftable.default.html">coeftable(<i>&lt;default&gt;</i>)</a></code> <code><a href="coeftable.default.html">se(<i>&lt;default&gt;</i>)</a></code> <code><a href="coeftable.default.html">tstat(<i>&lt;default&gt;</i>)</a></code> <code><a href="coeftable.default.html">pvalue(<i>&lt;default&gt;</i>)</a></code> <code><a href="coeftable.default.html">se(<i>&lt;matrix&gt;</i>)</a></code> <code><a href="coeftable.default.html">se(<i>&lt;fixest_vcov&gt;</i>)</a></code>
 
         </dt>
         <dd>Extracts the coefficients table from an estimation</dd>
@@ -237,10 +243,22 @@
         <dd>Summary of a <code>fixest</code> object. Computes different types of standard errors.</dd>
       </dl><dl><dt>
 
-          <code><a href="ssc.html">ssc()</a></code> <code><a href="ssc.html">setFixest_ssc()</a></code> <code><a href="ssc.html">getFixest_ssc()</a></code>
+          <code><a href="ssc.html">ssc()</a></code>
 
         </dt>
         <dd>Governs the small sample correction in <code>fixest</code> VCOVs</dd>
+      </dl><dl><dt>
+
+          <code><a href="getFixest_ssc.html">getFixest_ssc()</a></code>
+
+        </dt>
+        <dd>Gets the default values for the small sample correction</dd>
+      </dl><dl><dt>
+
+          <code><a href="setFixest_ssc.html">setFixest_ssc()</a></code>
+
+        </dt>
+        <dd>Sets the default values for the small sample correction</dd>
       </dl><dl><dt>
 
           <code><a href="vcov_cluster.html">vcov_cluster()</a></code>
@@ -265,6 +283,18 @@
 
         </dt>
         <dd>Heteroskedasticity-Robust VCOV</dd>
+      </dl><dl><dt>
+
+          <code><a href="print.fixest_vcov.html">print(<i>&lt;fixest_vcov&gt;</i>)</a></code>
+
+        </dt>
+        <dd>A print facility for the VCOVs from <code>fixest</code> objects.</dd>
+      </dl><dl><dt>
+
+          <code><a href="print.ssc_type.html">print(<i>&lt;ssc_type&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Method to print the type of small sample correction</dd>
       </dl></div><div class="section level2">
       <h2 id="multiple-estimations">Multiple estimations<a class="anchor" aria-label="anchor" href="#multiple-estimations"></a></h2>
 
@@ -679,6 +709,12 @@
         <dd>Estimations table (export the results of multiples estimations to a DF or to Latex)</dd>
       </dl><dl><dt>
 
+          <code><a href="getFixest_ssc.html">getFixest_ssc()</a></code>
+
+        </dt>
+        <dd>Gets the default values for the small sample correction</dd>
+      </dl><dl><dt>
+
           <code><a href="print.fixest.html">print(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="print.fixest.html">setFixest_print()</a></code> <code><a href="print.fixest.html">getFixest_print()</a></code>
 
         </dt>
@@ -727,16 +763,16 @@
         <dd>Sets/gets the number of threads to use in <code>fixest</code> functions</dd>
       </dl><dl><dt>
 
+          <code><a href="setFixest_ssc.html">setFixest_ssc()</a></code>
+
+        </dt>
+        <dd>Sets the default values for the small sample correction</dd>
+      </dl><dl><dt>
+
           <code><a href="setFixest_vcov.html">setFixest_vcov()</a></code> <code><a href="setFixest_vcov.html">getFixest_vcov()</a></code>
 
         </dt>
         <dd>Sets the default type of standard errors to be used</dd>
-      </dl><dl><dt>
-
-          <code><a href="ssc.html">ssc()</a></code> <code><a href="ssc.html">setFixest_ssc()</a></code> <code><a href="ssc.html">getFixest_ssc()</a></code>
-
-        </dt>
-        <dd>Governs the small sample correction in <code>fixest</code> VCOVs</dd>
       </dl></div><div class="section level2">
       <h2 id="data-tools">Data tools<a class="anchor" aria-label="anchor" href="#data-tools"></a></h2>
 
@@ -900,7 +936,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
     </footer></div>

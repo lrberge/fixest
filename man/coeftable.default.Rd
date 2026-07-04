@@ -6,6 +6,7 @@
 \alias{tstat.default}
 \alias{pvalue.default}
 \alias{se.matrix}
+\alias{se.fixest_vcov}
 \title{Extracts the coefficients table from an estimation}
 \usage{
 \method{coeftable}{default}(object, keep, drop, order, ...)
@@ -17,6 +18,8 @@
 \method{pvalue}{default}(object, keep, drop, order, ...)
 
 \method{se}{matrix}(object, keep, drop, order, ...)
+
+\method{se}{fixest_vcov}(object, keep, drop, order, ...)
 }
 \arguments{
 \item{object}{The result of an estimation (a fitted model object). Note that this function
@@ -25,28 +28,36 @@ is made to work with \code{fixest} objects so it may not work for the specific m
 \item{keep}{Character vector. This element is used to display only a subset of variables. This
 should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}} help for more info). Each
 variable satisfying any of the regular expressions will be kept. This argument is applied post
-aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display
+aliasing (see argument \code{dict}).
+Use the argument \code{keep_raw} for the same effect before aliasing.
+
+Example: you have the variable \code{x1} to \code{x55} and want to display
 only \code{x1} to \code{x9}, then you could use \code{keep = "x[[:digit:]]$"}. If the first character is an
-exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that
-does not contain \dQuote{Intercept} is kept). See details.}
+exclamation mark, the effect is reversed (e.g. keep = "!Constant" means: every variable that
+does not contain \dQuote{Constant} is kept). See details.}
 
 \item{drop}{Character vector. This element is used if some variables are not to be displayed.
 This should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}} help for more info). Each
 variable satisfying any of the regular expressions will be discarded. This argument is applied
-post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to
+post aliasing (see argument \code{dict}).
+Use the argument \code{drop_raw} for the same effect before aliasing.
+
+Example: you have the variable \code{x1} to \code{x55} and want to
 display only \code{x1} to \code{x9}, then you could use \verb{drop = "x[[:digit:]]\{2\}}". If the first character
-is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable
-that does not contain \dQuote{Intercept} is dropped). See details.}
+is an exclamation mark, the effect is reversed (e.g. drop = "!Constant" means: every variable
+that does not contain \dQuote{Constant} is dropped). See details.}
 
 \item{order}{Character vector. This element is used if the user wants the variables to be
 ordered in a certain way. This should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}}
 help for more info). The variables satisfying the first regular expression will be placed first,
 then the order follows the sequence of regular expressions. This argument is applied post
-aliasing (see argument \code{dict}). Example: you have the following variables: \code{month1} to \code{month6},
+aliasing (see argument \code{dict}). Use the argument \code{order_raw} for the same effect before aliasing.
+
+Example: you have the following variables: \code{month1} to \code{month6},
 then \code{x1} to \code{x5}, then \code{year1} to \code{year6}. If you want to display first the x's, then the
 years, then the months you could use: \code{order = c("x", "year")}. If the first character is an
-exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that
-does not contain \dQuote{Intercept} goes first).  See details.}
+exclamation mark, the effect is reversed (e.g. order = "!Constant" means: every variable that
+does not contain \dQuote{Constant} goes first).  See details.}
 
 \item{...}{Other arguments that will be passed to \code{summary}.
 
@@ -75,6 +86,8 @@ Default method to extracts the coefficients table and its sub-components from an
 \item \code{pvalue(default)}: Extracts the p-values from an estimation
 
 \item \code{se(matrix)}: Extracts the standard-errors from a VCOV matrix
+
+\item \code{se(fixest_vcov)}: Extracts the standard-errors from a \code{fixest} VCOV matrix
 
 }}
 \examples{

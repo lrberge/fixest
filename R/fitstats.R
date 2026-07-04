@@ -436,30 +436,51 @@ fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
 
 #' Computes fit statistics of fixest objects
 #'
-#' Computes various fit statistics for `fixest` estimations.
+#' Computes various fit statistics or hypothesis tests for `fixest` estimations. 
+#' These statistics can also be used within [`etable`] or set to be displayed when printing the 
+#' model with [`setFixest_print`].
 #' 
 #' @inheritParams summary.fixest
 #'
-#' @param x A `fixest` estimation.
-#' @param type Character vector or one sided formula. The type of fit statistic to be computed. 
-#' The classic ones are: n, rmse, r2, pr2, f, wald, ivf, ivwald. You have the full list in 
-#' the details section or use `show_types = TRUE`. Further, you can register your own types 
-#' with [`fitstat_register`].
+#' @param x A `fixest` estimation, obtained for example from [`feols`].
+#' @param type Character vector or one sided formula. No default. 
+#' The type of fit statistic or tests to be computed. 
+#' The classic ones are: `n`, `rmse`, `r2`, `pr2`, `f`, `wald`, `ivf`, `ivwald`. 
+#' You have the full list in the details section or use `show_types = TRUE`. 
+#' Further, you can register your own types with [`fitstat_register`].
 #' @param simplify Logical, default is `FALSE`. By default a list is returned whose names are 
 #' the selected types. If `simplify = TRUE` and only one type is selected, then the element 
-#' is directly returned (ie will not be nested in a list).
+#' is directly returned (i.e. will not be nested in a list).
 #' @param verbose Logical, default is `TRUE`. If `TRUE`, an object of class `fixest_fitstat` 
 #' is returned (so its associated print method will be triggered). If `FALSE` a simple list 
-#' is returned instead.
-#' @param show_types Logical, default is `FALSE`. If `TRUE`, only prompts all available types.
+#' is returned instead (i.e. the same object without the class).
+#' @param show_types Logical, default is `FALSE`. If `TRUE`, this prompts all available types
+#' and nothing is returned.
+#' @param htest Logical scalar, default is `FALSE`. If `TRUE`, the results of tests are formatted
+#' according to the `htest` class (defined in the `stats` package), 
+#' and the returned object is a simple list. 
+#' If `FALSE`, the results of each test is a simple list but the object returned is of class 
+#' `fixest_fitstat`. 
 #' @param frame An environment in which to evaluate variables, default is `parent.frame()`. 
 #' Only used if the argument `type` is a formula and some values in the formula have to be 
-#' extended with the dot square bracket operator. Mostly for internal use.
-#' @param ... For internal use.
+#' extended with the dot square bracket operator. Mostly for internal use. 
+#' @param ... For internal use. 
+#' 
+#' @details 
+#' 
+#' Any statistic available in `fitstat` can also be used directly in [`etable`] via its 
+#' argument `fitstat`. For example `etable(est, fitstat = c("r2", "rmse"))` will report 
+#' the R2 and the RMSE in the fit statistics section of the table.
+#' 
+#' If one wants to change the default set of statistics reported when printing the model,
+#' this is possible with the function [`setFixest_print`] which accepts the argument `fitstat`.
+#' For example `setFixest_print(fitstat = ~r2 + f)` will report the R2 and the F-test 
+#' for each estimation.
 #'
 #' @section Registering your own types:
 #'
-#' You can register custom fit statistics with the function `fitstat_register`.
+#' You can register custom fit statistics with the function [`fitstat_register`]. 
+#' These statistics can be anything. Please see its documentation.
 #'
 #' @section Available types:
 #'
@@ -484,7 +505,7 @@ fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
 #' will give the statistic of the F-test, or `wf.p` will give the p-values of the F-test 
 #' on the projected model (i.e. projected onto the fixed-effects).}
 #' \item{`wald`: }{Wald test of joint nullity of the coefficients. This test always excludes 
-#' the intercept and the fixed-effects. These type returns the following values: 
+#' the intercept and the fixed-effects. This type returns the following values: 
 #' `stat`, `p`, `df1`, `df2` and `vcov`. The element `vcov` reports the way the VCOV 
 #' matrix was computed since it directly influences this statistic.}
 #' \item{`ivf`, `ivf1`, `ivf2`, `ivfall`: }{These statistics are specific to IV estimations. 
@@ -527,9 +548,52 @@ fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
 #'
 #'
 #' @return
-#' By default an object of class `fixest_fitstat` is returned. Using `verbose = FALSE` 
-#' returns a simple a list. Finally, if only one type is selected, `simplify = TRUE` 
-#' leads to the selected type to be returned.
+#' 
+#' By default an object of class `fixest_fitstat` is returned. 
+#' This object is a simple list containing the statistics/tests requested 
+#' by the user. 
+#' For example `fitstat(x, c("r2", "f"))` returns a list with two elements named `r2` and `f`.
+#' 
+#' Each statistic from the `fixest_fitstat` object can be of two types:
+#' \enumerate{
+#'   \item a list of numeric scalars whose elements depend on the type of fit statistic/test. 
+#'   For example the F-test, accessed with `f`, contains the elements 
+#'   `stat`, `p`, `df1`, and `df2`. The `wald` test contains the elements 
+#'   `stat`, `p`, `df1`, `df2` and `vcov`. The likelihood ratio, `lr`, contains the elements
+#'   `stat`, `p`, `df`. Etc.
+#' 
+#'   \item a numeric scalar, for either: i) scalar fit statistics, like `r2` or `rmse`, 
+#'   ii) when a specific element of a fit statistic is accessed, like e.g. `f.stat` 
+#'   which reports the `stat` element of the fit statistic `f`.
+#' }
+#' 
+#' The types of fit statistics and their structure are detailed 
+#' in the section `Available types` of this documentation.
+#' 
+#' The class `fixest_fitstat` has only a dedicated print method.
+#' 
+#' If the argument `htest=TRUE`, the object returned is a plain list containing the requested
+#' statistics and each test is formatted according to the `htest` class from the `stats` package. 
+#' `htest` objects are lists containing the following elements:
+#' \describe{
+#'   \item{statistic}{A numeric scalar equal to test statistic.}
+#'   \item{p.value}{A numeric scalar equal to the p-value of the test.}
+#'   \item{parameter}{A list containing various parameters used to calculate the 
+#'     p-value and the statistic. It can be `df`, `df1`, `df2`,  or `vcov`.}
+#'   \item{alternative}{The alternative hypothesis.}
+#'   \item{method}{The name of the test.}
+#'   \item{data.name}{The estimation call on which the test is applied.}
+#' }
+#' 
+#' Using `verbose = FALSE` removes the `fixest_fitstat` class from the returned object,
+#' turning it into a plain list (this is ignored when `htest=TRUE`).
+#' 
+#' If only one type is selected, `simplify = TRUE` leads to the selected statistic to 
+#' be directly returned (and hence is not nested inside a list). 
+#' For example `fitstat(x, "r2", simplify = TRUE)` returns a simple scalar.
+#' 
+#' If `show_types=TRUE`, this function returns instead a character vector with
+#'  all the available types.
 #'
 #' @examples
 #'
@@ -541,12 +605,18 @@ fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
 #'
 #' # Some fit statistics
 #' fitstat(gravity, ~ rmse + r2 + wald + wf)
+#' 
+#' # This is a simple list:
+#' names(fitstat(gravity, ~ rmse + r2 + wald + wf))
 #'
 #' # You can use them in etable
 #' etable(gravity, fitstat = ~ rmse + r2 + wald + wf)
 #'
 #' # For wald and wf, you could show the pvalue instead:
 #' etable(gravity, fitstat = ~ rmse + r2 + wald.p + wf.p)
+#' 
+#' # You can display the tests with the htest format with htest=TRUE
+#' fitstat(gravity, ~ rmse + r2 + wald + wf, htest = TRUE)
 #'
 #' # Now let's display some statistics that are not built-in
 #' # => we use fitstat_register to create them
@@ -562,13 +632,10 @@ fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
 #' # Now we can use these keywords in fitstat:
 #' etable(gravity, fitstat = ~ . + tstand + thc + t1w + t2w)
 #'
-#' # Note that the custom stats we created are can easily lead
-#' # to errors, but that's another story!
-#'
 #'
 fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL, 
                    simplify = FALSE, verbose = TRUE, show_types = FALSE,
-                   frame = parent.frame(), ...){
+                   htest = FALSE, frame = parent.frame(), ...){
 
   r2_types = c("sq.cor", "cor2", "r2", "ar2", "pr2", "apr2", "par2", "wr2",
                "war2", "awr2", "wpr2", "pwr2", "wapr2", "wpar2", "awpr2",
@@ -651,9 +718,9 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
 
   check_arg(x, "class(fixest) mbt")
   check_set_arg(type, "character vector no na | os formula")
-  check_arg(simplify, verbose, "logical scalar")
+  check_arg(simplify, verbose, htest, "logical scalar")
 
-  if("formula" %in% class(type)){
+  if(inherits(type, "formula")){
     type = .xpd(type, frame = frame)
 
     type = gsub(" ", "", strsplit(deparse_long(type[[2]]), "+", fixed = TRUE)[[1]])
@@ -663,6 +730,13 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
   # To update
   if(!isTRUE(x$summary)){
     x = summary(x, vcov = vcov, cluster = cluster, ssc = ssc, warn = FALSE)
+  }
+  
+  if(htest){
+    # we update the type dict (can be modifed by the user)
+    all_types = fitstat(give_types = TRUE)
+    dict_type = all_types$R_alias
+    options(fixest_fitstat_type_R_alias = dict_type)
   }
 
   IS_ETABLE = isTRUE(dots$etable)
@@ -685,12 +759,18 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
 
   res_all = list()
   type_all = type
+  
+  is_NA_model = isTRUE(x$NA_model)
 
   for(i in seq_along(type_all)){
     type = type_all[i]
-
+    alternative = NULL
+    
     # Big if
-    if(type == "n"){
+    if(is_NA_model){
+      res_all[[type]] = NA_real_
+      
+    } else if(type == "n"){
       res_all[[type]] = x$nobs
 
     } else if(type == "ll"){
@@ -766,10 +846,17 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
 
       if(root == "f"){
         if(!is.null(x$ssr)){
+          
+          if("fixef_id" %in% names(x)){
+            alternative = "At least one coefficient (including the fixed-effects) is different from 0"
+          } else {
+            alternative = "At least one coefficient is different from 0"
+          }
+          
           df1 = degrees_freedom(x, "k") - 1
           df2 = degrees_freedom(x, "t")
 
-          if(isTRUE(x$iv) && x$iv_stage == 2){
+          if(isTRUE(x$is_iv) && x$iv_stage == 2){
             # We need to compute the SSR
             w = 1
             if(!is.null(x$weights)) w = x$weights
@@ -787,6 +874,9 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
           res_all[[type]] = NA
         }
       } else if(root == "wf"){
+        
+        alternative = "At least one non fixed-effect coefficient is different from 0"
+        
         df1 = length(x$coefficients)
 
         if(!is.null(x$ssr_fe_only) && df1 > 0){
@@ -802,8 +892,11 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
 
 
       } else if(root == "ivfall"){
-        if(isTRUE(x$iv)){
+        if(isTRUE(x$is_iv)){
           if(x$iv_stage == 1){
+            
+            alternative = "At least one coefficient associated to the instruments is different from 0"
+            
             df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd)
             df2 = degrees_freedom(x, "resid")
 
@@ -814,6 +907,8 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
 
           } else {
             # f stat for the second stage
+            
+            alternative = "At least one coefficient associated to the endogenous regressors is different from 0"
 
             df1 = degrees_freedom(x, vars = x$iv_endo_names_fit)
             df2 = degrees_freedom(x, "resid")
@@ -834,7 +929,10 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
 
       } else if(root == "ivf1"){
 
-        if(isTRUE(x$iv)){
+        if(isTRUE(x$is_iv)){
+          
+          alternative = "At least one coefficient associated to the instruments is different from 0"
+          
           df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd, stage = 1)
           df2 = degrees_freedom(x, "resid", stage = 1)
 
@@ -854,6 +952,16 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
               vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
               res_all[[paste0(type, "::", endo)]] = set_value(vec, value)
             }
+            
+            if(htest){
+              # special case
+              for(endo in names(x_first)){
+                type_endo = paste0(type, "::", endo)
+                res_all[[type_endo]] = fitstat_to_htest(x, type, res_all[[type_endo]], alternative)
+              }
+              
+              next
+            }
           }
 
         } else {
@@ -861,8 +969,9 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
         }
 
       } else if(root == "ivf2"){
-        if(isTRUE(x$iv) && x$iv_stage == 2){
+        if(isTRUE(x$is_iv) && x$iv_stage == 2){
           # f stat for the second stage
+          alternative = "At least one coefficient associated to the endogenous regressors is different from 0"
 
           df1 = degrees_freedom(x, vars = x$iv_endo_names_fit)
           df2 = degrees_freedom(x, "resid")
@@ -881,8 +990,9 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
         }
 
       } else if(root == "kpr"){
-        if(isTRUE(x$iv) && x$iv_stage == 2){
+        if(isTRUE(x$is_iv) && x$iv_stage == 2){
           # The KP rank test is computed in a specific function
+          alternative = "The instruments are strong"
 
           vec = kp_stat(x)
           res_all[[type]] = set_value(vec, value)
@@ -892,8 +1002,9 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
         }
 
       } else if(root == "cd"){
-        if(isTRUE(x$iv) && x$iv_stage == 2){
+        if(isTRUE(x$is_iv) && x$iv_stage == 2){
           # The KP rank test is computed in a specific function
+          alternative = "The instruments are strong"
 
           vec = cd_stat(x)
           res_all[[type]] = set_value(vec, value)
@@ -905,6 +1016,12 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
       } else if(root == "wald"){
         # Joint nullity of the coefficients
         # if FE => on the projected model only
+        
+        if("fixef_id" %in% names(x)){
+          alternative = "At least one non fixed-effect coefficient is different from 0"
+        } else {
+          alternative = "At least one coefficient is different from 0"
+        }
 
         qui = !names(x$coefficients) %in% "(Intercept)"
         my_coef = x$coefficients[qui]
@@ -916,7 +1033,8 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
           # The VCOV is always full rank in here
           stat = .wald(x, names(my_coef))
           p = pf(stat, df1, df2, lower.tail = FALSE)
-          vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
+          vec = list(stat = stat, p = p, df1 = df1, df2 = df2, 
+                     vcov = attr(x$cov.scaled, "vcov_type"))
           res_all[[type]] = set_value(vec, value)
 
         } else {
@@ -926,8 +1044,10 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
 
       } else if(root == "ivwaldall"){
 
-        if(isTRUE(x$iv)){
+        if(isTRUE(x$is_iv)){
           if(x$iv_stage == 1){
+            
+            alternative = "At least one coefficient associated to the instruments is different from 0"
 
             df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd)
             df2 = degrees_freedom(x, "resid")
@@ -935,11 +1055,14 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
             stat = .wald(x, x$iv_inst_names_xpd)
 
             p = pf(stat, df1, df2, lower.tail = FALSE)
-            vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
+            vec = list(stat = stat, p = p, df1 = df1, df2 = df2, 
+                       vcov = attr(x$cov.scaled, "vcov_type"))
             res_all[[type]] = set_value(vec, value)
 
           } else {
             # wald stat for the second stage
+            
+            alternative = "At least one coefficient associated to endogenous regressor is different from 0"
 
             df1 = degrees_freedom(x, vars = x$iv_endo_names_fit)
             df2 = degrees_freedom(x, "resid")
@@ -947,7 +1070,8 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
             stat = .wald(x, x$iv_endo_names_fit)
 
             p = pf(stat, df1, df2, lower.tail = FALSE)
-            vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
+            vec = list(stat = stat, p = p, df1 = df1, df2 = df2, 
+                       vcov = attr(x$cov.scaled, "vcov_type"))
             res_all[[type]] = set_value(vec, value)
           }
 
@@ -957,17 +1081,20 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
 
       } else if(root %in% "ivwald1"){
 
-        if(isTRUE(x$iv)){
+        if(isTRUE(x$is_iv)){
+          
+          alternative = "At least one coefficient associated to the instruments is different from 0"
+          
           df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd, stage = 1)
           df2 = degrees_freedom(x, "resid", stage = 1)
-
 
           if(x$iv_stage == 1){
 
             stat = .wald(x, x$iv_inst_names_xpd)
 
             p = pf(stat, df1, df2, lower.tail = FALSE)
-            vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
+            vec = list(stat = stat, p = p, df1 = df1, df2 = df2, 
+                       vcov = attr(x$cov.scaled, "vcov_type"))
             res_all[[type]] = set_value(vec, value)
 
           } else {
@@ -994,9 +1121,20 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
 
               p = pf(stat, df1, df2, lower.tail = FALSE)
               vec = list(stat = stat, p = p, df1 = df1, df2 = df2, 
-                         vcov = attr(x$cov.scaled, "type"))
+                         vcov = attr(x$cov.scaled, "vcov_type"))
               res_all[[paste0(type, "::", endo)]] = set_value(vec, value)
             }
+            
+            if(htest){
+              # special case
+              for(endo in names(x_first)){
+                type_endo = paste0(type, "::", endo)
+                res_all[[type_endo]] = fitstat_to_htest(x, type, res_all[[type_endo]], alternative)
+              }
+              
+              next
+            }
+            
           }
 
         } else {
@@ -1004,8 +1142,9 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
         }
 
       } else if(root == "ivwald2"){
-        if(isTRUE(x$iv) && x$iv_stage == 2){
+        if(isTRUE(x$is_iv) && x$iv_stage == 2){
           # wald stat for the second stage
+          alternative = "At least one coefficient associated to the endogenous regressors is different from 0"
 
           df1 = degrees_freedom(x, vars = x$iv_endo_names_fit)
           df2 = degrees_freedom(x, "resid")
@@ -1013,7 +1152,8 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
           stat = .wald(x, x$iv_endo_names_fit)
 
           p = pf(stat, df1, df2, lower.tail = FALSE)
-          vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
+          vec = list(stat = stat, p = p, df1 = df1, df2 = df2, 
+                     vcov = attr(x$cov.scaled, "vcov_type"))
           res_all[[type]] = set_value(vec, value)
 
         } else {
@@ -1021,8 +1161,10 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
         }
 
       } else if(root == "wh"){
-        if(isTRUE(x$iv) && x$iv_stage == 2){
+        if(isTRUE(x$is_iv) && x$iv_stage == 2){
           # Wu Hausman stat for the second stage
+          alternative = "The regressor is endogenous"
+          
           vec = x$iv_wh
           res_all[[type]] = set_value(vec, value)
 
@@ -1033,6 +1175,8 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
       } else if(root == "sargan"){
         if(!is.null(x$iv_sargan)){
           # Wu Hausman stat for the second stage
+          alternative = "At least one instrument is invalid"
+          
           vec = x$iv_sargan
           res_all[[type]] = set_value(vec, value)
 
@@ -1042,6 +1186,7 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
 
       } else if(root == "lr"){
         if(!is.null(x$ll_null)){
+          alternative = "At least one coefficient is different from 0"
 
           stat = 2 * (x$loglik - x$ll_null)
           df = x$nparams
@@ -1056,7 +1201,7 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
 
       } else if(root == "wlr"){
         if(!is.null(x$ll_fe_only) || (x$method_type == "feglm" && !is.null(x$fixef_id))){
-
+          alternative = "At least one of the non fixed-effect coefficients is different from 0"
           if(x$method_type == "feglm"){
             # estimation of the FE only model
 
@@ -1091,6 +1236,10 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
         stop("The type '", type, "' is not supported, see details of ?fitstat, or use fitstat(show_types = TRUE) to get the names of all supported tests.")
       }
     }
+    
+    if(htest){
+      res_all[[type]] = fitstat_to_htest(x, type, res_all[[type]], alternative)
+    }
 
   }
 
@@ -1098,7 +1247,7 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
     verbose = FALSE
   }
 
-  if(verbose){
+  if(verbose && !htest){
     class(res_all) = "fixest_fitstat"
   }
 
@@ -1107,6 +1256,48 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
   }
 
   res_all
+}
+
+
+fitstat_to_htest = function(est, type, fitstat_test, alternative){
+  
+  if(!is.list(fitstat_test)){
+    return(fitstat_test)
+  }
+  
+  my_test = list()
+  if("stat" %in% names(fitstat_test)){
+    my_test$statistic = setNames(fitstat_test$stat, "statistic")
+  }
+  
+  if("p" %in% names(fitstat_test)){
+    my_test$p.value = fitstat_test$p
+  }
+  
+  prm_names = setdiff(names(fitstat_test), c("stat", "p"))
+  if(length(prm_names) > 0){
+    prms = fitstat_test[prm_names]
+    my_test$parameter = prms
+  }
+  
+  dict_type = getOption("fixest_fitstat_type_R_alias")
+  if(is.null(dict_type)){
+    # we make sure it's OK and it works, even when not called in the right sequence
+    all_types = fitstat(give_types = TRUE)
+    dict_type = all_types$R_alias
+    options(fixest_fitstat_type_R_alias = dict_type)
+  }
+  
+  if(!is.null(alternative)){
+    my_test$alternative = alternative
+  }
+  
+  my_test$method = if(type %in% names(dict_type)) dict_type[[type]] else type
+  my_test$data.name	= paste(deparse(est$call, width.cutoff = 100, nlines = 3), collapse = "\n")
+  
+  class(my_test) = "htest"
+  
+  my_test
 }
 
 
@@ -1197,13 +1388,19 @@ wald = function(x, keep = NULL, drop = NULL, print = TRUE, vcov, se, cluster, ..
   qui = names(x$coefficients) %in% coef_name
   my_coef = x$coefficients[qui]
   df1 = length(my_coef)
-
-  df2 = x$nobs - x$nparams
+  
+  df2 = attr(x$cov.scaled, "df.t")
+  if(is.null(df2)){
+    df2 = x$nobs - x$nparams
+  } else {
+    # normalisation => can happen with few clusters
+    df2 = max(df2, df1 + 1)
+  }
 
   # The VCOV is always full rank in here
-  stat = drop(my_coef %*% solve(x$cov.scaled[qui, qui]) %*% my_coef) / df1
+  stat = drop(my_coef %*% invert_posdef_mat(x$cov.scaled[qui, qui]) %*% my_coef) / df1
   p = pf(stat, df1, df2, lower.tail = FALSE)
-  vcov = attr(x$cov.scaled, "type")
+  vcov = attr(x$cov.scaled, "vcov_type")
   vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = vcov)
 
   if(print){
@@ -1222,7 +1419,7 @@ wald = function(x, keep = NULL, drop = NULL, print = TRUE, vcov, se, cluster, ..
 fitstat_validate = function(x, vector = FALSE){
   check_value(x, "NA | os formula | charin(FALSE) | character vector no na", .arg_name = "fitstat", .up = 1)
 
-  if("formula" %in% class(x)){
+  if(inherits(x, "formula")){
     x = attr(terms(update(~ DEFAULT, x)), "term.labels")
   } else if (length(x) == 1 && (isFALSE(x) || is.na(x))){
     x = c()
@@ -1325,7 +1522,7 @@ r2 = function(x, type = "all", full_names = FALSE){
 
   check_arg(full_names, "logical scalar")
 
-  if(!"fixest" %in% class(x)){
+  if(!inherits(x, "fixest")){
     stop("Only 'fixest' objects are supported.")
   }
 
@@ -1359,7 +1556,7 @@ r2 = function(x, type = "all", full_names = FALSE){
   isFixef = "fixef_vars" %in% names(x)
   n = nobs(x)
   
-  if(isTRUE(x$iv) && identical(x$iv_stage, 2)){
+  if(isTRUE(x$is_iv) && identical(x$iv_stage, 2)){
     x$ssr = cpp_ssq(x$iv_residuals)
   }
 
@@ -1521,7 +1718,7 @@ degrees_freedom = function(x, type, vars = NULL, vcov = NULL, se = NULL, cluster
   check_arg(stage, "integer scalar GE{1} LE{2}")
   check_arg(vars, "character vector no na")
 
-  if(stage == 1 && isTRUE(x$iv) && x$iv_stage == 2){
+  if(stage == 1 && isTRUE(x$is_iv) && x$iv_stage == 2){
     x = x$iv_first_stage[[1]]
   }
 
@@ -1619,11 +1816,22 @@ kp_stat = function(x){
   # internal function => x must be a fixest object
   #
   # The code here is a translation of the ranktest.jl function from the Vcov.jl package
-  # from @matthieugomez (see https://github.com/matthieugomez/Vcov.jl)
-  #
+  # from @matthieugomez (see https://github.com/FixedEffects/Vcov.jl)
 
 
-  if(!isTRUE(x$iv) || !x$iv_stage == 2) return(NA)
+  if(!isTRUE(x$is_iv) || !x$iv_stage == 2) return(NA)
+
+  n_endo = length(x$iv_first_stage)
+  n_inst = x$iv_n_inst
+  VCOV_TYPE = attr(x$cov.scaled, "vcov_type")
+  if (!identical(VCOV_TYPE, "IID") && n_inst != n_endo) {
+    warning(paste0(
+      "KP calculation is only implemented for the cases:\n",
+      " * vcov type is IID or\n",
+      " * number of endogenous variables == number of instruments"
+    ))
+    return(NA)
+  }
 
   # Necessary data
 
@@ -1637,8 +1845,8 @@ kp_stat = function(x){
   Z = model.matrix(x, type = "iv.inst")
   Z_proj = proj_on_U(x, Z)
 
-  k = n_endo = ncol(X_proj)
-  l = n_inst = ncol(Z)
+  k = n_endo
+  l = n_inst
 
   # We assume l >= k
   q = min(k, l) - 1
@@ -1650,7 +1858,7 @@ kp_stat = function(x){
   } else {
     PI = coef(summary(x, stage = 1))
   }
-  PI = PI[, colnames(PI) %in% x$iv_inst_names_xpd, drop = FALSE]
+  PI = as.matrix(PI[, colnames(PI) %in% x$iv_inst_names_xpd, drop = FALSE])
 
   Fmat = chol(crossprod(Z_proj))
   Gmat = chol(crossprod(X_proj))
@@ -1680,8 +1888,9 @@ kp_stat = function(x){
     a_qq = ssign(u_sub[1]) * u[1:l, k:l, drop = FALSE]
     b_qq = ssign(vt_sub[1]) * t(vt_k)
   } else {
-    a_qq = u[1:l, k:l] %*% (solve(u_sub) %*% mat_sqrt(u_sub %*% t(u_sub)))
-    b_qq = mat_sqrt(vt_sub %*% t(vt_sub)) %*% (solve(t(vt_sub)) %*% t(vt_k))
+    # u_sub %*% t(u_sub) = tcrossprod(u_sub)
+    a_qq = u[1:l, k:l] %*% (solve(u_sub) %*% mat_sqrt( tcrossprod(u_sub) ))
+    b_qq = mat_sqrt( tcrossprod(vt_sub) ) %*% (solve(t(vt_sub)) %*% t(vt_k))
   }
 
   # kronecker
@@ -1690,8 +1899,6 @@ kp_stat = function(x){
 
   # There is need to compute the vcov specifically for this case
   # We do it the same way as it was for x
-
-  VCOV_TYPE = attr(x$cov.scaled, "type")
 
   if(identical(VCOV_TYPE, "IID")){
     vlab = chol(tcrossprod(kronv) / nrow(X_proj))
@@ -1734,7 +1941,7 @@ cd_stat = function(x){
   # x: fixest object
   #
 
-  if(!isTRUE(x$iv) || !x$iv_stage == 2) return(NA)
+  if(!isTRUE(x$is_iv) || !x$iv_stage == 2) return(NA)
 
   # Necessary data
   X = model.matrix(x, type = "iv.endo")

@@ -629,7 +629,7 @@ aggregate.fixest = function(x, agg, full = FALSE, use_weights = TRUE, ...){
 
     res = rbind(before, res, after)
 
-    attr(res, "type") = attr(table_origin, "type")
+    attr(res, "vcov_type") = attr(table_origin, "vcov_type")
   }
 
   if(from_summary){

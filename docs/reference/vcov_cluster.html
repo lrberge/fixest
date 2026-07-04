@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.13.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.14.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,7 +70,7 @@ data set used for the estimation.</p></dd>
 
 <dt id="arg-ssc">ssc<a class="anchor" aria-label="anchor" href="#arg-ssc"></a></dt>
 <dd><p>An object returned by the function <code><a href="ssc.html">ssc</a></code>. It specifies how to perform the small
-sample correction.</p></dd>
+sample correction. These VCOVs accept all the arguments of <code><a href="ssc.html">ssc</a></code>.</p></dd>
 
 
 <dt id="arg-vcov-fix">vcov_fix<a class="anchor" aria-label="anchor" href="#arg-vcov-fix"></a></dt>
@@ -79,7 +79,10 @@ positive definite, whether to "fix" it using an eigenvalue decomposition
 (a la Cameron, Gelbach &amp; Miller 2011).
 Since the VCOV should be PSD asymptotically, this might be a sign of a problem
 with using the asymptotic approximation (e.g. too few units in clusters).
-If a problem is detected, the function will print a message to inform you.</p></dd>
+If a problem is detected, the function will print a message to inform you.
+Note that a message informs the user <strong>only if</strong> the regularized PD matrix is
+substantially different than the original non PD one (i.e. at least one difference
+between the two greated than 1e-8).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -111,18 +114,21 @@ functions (e.g. <code><a href="vcov.fixest.html">vcov.fixest</a></code> or even 
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># VCOV: using a formula giving the name of the clusters</span></span></span>
 <span class="r-in"><span><span class="fu">vcov_cluster</span><span class="op">(</span><span class="va">est</span>, <span class="op">~</span><span class="va">species</span> <span class="op">+</span> <span class="va">clu</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> VCOV type:  Clustered (species &amp; clu) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             (Intercept)         x1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   0.6046144 -0.2634955</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> x1           -0.2634955  0.1235058</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># works as well with a character vector</span></span></span>
 <span class="r-in"><span><span class="fu">vcov_cluster</span><span class="op">(</span><span class="va">est</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"species"</span>, <span class="st">"clu"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> VCOV type:  Clustered (species &amp; clu) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             (Intercept)         x1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   0.6046144 -0.2634955</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> x1           -0.2634955  0.1235058</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># you can also combine the two with '^'</span></span></span>
 <span class="r-in"><span><span class="fu">vcov_cluster</span><span class="op">(</span><span class="va">est</span>, <span class="op">~</span><span class="va">species</span><span class="op">^</span><span class="va">clu</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> VCOV type:  Clustered (combine_fixef_keep_names(species, clu)) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             (Intercept)          x1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)  0.27358801 -0.09893941</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> x1          -0.09893941  0.03852919</span>
@@ -134,7 +140,7 @@ functions (e.g. <code><a href="vcov.fixest.html">vcov.fixest</a></code> or even 
 <span class="r-in"><span><span class="co"># per se: pretty useless...</span></span></span>
 <span class="r-in"><span><span class="fu">vcov_cluster</span><span class="op">(</span><span class="op">~</span><span class="va">species</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ~species</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001a381218a88&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x0000023c66f2dc78&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># ...but VCOV-requests can be used at estimation time:</span></span></span>
 <span class="r-in"><span><span class="co"># it may be more explicit than...</span></span></span>

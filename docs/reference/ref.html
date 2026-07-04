@@ -9,7 +9,7 @@ of the factors. Useful in estimations when you want to set some value of a vecto
 
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.13.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.14.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -203,20 +203,20 @@ value in <code>x</code> (i.e. it's binning).</p></li>
 <span class="r-in"><span><span class="va">b</span> <span class="op">=</span> <span class="fu"><a href="feols.html">feols</a></span><span class="op">(</span><span class="va">Petal.Width</span> <span class="op">~</span> <span class="va">Petal.Length</span> <span class="op">+</span> <span class="fu">ref</span><span class="op">(</span><span class="va">Species</span>, <span class="st">"vers"</span><span class="op">)</span>, <span class="va">iris</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="etable.html">etable</a></span><span class="op">(</span><span class="va">a</span>, <span class="va">b</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                               a                   b</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:                     Petal.Width         Petal.Width</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Constant                       -0.0908 (0.0564)    0.3445* (0.1489)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Petal.Length                 0.2304*** (0.0344)  0.2304*** (0.0344)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Speciesversicolor            0.4354*** (0.1028)                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Speciesvirginica             0.8377*** (0.1453)                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ref(Species,"vers")setosa                       -0.4354*** (0.1028)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ref(Species,"vers")virginica                     0.4023*** (0.0572)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ____________________________ __________________ ___________________</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                                   IID                 IID</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Observations                                150                 150</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> R2                                      0.94557             0.94557</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Adj. R2                                 0.94446             0.94446</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                a                   b</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Dependent Var.:                      Petal.Width         Petal.Width</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Constant                        -0.0908 (0.0564)    0.3445* (0.1489)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Petal.Length                  0.2304*** (0.0344)  0.2304*** (0.0344)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Speciesversicolor             0.4354*** (0.1028)                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Speciesvirginica              0.8377*** (0.1453)                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ref(Species, "vers")setosa                       -0.4354*** (0.1028)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ref(Species, "vers")virginica                     0.4023*** (0.0572)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> _____________________________ __________________ ___________________</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> S.E. type                                    IID                 IID</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Observations                                 150                 150</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> R2                                       0.94557             0.94557</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Adj. R2                                  0.94446             0.94446</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-in"><span></span></span>

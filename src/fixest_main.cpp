@@ -36,7 +36,7 @@ RealVec::RealVec(SEXP x){
     is_int = true;
     p_int = INTEGER(x);
   } else {
-    Rf_error("The current SEXP type is not supported by the RealVec class.");
+    Rcpp::stop("The current SEXP type is not supported by the RealVec class.");
   }
 }
 
@@ -72,7 +72,7 @@ RealMat::RealMat(SEXP x, bool single_obs){
       if(l == 0){
         n = n_tmp;
       } else {
-        if(n != n_tmp) Rf_error("When setting up the class RealMat: The number of observations in the list is not coherent across columns.");
+        if(n != n_tmp) Rcpp::stop("When setting up the class RealMat: The number of observations in the list is not coherent across columns.");
       }
 
       K += K_tmp;
@@ -91,7 +91,7 @@ RealMat::RealMat(SEXP x, bool single_obs){
           if(k + 1 < K_tmp) p_x += n;
         }
       } else {
-        Rf_error("The current SEXP type is not supported by the RealMat class.");
+        Rcpp::stop("The current SEXP type is not supported by the RealMat class.");
       }
     }
 
@@ -130,7 +130,7 @@ RealMat::RealMat(SEXP x, bool single_obs){
         if(k + 1 < K) p_x += n;
       }
     } else {
-      Rf_error("The current SEXP type is not supported by the RealMat class.");
+      Rcpp::stop("The current SEXP type is not supported by the RealMat class.");
     }
   }
 }

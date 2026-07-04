@@ -23,7 +23,7 @@
 #' Note that it should always be the last element, see details. Multiple estimations can be 
 #' performed at once: for multiple dep. vars, wrap them in `c()`: ex `c(y1, y2)`. 
 #' For multiple indep. vars, use the stepwise functions: ex `x1 + csw(x2, x3)`. 
-#' The formula `fml = c(y1, y2) ~ x1 + cw0(x2, x3)` leads to 6 estimation, see details. 
+#' The formula `fml = c(y1, y2) ~ x1 + csw0(x2, x3)` leads to 6 estimation, see details. 
 #' Square brackets starting with a dot can be used to call global variables: 
 #' `y.[i] ~ x.[1:2]` will lead to `y3 ~ x1 + x2` if `i` is equal 
 #' to 3 in the current environment (see details in [`xpd`]).
@@ -228,7 +228,7 @@
 #' Note that if the dependent variable is also on the right-hand-side, it is automatically 
 #' removed from the set of explanatory variable. 
 #' For example, feols(y ~ y + x, base) works as feols(y ~ x, base). 
-#' This is particulary useful to batch multiple estimations with multiple left hand sides.
+#' This is particularly useful to batch multiple estimations with multiple left hand sides.
 #' 
 #' @section Argument sliding:
 #'
@@ -538,15 +538,19 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
       # I can't really mutualize these three lines of code since the verbose
       # needs to be checked before using it, and here it's an internal call
       time_start = proc.time()
-      gt = function(x, nl = TRUE) cat(sfill(x, 20), ": ", -(t0 - (t0<<-proc.time()))[3], 
-                      "s", ifelse(nl, "\n", ""), sep = "")
+      show_timing = function(x, nl = TRUE){
+        cat(sfill(x, 20), ": ", -(t0 - (t0<<-proc.time()))[3], 
+            "s", ifelse(nl, "\n", ""), sep = "")
+      }
       t0 = proc.time()
     }
 
   } else {
     time_start = proc.time()
-    gt = function(x, nl = TRUE) cat(sfill(x, 20), ": ", -(t0 - (t0<<-proc.time()))[3], "s", 
-                    ifelse(nl, "\n", ""), sep = "")
+    show_timing = function(x, nl = TRUE){
+      cat(sfill(x, 20), ": ", -(t0 - (t0<<-proc.time()))[3], "s", 
+          ifelse(nl, "\n", ""), sep = "")
+    }
     t0 = proc.time()
 
     # we use fixest_env for appropriate controls and data handling
@@ -574,8 +578,9 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
       stop("Argument 'env' must be an environment created by a fixest estimation. Currently it is not ", ifelse(r, "an", "a 'fixest'"), " environment.")
     }
 
-    if("try-error" %in% class(env)){
-      stop(format_error_msg(env, "feols"))
+    if(inherits(env, "try-error")){
+      err_msg = format_error_msg(env, "feols")
+      stopi("{err_msg}")
     }
 
     check_arg(only.env, "logical scalar")
@@ -630,7 +635,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
     }
 
     verbose = get("verbose", env)
-    if(verbose >= 2) gt("Setup")
+    if(verbose >= 2) show_timing("Setup")
   }
 
   isFixef = get("isFixef", env)
@@ -1204,18 +1209,19 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
   if(do_iv){
     assign("do_iv", FALSE, env)
     assign("verbose", 0, env)
-
+    
     # Loaded already
     # y: lhs
     # X: linear.mat
-
+    
     iv_lhs = get("iv_lhs", env)
     iv_lhs_names = get("iv_lhs_names", env)
     iv.mat = get("iv.mat", env) # we enforce (before) at least one variable in iv.mat
     K = ncol(iv.mat)
     n_endo = length(iv_lhs)
     lean = get("lean", env)
-
+    iv_main_dep_var = deparse(env$res$fml[[2]], width.cutoff = 100)[1]
+    
     # Simple check that the function is not misused
     pblm = intersect(iv_lhs_names, colnames(X))
     if(length(pblm) > 0){
@@ -1227,12 +1233,18 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
     }
 
     if(isFixef){
+      
+      ####
+      #### IV with fixef ####
+      ####
+      
+      
       # we batch demean first
 
       n_vars_X = if(is.null(ncol(X))) 0 else ncol(X)
 
       if(mem.clean) gc()
-
+      
       if(!is.null(dots$iv_products)){
         # means this is a call from multiple LHS/RHS
 
@@ -1296,9 +1308,11 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
         ZX_demean = cbind(iv.mat_demean, X_demean)
         ZX = cbind(iv.mat, X)
       }
-
+      
+      #
       # First stage(s)
-
+      #
+      
       ZXtZX = iv_products$ZXtZX
       ZXtu  = iv_products$ZXtu
 
@@ -1310,7 +1324,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
         my_res = feols(env = current_env, xwx = ZXtZX, xwy = ZXtu[[i]],
                        X_demean = ZX_demean, y_demean = iv_lhs_demean[[i]],
                        add_fitted_demean = TRUE, iv_call = TRUE, notes = FALSE)
-
+        
         # For the F-stats
         if(n_vars_X == 0 || no_X_Fstat){
           my_res$ssr_no_inst = cpp_ssq(iv_lhs_demean[[i]], weights)
@@ -1320,16 +1334,51 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
                                 xwx = iv_products$XtX, xwy = ZXtu[[i]][-(1:K)])
           my_res$ssr_no_inst = cpp_ssq(fit_no_inst$residuals, weights)
         }
-
+        
         my_res$iv_stage = 1
+        my_res$iv_main_dep_var = iv_main_dep_var
         my_res$iv_inst_names_xpd = colnames(iv.mat)
-
         res_first_stage[[iv_lhs_names[i]]] = my_res
+        
+        # Checking errors
+        error_endo_no_variation = my_res$ssr < 1e-10
+        error_inst_no_expl = abs(my_res$ssr - my_res$ssr_no_inst) < 1e-10
+        if(error_endo_no_variation || error_inst_no_expl){
+          # we keep the information on this first stage => useful for reporting
+          
+          if(error_endo_no_variation){
+            msg = sma("[IV error] The endogenous variable {bq ? iv_lhs_names[i]} is ",
+                      "fully explained by the exogenous variables and the instruments. ",
+                      "Please revise the model.")
+            
+          } else if(error_inst_no_expl){
+            msg = sma("[IV error] The instruments have 0 explanatory power ", 
+                      "for the endogenous variable {bq ? iv_lhs_names[i]}. ",
+                      "Please revise the model.")
+          }
+          
+          
+          if(IN_MULTI){
+            stack_multi_notes(msg)
+            return(fixest_NA_results_IV(env, res_first_stage, msg))
+            
+          } else {
+            mema("[IV error] Problematic 1st stage results:")
+            my_res$is_iv = FALSE
+            print(my_res)
+            
+            stopi("{msg}\nFor information, above are reported the results of the 1st stage estimation.")
+          }
+          
+        }
+        
       }
 
-      if(verbose >= 2) gt("1st stage(s)")
-
+      if(verbose >= 2) show_timing("1st stage(s)")
+      
+      #
       # Second stage
+      #
 
       if(n_endo == 1){
         res_FS = res_first_stage[[1]]
@@ -1385,7 +1434,10 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
       }
 
     } else {
-      # fixef == FALSE
+      
+      ####
+      #### IV without fixef ####
+      ####
 
       is_X = length(X) > 1
       if(!is_X){
@@ -1403,12 +1455,14 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 
       }
 
-      if(verbose >= 2) gt("IV products")
+      if(verbose >= 2) show_timing("IV products")
 
       ZX = if(is_X) cbind(iv.mat, X) else iv.mat
-
+      
+      #
       # First stage(s)
-
+      #
+      
       ZXtZX = iv_products$ZXtZX
       ZXtu  = iv_products$ZXtu
 
@@ -1426,14 +1480,14 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
         }
 
       }
-
+      
       res_first_stage = list()
 
       for(i in 1:n_endo){
         current_env = reshape_env(env, lhs = iv_lhs[[i]], rhs = ZX, fml_iv_endo = iv_lhs_names[i])
         my_res = feols(env = current_env, xwx = ZXtZX, xwy = ZXtu[[i]],
                        iv_call = TRUE, notes = FALSE)
-
+        
         # For the F-stats
         if(is_X){
           fit_no_inst = ols_fit(iv_lhs[[i]], X, w = weights, correct_0w = FALSE,
@@ -1444,17 +1498,53 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
         } else {
           my_res$ssr_no_inst = cpp_ssr_null(iv_lhs[[i]], weights)
         }
-
+        
         my_res$iv_stage = 1
+        my_res$iv_main_dep_var = iv_main_dep_var
         my_res$iv_inst_names_xpd = colnames(iv.mat)
-
         res_first_stage[[iv_lhs_names[i]]] = my_res
+        
+        # Checking errors
+        error_endo_no_variation = my_res$ssr < 1e-10
+        error_inst_no_expl = abs(my_res$ssr - my_res$ssr_no_inst) < 1e-10
+        if(error_endo_no_variation || error_inst_no_expl){
+          # we keep the information on this first stage => useful for reporting
+          
+          if(error_endo_no_variation){
+            msg = sma("[IV error] The endogenous variable {bq ? iv_lhs_names[i]} is ",
+                      "fully explained by the exogenous variables and the instruments. ",
+                      "Please revise the model.")
+            
+          } else if(error_inst_no_expl){
+            msg = sma("[IV error] The instruments have 0 explanatory power ", 
+                      "for the endogenous variable {bq ? iv_lhs_names[i]}. ",
+                      "Please revise the model.")
+          }
+          
+          
+          if(IN_MULTI){
+            stack_multi_notes(msg)
+            return(fixest_NA_results_IV(env, res_first_stage, msg))
+            
+          } else {
+            
+            mema("[IV error] Problematic 1st stage results:")
+            my_res$is_iv = FALSE
+            print(my_res)
+            
+            stopi("{msg}\nFor information, above are reported the results of the 1st stage estimation.")
+          }
+          
+        }
+        
       }
 
-      if(verbose >= 2) gt("1st stage(s)")
-
+      if(verbose >= 2) show_timing("1st stage(s)")
+      
+      #
       # Second stage
-
+      #
+      
       if(n_endo == 1){
         res_FS = res_first_stage[[1]]
         U = as.matrix(res_FS$fitted.values)
@@ -1472,7 +1562,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
       colnames(U) = paste0("fit_", iv_lhs_names)
 
       UX = if(is_X) cbind(U, X) else U
-
+      
       XtX = iv_products$XtX
       Xty = iv_products$Xty
       iv_prod_second = cpp_iv_product_completion(XtX = XtX, Xty = Xty, X = X,
@@ -1492,7 +1582,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
       }
 
       resid_s1 = lapply(res_first_stage, function(x) x$residuals)
-
+      
       current_env = reshape_env(env, rhs = UX)
       res_second_stage = feols(env = current_env, xwx = UXtUX, xwy = UXty,
                                resid_1st_stage = resid_s1, iv_call = TRUE, notes = FALSE)
@@ -1509,7 +1599,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 
     }
 
-    if(verbose >= 2) gt("2nd stage")
+    if(verbose >= 2) show_timing("2nd stage")
 
     #
     # Wu-Hausman endogeneity test
@@ -1546,7 +1636,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
       qui = df1 + 1:df1 + ("(Intercept)" %in% names(res_second_stage$coefficients))
       my_coef = fit_wh$coefficients[qui]
       vcov_wh = fit_wh$xwx_inv[qui, qui] * cpp_ssq(fit_wh$residuals, weights) / df2
-      stat = drop(my_coef %*% solve(vcov_wh) %*% my_coef) / df1
+      stat = drop(my_coef %*% invert_posdef_mat(vcov_wh) %*% my_coef) / df1
       p = pf(stat, df1, df2, lower.tail = FALSE)
     }
 
@@ -1633,6 +1723,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 
     # meta info
     res_second_stage$iv_stage = 2
+    res_second_stage$iv_main_dep_var = iv_main_dep_var
 
     return(res_second_stage)
 
@@ -1788,12 +1879,12 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 
     if(verbose >= 1){
       if(length(fixef_sizes) > 1){
-        gt("Demeaning", FALSE)
+        show_timing("Demeaning", FALSE)
         cat(" (iter: ", paste0(c(tail(res$iterations, 1), 
                                  res$iterations[-length(res$iterations)]), collapse = ", "), ")\n", 
             sep = "")
       } else {
-        gt("Demeaning")
+        show_timing("Demeaning")
       }
     }
   }
@@ -1840,7 +1931,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
           }
         }
 
-        return(fixest_NA_results(env))
+        return(fixest_NA_results(env, msg))
 
       } else {
         stop_up(msg, up = 1 * fromGLM)
@@ -1878,7 +1969,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 
   time_post = proc.time()
   if(verbose >= 1){
-    gt("Estimation")
+    show_timing("Estimation")
   }
 
   if(mem.clean){
@@ -1910,7 +2001,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
       } else {
         mema(msg)
       }
-
+      
     }
 
     res$collin.var = var_collinear
@@ -1919,7 +2010,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
     collin.coef = setNames(rep(NA, length(RHS_names)), RHS_names)
     collin.coef[!est$is_excluded] = res$coefficients
     res$collin.coef = collin.coef
-
+    
     if(isFixef){
       X = X[, !est$is_excluded, drop = FALSE]
     }
@@ -1927,7 +2018,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 
     collin.adj = sum(est$is_excluded)
   }
-
+  
   n = length(y)
   res$nparams = res$nparams - collin.adj - rm_depvar
   df_k = res$nparams
@@ -2020,7 +2111,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
     names(coeftable) = c("Estimate", "Std. Error", "t value",  "Pr(>|t|)")
     row.names(coeftable) = names(coef)
 
-    attr(se, "type") = attr(coeftable, "type") = "IID"
+    attr(se, "vcov_type") = attr(coeftable, "vcov_type") = "IID"
     res$coeftable = coeftable
     res$se = se
   }
@@ -2051,7 +2142,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
     }
   }
 
-  if(verbose >= 3) gt("Post-processing")
+  if(verbose >= 3) show_timing("Post-processing")
 
   class(res) = "fixest"
 
@@ -2086,7 +2177,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 ols_fit = function(y, X, w, correct_0w = FALSE, collin.tol, nthreads, xwx = NULL,
                    xwy = NULL, only.coef = FALSE){
   # No control here -- done before
-
+  
   if(is.null(xwx)){
     info_products = cpp_sparse_products(X, w, y, correct_0w, nthreads)
     xwx = info_products$XtX
@@ -2095,10 +2186,13 @@ ols_fit = function(y, X, w, correct_0w = FALSE, collin.tol, nthreads, xwx = NULL
 
   multicol = FALSE
   info_inv = cpp_cholesky(xwx, collin.tol, nthreads)
-
+  
   if(!is.null(info_inv$all_removed)){
     # Means all variables are collinear! => can happen when using FEs
-    return(list(all_removed = TRUE))
+    # if no regressor: resid = y
+    # (=> this info is useful in IVs)
+    
+    return(list(all_removed = TRUE, residuals = y))
   }
 
   xwx_inv = info_inv$XtX_inv
@@ -2130,13 +2224,14 @@ ols_fit = function(y, X, w, correct_0w = FALSE, collin.tol, nthreads, xwx = NULL
   residuals = y - fitted.values
 
   res = list(xwx = xwx, coefficients = beta, fitted.values = fitted.values,
-         xwx_inv = xwx_inv, multicol = multicol, residuals = residuals,
-         is_excluded = is_excluded, collin.min_norm = info_inv$min_norm)
+             xwx_inv = xwx_inv, multicol = multicol, residuals = residuals,
+             is_excluded = is_excluded, collin.min_norm = info_inv$min_norm)
 
   res
 }
 
-check_conv = function(y, X, fixef_id_list, slope_flag, slope_vars, weights, full = FALSE, fixef_names = NULL){
+check_conv = function(y, X, fixef_id_list, slope_flag, slope_vars, weights, 
+                      full = FALSE, fixef_names = NULL){
   # VERY SLOW!!!!
   # IF THIS FUNCTION LASTS => TO BE PORTED TO C++
 
@@ -2265,10 +2360,11 @@ feols.fit = function(y, X, fixef_df, vcov, offset, split, fsplit, split.keep, sp
     stop("Argument 'env' must be an environment created by a fixest estimation. Currently it is not ", ifelse(r, "an", "a 'fixest'"), " environment.")
   }
 
-  if("try-error" %in% class(env)){
+  if(inherits(env, "try-error")){
     mc = match.call()
     origin = ifelse(is.null(mc[["origin"]]), "feols.fit", mc[["origin"]])
-    stop(format_error_msg(env, origin))
+    err_msg = format_error_msg(env, origin)
+    stopi("{err_msg}")
   }
 
   check_arg(only.env, "logical scalar")
@@ -2493,7 +2589,7 @@ feglm = function(fml, data, family = "gaussian", vcov, offset, weights, subset, 
                          panel.id = panel.id, panel.time.step = panel.time.step,
                          panel.duplicate.method = panel.duplicate.method, 
                          linear.start = start,
-                         etastart=etastart, mustart = mustart, fixef = fixef,
+                         etastart = etastart, mustart = mustart, fixef = fixef,
                          fixef.rm = fixef.rm, fixef.tol = fixef.tol,
                          fixef.iter = fixef.iter, fixef.algo = fixef.algo, demeaner = demeaner,
                          collin.tol = collin.tol,
@@ -2508,10 +2604,11 @@ feglm = function(fml, data, family = "gaussian", vcov, offset, weights, subset, 
     stop("Argument 'env' must be an environment created by a fixest estimation. Currently it is not ", ifelse(r, "an", "a 'fixest'"), " environment.")
   }
 
-  if("try-error" %in% class(env)){
+  if(inherits(env, "try-error")){
     mc = match.call()
     origin = ifelse(is.null(mc[["origin"]]), "feglm", mc[["origin"]])
-    stop(format_error_msg(env, origin))
+    err_msg = format_error_msg(env, origin)
+    stopi("{err_msg}")
   }
 
   check_arg(only.env, "logical scalar")
@@ -2616,8 +2713,9 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
                          warn = warn, verbose = verbose, origin = "feglm.fit",
                          mc_origin = match.call(), call_env = call_env, ...), silent = TRUE)
 
-    if("try-error" %in% class(env)){
-      stop(format_error_msg(env, "feglm.fit"))
+    if(inherits(env, "try-error")){
+      err_msg = format_error_msg(env, "feglm.fit")
+      stopi("{err_msg}")
     }
 
     check_arg(only.env, "logical scalar")
@@ -2816,7 +2914,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
                                glm.tol = 1e-2, fixef.tol = 1e-2, env = env, 
                                lean_internal = TRUE))
 
-      if("try-error" %in% class(model_fe)){
+      if(inherits(model_fe, "try-error")){
         stop("Estimation failed during initialization when getting the fixed-effects, maybe change the values of 'start'? \n", model_fe)
       }
 
@@ -3230,7 +3328,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
     names(coeftable) = ctable_names
     row.names(coeftable) = names(coef)
 
-    attr(se, "type") = attr(coeftable, "type") = "IID"
+    attr(se, "vcov_type") = attr(coeftable, "vcov_type") = "IID"
     res$coeftable = coeftable
     res$se = se
   }
@@ -3363,7 +3461,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
 #' `fml = z~x+y|fixef_1+fixef_2`. Multiple estimations can be performed at once: 
 #' for multiple dep. vars, wrap them in `c()`: ex `c(y1, y2)`. For multiple indep. 
 #' vars, use the stepwise functions: ex `x1 + csw(x2, x3)`. 
-#' The formula `fml = c(y1, y2) ~ x1 + cw0(x2, x3)` leads to 6 estimation, see details. 
+#' The formula `fml = c(y1, y2) ~ x1 + csw0(x2, x3)` leads to 6 estimation, see details. 
 #' Square brackets starting with a dot can be used to call global variables: 
 #' `y.[i] ~ x.[1:2]` will lead to `y3 ~ x1 + x2` if `i` is equal to 3 in 
 #' the current environment (see details in [`xpd`]).
@@ -3547,8 +3645,9 @@ femlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian")
                    only.coef = only.coef, data.save = data.save,
                    env = env, ...), silent = TRUE)
 
-  if("try-error" %in% class(res)){
-    stop(format_error_msg(res, "femlm"))
+  if(inherits(res, "try-error")){
+    err_msg = format_error_msg(res, "femlm")
+    stopi("{err_msg}")
   }
 
   return(res)
@@ -3588,8 +3687,9 @@ fenegbin = function(fml, data, vcov, theta.init, start = 0, fixef, fixef.rm = "p
                    origin_bis = "fenegbin", mc_origin_bis = match.call(),
                    call_env_bis = call_env_bis, env = env, ...), silent = TRUE)
 
-  if("try-error" %in% class(res)){
-    stop(format_error_msg(res, "fenegbin"))
+  if(inherits(res, "try-error")){
+    err_msg = format_error_msg(res, "fenegbin")
+    stopi("{err_msg}")
   }
 
   return(res)
@@ -3633,8 +3733,9 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
                   origin_bis = "fepois", mc_origin_bis = match.call(),
                   call_env_bis = call_env_bis, env = env, ...), silent = TRUE)
 
-  if("try-error" %in% class(res)){
-    stop(format_error_msg(res, "fepois"))
+  if(inherits(res, "try-error")){
+    err_msg = format_error_msg(res, "fepois")
+    stopi("{err_msg}")
   }
 
   return(res)
@@ -3667,7 +3768,7 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
 #' you must use the argment `NL.fml`. Multiple estimations can be performed at once: 
 #' for multiple dep. vars, wrap them in `c()`: ex `c(y1, y2)`. For multiple indep. 
 #' vars, use the stepwise functions: ex `x1 + csw(x2, x3)`. This leads to 6 estimation 
-#' `fml = c(y1, y2) ~ x1 + cw0(x2, x3)`. See details. Square brackets starting with a 
+#' `fml = c(y1, y2) ~ x1 + csw0(x2, x3)`. See details. Square brackets starting with a 
 #' dot can be used to call global variables: `y.[i] ~ x.[1:2]` will lead to 
 #' `y3 ~ x1 + x2` if `i` is equal to 3 in the current environment (see details in [`xpd`]).
 #' @param start Starting values for the coefficients in the linear part (for the non-linear 
@@ -3792,7 +3893,7 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
 #' 
 #' If "none": no observation is removed.
 #' 
-#' Note that whathever the value of this options: the coefficient estimates 
+#' Note that whatever the value of this options: the coefficient estimates 
 #' will remain the same. It only affects inference (the standard-errors).
 #' 
 #' The algorithm is recursive, meaning that, e.g. in the presence of several fixed-effects (FEs),
@@ -3857,7 +3958,7 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
 #' time periods is used (typically if the time variable represents years, it will be 1). 
 #' This method can apply only to integer (or convertible to integer) variables. 
 #' If `"consecutive"`, then the time variable can be of any type: two successive 
-#' time periods represent a lag of 1. If `"witihn.consecutive"` then **within a given id**, 
+#' time periods represent a lag of 1. If `"within.consecutive"` then **within a given id**, 
 #' two successive time periods represent a lag of 1. Finally, if the time variable is numeric, 
 #' you can provide your own numeric time step.
 #' @param panel.duplicate.method If several observations have the same id and time values, 
@@ -4070,10 +4171,11 @@ feNmlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian"
     return(env)
   }
 
-  if("try-error" %in% class(env)){
+  if(inherits(env, "try-error")){
     mc = match.call()
     origin = ifelse(is.null(mc[["origin"]]), "feNmlm", mc[["origin"]])
-    stop(format_error_msg(env, origin))
+    err_msg = format_error_msg(env, origin)
+    stopi("{err_msg}")
   }
 
   verbose = get("verbose", env)
@@ -4234,7 +4336,7 @@ feNmlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian"
                           upper = upper, gradient = gradient, hessian = hessian, 
                           control = opt.control), silent = TRUE)
 
-  if("try-error" %in% class(opt)){
+  if(inherits(opt, "try-error")){
     # We return the coefficients (can be interesting for debugging)
     iter = get("iter", env)
     origin = get("origin", env)
@@ -4242,7 +4344,8 @@ feNmlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian"
                          iter, ". Reason: ", gsub("^[^\n]+\n *(.+\n)", "\\1", opt))
     if(IN_MULTI){
       stack_multi_notes(warning_msg)
-      return(fixest_NA_results(env))
+      return(fixest_NA_results(env, warning_msg))
+      
     } else if(!"coef_evaluated" %in% names(env)){
       # big problem right from the start
       stop(warning_msg)
@@ -4375,7 +4478,7 @@ feNmlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian"
   names(coeftable) = c("Estimate", "Std. Error", "z value",  "Pr(>|z|)")
   row.names(coeftable) = params
 
-  attr(se, "type") = attr(coeftable, "type") = "IID"
+  attr(se, "vcov_type") = attr(coeftable, "vcov_type") = "IID"
 
   mu_both = get_mu(coef, env, final = TRUE)
   mu = mu_both$mu
@@ -4699,6 +4802,7 @@ est_env = function(env, y, X, weights, endo, inst){
 #### Delayed warnings and notes ####
 ####
 
+
 setup_multi_notes = function(){
   # We reset all the notes
   options("fixest_multi_notes" = NULL)
@@ -4819,7 +4923,7 @@ format_error_msg = function(x, origin){
   #   argument => likely I'll need a match.call argument
 
   x = gsub("\n+$", "", x)
-
+  
   if(grepl("^Error (in|:|: in) (fe|fixest|fun|fml_split|panel)[^\n]+\n", x)){
     res = gsub("^Error (in|:|: in) (fe|fixest|fun|fml_split|panel)[^\n]+\n *(.+)", "\\3", x)
   } else if(grepl("[Oo]bject '.+' not found", x) || grepl("memory|cannot allocate", x)) {
@@ -4829,7 +4933,8 @@ format_error_msg = function(x, origin){
                   origin, 
                   ". If you think your call to the function is legitimate, could you report?")
   }
-  res
+  
+  as.character(res)
 }
 
 

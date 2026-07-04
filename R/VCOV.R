@@ -19,7 +19,7 @@
 #' @inheritParams summary.fixest
 #' @inheritParams nobs.fixest
 #'
-#' @param attr Logical, defaults to `FALSE`. Whether to include the attributes describing how 
+#' @param attr Logical, defaults to `TRUE`. Whether to include the attributes describing how 
 #' the VCOV was computed.
 #' @param ... Other arguments to be passed to [`summary.fixest`].
 #'
@@ -49,7 +49,8 @@
 #' 
 #' @references
 #'
-#' Ding, Peng, 2021, "The Frisch–Waugh–Lovell theorem for standard errors." Statistics & Probability Letters 168. 
+#' Ding, Peng, 2021, "The Frisch–Waugh–Lovell theorem for standard errors." 
+#' Statistics & Probability Letters 168. 
 #'
 #' @examples
 #'
@@ -204,8 +205,8 @@
 #'
 #'
 #'
-vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr = FALSE, 
-                       forceCovariance = FALSE, keepBounded = FALSE, 
+vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr = TRUE,
+                       forceCovariance = FALSE, keepBounded = FALSE,
                        nthreads = getFixest_nthreads(), vcov_fix = TRUE, ...){
   # computes the clustered vcov
 
@@ -390,7 +391,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
           .message = paste0("If argument 'vcov' is to be a function, it should return a square numeric matrix of the same dimension as the number of coefficients (here ", n_coef, ")."))
 
     # We add the type of the matrix
-    attr(vcov, "type") = vcov_name
+    attr(vcov, "vcov_type") = vcov_name
     attr(vcov, "df.K") = object$nparams
 
     return(vcov)
@@ -406,7 +407,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
     n_coef = length(object$coefficients)
     check_value(vcov, "square matrix nrow(value)", .value = n_coef)
 
-    attr(vcov, "type") = if(is.null(user_vcov_name)) "Custom" else user_vcov_name
+    attr(vcov, "vcov_type") = if(is.null(user_vcov_name)) "Custom" else user_vcov_name
 
     attr(vcov, "df.K") = object$nparams
 
@@ -416,6 +417,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
   extra_args = NULL
   if(inherits(vcov, "fixest_vcov_request")){
     if(!is.null(vcov$ssc)) ssc = vcov$ssc
+    if(!is.null(vcov$vcov_fix)) vcov_fix = vcov$vcov_fix
     var_names_all = vcov$var_names_all
     var_values_all = vcov$vcov_vars
     extra_args = vcov$extra_args
@@ -747,8 +749,8 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 
   # ssc related => we accept NULL
   # we check ssc since it can be used by the funs
-  if(missnull(ssc)) ssc = getFixest_ssc()
-  check_arg(ssc, "class(ssc.type)", 
+  if(missnull(ssc)) ssc = getFixest_ssc(vcov_name)
+  check_arg(ssc, "class(ssc_type)", 
             .message = "The argument 'ssc' must be an object created by the function ssc().")
 
 
@@ -807,7 +809,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
     }
 
     if(IS_NA_VCOV){
-      attr(bread, "type") = "NA (not-available)"
+      attr(bread, "vcov_type") = "NA (not-available)"
 
       if(is_attr){
         attr(bread, "df.K") = object$nparams
@@ -830,7 +832,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
     bread = VCOV_raw_forced
 
   }
-
+  
   ####
   #### ... vcov ####
   ####
@@ -873,30 +875,45 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
   ####
   #### ... vcov attributes ####
   ####
-
-  # After discussing, we decided that since this test is relatively cheap, we will do it every time. 
-  # We will warn even if `vcov_fix == FALSE`.
+  
+  # After discussing, we decided that since this test is relatively cheap, we will do it every time.
   eigenvalues = eigen(vcov_mat, symmetric = TRUE, only.values = TRUE)$values
-  if (any(eigenvalues < 1e-12)) {
-    # We 'fix' it
-    if (vcov_fix) {
-      all_attr = attributes(vcov_mat)
-      vcov_mat = mat_posdef_fix(vcov_mat)
-      is_complex = isTRUE(attr(vcov_mat, "is_complex"))
-      attributes(vcov_mat) = all_attr
-
-      if (is_complex) {
-        # we should never have a complex VCOV, but just in case...
-        warning("The VCOV matrix could not be fixed since its eigenvalues were complex. The complex standard-errors are reported for information purposes.", call. = FALSE)
-        vcov_mat = as.complex(vcov_mat)
-      } else if(!isFALSE(dots$warn)){
-        warning("The VCOV matrix is not positive semi-definite and was 'fixed' (see ?vcov).", 
-                call. = FALSE)
-      } 
-    } else if(!isFALSE(dots$warn)){
-      warning("The VCOV matrix is not positive semi-definite and was 'fixed' (see ?vcov).", 
-              call. = FALSE)
+  if(any(eigenvalues <= 0)){
+    # We 'fix' it by regularizing the VCOV
+    # NOTA: we ALWAYS fix even if vcov_fix = FALSE
+    #       => we only report a warning if the changes are "noticeable" 
+    
+    all_attr = attributes(vcov_mat)
+    fixed_vcov = mat_posdef_fix(vcov_mat)
+    
+    noticeable_change = max(abs(vcov_mat - fixed_vcov)) > 1e-8
+    
+    if(vcov_fix){
+      # we always turn it into positive definite even if the change is not noticeable
+      # because other software down the road may expect PD
+      is_complex = isTRUE(attr(fixed_vcov, "is_complex"))
+      attributes(fixed_vcov) = all_attr
+      vcov_mat = fixed_vcov
     }
+    
+    if(noticeable_change){
+      if(vcov_fix){
+        if(is_complex){
+          # we should never have a complex VCOV, but just in case...
+          warning("The VCOV matrix could not be fixed since its eigenvalues were complex. The complex standard-errors are reported for information purposes.", call. = FALSE)
+          vcov_mat = as.complex(vcov_mat)
+          
+        } else if(!isFALSE(dots$warn)){
+          warning("The VCOV matrix is not positive definite and was 'fixed' (see ?vcov).", 
+                  call. = FALSE)
+          
+        }
+      } else if(!isFALSE(dots$warn)){
+        warning("The VCOV matrix is not positive definite (see ?vcov).", call. = FALSE)
+      }
+    }
+    
+    
   }
 
   if(is_attr){
@@ -912,14 +929,16 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
       attr(vcov_mat, "df.t") = max(n - K, 1)
     }
 
-    if(is.null(attr(vcov_mat, "type", exact = TRUE))){
-      type_info = attr(vcov_mat, "type_info")
-      attr(vcov_mat, "type") = paste0(vcov_select$vcov_label, type_info)
-      attr(vcov_mat, "type_info") = NULL
+    if(is.null(attr(vcov_mat, "vcov_type", exact = TRUE))){
+      vcov_type_info = attr(vcov_mat, "vcov_type_info")
+      attr(vcov_mat, "vcov_type") = paste0(vcov_select$vcov_label, vcov_type_info)
+      attr(vcov_mat, "vcov_type_info") = NULL
     }
     
     attr(vcov_mat, "ssc") = ssc
     attr(vcov_mat, "df.K") = K
+    
+    class(vcov_mat) = "fixest_vcov"
   } else {
     # We clean the attributes
     all_attr = names(attributes(vcov_mat))
@@ -954,15 +973,18 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 #' the number of variables plus the number of fixed-effects. Finally, if `"nonnested"`, then 
 #' the number of parameters is equal to the number of variables plus the number of 
 #' fixed-effects that *are not* nested in the clusters used to cluster the standard-errors.
+#' 
+#' When the standard-errors are not clustered, `"nonnested"` is equivalent to `"full"`.
 #' @param K.exact Logical, default is `FALSE`. If there are 2 or more fixed-effects, 
-#' these fixed-effects they can be irregular, meaning they can provide the same information. 
+#' these fixed-effects can be irregular, meaning they can provide the same information. 
 #' If so, the "real" number of parameters should be lower than the total number of 
 #' fixed-effects. If `K.exact = TRUE`, then [`fixef.fixest`] is first run to 
 #' determine the exact number of parameters among the fixed-effects. Mostly, panels of 
 #' the type individual-firm require `K.exact = TRUE` (but it adds computational costs).
 #' @param G.adj Logical scalar, default is `TRUE`. How to make the small sample correction 
-#' when clustering the standard-errors? If `TRUE` a `G/(G-1)` correction is performed with `G` 
-#' the number of cluster values.
+#' with cluster-like standard-errors? If `TRUE` a `G/(G-1)` correction is performed with `G` 
+#' the number of cluster values. In the case of Newey-West or Driscoll-Kraay, `G` is the number
+#' of time periods.
 #' @param G.df Either "conventional" or "min" (default). Only relevant when the 
 #' variance-covariance matrix is two-way clustered (or higher). It governs how the small 
 #' sample adjustment for the clusters is to be performed. \[Sorry for the jargon that follows.\] 
@@ -970,12 +992,15 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 #' smallest G_i. If `G.df="conventional"` then the i-th "sandwich" matrix is adjusted 
 #' with G_i/(G_i-1) with G_i the number of unique clusters.
 #' @param t.df Either "conventional", "min" (default) or an integer scalar. Only relevant when 
-#' the variance-covariance matrix is clustered. It governs how the p-values should be computed. 
+#' the variance-covariance matrix is cluster-like. It governs how the p-values should be computed. 
 #' By default, the degrees of freedom of the Student t distribution is equal to the minimum size 
 #' of the clusters with which the VCOV has been clustered minus one. If `t.df="conventional"`, 
 #' then the degrees of freedom of the Student t distribution is equal to the number of 
 #' observations minus the number of estimated variables. You can also pass a number to 
 #' manually specify the DoF of the t-distribution.
+#' 
+#' In the case of Newey-West or Driscoll-Kraay, when `t.df="min"`, this leads to using
+#' the number of time periods minus one for the degrees of freedom of the t distribution.
 #' @param ... Only used internally (to catch deprecated parameters).
 #'
 #' @details
@@ -985,7 +1010,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 #' replicate standard-errors from other software.
 #'
 #' @return
-#' It returns a `ssc.type` object.
+#' It returns a `ssc_type` object.
 #'
 #' @author
 #' Laurent Berge
@@ -1069,11 +1094,11 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 #' # To permanently set the default ssc:
 #' #
 #'
-#' # eg no small sample adjustment:
-#' setFixest_ssc(ssc(K.adj = FALSE))
+#' # eg no small sample adjustment for iid VCOV:
+#' setFixest_ssc(ssc(K.adj = FALSE), "iid")
 #'
-#' # Factory default
-#' setFixest_ssc()
+#' # Restoring the default for all vcovs
+#' setFixest_ssc(vcov_names = "all")
 #'
 ssc = function(K.adj = TRUE, K.fixef = "nonnested", K.exact = FALSE,
                G.adj = TRUE, G.df = "min", t.df = "min", ...){
@@ -1087,11 +1112,10 @@ ssc = function(K.adj = TRUE, K.fixef = "nonnested", K.exact = FALSE,
   check_set_arg(K.adj, "loose logical scalar conv")
   check_set_arg(K.fixef, "match(none, full, all, nonnested, nested)", 
                 .message = "The argument `K.fixef` must be equal to either: i) none, ii) full, or iii) nonnested. Partial matching applies.")
+  
   if(identical(K.fixef, "all")){
     K.fixef = "full"
-  }
-  
-  if(identical(K.fixef, "nested")){
+  } else if(identical(K.fixef, "nested")){
     K.fixef = "nonnested"
   }
   
@@ -1101,14 +1125,17 @@ ssc = function(K.adj = TRUE, K.fixef = "nonnested", K.exact = FALSE,
 
   res = list(K.adj = K.adj, K.fixef = K.fixef, G.adj = G.adj, G.df = G.df,
              t.df = t.df, K.exact = K.exact)
-  class(res) = "ssc.type"
+  
+  class(res) = "ssc_type"
 
   res
 }
 
+
 ####
 #### User-level ####
 ####
+
 
 #' Heteroskedasticity-Robust VCOV
 #'
@@ -1118,14 +1145,29 @@ ssc = function(K.adj = TRUE, K.fixef = "nonnested", K.exact = FALSE,
 #' @inheritParams hatvalues.fixest
 #'
 #' @param x A `fixest` object.
-#' @param type A string scalar. Either "HC1"/"HC2"/"HC3"
+#' @param type A string scalar equal to "HC1" (default), "HC2" or "HC3". 
+#' Note that the case is ignored.
 #' @param ssc An object returned by the function [`ssc`]. It specifies how to perform the small 
-#' sample correction.
+#' sample correction. Note that this argument is only used in `"HC1"` which accepts 
+#' ssc arguments starting with `"K"`. In that case when `ssc(K.adj = FALSE)`, 
+#' it leads to "HC0". The argument `ssc` is ignored for `HC2` and `HC2` VCOVs.
 #'
+#' @section Small sample correction:
+#' A custom small sample correction can be applied to the HC1 VCOV using the [`ssc`] argument 
+#' and function. By default an adjustment of N/(N-K) is applied to the VCOV, with N the number of
+#' observations and K the number of parameters. If `ssc(K.adj = FALSE)`, meaning that there is 
+#' no adjustment, this leads to the HC0 VCOV. Finally ssc's arguemnts
+#' K.fixef and K.exact determine how to account for the parameters associated to the fixed-effects 
+#' (if the estimation contains fixed-effects).
+#' 
 #' @return
 #' If the first argument is a `fixest` object, then a VCOV is returned (i.e. a symmetric matrix).
 #'
-#' If the first argument is not a `fixest` object, then a) implicitly the arguments are shifted to the left (i.e. `vcov_hetero("HC3")` is equivalent to `vcov_hetero(type = "HC3")` and b) a VCOV-*request* is returned and NOT a VCOV. That VCOV-request can then be used in the argument `vcov` of various `fixest` functions (e.g. [`vcov.fixest`] or even in the estimation calls).
+#' If the first argument is not a `fixest` object, then a) implicitly the arguments are shifted
+#'  to the left (i.e. `vcov_hetero("HC3")` is equivalent to `vcov_hetero(type = "HC3")` and b) 
+#' a VCOV-*request* is returned and NOT a VCOV. That VCOV-request can then 
+#' be used in the argument `vcov` of various `fixest` functions (e.g. [`vcov.fixest`] 
+#' or even in the estimation calls).
 #'
 #' @author
 #' Laurent Berge and Kyle Butts
@@ -1141,8 +1183,9 @@ ssc = function(K.adj = TRUE, K.fixef = "nonnested", K.exact = FALSE,
 #' est = feols(y ~ x1 | species, base)
 #'
 #' vcov_hetero(est, "hc1")
-#' vcov_hetero(est, "hc2", ssc = ssc(K.adj = FALSE))
-#' vcov_hetero(est, "hc3", ssc = ssc(K.adj = FALSE))
+#' vcov_hetero(est, "hc1", ssc = ssc(K.adj = FALSE))
+#' vcov_hetero(est, "hc2")
+#' vcov_hetero(est, "hc3")
 #'
 #' # Using approximate hatvalues
 #' vcov_hetero(est, "hc3", exact = FALSE, boot.size = 500)
@@ -1160,14 +1203,14 @@ vcov_hetero = function(x, type = "hc1", exact = TRUE, boot.size = NULL,
   slide_args(x, type = type, exact = exact, boot.size = boot.size, ssc = ssc)
   IS_REQUEST = is.null(x)
 
-  check_value(ssc, "NULL class(ssc.type)", .message = "The argument 'ssc' must be an object created by the function ssc().")
+  check_value(ssc, "NULL class(ssc_type)", .message = "The argument 'ssc' must be an object created by the function ssc().")
 
 
   # We create the request
   use_request = IS_REQUEST
 
   extra_args = list(exact = exact, boot.size = boot.size)
-  vcov_request = list(vcov = type, ssc = ssc, extra_args = extra_args)
+  vcov_request = list(vcov = type, ssc = ssc, vcov_fix = vcov_fix, extra_args = extra_args)
   class(vcov_request) = "fixest_vcov_request"
 
 
@@ -1193,7 +1236,7 @@ vcov_hetero = function(x, type = "hc1", exact = TRUE, boot.size = NULL,
 #' values of the clusters. Note that in cases i) and ii) the variables are fetched directly in the 
 #' data set used for the estimation.
 #' @param ssc An object returned by the function [`ssc`]. It specifies how to perform the small 
-#' sample correction.
+#' sample correction. These VCOVs accept all the arguments of [`ssc`].
 #'
 #' @return
 #' If the first argument is a `fixest` object, then a VCOV is returned (i.e. a symmetric matrix).
@@ -1255,7 +1298,7 @@ vcov_cluster = function(x, cluster = NULL, ssc = NULL, vcov_fix = TRUE){
   slide_args(x, cluster = cluster, ssc = ssc)
   IS_REQUEST = is.null(x)
 
-  check_value(ssc, "NULL class(ssc.type)", .message = "The argument 'ssc' must be an object created by the function ssc().")
+  check_value(ssc, "NULL class(ssc_type)", .message = "The argument 'ssc' must be an object created by the function ssc().")
 
 
   # We create the request
@@ -1320,9 +1363,9 @@ vcov_cluster = function(x, cluster = NULL, ssc = NULL, vcov_fix = TRUE){
 
   }
 
-  if(use_request || !is.null(ssc)){
+  if(use_request || !is.null(ssc) || isFALSE(vcov_fix)){
     vcov_request = list(vcov = vcov, vcov_vars = vcov_vars,
-              var_names_all = var_names_all, ssc = ssc)
+              var_names_all = var_names_all, ssc = ssc, vcov_fix = vcov_fix)
     class(vcov_request) = "fixest_vcov_request"
 
   } else {
@@ -1366,6 +1409,31 @@ vcov_cluster = function(x, cluster = NULL, ssc = NULL, vcov_fix = TRUE){
 #' `n_t^0.25` with `n_t` the number of time periods (as of Newey and West 1987) for panel 
 #' Newey-West and Driscoll-Kraay. The default for the time series Newey-West is computed via 
 #' [`bwNeweyWest`][sandwich::NeweyWest] which implements the Newey and West 1994 method.
+#' @param ssc An object of class `ssc_type` obtained with the function [`ssc`]. 
+#' It specifies how to perform the small sample correction. See details.
+#' 
+#' By default the VCOV is multiplied by (N - 1) / (N - K) * T / (T - 1), with N the number of 
+#' observations, K the number of parameters and T the number of time periods. 
+#' To remove the (N - 1) / (N - K) adjustment, use `ssc=ssc(K.adj = FALSE)`.
+#' To remove the T / (T - 1) adjustment, use `ssc=ssc(G.adj = FALSE)`.
+#' To remove both, use `ssc=ssc(K.adj = FALSE, G.adj = FALSE)`.
+#' 
+#' 
+#' @section Small sample correction:
+#' By default, for the Newey-West and the Driscoll-Kraay VCOVs, the VCOV is multiplied 
+#' by (N - 1) / (N - K) * T / (T - 1), with N the number of observations, K the number of
+#' parameters and T the number of time periods. 
+#' 
+#' You can modify these adjustments with the argument `ssc`.
+#' To remove the (N - 1) / (N - K) adjustment, use `ssc=ssc(K.adj = FALSE)`.
+#' To remove the T / (T - 1) adjustment, use `ssc=ssc(G.adj = FALSE)`.
+#' To remove both, use `ssc=ssc(K.adj = FALSE, G.adj = FALSE)`.
+#' 
+#' If the estimation contains fixed effects, you can modify how the number of parameters is computed
+#' with the arguments `K.fixef` and `K.exact` (see [`ssc`] for details).
+#' 
+#' To compute the pvalue, the degrees of freedom of the t-stat is the number of time periods 
+#' if `ssc=ssc(t.df = "min")` (default). To use N - K instead use `ssc=ssc(t.df="conventional")`.
 #'
 #' @section Lag selection:
 #'
@@ -1440,7 +1508,7 @@ vcov_DK = function(x, time = NULL, lag = NULL, ssc = NULL, vcov_fix = TRUE){
   IS_REQUEST = is.null(x)
 
   check_value(lag, "NULL integer scalar GE{1}")
-  check_value(ssc, "NULL class(ssc.type)", 
+  check_value(ssc, "NULL class(ssc_type)", 
               .message = "The argument 'ssc' must be an object created by the function ssc().")
 
   # time
@@ -1455,9 +1523,9 @@ vcov_DK = function(x, time = NULL, lag = NULL, ssc = NULL, vcov_fix = TRUE){
   # recreating the call
   vcov = .xpd(lhs = "dk", rhs = time)
 
-  if(!is.null(lag) || !is.null(ssc)){
+  if(!is.null(lag) || !is.null(ssc) || isFALSE(vcov_fix)){
     extra_args = list(lag = lag)
-    vcov_request = list(vcov = vcov, ssc = ssc, extra_args = extra_args)
+    vcov_request = list(vcov = vcov, ssc = ssc, extra_args = extra_args, vcov_fix = vcov_fix)
     class(vcov_request) = "fixest_vcov_request"
   } else {
     # Everything can fit into a vcov formula
@@ -1486,7 +1554,7 @@ vcov_NW = function(x, unit = NULL, time = NULL, lag = NULL, ssc = NULL, vcov_fix
   IS_REQUEST = is.null(x)
 
   check_value(lag, "NULL integer scalar GE{1}")
-  check_value(ssc, "NULL class(ssc.type)", 
+  check_value(ssc, "NULL class(ssc_type)", 
               .message = "The argument 'ssc' must be an object created by the function ssc().")
 
   # unit
@@ -1510,9 +1578,9 @@ vcov_NW = function(x, unit = NULL, time = NULL, lag = NULL, ssc = NULL, vcov_fix
   # recreating the call
   vcov = .xpd(lhs = "nw", rhs = c(unit, time))
 
-  if(!is.null(lag) || !is.null(ssc)){
+  if(!is.null(lag) || !is.null(ssc) || isFALSE(vcov_fix)){
     extra_args = list(lag = lag)
-    vcov_request = list(vcov = vcov, ssc = ssc, extra_args = extra_args)
+    vcov_request = list(vcov = vcov, ssc = ssc, extra_args = extra_args, vcov_fix = vcov_fix)
     class(vcov_request) = "fixest_vcov_request"
   } else {
     # Everything can fit into a vcov formula
@@ -1563,6 +1631,20 @@ vcov_NW = function(x, unit = NULL, time = NULL, lag = NULL, ssc = NULL, vcov_fix
 #' @param distance How to compute the distance between points. It can be equal to "triangular" 
 #' (default) or "spherical". The latter case corresponds to the great circle distance and is more 
 #' precise than triangular but is a bit more intensive computationally.
+#' @param ssc An object of class `ssc_type` obtained with the function [`ssc`]. 
+#' It specifies how to perform the small sample correction. 
+#' 
+#' By default the VCOV is multiplied by (N - 1) / (N - K) with N the number of 
+#' observations and K the number of parameters. 
+#' To remove this adjustment, use `ssc=ssc(K.adj = FALSE)`.
+#' 
+#' @section Small sample correction:
+#' By default the VCOV is multiplied by (N - 1) / (N - K) with N the number of 
+#' observations and K the number of parameters. 
+#' To remove this adjustment, use `ssc=ssc(K.adj = FALSE)`.
+#' 
+#' If the estimation contains fixed effects, you can modify how the number of parameters is computed
+#' with the arguments `K.fixef` and `K.exact` (see [`ssc`] for details).
 #'
 #' @return
 #' If the first argument is a `fixest` object, then a VCOV is returned (i.e. a symmetric matrix).
@@ -1610,7 +1692,7 @@ vcov_conley = function(x, lat = NULL, lon = NULL, cutoff = NULL, pixel = 0,
              distance = distance, ssc = ssc)
   IS_REQUEST = is.null(x)
 
-  check_value(ssc, "NULL class(ssc.type)", 
+  check_value(ssc, "NULL class(ssc_type)", 
               .message = "The argument 'ssc' must be an object created by the function ssc().")
 
   # lat
@@ -1646,7 +1728,7 @@ vcov_conley = function(x, lat = NULL, lon = NULL, cutoff = NULL, pixel = 0,
   vcov = .xpd(lhs = "conley", rhs = c(lat, lon))
 
   extra_args = list(cutoff = cutoff, pixel = pixel, distance = distance)
-  vcov_request = list(vcov = vcov, ssc = ssc, extra_args = extra_args)
+  vcov_request = list(vcov = vcov, ssc = ssc, vcov_fix = vcov_fix, extra_args = extra_args)
   class(vcov_request) = "fixest_vcov_request"
 
   if(IS_REQUEST){
@@ -1664,6 +1746,12 @@ vcov_conley = function(x, lat = NULL, lon = NULL, cutoff = NULL, pixel = 0,
 ####
 
 
+ssc_available = function(K = FALSE, G = FALSE){
+  res = c()
+  if(K) res = "K"
+  if(G) res = c(res, "G")
+  res
+}
 
 vcov_setup = function(){
 
@@ -1674,6 +1762,8 @@ vcov_setup = function(){
   vcov_iid_setup = list(name = c("iid", "normal", "standard"), 
                         fun_name = "vcov_iid_internal", 
                         ssc_allow_nonnested = TRUE,
+                        ssc_default = ssc(K.adj = TRUE, K.fixef = "full"),
+                        ssc_available = ssc_available(K = TRUE),
                         vcov_label = "IID")
 
   #
@@ -1682,6 +1772,8 @@ vcov_setup = function(){
 
   vcov_hetero_setup = list(name = c("hetero", "white", "hc1"), 
                            fun_name = "vcov_hetero_internal", 
+                           ssc_default = ssc(K.adj = TRUE, K.fixef = "full"),
+                           ssc_available = ssc_available(K = TRUE),
                            vcov_label = "Heteroskedasticity-robust")
   
   vcov_hc2_setup = list(name = "hc2", 
@@ -1699,6 +1791,7 @@ vcov_setup = function(){
   vcov_clust_setup = list(name = c("cluster", ""), 
                           fun_name = "vcov_cluster_internal", 
                           ssc_allow_nonnested = TRUE,
+                          ssc_available = ssc_available(K = TRUE, G = TRUE),
                           vcov_label = "Clustered")
   
   vcov_clust_setup$vars = list(
@@ -1725,6 +1818,7 @@ vcov_setup = function(){
   vcov_twoway_setup = list(name = "twoway", 
                            fun_name = "vcov_cluster_internal", 
                            ssc_allow_nonnested = TRUE,
+                           ssc_available = ssc_available(K = TRUE, G = TRUE),
                            vcov_label = "Clustered")
   vcov_twoway_setup$vars = list(cl1 = cl1, cl2 = cl2)
   vcov_twoway_setup$patterns = c("", "cl1 + cl2")
@@ -1732,6 +1826,7 @@ vcov_setup = function(){
   vcov_threeway_setup = list(name = "threeway", 
                              fun_name = "vcov_cluster_internal", 
                              ssc_allow_nonnested = TRUE,
+                             ssc_available = ssc_available(K = TRUE, G = TRUE),
                              vcov_label = "Clustered")
   vcov_threeway_setup$vars = list(cl1 = cl1, cl2 = cl2, cl3 = cl3)
   vcov_threeway_setup$patterns = c("", "cl1 + cl2 + cl3")
@@ -1739,6 +1834,7 @@ vcov_setup = function(){
   vcov_fourway_setup = list(name = "fourway", 
                             fun_name = "vcov_cluster_internal", 
                             ssc_allow_nonnested = TRUE,
+                            ssc_available = ssc_available(K = TRUE, G = TRUE),
                             vcov_label = "Clustered")
   vcov_fourway_setup$vars = list(cl1 = cl1, cl2 = cl2, cl3 = cl3, cl4 = cl4)
   vcov_fourway_setup$patterns = c("", "cl1 + cl2 + cl3 + cl4")
@@ -1756,6 +1852,8 @@ vcov_setup = function(){
 
   vcov_newey_west_setup = list(name = c("NW", "newey_west"),
                                fun_name = "vcov_newey_west_internal",
+                               ssc_default = ssc(K.adj = TRUE, K.fixef = "full"),
+                               ssc_available = ssc_available(K = TRUE),
                                vcov_label = "Newey-West")
 
   vcov_newey_west_setup$vars = list(unit = unit, time = time)
@@ -1770,6 +1868,8 @@ vcov_setup = function(){
 
   vcov_driscoll_kraay_setup = list(name = c("DK", "driscoll_kraay"),
                                    fun_name = "vcov_driscoll_kraay_internal",
+                                   ssc_default = ssc(K.adj = TRUE, K.fixef = "full"),
+                                   ssc_available = ssc_available(K = TRUE),
                                    vcov_label = "Driscoll-Kraay")
 
   vcov_driscoll_kraay_setup$vars = list(time = time)
@@ -1795,6 +1895,8 @@ vcov_setup = function(){
 
   vcov_conley_setup = list(name = "conley", 
                            fun_name = "vcov_conley_internal", 
+                           ssc_default = ssc(K.adj = TRUE, K.fixef = "full"),
+                           ssc_available = ssc_available(K = TRUE),
                            vcov_label = "Conley")
   vcov_conley_setup$vars = list(lat = lat, lng = lng)
   vcov_conley_setup$arg_main = c("cutoff", "pixel", "distance")
@@ -1808,6 +1910,8 @@ vcov_setup = function(){
 
   vcov_conley_hac_setup = list(name = c("conley_hac", "hac_conley"), 
                                fun_name = "vcov_conley_hac_internal", 
+                               ssc_default = ssc(K.adj = TRUE, K.fixef = "full"),
+                               ssc_available = ssc_available(K = TRUE),
                                vcov_label = "Conley-HAC")
   # The variables (already defined earlier)
   unit_conleyHAC = unit
@@ -1905,6 +2009,8 @@ vcov_hetero_internal = function(bread, scores, sandwich, nthreads, ssc, n, K, ..
     
   }
   
+  # ssc must be provided excplicitly by the user
+  # default: K.adj = TRUE
   if(ssc$K.adj){
     adj = n / (n - K)
     vcov_mat = vcov_mat * adj
@@ -1919,8 +2025,8 @@ vcov_hc2_hc3_internal = function(bread, scores, sandwich, nthreads, vcov_name,
   
   # we don't allow ssc changes => HC2/HC3 **are** SSCs
   
-  # For HC2/ HC3, need to divide scores by the hatvalues
-  if (isTRUE(object$iv)) {
+  # For HC2/HC3, need to divide scores by the hatvalues
+  if (isTRUE(object$is_iv)) {
     stopi("The VCOV type {bq ? vcov_name} is not defined in IV estimations.")
   }
   
@@ -1930,6 +2036,7 @@ vcov_hc2_hc3_internal = function(bread, scores, sandwich, nthreads, vcov_name,
   if (length(problem_idx) > 0L) {
 
     stopi("When calculating the diagonals of the projection matrix, {n ? problem_idx} value{$s, were} found to equal 1. This is most likely due to dummy variables/fixed-effects with only 1 observation, so that removing that observation would make that coefficient non-estimable. \nThe problematic row{$s, are}: {enum ? problem_idx}.")
+    
   }
 
   if (vcov_name == "hc2") {
@@ -2024,9 +2131,9 @@ vcov_cluster_internal = function(bread, scores, vars, ssc, object, n, K,
 
   var_names_all = var_names_all[nchar(var_names_all) > 0]
   if(length(var_names_all) > 0){
-    attr(vcov_mat, "type_info") = sma(" ({' & 'c ? var_names_all})")
+    attr(vcov_mat, "vcov_type_info") = sma(" ({' & 'c ? var_names_all})")
   } else {
-    attr(vcov_mat, "type") = switch(nway,
+    attr(vcov_mat, "vcov_type") = switch(nway,
                                     "1" = "Clustered",
                                     "2" = "Two-way",
                                     "3" = "Three-way",
@@ -2120,20 +2227,28 @@ vcov_newey_west_internal = function(bread, scores, vars, ssc, n, K,
   } else {
     vcov_mat = meat
   }
-
+  
+  # the adjustment
+  # NOTE that if lag = 0 and we're in a pure time series (ie T = n) => we end up with 
+  # adj = (n - 1)/(n - k) * T / (T - 1) = (n - 1)/(n - k) * n / (n - 1) = n / (n - k)
+  # => equivalent to HC1
+  adj = 1
   if(ssc$G.adj){
-    vcov_mat = vcov_mat * n_time / (n_time - 1)
+    adj = n_time / (n_time - 1)
   }
   
   if(ssc$K.adj){
-    adj = (n - 1) / (n - K)
+    adj = adj * (n - 1) / (n - K)
+  }
+  
+  if(adj != 1){
     vcov_mat = vcov_mat * adj
   }
 
   attr(vcov_mat, "G") = n_time
   attr(vcov_mat, "min_cluster_size") = n_time
 
-  attr(vcov_mat, "type_info") = paste0(" (L=", lag, ")")
+  attr(vcov_mat, "vcov_type_info") = paste0(" (L=", lag, ")")
 
   vcov_mat
 }
@@ -2168,20 +2283,25 @@ vcov_driscoll_kraay_internal = function(bread, scores, vars, ssc, n, K,
   } else {
     vcov_mat = meat
   }
-
+  
+  # adjustment
+  adj = 1
   if(ssc$G.adj){
-    vcov_mat = vcov_mat * n_time / (n_time - 1)
+    adj = n_time / (n_time - 1)
   }
   
   if(ssc$K.adj){
-    adj = (n - 1) / (n - K)
+    adj = adj * (n - 1) / (n - K)
+  }
+  
+  if(adj != 1){
     vcov_mat = vcov_mat * adj
   }
 
   attr(vcov_mat, "G") = n_time
   attr(vcov_mat, "min_cluster_size") = n_time
 
-  attr(vcov_mat, "type_info") = paste0(" (L=", lag, ")")
+  attr(vcov_mat, "vcov_type_info") = paste0(" (L=", lag, ")")
 
   vcov_mat
 }
@@ -2281,13 +2401,13 @@ vcov_conley_internal = function(bread, scores, vars, ssc, n, K, sandwich, nthrea
   }
   
   if(ssc$K.adj){
-    adj = (n - 1) / (n - K)
+    adj = n / (n - K)
     vcov_mat = vcov_mat * adj
   }
 
   scale = if(metric == "km") 1 else 1 / 1.60934
 
-  attr(vcov_mat, "type_info") = paste0(" (", cutoff * scale, metric, ")")
+  attr(vcov_mat, "vcov_type_info") = paste0(" (", cutoff * scale, metric, ")")
 
   vcov_mat
 }
@@ -2748,28 +2868,227 @@ is_function_in_it = function(x){
 ####
 
 
-
-#' @rdname ssc
-#'
-#' @param ssc.type An object of class `ssc.type` obtained with the function [`ssc`].
-setFixest_ssc = function(ssc.type = ssc()){
-
-  if(!"ssc.type" %in% class(ssc.type)){
-    stop("The argument 'ssc' must be an object created by the function ssc().")
+#' Method to print the type of small sample correction
+#' 
+#' Pretty print for the small sample correction obtained from [`ssc`]
+#' 
+#' @param x An object of class `ssc_type`, obtained from the function [`ssc`].
+#' @param ... Not currently used.
+#' 
+#' @return 
+#' This function does not return anything.
+#' 
+#' @seealso 
+#' [`vcov.fixest`], [`ssc`], [`setFixest_ssc`], [`getFixest_ssc`]
+#' 
+#' @examples 
+#' 
+#' # ssc() is just a list
+#' unclass(ssc())
+#' 
+#' # print of ssc, much more compactly
+#' ssc()
+#' 
+print.ssc_type = function(x, ...){
+  
+  available = attr(x, "available")
+  vcov_label = attr(x, "vcov_label")
+  
+  if(is.null(vcov_label)){
+    # this means this is a plain ssc call from the user
+    catma(
+      "Small sample correction:\n", 
+      "K.adj = {x$K.adj}, K.fixef = {Q ? x$K.fixef}, K.exact = {x$K.exact}\n",
+      "G.adj = {x$G.adj}, G.df = {Q ? x$G.df}, t.df = {Q ? x$t.df}\n"
+    )
+    return(invisible(NULL))
   }
-
-  options("fixest_ssc" = ssc.type)
+  
+  # Now ssc is from getFixest_ssc where we added information on the VCOV type
+  
+  if(is.null(available)){
+    catma("No small sample correction available for {vcov_label} VCOVs\n")
+    return(invisible(NULL))
+  }
+  
+  line_K = ""
+  line_G = ""
+  
+  if("K" %in% available){
+    line_K = sma("K.adj = {x$K.adj}, K.fixef = {Q ? x$K.fixef}, K.exact = {x$K.exact}\n")
+  }
+  
+  if("G" %in% available){
+    line_G = sma("G.adj = {x$G.adj}, G.df = {Q ? x$G.df}, t.df = {Q ? x$t.df}\n")
+  }
+  
+  catma(
+    "Small sample correction for {vcov_label} VCOV:\n", 
+    line_K,
+    line_G
+  )
+  
+  
 }
 
-#' @rdname ssc
-getFixest_ssc = function(){
 
-  ssc = getOption("fixest_ssc")
-  if(!"ssc.type" %in% class(ssc)){
-    stop("The value of getOption(\"fixest_ssc\") is currently not legal. Please use function setFixest_dict to set it to an appropriate value.")
+#' Sets the default values for the small sample correction
+#' 
+#' Sets the default values for the Small Sample Correction (SSC) for specific `fixest` VCOVs
+#'
+#' @param ssc_type Either `NULL` (default), or an object of class `ssc_type` obtained 
+#' with the function [`ssc`], or old options values (of class `setFixest_ssc`). 
+#' By default, if `NULL`, it resets the SSC to their default value for the selected VCOVs.
+#' Otherwise it sets the default SSC for the selected VCOVs to the value returned by 
+#' the function ssc().
+#' @param vcov_names Character vector corresponding to the keywords of the VCOVs for which
+#' to change the default SSC. By default it is equal to `"iid"`. Some common VCOV names are: 
+#' "iid", "hetero", "cluster", "twoway", "newey", "driscoll", "conley".
+#' 
+#' @return 
+#' This functions invisibly returns the list of old settings, a list of class `setFixest_ssc`.
+#' 
+#' @seealso 
+#' [`vcov.fixest`], [`ssc`], [`getFixest_ssc`]
+#' 
+#' @examples 
+#' 
+#' # Estimation with current default values for the small sample correction
+#' feols(Sepal.Length ~ Petal.Length + Petal.Width, iris)
+#' 
+#' # looking at the default SSC
+#' getFixest_ssc("iid")
+#' 
+#' # 1) setting new default (and saving the previous opts)
+#' old_opts = setFixest_ssc(ssc(K.adj = FALSE), "iid")
+#' # => the SEs/t-stat differ
+#' feols(Sepal.Length ~ Petal.Length + Petal.Width, iris)
+#' 
+#' getFixest_ssc("iid")
+#' 
+#' # 2) resetting to the old values
+#' setFixest_ssc(old_opts)
+#' getFixest_ssc("iid")
+#' 
+#' 
+setFixest_ssc = function(ssc_type = NULL, vcov_names = "iid"){
+  
+  check_arg(vcov_names, "character vector no na len(1,)")
+  
+  check_arg(ssc_type, "NULL class(ssc_type, setFixest_ssc)", 
+            .message = "The argument 'ssc' must be an object created by the function ssc() or old options (obtained from setFixest_ssc()).")
+  
+  # the old values
+  old_opts = getOption("fixest_ssc", list())
+  class(old_opts) = "setFixest_ssc"
+  
+  if(inherits(ssc_type, "setFixest_ssc")){
+    options("fixest_ssc" = ssc_type)
+    return(invisible(old_opts))
+  }
+  
+  # All valid VCOVs
+  all_vcov = getOption("fixest_vcov_builtin")
+  all_vcov_names = unlist(lapply(all_vcov, `[[`, "name"))
+  all_vcov_names = all_vcov_names[nchar(all_vcov_names) > 0]
+  all_vcov_names = c(all_vcov_names, "all")
+  
+  # special case
+  vcov_names[vcov_names == ""] = "cluster"
+  
+  check_set_arg(vcov_names, "multi match", .choices = all_vcov_names)
+  
+  if("all" %in% vcov_names){
+    vcov_names = sapply(all_vcov, function(x) x$name[1])
+  }
+  
+  all_ssc = old_opts
+  
+  for(vcov in vcov_names){
+    vcov_id = which(sapply(all_vcov, function(x) vcov %in% x$name))
+    vcov_info = all_vcov[[vcov_id]]
+    name = vcov_info$name[1]
+    
+    my_ssc = ssc_type
+    if(!is.null(ssc_type)){
+      if(!is.null(vcov_info$ssc_available)){
+        attr(my_ssc, "available") = vcov_info$ssc_available
+      }
+      attr(my_ssc, "vcov_label") = vcov_info$vcov_label
+    }
+    
+    all_ssc[[name]] = my_ssc
   }
 
-  ssc
+  options("fixest_ssc" = all_ssc)
+  return(invisible(old_opts))
+}
+
+#' Gets the default values for the small sample correction
+#' 
+#' Gets the default small sample correction, of class `ssc_type`, for specific `fixest` VCOVs
+#' 
+#' @param vcov_name A character scalar naming the type of VCOV, or `NULL`. It should give
+#'  the name of a valid `fixest` VCOV (see [`vcov.fixest`]). If so, an object of class 
+#' `ssc_type` is returned.
+#' If `NULL`, the list of all small sample corrections (of class `ssc_type`) 
+#' which have been set by the user is returned.  
+#' 
+#' @return 
+#' If `vcov_name` is a valid `fixest` VCOV name, an object of class `ssc_type` is returned, 
+#' it corresponds to the default small sample correction (SSC) for this VCOV.
+#' 
+#' If `NULL`, all the SSCs that have been set by the user with [`setFixest_ssc`] are returned.
+#' 
+#' @seealso 
+#' [`vcov.fixest`], [`ssc`], [`setFixest_ssc`]
+#' 
+#' @examples 
+#' 
+#' # default SSC for iid
+#' getFixest_ssc("iid")
+#' 
+#' # in a fresh session, the default for Newey West VCOVs is different:
+#' getFixest_ssc("NW")
+#' 
+getFixest_ssc = function(vcov_name = NULL){
+  
+  check_arg(vcov_name, "character scalar NULL")
+  # special case
+  if(!is.null(vcov_name) && vcov_name == "") vcov_name = "cluster"
+
+  all_ssc = getOption("fixest_ssc", list())
+  
+  if(is.null(vcov_name)){
+    return(all_ssc)
+  }
+  
+  # All valid VCOVs
+  all_vcov = getOption("fixest_vcov_builtin")
+  all_vcov_names = unlist(lapply(all_vcov, `[[`, "name"))
+  all_vcov_names = all_vcov_names[nchar(all_vcov_names) > 0]
+  
+  check_set_arg(vcov_name, "match", .choices = all_vcov_names)
+  
+  vcov_id = which(sapply(all_vcov, function(x) vcov_name %in% x$name))
+  vcov_info = all_vcov[[vcov_id]]
+  name = vcov_info$name[1]
+  
+  vcov_ssc = all_ssc[[name]]
+  if(is.null(vcov_ssc)){
+    if(!is.null(vcov_info$ssc_default)){
+      vcov_ssc = vcov_info$ssc_default
+    } else {
+      # the fallback
+      vcov_ssc = ssc()
+    }
+    
+    attr(vcov_ssc, "vcov_label") = vcov_info$vcov_label
+    attr(vcov_ssc, "available") = vcov_info$ssc_available
+    
+  }
+
+  vcov_ssc
 }
 
 

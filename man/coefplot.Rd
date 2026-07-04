@@ -150,20 +150,7 @@ and/or to the function \code{plot} or \code{lines} (if \code{add = TRUE}).}
 
 \item{objects}{A list of \code{fixest} estimation objects, or \code{NULL} (default). If provided,
 the objects in \code{...} are ignored and the only coefficients reported are the ones in the
-argument \code{objects}.
-#' @param vcov Versatile argument to specify the VCOV.
-In general, it is either a character scalar equal to a VCOV type, either a formula of the form:
-vcov_type ~ variables. The VCOV types implemented are: "iid", "hetero" (or "HC1"),
-"cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley".
-It also accepts object from vcov_cluster, vcov_NW, NW, vcov_DK, DK, vcov_conley and conley.
-It also accepts covariance matrices computed externally.
-Finally it accepts functions to compute the covariances.
-See the vcov documentation in the vignette.
-You can pass several VCOVs (as above) if you nest them into a list.
-If the number of VCOVs equals the number of models, eahc VCOV is mapped to the appropriate model.
-If there is one model and several VCOVs, or if the first element of the list is equal to
-\code{"each"} or \code{"times"}, then the estimations will be replicated and the results
-for each estimation and each VCOV will be reported.}
+argument \code{objects}.}
 
 \item{style}{A character scalar giving the style of the plot to be used. You
 can set styles with the function \code{\link{setFixest_coefplot}}, setting all the default
@@ -191,8 +178,9 @@ It also accepts object from vcov_cluster, vcov_NW, NW, vcov_DK, DK, vcov_conley 
 It also accepts covariance matrices computed externally.
 Finally it accepts functions to compute the covariances.
 See the vcov documentation in the vignette.
+
 You can pass several VCOVs (as above) if you nest them into a list.
-If the number of VCOVs equals the number of models, eahc VCOV is mapped to the appropriate model.
+If the number of VCOVs equals the number of models, each VCOV is mapped to the appropriate model.
 If there is one model and several VCOVs, or if the first element of the list is equal to
 \code{"each"} or \code{"times"}, then the estimations will be replicated and the results
 for each estimation and each VCOV will be reported.}
@@ -228,28 +216,36 @@ entries in the global dictionary, to disable this behavior, use "reset" as the f
 \item{keep}{Character vector. This element is used to display only a subset of variables. This
 should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}} help for more info). Each
 variable satisfying any of the regular expressions will be kept. This argument is applied post
-aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display
+aliasing (see argument \code{dict}).
+Use the argument \code{keep_raw} for the same effect before aliasing.
+
+Example: you have the variable \code{x1} to \code{x55} and want to display
 only \code{x1} to \code{x9}, then you could use \code{keep = "x[[:digit:]]$"}. If the first character is an
-exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that
-does not contain \dQuote{Intercept} is kept). See details.}
+exclamation mark, the effect is reversed (e.g. keep = "!Constant" means: every variable that
+does not contain \dQuote{Constant} is kept). See details.}
 
 \item{drop}{Character vector. This element is used if some variables are not to be displayed.
 This should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}} help for more info). Each
 variable satisfying any of the regular expressions will be discarded. This argument is applied
-post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to
+post aliasing (see argument \code{dict}).
+Use the argument \code{drop_raw} for the same effect before aliasing.
+
+Example: you have the variable \code{x1} to \code{x55} and want to
 display only \code{x1} to \code{x9}, then you could use \verb{drop = "x[[:digit:]]\{2\}}". If the first character
-is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable
-that does not contain \dQuote{Intercept} is dropped). See details.}
+is an exclamation mark, the effect is reversed (e.g. drop = "!Constant" means: every variable
+that does not contain \dQuote{Constant} is dropped). See details.}
 
 \item{order}{Character vector. This element is used if the user wants the variables to be
 ordered in a certain way. This should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}}
 help for more info). The variables satisfying the first regular expression will be placed first,
 then the order follows the sequence of regular expressions. This argument is applied post
-aliasing (see argument \code{dict}). Example: you have the following variables: \code{month1} to \code{month6},
+aliasing (see argument \code{dict}). Use the argument \code{order_raw} for the same effect before aliasing.
+
+Example: you have the following variables: \code{month1} to \code{month6},
 then \code{x1} to \code{x5}, then \code{year1} to \code{year6}. If you want to display first the x's, then the
 years, then the months you could use: \code{order = c("x", "year")}. If the first character is an
-exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that
-does not contain \dQuote{Intercept} goes first).  See details.}
+exclamation mark, the effect is reversed (e.g. order = "!Constant" means: every variable that
+does not contain \dQuote{Constant} goes first).  See details.}
 
 \item{ci.width}{The width of the extremities of the confidence intervals. Default is \code{0.1}.}
 
@@ -309,11 +305,15 @@ can set the display of the grid with the argument \code{grid.par}.}
 to \code{\link[graphics:abline]{graphics::abline}}. You also have two additional arguments: use \code{horiz =  FALSE} to disable the horizontal lines, and use \code{vert = FALSE} to disable the
 vertical lines. Eg: \code{grid.par = list(vert = FALSE, col = "red", lwd = 2)}.}
 
-\item{zero}{Logical, default is \code{TRUE}. Whether the 0-line should be emphasized.
-You can set the parameters of that line with the argument \code{zero.par}.}
+\item{zero}{Logical scalar, default is \code{TRUE}. Whether the 0 should be displayed
+in the limits of the y-axis.
+Note that you can set how this zero line looks like with the argument \code{zero.par}.}
 
-\item{zero.par}{List. Parameters of the zero-line. The default values are
-\code{col = "black"} and \code{lwd = 1}. You can add any graphical parameter that will be passed
+\item{zero.par}{A named list of graphical parameters or a logical scalar.
+This argument is a list containing the graphical parameters used to draw the zero-line.
+The default value is \code{list(col = "black", lwd = 1)} (it's the same if \code{TRUE}).
+Set it to \code{FALSE} to turn off the special emphasis of the zero line.
+You can add any graphical parameter that will be passed
 to \code{\link[graphics:abline]{graphics::abline}}. Example: \code{zero.par = list(col = "darkblue", lwd = 3)}.}
 
 \item{pt.join}{Logical, default is \code{FALSE}. If \code{TRUE}, then the coefficient estimates
@@ -331,11 +331,13 @@ with the argument \code{ci.join.par}.}
 Only used if \code{ci.join=TRUE}. By default it is equal to \code{list(lwd = lwd, col = col, lty = 2)}.}
 
 \item{ci.fill}{Logical default to \code{FALSE}. Whether to fill the confidence intervals
-with a color. If \code{TRUE}, then you can set the graphical parameters with the argument \code{ci.fill.par}.}
+with a color. If \code{TRUE}, then you can set the graphical parameters
+with the argument \code{ci.fill.par}.}
 
 \item{ci.fill.par}{A list of parameters to be passed to \code{\link[graphics:polygon]{graphics::polygon}}.
 Only used if \code{ci.fill=TRUE}. By default it is equal to \code{list(col = "lightgray", alpha = 0.5)}.
-Note that \code{alpha} is a special parameter that adds transparency to the color (ranges from 0 to 1).}
+Note that \code{alpha} is a special parameter that adds transparency to the color
+(ranges from 0 to 1).}
 
 \item{ref}{Used to add points at \code{y = 0} (typically to visualize reference points).
 Either: i) "auto" (default), ii) a character vector of length 1, iii) a list
@@ -356,7 +358,8 @@ line will be drawn at that specific value.}
 
 \item{ref.line.par}{List. Parameters of the vertical line on the reference. The
 default values are: \code{col = "black"} and \code{lty = 2}. You can add any graphical
-parameter that will be passed to \code{\link[graphics:abline]{graphics::abline}}. Eg: \code{ref.line.par = list(lty = 1, lwd = 3)}.}
+parameter that will be passed to \code{\link[graphics:abline]{graphics::abline}}.
+Eg: \code{ref.line.par = list(lty = 1, lwd = 3)}.}
 
 \item{lab.cex}{The size of the labels of the coefficients. Default is missing.
 It is automatically set by an internal algorithm which can go as low as \code{lab.min.cex}
@@ -426,7 +429,8 @@ plot default with \code{\link{setFixest_coefplot}}).}
 appears on the x-axis. The default is equal to \code{"Estimate and __ci__ Conf. Int."},
 with \verb{__ci__} a special variable giving the value of the confidence interval.}
 
-\item{ylab}{The label of the y-axis, default is \code{NULL}. Note that if \code{horiz =  FALSE}, it overrides the value of the argument \code{value.lab}.}
+\item{ylab}{The label of the y-axis, default is \code{NULL}. Note that if
+\code{horiz = FALSE}, it overrides the value of the argument \code{value.lab}.}
 
 \item{xlab}{The label of the x-axis, default is \code{NULL}. Note that if \code{horiz =  TRUE}, it overrides the value of the argument \code{value.lab}.}
 
@@ -477,6 +481,14 @@ Note, importantly, that interactions of two factor variables are (in general)
 disregarded since they would require a 3-D plot to be properly represented.
 }
 
+\section{Mathematical expressions}{
+
+
+You can add \code{\link[grDevices:plotmath]{plotmath}} mathematical expressions in the arguments
+\code{main}, \code{sub}, \code{xlab}, or \code{ylab}. To do so, start the character string with an ampersand.
+For example main = "&lambda^2".
+}
+
 \section{Arguments keep, drop and order}{
 
 The arguments \code{keep}, \code{drop} and \code{order} use regular expressions. If you are not aware
@@ -496,12 +508,17 @@ You can use the special character "!" (exclamation mark) to reverse the effect
 of the regular expression (this feature is specific to this function).
 For example \code{drop = "!Wind"} would drop any variable that does not contain "Wind".
 
-You can use the special character "\%" (percentage) to make reference to the
-original variable name instead of the aliased name. For example, you have a
-variable named \code{"Month6"}, and use a dictionary \code{dict = c(Month6="June")}.
+By default, the regular expressions are checked against the variables after
+they have been renamed with the dictionary (argument \code{dict}).
+You can use the \verb{*_raw} versions of drop/keep/order to apply the regular
+expressions on the original variable names.
+Note that alternatively you can use the special character "\%" (percentage) at the
+beginning of drop/keep/order's regular expressions to refer to the original variable name.
+For example, you have a variable named \code{"Month6"},
+and use a dictionary \code{dict = c(Month6="June")}.
 Thus the variable will be displayed as \code{"June"}.
-If you want to delete that variable, you can use either \code{drop="June"},
-or \code{drop="\%Month6"} (which makes reference to its original name).
+If you want to delete that variable, you can use either \code{drop="June"}, \code{drop_raw="Month6"},
+or \code{drop="\%Month6"}.
 
 The argument \code{order} takes in a vector of regular expressions, the order will follow the
 elements of this vector. The vector gives a list of priorities,

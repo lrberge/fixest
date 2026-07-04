@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.13.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.14.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,20 +66,24 @@
 <dd><p>Character vector. This element is used to display only a subset of variables. This
 should be a vector of regular expressions (see <code><a href="https://rdrr.io/r/base/regex.html" class="external-link">base::regex</a></code> help for more info). Each
 variable satisfying any of the regular expressions will be kept. This argument is applied post
-aliasing (see argument <code>dict</code>). Example: you have the variable <code>x1</code> to <code>x55</code> and want to display
+aliasing (see argument <code>dict</code>).
+Use the argument <code>keep_raw</code> for the same effect before aliasing.</p>
+<p>Example: you have the variable <code>x1</code> to <code>x55</code> and want to display
 only <code>x1</code> to <code>x9</code>, then you could use <code>keep = "x[[:digit:]]$"</code>. If the first character is an
-exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that
-does not contain “Intercept” is kept). See details.</p></dd>
+exclamation mark, the effect is reversed (e.g. keep = "!Constant" means: every variable that
+does not contain “Constant” is kept). See details.</p></dd>
 
 
 <dt id="arg-drop">drop<a class="anchor" aria-label="anchor" href="#arg-drop"></a></dt>
 <dd><p>Character vector. This element is used if some variables are not to be displayed.
 This should be a vector of regular expressions (see <code><a href="https://rdrr.io/r/base/regex.html" class="external-link">base::regex</a></code> help for more info). Each
 variable satisfying any of the regular expressions will be discarded. This argument is applied
-post aliasing (see argument <code>dict</code>). Example: you have the variable <code>x1</code> to <code>x55</code> and want to
+post aliasing (see argument <code>dict</code>).
+Use the argument <code>drop_raw</code> for the same effect before aliasing.</p>
+<p>Example: you have the variable <code>x1</code> to <code>x55</code> and want to
 display only <code>x1</code> to <code>x9</code>, then you could use <code>drop = "x[[:digit:]]{2}</code>". If the first character
-is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable
-that does not contain “Intercept” is dropped). See details.</p></dd>
+is an exclamation mark, the effect is reversed (e.g. drop = "!Constant" means: every variable
+that does not contain “Constant” is dropped). See details.</p></dd>
 
 
 <dt id="arg-print">print<a class="anchor" aria-label="anchor" href="#arg-print"></a></dt>
@@ -153,9 +157,8 @@ second degrees of freedoms.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Same but with clustered SEs</span></span></span>
 <span class="r-in"><span><span class="fu">wald</span><span class="op">(</span><span class="va">est</span>, <span class="st">"poly"</span>, cluster <span class="op">=</span> <span class="st">"Month"</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The VCOV matrix is not positive semi-definite and was 'fixed' (see ?vcov).</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Wald test, H0: joint nullity of poly(Temp, 3)1, poly(Temp, 3)2 and poly(Temp, 3)3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  stat = 170.3, p-value &lt; 2.2e-16, on 3 and 105 DoF, VCOV: Clustered (Month).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  stat = 170.3, p-value = 1.128e-4, on 3 and 4 DoF, VCOV: Clustered (Month).</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Now: all vars but the polynomial and the intercept</span></span></span>
 <span class="r-in"><span><span class="fu">wald</span><span class="op">(</span><span class="va">est</span>, drop <span class="op">=</span> <span class="st">"Inte|poly"</span><span class="op">)</span></span></span>
@@ -172,7 +175,7 @@ second degrees of freedoms.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># The graph of the coefficients</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="coefplot.html">coefplot</a></span><span class="op">(</span><span class="va">est_did</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in strwidth(labels_trunc):</span> plot.new has not been called yet</span>
+<span class="r-plt img"><img src="wald-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># The pre-trend test</span></span></span>
 <span class="r-in"><span><span class="fu">wald</span><span class="op">(</span><span class="va">est_did</span>, <span class="st">"period::[1234]$"</span><span class="op">)</span></span></span>

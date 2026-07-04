@@ -20,7 +20,7 @@
 }
 }
 \source{
-The source of this data set is the Microsoft Academic Graph data set, extracted in 2020. Now a defunct project, you can find similar data on \href{https://docs.openalex.org/}{OpenAlex}.
+The source of this data set is the Microsoft Academic Graph data set, extracted in 2020. Now a defunct project, you can find similar data on \href{https://developers.openalex.org/}{OpenAlex}.
 
 The variables \code{birth_year}, \code{is_woman} and \code{age} were randomly generated. All other variables have created from the raw MAG files.
 }

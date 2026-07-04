@@ -64,16 +64,17 @@ It also accepts covariance matrices computed externally.
 Finally it accepts functions to compute the covariances.
 See the vcov documentation in the vignette.
 You can pass several VCOVs (as above) if you nest them into a list.
-If the number of VCOVs equals the number of models, eahc VCOV is mapped to the appropriate model.
+If the number of VCOVs equals the number of models, each VCOV is mapped to the appropriate model.
 If there is one model and several VCOVs, or if the first element of the list is equal to
 \code{"each"} or \code{"times"}, then the estimations will be replicated and the results
 for each estimation and each VCOV will be reported.}
 
-\item{ssc}{An object of class \code{ssc.type} obtained with the function \code{\link{ssc}}. Represents
-how the degree of freedom correction should be done.You must use the function \code{\link{ssc}}
+\item{ssc}{An object of class \code{ssc_type} obtained with the function \code{\link{ssc}}. Represents
+how the small sample correction should be done. You must use the function \code{\link{ssc}}
 for this argument. The arguments and defaults of the function \code{\link{ssc}} are:
 \code{K.adj = TRUE}, \code{K.fixef = "nonnested"}, \code{G.adj = TRUE}, \code{G.df = "min"},
-\code{t.df = "min"}, \verb{K.exact = FALSE)}. See the help of the function \code{\link{ssc}} for details.}
+\code{t.df = "min"}, \verb{K.exact = FALSE)}. See the help of the function \code{\link{ssc}} for details.
+Not all VCOV types are affected by this argument.}
 
 \item{cluster}{Tells how to cluster the standard-errors (if clustering is requested). Can
 be either a list of vectors, a character vector of variable names, a formula or an
@@ -87,28 +88,36 @@ with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st 
 \item{keep}{Character vector. This element is used to display only a subset of variables. This
 should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}} help for more info). Each
 variable satisfying any of the regular expressions will be kept. This argument is applied post
-aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display
+aliasing (see argument \code{dict}).
+Use the argument \code{keep_raw} for the same effect before aliasing.
+
+Example: you have the variable \code{x1} to \code{x55} and want to display
 only \code{x1} to \code{x9}, then you could use \code{keep = "x[[:digit:]]$"}. If the first character is an
-exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that
-does not contain \dQuote{Intercept} is kept). See details.}
+exclamation mark, the effect is reversed (e.g. keep = "!Constant" means: every variable that
+does not contain \dQuote{Constant} is kept). See details.}
 
 \item{drop}{Character vector. This element is used if some variables are not to be displayed.
 This should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}} help for more info). Each
 variable satisfying any of the regular expressions will be discarded. This argument is applied
-post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to
+post aliasing (see argument \code{dict}).
+Use the argument \code{drop_raw} for the same effect before aliasing.
+
+Example: you have the variable \code{x1} to \code{x55} and want to
 display only \code{x1} to \code{x9}, then you could use \verb{drop = "x[[:digit:]]\{2\}}". If the first character
-is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable
-that does not contain \dQuote{Intercept} is dropped). See details.}
+is an exclamation mark, the effect is reversed (e.g. drop = "!Constant" means: every variable
+that does not contain \dQuote{Constant} is dropped). See details.}
 
 \item{order}{Character vector. This element is used if the user wants the variables to be
 ordered in a certain way. This should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}}
 help for more info). The variables satisfying the first regular expression will be placed first,
 then the order follows the sequence of regular expressions. This argument is applied post
-aliasing (see argument \code{dict}). Example: you have the following variables: \code{month1} to \code{month6},
+aliasing (see argument \code{dict}). Use the argument \code{order_raw} for the same effect before aliasing.
+
+Example: you have the following variables: \code{month1} to \code{month6},
 then \code{x1} to \code{x5}, then \code{year1} to \code{year6}. If you want to display first the x's, then the
 years, then the months you could use: \code{order = c("x", "year")}. If the first character is an
-exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that
-does not contain \dQuote{Intercept} goes first).  See details.}
+exclamation mark, the effect is reversed (e.g. order = "!Constant" means: every variable that
+does not contain \dQuote{Constant} goes first).  See details.}
 
 \item{list}{Logical, default is \code{FALSE}. If \code{TRUE}, then a nested list is returned, the
 first layer is accessed with the coefficients names; the second layer with the

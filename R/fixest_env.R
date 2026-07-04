@@ -183,7 +183,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
   lhs_bounds = list()
   if(origin_type == "feNmlm"){
     family_name = try(match.arg(family), silent = TRUE)
-    if("try-error" %in% class(family_name)){
+    if(inherits(family_name, "try-error")){
       #  then we try with deparse
       family_dep = deparse(mc_origin$family)
 
@@ -193,7 +193,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
 
       family_name = try(match.arg(family_dep, c("poisson", "negbin", "logit", "gaussian")), 
                         silent = TRUE)
-      if("try-error" %in% class(family_name)){
+      if(inherits(family_name, "try-error")){
         stop("Argument family must be equal to 'poisson', 'logit', 'negbin' or 'gaussian'.")
       }
     }
@@ -283,7 +283,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
 
     assign("family_funs", family_funs, env)
   }
-
+  
   check_arg("logical scalar", demeaned, notes, warn, mem.clean, only.coef, data.save)
   
   if(origin_type %in% c("feols", "feglm")){
@@ -362,7 +362,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
         fixef_df = as.data.frame(fixef_df)
       }
 
-      if(!is.matrix(fixef_df) && !"data.frame" %in% class(fixef_df)){
+      if(!is.matrix(fixef_df) && !inherits(fixef_df, "data.frame")){
         stop("Argument fixef_df must be a vector, a matrix, a list or a data.frame (currently its class is {enum.bq ? class(fixef_df)}).")
       }
 
@@ -485,7 +485,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
     }
 
     # The conversion of the data (due to data.table)
-    if(!"data.frame" %in% class(data)){
+    if(!inherits(data, "data.frame")){
       stop("The argument 'data' must be a data.frame or a matrix.")
     }
     
@@ -1051,7 +1051,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
 
       isSubset = TRUE
 
-      if("formula" %in% class(subset)){
+      if(inherits(subset, "formula")){
 
         if(isFit){
           stop("In ", origin, " the subset cannot be a formula. You must provide either an integer vector or a logical vector.")
@@ -1314,7 +1314,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
 
     if(isLinear){
 
-      if("data.frame" %in% class(X)){
+      if(inherits(X, "data.frame")){
         X = as.matrix(X)
       }
 
@@ -1573,7 +1573,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
   msgNA_NL = ""
   if(!missnull(NL.fml)){
 
-    if(!"formula" %in% class(NL.fml)) stop("Argument 'NL.fml' must be a formula.")
+    if(!inherits(NL.fml, "formula")) stop("Argument 'NL.fml' must be a formula.")
     NL.fml = formula(NL.fml) # we regularize the formula
 
     isNonLinear = TRUE
@@ -1641,7 +1641,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
     if(!is.null(offset)){
       isOffset = TRUE
 
-      if("formula" %in% class(offset)){
+      if(inherits(offset, "formula")){
 
         if(isFit){
           stop("In ", origin, " the offset cannot be a formula. You must provide a numeric vector.")
@@ -1733,7 +1733,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
     if(!is.null(weights)){
       isWeight = TRUE
 
-      if("formula" %in% class(weights)){
+      if(inherits(weights, "formula")){
 
         if(isFit){
           stopi("In {origin} the weights cannot be a formula. You must provide a numeric vector.")
@@ -1881,7 +1881,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
     if(is.null(split.keep)) split.keep = attr(split, "keep")
     if(is.null(split.drop)) split.drop = attr(split, "drop")
 
-    if("formula" %in% class(split)){
+    if(inherits(split, "formula")){
 
       if(isFit){
         stop("In ", origin, " the split cannot be a formula. You must provide a numeric vector.")
@@ -2132,7 +2132,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
 
   if(!missnull(ssc)){
     do_summary = TRUE
-    if(!identical(class(ssc), "ssc.type")){
+    if(!identical(class(ssc), "ssc_type")){
       stop("The argument 'ssc' must be an object obtained from the function ssc().")
     }
   } else {
@@ -3217,7 +3217,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
   if(isFit) res$is_fit = TRUE
 
   if(do_iv){
-    res$iv = TRUE
+    res$is_iv = TRUE
     res$iv_inst_names = inst_names
     res$iv_n_inst = ncol(iv.mat)
     res$iv_endo_names = iv_lhs_names
@@ -3466,7 +3466,8 @@ setup_fixef = function(fixef_df, lhs, fixef_vars, fixef.rm, family, lhs_bounds,
       # index(fe_index) B   
       #            (new/old):              1, 2, 3, 2
       
-      items = all_index_info$index[[i]][all_index_info$firstobs[[i]]]
+      # NOTA: $firstobs gives the index of the input object
+      items = fixef_df[[i]][all_index_info$firstobs[[i]]]
       items_order = order(items)
       items_order_order = order(items_order)
       
@@ -4065,6 +4066,12 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
       } else {
         K = K + sum(fixef_sizes - 1) + 1
       }
+      
+      # NOTA: the intercept may sneak in in multiple estimations, we need to bookkeep
+      if("(Intercept)" %in% params){
+        K = K - 1
+      }
+      
     }
     res$nparams = K
 
@@ -4156,10 +4163,16 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
       } else {
         K = K + sum(fixef_sizes - 1) + 1
       }
+      
+      # NOTA: the intercept may sneak in in multiple estimations, we need to bookkeep
+      if("(Intercept)" %in% params){
+        K = K - 1
+      }
+      
     }
     res$nparams = K
 
-    if(!isLinear && !isTRUE(res$iv)){
+    if(!isLinear && !isTRUE(res$is_iv)){
       res$onlyFixef = TRUE
     }
   }
@@ -4176,8 +4189,9 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
   if(!is.null(fml_iv_endo)){
     fml_linear = res$fml_all$linear
     fml_iv = res$fml_all$iv
-
-    is_pblm = "try-error" %in% class(try(str2lang(fml_iv_endo), silent = TRUE))
+    
+    test_fml_iv_endo = try(str2lang(fml_iv_endo), silent = TRUE)
+    is_pblm = inherits(test_fml_iv_endo, "try-error")
     if(is_pblm){
       # Avoids a bug
       fml_iv_endo = paste0("`", fml_iv_endo, "`")
@@ -4624,7 +4638,7 @@ collect_vars = function(...){
 
   for(i in seq_along(dots)){
     di = dots[[i]]
-    if("formula" %in% class(di)){
+    if(inherits(di, "formula")){
       vars = c(vars, all.vars(di))
     } else if(length(di) < 5 && is.character(di)){
       vars = c(vars, di)
@@ -4634,10 +4648,10 @@ collect_vars = function(...){
   unique(vars)
 }
 
-fixest_NA_results = function(env){
+fixest_NA_results = function(env, cause = NULL){
   # Container for NA results
   # so far the non-linear part is not covered
-
+  
   res = get("res", env)
 
   X = get("linear.mat", env)
@@ -4655,7 +4669,7 @@ fixest_NA_results = function(env){
 
   cov.scaled = matrix(NA, n, n)
 
-  attr(se, "type") = attr(coeftable, "type") = attr(cov.scaled, "type") = "Void"
+  attr(se, "vcov_type") = attr(coeftable, "vcov_type") = attr(cov.scaled, "vcov_type") = "Void"
   res$coeftable = coeftable
   res$se = se
   res$cov.scaled = cov.scaled
@@ -4667,6 +4681,84 @@ fixest_NA_results = function(env){
   res$ssr = res$ssr_null = res$ssr_fe_only = res$sigma2 = res$loglik = res$ll_null = res$ll_fe_only = res$pseudo_r2 = res$deviance = res$sq.cor = NA_real_
 
   res$NA_model = TRUE
+  res$cause_NA_model = cause
+  class(res) = "fixest"
+
+  res
+}
+
+fixest_NA_results_IV = function(env_2nd_stage, res_first_stage, cause = NULL){
+  # Container for NA results
+  # => we need to reconstruct
+  
+  res = get("res", env_2nd_stage)
+  
+  # general information
+  iv_lhs = get("iv_lhs", env_2nd_stage)
+  iv_lhs_names = get("iv_lhs_names", env_2nd_stage)
+  ZX = iv.mat = get("iv.mat", env_2nd_stage)
+  iv_main_dep_var = deparse(res$fml[[2]], width.cutoff = 100)[1]
+  
+  #
+  # 1st stages
+  #
+  
+  n_endo = length(iv_lhs_names)
+  i_start = length(res_first_stage) + 1
+  
+  if(i_start <= n_endo){
+    for(i in i_start:n_endo){
+      current_env = reshape_env(env_2nd_stage, lhs = iv_lhs[[i]], rhs = ZX, 
+                                fml_iv_endo = iv_lhs_names[i])
+      my_res = fixest_NA_results(current_env, cause)
+      
+      my_res$ssr_no_inst = NA_real_
+      my_res$iv_stage = 1
+      my_res$iv_inst_names_xpd = colnames(iv.mat)
+      res_first_stage[[iv_lhs_names[i]]] = my_res
+    }
+  }
+  
+  #
+  # 2nd stage
+  #
+  
+
+  X = get("linear.mat", env_2nd_stage)
+
+  n = ncol(X)
+  NA_values = rep(NA_real_, n)
+
+  coef = se = NA_values
+  names(coef) = names(se) = colnames(X)
+
+  coeftable = data.frame("Estimate" = NA_values, "Std. Error" = NA_values, 
+                         "t value" = NA_values, "Pr(>|t|)" = NA_values)
+  names(coeftable) = c("Estimate", "Std. Error", "t value",  "Pr(>|t|)")
+  row.names(coeftable) = names(coef)
+
+  cov.scaled = matrix(NA, n, n)
+
+  attr(se, "vcov_type") = attr(coeftable, "vcov_type") = attr(cov.scaled, "vcov_type") = "Void"
+  res$coeftable = coeftable
+  res$se = se
+  res$cov.scaled = cov.scaled
+
+  res$summary = TRUE
+
+  # Fit stats
+  res$nobs = nrow(X)
+  res$ssr = res$ssr_null = res$ssr_fe_only = res$sigma2 = res$loglik = res$ll_null = res$ll_fe_only = res$pseudo_r2 = res$deviance = res$sq.cor = res$ssr_no_endo = NA_real_
+  
+  # extra information
+  res$iv_first_stage = res_first_stage
+  res$iv_stage = 2
+  res$iv_inst_names_xpd = res_first_stage[[1]]$iv_inst_names_xpd
+  res$iv_endo_names_fit = paste0("fit_", res$iv_endo_names)
+  res$iv_main_dep_var = iv_main_dep_var
+
+  res$NA_model = TRUE
+  res$cause_NA_model = cause
   class(res) = "fixest"
 
   res

@@ -39,6 +39,7 @@ reference:
         - etable
         - coefplot
         - iplot
+        - plot.fixest
         - style.df
         - style.tex
         - extralines_register
@@ -71,6 +72,8 @@ reference:
         - ssc
         - matches("est_(vocv|ssc)$")
         - matches("^vcov_")
+        - print.fixest_vcov
+        - print.ssc_type
     - title: Multiple estimations
       desc: Perform, and handle, multiple estimations
       contents:

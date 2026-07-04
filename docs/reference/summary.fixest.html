@@ -11,7 +11,7 @@ errors. The new variance covariance matrix is an object returned."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.13.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.14.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -79,7 +79,7 @@ errors. The new variance covariance matrix is an object returned.</p>
 <span>  <span class="va">object</span>,</span>
 <span>  <span class="va">se</span>,</span>
 <span>  <span class="va">cluster</span>,</span>
-<span>  ssc <span class="op">=</span> <span class="fu"><a href="ssc.html">getFixest_ssc</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  ssc <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  vcov <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  stage <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  lean <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -122,11 +122,12 @@ the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1
 
 
 <dt id="arg-ssc">ssc<a class="anchor" aria-label="anchor" href="#arg-ssc"></a></dt>
-<dd><p>An object of class <code>ssc.type</code> obtained with the function <code><a href="ssc.html">ssc</a></code>. Represents
-how the degree of freedom correction should be done.You must use the function <code><a href="ssc.html">ssc</a></code>
+<dd><p>An object of class <code>ssc_type</code> obtained with the function <code><a href="ssc.html">ssc</a></code>. Represents
+how the small sample correction should be done. You must use the function <code><a href="ssc.html">ssc</a></code>
 for this argument. The arguments and defaults of the function <code><a href="ssc.html">ssc</a></code> are:
 <code>K.adj = TRUE</code>, <code>K.fixef = "nonnested"</code>, <code>G.adj = TRUE</code>, <code>G.df = "min"</code>,
-<code>t.df = "min"</code>, <code>K.exact = FALSE)</code>. See the help of the function <code><a href="ssc.html">ssc</a></code> for details.</p></dd>
+<code>t.df = "min"</code>, <code>K.exact = FALSE)</code>. See the help of the function <code><a href="ssc.html">ssc</a></code> for details.
+Not all VCOV types are affected by this argument.</p></dd>
 
 
 <dt id="arg-stage">stage<a class="anchor" aria-label="anchor" href="#arg-stage"></a></dt>
@@ -188,7 +189,10 @@ positive definite, whether to "fix" it using an eigenvalue decomposition
 (a la Cameron, Gelbach &amp; Miller 2011).
 Since the VCOV should be PSD asymptotically, this might be a sign of a problem
 with using the asymptotic approximation (e.g. too few units in clusters).
-If a problem is detected, the function will print a message to inform you.</p></dd>
+If a problem is detected, the function will print a message to inform you.
+Note that a message informs the user <strong>only if</strong> the regularized PD matrix is
+substantially different than the original non PD one (i.e. at least one difference
+between the two greated than 1e-8).</p></dd>
 
 
 <dt id="arg-nthreads">nthreads<a class="anchor" aria-label="anchor" href="#arg-nthreads"></a></dt>
@@ -440,8 +444,8 @@ to visualize the results of multiple estimations.</p></div>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 1,000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Conley (100km) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)  881.625   108.9005  8.09569 1.6480e-15 ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> mag         -123.421    19.2323 -6.41737 2.1389e-10 ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)  881.625    108.955  8.09164 1.7002e-15 ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> mag         -123.421     19.242 -6.41416 2.1827e-10 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 209.6   Adj. R2: 0.052245</span>
@@ -452,8 +456,8 @@ to visualize the results of multiple estimations.</p></div>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 1,000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Conley (200km) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)  881.625   128.2426  6.87467 1.0937e-11 ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> mag         -123.421    22.8950 -5.39074 8.7582e-08 ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)  881.625   128.3068  6.87123 1.1191e-11 ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> mag         -123.421    22.9064 -5.38804 8.8868e-08 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 209.6   Adj. R2: 0.052245</span>
@@ -470,8 +474,8 @@ to visualize the results of multiple estimations.</p></div>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observations: 1,000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard-errors: Conley (90km) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)  881.625   110.6727  7.96606 4.4465e-15 ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> mag         -123.421    20.1746 -6.11765 1.3619e-09 ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)  881.625   110.7281  7.96207 4.5832e-15 ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> mag         -123.421    20.1847 -6.11459 1.3873e-09 ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> RMSE: 209.6   Adj. R2: 0.052245</span>

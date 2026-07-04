@@ -41,7 +41,7 @@ xaxis_labels = function(at, labels, line.min = 0, line.max = 2, minCex = 0.8,
   # # we replace the trucated element with dots to show that there is more
   # qui = nchar(myLabels) == trunc & nchar(labels[myOrder]) > trunc
   # myLabels[qui] = gsub("..$", "\\.\\.", myLabels[qui])
-  if(!"call" %in% class(myLabels)){
+  if(!inherits(myLabels, "call")){
     if(any(nchar(myLabels) > trunc)){
       # myLabels = truncate_string(myLabels, trunc, method = trunc.method)
     }
@@ -213,7 +213,7 @@ xaxis_biased = function(at, labels, angle, cex, line.min = 0, line.max = 2,
   dots = list(...)
   dots$x = at
 
-  if(!"call" %in% class(labels)){
+  if(!inherits(labels, "call")){
     if(any(nchar(labels) > trunc)){
       # labels_trunc = truncate_string(labels, trunc = trunc, method = trunc.method)
       labels_trunc = labels

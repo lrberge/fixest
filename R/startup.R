@@ -96,29 +96,12 @@ initialize_startup_msg = function(all_startup_msg){
 
   if(!is_pkg_version(previous_version)){
     # We first update the version
-    # message("updating the version")
     config_update("fixest_version", current_version)
 
-    # message("Is fixest used? ", is_fixest_used())
-
-    # Is it a new project? Or was fixest simply never used before?
-    if(!is_corrupt_version && is_fixest_used()){
-      # => message
-      # Since I register versions since 0.9.0, this means that the
-      # version of fixest used was anterior => all msgs should pop
-
-      config_update("fixest_startup_msg", TRUE)
-      msg = build_startup_msg(all_startup_msg)
-      
-      return(msg)
-    } else {
-      # fixest was never used or the version was corrupt
-      # => we don't show any message since it will not break any existing code
-      config_update("fixest_startup_msg", FALSE)
-      return(NULL)
-    }
-
-    # message("updating done ")
+    # This is a new project
+    # => we don't show any message since it will not break any existing code
+    config_update("fixest_startup_msg", FALSE)
+    return(NULL)
 
   } else if(!identical(previous_version, current_version)){
 
@@ -219,6 +202,11 @@ build_startup_msg = function(all_startup_msg, previous_version = NULL){
     return(NULL)
   }
   
+  if(is_pkg_version(previous_version)){
+    msg = c(sma("This project used fixest {previous_version}, beware of the following changes:"), 
+            msg)
+  }
+  
   msg = paste(msg, collapse = "\n")
 }
 
@@ -285,7 +273,7 @@ is_fixest_used = function(){
 
   for(f in fixest_files){
     f_created = file.mtime(f)
-    if("POSIXt" %in% class(f_created)){
+    if(inherits(f_created, "POSIXt")){
       d = as.numeric(difftime(now, f_created, units = "days"))
       if(d > 7){
         return(TRUE)

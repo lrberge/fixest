@@ -1,10 +1,10 @@
 
-
 #include <stdint.h>
 #include <cmath>
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <Rcpp.h>
 #include <R.h>
 #include <Rinternals.h>
 
@@ -55,17 +55,16 @@ inline SEXP to_r_vector(const vector<int> &x){
 // Class very useful to pass around the data on R vectors 
 class IndexInputVector {
   
-  SEXP x_conv;
   bool is_initialized = false;
   
   void reset(){
     // we reset to the default values
+    
     is_fast_int = false;
     x_range = 0;
     x_range_bin = 0;
     x_min = 0;
     type = 0;
-    is_protect = false;
     any_na = true;
     NA_value = -1;
     px_int = nullptr;
@@ -90,10 +89,6 @@ public:
   int x_range_bin = 0;
   int x_min = 0;
   int type = 0;
-  
-  // if a non numeric non character vector has been turned into character
-  // we need to keep track of protection
-  bool is_protect = false;
   
   // this is only used in the quick ints algorithm
   // for factors and bool we assume there are NAs since we don't traverse the data

@@ -128,7 +128,7 @@ SEXP cpp_index_table_sum(SEXP fixef_list, SEXP y, const bool save_sum_y,
   const bool do_sum_y = save_sum_y || rm_0 || rm_1;
   
   if(do_sum_y && Rf_length(y) != n_obs){
-    Rf_error("Internal error, cpp_index_table_sum: the length of y is different from the length of the fixed-effects.");
+    Rcpp::stop("Internal error, cpp_index_table_sum: the length of y is different from the length of the fixed-effects.");
   }
   
   // we intialize the information on the indexes to be computed
@@ -139,7 +139,7 @@ SEXP cpp_index_table_sum(SEXP fixef_list, SEXP y, const bool save_sum_y,
     all_indexes_sexp[q] = PROTECT(Rf_allocVector(INTSXP, n_obs));
   }
   
-  std::vector< indexthis::IndexInputVector > all_input_vectors(Q);
+  std::vector<indexthis::IndexInputVector> all_input_vectors(Q);
   std::vector<indexthis::IndexedVector> all_index_info(Q);
   for(int q = 0 ; q < Q ; ++q){
     const SEXP &fixef_vec = VECTOR_ELT(fixef_list, q);
@@ -259,6 +259,10 @@ SEXP cpp_index_table_sum(SEXP fixef_list, SEXP y, const bool save_sum_y,
         all_raw_input_vectors[q] = std::move(new_input);
         all_input_vectors[q].initialize(all_raw_input_vectors[q]);
         
+      }
+      
+      // NOTA: we cannot call R API functions in a multi threaded loop
+      for(int q = 0 ; q < Q ; ++q){
         // 2) we reset the containers of the future indexes
         UNPROTECT(1);
         all_indexes_sexp[q] = PROTECT(Rf_allocVector(INTSXP, n_new));

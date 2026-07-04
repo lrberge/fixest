@@ -58,7 +58,7 @@ That means all observations that are perfectly explained by the FEs are removed.
 
 If "none": no observation is removed.
 
-Note that whathever the value of this options: the coefficient estimates
+Note that whatever the value of this options: the coefficient estimates
 will remain the same. It only affects inference (the standard-errors).
 
 The algorithm is recursive, meaning that, e.g. in the presence of several fixed-effects (FEs),

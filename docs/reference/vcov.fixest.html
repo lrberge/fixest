@@ -9,7 +9,7 @@ estimated with femlm, feols or feglm."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">fixest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.13.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.14.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,7 +60,7 @@ estimated with <code><a href="femlm.html">femlm</a></code>, <code><a href="feols
 <span>  se <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">cluster</span>,</span>
 <span>  ssc <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  attr <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  attr <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  forceCovariance <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  keepBounded <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  nthreads <span class="op">=</span> <span class="fu"><a href="setFixest_nthreads.html">getFixest_nthreads</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -111,15 +111,16 @@ the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1
 
 
 <dt id="arg-ssc">ssc<a class="anchor" aria-label="anchor" href="#arg-ssc"></a></dt>
-<dd><p>An object of class <code>ssc.type</code> obtained with the function <code><a href="ssc.html">ssc</a></code>. Represents
-how the degree of freedom correction should be done.You must use the function <code><a href="ssc.html">ssc</a></code>
+<dd><p>An object of class <code>ssc_type</code> obtained with the function <code><a href="ssc.html">ssc</a></code>. Represents
+how the small sample correction should be done. You must use the function <code><a href="ssc.html">ssc</a></code>
 for this argument. The arguments and defaults of the function <code><a href="ssc.html">ssc</a></code> are:
 <code>K.adj = TRUE</code>, <code>K.fixef = "nonnested"</code>, <code>G.adj = TRUE</code>, <code>G.df = "min"</code>,
-<code>t.df = "min"</code>, <code>K.exact = FALSE)</code>. See the help of the function <code><a href="ssc.html">ssc</a></code> for details.</p></dd>
+<code>t.df = "min"</code>, <code>K.exact = FALSE)</code>. See the help of the function <code><a href="ssc.html">ssc</a></code> for details.
+Not all VCOV types are affected by this argument.</p></dd>
 
 
 <dt id="arg-attr">attr<a class="anchor" aria-label="anchor" href="#arg-attr"></a></dt>
-<dd><p>Logical, defaults to <code>FALSE</code>. Whether to include the attributes describing how
+<dd><p>Logical, defaults to <code>TRUE</code>. Whether to include the attributes describing how
 the VCOV was computed.</p></dd>
 
 
@@ -151,7 +152,10 @@ positive definite, whether to "fix" it using an eigenvalue decomposition
 (a la Cameron, Gelbach &amp; Miller 2011).
 Since the VCOV should be PSD asymptotically, this might be a sign of a problem
 with using the asymptotic approximation (e.g. too few units in clusters).
-If a problem is detected, the function will print a message to inform you.</p></dd>
+If a problem is detected, the function will print a message to inform you.
+Note that a message informs the user <strong>only if</strong> the regularized PD matrix is
+substantially different than the original non PD one (i.e. at least one difference
+between the two greated than 1e-8).</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -174,7 +178,8 @@ the arguments, please have a look at the dedicated vignette:
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>Ding, Peng, 2021, "The Frisch–Waugh–Lovell theorem for standard errors." Statistics &amp; Probability Letters 168.</p>
+    <p>Ding, Peng, 2021, "The Frisch–Waugh–Lovell theorem for standard errors."
+Statistics &amp; Probability Letters 168.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -345,14 +350,14 @@ the arguments, please have a look at the dedicated vignette:
 <span class="r-in"><span><span class="co"># with lat/lon the latitude/longitude variable names in the data set</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="coeftable.html">se</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">est_geo</span>, <span class="fu"><a href="vcov_conley.html">conley</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span> <span class="op">~</span> <span class="va">lat</span> <span class="op">+</span> <span class="va">long</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)         mag </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   108.90052    19.23233 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   108.95501    19.24195 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Alternative way:</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># -&gt; using the vcov_DK function</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="coeftable.html">se</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">est_geo</span>, <span class="fu"><a href="vcov_conley.html">vcov_conley</a></span><span class="op">(</span>lat <span class="op">=</span> <span class="st">"lat"</span>, lon <span class="op">=</span> <span class="st">"long"</span>, cutoff <span class="op">=</span> <span class="fl">100</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)         mag </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   108.90052    19.23233 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   108.95501    19.24195 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># -------------------|</span></span></span>
 <span class="r-in"><span><span class="co"># Implicit deduction |</span></span></span>
@@ -364,7 +369,7 @@ the arguments, please have a look at the dedicated vignette:
 <span class="r-in"><span><span class="co"># The following works:</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="coeftable.html">se</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">est_geo</span>, <span class="st">"conley"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)         mag </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   110.67271    20.17456 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   110.72809    20.18466 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># ======================== #</span></span></span>

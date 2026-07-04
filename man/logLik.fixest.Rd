@@ -12,7 +12,7 @@
 \item{...}{Not currently used.}
 }
 \value{
-It returns a numeric scalar.
+It returns an object of class \code{\link[stats:logLik]{logLik}}.
 }
 \description{
 This function extracts the log-likelihood from a \code{fixest} estimation.

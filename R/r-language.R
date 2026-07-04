@@ -187,7 +187,7 @@ fml_split_internal = function(fml, split.lhs = FALSE){
 
 
 fml_split = function(fml, i, split.lhs = FALSE, text = FALSE, raw = FALSE){
-  # I had to create that fonction to cope with the following formula:
+  # I had to create that function to cope with the following formula:
   #
   #                       y ~ x1 | fe1 | u ~ z
   #
