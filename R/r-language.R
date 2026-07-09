@@ -322,7 +322,7 @@ is_fml_inside = function(fml){
 }
 
 
-merge_fml = function(fml_linear, fml_fixef = NULL, fml_iv = NULL){
+fml_merge = function(fml_linear, fml_fixef = NULL, fml_iv = NULL){
 
   is_fe = length(fml_fixef) > 0
   is_iv = length(fml_iv) > 0
@@ -591,7 +591,7 @@ replace_target_with_expr = function(expr, target, replacement){
   return(expr)
 }
 
-fixest_upadte_formula = function(fml_new, fml_old){
+fixest_update_formula = function(fml_new, fml_old){
   
   all_parts_old = fml_split(fml_old)
   all_parts_new = fml_split(fml_new)

@@ -3352,7 +3352,7 @@ update.fixest = function(object, fml.update = NULL, fml = NULL, nframes = 1,
   if(!is.null(fml)){
     fml_new = fml
   } else if(!is.null(fml.update)){
-    fml_new = fixest_upadte_formula(fml.update, fml_new)
+    fml_new = fixest_update_formula(fml.update, fml_new)
   }
 
   #
@@ -3559,8 +3559,8 @@ formula.fixest = function(x, type = "full", fml.update = NULL,
                 .message = "The argument `type` must be one of: `full`, `full.noiv`, `full.nofixef.noiv`, `lhs`, `rhs`, `indep`, `rhs.nofixef`, `NL`, `fixef`, `iv`, `iv.endo`, `iv.inst`, `iv.reduced`")
   
   if(!is.null(fml.update)){
-    fml_old = merge_fml(x$fml_all$linear, x$fml_all$fixef, x$fml_all$iv)
-    res = fixest_upadte_formula(fml.update, fml_old)
+    fml_old = fml_merge(x$fml_all$linear, x$fml_all$fixef, x$fml_all$iv)
+    res = fixest_update_formula(fml.update, fml_old)
     
     return(res)
     
@@ -3587,8 +3587,8 @@ formula.fixest = function(x, type = "full", fml.update = NULL,
       }
     }
     
-    fml_old = merge_fml(fml_main, fml_fixef, fml_iv)
-    res = fixest_upadte_formula(fml.build, fml_old)
+    fml_old = fml_merge(fml_main, fml_fixef, fml_iv)
+    res = fixest_update_formula(fml.build, fml_old)
     
     vars = all.vars(res)
     if(".lhs" %in% vars){
@@ -3626,22 +3626,22 @@ formula.fixest = function(x, type = "full", fml.update = NULL,
   if(type == "indep") type = "rhs.nofixef"
   
   if(type == "full"){
-    res = merge_fml(x$fml_all$linear, x$fml_all$fixef, x$fml_all$iv)
+    res = fml_merge(x$fml_all$linear, x$fml_all$fixef, x$fml_all$iv)
     return(res)
     
   } else if(type == "full.noiv"){
-    res = merge_fml(x$fml_all$linear, x$fml_all$fixef, NULL)
+    res = fml_merge(x$fml_all$linear, x$fml_all$fixef, NULL)
     return(res)
     
   } else if(type == "full.nofixef.noiv"){
-    res = merge_fml(x$fml_all$linear, NULL, NULL)
+    res = fml_merge(x$fml_all$linear, NULL, NULL)
     return(res)
     
   } else if(type == "lhs"){
     return(x$fml[1:2])
 
   } else if(type == "rhs"){
-    rhs = merge_fml(x$fml_all$linear, x$fml_all$fixef)
+    rhs = fml_merge(x$fml_all$linear, x$fml_all$fixef)
     return(rhs[c(1, 3)])
 
   } else if(type == "rhs.nofixef"){
@@ -3688,7 +3688,7 @@ formula.fixest = function(x, type = "full", fml.update = NULL,
 
     } else if(type == "iv.reduced"){
       rhs = xpd(x$fml, add = fml_iv[[3]])
-      res = merge_fml(rhs, x$fml_all$fixef)
+      res = fml_merge(rhs, x$fml_all$fixef)
       return(res)
 
     }

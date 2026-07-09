@@ -2219,6 +2219,213 @@ xpd = function(fml, ..., add = NULL, lhs = NULL, rhs = NULL, add.after_pipe = NU
   fml
 }
 
+get_fml_all = function(x) { 
+  if (inherits(x, "fixest")) { 
+    return(x$fml_all)
+  } else if (inherits(x, "formula")) { 
+    fml_parts = fml_split(x, raw = TRUE)
+    n_parts = length(fml_parts)
+
+    do_iv = is_fml_inside(fml_parts[[2]])
+
+    fml_all = list(
+      linear = fml_maker(fml_parts[[1]])
+    )
+
+    # The different parts of the formula
+    fml_fixef = fml_iv = NULL
+    if(n_parts == 3){
+      fml_all$fixef = fml_maker(fml_parts[[2]])
+      fml_all$iv = fml_maker(fml_parts[[3]])
+    } else if(n_parts == 2){
+      if(do_iv){
+        fml_all$iv = fml_maker(fml_parts[[2]])
+      } else {
+        fml_all$fixef = fml_maker(fml_parts[[2]])
+      }
+    }
+    return(fml_all)
+  }
+}
+
+fml_extract = function(
+  x,
+  type = "full",
+  fml.update = NULL,
+  fml.build = NULL,
+  ...
+) { 
+  fml_all = get_fml_all(x)
+  
+  # Extract the formula from the object
+  # we add the clusters in the formula if needed
+
+  # Checking the arguments
+  if (is_user_level_call()) {
+    validate_dots(suggest_args = "type")
+  }
+
+  check_arg(fml.update, fml.build, "NULL ts formula")
+
+  if (isTRUE(x$is_fit)) {
+    stop(
+      "fml_extract method not available for fixest estimations obtained from fit methods."
+    )
+  }
+
+  check_set_arg(
+    type,
+    "match(full, full.noiv, full.nofixef.noiv, lhs, indep, rhs, rhs.nofixef, NL, fixef, iv, iv.endo, iv.inst, iv.reduced, linear)",
+    .message = "The argument `type` must be one of: `full`, `full.noiv`, `full.nofixef.noiv`, `lhs`, `rhs`, `indep`, `rhs.nofixef`, `NL`, `fixef`, `iv`, `iv.endo`, `iv.inst`, `iv.reduced`"
+  )
+
+  if (!is.null(fml.update)) {
+    fml_old = fml_merge(fml_all$linear, fml_all$fixef, fml_all$iv)
+    res = fixest_update_formula(fml.update, fml_old)
+
+    return(res)
+  }
+
+  if (!is.null(fml.build)) {
+    fml_main = fml_all$linear
+    fml_fixef = fml_all$fixef
+    fml_iv = fml_all$iv
+
+    fml_parts_new = fml_split(fml.build)
+
+    if (length(fml_parts_new) == 1) {
+      fml_fixef = NULL
+      fml_iv = NULL
+    } else if (length(fml_parts_new) == 2) {
+      if (length(fml_parts_new[[2]]) == 2) {
+        # no iv
+        fml_iv = NULL
+      } else {
+        # no FE
+        fml_fixef = NULL
+      }
+    }
+
+    fml_old = fml_merge(fml_main, fml_fixef, fml_iv)
+    res = fixest_update_formula(fml.build, fml_old)
+
+    vars = all.vars(res)
+    if (".lhs" %in% vars) {
+      res = replace_target_with_expr(res, quote(.lhs), fml_extract(x, "lhs")[[2]])
+    }
+
+    if (".indep" %in% vars) {
+      res = replace_target_with_expr(
+        res,
+        quote(.indep),
+        fml_extract(x, "indep")[[2]]
+      )
+    }
+
+    if (".fixef" %in% vars) {
+      res = replace_target_with_expr(
+        res,
+        quote(.fixef),
+        fml_extract(x, "fixef")[[2]]
+      )
+    }
+
+    if (".endo" %in% vars) {
+      if (!isTRUE(x$is_iv)) {
+        stop(
+          "In the argument `fml.update`, the variable `.endo` is only accessible when `x` is an IV estimation, which is not the case here."
+        )
+      }
+      res = replace_target_with_expr(
+        res,
+        quote(.endo),
+        fml_extract(x, "iv.endo")[[2]]
+      )
+    }
+
+    if (".inst" %in% vars) {
+      if (!isTRUE(x$is_iv)) {
+        stop(
+          "In the argument `fml.update`, the variable `.inst` is only accessible when `x` is an IV estimation, which is not the case here."
+        )
+      }
+      res = replace_target_with_expr(
+        res,
+        quote(.inst),
+        fml_extract(x, "iv.inst")[[2]]
+      )
+    }
+
+    return(res)
+  }
+
+  if (type == "linear") {
+    type = "full.nofixef.noiv"
+  }
+  if (type == "indep") {
+    type = "rhs.nofixef"
+  }
+
+  if (type == "full") {
+    res = fml_merge(fml_all$linear, fml_all$fixef, fml_all$iv)
+    return(res)
+  } else if (type == "full.noiv") {
+    res = fml_merge(fml_all$linear, fml_all$fixef, NULL)
+    return(res)
+  } else if (type == "full.nofixef.noiv") {
+    res = fml_merge(fml_all$linear, NULL, NULL)
+    return(res)
+  } else if (type == "lhs") {
+    return(x$fml[1:2])
+  } else if (type == "rhs") {
+    rhs = fml_merge(fml_all$linear, fml_all$fixef)
+    return(rhs[c(1, 3)])
+  } else if (type == "rhs.nofixef") {
+    return(x$fml[c(1, 3)])
+  } else if (type == "NL") {
+    if (!x$method == "feNmlm") {
+      stop("type = 'NL' is not valid for a ", x$method, " estimation.")
+    }
+
+    NL.fml = x$NL.fml
+    if (is.null(NL.fml)) {
+      stop(
+        "There was no nonlinear part estimated, option type = 'NL' cannot be used."
+      )
+    }
+
+    return(NL.fml)
+  } else if (type == "fixef") {
+    if (is.null(fml_all$fixef)) {
+      res = ~0
+    } else {
+      res = fml_all$fixef
+    }
+
+    return(res)
+  } else {
+    if (is.null(fml_all$iv)) {
+      stopi(
+        "Argument `type = '{type}'` is only available for feols estimations with IVs."
+      )
+    }
+
+    fml_iv = fml_all$iv
+
+    if (type == "iv") {
+      return(fml_iv)
+    } else if (type == "iv.endo") {
+      return(fml_iv[1:2])
+    } else if (type == "iv.inst") {
+      return(fml_iv[c(1, 3)])
+    } else if (type == "iv.reduced") {
+      rhs = xpd(x$fml, add = fml_iv[[3]])
+      res = fml_merge(rhs, fml_all$fixef)
+      return(res)
+    }
+  } 
+}
+
 
 #' Centers a set of variables around a set of factors
 #'
