@@ -3,6 +3,8 @@
 
 ## Bug fixes
 
+- fix bug in `predict()` with `newdata` on a model extracted from a stepwise estimation containing `i()`: the check on the `i()` levels indexed the freshly built model-matrix info with the (possibly longer) stored one, leading to a "subscript out of bounds" error. Reported by @davi-dmittelstadt, #672.
+
 - fix bug in vcov(): following v0.14.0, the returned object was a matrix of class `fixest_vcov` -- which led to problem for matrix operations as it didn't inherit the matrix class. Now fixed, thanks to @strengejacke, #652.
 
 - fix bug in `xpd`: variable completion with `..` suffix now works when after an underscore (e.g. `xpd(~var_.., data = data.frame(var_1=1, var_2=2))`)

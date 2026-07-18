@@ -2392,6 +2392,10 @@ test(predict(res, quoi), "err")
 res = feols(y ~ x1 | species^fe_bis, base, fixef.rm = "none")
 test(predict(res), predict(res, base))
 
+# predict with newdata on a model extracted from a stepwise estimation with i()
+res_sw = feols(y ~ sw(x1 + i(species), x1 + i(species)), base)
+test(predict(res_sw[[1]], newdata = base), predict(res_sw[[1]]))
+
 # Handling NAs properly
 base_NA = data.frame(a = 1:5, b = c(3:6, NA),
                      c = as.factor(c("a", "b", "a", "b", "a")))
