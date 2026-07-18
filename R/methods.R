@@ -2931,9 +2931,11 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
     mm_info_new = attr(matrix_linear, "model_matrix_info")
     if(!is.null(mm_info_new)){
       mm_info = object$model_matrix_info
-      # The order of creation is exactly the same (same fun used),
-      # so the two mm_info are identical in structure
-      for(i in seq_along(mm_info)){
+      # The order of creation is the same (same fun used), but the stored
+      # mm_info can hold more entries than the one rebuilt from newdata
+      # (e.g. models extracted from a stepwise estimation), so we only
+      # compare the entries that exist in both to avoid an out-of-bounds.
+      for(i in seq_len(min(length(mm_info), length(mm_info_new)))){
         mm_new_i = mm_info_new[[i]]
         mm_i = mm_info[[i]]
         if("coef_names_full" %in% names(mm_i)){
