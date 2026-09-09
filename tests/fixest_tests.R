@@ -149,11 +149,11 @@ for(model in c("ols", "pois", "logit", "negbin", "Gamma")){
           }
 
         } else if(model == "negbin"){
-          # no offset in glm.nb + no VS in fenegbin + no weights in fenegbin
-          if(use_weights || use_offset || id_fe > 2) next
+          # no offset in glm.nb + no VS in fenegbin
+          if(use_offset || id_fe > 2) next
 
-          res = fenegbin(fml_fixest, base, notes = FALSE)
-          res_bis = MASS::glm.nb(fml_stats, base)
+          res = fenegbin(fml_fixest, base, weights = my_weight, notes = FALSE)
+          res_bis = MASS::glm.nb(fml_stats, base, weights = my_weight)
 
         }
 
@@ -203,6 +203,70 @@ test(length(coef(res)), 1)
 res = feols(c(y, x1) ~ 1 | fe1 | x2 ~ x3, base)
 
 res = feols(y ~ x1 | fe1[x2] + fe2[x2], base)
+
+#
+# weights in the ML estimations
+#
+
+set.seed(3)
+base_ml = data.frame(x = rnorm(300), z = rnorm(300),
+                     fe1 = factor(rep(1:8, length.out = 300)),
+                     fe2 = factor(rep(1:5, each = 60)),
+                     w = runif(300, 0.3, 3))
+base_ml$y_count = rnbinom(300, mu = exp(0.5 + 0.4 * base_ml$x), size = 1.5)
+base_ml$y_01 = as.integer(base_ml$y_count > 1)
+
+# poisson: the ML algorithm must match glm
+for(fml_id in 1:3){
+  fml_ml = switch(fml_id, `1` = y_count ~ x + z,
+                          `2` = y_count ~ x + z | fe1,
+                          `3` = y_count ~ x + z | fe1 + fe2)
+  fml_glm = switch(fml_id, `1` = y_count ~ x + z,
+                           `2` = y_count ~ x + z + fe1,
+                           `3` = y_count ~ x + z + fe1 + fe2)
+
+  res = femlm(fml_ml, base_ml, family = "poisson", weights = ~w)
+  res_bis = glm(fml_glm, poisson(), base_ml, weights = w)
+
+  test(coef(res)["x"], coef(res_bis)["x"], "~", 1e-5)
+  test(coef(res)["z"], coef(res_bis)["z"], "~", 1e-5)
+  # K.adj = 0 => no small sample adjustment, as in glm
+  test(se(res, se = "st", ssc = ssc(K.adj = 0))["x"],
+       summary(res_bis)$coefficients["x", 2], "~", 1e-4)
+}
+
+# logit and gaussian
+test(coef(femlm(y_01 ~ x + z | fe1, base_ml, family = "logit", weights = ~w))["x"],
+     coef(suppressWarnings(glm(y_01 ~ x + z + fe1, binomial(), base_ml, weights = w)))["x"],
+     "~", 1e-5)
+test(coef(femlm(y_count ~ x + z | fe1, base_ml, family = "gaussian", weights = ~w))["x"],
+     coef(lm(y_count ~ x + z + fe1, base_ml, weights = w))["x"], "~", 1e-5)
+
+# negbin: both the coefficients and the over-dispersion parameter
+res = fenegbin(y_count ~ x + z | fe1, base_ml, weights = ~w, notes = FALSE)
+res_bis = MASS::glm.nb(y_count ~ x + z + fe1, base_ml, weights = base_ml$w)
+test(coef(res)["x"], coef(res_bis)["x"], "~", 1e-4)
+test(res$theta, res_bis$theta, "~", 1e-3)
+
+# a unit weight must be identical to no weight at all
+test(coef(fenegbin(y_count ~ x + z | fe1, base_ml, weights = rep(1, 300), notes = FALSE)),
+     coef(fenegbin(y_count ~ x + z | fe1, base_ml, notes = FALSE)))
+
+# 0 weights: the observations are dropped
+test(coef(femlm(y_count ~ x + z | fe1, base_ml, family = "poisson",
+                weights = c(rep(0, 30), base_ml$w[-(1:30)]), notes = FALSE))["x"],
+     coef(femlm(y_count ~ x + z | fe1, base_ml[-(1:30), ], family = "poisson",
+                weights = base_ml$w[-(1:30)]))["x"], "~", 1e-8)
+
+# split: the environment is reshaped, the weights must be subset accordingly
+res_split = fenegbin(y_count ~ x + z | fe1, base_ml, weights = ~w, split = ~fe2,
+                     notes = FALSE)
+test(coef(res_split[[1]])["x"],
+     coef(fenegbin(y_count ~ x + z | fe1, base_ml[base_ml$fe2 == 1, ],
+                   weights = base_ml$w[base_ml$fe2 == 1], notes = FALSE))["x"], "~", 1e-4)
+
+# the weights are stored in the result
+test(weights(fenegbin(y_count ~ x | fe1, base_ml, weights = ~w, notes = FALSE)), base_ml$w)
 
 #
 # singletons

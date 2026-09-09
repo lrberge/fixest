@@ -1,6 +1,10 @@
 
 # fixest 0.14.2
 
+## New features
+
+- `femlm`, `fenegbin` and `feNmlm` gain the argument `weights`, hence maximum likelihood estimations can now be weighted. The weights enter the log-likelihood linearly and are accounted for in the score, in the information matrix and in the concentration of the fixed-effects; for the negative binomial the over-dispersion parameter is weighted too. Note that until now the argument was silently ignored by these functions (a generic warning was raised and unweighted estimates were returned).
+
 ## Bug fixes
 
 - fix bug in vcov(): following v0.14.0, the returned object was a matrix of class `fixest_vcov` -- which led to problem for matrix operations as it didn't inherit the matrix class. Now fixed, thanks to @strengejacke, #652.

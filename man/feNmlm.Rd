@@ -17,6 +17,7 @@ feNmlm(
   upper,
   NL.start.init,
   offset,
+  weights,
   subset,
   split,
   fsplit,
@@ -148,6 +149,10 @@ is set to \code{NL.start.init}.}
 \item{offset}{A formula or a numeric vector. An offset can be added to the estimation.
 If equal to a formula, it should be of the form (for example) \code{~0.5*x**2}. This
 offset is linearly added to the elements of the main formula 'fml'.}
+
+\item{weights}{A formula or a numeric vector. Each observation can be weighted,
+the weights must be greater than 0. If equal to a formula, it should be one-sided:
+for example \code{~ var_weight}.}
 
 \item{subset}{A vector (logical or numeric) or a one-sided formula. If provided,
 then the estimation will be performed only on the observations defined by this argument.}
