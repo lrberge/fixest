@@ -1,0 +1,52 @@
+# Line endings
+# ------------
+# Every text file uses LF, both in the repository and in the working tree.
+# This keeps generated files stable: Rcpp::compileAttributes() and roxygen2
+# write CRLF on Windows, which otherwise shows up as a whole-file diff.
+* text=auto eol=lf
+
+# Binary artifacts
+# ----------------
+# Marked explicitly so that git never applies the line-ending filter to them
+# and never tries to diff them as text.
+
+# images and fonts
+*.png     binary
+*.PNG     binary
+*.jpg     binary
+*.jpeg    binary
+*.gif     binary
+*.ico     binary
+*.ttf     binary
+*.otf     binary
+*.woff    binary
+*.woff2   binary
+*.eot     binary
+
+# documents
+*.pdf     binary
+*.docx    binary
+*.xlsx    binary
+*.pptx    binary
+*.doc     binary
+*.xls     binary
+*.ppt     binary
+
+# data sets and on-disk databases
+*.RData   binary
+*.rdata   binary
+*.rda     binary
+*.rds     binary
+*.dta     binary
+*.sav     binary
+*.parquet binary
+*.feather binary
+*.duckdb  binary
+*.sqlite  binary
+
+# archives
+*.zip     binary
+*.gz      binary
+*.bz2     binary
+*.xz      binary
+*.tar     binary
