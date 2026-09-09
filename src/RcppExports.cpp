@@ -11,8 +11,8 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // compute_cluster_coef_r
-SEXP compute_cluster_coef_r(int family, int nb_coef, double theta, double diffMax_NR, SEXP r_mu, SEXP r_lhs, SEXP r_sum_y, SEXP r_dum, SEXP r_obsCluster, SEXP r_table, SEXP r_cumtable, int nthreads);
-RcppExport SEXP _fixest_compute_cluster_coef_r(SEXP familySEXP, SEXP nb_coefSEXP, SEXP thetaSEXP, SEXP diffMax_NRSEXP, SEXP r_muSEXP, SEXP r_lhsSEXP, SEXP r_sum_ySEXP, SEXP r_dumSEXP, SEXP r_obsClusterSEXP, SEXP r_tableSEXP, SEXP r_cumtableSEXP, SEXP nthreadsSEXP) {
+SEXP compute_cluster_coef_r(int family, int nb_coef, double theta, double diffMax_NR, SEXP r_mu, SEXP r_lhs, SEXP r_sum_y, SEXP r_dum, SEXP r_obsCluster, SEXP r_table, SEXP r_cumtable, int nthreads, SEXP r_weights, SEXP r_sum_w);
+RcppExport SEXP _fixest_compute_cluster_coef_r(SEXP familySEXP, SEXP nb_coefSEXP, SEXP thetaSEXP, SEXP diffMax_NRSEXP, SEXP r_muSEXP, SEXP r_lhsSEXP, SEXP r_sum_ySEXP, SEXP r_dumSEXP, SEXP r_obsClusterSEXP, SEXP r_tableSEXP, SEXP r_cumtableSEXP, SEXP nthreadsSEXP, SEXP r_weightsSEXP, SEXP r_sum_wSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -28,13 +28,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< SEXP >::type r_table(r_tableSEXP);
     Rcpp::traits::input_parameter< SEXP >::type r_cumtable(r_cumtableSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_cluster_coef_r(family, nb_coef, theta, diffMax_NR, r_mu, r_lhs, r_sum_y, r_dum, r_obsCluster, r_table, r_cumtable, nthreads));
+    Rcpp::traits::input_parameter< SEXP >::type r_weights(r_weightsSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type r_sum_w(r_sum_wSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_cluster_coef_r(family, nb_coef, theta, diffMax_NR, r_mu, r_lhs, r_sum_y, r_dum, r_obsCluster, r_table, r_cumtable, nthreads, r_weights, r_sum_w));
     return rcpp_result_gen;
 END_RCPP
 }
 // update_mu_single_cluster
-SEXP update_mu_single_cluster(int family, int nb_cluster, double theta, double diffMax_NR, SEXP mu_in, SEXP lhs, SEXP sum_y, SEXP dum, SEXP obsCluster, SEXP table, SEXP cumtable, int nthreads);
-RcppExport SEXP _fixest_update_mu_single_cluster(SEXP familySEXP, SEXP nb_clusterSEXP, SEXP thetaSEXP, SEXP diffMax_NRSEXP, SEXP mu_inSEXP, SEXP lhsSEXP, SEXP sum_ySEXP, SEXP dumSEXP, SEXP obsClusterSEXP, SEXP tableSEXP, SEXP cumtableSEXP, SEXP nthreadsSEXP) {
+SEXP update_mu_single_cluster(int family, int nb_cluster, double theta, double diffMax_NR, SEXP mu_in, SEXP lhs, SEXP sum_y, SEXP dum, SEXP obsCluster, SEXP table, SEXP cumtable, int nthreads, SEXP weights, SEXP sum_w);
+RcppExport SEXP _fixest_update_mu_single_cluster(SEXP familySEXP, SEXP nb_clusterSEXP, SEXP thetaSEXP, SEXP diffMax_NRSEXP, SEXP mu_inSEXP, SEXP lhsSEXP, SEXP sum_ySEXP, SEXP dumSEXP, SEXP obsClusterSEXP, SEXP tableSEXP, SEXP cumtableSEXP, SEXP nthreadsSEXP, SEXP weightsSEXP, SEXP sum_wSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -50,13 +52,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< SEXP >::type table(tableSEXP);
     Rcpp::traits::input_parameter< SEXP >::type cumtable(cumtableSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(update_mu_single_cluster(family, nb_cluster, theta, diffMax_NR, mu_in, lhs, sum_y, dum, obsCluster, table, cumtable, nthreads));
+    Rcpp::traits::input_parameter< SEXP >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type sum_w(sum_wSEXP);
+    rcpp_result_gen = Rcpp::wrap(update_mu_single_cluster(family, nb_cluster, theta, diffMax_NR, mu_in, lhs, sum_y, dum, obsCluster, table, cumtable, nthreads, weights, sum_w));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_conv_acc_gnl
-List cpp_conv_acc_gnl(int family, int iterMax, double diffMax, double diffMax_NR, double theta, SEXP nb_cluster_all, SEXP lhs, SEXP mu_init, SEXP dum_vector, SEXP tableCluster_vector, SEXP sum_y_vector, SEXP cumtable_vector, SEXP obsCluster_vector, int nthreads);
-RcppExport SEXP _fixest_cpp_conv_acc_gnl(SEXP familySEXP, SEXP iterMaxSEXP, SEXP diffMaxSEXP, SEXP diffMax_NRSEXP, SEXP thetaSEXP, SEXP nb_cluster_allSEXP, SEXP lhsSEXP, SEXP mu_initSEXP, SEXP dum_vectorSEXP, SEXP tableCluster_vectorSEXP, SEXP sum_y_vectorSEXP, SEXP cumtable_vectorSEXP, SEXP obsCluster_vectorSEXP, SEXP nthreadsSEXP) {
+List cpp_conv_acc_gnl(int family, int iterMax, double diffMax, double diffMax_NR, double theta, SEXP nb_cluster_all, SEXP lhs, SEXP mu_init, SEXP dum_vector, SEXP tableCluster_vector, SEXP sum_y_vector, SEXP cumtable_vector, SEXP obsCluster_vector, int nthreads, SEXP weights, SEXP sum_w_vector);
+RcppExport SEXP _fixest_cpp_conv_acc_gnl(SEXP familySEXP, SEXP iterMaxSEXP, SEXP diffMaxSEXP, SEXP diffMax_NRSEXP, SEXP thetaSEXP, SEXP nb_cluster_allSEXP, SEXP lhsSEXP, SEXP mu_initSEXP, SEXP dum_vectorSEXP, SEXP tableCluster_vectorSEXP, SEXP sum_y_vectorSEXP, SEXP cumtable_vectorSEXP, SEXP obsCluster_vectorSEXP, SEXP nthreadsSEXP, SEXP weightsSEXP, SEXP sum_w_vectorSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -74,13 +78,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< SEXP >::type cumtable_vector(cumtable_vectorSEXP);
     Rcpp::traits::input_parameter< SEXP >::type obsCluster_vector(obsCluster_vectorSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_conv_acc_gnl(family, iterMax, diffMax, diffMax_NR, theta, nb_cluster_all, lhs, mu_init, dum_vector, tableCluster_vector, sum_y_vector, cumtable_vector, obsCluster_vector, nthreads));
+    Rcpp::traits::input_parameter< SEXP >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type sum_w_vector(sum_w_vectorSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_conv_acc_gnl(family, iterMax, diffMax, diffMax_NR, theta, nb_cluster_all, lhs, mu_init, dum_vector, tableCluster_vector, sum_y_vector, cumtable_vector, obsCluster_vector, nthreads, weights, sum_w_vector));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_conv_seq_gnl
-List cpp_conv_seq_gnl(int family, int iterMax, double diffMax, double diffMax_NR, double theta, SEXP nb_cluster_all, SEXP lhs, SEXP mu_init, SEXP dum_vector, SEXP tableCluster_vector, SEXP sum_y_vector, SEXP cumtable_vector, SEXP obsCluster_vector, int nthreads);
-RcppExport SEXP _fixest_cpp_conv_seq_gnl(SEXP familySEXP, SEXP iterMaxSEXP, SEXP diffMaxSEXP, SEXP diffMax_NRSEXP, SEXP thetaSEXP, SEXP nb_cluster_allSEXP, SEXP lhsSEXP, SEXP mu_initSEXP, SEXP dum_vectorSEXP, SEXP tableCluster_vectorSEXP, SEXP sum_y_vectorSEXP, SEXP cumtable_vectorSEXP, SEXP obsCluster_vectorSEXP, SEXP nthreadsSEXP) {
+List cpp_conv_seq_gnl(int family, int iterMax, double diffMax, double diffMax_NR, double theta, SEXP nb_cluster_all, SEXP lhs, SEXP mu_init, SEXP dum_vector, SEXP tableCluster_vector, SEXP sum_y_vector, SEXP cumtable_vector, SEXP obsCluster_vector, int nthreads, SEXP weights, SEXP sum_w_vector);
+RcppExport SEXP _fixest_cpp_conv_seq_gnl(SEXP familySEXP, SEXP iterMaxSEXP, SEXP diffMaxSEXP, SEXP diffMax_NRSEXP, SEXP thetaSEXP, SEXP nb_cluster_allSEXP, SEXP lhsSEXP, SEXP mu_initSEXP, SEXP dum_vectorSEXP, SEXP tableCluster_vectorSEXP, SEXP sum_y_vectorSEXP, SEXP cumtable_vectorSEXP, SEXP obsCluster_vectorSEXP, SEXP nthreadsSEXP, SEXP weightsSEXP, SEXP sum_w_vectorSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -98,7 +104,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< SEXP >::type cumtable_vector(cumtable_vectorSEXP);
     Rcpp::traits::input_parameter< SEXP >::type obsCluster_vector(obsCluster_vectorSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_conv_seq_gnl(family, iterMax, diffMax, diffMax_NR, theta, nb_cluster_all, lhs, mu_init, dum_vector, tableCluster_vector, sum_y_vector, cumtable_vector, obsCluster_vector, nthreads));
+    Rcpp::traits::input_parameter< SEXP >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type sum_w_vector(sum_w_vectorSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_conv_seq_gnl(family, iterMax, diffMax, diffMax_NR, theta, nb_cluster_all, lhs, mu_init, dum_vector, tableCluster_vector, sum_y_vector, cumtable_vector, obsCluster_vector, nthreads, weights, sum_w_vector));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1167,10 +1175,10 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_fixest_compute_cluster_coef_r", (DL_FUNC) &_fixest_compute_cluster_coef_r, 12},
-    {"_fixest_update_mu_single_cluster", (DL_FUNC) &_fixest_update_mu_single_cluster, 12},
-    {"_fixest_cpp_conv_acc_gnl", (DL_FUNC) &_fixest_cpp_conv_acc_gnl, 14},
-    {"_fixest_cpp_conv_seq_gnl", (DL_FUNC) &_fixest_cpp_conv_seq_gnl, 14},
+    {"_fixest_compute_cluster_coef_r", (DL_FUNC) &_fixest_compute_cluster_coef_r, 14},
+    {"_fixest_update_mu_single_cluster", (DL_FUNC) &_fixest_update_mu_single_cluster, 14},
+    {"_fixest_cpp_conv_acc_gnl", (DL_FUNC) &_fixest_cpp_conv_acc_gnl, 16},
+    {"_fixest_cpp_conv_seq_gnl", (DL_FUNC) &_fixest_cpp_conv_seq_gnl, 16},
     {"_fixest_get_n_cells", (DL_FUNC) &_fixest_get_n_cells, 2},
     {"_fixest_cpp_conv_acc_poi_2", (DL_FUNC) &_fixest_cpp_conv_acc_poi_2, 11},
     {"_fixest_cpp_conv_seq_poi_2", (DL_FUNC) &_fixest_cpp_conv_seq_poi_2, 11},

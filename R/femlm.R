@@ -132,7 +132,7 @@ femlm_hessian = function(coef, env){
 
 	jacob.mat = get_Jacobian(coef, env)
 
-	ll_d2 = famFuns$ll_d2(y, mu, exp_mu, coef)
+	ll_d2 = famFuns$ll_d2(y, mu, exp_mu, coef = coef, env = env)
 	if(isFixef){
 		dxi_dbeta = deriv_xi(jacob.mat, ll_d2, env, coef)
 		jacob.mat = jacob.mat + dxi_dbeta
@@ -647,14 +647,15 @@ get_model_null = function(env, theta.init){
 	if(family == "poisson"){
 		# There is a closed form
 
+		w = get0("weights.value", envir = env, ifnotfound = 1)
+
 		if("lfactorial" %in% names(env)){
 			lfact = get("lfactorial", env)
 		} else {
-			lfact = sum(rpar_lgamma(y + 1, env))
+			lfact = wsum(w, rpar_lgamma(y + 1, env))
 			assign("lfactorial", lfact, env)
 		}
 
-	    w = env$weights.value
 	    isWeight = length(w) > 1
 	    if(isWeight){
 	        sy = sum(y * w)
@@ -669,8 +670,10 @@ get_model_null = function(env, theta.init){
 
 	} else if(family == "gaussian"){
 		# there is a closed form
-		constant = mean(y)
-		ss = sum( (y - constant)**2 )
+		w = get0("weights.value", envir = env, ifnotfound = 1)
+		N = wn(w, y)
+		constant = wsum(w, y) / N
+		ss = wsum(w, (y - constant)**2 )
 		sigma = sqrt( ss / N )
 		loglik = -1/2/sigma^2*ss - N*log(sigma) - N*log(2*pi)/2
 
@@ -691,18 +694,21 @@ get_model_null = function(env, theta.init){
 
 	} else if(family=="negbin"){
 
+		w = get0("weights.value", envir = env, ifnotfound = 1)
+		N = wn(w, y)
+
 		if("lgamma" %in% names(env)){
 			lgamm = get("lgamma", env)
 		} else {
-			lgamm = sum(rpar_lgamma(y + 1, env))
+			lgamm = wsum(w, rpar_lgamma(y + 1, env))
 			assign("lgamma", lgamm, env)
 		}
 
-		sy = sum(y)
+		sy = wsum(w, y)
 		constant = log(sy / N)
 
-		mean_y = mean(y)
-		invariant = sum(y*constant) - lgamm
+		mean_y = sy / N
+		invariant = sy*constant - lgamm
 
 		if(is.null(theta.init)){
 			theta.guess = max(mean_y**2 / max((var(y) - mean_y), 1e-4), 0.05)
@@ -1038,6 +1044,40 @@ deriv_xi_other = function(ll_dx_dother, ll_d2, env, coef){
 #### Convergence ####
 ####
 
+setup_weighted_sums = function(env){
+	# The convergence algorithms need, for each fixed-effect cluster, the sum of w*y
+	# and the sum of w (the latter replaces the cluster size in the weighted problem).
+	# They do not change during the estimation, hence they are computed only once.
+	# When the estimation is unweighted, sum_y is already what cpp expects and NULL is
+	# passed instead of the weights.
+
+	w = get0("weights.value", envir = env, ifnotfound = 1)
+
+	if(length(w) == 1 || !get("isFixef", env)){
+		assign("sum_w_vector", NULL, env)
+		return(invisible(NULL))
+	}
+
+	lhs = get("lhs", env)
+	fixef_id_list = get("fixef_id_list", env)
+	fixef_sizes = get("fixef_sizes", env)
+
+	wy = w * lhs
+	sum_y_all = sum_w_all = list()
+	for(q in seq_along(fixef_id_list)){
+		# cpp_tapply_vsum expects the 1-based cluster ids
+		id = as.integer(fixef_id_list[[q]])
+		sum_y_all[[q]] = cpp_tapply_vsum(fixef_sizes[q], wy, id)
+		sum_w_all[[q]] = cpp_tapply_vsum(fixef_sizes[q], w, id)
+	}
+
+	assign("sum_y", sum_y_all, env)
+	assign("sum_y_vector", unlist(sum_y_all), env)
+	assign("sum_w_vector", unlist(sum_w_all), env)
+
+	invisible(NULL)
+}
+
 convergence = function(coef, mu_in, env, iterMax){
 	# computes the new mu wrt the cluster coefficients
 
@@ -1096,6 +1136,12 @@ conv_single = function(coef, mu_in, env){
 	NR.tol = get("NR.tol", env)
 	family = get("familyConv", env)
 
+	# Weights: NULL is passed to cpp when the estimation is unweighted
+	w = get0("weights.value", envir = env, ifnotfound = 1)
+	isWeight = length(w) > 1
+	weights_cpp = if(isWeight) w else NULL
+	sum_w_cpp = if(isWeight) get("sum_w_vector", env) else NULL
+
 	family_nb = switch(family, poisson=1, negbin=2, logit=3, gaussian=4, lpoisson=5)
 	theta = ifelse(family == "negbin", coef[".theta"], 1)
 
@@ -1104,7 +1150,7 @@ conv_single = function(coef, mu_in, env){
 	  diffMax_NR = NR.tol, mu_in = mu_in, lhs = lhs, sum_y = sum_y_vector, 
 	  dum = fixef_id_vector, obsCluster = fixef_order_vector, 
 	  table = fixef_table_vector, cumtable = fixef_cumtable_vector, 
-	  nthreads = nthreads
+	  nthreads = nthreads, weights = weights_cpp, sum_w = sum_w_cpp
 	)
 
 	return(mu_new)
@@ -1128,6 +1174,12 @@ conv_seq = function(coef, mu_in, env, iterMax){
 	NR.tol = get("NR.tol", env)
 	family = get("familyConv", env)
 
+	# Weights: NULL is passed to cpp when the estimation is unweighted
+	w = get0("weights.value", envir = env, ifnotfound = 1)
+	isWeight = length(w) > 1
+	weights_cpp = if(isWeight) w else NULL
+	sum_w_cpp = if(isWeight) get("sum_w_vector", env) else NULL
+
 	family_nb = switch(family, poisson = 1, negbin = 2, logit = 3, gaussian = 4, lpoisson = 5)
 	theta = ifelse(family == "negbin", coef[".theta"], 1)
 
@@ -1138,7 +1190,7 @@ conv_seq = function(coef, mu_in, env, iterMax){
 		mu_in = log(mu_in)
 	}
 
-	if(Q == 2 & family == "poisson"){
+	if(Q == 2 & family == "poisson" & !isWeight){
 		# Required Variables
 		setup_poisson_fixedcost(env)
 		info = get("fixedCostPoisson", env)
@@ -1149,7 +1201,7 @@ conv_seq = function(coef, mu_in, env, iterMax){
 		                         sum_y_vector = sum_y_vector, iterMax = iterMax, 
 		                         diffMax = fixef.tol, exp_mu_in = mu_in)
 
-	} else if(Q == 2 & family == "gaussian"){
+	} else if(Q == 2 & family == "gaussian" & !isWeight){
 		# Required variables
 		setup_gaussian_fixedcost(env)
 		info = get("fixedCostGaussian", env)
@@ -1168,7 +1220,8 @@ conv_seq = function(coef, mu_in, env, iterMax){
 		                       nb_cluster_all = fixef_sizes, mu_init = mu_in, 
 		                       dum_vector = dum_vector, tableCluster_vector = fixef_table_vector, 
 		                       sum_y_vector = sum_y_vector, cumtable_vector = fixef_cumtable_vector, 
-		                       obsCluster_vector = fixef_order_vector, nthreads = nthreads)
+		                       obsCluster_vector = fixef_order_vector, nthreads = nthreads, 
+		                       weights = weights_cpp, sum_w_vector = sum_w_cpp)
 	}
 
 	if(family == "lpoisson"){
@@ -1197,6 +1250,12 @@ conv_acc = function(coef, mu_in, env, iterMax, only2 = FALSE){
 	NR.tol = get("NR.tol", env)
 	family = get("familyConv", env)
 
+	# Weights: NULL is passed to cpp when the estimation is unweighted
+	w = get0("weights.value", envir = env, ifnotfound = 1)
+	isWeight = length(w) > 1
+	weights_cpp = if(isWeight) w else NULL
+	sum_w_cpp = if(isWeight) get("sum_w_vector", env) else NULL
+
 	family_nb = switch(family, poisson = 1, negbin = 2, logit = 3, gaussian = 4, lpoisson = 5)
 	theta = ifelse(family == "negbin", coef[".theta"], 1)
 
@@ -1220,7 +1279,7 @@ conv_acc = function(coef, mu_in, env, iterMax, only2 = FALSE){
 		mu_in = log(mu_in)
 	}
 
-	if(Q == 2 & family == "poisson"){
+	if(Q == 2 & family == "poisson" & !isWeight){
 		# Required Variables
 		setup_poisson_fixedcost(env)
 		info = get("fixedCostPoisson", env)
@@ -1231,7 +1290,7 @@ conv_acc = function(coef, mu_in, env, iterMax, only2 = FALSE){
 		                         sum_y_vector = sum_y_vector, iterMax = iterMax, 
 		                         diffMax = fixef.tol, exp_mu_in = mu_in)
 
-	} else if(Q == 2 & family == "gaussian"){
+	} else if(Q == 2 & family == "gaussian" & !isWeight){
 		# Required variables
 		setup_gaussian_fixedcost(env)
 		info = get("fixedCostGaussian", env)
@@ -1250,7 +1309,8 @@ conv_acc = function(coef, mu_in, env, iterMax, only2 = FALSE){
 		                       nb_cluster_all = fixef_sizes, mu_init = mu_in, 
 		                       dum_vector = dum_vector, tableCluster_vector = fixef_table_vector, 
 		                       sum_y_vector = sum_y_vector, cumtable_vector = fixef_cumtable_vector, 
-		                       obsCluster_vector = fixef_order_vector, nthreads = nthreads)
+		                       obsCluster_vector = fixef_order_vector, nthreads = nthreads, 
+		                       weights = weights_cpp, sum_w_vector = sum_w_cpp)
 	}
 
 	if(family == "poisson" && res$any_negative_poisson){

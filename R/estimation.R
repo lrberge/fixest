@@ -3484,6 +3484,12 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
 #' the same families but differ in that the latter is a direct maximum likelihood 
 #' optimization (so the two can really have different convergence rates).
 #'
+#' Weighted estimations are supported via the argument `weights`. The weights enter 
+#' the log-likelihood linearly, i.e. the objective becomes `sum_i w_i * l_i`, and they 
+#' are taken into account in the score, in the information matrix and in the 
+#' concentration of the fixed-effects. For the negative binomial, the over-dispersion 
+#' parameter is estimated jointly with the coefficients and is weighted too.
+#'
 #' @return
 #' A `fixest` object. Note that `fixest` objects contain many elements and most of 
 #' them are for internal use, they are presented here only for information. 
@@ -3622,7 +3628,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
 #'
 #'
 femlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian"), vcov,
-                 start = 0, fixef, fixef.rm = "perfect_fit", offset, subset,
+                 start = 0, fixef, fixef.rm = "perfect_fit", offset, weights, subset,
                  split, fsplit, split.keep, split.drop,
                  cluster, se, ssc, panel.id, panel.time.step = NULL, 
                  panel.duplicate.method = "none", 
@@ -3638,7 +3644,7 @@ femlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian")
   call_env_bis = new.env(parent = parent.frame())
 
   res = try(feNmlm(fml = fml, data = data, family = family, fixef = fixef,
-                   fixef.rm = fixef.rm, offset = offset, subset = subset,
+                   fixef.rm = fixef.rm, offset = offset, weights = weights, subset = subset,
                    split = split, fsplit = fsplit,
                    split.keep = split.keep, split.drop = split.drop,
                    vcov = vcov, cluster = cluster,
@@ -3664,7 +3670,7 @@ femlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian")
 
 #' @rdname femlm
 fenegbin = function(fml, data, vcov, theta.init, start = 0, fixef, fixef.rm = "perfect_fit",
-                    offset, subset, split, fsplit, split.keep, split.drop,
+                    offset, weights, subset, split, fsplit, split.keep, split.drop,
                     cluster, se, ssc, panel.id, panel.time.step = NULL, 
                     panel.duplicate.method = "none",
                     fixef.tol = 1e-5, fixef.iter = 10000, nthreads = getFixest_nthreads(),
@@ -3683,7 +3689,7 @@ fenegbin = function(fml, data, vcov, theta.init, start = 0, fixef, fixef.rm = "p
 
   res = try(feNmlm(fml = fml, data = data, family = "negbin", theta.init = theta.init,
                    start = start, fixef = fixef, fixef.rm = fixef.rm, offset = offset,
-                   subset = subset, split = split, fsplit = fsplit,
+                   weights = weights, subset = subset, split = split, fsplit = fsplit,
                    split.keep = split.keep, split.drop = split.drop,
                    vcov = vcov, cluster = cluster,
                    se = se, ssc = ssc, panel.id = panel.id, panel.time.step = panel.time.step,
@@ -3858,6 +3864,9 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
 #' @param offset A formula or a numeric vector. An offset can be added to the estimation. 
 #' If equal to a formula, it should be of the form (for example) `~0.5*x**2`. This 
 #' offset is linearly added to the elements of the main formula 'fml'.
+#' @param weights A formula or a numeric vector. Each observation can be weighted, 
+#' the weights must be greater than 0. If equal to a formula, it should be one-sided: 
+#' for example `~ var_weight`.
 #' @param jacobian.method (For NL models only) Character scalar. Provides the method 
 #' used to numerically compute the Jacobian of the non-linear part. 
 #' Can be either `"simple"` or `"Richardson"`. Default is `"simple"`. 
@@ -4135,7 +4144,7 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
 #'
 feNmlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian"), NL.fml, vcov,
                   fixef, fixef.rm = "perfect_fit", NL.start, lower, upper, NL.start.init,
-                  offset, subset, split, fsplit, split.keep, split.drop,
+                  offset, weights, subset, split, fsplit, split.keep, split.drop,
                   cluster, se, ssc, panel.id, panel.time.step = NULL, 
                   panel.duplicate.method = "none",
                   start = 0, jacobian.method = "simple", useHessian = TRUE,
@@ -4155,7 +4164,8 @@ feNmlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian"
     env = try(fixest_env(fml = fml, data = data, family = family, NL.fml = NL.fml,
                          fixef = fixef, fixef.rm = fixef.rm, NL.start = NL.start,
                          lower = lower, upper = upper, NL.start.init = NL.start.init,
-                         offset = offset, subset = subset, split = split, fsplit = fsplit,
+                         offset = offset, weights = weights, subset = subset, 
+                         split = split, fsplit = fsplit,
                          split.keep = split.keep, split.drop = split.drop,
                          vcov = vcov, cluster = cluster, se = se, ssc = ssc,
                          panel.id = panel.id, panel.time.step = panel.time.step,
@@ -4266,6 +4276,9 @@ feNmlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian"
 
   isFixef = get("isFixef", env)
   onlyFixef = !isLinear && !isNonLinear && isFixef
+
+  # the per-cluster weighted sums used by the convergence algorithms
+  setup_weighted_sums(env)
 
   #
   # Model 0 + theta init
