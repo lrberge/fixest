@@ -9,6 +9,7 @@ demeaning_algo(
   iter_warmup = 15,
   iter_projAfterAcc = 40,
   iter_grandAcc = 4,
+  parallel_yDemean = FALSE,
   internal = FALSE
 )
 }
@@ -43,11 +44,16 @@ This settings controls a grand acceleration, which is instead for \code{f^k(X)} 
 is performed for \code{h(X) = f^4(X)} every 8 iterations (2 times 4, equivalent to
 the iterations the time to gather \code{h(X)} and \code{h(h(X))}).}
 
+\item{parallel_yDemean}{Logical scalar, default is \code{FALSE}. If \code{TRUE}, the demeaning
+of the dependent variable(s) is parallelized across threads internally. This avoids
+the bottleneck where one thread demeans the dependent variable while all other threads
+remain idle.}
+
 \item{internal}{Logical scalar, default is \code{FALSE}. If \code{TRUE}, no check on the arguments
 is performed and the returned object is a plain list. For internal use only.}
 }
 \value{
-This function returns a list of 4 integers, equal to the arguments passed by the user.
+This function returns a list of 5 elements, equal to the arguments passed by the user.
 That list is of class \code{demeaning_algo}.
 }
 \description{

@@ -2170,6 +2170,51 @@ trade_dt$ln_dist = log(trade_dt$dist_km)
 dist_dm_dt = demean(ln_dist ~ Origin + Destination, data = trade_dt)
 dist_dm_df = demean(ln_dist ~ Origin + Destination, data = base)
 
+# parallel_yDemean tests
+algo_p0 = demeaning_algo(parallel_yDemean = FALSE)
+algo_p1 = demeaning_algo(parallel_yDemean = TRUE)
+test(algo_p0$parallel_yDemean, FALSE)
+test(algo_p1$parallel_yDemean, TRUE)
+
+# 1. Direct demean() with 1, 2, and 3 FEs
+fe1 = base[, "Origin", drop = FALSE]
+fe2 = base[, c("Origin", "Destination")]
+fe3 = base[, c("Origin", "Destination", "Product")]
+
+dm1_seq = demean(X, fe1, fixef.algo = algo_p0)
+dm1_par = demean(X, fe1, fixef.algo = algo_p1)
+test(dm1_seq, dm1_par, "~", 1e-10)
+
+dm2_seq = demean(X, fe2, fixef.algo = algo_p0)
+dm2_par = demean(X, fe2, fixef.algo = algo_p1)
+test(dm2_seq, dm2_par, "~", 1e-10)
+
+dm3_seq = demean(X, fe3, fixef.algo = algo_p0)
+dm3_par = demean(X, fe3, fixef.algo = algo_p1)
+test(dm3_seq, dm3_par, "~", 1e-10)
+
+# 2. feols() with parallel_yDemean
+m_ols_seq = feols(ln_euros ~ ln_dist | Origin + Destination + Product, base, fixef.algo = algo_p0)
+m_ols_par = feols(ln_euros ~ ln_dist | Origin + Destination + Product, base, fixef.algo = algo_p1)
+test(coef(m_ols_seq), coef(m_ols_par), "~", 1e-10)
+test(se(m_ols_seq), se(m_ols_par), "~", 1e-10)
+
+# 3. fepois() with parallel_yDemean
+m_poi_seq = fepois(Euros ~ ln_dist | Origin + Destination + Product, base, fixef.algo = algo_p0)
+m_poi_par = fepois(Euros ~ ln_dist | Origin + Destination + Product, base, fixef.algo = algo_p1)
+test(coef(m_poi_seq), coef(m_poi_par), "~", 1e-10)
+test(se(m_poi_seq), se(m_poi_par), "~", 1e-10)
+
+# 4. Varying slopes with parallel_yDemean
+X_slopes_seq = demean(base$ln_dist, fe2, slope.vars = base$ln_euros, slope.flag = c(0, 1), fixef.algo = algo_p0)
+X_slopes_par = demean(base$ln_dist, fe2, slope.vars = base$ln_euros, slope.flag = c(0, 1), fixef.algo = algo_p1)
+test(X_slopes_seq, X_slopes_par, "~", 1e-10)
+
+# 5. Weighted estimation with parallel_yDemean
+m_w_seq = feols(ln_euros ~ ln_dist | Origin + Destination + Product, base, weights = ~dist_km, fixef.algo = algo_p0)
+m_w_par = feols(ln_euros ~ ln_dist | Origin + Destination + Product, base, weights = ~dist_km, fixef.algo = algo_p1)
+test(coef(m_w_seq), coef(m_w_par), "~", 1e-10)
+
 ####
 #### hatvalues ####
 ####

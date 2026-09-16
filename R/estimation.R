@@ -1065,7 +1065,8 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
                                    algo_extraProj = fixef.algo$extraProj, 
                                    algo_iter_warmup = fixef.algo$iter_warmup, 
                                    algo_iter_projAfterAcc = fixef.algo$iter_projAfterAcc, 
-                                   algo_iter_grandAcc = fixef.algo$iter_grandAcc)
+                                   algo_iter_grandAcc = fixef.algo$iter_grandAcc,
+                                   algo_parallel_yDemean = isTRUE(fixef.algo$parallel_yDemean))
 
           X_demean = vars_demean$X_demean
           y_demean = vars_demean$y_demean
@@ -1080,7 +1081,8 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
                                         algo_extraProj = fixef.algo$extraProj, 
                                         algo_iter_warmup = fixef.algo$iter_warmup, 
                                         algo_iter_projAfterAcc = fixef.algo$iter_projAfterAcc, 
-                                        algo_iter_grandAcc = fixef.algo$iter_grandAcc)
+                                        algo_iter_grandAcc = fixef.algo$iter_grandAcc,
+                                        algo_parallel_yDemean = isTRUE(fixef.algo$parallel_yDemean))
 
             iv.mat_demean = iv_vars_demean$X_demean
             iv_lhs_demean = iv_vars_demean$y_demean
@@ -1278,7 +1280,8 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
                                  algo_extraProj = fixef.algo$extraProj, 
                                  algo_iter_warmup = fixef.algo$iter_warmup, 
                                  algo_iter_projAfterAcc = fixef.algo$iter_projAfterAcc, 
-                                 algo_iter_grandAcc = fixef.algo$iter_grandAcc)
+                                 algo_iter_grandAcc = fixef.algo$iter_grandAcc,
+                                 algo_parallel_yDemean = isTRUE(fixef.algo$parallel_yDemean))
 
         iv_vars_demean = cpp_demean(iv_lhs, iv.mat, weights, iterMax = fixef.iter,
                                     diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
@@ -1288,7 +1291,8 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
                                     algo_extraProj = fixef.algo$extraProj, 
                                     algo_iter_warmup = fixef.algo$iter_warmup, 
                                     algo_iter_projAfterAcc = fixef.algo$iter_projAfterAcc, 
-                                    algo_iter_grandAcc = fixef.algo$iter_grandAcc)
+                                    algo_iter_grandAcc = fixef.algo$iter_grandAcc,
+                                    algo_parallel_yDemean = isTRUE(fixef.algo$parallel_yDemean))
 
         X_demean = vars_demean$X_demean
         y_demean = vars_demean$y_demean
@@ -1820,7 +1824,8 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
                              algo_extraProj = fixef.algo$extraProj, 
                              algo_iter_warmup = fixef.algo$iter_warmup, 
                              algo_iter_projAfterAcc = fixef.algo$iter_projAfterAcc, 
-                             algo_iter_grandAcc = fixef.algo$iter_grandAcc)
+                             algo_iter_grandAcc = fixef.algo$iter_grandAcc,
+                             algo_parallel_yDemean = isTRUE(fixef.algo$parallel_yDemean))
     
     y_demean = vars_demean$y_demean
     if(onlyFixef){

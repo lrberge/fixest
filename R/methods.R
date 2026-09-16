@@ -1178,7 +1178,8 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE,
                           algo_iter_warmup = fixef_algo$iter_warmup, 
                           algo_iter_projAfterAcc = fixef_algo$iter_projAfterAcc, 
                           algo_iter_grandAcc = fixef_algo$iter_grandAcc, 
-                          save_fixef = TRUE)
+                          save_fixef = TRUE,
+                          algo_parallel_yDemean = isTRUE(fixef_algo$parallel_yDemean))
 
     fixef_coef = S_demean$fixef_coef
 
@@ -1338,7 +1339,8 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE,
                               algo_iter_warmup = fixef_algo$iter_warmup, 
                               algo_iter_projAfterAcc = fixef_algo$iter_projAfterAcc, 
                               algo_iter_grandAcc = fixef_algo$iter_grandAcc, 
-                              save_fixef = TRUE)
+                              save_fixef = TRUE,
+                              algo_parallel_yDemean = isTRUE(fixef_algo$parallel_yDemean))
 
         fixef_coef = S_demean$fixef_coef
 

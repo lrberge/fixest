@@ -162,9 +162,9 @@ class FEClass{
   vector<int> coef_start_Q;
 
   // internal functions
-  void compute_fe_coef_internal(int, double *, bool, RealVec, double *, double *);
-  void compute_fe_coef_2_internal(double *, double *, double *, bool);
-  void add_wfe_coef_to_mu_internal(int, double *, double *, bool);
+  void compute_fe_coef_internal(int, double *, bool, RealVec, double *, double *, int = 1);
+  void compute_fe_coef_2_internal(double *, double *, double *, bool, int = 1);
+  void add_wfe_coef_to_mu_internal(int, double *, double *, bool, int = 1);
 
 public:
 
@@ -185,17 +185,17 @@ public:
   FEClass(int n_obs, int Q, SEXP r_weights, SEXP fe_id_list, SEXP r_nb_id_Q, SEXP table_id_I, SEXP slope_flag_Q, SEXP slope_vars_list);
 
   // functions
-  void compute_fe_coef(double *fe_coef, RealVec &mu_in_N);
-  void compute_fe_coef(int q, double *fe_coef, double *sum_other_coef_N, double *in_out_C);
+  void compute_fe_coef(double *fe_coef, RealVec &mu_in_N, int nthreads = 1);
+  void compute_fe_coef(int q, double *fe_coef, double *sum_other_coef_N, double *in_out_C, int nthreads = 1);
 
-  void add_wfe_coef_to_mu(int q, double *fe_coef_C, double *out_N);
-  void add_fe_coef_to_mu(int q, double *fe_coef_C, double *out_N);
+  void add_wfe_coef_to_mu(int q, double *fe_coef_C, double *out_N, int nthreads = 1);
+  void add_fe_coef_to_mu(int q, double *fe_coef_C, double *out_N, int nthreads = 1);
 
-  void compute_fe_coef_2(double *fe_coef_in_C, double *fe_coef_out_C, double *fe_coef_tmp, double *in_out_C);
+  void compute_fe_coef_2(double *fe_coef_in_C, double *fe_coef_out_C, double *fe_coef_tmp, double *in_out_C, int nthreads = 1);
 
-  void add_2_fe_coef_to_mu(double *fe_coef_a, double *fe_coef_b, double *in_out_C, double *out_N, bool update_beta);
+  void add_2_fe_coef_to_mu(double *fe_coef_a, double *fe_coef_b, double *in_out_C, double *out_N, bool update_beta = true, int nthreads = 1);
 
-  void compute_in_out(int q, double *in_out_C, RealVec &in_N, double *out_N);
+  void compute_in_out(int q, double *in_out_C, RealVec &in_N, double *out_N, int nthreads = 1);
 };
 
 FEClass::FEClass(int n_obs, int Q, SEXP r_weights, SEXP fe_id_list, SEXP r_nb_id_Q, SEXP table_id_I, SEXP slope_flag_Q, SEXP slope_vars_list){
@@ -441,25 +441,25 @@ FEClass::FEClass(int n_obs, int Q, SEXP r_weights, SEXP fe_id_list, SEXP r_nb_id
 
 
 // Overloaded versions
-void FEClass::compute_fe_coef(double *fe_coef_C, RealVec &mu_in_N){
+void FEClass::compute_fe_coef(double *fe_coef_C, RealVec &mu_in_N, int nthreads){
   // mu: length n_obs, vector giving sum_in_out
   // fe_coef: vector receiving the fixed-effects coefficients
 
   // single FE version
-  compute_fe_coef_internal(0, fe_coef_C, true, mu_in_N, nullptr, nullptr);
+  compute_fe_coef_internal(0, fe_coef_C, true, mu_in_N, nullptr, nullptr, nthreads);
 }
 
-void FEClass::compute_fe_coef(int q, double *fe_coef_C, double *sum_other_coef_N, double *in_out_C){
+void FEClass::compute_fe_coef(int q, double *fe_coef_C, double *sum_other_coef_N, double *in_out_C, int nthreads){
   // mu: length n_obs, vector giving sum_in_out
   // fe_coef: vector receiving the fixed-effects coefficients
 
   // multiple FE version
-  compute_fe_coef_internal(q, fe_coef_C, false, nullptr, sum_other_coef_N, in_out_C);
+  compute_fe_coef_internal(q, fe_coef_C, false, nullptr, sum_other_coef_N, in_out_C, nthreads);
 
 }
 
 void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single, RealVec mu_in_N, 
-                                       double *sum_other_coef_N, double *in_out_C){
+                                       double *sum_other_coef_N, double *in_out_C, int nthreads){
   // mu: length n_obs, vector giving sum_in_out
   // fe_coef: vector receiving the fixed-effects coefficients
 
@@ -478,11 +478,20 @@ void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single,
 
     if(is_single){
 
-      for(int obs=0 ; obs<n_obs ; ++obs){
-        if(is_weight){
-          my_fe_coef[my_fe[obs] - 1] += p_weights[obs] * mu_in_N[obs];
-        } else {
-          my_fe_coef[my_fe[obs] - 1] += mu_in_N[obs];
+      if(nthreads > 1){
+        #pragma omp parallel for num_threads(nthreads) schedule(static)
+        for(int obs=0 ; obs<n_obs ; ++obs){
+          double val = is_weight ? (p_weights[obs] * mu_in_N[obs]) : mu_in_N[obs];
+          #pragma omp atomic
+          my_fe_coef[my_fe[obs] - 1] += val;
+        }
+      } else {
+        for(int obs=0 ; obs<n_obs ; ++obs){
+          if(is_weight){
+            my_fe_coef[my_fe[obs] - 1] += p_weights[obs] * mu_in_N[obs];
+          } else {
+            my_fe_coef[my_fe[obs] - 1] += mu_in_N[obs];
+          }
         }
       }
 
@@ -490,20 +499,41 @@ void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single,
 
       const double *sum_in_out = in_out_C + coef_start_Q[q];
 
-      // initialize cluster coef
-      for(int m=0 ; m<nb_coef ; ++m){
-        my_fe_coef[m] = sum_in_out[m];
-      }
+      if(nthreads > 1){
+        #pragma omp parallel for num_threads(nthreads) schedule(static)
+        for(int m=0 ; m<nb_coef ; ++m){
+          my_fe_coef[m] = sum_in_out[m];
+        }
 
-      // looping sequentially over the sum of other coefficients
-      for(int i=0 ; i<n_obs ; ++i){
-        my_fe_coef[my_fe[i] - 1] -= sum_other_coef_N[i];
+        #pragma omp parallel for num_threads(nthreads) schedule(static)
+        for(int i=0 ; i<n_obs ; ++i){
+          double val = sum_other_coef_N[i];
+          #pragma omp atomic
+          my_fe_coef[my_fe[i] - 1] -= val;
+        }
+      } else {
+        // initialize cluster coef
+        for(int m=0 ; m<nb_coef ; ++m){
+          my_fe_coef[m] = sum_in_out[m];
+        }
+
+        // looping sequentially over the sum of other coefficients
+        for(int i=0 ; i<n_obs ; ++i){
+          my_fe_coef[my_fe[i] - 1] -= sum_other_coef_N[i];
+        }
       }
 
     }
     
-    for(int m=0 ; m<nb_coef ; ++m){
-      my_fe_coef[m] /= my_SW[m];
+    if(nthreads > 1){
+      #pragma omp parallel for num_threads(nthreads) schedule(static)
+      for(int m=0 ; m<nb_coef ; ++m){
+        my_fe_coef[m] /= my_SW[m];
+      }
+    } else {
+      for(int m=0 ; m<nb_coef ; ++m){
+        my_fe_coef[m] /= my_SW[m];
+      }
     }
 
   } else {
@@ -516,12 +546,23 @@ void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single,
 
     if(is_single){
 
-      for(int i=0 ; i<n_obs ; ++i){
-        for(int v1=0 ; v1<V ; ++v1){
-          if(is_weight){
-            rhs(my_fe[i] - 1, v1) += VS_mat(i, v1) * mu_in_N[i] * p_weights[i];
-          } else {
-            rhs(my_fe[i] - 1, v1) += VS_mat(i, v1) * mu_in_N[i];
+      if(nthreads > 1){
+        #pragma omp parallel for num_threads(nthreads) schedule(static)
+        for(int i=0 ; i<n_obs ; ++i){
+          for(int v1=0 ; v1<V ; ++v1){
+            double val = is_weight ? (VS_mat(i, v1) * mu_in_N[i] * p_weights[i]) : (VS_mat(i, v1) * mu_in_N[i]);
+            #pragma omp atomic
+            rhs(my_fe[i] - 1, v1) += val;
+          }
+        }
+      } else {
+        for(int i=0 ; i<n_obs ; ++i){
+          for(int v1=0 ; v1<V ; ++v1){
+            if(is_weight){
+              rhs(my_fe[i] - 1, v1) += VS_mat(i, v1) * mu_in_N[i] * p_weights[i];
+            } else {
+              rhs(my_fe[i] - 1, v1) += VS_mat(i, v1) * mu_in_N[i];
+            }
           }
         }
       }
@@ -530,13 +571,29 @@ void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single,
 
       // initialization
       const double *sum_in_out = in_out_C + coef_start_Q[q];
-      for(int m=0 ; m<nb_coef ; ++m){
-        my_fe_coef[m] = sum_in_out[m];
-      }
+      if(nthreads > 1){
+        #pragma omp parallel for num_threads(nthreads) schedule(static)
+        for(int m=0 ; m<nb_coef ; ++m){
+          my_fe_coef[m] = sum_in_out[m];
+        }
 
-      for(int i=0 ; i<n_obs ; ++i){
-        for(int v=0 ; v<V ; ++v){
-          rhs(my_fe[i] - 1, v) -= VS_mat(i, v) * sum_other_coef_N[i];
+        #pragma omp parallel for num_threads(nthreads) schedule(static)
+        for(int i=0 ; i<n_obs ; ++i){
+          for(int v=0 ; v<V ; ++v){
+            double val = VS_mat(i, v) * sum_other_coef_N[i];
+            #pragma omp atomic
+            rhs(my_fe[i] - 1, v) -= val;
+          }
+        }
+      } else {
+        for(int m=0 ; m<nb_coef ; ++m){
+          my_fe_coef[m] = sum_in_out[m];
+        }
+
+        for(int i=0 ; i<n_obs ; ++i){
+          for(int v=0 ; v<V ; ++v){
+            rhs(my_fe[i] - 1, v) -= VS_mat(i, v) * sum_other_coef_N[i];
+          }
         }
       }
 
@@ -544,28 +601,57 @@ void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single,
 
 
     // "Correcting" the last column
-    for(int c=0 ; c<nb_id ; ++c){
-      for(int v=0 ; v<V ; ++v){
-        for(int v1=v + 1 ; v1<V ; ++v1){
-          // -= row_coef * value from the v row
-          rhs(c, v1) -= my_system(c, v1, v) * rhs(c, v);
+    if(nthreads > 1 && nb_id >= 2000){
+      #pragma omp parallel for num_threads(nthreads) schedule(static)
+      for(int c=0 ; c<nb_id ; ++c){
+        for(int v=0 ; v<V ; ++v){
+          for(int v1=v + 1 ; v1<V ; ++v1){
+            // -= row_coef * value from the v row
+            rhs(c, v1) -= my_system(c, v1, v) * rhs(c, v);
+          }
         }
       }
-    }
 
-    // Solving => we store the solution in rhs
-    double val = 0;
-    for(int c=0 ; c<nb_id ; ++c){
-      // We backward solve
-      for(int v=V - 1 ; v>=0 ; --v){
-        if(my_system(c, v, v) == 0){
-          rhs(c, v) = 0;
-        } else {
-          val = rhs(c, v);
-          for(int v_done=v + 1 ; v_done<V ; ++v_done){
-            val -= rhs(c, v_done) * my_system(c, v, v_done);
+      // Solving => we store the solution in rhs
+      #pragma omp parallel for num_threads(nthreads) schedule(static)
+      for(int c=0 ; c<nb_id ; ++c){
+        // We backward solve
+        for(int v=V - 1 ; v>=0 ; --v){
+          if(my_system(c, v, v) == 0){
+            rhs(c, v) = 0;
+          } else {
+            double val = rhs(c, v);
+            for(int v_done=v + 1 ; v_done<V ; ++v_done){
+              val -= rhs(c, v_done) * my_system(c, v, v_done);
+            }
+            rhs(c, v) = val / my_system(c, v, v);
           }
-          rhs(c, v) = val / my_system(c, v, v);
+        }
+      }
+    } else {
+      for(int c=0 ; c<nb_id ; ++c){
+        for(int v=0 ; v<V ; ++v){
+          for(int v1=v + 1 ; v1<V ; ++v1){
+            // -= row_coef * value from the v row
+            rhs(c, v1) -= my_system(c, v1, v) * rhs(c, v);
+          }
+        }
+      }
+
+      // Solving => we store the solution in rhs
+      double val = 0;
+      for(int c=0 ; c<nb_id ; ++c){
+        // We backward solve
+        for(int v=V - 1 ; v>=0 ; --v){
+          if(my_system(c, v, v) == 0){
+            rhs(c, v) = 0;
+          } else {
+            val = rhs(c, v);
+            for(int v_done=v + 1 ; v_done<V ; ++v_done){
+              val -= rhs(c, v_done) * my_system(c, v, v_done);
+            }
+            rhs(c, v) = val / my_system(c, v, v);
+          }
         }
       }
     }
@@ -576,7 +662,7 @@ void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single,
 
 
 void FEClass::compute_fe_coef_2_internal(double *fe_coef_in_out_C, double *fe_coef_tmp, 
-                                         double *in_out_C, bool step_2 = false){
+                                         double *in_out_C, bool step_2, int nthreads){
   // The aim here is to update the value of b given the value of a
   // fe_coef_tmp is always of size the 2nd FE
   // fe_in/out are always the size the 1st FE
@@ -627,84 +713,162 @@ void FEClass::compute_fe_coef_2_internal(double *fe_coef_in_out_C, double *fe_co
 
 
   // initialize cluster coef
-  for(int m=0 ; m<nb_coef_b ; ++m){
-    my_fe_coef_b[m] = my_in_out_b[m];
+  if(nthreads > 1){
+    #pragma omp parallel for num_threads(nthreads) schedule(static)
+    for(int m=0 ; m<nb_coef_b ; ++m){
+      my_fe_coef_b[m] = my_in_out_b[m];
+    }
+  } else {
+    for(int m=0 ; m<nb_coef_b ; ++m){
+      my_fe_coef_b[m] = my_in_out_b[m];
+    }
   }
 
   if(is_slope_b == false){
 
     // Adding the values of the first FE
-    for(int i=0 ; i<n_obs ; ++i){
-      if(is_slope_a){
-        for(int v=0 ; v<V_a ; ++v){
-          if(is_weight){
-            my_fe_coef_b[my_fe_b[i] - 1] -= my_vs_coef_a(my_fe_a[i] - 1, v) * VS_mat_a(i, v) * p_weights[i];
-          } else {
-            my_fe_coef_b[my_fe_b[i] - 1] -= my_vs_coef_a(my_fe_a[i] - 1, v) * VS_mat_a(i, v);
+    if(nthreads > 1){
+      #pragma omp parallel for num_threads(nthreads) schedule(static)
+      for(int i=0 ; i<n_obs ; ++i){
+        if(is_slope_a){
+          for(int v=0 ; v<V_a ; ++v){
+            double val = is_weight ? (my_vs_coef_a(my_fe_a[i] - 1, v) * VS_mat_a(i, v) * p_weights[i]) : (my_vs_coef_a(my_fe_a[i] - 1, v) * VS_mat_a(i, v));
+            #pragma omp atomic
+            my_fe_coef_b[my_fe_b[i] - 1] -= val;
           }
+        } else if(is_weight){
+          double val = my_fe_coef_a[my_fe_a[i] - 1] * p_weights[i];
+          #pragma omp atomic
+          my_fe_coef_b[my_fe_b[i] - 1] -= val;
+        } else {
+          double val = my_fe_coef_a[my_fe_a[i] - 1];
+          #pragma omp atomic
+          my_fe_coef_b[my_fe_b[i] - 1] -= val;
         }
-      } else if(is_weight){
-        my_fe_coef_b[my_fe_b[i] - 1] -= my_fe_coef_a[my_fe_a[i] - 1] * p_weights[i];
-      } else {
-        my_fe_coef_b[my_fe_b[i] - 1] -= my_fe_coef_a[my_fe_a[i] - 1];
       }
-    }
 
-    double *my_SW = p_sum_weights_noVS_C[index_b];
-    for(int m=0 ; m<nb_coef_b ; ++m){
-      my_fe_coef_b[m] /= my_SW[m];
+      double *my_SW = p_sum_weights_noVS_C[index_b];
+      #pragma omp parallel for num_threads(nthreads) schedule(static)
+      for(int m=0 ; m<nb_coef_b ; ++m){
+        my_fe_coef_b[m] /= my_SW[m];
+      }
+    } else {
+      for(int i=0 ; i<n_obs ; ++i){
+        if(is_slope_a){
+          for(int v=0 ; v<V_a ; ++v){
+            if(is_weight){
+              my_fe_coef_b[my_fe_b[i] - 1] -= my_vs_coef_a(my_fe_a[i] - 1, v) * VS_mat_a(i, v) * p_weights[i];
+            } else {
+              my_fe_coef_b[my_fe_b[i] - 1] -= my_vs_coef_a(my_fe_a[i] - 1, v) * VS_mat_a(i, v);
+            }
+          }
+        } else if(is_weight){
+          my_fe_coef_b[my_fe_b[i] - 1] -= my_fe_coef_a[my_fe_a[i] - 1] * p_weights[i];
+        } else {
+          my_fe_coef_b[my_fe_b[i] - 1] -= my_fe_coef_a[my_fe_a[i] - 1];
+        }
+      }
+
+      double *my_SW = p_sum_weights_noVS_C[index_b];
+      for(int m=0 ; m<nb_coef_b ; ++m){
+        my_fe_coef_b[m] /= my_SW[m];
+      }
     }
 
   } else {
     simple_mat_with_id my_system_b(p_eq_systems_VS_C[index_b], V_b);
     simple_mat_with_id rhs_b(my_fe_coef_b, V_b, 1);
 
-    double tmp = 0;
-
-    for(int i=0 ; i<n_obs ; ++i){
-      
-      if(is_slope_a){
-        tmp = 0;
-        for(int v=0 ; v<V_a ; ++v){
-          tmp += my_vs_coef_a(my_fe_a[i] - 1, v) * VS_mat_a(i, v);
+    if(nthreads > 1){
+      #pragma omp parallel for num_threads(nthreads) schedule(static)
+      for(int i=0 ; i<n_obs ; ++i){
+        double tmp = 0;
+        if(is_slope_a){
+          for(int v=0 ; v<V_a ; ++v){
+            tmp += my_vs_coef_a(my_fe_a[i] - 1, v) * VS_mat_a(i, v);
+          }
+        } else {
+          tmp = my_fe_coef_a[my_fe_a[i] - 1];
         }
 
-      } else {
-        tmp = my_fe_coef_a[my_fe_a[i] - 1];
+        for(int v=0 ; v<V_b ; ++v){
+          double val = is_weight ? (VS_mat_b(i, v) * tmp * p_weights[i]) : (VS_mat_b(i, v) * tmp);
+          #pragma omp atomic
+          rhs_b(my_fe_b[i] - 1, v) -= val;
+        }
       }
-
-      for(int v=0 ; v<V_b ; ++v){
-        if(is_weight){
-          rhs_b(my_fe_b[i] - 1, v) -= VS_mat_b(i, v) * tmp * p_weights[i];
+    } else {
+      double tmp = 0;
+      for(int i=0 ; i<n_obs ; ++i){
+        if(is_slope_a){
+          tmp = 0;
+          for(int v=0 ; v<V_a ; ++v){
+            tmp += my_vs_coef_a(my_fe_a[i] - 1, v) * VS_mat_a(i, v);
+          }
         } else {
-          rhs_b(my_fe_b[i] - 1, v) -= VS_mat_b(i, v) * tmp;
+          tmp = my_fe_coef_a[my_fe_a[i] - 1];
+        }
+
+        for(int v=0 ; v<V_b ; ++v){
+          if(is_weight){
+            rhs_b(my_fe_b[i] - 1, v) -= VS_mat_b(i, v) * tmp * p_weights[i];
+          } else {
+            rhs_b(my_fe_b[i] - 1, v) -= VS_mat_b(i, v) * tmp;
+          }
         }
       }
     }
 
     // "Correcting" the last column
-    for(int c=0 ; c<nb_id_b ; ++c){
-      for(int v=0 ; v<V_b ; ++v){
-        for(int v1=v + 1 ; v1<V_b ; ++v1){
-          // -= row_coef * value from the v row
-          rhs_b(c, v1) -= my_system_b(c, v1, v) * rhs_b(c, v);
+    if(nthreads > 1 && nb_id_b >= 2000){
+      #pragma omp parallel for num_threads(nthreads) schedule(static)
+      for(int c=0 ; c<nb_id_b ; ++c){
+        for(int v=0 ; v<V_b ; ++v){
+          for(int v1=v + 1 ; v1<V_b ; ++v1){
+            rhs_b(c, v1) -= my_system_b(c, v1, v) * rhs_b(c, v);
+          }
         }
       }
-    }
 
-    // Solving => we store the solution in rhs
-    double val = 0;
-    for(int c=0 ; c<nb_id_b ; ++c){
-      // We backward solve
-      for(int v=V_b - 1 ; v>=0 ; --v){
-        if(my_system_b(c, v, v) == 0){
-          rhs_b(c, v) = 0;
-        } else {
-          val = rhs_b(c, v);
-          for(int v_done=v + 1 ; v_done<V_b ; ++v_done){
-            val -= rhs_b(c, v_done) * my_system_b(c, v, v_done);
+      // Solving => we store the solution in rhs
+      #pragma omp parallel for num_threads(nthreads) schedule(static)
+      for(int c=0 ; c<nb_id_b ; ++c){
+        // We backward solve
+        for(int v=V_b - 1 ; v>=0 ; --v){
+          if(my_system_b(c, v, v) == 0){
+            rhs_b(c, v) = 0;
+          } else {
+            double val = rhs_b(c, v);
+            for(int v_done=v + 1 ; v_done<V_b ; ++v_done){
+              val -= rhs_b(c, v_done) * my_system_b(c, v, v_done);
+            }
+            rhs_b(c, v) = val / my_system_b(c, v, v);
           }
-          rhs_b(c, v) = val / my_system_b(c, v, v);
+        }
+      }
+    } else {
+      for(int c=0 ; c<nb_id_b ; ++c){
+        for(int v=0 ; v<V_b ; ++v){
+          for(int v1=v + 1 ; v1<V_b ; ++v1){
+            rhs_b(c, v1) -= my_system_b(c, v1, v) * rhs_b(c, v);
+          }
+        }
+      }
+
+      // Solving => we store the solution in rhs
+      double val = 0;
+      for(int c=0 ; c<nb_id_b ; ++c){
+        // We backward solve
+        for(int v=V_b - 1 ; v>=0 ; --v){
+          if(my_system_b(c, v, v) == 0){
+            rhs_b(c, v) = 0;
+          } else {
+            val = rhs_b(c, v);
+            for(int v_done=v + 1 ; v_done<V_b ; ++v_done){
+              val -= rhs_b(c, v_done) * my_system_b(c, v, v_done);
+            }
+            rhs_b(c, v) = val / my_system_b(c, v, v);
+          }
         }
       }
     }
@@ -713,99 +877,91 @@ void FEClass::compute_fe_coef_2_internal(double *fe_coef_in_out_C, double *fe_co
 }
 
 void FEClass::compute_fe_coef_2(double *fe_coef_in_C, double *fe_coef_out_C, 
-                                double *fe_coef_tmp, double *in_out_C){
+                                double *fe_coef_tmp, double *in_out_C, int nthreads){
   // Specific to the 2-FEs case
   // This way we avoid creating and using a temp object of length N
 
-
-
-  //
   // Step 1: Updating b
-  //
+  compute_fe_coef_2_internal(fe_coef_in_C, fe_coef_tmp, in_out_C, false, nthreads);
 
-  compute_fe_coef_2_internal(fe_coef_in_C, fe_coef_tmp, in_out_C);
-
-  //
   // Step 2: Updating a
-  //
-
-  compute_fe_coef_2_internal(fe_coef_out_C, fe_coef_tmp, in_out_C, true);
+  compute_fe_coef_2_internal(fe_coef_out_C, fe_coef_tmp, in_out_C, true, nthreads);
 
 }
 
-void FEClass::add_wfe_coef_to_mu(int q, double *fe_coef_C, double *out_N){
+void FEClass::add_wfe_coef_to_mu(int q, double *fe_coef_C, double *out_N, int nthreads){
   // We add the weighted FE coefficient to each observation
-
-  add_wfe_coef_to_mu_internal(q, fe_coef_C, out_N, true);
-
+  add_wfe_coef_to_mu_internal(q, fe_coef_C, out_N, true, nthreads);
 }
 
-void FEClass::add_fe_coef_to_mu(int q, double *fe_coef_C, double *out_N){
+void FEClass::add_fe_coef_to_mu(int q, double *fe_coef_C, double *out_N, int nthreads){
   // We add the FE coefficient to each observation -- NO WEIGHTS!!!
-
-  // Single FE version
-  add_wfe_coef_to_mu_internal(q, fe_coef_C, out_N, false);
-
+  add_wfe_coef_to_mu_internal(q, fe_coef_C, out_N, false, nthreads);
 }
 
-void FEClass::add_wfe_coef_to_mu_internal(int q, double *fe_coef_C, double *out_N, bool add_weights){
-  // We just add the weighted (or not) FE coefficient to each observation
-  // We need to be careful for VS
-
+void FEClass::add_wfe_coef_to_mu_internal(int q, double *fe_coef_C, double *out_N, bool add_weights, int nthreads){
   int V = nb_vs_Q[q];
   int *my_fe = p_fe_id[q];
-
   double *my_fe_coef = fe_coef_C + coef_start_Q[q];
-
   const bool use_weights = add_weights && is_weight;
 
   if(is_slope_Q[q] == false){
-
-    for(int i=0 ; i<n_obs ; ++i){
-      if(use_weights){
-        out_N[i] += my_fe_coef[my_fe[i] - 1] * p_weights[i];
-      } else {
-        out_N[i] += my_fe_coef[my_fe[i] - 1];
+    if(nthreads > 1){
+      #pragma omp parallel for num_threads(nthreads) schedule(static)
+      for(int i=0 ; i<n_obs ; ++i){
+        if(use_weights){
+          out_N[i] += my_fe_coef[my_fe[i] - 1] * p_weights[i];
+        } else {
+          out_N[i] += my_fe_coef[my_fe[i] - 1];
+        }
+      }
+    } else {
+      for(int i=0 ; i<n_obs ; ++i){
+        if(use_weights){
+          out_N[i] += my_fe_coef[my_fe[i] - 1] * p_weights[i];
+        } else {
+          out_N[i] += my_fe_coef[my_fe[i] - 1];
+        }
       }
     }
-
   } else {
     simple_mat_of_vs_vars VS_mat(this, q);
     simple_mat_with_id my_vs_coef(my_fe_coef, nb_vs_Q[q], 1);
 
-    for(int i=0 ; i<n_obs ; ++i){
-      for(int v=0 ; v<V ; ++v){
-        if(use_weights){
-          out_N[i] += my_vs_coef(my_fe[i] - 1, v) * VS_mat(i, v) * p_weights[i];
-        } else {
-          out_N[i] += my_vs_coef(my_fe[i] - 1, v) * VS_mat(i, v);
+    if(nthreads > 1){
+      #pragma omp parallel for num_threads(nthreads) schedule(static)
+      for(int i=0 ; i<n_obs ; ++i){
+        for(int v=0 ; v<V ; ++v){
+          if(use_weights){
+            out_N[i] += my_vs_coef(my_fe[i] - 1, v) * VS_mat(i, v) * p_weights[i];
+          } else {
+            out_N[i] += my_vs_coef(my_fe[i] - 1, v) * VS_mat(i, v);
+          }
+        }
+      }
+    } else {
+      for(int i=0 ; i<n_obs ; ++i){
+        for(int v=0 ; v<V ; ++v){
+          if(use_weights){
+            out_N[i] += my_vs_coef(my_fe[i] - 1, v) * VS_mat(i, v) * p_weights[i];
+          } else {
+            out_N[i] += my_vs_coef(my_fe[i] - 1, v) * VS_mat(i, v);
+          }
         }
       }
     }
-
   }
-
 }
 
 void FEClass::add_2_fe_coef_to_mu(double *fe_coef_a, double *fe_coef_b, double *in_out_C, 
-                                  double *out_N, bool update_beta = true){
-  // We add the value of the FE coefficients to each observation
-
-
-  //
+                                  double *out_N, bool update_beta, int nthreads){
   // Step 1: we update the coefficients of b
-  //
-
   if(update_beta){
-    compute_fe_coef_2_internal(fe_coef_a, fe_coef_b, in_out_C, out_N);
+    compute_fe_coef_2_internal(fe_coef_a, fe_coef_b, in_out_C, false, nthreads);
   }
 
-  //
   // Step 2: we add the value of each coef
-  //
-
   for(int q=0 ; q<2 ; ++q){
-
     double *my_fe_coef = q == 0 ? fe_coef_a : fe_coef_b;
     int *my_fe = p_fe_id[q];
     bool is_slope = is_slope_Q[q];
@@ -814,59 +970,78 @@ void FEClass::add_2_fe_coef_to_mu(double *fe_coef_a, double *fe_coef_b, double *
     simple_mat_of_vs_vars VS_mat(this, q);
     simple_mat_with_id my_vs_coef(my_fe_coef, nb_vs_Q[q], 1);
 
-    for(int i=0 ; i<n_obs ; ++i){
-      if(is_slope){
-        for(int v=0 ; v<V ; ++v){
-          out_N[i] += my_vs_coef(my_fe[i] - 1, v) * VS_mat(i, v);
+    if(nthreads > 1){
+      #pragma omp parallel for num_threads(nthreads) schedule(static)
+      for(int i=0 ; i<n_obs ; ++i){
+        if(is_slope){
+          for(int v=0 ; v<V ; ++v){
+            out_N[i] += my_vs_coef(my_fe[i] - 1, v) * VS_mat(i, v);
+          }
+        } else {
+          out_N[i] += my_fe_coef[my_fe[i] - 1];
         }
-      } else {
-        out_N[i] += my_fe_coef[my_fe[i] - 1];
+      }
+    } else {
+      for(int i=0 ; i<n_obs ; ++i){
+        if(is_slope){
+          for(int v=0 ; v<V ; ++v){
+            out_N[i] += my_vs_coef(my_fe[i] - 1, v) * VS_mat(i, v);
+          }
+        } else {
+          out_N[i] += my_fe_coef[my_fe[i] - 1];
+        }
       }
     }
-
   }
-
 }
 
-
-void FEClass::compute_in_out(int q, double *in_out_C, RealVec &in_N, double *out_N){
-  // q: the index of the FE
-  // *in_out_C: pointer to the vector of cumulated (input-output), of length C (nber of FE coefs)
-  //            => this is a precomputation of the target quantity
-  // in_N: vector of input, of length N
-  // output: vector of length the number of coefficients
-
+void FEClass::compute_in_out(int q, double *in_out_C, RealVec &in_N, double *out_N, int nthreads){
   int V = nb_vs_Q[q];
   int *my_fe = p_fe_id[q];
-
   double *sum_in_out = in_out_C + coef_start_Q[q];
 
   if(is_slope_Q[q] == false){
-
-    for(int i=0 ; i<n_obs ; ++i){
-      if(is_weight){
-        sum_in_out[my_fe[i] - 1] += (in_N[i] - out_N[i]) * p_weights[i];
-      } else {
-        sum_in_out[my_fe[i] - 1] += (in_N[i] - out_N[i]);
+    if(nthreads > 1){
+      #pragma omp parallel for num_threads(nthreads) schedule(static)
+      for(int i=0 ; i<n_obs ; ++i){
+        double val = is_weight ? ((in_N[i] - out_N[i]) * p_weights[i]) : (in_N[i] - out_N[i]);
+        #pragma omp atomic
+        sum_in_out[my_fe[i] - 1] += val;
+      }
+    } else {
+      for(int i=0 ; i<n_obs ; ++i){
+        if(is_weight){
+          sum_in_out[my_fe[i] - 1] += (in_N[i] - out_N[i]) * p_weights[i];
+        } else {
+          sum_in_out[my_fe[i] - 1] += (in_N[i] - out_N[i]);
+        }
       }
     }
-
   } else {
     simple_mat_of_vs_vars VS_mat(this, q);
     simple_mat_with_id my_vs_sum_in_out(sum_in_out, nb_vs_Q[q], 1);
 
-    for(int i=0 ; i<n_obs ; ++i){
-      for(int v=0 ; v<V ; ++v){
-        if(is_weight){
-          my_vs_sum_in_out(my_fe[i] - 1, v) += (in_N[i] - out_N[i]) * VS_mat(i, v) * p_weights[i];
-        } else {
-          my_vs_sum_in_out(my_fe[i] - 1, v) += (in_N[i] - out_N[i]) * VS_mat(i, v);
+    if(nthreads > 1){
+      #pragma omp parallel for num_threads(nthreads) schedule(static)
+      for(int i=0 ; i<n_obs ; ++i){
+        for(int v=0 ; v<V ; ++v){
+          double val = is_weight ? ((in_N[i] - out_N[i]) * VS_mat(i, v) * p_weights[i]) : ((in_N[i] - out_N[i]) * VS_mat(i, v));
+          #pragma omp atomic
+          my_vs_sum_in_out(my_fe[i] - 1, v) += val;
+        }
+      }
+    } else {
+      for(int i=0 ; i<n_obs ; ++i){
+        for(int v=0 ; v<V ; ++v){
+          if(is_weight){
+            my_vs_sum_in_out(my_fe[i] - 1, v) += (in_N[i] - out_N[i]) * VS_mat(i, v) * p_weights[i];
+          } else {
+            my_vs_sum_in_out(my_fe[i] - 1, v) += (in_N[i] - out_N[i]) * VS_mat(i, v);
+          }
         }
       }
     }
-
   }
-
 }
 
 FEClass::simple_mat_of_vs_vars::simple_mat_of_vs_vars(const FEClass *FE_info, int q){
@@ -916,6 +1091,9 @@ struct PARAM_DEMEAN{
   int algo_iter_projAfterAcc;
   int algo_iter_grandAcc;
 
+  int nthreads;
+  bool algo_parallel_yDemean;
+
   // iterations
   int *p_iterations_all;
 
@@ -939,40 +1117,66 @@ struct PARAM_DEMEAN{
 
 bool dm_update_X_IronsTuck(int nb_coef_no_Q, vector<double> &X,
                            const vector<double> &GX, const vector<double> &GGX,
-                           vector<double> &delta_GX, vector<double> &delta2_X){
+                           vector<double> &delta_GX, vector<double> &delta2_X,
+                           int nthreads = 1){
 
-  for(int i=0 ; i<nb_coef_no_Q ; ++i){
-    double GX_tmp = GX[i];
-    delta_GX[i] = GGX[i] - GX_tmp;
-    delta2_X[i] = delta_GX[i] - GX_tmp + X[i];
-  }
-
-  double vprod = 0, ssq = 0;
-  for(int i=0 ; i<nb_coef_no_Q ; ++i){
-    double delta2_X_tmp = delta2_X[i];
-    vprod += delta_GX[i] * delta2_X_tmp;
-    ssq += delta2_X_tmp * delta2_X_tmp;
-  }
-
-  bool res = false;
-
-  if(ssq == 0){
-    res = true;
-  } else {
-    double coef = vprod/ssq;
-
-    // update of X:
+  if(nthreads > 1 && nb_coef_no_Q >= 5000){
+    #pragma omp parallel for num_threads(nthreads) schedule(static)
     for(int i=0 ; i<nb_coef_no_Q ; ++i){
-      X[i] = GGX[i] - coef * delta_GX[i];
+      double GX_tmp = GX[i];
+      delta_GX[i] = GGX[i] - GX_tmp;
+      delta2_X[i] = delta_GX[i] - GX_tmp + X[i];
     }
-  }
 
-  return(res);
+    double vprod = 0, ssq = 0;
+    #pragma omp parallel for num_threads(nthreads) schedule(static) reduction(+: vprod, ssq)
+    for(int i=0 ; i<nb_coef_no_Q ; ++i){
+      double delta2_X_tmp = delta2_X[i];
+      vprod += delta_GX[i] * delta2_X_tmp;
+      ssq += delta2_X_tmp * delta2_X_tmp;
+    }
+
+    bool res = false;
+    if(ssq == 0){
+      res = true;
+    } else {
+      double coef = vprod/ssq;
+      #pragma omp parallel for num_threads(nthreads) schedule(static)
+      for(int i=0 ; i<nb_coef_no_Q ; ++i){
+        X[i] = GGX[i] - coef * delta_GX[i];
+      }
+    }
+    return(res);
+  } else {
+    for(int i=0 ; i<nb_coef_no_Q ; ++i){
+      double GX_tmp = GX[i];
+      delta_GX[i] = GGX[i] - GX_tmp;
+      delta2_X[i] = delta_GX[i] - GX_tmp + X[i];
+    }
+
+    double vprod = 0, ssq = 0;
+    for(int i=0 ; i<nb_coef_no_Q ; ++i){
+      double delta2_X_tmp = delta2_X[i];
+      vprod += delta_GX[i] * delta2_X_tmp;
+      ssq += delta2_X_tmp * delta2_X_tmp;
+    }
+
+    bool res = false;
+    if(ssq == 0){
+      res = true;
+    } else {
+      double coef = vprod/ssq;
+      for(int i=0 ; i<nb_coef_no_Q ; ++i){
+        X[i] = GGX[i] - coef * delta_GX[i];
+      }
+    }
+    return(res);
+  }
 }
 
 
 void compute_fe_gnl(double *p_fe_coef_origin, double *p_fe_coef_destination,
-                    double *p_sum_other_means, double *p_sum_in_out, PARAM_DEMEAN *args){
+                    double *p_sum_other_means, double *p_sum_in_out, PARAM_DEMEAN *args, int nthreads = 1){
   // update of the cluster coefficients
   // p_fe_coef_origin: the FEs vector of origin
   // p_fe_coef_destination: the FEs of destination (which will receive the updated values)
@@ -999,7 +1203,15 @@ void compute_fe_gnl(double *p_fe_coef_origin, double *p_fe_coef_destination,
     
     // STEP 1: we compute the sum of the other coef values
     // Note that we need to recompute it from scratch everytime (otherwise precision issues arise)
-    std::fill_n(p_sum_other_means, n_obs, 0);
+    if(nthreads > 1){
+      #pragma omp parallel for num_threads(nthreads) schedule(static)
+      for(int i=0 ; i<n_obs ; ++i){
+        p_sum_other_means[i] = 0;
+      }
+    } else {
+      std::fill_n(p_sum_other_means, n_obs, 0);
+    }
+
     double *my_fe_coef;
     for(int h=0 ; h<Q ; h++){
       if(h == q) continue;
@@ -1010,11 +1222,11 @@ void compute_fe_gnl(double *p_fe_coef_origin, double *p_fe_coef_destination,
         my_fe_coef = p_fe_coef_destination;
       }
 
-      FE_info.add_wfe_coef_to_mu(h, my_fe_coef, p_sum_other_means);
+      FE_info.add_wfe_coef_to_mu(h, my_fe_coef, p_sum_other_means, nthreads);
     }
 
     // STEP 2: computing the FE coef
-    FE_info.compute_fe_coef(q, p_fe_coef_destination, p_sum_other_means, p_sum_in_out);
+    FE_info.compute_fe_coef(q, p_fe_coef_destination, p_sum_other_means, p_sum_in_out, nthreads);
     
   }
 
@@ -1025,19 +1237,19 @@ void compute_fe_gnl(double *p_fe_coef_origin, double *p_fe_coef_destination,
 
 void compute_fe(int Q, double *p_fe_coef_origin, double *p_fe_coef_destination,
                 double *p_sum_other_means, double *p_sum_in_out, 
-                PARAM_DEMEAN *args){
+                PARAM_DEMEAN *args, int nthreads = 1){
   if(Q == 2){
     FEClass &FE_info = *(args->p_FE_info);
     FE_info.compute_fe_coef_2(p_fe_coef_origin, p_fe_coef_destination, 
-                              p_sum_other_means, p_sum_in_out);
+                              p_sum_other_means, p_sum_in_out, nthreads);
   } else {
     compute_fe_gnl(p_fe_coef_origin, p_fe_coef_destination, p_sum_other_means, 
-                   p_sum_in_out, args);
+                   p_sum_in_out, args, nthreads);
   }
 }
 
 
-void demean_single_1(int v, PARAM_DEMEAN* args){
+void demean_single_1(int v, PARAM_DEMEAN* args, int nthreads = 1){
   // v: variable identifier to demean
 
   // Q == 1: nothing to say, just compute the closed form
@@ -1069,10 +1281,10 @@ void demean_single_1(int v, PARAM_DEMEAN* args){
   double *output = p_output[v];
 
   // We compute the FEs
-  FE_info.compute_fe_coef(p_fe_coef, input);
+  FE_info.compute_fe_coef(p_fe_coef, input, nthreads);
 
   // Output:
-  FE_info.add_fe_coef_to_mu(0, p_fe_coef, output);
+  FE_info.add_fe_coef_to_mu(0, p_fe_coef, output, nthreads);
 
   // saving the fixef coefs
   double *fixef_values = args->fixef_values;
@@ -1085,7 +1297,7 @@ void demean_single_1(int v, PARAM_DEMEAN* args){
 }
 
 
-bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false){
+bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false, int nthreads = 1){
 
   //
   // data
@@ -1132,7 +1344,7 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
   double *p_sum_in_out = sum_input_output.data();
 
   for(int q=0 ; q<Q ; ++q){
-    FE_info.compute_in_out(q, p_sum_in_out, input, output);
+    FE_info.compute_in_out(q, p_sum_in_out, input, output, nthreads);
   }
 
   // interruption handling
@@ -1184,7 +1396,7 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
   //
 
   // first iteration
-  compute_fe(Q, p_X, p_GX, p_sum_other_means, p_sum_in_out, args);
+  compute_fe(Q, p_X, p_GX, p_sum_other_means, p_sum_in_out, args, nthreads);
 
   // check whether we should go into the loop
   bool keepGoing = false;
@@ -1215,25 +1427,25 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
       // simple projections, at the request of the user
       // may be useful to hasten convergence on special cases
       // default is 0
-      compute_fe(Q, p_GX, p_GGX, p_sum_other_means, p_sum_in_out, args);
-      compute_fe(Q, p_GGX, p_X, p_sum_other_means, p_sum_in_out, args);
-      compute_fe(Q, p_X, p_GX, p_sum_other_means, p_sum_in_out, args);
+      compute_fe(Q, p_GX, p_GGX, p_sum_other_means, p_sum_in_out, args, nthreads);
+      compute_fe(Q, p_GGX, p_X, p_sum_other_means, p_sum_in_out, args, nthreads);
+      compute_fe(Q, p_X, p_GX, p_sum_other_means, p_sum_in_out, args, nthreads);
     }
 
     // origin: GX, destination: GGX
-    compute_fe(Q, p_GX, p_GGX, p_sum_other_means, p_sum_in_out, args);
+    compute_fe(Q, p_GX, p_GGX, p_sum_other_means, p_sum_in_out, args, nthreads);
 
     // X: outcome of the acceleration
-    numconv = dm_update_X_IronsTuck(nb_coef_no_Q, X, GX, GGX, delta_GX, delta2_X);
+    numconv = dm_update_X_IronsTuck(nb_coef_no_Q, X, GX, GGX, delta_GX, delta2_X, nthreads);
     if(numconv) break;
     
     if(iter >= iter_projAfterAcc){
       std::memcpy(p_Y, p_X, nb_coef_T * sizeof(double));
-      compute_fe(Q, p_Y, p_X, p_sum_other_means, p_sum_in_out, args);
+      compute_fe(Q, p_Y, p_X, p_sum_other_means, p_sum_in_out, args, nthreads);
     }    
 
     // origin: X, destination: GX
-    compute_fe(Q, p_X, p_GX, p_sum_other_means, p_sum_in_out, args);
+    compute_fe(Q, p_X, p_GX, p_sum_other_means, p_sum_in_out, args, nthreads);
 
     keepGoing = false;
     for(int i=0 ; i<nb_coef_no_Q ; ++i){
@@ -1251,9 +1463,9 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
         std::memcpy(p_GY, p_GX, nb_coef_T * sizeof(double));
       } else {
         std::memcpy(p_GGY, p_GX, nb_coef_T * sizeof(double));
-        numconv = dm_update_X_IronsTuck(nb_coef_no_Q, Y, GY, GGY, delta_GX, delta2_X);
+        numconv = dm_update_X_IronsTuck(nb_coef_no_Q, Y, GY, GGY, delta_GX, delta2_X, nthreads);
         if(numconv) break;
-        compute_fe(Q, p_Y, p_GX, p_sum_other_means, p_sum_in_out, args);
+        compute_fe(Q, p_Y, p_GX, p_sum_other_means, p_sum_in_out, args, nthreads);
         grand_acc = 0;
       }
     }
@@ -1266,21 +1478,31 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
       double *p_mu = mu_current.data();
       
       if(two_fe_algo){
-        FE_info.add_2_fe_coef_to_mu(p_GX, p_sum_other_means, p_sum_in_out, p_mu);
+        FE_info.add_2_fe_coef_to_mu(p_GX, p_sum_other_means, p_sum_in_out, p_mu, true, nthreads);
       } else {
         for(int q=0 ; q<Q ; ++q){
-          FE_info.add_fe_coef_to_mu(q, p_GX, p_mu);
+          FE_info.add_fe_coef_to_mu(q, p_GX, p_mu, nthreads);
         }
       }
       
       double ssr_old = ssr;
 
       // we compute the new SSR
-      ssr = 0;
-      double resid;
-      for(int i=0 ; i<n_obs ; ++i){
-        resid = input[i] - mu_current[i];
-        ssr += resid*resid;
+      if(nthreads > 1){
+        double ssr_acc = 0;
+        #pragma omp parallel for num_threads(nthreads) schedule(static) reduction(+: ssr_acc)
+        for(int i=0 ; i<n_obs ; ++i){
+          double resid = input[i] - mu_current[i];
+          ssr_acc += resid*resid;
+        }
+        ssr = ssr_acc;
+      } else {
+        ssr = 0;
+        double resid;
+        for(int i=0 ; i<n_obs ; ++i){
+          resid = input[i] - mu_current[i];
+          ssr += resid*resid;
+        }
       }
 
       if(stopping_crit(ssr_old, ssr, diffMax)){
@@ -1301,11 +1523,11 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
     double *p_alpha_final = p_GX;
     p_beta_final = p_sum_other_means;
 
-    FE_info.compute_fe_coef_2(p_alpha_final, p_alpha_final, p_beta_final, p_sum_in_out);
-    FE_info.add_2_fe_coef_to_mu(p_alpha_final, p_beta_final, p_sum_in_out, output, false);
+    FE_info.compute_fe_coef_2(p_alpha_final, p_alpha_final, p_beta_final, p_sum_in_out, nthreads);
+    FE_info.add_2_fe_coef_to_mu(p_alpha_final, p_beta_final, p_sum_in_out, output, false, nthreads);
   } else {
     for(int q=0 ; q<Q ; ++q){
-      FE_info.add_fe_coef_to_mu(q, p_GX, output);
+      FE_info.add_fe_coef_to_mu(q, p_GX, output, nthreads);
     }
   }  
 
@@ -1335,7 +1557,7 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
   return(conv);
 }
 
-void demean_single_gnl(int v, PARAM_DEMEAN* args){
+void demean_single_gnl(int v, PARAM_DEMEAN* args, int nthreads = 1){
   // v: integer identifying the variable to demean
 
   // Algorithm to quickly get the means
@@ -1351,13 +1573,13 @@ void demean_single_gnl(int v, PARAM_DEMEAN* args){
   int Q = args->Q;
 
   if(Q == 2){
-    demean_acc_gnl(v, iterMax, args);
+    demean_acc_gnl(v, iterMax, args, false, nthreads);
   } else {
     bool conv = false;
     
     // iter_warmup <= 0 means no warmup and we start directly with 2FE algo
     if(iter_warmup > 0){
-      conv = demean_acc_gnl(v, iter_warmup, args);
+      conv = demean_acc_gnl(v, iter_warmup, args, false, nthreads);
       iter_warmup = 0;
     }
 
@@ -1365,12 +1587,12 @@ void demean_single_gnl(int v, PARAM_DEMEAN* args){
       // convergence for the first 2 FEs
       int iter_max_2FE = iterMax / 2 - iter_warmup;
       if(iter_max_2FE > 0){
-        demean_acc_gnl(v, iter_max_2FE, args, true);
+        demean_acc_gnl(v, iter_max_2FE, args, true, nthreads);
       }
       
       // re-acceleration
       int iter_previous = args->p_iterations_all[v];
-      demean_acc_gnl(v, iterMax - iter_previous, args);
+      demean_acc_gnl(v, iterMax - iter_previous, args, false, nthreads);
     }
   }
 
@@ -1417,7 +1639,8 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
                 SEXP fe_id_list, SEXP table_id_I, SEXP slope_flag_Q, SEXP slope_vars_list,
                 SEXP r_init, int nthreads, 
                 int algo_extraProj, int algo_iter_warmup, int algo_iter_projAfterAcc, 
-                int algo_iter_grandAcc, bool save_fixef = false){
+                int algo_iter_grandAcc, bool save_fixef = false,
+                bool algo_parallel_yDemean = false){
   // main fun that calls demean_single
   // preformats all the information needed on the fixed-effects
   // y: the dependent variable
@@ -1534,6 +1757,9 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
   // negative number or 0 means never
   args.algo_iter_grandAcc = algo_iter_grandAcc <= 0 ? 1000000 : algo_iter_grandAcc;
 
+  args.nthreads = nthreads;
+  args.algo_parallel_yDemean = algo_parallel_yDemean;
+
   // save FE_info
   args.p_FE_info = &FE_info;
 
@@ -1556,26 +1782,60 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
   // the main loop
   //
 
-  int nthreads_current = nthreads > n_vars ? n_vars : nthreads;
+  if(!algo_parallel_yDemean){
+    int nthreads_current = nthreads > n_vars ? n_vars : nthreads;
 
-  // enlever les rprintf dans les nthreads jobs
-  #pragma omp parallel for num_threads(nthreads_current) schedule(static, 1)
-  for(int v = 0 ; v<(n_vars+nthreads_current) ; ++v){
-    // demean_single is the workhorse
-    // you get the "mean"
+    #pragma omp parallel for num_threads(nthreads_current) schedule(static, 1)
+    for(int v = 0 ; v<(n_vars+nthreads_current) ; ++v){
+      // demean_single is the workhorse
+      // you get the "mean"
 
-    if(!*(args.stopnow)){
-      if(v < n_vars){
-        if(Q == 1){
-          demean_single_1(v, &args);
-        } else {
-          demean_single_gnl(v, &args);
+      if(!*(args.stopnow)){
+        if(v < n_vars){
+          if(Q == 1){
+            demean_single_1(v, &args, 1);
+          } else {
+            demean_single_gnl(v, &args, 1);
+          }
+        } else if(true && Q != 1){
+          stayIdleCheckingInterrupt(&stopnow, jobdone, n_vars, pcounter);
         }
-      } else if(true && Q != 1){
-        stayIdleCheckingInterrupt(&stopnow, jobdone, n_vars, pcounter);
+      }
+
+    }
+  } else {
+    // Two-phase parallel demeaning:
+    // Phase 1: Demean X variables in parallel across threads (if any)
+    if(n_vars_X > 0){
+      int nthreads_X = nthreads > n_vars_X ? n_vars_X : nthreads;
+      #pragma omp parallel for num_threads(nthreads_X) schedule(static, 1)
+      for(int v = 0 ; v<(n_vars_X+nthreads_X) ; ++v){
+        if(!*(args.stopnow)){
+          if(v < n_vars_X){
+            if(Q == 1){
+              demean_single_1(v, &args, 1);
+            } else {
+              demean_single_gnl(v, &args, 1);
+            }
+          } else if(true && Q != 1){
+            stayIdleCheckingInterrupt(&stopnow, jobdone, n_vars_X, pcounter);
+          }
+        }
       }
     }
 
+    // Phase 2: Demean y variable(s) sequentially across y, but internally parallelized across all nthreads
+    if(!*(args.stopnow) && useY){
+      for(int y_idx = 0 ; y_idx < n_vars_y ; ++y_idx){
+        int v = n_vars_X + y_idx;
+        if(Q == 1){
+          demean_single_1(v, &args, nthreads);
+        } else {
+          demean_single_gnl(v, &args, nthreads);
+        }
+        if(*(args.stopnow)) break;
+      }
+    }
   }
 
 
@@ -1602,6 +1862,7 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
     p_input_tmp = p_input[k];
     p_output_tmp = p_output[k];
 
+    #pragma omp parallel for num_threads(nthreads) schedule(static)
     for(int i=0 ; i < n_obs ; ++i){
       X_demean(i, k) = p_input_tmp[i] - p_output_tmp[i];
     }
@@ -1618,6 +1879,7 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
       p_output_tmp = p_output[n_vars_X + v];
 
       NumericVector y_demean_tmp(n_obs);
+      #pragma omp parallel for num_threads(nthreads) schedule(static)
       for(int i=0 ; i < n_obs ; ++i){
         y_demean_tmp[i] = p_input_tmp[i] - p_output_tmp[i];
       }
@@ -1633,6 +1895,7 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
       // y is always the last variable
       p_input_tmp = p_input[n_vars - 1];
       p_output_tmp = p_output[n_vars - 1];
+      #pragma omp parallel for num_threads(nthreads) schedule(static)
       for(int i=0 ; i < n_obs ; ++i){
         y_demean[i] = p_input_tmp[i] - p_output_tmp[i];
       }

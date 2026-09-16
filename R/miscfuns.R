@@ -2822,7 +2822,8 @@ demean = function(X, f, slope.vars = NULL, slope.flag = NULL, data, weights,
                            algo_extraProj = fixef.algo$extraProj, 
                            algo_iter_warmup = fixef.algo$iter_warmup, 
                            algo_iter_projAfterAcc = fixef.algo$iter_projAfterAcc, 
-                           algo_iter_grandAcc = fixef.algo$iter_grandAcc)
+                           algo_iter_grandAcc = fixef.algo$iter_grandAcc,
+                           algo_parallel_yDemean = isTRUE(fixef.algo$parallel_yDemean))
 
   # Internal call
   if(fe_info){
@@ -3393,6 +3394,10 @@ fixest_data = function(x, sample = "original"){
 #' (i.e. the function `f` applied `k` times). By default, an additional acceleration 
 #' is performed for `h(X) = f^4(X)` every 8 iterations (2 times 4, equivalent to 
 #' the iterations the time to gather `h(X)` and `h(h(X))`).
+#' @param parallel_yDemean Logical scalar, default is `FALSE`. If `TRUE`, the demeaning
+#' of the dependent variable(s) is parallelized across threads internally. This avoids
+#' the bottleneck where one thread demeans the dependent variable while all other threads
+#' remain idle.
 #' @param internal Logical scalar, default is `FALSE`. If `TRUE`, no check on the arguments 
 #' is performed and the returned object is a plain list. For internal use only.
 #' 
@@ -3447,23 +3452,26 @@ fixest_data = function(x, sample = "original"){
 #' 
 #' 
 #' @return 
-#' This function returns a list of 4 integers, equal to the arguments passed by the user. 
+#' This function returns a list of 5 elements, equal to the arguments passed by the user. 
 #' That list is of class `demeaning_algo`.
 #' 
 #' 
 #' 
 demeaning_algo = function(extraProj = 0, iter_warmup = 15, iter_projAfterAcc = 40, 
-                          iter_grandAcc = 4, internal = FALSE){
+                          iter_grandAcc = 4, parallel_yDemean = FALSE, internal = FALSE){
   
   if(internal){
     return(list(extraProj = extraProj, iter_warmup = iter_warmup, 
-                iter_projAfterAcc = iter_projAfterAcc, iter_grandAcc = iter_grandAcc))
+                iter_projAfterAcc = iter_projAfterAcc, iter_grandAcc = iter_grandAcc,
+                parallel_yDemean = parallel_yDemean))
   }
   
   check_arg("integer scalar", extraProj, iter_warmup, iter_projAfterAcc, iter_grandAcc)
+  check_arg(parallel_yDemean, "logical scalar")
   
   res = list(extraProj = extraProj, iter_warmup = iter_warmup, 
-             iter_projAfterAcc = iter_projAfterAcc, iter_grandAcc = iter_grandAcc)
+             iter_projAfterAcc = iter_projAfterAcc, iter_grandAcc = iter_grandAcc,
+             parallel_yDemean = parallel_yDemean)
   class(res) = "demeaning_algo"
   
   res
