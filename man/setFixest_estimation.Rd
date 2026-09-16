@@ -20,6 +20,7 @@ setFixest_estimation(
   mem.clean = FALSE,
   glm.iter = 25,
   glm.tol = 1e-08,
+  glm.continueOnWarn = FALSE,
   data.save = FALSE,
   reset = FALSE
 )
@@ -115,6 +116,10 @@ code to avoid memory issues.}
 \item{glm.iter}{Number of iterations of the glm algorithm. Default is 25.}
 
 \item{glm.tol}{Tolerance level for the glm algorithm. Default is \code{1e-8}.}
+
+\item{glm.continueOnWarn}{Logical scalar, default is \code{FALSE}. If \code{TRUE}, the IRLS outer loop
+will not terminate early (even if deviance change is below \code{glm.tol}) if the inner
+demeaning loop did not converge in the current iteration.}
 
 \item{data.save}{Logical scalar, default is \code{FALSE}. If \code{TRUE}, the data used for
 the estimation is saved within the returned object. Hence later calls to predict(),
