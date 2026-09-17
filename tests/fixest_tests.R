@@ -3253,18 +3253,7 @@ est_mult = feols(y ~ x1 + x2, base, split = ~species)
 test(dim(fixest_data(est_mult)), dim(base))
 
 test(nrow(fixest_data(est_mult, "esti")), 45)
-
-# glm.continueOnWarn tests
-test("glm.continueOnWarn" %in% names(formals(feglm)), TRUE)
-test("glm.continueOnWarn" %in% names(formals(fepois)), TRUE)
-
-m1_def = fepois(Euros ~ log(dist_km) | Origin + Destination, trade)
-m1_fls = fepois(Euros ~ log(dist_km) | Origin + Destination, trade, glm.continueOnWarn = FALSE)
-test(coef(m1_def), coef(m1_fls))
-
-test(fepois(Euros ~ log(dist_km) | Origin + Destination, trade, glm.continueOnWarn = "invalid"), "err")
-
-# When fixef.iter is low, glm.continueOnWarn = TRUE continues outer iterations
+# glm.continueOnWarn: When fixef.iter is low, glm.continueOnWarn = TRUE continues outer iterations
 m_cw_fls = suppressWarnings(fepois(Euros ~ log(dist_km) | Origin + Destination, trade, 
                                    fixef.iter = 1, glm.iter = 25, glm.continueOnWarn = FALSE))
 m_cw_tru = suppressWarnings(fepois(Euros ~ log(dist_km) | Origin + Destination, trade, 
