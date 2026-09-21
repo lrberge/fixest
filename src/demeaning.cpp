@@ -761,6 +761,7 @@ void FEClass::add_wfe_coef_to_mu_internal(int q, double *fe_coef_C, double *out_
 
   if(is_slope_Q[q] == false){
 
+    #pragma omp taskloop num_tasks(4 * omp_get_num_threads()) default(shared) if(n_obs >= 20000)
     for(int i=0 ; i<n_obs ; ++i){
       if(use_weights){
         out_N[i] += my_fe_coef[my_fe[i] - 1] * p_weights[i];
@@ -773,6 +774,7 @@ void FEClass::add_wfe_coef_to_mu_internal(int q, double *fe_coef_C, double *out_
     simple_mat_of_vs_vars VS_mat(this, q);
     simple_mat_with_id my_vs_coef(my_fe_coef, nb_vs_Q[q], 1);
 
+    #pragma omp taskloop num_tasks(4 * omp_get_num_threads()) default(shared) if(n_obs >= 20000)
     for(int i=0 ; i<n_obs ; ++i){
       for(int v=0 ; v<V ; ++v){
         if(use_weights){
@@ -941,6 +943,7 @@ bool dm_update_X_IronsTuck(int nb_coef_no_Q, vector<double> &X,
                            const vector<double> &GX, const vector<double> &GGX,
                            vector<double> &delta_GX, vector<double> &delta2_X){
 
+  #pragma omp taskloop num_tasks(4 * omp_get_num_threads()) default(shared) if(nb_coef_no_Q >= 20000)
   for(int i=0 ; i<nb_coef_no_Q ; ++i){
     double GX_tmp = GX[i];
     delta_GX[i] = GGX[i] - GX_tmp;
@@ -962,6 +965,7 @@ bool dm_update_X_IronsTuck(int nb_coef_no_Q, vector<double> &X,
     double coef = vprod/ssq;
 
     // update of X:
+    #pragma omp taskloop num_tasks(4 * omp_get_num_threads()) default(shared) if(nb_coef_no_Q >= 20000)
     for(int i=0 ; i<nb_coef_no_Q ; ++i){
       X[i] = GGX[i] - coef * delta_GX[i];
     }
@@ -998,8 +1002,10 @@ void compute_fe_gnl(double *p_fe_coef_origin, double *p_fe_coef_destination,
   for(int q=Q-1 ; q>=0 ; q--){
     
     // STEP 1: we compute the sum of the other coef values
-    // Note that we need to recompute it from scratch everytime (otherwise precision issues arise)
-    std::fill_n(p_sum_other_means, n_obs, 0);
+    #pragma omp taskloop num_tasks(4 * omp_get_num_threads()) default(shared) if(n_obs >= 20000)
+    for(int i=0 ; i<n_obs ; ++i){
+      p_sum_other_means[i] = 0.0;
+    }
     double *my_fe_coef;
     for(int h=0 ; h<Q ; h++){
       if(h == q) continue;
@@ -1379,38 +1385,6 @@ void demean_single_gnl(int v, PARAM_DEMEAN* args){
 
 }
 
-void stayIdleCheckingInterrupt(bool *stopnow, vector<int> &jobdone, int n_vars, int *counterInside){
-  // function that keeps the master thread busy until everything is done
-
-  int nbDone = 0, iter = 1;
-  bool isMaster = omp_get_thread_num() == 0;
-
-
-  while(isMaster && nbDone < n_vars && !(*stopnow)){
-    ++iter;
-
-    if(iter % 500000000 == 0){
-      if(pending_interrupt()){
-        (*counterInside)++;
-        *stopnow = true;
-        break;
-      } else {
-        // to avoid int overflow:
-        iter = 0;
-      }
-    }
-
-    if(iter % 1000000 == 0){
-      nbDone = 0;
-      for(int v=0 ; v<n_vars ; v++){
-        nbDone += jobdone[v];
-      }
-    }
-
-  }
-
-}
-
 // Loop over demean_single
 // [[Rcpp::export]]
 List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax, SEXP r_nb_id_Q,
@@ -1548,34 +1522,40 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
   int *pjobdone = jobdone.data();
   args.jobdone = pjobdone;
 
-  int counter = 0;
-  int *pcounter = &counter;
-
 
   //
   // the main loop
   //
 
-  int nthreads_current = nthreads > n_vars ? n_vars : nthreads;
-
-  // enlever les rprintf dans les nthreads jobs
-  #pragma omp parallel for num_threads(nthreads_current) schedule(static, 1)
-  for(int v = 0 ; v<(n_vars+nthreads_current) ; ++v){
-    // demean_single is the workhorse
-    // you get the "mean"
-
-    if(!*(args.stopnow)){
-      if(v < n_vars){
+  if(nthreads == 1){
+    for(int v = 0 ; v < n_vars ; ++v){
+      if(!*(args.stopnow)){
         if(Q == 1){
           demean_single_1(v, &args);
         } else {
           demean_single_gnl(v, &args);
         }
-      } else if(true && Q != 1){
-        stayIdleCheckingInterrupt(&stopnow, jobdone, n_vars, pcounter);
       }
     }
-
+  } else {
+    #pragma omp parallel num_threads(nthreads) default(shared)
+    {
+      #pragma omp single nowait
+      {
+        for(int v = 0 ; v < n_vars ; ++v){
+          #pragma omp task firstprivate(v) default(shared)
+          {
+            if(!*(args.stopnow)){
+              if(Q == 1){
+                demean_single_1(v, &args);
+              } else {
+                demean_single_gnl(v, &args);
+              }
+            }
+          }
+        }
+      }
+    }
   }
 
 
@@ -1583,8 +1563,6 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
     UNPROTECT(1);
     stop("cpp_demean: User interrupt.");
   }
-
-  // Rprintf("Master checking: %i\n", *pcounter);
 
   //
   // save
