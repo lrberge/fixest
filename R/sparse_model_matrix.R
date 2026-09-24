@@ -625,6 +625,21 @@ vars_to_sparse_mat = function(vars, data, collin.rm = FALSE, object = NULL,
       xi = variables_list[[i]]
 
       if (inherits(xi, "sparse_var")) {
+        # NA values in factors are stored as missing column indexes. Since
+        # sparse matrices cannot hold NA implicit zeros, we mark the whole
+        # observation as NA, as model.matrix() does
+        na_i = which(is.na(xi$colid))
+        if (length(na_i) > 0) {
+          xi$rowid = c(xi$rowid[-na_i], rep(xi$rowid[na_i], each = xi$n_cols))
+          xi$colid = c(
+            xi$colid[-na_i],
+            rep(seq_len(xi$n_cols), times = length(na_i))
+          )
+          xi$values = c(
+            xi$values[-na_i],
+            rep(NA_real_, length(na_i) * xi$n_cols)
+          )
+        }
 
         id_all[[i]] = cbind(xi$rowid, running_cols[i] + xi$colid)
         values_all[[i]] = xi$values
