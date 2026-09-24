@@ -817,7 +817,7 @@ sm_fml_breaker <- function(fml, op) {
     fml <- fml[[2]]
   }
 
-  if (length(fml) == 2) {
+  if (length(fml) == 2 && is_operator(fml, "~")) {
     res[[k]] <- fml[[2]]
   } else {
     res[[k]] <- fml
