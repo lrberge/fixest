@@ -731,7 +731,13 @@ vars_to_sparse_mat = function(vars, data, collin.rm = FALSE, object = NULL,
   # add intercept if needed and not already present
   # when collin.rm = TRUE, we change add_intercept depending on if it is needed
   if (add_intercept && !("(Intercept)" %in% colnames(mat))) {
-    intercept = Matrix::Matrix(1, nrow(data), 1, dimnames = list(NULL, "(Intercept)"))
+    intercept = Matrix::Matrix(
+      1,
+      nrow(data),
+      1,
+      sparse = TRUE,
+      dimnames = list(NULL, "(Intercept)")
+    )
     mat = if (is.null(mat)) intercept else cbind(intercept, mat)
   }
 
