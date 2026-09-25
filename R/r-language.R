@@ -382,6 +382,17 @@ protect_powers_expand_lags = function(expr){
     
     return(new_expr)
     
+  } else if(length(expr[[1]]) == 1 && as.character(expr[[1]]) == "I"){
+    # already protected: `I(x^2)` must not become `I(I(x^2))`.
+    # We still recurse into the argument so that e.g. lags get expanded.
+    
+    inner = expr[[2]]
+    if(!(is_operator(inner, "^") && is.numeric(inner[[3]]))){
+      expr[[2]] = protect_powers_expand_lags(inner)
+    }
+    
+    return(expr)
+    
   } else if(length(expr[[1]]) == 1 && expr[[1]] == "^"){
     # power
     

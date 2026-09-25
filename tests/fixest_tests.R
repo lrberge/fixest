@@ -3037,6 +3037,14 @@ test(formula(est, fml.update = . ~ . + I(x1^2)),
 test(formula(est, fml.update = . ~ . + I(x1^2) | 0 | 0), 
      y ~ x1 + I(x1^2))
 
+# a user-supplied I(x^2) must not be wrapped again into I(I(x^2))
+test(fixest:::fixest_fml_rewriter(y ~ I(x1^2))$fml, y ~ I(x1^2))
+test(fixest:::fixest_fml_rewriter(y ~ I(x1^2) + x1^3)$fml, y ~ I(x1^2) + I(x1^3))
+# ... while lags inside I() are still expanded
+test(deparse(fixest:::fixest_fml_rewriter(y ~ I(l(x1, 1:2)))$fml), 
+     "y ~ I(l(x1, 1) + l(x1, 2))")
+test(names(coef(feols(y ~ I(x1^2), base))), c("(Intercept)", "I(x1^2)"))
+
 # build
 test(formula(est, fml.build = . ~ .endo + .inst), y ~ x2 + x3)
 
