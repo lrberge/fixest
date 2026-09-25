@@ -2872,9 +2872,9 @@ test_col_names(feols(mpg ~ poly(hp, degree = 2) + disp | vs, mtcars))
 # Allow NA in factor variable
 d <- data.frame(y = 1:3, g = factor(c("a", NA, "b")))
 m <- fixest::sparse_model_matrix(y ~ factor(g), d)
-test(all(is.na(m[2, c("ga", "gb")])), TRUE)
+test(all(is.na(m[2, c("factor(g)a", "factor(g)b")])), TRUE)
 m <- fixest::sparse_model_matrix(y ~ i(g), d)
-test(all(is.na(m[2, c("ga", "gb")])), TRUE)
+test(all(is.na(m[2, c("g::a", "g::b")])), TRUE)
 m2 <- fixest::sparse_model_matrix(y ~ g, d, na.rm = TRUE)
 test(nrow(m2), 2L)
 
