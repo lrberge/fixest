@@ -801,7 +801,7 @@ is_rhs_only <- function(fml) {
     return(TRUE)
   }
   # e.g. fml = ~ x | t ~ z
-  if (length(fml[[2]]) == 2) {
+  if (is_operator(fml[[2]], "~") &&length(fml[[2]]) == 2) {
     return(TRUE)
   }
   return(FALSE)
