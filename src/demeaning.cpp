@@ -90,42 +90,29 @@ class simple_mat_with_id{
   // => Access to one of the n_coef matrices of size n_vs x n_vs; all stacked in a single vector
   //
   // px0: origin of the vector (which is of length n_coef * n_vs * n_vs)
-  // px_current: working location of the n_vs x n_vs matrix
   // n: n_vs
   // n2: explicit
-  // id_current: current identifier. The identifiers range from 0 to (n_coef - 1)
 
   simple_mat_with_id() = delete;
 
   double *px0;
-  double *px_current;
-  int nrow, ncol, n_total, id_current = 0;
+  int nrow, ncol, n_total;
 
 public:
   simple_mat_with_id(double* px_in, int nrow_in):
-    px0(px_in), px_current(px_in), nrow(nrow_in), ncol(nrow_in), n_total(nrow * ncol) {};
+    px0(px_in), nrow(nrow_in), ncol(nrow_in), n_total(nrow * ncol) {};
   simple_mat_with_id(double* px_in, int nrow_in, int ncol_in):
-    px0(px_in), px_current(px_in), nrow(nrow_in), ncol(ncol_in), n_total(nrow * ncol) {};
+    px0(px_in), nrow(nrow_in), ncol(ncol_in), n_total(nrow * ncol) {};
   double& operator()(int id, int i, int j);
   double& operator()(int id, int i);
 };
 
 inline double& simple_mat_with_id::operator()(int id, int i, int j){
-  if(id != id_current){
-    id_current = id;
-    px_current = px0 + n_total * id;
-  }
-
-  return px_current[i + nrow * j];
+  return px0[n_total * id + i + nrow * j];
 }
 
 inline double& simple_mat_with_id::operator()(int id, int i){
-  if(id != id_current){
-    id_current = id;
-    px_current = px0 + n_total * id;
-  }
-
-  return px_current[i];
+  return px0[n_total * id + i];
 }
 
 class FEClass{
@@ -1540,9 +1527,9 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
   } else {
     #pragma omp parallel num_threads(nthreads) default(shared)
     {
-      #pragma omp single nowait
+      #pragma omp master
       {
-        for(int v = 0 ; v < n_vars ; ++v){
+        for(int v = 1 ; v < n_vars ; ++v){
           #pragma omp task firstprivate(v) default(shared)
           {
             if(!*(args.stopnow)){
@@ -1552,6 +1539,14 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
                 demean_single_gnl(v, &args);
               }
             }
+          }
+        }
+
+        if(!*(args.stopnow)){
+          if(Q == 1){
+            demean_single_1(0, &args);
+          } else {
+            demean_single_gnl(0, &args);
           }
         }
       }
