@@ -1304,7 +1304,7 @@ std::string apply_escape_markup(const char * x){
 
   int n = std::strlen(x);
   std::vector<std::string> tmp_all(4, "");
-  std::string tmp = "", res = "";
+  std::string tmp = "";
 
   std::vector<bool> is_open(4, false);
   std::vector<int> id_open;
