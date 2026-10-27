@@ -3254,6 +3254,28 @@ test(dim(fixest_data(est_mult)), dim(base))
 
 test(nrow(fixest_data(est_mult, "esti")), 45)
 
+# Varying slopes with constant or near-constant within-cluster slope values
+set.seed(42)
+n_vs_test = 60
+fe1_vs = rep(1:20, each = 3)
+fe2_vs = sample(1:5, n_vs_test, replace = TRUE)
+fe3_vs = sample(1:5, n_vs_test, replace = TRUE)
+x_vs   = rnorm(n_vs_test)
+y_vs   = 2.5 * x_vs + rnorm(n_vs_test)
+
+for(eps_vs in c(0, 1e-15, 1e-12, 1e-4)){
+  z_vs = rnorm(n_vs_test)
+  z_vs[1:3] = c(0.1, 0.1, 0.1 + eps_vs)
+  z_vs[4:6] = c(0.3, 0.3, 0.3 - eps_vs)
+  df_vs = data.frame(y = y_vs, x = x_vs, z = z_vs,
+                     fe1 = factor(fe1_vs), fe2 = factor(fe2_vs), fe3 = factor(fe3_vs))
+  est_vs_fe = feols(y ~ x | fe1[z] + fe2 + fe3, df_vs, fixef.tol = 1e-10)
+  est_vs_lm = lm(y ~ x + fe1 + fe1:z + fe2 + fe3, df_vs)
+  test(est_vs_fe$convStatus, TRUE)
+  test(unname(coef(est_vs_fe)["x"]), unname(coef(est_vs_lm)["x"]), "~", 1e-6)
+}
+
+
 
 
 
