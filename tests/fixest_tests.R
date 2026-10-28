@@ -3254,6 +3254,16 @@ test(dim(fixest_data(est_mult)), dim(base))
 
 test(nrow(fixest_data(est_mult, "esti")), 45)
 
+# C++ check_conv and check_conv_feols (including zero-slope cluster)
+base_cc = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+base_cc$FE = rep(1:30, 5)
+base_cc$x3[base_cc$FE == 1] = 0
+est_cc = feols(y ~ x1 | species[x2] + FE[x3], base_cc, fixef.tol = 1e-8)
+conv_cc = check_conv_feols(est_cc)
+test(anyNA(unlist(conv_cc)), FALSE)
+test(max(abs(unlist(conv_cc))) < 1e-5, TRUE)
+
+
 
 
 
