@@ -1671,6 +1671,186 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
   return(res);
 }
 
+struct ConvTerm {
+  const int *fixef_id;
+  const double *slope_var;
+  int n_groups;
+};
+
+// [[Rcpp::export]]
+SEXP cpp_check_conv(SEXP y, SEXP X_raw, SEXP fixef_id_list, SEXP slope_flag_Q,
+                    SEXP slope_vars_list, SEXP r_weights, bool full = false, int nthreads = 1){
+
+  int Q = Rf_length(slope_flag_Q);
+  if(Q == 0){
+    return R_NilValue;
+  }
+
+  int n_obs = Rf_length(VECTOR_ELT(fixef_id_list, 0));
+
+  bool use_y = true;
+  int n_vars_X = 0;
+  if(Rf_xlength(X_raw) == 1 && (!Rf_isMatrix(X_raw) || Rf_xlength(y) > 1)){
+    use_y = true;
+    n_vars_X = 0;
+  } else {
+    if(Rf_xlength(y) <= 1 && n_obs > 1){
+      use_y = false;
+    }
+    n_vars_X = Rf_isMatrix(X_raw) ? Rf_ncols(X_raw) : 1;
+  }
+
+  int K = n_vars_X + (use_y ? 1 : 0);
+
+  vector<RealVec> vars_K(K);
+  if(use_y){
+    vars_K[0] = RealVec(y);
+  }
+  if(n_vars_X > 0){
+    RealMat m_X(X_raw, n_obs == 1);
+    int offset = use_y ? 1 : 0;
+    for(int k = 0 ; k < n_vars_X ; ++k){
+      vars_K[offset + k] = m_X[k];
+    }
+  }
+
+  bool use_weights = (Rf_xlength(r_weights) == n_obs && n_obs > 1);
+  double scalar_w = (Rf_xlength(r_weights) == 1) ? REAL(r_weights)[0] : 1.0;
+  const double *p_weights = use_weights ? REAL(r_weights) : nullptr;
+
+  IntegerVector slope_flag(slope_flag_Q);
+  vector<ConvTerm> terms;
+  int index_slope = 0;
+
+  for(int q = 0 ; q < Q ; ++q){
+    SEXP r_fe = VECTOR_ELT(fixef_id_list, q);
+    const int *fe_id = INTEGER(r_fe);
+
+    int G = 0;
+    for(int i = 0 ; i < n_obs ; ++i){
+      if(fe_id[i] > G) G = fe_id[i];
+    }
+
+    int sf = slope_flag[q];
+    if(sf >= 0){
+      terms.push_back(ConvTerm{fe_id, nullptr, G});
+    }
+
+    int n_slopes = std::abs(sf);
+    for(int s = 0 ; s < n_slopes ; ++s){
+      SEXP r_sv = VECTOR_ELT(slope_vars_list, index_slope++);
+      const double *sv = REAL(r_sv);
+      terms.push_back(ConvTerm{fe_id, sv, G});
+    }
+  }
+
+  int T = static_cast<int>(terms.size());
+  int nthreads_k = nthreads < K ? nthreads : K;
+  if(nthreads_k < 1) nthreads_k = 1;
+
+  NumericMatrix info_max(full ? 1 : K, full ? 1 : T);
+  List info_full(full ? K : 0);
+  vector<double*> full_ptrs;
+
+  if(full){
+    full_ptrs.resize(static_cast<size_t>(K) * T, nullptr);
+    for(int k = 0 ; k < K ; ++k){
+      List list_k(T);
+      for(int t = 0 ; t < T ; ++t){
+        NumericVector vec_kt(terms[t].n_groups);
+        full_ptrs[static_cast<size_t>(k) * T + t] = REAL(vec_kt);
+        list_k[t] = vec_kt;
+      }
+      info_full[k] = list_k;
+    }
+  }
+
+  for(int t = 0 ; t < T ; ++t){
+    const int *fe_id = terms[t].fixef_id;
+    const double *sv = terms[t].slope_var;
+    int G = terms[t].n_groups;
+
+    vector<double> inv_denom(G, 0.0);
+    if(sv == nullptr){
+      for(int i = 0 ; i < n_obs ; ++i){
+        inv_denom[fe_id[i] - 1] += 1.0;
+      }
+      for(int g = 0 ; g < G ; ++g){
+        inv_denom[g] = inv_denom[g] > 0.0 ? (scalar_w / inv_denom[g]) : 0.0;
+      }
+    } else {
+      if(use_weights){
+        for(int i = 0 ; i < n_obs ; ++i){
+          double v = sv[i];
+          inv_denom[fe_id[i] - 1] += p_weights[i] * v * v;
+        }
+      } else {
+        for(int i = 0 ; i < n_obs ; ++i){
+          double v = sv[i];
+          inv_denom[fe_id[i] - 1] += v * v;
+        }
+      }
+      for(int g = 0 ; g < G ; ++g){
+        inv_denom[g] = inv_denom[g] > 0.0 ? (1.0 / inv_denom[g]) : 0.0;
+      }
+    }
+
+    #pragma omp parallel for num_threads(nthreads_k) schedule(static, 1)
+    for(int k = 0 ; k < K ; ++k){
+      RealVec x_k = vars_K[k];
+      vector<double> local_buf;
+      double *acc = nullptr;
+      if(full){
+        acc = full_ptrs[static_cast<size_t>(k) * T + t];
+        std::fill_n(acc, G, 0.0);
+      } else {
+        local_buf.assign(G, 0.0);
+        acc = local_buf.data();
+      }
+
+      if(sv == nullptr){
+        if(use_weights){
+          for(int i = 0 ; i < n_obs ; ++i){
+            acc[fe_id[i] - 1] += p_weights[i] * x_k[i];
+          }
+        } else {
+          for(int i = 0 ; i < n_obs ; ++i){
+            acc[fe_id[i] - 1] += x_k[i];
+          }
+        }
+      } else {
+        if(use_weights){
+          for(int i = 0 ; i < n_obs ; ++i){
+            acc[fe_id[i] - 1] += p_weights[i] * x_k[i] * sv[i];
+          }
+        } else {
+          for(int i = 0 ; i < n_obs ; ++i){
+            acc[fe_id[i] - 1] += x_k[i] * sv[i];
+          }
+        }
+      }
+
+      if(full){
+        for(int g = 0 ; g < G ; ++g){
+          acc[g] *= inv_denom[g];
+        }
+      } else {
+        double max_abs = 0.0;
+        for(int g = 0 ; g < G ; ++g){
+          double val = std::fabs(acc[g] * inv_denom[g]);
+          if(val > max_abs) max_abs = val;
+        }
+        info_max(k, t) = max_abs;
+      }
+    }
+  }
+
+  if(full){
+    return info_full;
+  }
+  return info_max;
+}
+
 
 
 
