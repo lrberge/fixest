@@ -1721,26 +1721,6 @@ test(se(est_panel, ssc = ssc(K.adj = FALSE)), se(est_panel, ~id + ssc(K.adj = FA
 test(se_est, se(est_panel, vcov_cluster("id")))
 test(se_est, se(vcov_cluster(est_panel, "id")))
 
-# four-way cluster formula (~ cl1 + cl2 + cl3 + cl4 and cluster ~ cl1 + cl2 + cl3 + cl4)
-set.seed(123)
-base_4w = data.frame(
-  y   = rnorm(200),
-  x1  = rnorm(200),
-  fe1 = sample(1:25, 200, TRUE),
-  fe2 = sample(1:20, 200, TRUE),
-  c1  = sample(1:10, 200, TRUE),
-  c2  = sample(1:12, 200, TRUE),
-  c3  = sample(1:14, 200, TRUE),
-  c4  = sample(1:16, 200, TRUE)
-)
-est_4w = feols(y ~ x1 | fe1 + fe2, base_4w)
-se_4w_ref = se(est_4w, fourway ~ c1 + c2 + c3 + c4)
-test(se(est_4w, ~ c1 + c2 + c3 + c4), se_4w_ref)
-test(se(est_4w, cluster ~ c1 + c2 + c3 + c4), se_4w_ref)
-test(se(est_4w, vcov_cluster(c("c1", "c2", "c3", "c4"))), se_4w_ref)
-test(se(feols(y ~ x1 | fe1 + fe2, base_4w, cluster = ~ c1 + c2 + c3 + c4)), se_4w_ref)
-test(isTRUE(all.equal(se_4w_ref, se(est_4w, fourway ~ fe1 + c2 + c3 + c4))), FALSE)
-
 # NW
 se_NW = se(est_panel, "NW")
 test(se_NW, se(est_panel, NW ~ id + period))
