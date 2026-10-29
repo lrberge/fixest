@@ -1803,7 +1803,7 @@ vcov_setup = function(){
   )
   
   vcov_clust_setup$patterns = c("", "cl1", "cl1 + cl2", "cl1 + cl2 + cl3",
-                                "c1 + cl2 + cl3 + cl4")
+                                "cl1 + cl2 + cl3 + cl4")
 
   # Other keywords => direct two-/three-/four-way clustering
   cl1 = list(guess_from = list(fixef = 1), label = "first cluster", 
