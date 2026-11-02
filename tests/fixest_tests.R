@@ -2070,6 +2070,15 @@ res_sunab = feols(y ~ x1 + sunab(year_treated, year, bin.rel = "bin::2"), base_s
 iplot(res_sunab)
 test(length(coef(res_sunab)), 12)
 
+# The first observation of each cohort must count toward its classification.
+cohort = rep(1:4, each = 4)
+period = c(-2, -1, 0, 1, -1, 0, 1, 2, -1, -1, -1, -1, 0, 1, 2, 3)
+for(idx in list(1:16, c(4:1, 8:5, 12:9, 16:13))){
+  info_sunab = fixest:::cpp_find_never_always_treated(cohort[idx], period[idx])
+  test(info_sunab$ref, c(3L, 4L))
+  test(info_sunab$always_treated, 4L)
+}
+
 
 ####
 #### bin ####
