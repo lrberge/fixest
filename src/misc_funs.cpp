@@ -1024,16 +1024,11 @@ List cpp_find_never_always_treated(IntegerVector cohort, NumericVector period){
 
   int n = cohort.size();
 
-  bool is_pos = false;
-  bool is_neg = false;
+  bool is_neg = period[0] < 0;
+  bool is_pos = !is_neg;
   bool is_ok = false;
 
   int j = cohort[0];
-  if(period[0] < 0){
-    is_neg = true;
-  } else {
-    is_pos = true;
-  }
 
   for(int i=1 ; i<n ; ++i){
 
@@ -1059,8 +1054,8 @@ List cpp_find_never_always_treated(IntegerVector cohort, NumericVector period){
 
       // re-init
       j = cohort[i];
-      is_neg = false;
-      is_pos = false;
+      is_neg = period[i] < 0;
+      is_pos = !is_neg;
       is_ok = false;
 
     }

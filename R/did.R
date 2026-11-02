@@ -324,7 +324,7 @@ sunab = function(cohort, period, ref.c = NULL, ref.p = -1, bin, bin.rel,
   } else {
     qui_drop = which(cohort_int %in% info$ref | period %in% ref.p)
   }
-  qui_NA = info$always_treated
+  qui_NA = which(cohort_int %in% info$always_treated)
 
   # All references have been removed => pure i() without ref
   cohort = cohort[-qui_drop]
