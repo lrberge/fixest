@@ -1480,16 +1480,24 @@ i = function(factor_var, var, ref = NULL, keep = NULL, bin = NULL,
     
     # Internal call: we return the row ids + the values + the indexes + the names
 
+    # Rows with NA are kept (but flagged with a missing column id) so that
+    # they can be set to NA instead of 0 in the resulting sparse matrix
     if(length(who_is_dropped) > 0){
-      valid_row = !is_na_all & !fe_num %in% who_is_dropped
+      keep_row = !fe_num %in% who_is_dropped
     } else {
-      valid_row = !is_na_all
+      keep_row = rep(TRUE, length(fe_num))
     }
+
+    valid_row = keep_row & !is_na_all
 
     # we need to ensure the IDs go from 1 to # Unique
     fe_colid = to_integer(fe_num[valid_row], sorted = TRUE)
 
-    values = if(length(var) == 1) rep(1, length(valid_row)) else var
+    # NA observations have no column index
+    colid = rep(NA_integer_, sum(keep_row))
+    colid[!is_na_all[keep_row]] = fe_colid
+
+    values = if(length(var) == 1) rep(1, length(fe_num)) else var
 
     # Clean names
     
@@ -1504,8 +1512,8 @@ i = function(factor_var, var, ref = NULL, keep = NULL, bin = NULL,
     }
     
 
-    res = list(rowid = which(valid_row), values = values,
-               colid = fe_colid, col_names = col_names)
+    res = list(rowid = which(keep_row), values = values,
+               colid = colid, col_names = col_names)
 
     class(res) = "i_sparse"
 

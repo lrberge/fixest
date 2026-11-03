@@ -625,6 +625,21 @@ vars_to_sparse_mat = function(vars, data, collin.rm = FALSE, object = NULL,
       xi = variables_list[[i]]
 
       if (inherits(xi, "sparse_var")) {
+        # NA values in factors are stored as missing column indexes. Since
+        # sparse matrices cannot hold NA implicit zeros, we mark the whole
+        # observation as NA, as model.matrix() does
+        na_i = which(is.na(xi$colid))
+        if (length(na_i) > 0) {
+          xi$rowid = c(xi$rowid[-na_i], rep(xi$rowid[na_i], each = xi$n_cols))
+          xi$colid = c(
+            xi$colid[-na_i],
+            rep(seq_len(xi$n_cols), times = length(na_i))
+          )
+          xi$values = c(
+            xi$values[-na_i],
+            rep(NA_real_, length(na_i) * xi$n_cols)
+          )
+        }
 
         id_all[[i]] = cbind(xi$rowid, running_cols[i] + xi$colid)
         values_all[[i]] = xi$values
@@ -716,8 +731,14 @@ vars_to_sparse_mat = function(vars, data, collin.rm = FALSE, object = NULL,
   # add intercept if needed and not already present
   # when collin.rm = TRUE, we change add_intercept depending on if it is needed
   if (add_intercept && !("(Intercept)" %in% colnames(mat))) {
-    mat = cbind(1, mat)
-    colnames(mat)[1] = "(Intercept)"
+    intercept = Matrix::Matrix(
+      1,
+      nrow(data),
+      1,
+      sparse = TRUE,
+      dimnames = list(NULL, "(Intercept)")
+    )
+    mat = if (is.null(mat)) intercept else cbind(intercept, mat)
   }
 
   return(mat)
@@ -786,7 +807,7 @@ is_rhs_only <- function(fml) {
     return(TRUE)
   }
   # e.g. fml = ~ x | t ~ z
-  if (length(fml[[2]]) == 2) {
+  if (is_operator(fml[[2]], "~") &&length(fml[[2]]) == 2) {
     return(TRUE)
   }
   return(FALSE)
@@ -802,7 +823,7 @@ sm_fml_breaker <- function(fml, op) {
     fml <- fml[[2]]
   }
 
-  if (length(fml) == 2) {
+  if (length(fml) == 2 && is_operator(fml, "~")) {
     res[[k]] <- fml[[2]]
   } else {
     res[[k]] <- fml
