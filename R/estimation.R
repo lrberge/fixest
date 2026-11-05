@@ -2425,6 +2425,9 @@ feols.fit = function(y, X, fixef_df, vcov, offset, split, fsplit, split.keep, sp
 #' two coefficients of successive iterations.
 #' @param glm.iter Number of iterations of the glm algorithm. Default is 25.
 #' @param glm.tol Tolerance level for the glm algorithm. Default is `1e-8`.
+#' @param glm.continueOnWarn Logical scalar, default is `FALSE`. If `TRUE`, the IRLS outer loop 
+#' will not terminate early (even if deviance change is below `glm.tol`) if the inner 
+#' demeaning loop did not converge in the current iteration.
 #' @param verbose Integer. Higher values give more information. In particular, 
 #' it can detail the number of iterations in the demeaning algoritmh (the first number 
 #' is the left-hand-side, the other numbers are the right-hand-side variables). 
@@ -2577,7 +2580,8 @@ feglm = function(fml, data, family = "gaussian", vcov, offset, weights, subset, 
                  etastart = NULL, mustart = NULL, fixef, fixef.rm = "perfect_fit",
                  fixef.tol = 1e-6, fixef.iter = 10000, fixef.algo = NULL, 
                  collin.tol = 1e-9,
-                 glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(),
+                 glm.iter = 25, glm.tol = 1e-8, glm.continueOnWarn = FALSE, 
+                 nthreads = getFixest_nthreads(),
                  lean = FALSE, warn = TRUE, notes = getFixest_notes(), verbose = 0,
                  only.coef = FALSE, data.save = FALSE,
                  fixef.keep_names = NULL, mem.clean = FALSE, only.env = FALSE, env, ...){
@@ -2604,6 +2608,7 @@ feglm = function(fml, data, family = "gaussian", vcov, offset, weights, subset, 
                          fixef.iter = fixef.iter, fixef.algo = fixef.algo,
                          collin.tol = collin.tol,
                          glm.iter = glm.iter, glm.tol = glm.tol,
+                         glm.continueOnWarn = glm.continueOnWarn,
                          nthreads = nthreads, lean = lean, warn = warn, notes = notes,
                          verbose = verbose, fixef.keep_names = fixef.keep_names,
                          mem.clean = mem.clean, only.coef = only.coef, data.save = data.save,
@@ -2644,7 +2649,8 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
                      etastart = NULL, mustart = NULL, fixef.rm = "perfect_fit",
                      fixef.tol = 1e-6, fixef.iter = 10000, fixef.algo = NULL, 
                      collin.tol = 1e-9,
-                     glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(),
+                     glm.iter = 25, glm.tol = 1e-8, glm.continueOnWarn = FALSE, 
+                     nthreads = getFixest_nthreads(),
                      lean = FALSE, warn = TRUE, notes = getFixest_notes(), mem.clean = FALSE,
                      verbose = 0, only.env = FALSE, only.coef = FALSE, env, ...){
 
@@ -2678,6 +2684,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
     if(missing(collin.tol)) collin.tol = get("collin.tol", env)
     if(missing(glm.iter)) glm.iter = get("glm.iter", env)
     if(missing(glm.tol)) glm.tol = get("glm.tol", env)
+    if(missing(glm.continueOnWarn)) glm.continueOnWarn = get("glm.continueOnWarn", env)
     if(missing(warn)) warn = get("warn", env)
     if(missing(verbose)) verbose = get("verbose", env)
     if(missing(only.coef)) only.coef = get("only.coef", env)
@@ -2717,7 +2724,8 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
                          fixef.tol = fixef.tol, fixef.iter = fixef.iter,
                          fixef.algo = fixef.algo,
                          collin.tol = collin.tol, glm.iter = glm.iter,
-                         glm.tol = glm.tol, notes = notes, mem.clean = mem.clean,
+                         glm.tol = glm.tol, glm.continueOnWarn = glm.continueOnWarn,
+                         notes = notes, mem.clean = mem.clean,
                          only.coef = only.coef,
                          warn = warn, verbose = verbose, origin = "feglm.fit",
                          mc_origin = match.call(), call_env = call_env, ...), silent = TRUE)
@@ -3165,10 +3173,16 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
 
     }
 
-    if(abs(dev_evol)/(0.1 + abs(dev)) < glm.tol){
+    dev_converged = abs(dev_evol)/(0.1 + abs(dev)) < glm.tol
+    has_inner_warn = (!is.null(wols$iterations) && any(wols$iterations >= fixef.iter)) || !is.null(wols$warn_varying_slope)
+
+    if(dev_converged && !(glm.continueOnWarn && has_inner_warn)){
       conv = TRUE
       break
     } else {
+      if(verbose >= 2 && dev_converged && (glm.continueOnWarn && has_inner_warn)){
+        cat("Iteration continued: deviance converged but inner demeaning did not converge (glm.continueOnWarn = TRUE)\n")
+      }
       devold = dev
       wols_old = wols
     }
@@ -3711,7 +3725,7 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
                   panel.duplicate.method = "none", start = NULL, etastart = NULL,
                   mustart = NULL, fixef, fixef.rm = "perfect_fit", fixef.tol = 1e-6,
                   fixef.iter = 10000, fixef.algo = NULL,
-                  collin.tol = 1e-9, glm.iter = 25, glm.tol = 1e-8,
+                  collin.tol = 1e-9, glm.iter = 25, glm.tol = 1e-8, glm.continueOnWarn = FALSE,
                   nthreads = getFixest_nthreads(), lean = FALSE, 
                   warn = TRUE, notes = getFixest_notes(),
                   verbose = 0, fixef.keep_names = NULL, mem.clean = FALSE, only.env = FALSE,
@@ -3736,6 +3750,7 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
                   fixef.rm = fixef.rm, fixef.tol = fixef.tol, fixef.iter = fixef.iter,
                   fixef.algo = fixef.algo,
                   collin.tol = collin.tol, glm.iter = glm.iter, glm.tol = glm.tol,
+                  glm.continueOnWarn = glm.continueOnWarn,
                   nthreads = nthreads, lean = lean, warn = warn, notes = notes,
                   verbose = verbose, fixef.keep_names = fixef.keep_names, mem.clean = mem.clean,
                   only.env = only.env, only.coef = only.coef, data.save = data.save,

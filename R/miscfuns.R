@@ -7545,13 +7545,13 @@ setFixest_estimation = function(data = NULL, panel.id = NULL, fixef.rm = "perfec
                                 fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10,
                                 lean = FALSE, verbose = 0, warn = TRUE, fixef.keep_names = NULL,
                                 demeaned = FALSE, mem.clean = FALSE, glm.iter = 25,
-                                glm.tol = 1e-8, data.save = FALSE, reset = FALSE){
+                                glm.tol = 1e-8, glm.continueOnWarn = FALSE, data.save = FALSE, reset = FALSE){
 
   check_set_arg(fixef.rm, "match(singletons, infinite_coef, perfect_fit, none)")
   check_arg(fixef.tol, collin.tol, glm.tol, "numeric scalar GT{0}")
   check_arg(fixef.iter, glm.iter, "integer scalar GE{1}")
   check_arg(verbose, "integer scalar GE{0}")
-  check_arg(lean, warn, demeaned, mem.clean, reset, data.save, "logical scalar")
+  check_arg(lean, warn, demeaned, mem.clean, reset, data.save, glm.continueOnWarn, "logical scalar")
   check_arg(fixef.keep_names, "NULL logical scalar")
   check_arg(panel.id, "NULL character vector len(,2) no na | os formula")
 

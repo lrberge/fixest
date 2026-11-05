@@ -35,6 +35,7 @@ feglm(
   collin.tol = 1e-09,
   glm.iter = 25,
   glm.tol = 1e-08,
+  glm.continueOnWarn = FALSE,
   nthreads = getFixest_nthreads(),
   lean = FALSE,
   warn = TRUE,
@@ -75,6 +76,7 @@ feglm.fit(
   collin.tol = 1e-09,
   glm.iter = 25,
   glm.tol = 1e-08,
+  glm.continueOnWarn = FALSE,
   nthreads = getFixest_nthreads(),
   lean = FALSE,
   warn = TRUE,
@@ -115,6 +117,7 @@ fepois(
   collin.tol = 1e-09,
   glm.iter = 25,
   glm.tol = 1e-08,
+  glm.continueOnWarn = FALSE,
   nthreads = getFixest_nthreads(),
   lean = FALSE,
   warn = TRUE,
@@ -319,6 +322,10 @@ collinearity is t-stats that are extremely low (for instance when t-stats < 1e-3
 \item{glm.iter}{Number of iterations of the glm algorithm. Default is 25.}
 
 \item{glm.tol}{Tolerance level for the glm algorithm. Default is \code{1e-8}.}
+
+\item{glm.continueOnWarn}{Logical scalar, default is \code{FALSE}. If \code{TRUE}, the IRLS outer loop
+will not terminate early (even if deviance change is below \code{glm.tol}) if the inner
+demeaning loop did not converge in the current iteration.}
 
 \item{nthreads}{The number of threads. Can be: a) an integer lower than, or equal to,
 the maximum number of threads; b) 0: meaning all available threads will be used;
