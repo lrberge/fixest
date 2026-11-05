@@ -3264,6 +3264,31 @@ test(dim(fixest_data(est_mult)), dim(base))
 test(nrow(fixest_data(est_mult, "esti")), 45)
 
 
+####
+#### lean in-place demean ####
+####
+
+chunk("lean in-place demean")
+
+base_lean = setNames(iris, c("y1", "x1", "x2", "x3", "species"))
+base_lean$y2 = base_lean$y1 * 0.5 + base_lean$x1
+base_lean$fe2 = rep(1:10, 15)
+
+est_full = feols(y1 ~ x1 + x2 | species + fe2, base_lean, vcov = ~species)
+est_lean = feols(y1 ~ x1 + x2 | species + fe2, base_lean, vcov = ~species, lean = TRUE, mem.clean = TRUE)
+test(coef(est_lean), coef(est_full))
+test(se(est_lean), se(est_full))
+test(est_lean$sq.cor, est_full$sq.cor)
+test(est_lean$ssr, est_full$ssr)
+
+est_m_full = feols(c(y1, y2) ~ x1 + x2 | species + fe2, base_lean, vcov = ~species)
+est_m_lean = feols(c(y1, y2) ~ x1 + x2 | species + fe2, base_lean, vcov = ~species, lean = TRUE, mem.clean = TRUE)
+test(unlist(coef(est_m_lean)), unlist(coef(est_m_full)))
+test(unlist(se(est_m_lean)), unlist(se(est_m_full)))
+test(est_m_lean[[1]]$sq.cor, est_m_full[[1]]$sq.cor)
+test(est_m_lean[[2]]$sq.cor, est_m_full[[2]]$sq.cor)
+
+
 
 
 
