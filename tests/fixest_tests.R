@@ -3264,6 +3264,19 @@ test(dim(fixest_data(est_mult)), dim(base))
 test(nrow(fixest_data(est_mult, "esti")), 45)
 
 
+####
+#### demean varying slopes ####
+####
+
+chunk("demean varying slopes")
+
+base_vs = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+base_vs$fe2 = rep(1:10, 15)
+est_vs = feols(y ~ x1 | species[x2, x3] + fe2[x2], base_vs)
+dm_vs = demean(y + x1 ~ species[x2, x3] + fe2[x2], data = base_vs)
+test(as.numeric(lm(y ~ 0 + x1, dm_vs)$coefficients), as.numeric(coef(est_vs)))
+
+
 
 
 
