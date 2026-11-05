@@ -1356,21 +1356,28 @@ void demean_single_gnl(int v, PARAM_DEMEAN* args){
     bool conv = false;
     
     // iter_warmup <= 0 means no warmup and we start directly with 2FE algo
-    if(iter_warmup > 0){
-      conv = demean_acc_gnl(v, iter_warmup, args);
-      iter_warmup = 0;
+    // Warmup is bounded by total budget iterMax
+    int warmup_budget = iter_warmup < iterMax ? iter_warmup : iterMax;
+    if(warmup_budget > 0){
+      conv = demean_acc_gnl(v, warmup_budget, args);
     }
 
-    if(conv == false && iterMax > iter_warmup){
+    int iter_done = args->p_iterations_all[v];
+    int iter_rem = iterMax - iter_done;
+
+    if(conv == false && iter_rem > 0){
       // convergence for the first 2 FEs
-      int iter_max_2FE = iterMax / 2 - iter_warmup;
+      int iter_max_2FE = iterMax / 2 - iter_done;
       if(iter_max_2FE > 0){
         demean_acc_gnl(v, iter_max_2FE, args, true);
       }
       
-      // re-acceleration
-      int iter_previous = args->p_iterations_all[v];
-      demean_acc_gnl(v, iterMax - iter_previous, args);
+      // re-acceleration with any remaining budget
+      iter_done = args->p_iterations_all[v];
+      iter_rem = iterMax - iter_done;
+      if(iter_rem > 0){
+        demean_acc_gnl(v, iter_rem, args);
+      }
     }
   }
 
