@@ -3264,6 +3264,25 @@ test(dim(fixest_data(est_mult)), dim(base))
 test(nrow(fixest_data(est_mult, "esti")), 45)
 
 
+####
+#### multi-LHS mem.clean ####
+####
+
+chunk("multi-LHS mem.clean")
+
+base_ml = setNames(iris, c("y1", "x1", "x2", "x3", "species"))
+base_ml$y2 = base_ml$y1 * 0.5 + base_ml$x1
+
+est_ml_1 = feols(c(y1, y2) ~ x1 + x2 | species, base_ml, mem.clean = FALSE)
+est_ml_2 = feols(c(y1, y2) ~ x1 + x2 | species, base_ml, mem.clean = TRUE)
+test(unlist(coef(est_ml_1)), unlist(coef(est_ml_2)))
+test(unlist(se(est_ml_1)), unlist(se(est_ml_2)))
+
+est_ml_sw1 = feols(c(y1, y2) ~ csw(x1, x2) | species, base_ml, mem.clean = FALSE)
+est_ml_sw2 = feols(c(y1, y2) ~ csw(x1, x2) | species, base_ml, mem.clean = TRUE)
+test(unlist(coef(est_ml_sw1)), unlist(coef(est_ml_sw2)))
+
+
 
 
 

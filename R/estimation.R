@@ -1030,7 +1030,20 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
             id_rhs = id_rhs + 1
           }
 
-          X_all = do.call("cbind", args_cbind)
+          args_cbind = args_cbind[!sapply(args_cbind, is.null)]
+          if(length(args_cbind) == 1){
+            X_all = args_cbind[[1]]
+          } else {
+            X_all = do.call("cbind", args_cbind)
+          }
+          if(mem.clean){
+            rm(args_cbind, my_rhs)
+            if(length(lhs_group) == 1 && length(rhs_group) == 1){
+              rm(linear_core, X)
+              assign("linear.mat", NULL, env)
+              assign("linear.mat", NULL, my_env)
+            }
+          }
         }
 
         if(do_iv){
@@ -1126,8 +1139,11 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
               qui_X = dict_vars[all_varnames[qui_X]]
             }
 
+            is_all_cols = isLinear_current && length(qui_X) == ncol(X_all) &&
+              all(qui_X == seq_len(ncol(X_all)))
+
             if(isLinear_current){
-              my_X = X_all[, qui_X, drop = FALSE]
+              my_X = if(is_all_cols) X_all else X_all[, qui_X, drop = FALSE]
             } else {
               my_X = 0
             }
@@ -1140,7 +1156,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
               if(isLinear_current){
                 qui_iv = c(1:n_inst, n_inst + qui_X)
 
-                XtX = iv_products$XtX[qui_X, qui_X, drop = FALSE]
+                XtX = if(is_all_cols) iv_products$XtX else iv_products$XtX[qui_X, qui_X, drop = FALSE]
                 Xty = iv_products$Xty[[ii]][qui_X]
               } else {
                 qui_iv = 1:n_inst
@@ -1156,7 +1172,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 
               if(isFixef){
                 my_res = feols(env = current_env, iv_products = my_iv_products,
-                               X_demean = X_demean[ , qui_X, drop = FALSE],
+                               X_demean = if(is_all_cols) X_demean else X_demean[ , qui_X, drop = FALSE],
                                y_demean = y_demean[[ii]],
                                iv.mat_demean = iv.mat_demean, iv_lhs_demean = iv_lhs_demean)
               } else {
@@ -1165,12 +1181,14 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 
             } else {
               if(isFixef){
-                my_res = feols(env = current_env, xwx = xwx[qui_X, qui_X, drop = FALSE], 
+                my_res = feols(env = current_env,
+                               xwx = if(is_all_cols) xwx else xwx[qui_X, qui_X, drop = FALSE], 
                                xwy = xwy[[ii]][qui_X],
-                               X_demean = X_demean[ , qui_X, drop = FALSE],
+                               X_demean = if(is_all_cols) X_demean else X_demean[ , qui_X, drop = FALSE],
                                y_demean = y_demean[[ii]])
               } else {
-                my_res = feols(env = current_env, xwx = xwx[qui_X, qui_X, drop = FALSE], 
+                my_res = feols(env = current_env,
+                               xwx = if(is_all_cols) xwx else xwx[qui_X, qui_X, drop = FALSE], 
                                xwy = xwy[[ii]][qui_X])
               }
             }
