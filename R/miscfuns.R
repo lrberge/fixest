@@ -7551,7 +7551,8 @@ setFixest_estimation = function(data = NULL, panel.id = NULL, fixef.rm = "perfec
   check_arg(fixef.tol, collin.tol, glm.tol, "numeric scalar GT{0}")
   check_arg(fixef.iter, glm.iter, "integer scalar GE{1}")
   check_arg(verbose, "integer scalar GE{0}")
-  check_arg(lean, warn, demeaned, mem.clean, reset, data.save, "logical scalar")
+  check_arg(lean, warn, demeaned, reset, data.save, "logical scalar")
+  check_set_arg(mem.clean, "logical scalar | match(aggressive)")
   check_arg(fixef.keep_names, "NULL logical scalar")
   check_arg(panel.id, "NULL character vector len(,2) no na | os formula")
 

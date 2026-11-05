@@ -306,10 +306,12 @@ otherwise.}
 the centered variables be returned? If \code{TRUE}, it creates the items
 \code{y_demeaned} and \code{X_demeaned}.}
 
-\item{mem.clean}{Logical scalar, default is \code{FALSE}. Only to be used if the data set is
+\item{mem.clean}{Logical scalar or \code{"aggressive"}, default is \code{FALSE}. Only to be used if the data set is
 large compared to the available RAM. If \code{TRUE} then intermediary objects are removed as
 much as possible and \code{\link{gc}} is run before each substantial C++ section in the internal
-code to avoid memory issues.}
+code to avoid memory issues. If \code{"aggressive"} and \code{data} is a \code{data.table} (with \code{data.save = FALSE}),
+columns in \code{data} that are no longer needed after model setup (i.e. all columns except cluster/VCOV variables)
+are dropped in-place from the \code{data.table} via \code{data.table::set(data, j = ..., value = NULL)} before demeaning.}
 
 \item{only.env}{(Advanced users.) Logical scalar, default is \code{FALSE}. If \code{TRUE}, then only
 the environment used to make the estimation is returned.}
