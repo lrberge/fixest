@@ -1417,7 +1417,7 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
                 SEXP fe_id_list, SEXP table_id_I, SEXP slope_flag_Q, SEXP slope_vars_list,
                 SEXP r_init, int nthreads, 
                 int algo_extraProj, int algo_iter_warmup, int algo_iter_projAfterAcc, 
-                int algo_iter_grandAcc, bool save_fixef = false){
+                int algo_iter_grandAcc, bool save_fixef = false, bool in_place = false){
   // main fun that calls demean_single
   // preformats all the information needed on the fixed-effects
   // y: the dependent variable
@@ -1594,7 +1594,8 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
 
   int nrow = useX ? n_obs : 1;
   int ncol = useX ? n_vars_X : 1;
-  NumericMatrix X_demean(nrow, ncol);
+  bool can_in_place = in_place && useX && TYPEOF(X_raw) == REALSXP && Rf_isMatrix(X_raw) && !MAYBE_SHARED(X_raw);
+  NumericMatrix X_demean = can_in_place ? NumericMatrix(X_raw) : NumericMatrix(nrow, ncol);
 
   RealVec p_input_tmp;
   double *p_output_tmp;
