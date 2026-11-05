@@ -520,8 +520,10 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
   # 1st: is the call coming from feglm?
   fromGLM = FALSE
   skip_fixef = FALSE
+  mem.clean.aggressive = FALSE
   if("fromGLM" %in% names(dots)){
     fromGLM = TRUE
+    mem.clean = isTRUE(mem.clean)
     # env is provided by feglm
     X = dots$X
     y = as.vector(dots$y)
@@ -618,6 +620,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
     correct_0w = FALSE
 
     mem.clean = get("mem.clean", env)
+    mem.clean.aggressive = isTRUE(mget("mem.clean.aggressive", env, ifnotfound = list(FALSE))[[1]])
 
     demeaned = get("demeaned", env)
 
@@ -1806,6 +1809,11 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
     slope_flag = get("slope_flag", env)
     slope_vars = get("slope_variables", env)
 
+    if(!fromGLM && mem.clean.aggressive && !IN_MULTI){
+      assign("linear.mat", NULL, env)
+      assign("lhs", NULL, env)
+    }
+
     if(mem.clean){
       # we can't really rm many variables... but gc can be enough
       # cpp_demean is the most mem intensive bit
@@ -2681,6 +2689,8 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
     if(missing(warn)) warn = get("warn", env)
     if(missing(verbose)) verbose = get("verbose", env)
     if(missing(only.coef)) only.coef = get("only.coef", env)
+    if(missing(mem.clean)) mem.clean = get("mem.clean", env)
+    else mem.clean = isTRUE(mem.clean) || identical(mem.clean, "aggressive")
 
     # starting point of the fixed-effects
     if(!is.null(dots$means)) means = dots$means
@@ -2747,6 +2757,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
 
     # warn flag
     warn = get("warn", env)
+    mem.clean = get("mem.clean", env)
 
     # init
     init.type = get("init.type", env)
@@ -3939,10 +3950,12 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
 #' otherwise.
 #' @param only.env (Advanced users.) Logical scalar, default is `FALSE`. If `TRUE`, then only 
 #' the environment used to make the estimation is returned.
-#' @param mem.clean Logical scalar, default is `FALSE`. Only to be used if the data set is 
+#' @param mem.clean Logical scalar or `"aggressive"`, default is `FALSE`. Only to be used if the data set is 
 #' large compared to the available RAM. If `TRUE` then intermediary objects are removed as 
 #' much as possible and [`gc`] is run before each substantial C++ section in the internal 
-#' code to avoid memory issues.
+#' code to avoid memory issues. If `"aggressive"` and `data` is a `data.table` (with `data.save = FALSE`), 
+#' columns in `data` that are no longer needed after model setup (i.e. all columns except cluster/VCOV variables) 
+#' are dropped in-place from the `data.table` via `data.table::set(data, j = ..., value = NULL)` before demeaning.
 #' @param lean Logical scalar, default is `FALSE`. If `TRUE` then all large objects are removed 
 #' from the returned result: this will save memory but will block the possibility to 
 #' use many methods. It is recommended to use the arguments `se` or `cluster` to 

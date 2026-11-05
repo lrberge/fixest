@@ -284,7 +284,11 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
     assign("family_funs", family_funs, env)
   }
   
-  check_arg("logical scalar", demeaned, notes, warn, mem.clean, only.coef, data.save)
+  check_arg("logical scalar", demeaned, notes, warn, only.coef, data.save)
+  check_set_arg(mem.clean, "logical scalar | match(aggressive)")
+  mem.clean.aggressive = identical(mem.clean, "aggressive")
+  mem.clean = isTRUE(mem.clean) || mem.clean.aggressive
+  data_origin_dt = NULL
   
   if(origin_type %in% c("feols", "feglm")){
     check_arg("NULL class(demeaning_algo)", fixef.algo)
@@ -495,6 +499,9 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
     # More robust to ensure it's always a plain data.frame, avoids problems from specific methods.
     # Maybe at some point do as Sebastian suggested and use plain lists instead?
     # Well I've done it in a branch but I find it more difficult to maintain. We'll see.
+    if(mem.clean.aggressive && inherits(data, "data.table") && !data.save){
+      data_origin_dt = data
+    }
     if(!identical(class(data), "data.frame")){
       class(data) = "data.frame"
     }
@@ -914,6 +921,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
   # so that subset works properly
   vcov = oldargs_to_vcov(se, cluster, vcov)
   vcov_vars = NULL
+  vcov_varnames_keep = NULL
   if(!missnull(vcov)){
 
     if(isFit){
@@ -935,6 +943,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
                                              data_names = data_names,
                                              panel.id = panel.id, fixef_vars = fe_vars),
                                  "Problem in the VCOV:\n")
+    vcov_varnames_keep = vcov_varnames
 
     if(isFit && (length(vcov_varnames) > 0 && !vcov_varnames %in% fe_vars)){
       stop("In argument 'vcov', fit methods cannot accept VCOVs using extra variables (since there's no data base from which to extract them).")
@@ -2941,6 +2950,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
   assign("origin_type", origin_type, env)
   assign("warn", warn, env)
   assign("mem.clean", mem.clean, env)
+  assign("mem.clean.aggressive", mem.clean.aggressive, env)
   assign("nthreads", nthreads, env)
   assign("demeaned", demeaned, env)
 
@@ -3328,6 +3338,19 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
     if("sunab" %in% names(GLOBAL_fixest_mm_info)){
       res$is_sunab = TRUE
     }
+  }
+
+  if(mem.clean.aggressive && !is.null(data_origin_dt) && !data.save && !isSplit && !isSubset &&
+     requireNamespace("data.table", quietly = TRUE)){
+    keep_cols = unique(c(vcov_varnames_keep,
+                         if(!is.null(panel.id)) unlist(lapply(panel.id, function(x) all.vars(str2expression(x)))),
+                         if(multi_fixef) var_sw))
+    drop_cols = setdiff(names(data_origin_dt), keep_cols)
+    if(length(drop_cols) > 0){
+      data.table::set(data_origin_dt, j = drop_cols, value = NULL)
+    }
+    rm(data, data_origin_dt)
+    gc()
   }
 
   assign("res", res, env)
