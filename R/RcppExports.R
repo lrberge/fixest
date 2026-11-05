@@ -65,6 +65,10 @@ cpp_demean <- function(y, X_raw, r_weights, iterMax, diffMax, r_nb_id_Q, fe_id_l
     .Call(`_fixest_cpp_demean`, y, X_raw, r_weights, iterMax, diffMax, r_nb_id_Q, fe_id_list, table_id_I, slope_flag_Q, slope_vars_list, r_init, nthreads, algo_extraProj, algo_iter_warmup, algo_iter_projAfterAcc, algo_iter_grandAcc, save_fixef)
 }
 
+cpp_check_conv <- function(y, X_raw, fixef_id_list, slope_flag_Q, slope_vars_list, r_weights, full = FALSE, nthreads = 1L) {
+    .Call(`_fixest_cpp_check_conv`, y, X_raw, fixef_id_list, slope_flag_Q, slope_vars_list, r_weights, full, nthreads)
+}
+
 cpp_dsb <- function(Rstr) {
     .Call(`_fixest_cpp_dsb`, Rstr)
 }

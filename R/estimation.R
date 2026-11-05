@@ -1840,8 +1840,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 
     if(any(abs(slope_flag) > 0) && any(res$iterations > 300)){
       # Maybe we have a convergence problem
-      # This is poorly coded, but it's a temporary fix
-      opt_fe = check_conv(y_demean, X_demean, fixef_id_list, slope_flag, slope_vars, weights)
+      opt_fe = check_conv(y_demean, X_demean, fixef_id_list, slope_flag, slope_vars, weights, nthreads = nthreads)
 
       # This is a bit too rough a check but it should catch the most problematic cases
       if(anyNA(opt_fe) || any(opt_fe > 1e-4)){
@@ -2241,95 +2240,17 @@ ols_fit = function(y, X, w, correct_0w = FALSE, collin.tol, nthreads, xwx = NULL
 }
 
 check_conv = function(y, X, fixef_id_list, slope_flag, slope_vars, weights, 
-                      full = FALSE, fixef_names = NULL){
-  # VERY SLOW!!!!
-  # IF THIS FUNCTION LASTS => TO BE PORTED TO C++
-
+                      full = FALSE, fixef_names = NULL, nthreads = getFixest_nthreads()){
   # y, X => variables that were demeaned
-
   # For each variable: we compute the optimal FE coefficient
   # it should be 0 if the algorithm converged
 
-  Q = length(slope_flag)
+  res = cpp_check_conv(y, X, fixef_id_list, slope_flag, slope_vars, weights, full, nthreads)
 
-  use_y = TRUE
-  if(length(X) == 1){
-    K = 1
-    nobs = length(y)
-  } else {
-    nobs = NROW(X)
-
-    if(length(y) <= 1){
-      use_y = FALSE
+  if(full && !is.null(fixef_names)){
+    for(k in seq_along(res)){
+      names(res[[k]]) = fixef_names
     }
-
-    K = NCOL(X) + use_y
-  }
-
-  info_max = list()
-  info_full = vector("list", K)
-
-  for(k in 1:K){
-    if(k == 1 && use_y){
-      x = y
-    } else if(use_y){
-      x = X[, k - use_y]
-    } else {
-      x = X[, k]
-    }
-
-    info_max_tmp = c()
-    info_full_tmp = list()
-    index_slope = 1
-    for(q in 1:Q){
-      fixef_id = fixef_id_list[[q]]
-
-      if(slope_flag[q] >= 0){
-        x_means = tapply(weights * x, fixef_id, mean)
-        info_max_tmp = c(info_max_tmp, max(abs(x_means)))
-
-        if(full){
-          info_full_tmp[[length(info_full_tmp) + 1]] = x_means
-        }
-      }
-
-      n_slopes = abs(slope_flag[q])
-      if(n_slopes > 0){
-        for(i in 1:n_slopes){
-          var = slope_vars[[index_slope]]
-
-          num = tapply(weights * x * var, fixef_id, sum)
-          denom = tapply(weights * var^2, fixef_id, sum)
-
-          x_means = num/denom
-          info_max_tmp = c(info_max_tmp, max(abs(x_means)))
-
-          if(full){
-            info_full_tmp[[length(info_full_tmp) + 1]] = x_means
-          }
-
-          index_slope = index_slope + 1
-        }
-      }
-    }
-
-    if(!is.null(fixef_names)){
-      names(info_full_tmp) = fixef_names
-    }
-
-    info_max[[k]] = info_max_tmp
-
-    if(full){
-      info_full[[k]] = info_full_tmp
-    }
-  }
-
-  info_max = do.call("rbind", info_max)
-
-  if(full){
-    res = info_full
-  } else {
-    res = info_max
   }
 
   res
