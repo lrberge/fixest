@@ -127,17 +127,21 @@ NumericMatrix cpp_tapply_sum(int Q, NumericMatrix x, IntegerVector dum){
   // x: a matrix
   // dum: the N vector of clusters
 
-  int N = x.nrow();
+  size_t N = static_cast<size_t>(x.nrow());
   int K = x.ncol();
+  size_t Q_sz = static_cast<size_t>(Q);
 
   NumericMatrix res(Q, K);
-  int i, q, k;
+  const double *px = REAL(x);
+  const int *pdum = INTEGER(dum);
+  double *pres = REAL(res);
 
-  for(i=0 ; i<N ; i++){
-    q = dum(i) - 1; // we take 1 off => different indexation in C
-
-    for(k=0 ; k<K ; k++){
-      res(q, k) += x(i, k);
+  #pragma omp parallel for if(K > 1 && N > 10000)
+  for(int k = 0; k < K; ++k){
+    const double *col_x = px + static_cast<size_t>(k) * N;
+    double *col_res = pres + static_cast<size_t>(k) * Q_sz;
+    for(size_t i = 0; i < N; ++i){
+      col_res[pdum[i] - 1] += col_x[i];
     }
   }
 

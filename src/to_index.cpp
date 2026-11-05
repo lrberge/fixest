@@ -137,7 +137,7 @@ void IndexInputVector::initialize(const SEXP &x){
     if(IS_INT){
       // finding out if we're in the easy case
       this->x_range_bin = power_of_two(this->x_range);    
-      this->is_fast_int = this->x_range < 100000 || this->x_range <= 2*n;
+      this->is_fast_int = this->x_range < 100000 || this->x_range <= 2.0 * n;
       this->NA_value = this->x_range - 1;
     }
     
@@ -393,7 +393,7 @@ void general_type_to_index_double(const IndexInputVector *x, int *__restrict p_i
   bool do_fast_int = false;
   if(x->is_fast_int){
     int sum_range_bin = x->x_range_bin + power_of_two(n_groups);
-    do_fast_int = sum_range_bin < 17 || sum_range_bin <= power_of_two(5.0 * n);
+    do_fast_int = (sum_range_bin < 17 || sum_range_bin <= power_of_two(5.0 * n)) && sum_range_bin <= 28;
   }
   
   if(do_fast_int){
@@ -989,7 +989,8 @@ void to_index_main(const std::vector<IndexInputVector> &all_vecs, IndexedVector 
     const IndexInputVector *x = &all_vecs[k];
     if(x->is_fast_int){
       int new_bin_range = sum_bin_ranges + x->x_range_bin;
-      if(new_bin_range < 17 || (K >= 2 && new_bin_range <= power_of_two(5 * n))){
+      if((new_bin_range < 17 || (K >= 2 && new_bin_range <= power_of_two(5.0 * n))) &&
+         new_bin_range + static_cast<int>(id_fast_int.size()) <= 28){
         id_fast_int.push_back(k);
         sum_bin_ranges = new_bin_range;
       } else {

@@ -1968,7 +1968,6 @@ vcovClust = function (cluster, myBread, scores, adj = FALSE, do.unclass = TRUE,
   }
 
   Q = max(cluster)
-  RightScores = cpp_tapply_sum(Q, scores, cluster)
 
   # Finite sample correction:
   if(adj){
@@ -1977,13 +1976,20 @@ vcovClust = function (cluster, myBread, scores, adj = FALSE, do.unclass = TRUE,
     adj_value = 1
   }
 
-  if(!sandwich){
-    res = cpp_crossprod(RightScores, 1, nthreads) * adj_value
-    return(res)
+  if(Q == n){
+    meat = cpp_crossprod(scores, 1, nthreads) * adj_value
+  } else {
+    RightScores = cpp_tapply_sum(Q, scores, cluster)
+    meat = cpp_crossprod(RightScores, 1, nthreads) * adj_value
+    rm(RightScores)
+    if(Q > 1e7) gc()
   }
 
-  xy = cpp_matprod(RightScores, myBread, nthreads)
-  res = cpp_crossprod(xy, 1, nthreads) * adj_value
+  if(!sandwich){
+    return(meat)
+  }
+
+  res = cpp_matprod(cpp_matprod(myBread, meat, nthreads), myBread, nthreads)
   res
 }
 
@@ -2001,12 +2007,9 @@ vcov_iid_internal = function(bread, ssc, object, n, K, ...){
 vcov_hetero_internal = function(bread, scores, sandwich, nthreads, ssc, n, K, ...){
   # we don't allow ssc changes
 
-  if(!sandwich){
-    vcov_mat = cpp_crossprod(scores, 1, nthreads)
-    
-  } else {
-    vcov_mat = cpp_crossprod(cpp_matprod(scores, bread, nthreads), 1, nthreads)
-    
+  vcov_mat = cpp_crossprod(scores, 1, nthreads)
+  if(sandwich){
+    vcov_mat = cpp_matprod(cpp_matprod(bread, vcov_mat, nthreads), bread, nthreads)
   }
   
   # ssc must be provided excplicitly by the user
@@ -2047,12 +2050,9 @@ vcov_hc2_hc3_internal = function(bread, scores, sandwich, nthreads, vcov_name,
     
   }
   
-  if(!sandwich){
-    vcov_mat = cpp_crossprod(scores, 1, nthreads)
-    
-  } else {
-    vcov_mat = cpp_crossprod(cpp_matprod(scores, bread, nthreads), 1, nthreads)
-    
+  vcov_mat = cpp_crossprod(scores, 1, nthreads)
+  if(sandwich){
+    vcov_mat = cpp_matprod(cpp_matprod(bread, vcov_mat, nthreads), bread, nthreads)
   }
 
   vcov_mat
@@ -2085,27 +2085,14 @@ vcov_cluster_internal = function(bread, scores, vars, ssc, object, n, K,
       } else if(i > 1){
 
         vars = myComb[, j]
-
-        if(sum(power[vars]) > 14){
-          my_clusters = cluster[vars]
-
-          order_index = do.call(order, my_clusters)
-          index = cpp_combine_clusters(my_clusters, order_index)
-        } else {
-          # quicker, but limited by the precision of integers
-          index = cluster[[vars[1]]]
-          for(k in 2:length(vars)){
-            index = index + cluster[[vars[k]]]*10**sum(power[vars[1:(k-1)]])
-          }
-        }
-
-        index = to_index_internal(index)
+        index = to_integer(inputs = cluster[vars], na.valid = TRUE, internal = TRUE)
 
       }
 
       vcov_mat = vcov_mat + (-1)**(i+1) * vcovClust(index, bread, scores,
                                                     adj = ssc$G.adj && ssc$G.df == 
                                               "conventional",
+                                            do.unclass = (i == 1),
                                             sandwich = sandwich, nthreads = nthreads)
 
     }
