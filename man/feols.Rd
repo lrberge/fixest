@@ -27,6 +27,7 @@ feols(
   fixef.tol = 1e-06,
   fixef.iter = 10000,
   fixef.algo = NULL,
+  demeaner = NULL,
   collin.tol = 1e-09,
   nthreads = getFixest_nthreads(),
   lean = FALSE,
@@ -62,6 +63,7 @@ feols.fit(
   fixef.tol = 1e-06,
   fixef.iter = 10000,
   fixef.algo = NULL,
+  demeaner = NULL,
   collin.tol = 1e-09,
   nthreads = getFixest_nthreads(),
   lean = FALSE,
@@ -249,6 +251,10 @@ Only play with it if the convergence is slow, i.e. look at the slot \verb{$itera
 over 50, it may be worth playing around with it. Please read the documentation of the
 function \code{\link{demeaning_algo}}. Be aware that there is no clear guidance on how to change the
 settings, it's more a matter of try-and-see.}
+
+\item{demeaner}{\code{NULL} (default) or a demeaning backend object created by
+\code{\link{MapDemeaner}} or \code{\link{LsmrDemeaner}}. If \code{NULL}, the native MAP backend is
+used with \code{fixef.tol}, \code{fixef.iter}, and \code{fixef.algo}.}
 
 \item{collin.tol}{Numeric scalar, default is \code{1e-9}. Threshold deciding when variables should
 be considered collinear and subsequently removed from the estimation. Higher values means more

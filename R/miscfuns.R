@@ -2377,10 +2377,13 @@ demean = function(X, f, slope.vars = NULL, slope.flag = NULL, data, weights,
                   sample = "estimation",
                   nthreads = getFixest_nthreads(), notes = getFixest_notes(),
                   iter = 2000, tol = 1e-6, 
-                  fixef.reorder = TRUE, fixef.algo = NULL,
+                  fixef.reorder = TRUE, fixef.algo = NULL, demeaner = NULL,
                   na.rm = TRUE, as.matrix = is.atomic(X),
                   im_confident = FALSE, ...) {
 
+
+  mc_demean = match.call()
+  explicit_demeaning_args = intersect(c("tol", "iter", "fixef.algo"), names(mc_demean))
 
   ANY_NA = FALSE
   # SK: to reassign class if X is data.frame, data.table or tibble. Optimally you would preserve all attributes,
@@ -2732,6 +2735,12 @@ demean = function(X, f, slope.vars = NULL, slope.flag = NULL, data, weights,
     }
   }
 
+  demeaner = fixest_resolve_demeaner(demeaner, tol, iter, fixef.algo,
+                                     explicit_demeaning_args)
+  tol = fixest_demeaner_tol(demeaner)
+  iter = fixest_demeaner_iter(demeaner)
+  fixef.algo = fixest_demeaner_algo(demeaner)
+
   #
   # Unclassing fes
   #
@@ -2814,15 +2823,12 @@ demean = function(X, f, slope.vars = NULL, slope.flag = NULL, data, weights,
     X = 0
   }
 
-  vars_demean = cpp_demean(y, X, weights, iterMax = iter,
-                           diffMax = tol, r_nb_id_Q = fixef_sizes,
-                           fe_id_list = all_index_info$index, table_id_I = fixef_table_vector,
-                           slope_flag_Q = slope.flag, slope_vars_list = slope.vars,
-                           r_init = 0, nthreads = nthreads, 
-                           algo_extraProj = fixef.algo$extraProj, 
-                           algo_iter_warmup = fixef.algo$iter_warmup, 
-                           algo_iter_projAfterAcc = fixef.algo$iter_projAfterAcc, 
-                           algo_iter_grandAcc = fixef.algo$iter_grandAcc)
+  vars_demean = fixest_demean(y, X, weights, iterMax = iter,
+                              diffMax = tol, r_nb_id_Q = fixef_sizes,
+                              fe_id_list = all_index_info$index, table_id_I = fixef_table_vector,
+                              slope_flag_Q = slope.flag, slope_vars_list = slope.vars,
+                              r_init = 0, nthreads = nthreads,
+                              fixef.algo = fixef.algo, demeaner = demeaner)
 
   # Internal call
   if(fe_info){
@@ -3467,6 +3473,86 @@ demeaning_algo = function(extraProj = 0, iter_warmup = 15, iter_projAfterAcc = 4
   class(res) = "demeaning_algo"
   
   res
+}
+
+fixest_demean = function(y, X_raw, r_weights, iterMax, diffMax, r_nb_id_Q,
+                         fe_id_list, table_id_I, slope_flag_Q, slope_vars_list,
+                         r_init, nthreads, fixef.algo, demeaner = NULL){
+
+  call_cpp_demean = function(){
+    cpp_demean(y, X_raw, r_weights, iterMax, diffMax, r_nb_id_Q,
+               fe_id_list, table_id_I, slope_flag_Q, slope_vars_list,
+               r_init, nthreads,
+               algo_extraProj = fixef.algo$extraProj,
+               algo_iter_warmup = fixef.algo$iter_warmup,
+               algo_iter_projAfterAcc = fixef.algo$iter_projAfterAcc,
+               algo_iter_grandAcc = fixef.algo$iter_grandAcc)
+  }
+
+  fixest_check_demeaner(demeaner)
+
+  # For one-way fixed effects, always use the cpp_demean backend.
+  if(is.null(demeaner) || inherits(demeaner, "fixest_demeaner_map") || length(r_nb_id_Q) == 1){
+    return(call_cpp_demean())
+  }
+
+  if(!fixest_withinr_supports_lsmr_options()){
+    stop("Using LsmrDemeaner() requires a current 'withinr' with LsmrOptions(). ",
+         "Install the current withinr R bindings and try again.")
+  }
+
+  if(any(slope_flag_Q != 0)){
+    stop("LsmrDemeaner() does not support varying slopes. ",
+         "Use MapDemeaner() for models with varying slopes.")
+  }
+
+  is_y_list = is.list(y)
+  has_y = is_y_list || (is.numeric(y) && length(y) > 1)
+  has_X = is.numeric(X_raw) && length(X_raw) > 1
+
+  y_mat = if(is_y_list) do.call(cbind, y) else if(has_y) as.matrix(y) else NULL
+  X_mat = if(has_X) as.matrix(X_raw) else NULL
+  n_y = NCOL(y_mat)
+  n_X = NCOL(X_mat)
+
+  Y = cbind(X_mat, y_mat)
+
+  categories = do.call(cbind, fe_id_list)
+  w = if(length(r_weights) == 1) NULL else r_weights
+  options = withinr::LsmrOptions(
+    tol = max(demeaner$fixef_atol, demeaner$fixef_btol),
+    maxiter = as.integer(demeaner$fixef_maxiter),
+    local_size = demeaner$local_size
+  )
+  preconditioner = fixest_lsmr_preconditioner_arg(demeaner)
+
+  result = withinr::solve_batch(categories, Y, options = options, weights = w,
+                                preconditioner = preconditioner)
+
+  if(!all(result$converged)){
+    warning("withinr::solve_batch did not converge for all variables. ",
+            "Consider increasing fixef_maxiter or using MapDemeaner().")
+  }
+
+  dm = result$demeaned
+
+  if(has_X){
+    X_demean = dm[, seq_len(n_X), drop = FALSE]
+    colnames(X_demean) = colnames(X_mat)
+  } else {
+    X_demean = 0
+  }
+
+  if(!has_y){
+    y_demean = 0
+  } else if(is_y_list){
+    y_demean = lapply((n_X + 1):(n_X + n_y), function(i) dm[, i])
+  } else {
+    y_demean = dm[, n_X + 1]
+  }
+
+  list(X_demean = X_demean, y_demean = y_demean,
+       iterations = as.integer(result$iterations), means = 0)
 }
 
 #### ------------- ####
@@ -7545,9 +7631,20 @@ setFixest_estimation = function(data = NULL, panel.id = NULL, fixef.rm = "perfec
                                 fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10,
                                 lean = FALSE, verbose = 0, warn = TRUE, fixef.keep_names = NULL,
                                 demeaned = FALSE, mem.clean = FALSE, glm.iter = 25,
-                                glm.tol = 1e-8, data.save = FALSE, reset = FALSE){
+                                glm.tol = 1e-8, demeaner = NULL, data.save = FALSE, reset = FALSE){
+
+  mc = match.call()
+  args_default = setdiff(names(mc)[-1], "reset")
 
   check_set_arg(fixef.rm, "match(singletons, infinite_coef, perfect_fit, none)")
+  fixest_check_demeaner(demeaner)
+  if("demeaner" %in% args_default && any(c("fixef.tol", "fixef.iter") %in% args_default)){
+    pblm = intersect(c("fixef.tol", "fixef.iter"), args_default)
+    pblm = paste0("`", pblm, "`", collapse = ", ")
+    stop("When `demeaner` is provided, do not also provide ",
+         pblm, ". ",
+         "Put these controls inside MapDemeaner() or LsmrDemeaner().")
+  }
   check_arg(fixef.tol, collin.tol, glm.tol, "numeric scalar GT{0}")
   check_arg(fixef.iter, glm.iter, "integer scalar GE{1}")
   check_arg(verbose, "integer scalar GE{0}")
@@ -7574,8 +7671,6 @@ setFixest_estimation = function(data = NULL, panel.id = NULL, fixef.rm = "perfec
   }
 
   # Saving the default values
-  mc = match.call()
-  args_default = setdiff(names(mc)[-1], "reset")
 
   # NOTA: we don't allow delayed evaluation => all arguments must have hard values
   for(v in args_default){
@@ -7643,16 +7738,6 @@ getFixest_multi = function(){
 
   x
 }
-
-
-
-
-
-
-
-
-
-
 
 
 
