@@ -163,7 +163,7 @@ class FEClass{
   vector<int64_t> coef_start_Q;
 
   // internal functions
-  void compute_fe_coef_internal(int, double *, bool, RealVec, double *, double *);
+  void compute_fe_coef_internal(int, double *, bool, RealVec, double *, double *, bool = false);
   void compute_fe_coef_2_internal(double *, double *, double *, bool);
   void add_wfe_coef_to_mu_internal(int, double *, double *, bool);
 
@@ -187,7 +187,7 @@ public:
 
   // functions
   void compute_fe_coef(double *fe_coef, RealVec &mu_in_N);
-  void compute_fe_coef(int q, double *fe_coef, double *sum_other_coef_N, double *in_out_C);
+  void compute_fe_coef(int q, double *fe_coef, double *sum_other_coef_N, double *in_out_C, bool parallel_obs = false);
 
   void add_wfe_coef_to_mu(int q, double *fe_coef_C, double *out_N);
   void add_fe_coef_to_mu(int q, double *fe_coef_C, double *out_N);
@@ -454,17 +454,17 @@ void FEClass::compute_fe_coef(double *fe_coef_C, RealVec &mu_in_N){
   compute_fe_coef_internal(0, fe_coef_C, true, mu_in_N, nullptr, nullptr);
 }
 
-void FEClass::compute_fe_coef(int q, double *fe_coef_C, double *sum_other_coef_N, double *in_out_C){
+void FEClass::compute_fe_coef(int q, double *fe_coef_C, double *sum_other_coef_N, double *in_out_C, bool parallel_obs){
   // mu: length n_obs, vector giving sum_in_out
   // fe_coef: vector receiving the fixed-effects coefficients
 
   // multiple FE version
-  compute_fe_coef_internal(q, fe_coef_C, false, nullptr, sum_other_coef_N, in_out_C);
+  compute_fe_coef_internal(q, fe_coef_C, false, nullptr, sum_other_coef_N, in_out_C, parallel_obs);
 
 }
 
 void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single, RealVec mu_in_N, 
-                                       double *sum_other_coef_N, double *in_out_C){
+                                       double *sum_other_coef_N, double *in_out_C, bool parallel_obs){
   // mu: length n_obs, vector giving sum_in_out
   // fe_coef: vector receiving the fixed-effects coefficients
 
@@ -476,6 +476,7 @@ void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single,
   const double *const p_weights = this->p_weights;
 
   double *my_fe_coef = fe_coef_C + coef_start_Q[q];
+  const bool use_par_obs = parallel_obs && n_obs >= 65536 && nb_id >= 65536;
 
   if(is_slope_Q[q] == false){
 
@@ -501,9 +502,47 @@ void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single,
         my_fe_coef[m] = sum_in_out[m];
       }
 
-      // looping sequentially over the sum of other coefficients
-      for(int i=0 ; i<n_obs ; ++i){
-        my_fe_coef[my_fe[i] - 1] -= sum_other_coef_N[i];
+      if(use_par_obs){
+        int n_tasks = omp_num_tasks(n_obs);
+        if(n_tasks < 1) n_tasks = 1;
+        int chunk_len = (n_obs + n_tasks - 1) / n_tasks;
+        #pragma omp taskloop num_tasks(n_tasks) default(shared)
+        for(int t=0 ; t<n_tasks ; ++t){
+          int i_start = t * chunk_len;
+          int i_end = i_start + chunk_len;
+          if(i_end > n_obs) i_end = n_obs;
+          if(i_start < i_end){
+            int c_cur = my_fe[i_start] - 1;
+            double acc = sum_other_coef_N[i_start];
+            for(int i=i_start + 1 ; i<i_end ; ++i){
+              int c = my_fe[i] - 1;
+              if(c == c_cur){
+                acc += sum_other_coef_N[i];
+              } else {
+                #pragma omp atomic
+                my_fe_coef[c_cur] -= acc;
+                c_cur = c;
+                acc = sum_other_coef_N[i];
+              }
+            }
+            #pragma omp atomic
+            my_fe_coef[c_cur] -= acc;
+          }
+        }
+      } else if(n_obs > 0){
+        int c_cur = my_fe[0] - 1;
+        double acc = sum_other_coef_N[0];
+        for(int i=1 ; i<n_obs ; ++i){
+          int c = my_fe[i] - 1;
+          if(c == c_cur){
+            acc += sum_other_coef_N[i];
+          } else {
+            my_fe_coef[c_cur] -= acc;
+            c_cur = c;
+            acc = sum_other_coef_N[i];
+          }
+        }
+        my_fe_coef[c_cur] -= acc;
       }
 
     }
@@ -542,9 +581,77 @@ void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single,
         my_fe_coef[m] = sum_in_out[m];
       }
 
-      for(int i=0 ; i<n_obs ; ++i){
-        for(int v=0 ; v<V ; ++v){
-          rhs(my_fe[i] - 1, v) -= VS_mat(i, v) * sum_other_coef_N[i];
+      if(V == 1){
+        if(use_par_obs){
+          int n_tasks = omp_num_tasks(n_obs);
+          if(n_tasks < 1) n_tasks = 1;
+          int chunk_len = (n_obs + n_tasks - 1) / n_tasks;
+          #pragma omp taskloop num_tasks(n_tasks) default(shared)
+          for(int t=0 ; t<n_tasks ; ++t){
+            int i_start = t * chunk_len;
+            int i_end = i_start + chunk_len;
+            if(i_end > n_obs) i_end = n_obs;
+            if(i_start < i_end){
+              int c_cur = my_fe[i_start] - 1;
+              double acc = VS_mat(i_start, 0) * sum_other_coef_N[i_start];
+              for(int i=i_start + 1 ; i<i_end ; ++i){
+                int c = my_fe[i] - 1;
+                double val = VS_mat(i, 0) * sum_other_coef_N[i];
+                if(c == c_cur){
+                  acc += val;
+                } else {
+                  #pragma omp atomic
+                  my_fe_coef[c_cur] -= acc;
+                  c_cur = c;
+                  acc = val;
+                }
+              }
+              #pragma omp atomic
+              my_fe_coef[c_cur] -= acc;
+            }
+          }
+        } else if(n_obs > 0){
+          int c_cur = my_fe[0] - 1;
+          double acc = VS_mat(0, 0) * sum_other_coef_N[0];
+          for(int i=1 ; i<n_obs ; ++i){
+            int c = my_fe[i] - 1;
+            double val = VS_mat(i, 0) * sum_other_coef_N[i];
+            if(c == c_cur){
+              acc += val;
+            } else {
+              my_fe_coef[c_cur] -= acc;
+              c_cur = c;
+              acc = val;
+            }
+          }
+          my_fe_coef[c_cur] -= acc;
+        }
+      } else if(use_par_obs){
+        int n_tasks = omp_num_tasks(n_obs);
+        if(n_tasks < 1) n_tasks = 1;
+        int chunk_len = (n_obs + n_tasks - 1) / n_tasks;
+        #pragma omp taskloop num_tasks(n_tasks) default(shared)
+        for(int t=0 ; t<n_tasks ; ++t){
+          int i_start = t * chunk_len;
+          int i_end = i_start + chunk_len;
+          if(i_end > n_obs) i_end = n_obs;
+          for(int i=i_start ; i<i_end ; ++i){
+            int c = my_fe[i] - 1;
+            double s_i = sum_other_coef_N[i];
+            for(int v=0 ; v<V ; ++v){
+              double val = VS_mat(i, v) * s_i;
+              #pragma omp atomic
+              rhs(c, v) -= val;
+            }
+          }
+        }
+      } else {
+        for(int i=0 ; i<n_obs ; ++i){
+          int c = my_fe[i] - 1;
+          double s_i = sum_other_coef_N[i];
+          for(int v=0 ; v<V ; ++v){
+            rhs(c, v) -= VS_mat(i, v) * s_i;
+          }
         }
       }
 
@@ -552,25 +659,33 @@ void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single,
 
 
     // Forward elimination and backward solve per group c
-    #pragma omp taskloop num_tasks(omp_num_tasks(nb_id, 16384)) default(shared) if(nb_id >= 16384)
-    for(int c=0 ; c<nb_id ; ++c){
-      for(int v=0 ; v<V ; ++v){
-        for(int v1=v + 1 ; v1<V ; ++v1){
-          // -= row_coef * value from the v row
-          rhs(c, v1) -= my_system(c, v1, v) * rhs(c, v);
-        }
+    if(V == 1){
+      #pragma omp taskloop num_tasks(omp_num_tasks(nb_id, 16384)) default(shared) if(nb_id >= 16384)
+      for(int c=0 ; c<nb_id ; ++c){
+        double d = my_system(c, 0, 0);
+        my_fe_coef[c] = (d == 0) ? 0.0 : (my_fe_coef[c] / d);
       }
-
-      // We backward solve
-      for(int v=V - 1 ; v>=0 ; --v){
-        if(my_system(c, v, v) == 0){
-          rhs(c, v) = 0;
-        } else {
-          double val = rhs(c, v);
-          for(int v_done=v + 1 ; v_done<V ; ++v_done){
-            val -= rhs(c, v_done) * my_system(c, v, v_done);
+    } else {
+      #pragma omp taskloop num_tasks(omp_num_tasks(nb_id, 16384)) default(shared) if(nb_id >= 16384)
+      for(int c=0 ; c<nb_id ; ++c){
+        for(int v=0 ; v<V ; ++v){
+          for(int v1=v + 1 ; v1<V ; ++v1){
+            // -= row_coef * value from the v row
+            rhs(c, v1) -= my_system(c, v1, v) * rhs(c, v);
           }
-          rhs(c, v) = val / my_system(c, v, v);
+        }
+
+        // We backward solve
+        for(int v=V - 1 ; v>=0 ; --v){
+          if(my_system(c, v, v) == 0){
+            rhs(c, v) = 0;
+          } else {
+            double val = rhs(c, v);
+            for(int v_done=v + 1 ; v_done<V ; ++v_done){
+              val -= rhs(c, v_done) * my_system(c, v, v_done);
+            }
+            rhs(c, v) = val / my_system(c, v, v);
+          }
         }
       }
     }
@@ -1127,6 +1242,8 @@ struct PARAM_DEMEAN{
   // stopflag
   bool *stopnow;
   int *jobdone;
+  int nthreads = 1;
+  int *active_vars = nullptr;
 };
 
 
@@ -1143,6 +1260,7 @@ bool dm_update_X_IronsTuck(int64_t nb_coef_no_Q, vector<double> &X,
   }
 
   double vprod = 0, ssq = 0;
+  #pragma omp taskloop reduction(+:vprod, ssq) num_tasks(omp_num_tasks(nb_coef_no_Q)) default(shared) if(nb_coef_no_Q >= 20000)
   for(int64_t i=0 ; i<nb_coef_no_Q ; ++i){
     double delta2_X_tmp = delta2_X[i];
     vprod += delta_GX[i] * delta2_X_tmp;
@@ -1189,6 +1307,8 @@ void compute_fe_gnl(double *p_fe_coef_origin, double *p_fe_coef_destination,
   FEClass &FE_info = *(args->p_FE_info);
 
   // We update each cluster coefficient, starting from Q (the smallest one)
+  int n_active = (args->active_vars != nullptr) ? *(args->active_vars) : args->nthreads;
+  bool parallel_obs = (args->nthreads > 1) && (n_active * 4 <= args->nthreads);
 
   for(int q=Q-1 ; q>=0 ; q--){
     
@@ -1196,7 +1316,7 @@ void compute_fe_gnl(double *p_fe_coef_origin, double *p_fe_coef_destination,
     FE_info.compute_sum_other_means(q, p_fe_coef_origin, p_fe_coef_destination, p_sum_other_means);
 
     // STEP 2: computing the FE coef
-    FE_info.compute_fe_coef(q, p_fe_coef_destination, p_sum_other_means, p_sum_in_out);
+    FE_info.compute_fe_coef(q, p_fe_coef_destination, p_sum_other_means, p_sum_in_out, parallel_obs);
     
   }
 
@@ -1549,6 +1669,10 @@ void demean_single_gnl(int v, PARAM_DEMEAN* args){
 
   int *jobdone = args->jobdone;
   jobdone[v] = 1;
+  if(args->active_vars != nullptr){
+    #pragma omp atomic
+    (*(args->active_vars))--;
+  }
 
 }
 
@@ -1692,6 +1816,9 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
   vector<int> jobdone(n_vars, 0);
   int *pjobdone = jobdone.data();
   args.jobdone = pjobdone;
+  int active_vars = n_vars;
+  args.nthreads = nthreads;
+  args.active_vars = &active_vars;
 
 
   //
