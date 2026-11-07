@@ -78,7 +78,7 @@ public:
   RealVec(std::nullptr_t){};
 
 
-  inline double operator[](int i){
+  inline double operator[](int i) const {
     if(is_int) return static_cast<double>(p_int[i]);
     return p_dble[i];
   }
