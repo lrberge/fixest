@@ -70,6 +70,17 @@ using std::int64_t;
 int pending_interrupt() {
   return !(R_ToplevelExec(Rcpp::checkInterruptFn, NULL));
 }
+
+inline int omp_num_tasks(int64_t n, int64_t min_grain = 32768){
+#ifdef _OPENMP
+  int nt = 4 * omp_get_num_threads();
+  int64_t max_t = n / min_grain;
+  if(max_t < 1) max_t = 1;
+  return max_t < nt ? static_cast<int>(max_t) : nt;
+#else
+  return 1;
+#endif
+}
 // Works but only the master thread can call that function!
 // What happens if the master thread has finished its job but the lower thread is in an "infinite" loop?
 // this is tricky, as such we cannot stop it.
@@ -90,42 +101,29 @@ class simple_mat_with_id{
   // => Access to one of the n_coef matrices of size n_vs x n_vs; all stacked in a single vector
   //
   // px0: origin of the vector (which is of length n_coef * n_vs * n_vs)
-  // px_current: working location of the n_vs x n_vs matrix
   // n: n_vs
   // n2: explicit
-  // id_current: current identifier. The identifiers range from 0 to (n_coef - 1)
 
   simple_mat_with_id() = delete;
 
   double *px0;
-  double *px_current;
-  int nrow, ncol, n_total, id_current = 0;
+  int nrow, ncol, n_total;
 
 public:
   simple_mat_with_id(double* px_in, int nrow_in):
-    px0(px_in), px_current(px_in), nrow(nrow_in), ncol(nrow_in), n_total(nrow * ncol) {};
+    px0(px_in), nrow(nrow_in), ncol(nrow_in), n_total(nrow * ncol) {};
   simple_mat_with_id(double* px_in, int nrow_in, int ncol_in):
-    px0(px_in), px_current(px_in), nrow(nrow_in), ncol(ncol_in), n_total(nrow * ncol) {};
+    px0(px_in), nrow(nrow_in), ncol(ncol_in), n_total(nrow * ncol) {};
   double& operator()(int id, int i, int j);
   double& operator()(int id, int i);
 };
 
 inline double& simple_mat_with_id::operator()(int id, int i, int j){
-  if(id != id_current){
-    id_current = id;
-    px_current = px0 + n_total * id;
-  }
-
-  return px_current[i + nrow * j];
+  return px0[n_total * id + i + nrow * j];
 }
 
 inline double& simple_mat_with_id::operator()(int id, int i){
-  if(id != id_current){
-    id_current = id;
-    px_current = px0 + n_total * id;
-  }
-
-  return px_current[i];
+  return px0[n_total * id + i];
 }
 
 class FEClass{
@@ -190,6 +188,10 @@ public:
 
   void add_wfe_coef_to_mu(int q, double *fe_coef_C, double *out_N);
   void add_fe_coef_to_mu(int q, double *fe_coef_C, double *out_N);
+  void add_all_fe_coef_to_mu(double *fe_coef_C, double *out_N);
+  void compute_sum_other_means(int q, double *fe_coef_origin, double *fe_coef_destination, double *out_N);
+  double compute_ssr(double *fe_coef_C, RealVec &in_N);
+  double compute_2_fe_ssr(double *fe_coef_a, double *fe_coef_b, double *in_out_C, RealVec &in_N);
 
   void compute_fe_coef_2(double *fe_coef_in_C, double *fe_coef_out_C, double *fe_coef_tmp, double *in_out_C);
 
@@ -491,6 +493,7 @@ void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single,
       const double *sum_in_out = in_out_C + coef_start_Q[q];
 
       // initialize cluster coef
+      #pragma omp taskloop num_tasks(omp_num_tasks(nb_coef)) default(shared) if(nb_coef >= 32768)
       for(int m=0 ; m<nb_coef ; ++m){
         my_fe_coef[m] = sum_in_out[m];
       }
@@ -502,6 +505,7 @@ void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single,
 
     }
     
+    #pragma omp taskloop num_tasks(omp_num_tasks(nb_coef)) default(shared) if(nb_coef >= 32768)
     for(int m=0 ; m<nb_coef ; ++m){
       my_fe_coef[m] /= my_SW[m];
     }
@@ -530,6 +534,7 @@ void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single,
 
       // initialization
       const double *sum_in_out = in_out_C + coef_start_Q[q];
+      #pragma omp taskloop num_tasks(omp_num_tasks(nb_coef)) default(shared) if(nb_coef >= 32768)
       for(int m=0 ; m<nb_coef ; ++m){
         my_fe_coef[m] = sum_in_out[m];
       }
@@ -543,7 +548,8 @@ void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single,
     }
 
 
-    // "Correcting" the last column
+    // Forward elimination and backward solve per group c
+    #pragma omp taskloop num_tasks(omp_num_tasks(nb_id, 16384)) default(shared) if(nb_id >= 16384)
     for(int c=0 ; c<nb_id ; ++c){
       for(int v=0 ; v<V ; ++v){
         for(int v1=v + 1 ; v1<V ; ++v1){
@@ -551,17 +557,13 @@ void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single,
           rhs(c, v1) -= my_system(c, v1, v) * rhs(c, v);
         }
       }
-    }
 
-    // Solving => we store the solution in rhs
-    double val = 0;
-    for(int c=0 ; c<nb_id ; ++c){
       // We backward solve
       for(int v=V - 1 ; v>=0 ; --v){
         if(my_system(c, v, v) == 0){
           rhs(c, v) = 0;
         } else {
-          val = rhs(c, v);
+          double val = rhs(c, v);
           for(int v_done=v + 1 ; v_done<V ; ++v_done){
             val -= rhs(c, v_done) * my_system(c, v, v_done);
           }
@@ -627,6 +629,7 @@ void FEClass::compute_fe_coef_2_internal(double *fe_coef_in_out_C, double *fe_co
 
 
   // initialize cluster coef
+  #pragma omp taskloop num_tasks(omp_num_tasks(nb_coef_b)) default(shared) if(nb_coef_b >= 32768)
   for(int m=0 ; m<nb_coef_b ; ++m){
     my_fe_coef_b[m] = my_in_out_b[m];
   }
@@ -651,6 +654,7 @@ void FEClass::compute_fe_coef_2_internal(double *fe_coef_in_out_C, double *fe_co
     }
 
     double *my_SW = p_sum_weights_noVS_C[index_b];
+    #pragma omp taskloop num_tasks(omp_num_tasks(nb_coef_b)) default(shared) if(nb_coef_b >= 32768)
     for(int m=0 ; m<nb_coef_b ; ++m){
       my_fe_coef_b[m] /= my_SW[m];
     }
@@ -682,7 +686,8 @@ void FEClass::compute_fe_coef_2_internal(double *fe_coef_in_out_C, double *fe_co
       }
     }
 
-    // "Correcting" the last column
+    // Forward elimination and backward solve per group c
+    #pragma omp taskloop num_tasks(omp_num_tasks(nb_id_b, 16384)) default(shared) if(nb_id_b >= 16384)
     for(int c=0 ; c<nb_id_b ; ++c){
       for(int v=0 ; v<V_b ; ++v){
         for(int v1=v + 1 ; v1<V_b ; ++v1){
@@ -690,17 +695,13 @@ void FEClass::compute_fe_coef_2_internal(double *fe_coef_in_out_C, double *fe_co
           rhs_b(c, v1) -= my_system_b(c, v1, v) * rhs_b(c, v);
         }
       }
-    }
 
-    // Solving => we store the solution in rhs
-    double val = 0;
-    for(int c=0 ; c<nb_id_b ; ++c){
       // We backward solve
       for(int v=V_b - 1 ; v>=0 ; --v){
         if(my_system_b(c, v, v) == 0){
           rhs_b(c, v) = 0;
         } else {
-          val = rhs_b(c, v);
+          double val = rhs_b(c, v);
           for(int v_done=v + 1 ; v_done<V_b ; ++v_done){
             val -= rhs_b(c, v_done) * my_system_b(c, v, v_done);
           }
@@ -761,6 +762,7 @@ void FEClass::add_wfe_coef_to_mu_internal(int q, double *fe_coef_C, double *out_
 
   if(is_slope_Q[q] == false){
 
+    #pragma omp taskloop num_tasks(omp_num_tasks(n_obs)) default(shared) if(n_obs >= 20000)
     for(int i=0 ; i<n_obs ; ++i){
       if(use_weights){
         out_N[i] += my_fe_coef[my_fe[i] - 1] * p_weights[i];
@@ -773,6 +775,7 @@ void FEClass::add_wfe_coef_to_mu_internal(int q, double *fe_coef_C, double *out_
     simple_mat_of_vs_vars VS_mat(this, q);
     simple_mat_with_id my_vs_coef(my_fe_coef, nb_vs_Q[q], 1);
 
+    #pragma omp taskloop num_tasks(omp_num_tasks(n_obs)) default(shared) if(n_obs >= 20000)
     for(int i=0 ; i<n_obs ; ++i){
       for(int v=0 ; v<V ; ++v){
         if(use_weights){
@@ -787,6 +790,185 @@ void FEClass::add_wfe_coef_to_mu_internal(int q, double *fe_coef_C, double *out_
 
 }
 
+void FEClass::compute_sum_other_means(int q, double *fe_coef_origin, double *fe_coef_destination, double *out_N){
+  // Fused Step 1 of compute_fe_gnl: sums all h != q into a register per observation i
+  // and writes out_N[i] in a single pass instead of Q taskloop passes over DRAM.
+  const bool use_weights = is_weight;
+  vector<double*> my_fe_coef_H(Q);
+  vector<simple_mat_of_vs_vars> vs_mat_H;
+  vs_mat_H.reserve(Q);
+  vector<simple_mat_with_id> vs_coef_H;
+  vs_coef_H.reserve(Q);
+
+  for(int h=0 ; h<Q ; ++h){
+    double *base_coef = (h < q) ? fe_coef_origin : fe_coef_destination;
+    my_fe_coef_H[h] = base_coef + coef_start_Q[h];
+    vs_mat_H.emplace_back(this, h);
+    vs_coef_H.emplace_back(my_fe_coef_H[h], is_slope_Q[h] ? nb_vs_Q[h] : 1, 1);
+  }
+
+  #pragma omp taskloop num_tasks(omp_num_tasks(n_obs)) default(shared) if(n_obs >= 20000)
+  for(int i=0 ; i<n_obs ; ++i){
+    double sum_i = 0.0;
+    const double w_i = use_weights ? p_weights[i] : 1.0;
+    for(int h=0 ; h<Q ; ++h){
+      if(h == q) continue;
+      int id = p_fe_id[h][i] - 1;
+      if(is_slope_Q[h] == false){
+        if(use_weights){
+          sum_i += my_fe_coef_H[h][id] * w_i;
+        } else {
+          sum_i += my_fe_coef_H[h][id];
+        }
+      } else {
+        int V = nb_vs_Q[h];
+        simple_mat_of_vs_vars &VS_mat = vs_mat_H[h];
+        simple_mat_with_id &my_vs_coef = vs_coef_H[h];
+        for(int v=0 ; v<V ; ++v){
+          if(use_weights){
+            sum_i += my_vs_coef(id, v) * VS_mat(i, v) * w_i;
+          } else {
+            sum_i += my_vs_coef(id, v) * VS_mat(i, v);
+          }
+        }
+      }
+    }
+    out_N[i] = sum_i;
+  }
+}
+
+void FEClass::add_all_fe_coef_to_mu(double *fe_coef_C, double *out_N){
+  // Fused pass adding all Q FE contributions to out_N[i] in a single taskloop
+  vector<double*> my_fe_coef_Q(Q);
+  vector<simple_mat_of_vs_vars> vs_mat_Q;
+  vs_mat_Q.reserve(Q);
+  vector<simple_mat_with_id> vs_coef_Q;
+  vs_coef_Q.reserve(Q);
+
+  for(int q=0 ; q<Q ; ++q){
+    my_fe_coef_Q[q] = fe_coef_C + coef_start_Q[q];
+    vs_mat_Q.emplace_back(this, q);
+    vs_coef_Q.emplace_back(my_fe_coef_Q[q], is_slope_Q[q] ? nb_vs_Q[q] : 1, 1);
+  }
+
+  #pragma omp taskloop num_tasks(omp_num_tasks(n_obs)) default(shared) if(n_obs >= 20000)
+  for(int i=0 ; i<n_obs ; ++i){
+    double sum_i = 0.0;
+    for(int q=0 ; q<Q ; ++q){
+      int id = p_fe_id[q][i] - 1;
+      if(is_slope_Q[q] == false){
+        sum_i += my_fe_coef_Q[q][id];
+      } else {
+        int V = nb_vs_Q[q];
+        simple_mat_of_vs_vars &VS_mat = vs_mat_Q[q];
+        simple_mat_with_id &my_vs_coef = vs_coef_Q[q];
+        for(int v=0 ; v<V ; ++v){
+          sum_i += my_vs_coef(id, v) * VS_mat(i, v);
+        }
+      }
+    }
+    out_N[i] += sum_i;
+  }
+}
+
+double FEClass::compute_ssr(double *fe_coef_C, RealVec &in_N){
+  // Computes sum_{i=0}^{n_obs-1} (in_N[i] - sum_q FE_q(i))^2 in a single fused taskloop
+  // without allocating a temporary n_obs vector.
+  vector<double*> my_fe_coef_Q(Q);
+  vector<simple_mat_of_vs_vars> vs_mat_Q;
+  vs_mat_Q.reserve(Q);
+  vector<simple_mat_with_id> vs_coef_Q;
+  vs_coef_Q.reserve(Q);
+
+  for(int q=0 ; q<Q ; ++q){
+    my_fe_coef_Q[q] = fe_coef_C + coef_start_Q[q];
+    vs_mat_Q.emplace_back(this, q);
+    vs_coef_Q.emplace_back(my_fe_coef_Q[q], is_slope_Q[q] ? nb_vs_Q[q] : 1, 1);
+  }
+
+  int n_tasks = omp_num_tasks(n_obs);
+  vector<double> chunk_ssr(n_tasks, 0.0);
+
+  #pragma omp taskloop num_tasks(n_tasks) default(shared) if(n_obs >= 20000)
+  for(int t=0 ; t<n_tasks ; ++t){
+    int i_start = static_cast<int>((static_cast<int64_t>(t) * n_obs) / n_tasks);
+    int i_end   = static_cast<int>((static_cast<int64_t>(t + 1) * n_obs) / n_tasks);
+    double local_ssr = 0.0;
+    for(int i=i_start ; i<i_end ; ++i){
+      double mu_i = 0.0;
+      for(int q=0 ; q<Q ; ++q){
+        int id = p_fe_id[q][i] - 1;
+        if(is_slope_Q[q] == false){
+          mu_i += my_fe_coef_Q[q][id];
+        } else {
+          int V = nb_vs_Q[q];
+          simple_mat_of_vs_vars &VS_mat = vs_mat_Q[q];
+          simple_mat_with_id &my_vs_coef = vs_coef_Q[q];
+          for(int v=0 ; v<V ; ++v){
+            mu_i += my_vs_coef(id, v) * VS_mat(i, v);
+          }
+        }
+      }
+      double resid = in_N[i] - mu_i;
+      local_ssr += resid * resid;
+    }
+    chunk_ssr[t] = local_ssr;
+  }
+
+  double ssr = 0.0;
+  for(int t=0 ; t<n_tasks ; ++t){
+    ssr += chunk_ssr[t];
+  }
+  return ssr;
+}
+
+double FEClass::compute_2_fe_ssr(double *fe_coef_a, double *fe_coef_b, double *in_out_C, RealVec &in_N){
+  compute_fe_coef_2_internal(fe_coef_a, fe_coef_b, in_out_C, false);
+
+  simple_mat_of_vs_vars VS_mat_0(this, 0);
+  simple_mat_of_vs_vars VS_mat_1(this, 1);
+  simple_mat_with_id my_vs_coef_0(fe_coef_a, is_slope_Q[0] ? nb_vs_Q[0] : 1, 1);
+  simple_mat_with_id my_vs_coef_1(fe_coef_b, is_slope_Q[1] ? nb_vs_Q[1] : 1, 1);
+  int *my_fe_0 = p_fe_id[0];
+  int *my_fe_1 = p_fe_id[1];
+  bool is_slope_0 = is_slope_Q[0];
+  bool is_slope_1 = is_slope_Q[1];
+  int V_0 = nb_vs_Q[0];
+  int V_1 = nb_vs_Q[1];
+
+  int n_tasks = omp_num_tasks(n_obs);
+  vector<double> chunk_ssr(n_tasks, 0.0);
+
+  #pragma omp taskloop num_tasks(n_tasks) default(shared) if(n_obs >= 20000)
+  for(int t=0 ; t<n_tasks ; ++t){
+    int i_start = static_cast<int>((static_cast<int64_t>(t) * n_obs) / n_tasks);
+    int i_end   = static_cast<int>((static_cast<int64_t>(t + 1) * n_obs) / n_tasks);
+    double local_ssr = 0.0;
+    for(int i=i_start ; i<i_end ; ++i){
+      double mu_i = 0.0;
+      if(is_slope_0){
+        for(int v=0 ; v<V_0 ; ++v) mu_i += my_vs_coef_0(my_fe_0[i] - 1, v) * VS_mat_0(i, v);
+      } else {
+        mu_i += fe_coef_a[my_fe_0[i] - 1];
+      }
+      if(is_slope_1){
+        for(int v=0 ; v<V_1 ; ++v) mu_i += my_vs_coef_1(my_fe_1[i] - 1, v) * VS_mat_1(i, v);
+      } else {
+        mu_i += fe_coef_b[my_fe_1[i] - 1];
+      }
+      double resid = in_N[i] - mu_i;
+      local_ssr += resid * resid;
+    }
+    chunk_ssr[t] = local_ssr;
+  }
+
+  double ssr = 0.0;
+  for(int t=0 ; t<n_tasks ; ++t){
+    ssr += chunk_ssr[t];
+  }
+  return ssr;
+}
+
 void FEClass::add_2_fe_coef_to_mu(double *fe_coef_a, double *fe_coef_b, double *in_out_C, 
                                   double *out_N, bool update_beta = true){
   // We add the value of the FE coefficients to each observation
@@ -797,33 +979,42 @@ void FEClass::add_2_fe_coef_to_mu(double *fe_coef_a, double *fe_coef_b, double *
   //
 
   if(update_beta){
-    compute_fe_coef_2_internal(fe_coef_a, fe_coef_b, in_out_C, out_N);
+    compute_fe_coef_2_internal(fe_coef_a, fe_coef_b, in_out_C, false);
   }
 
   //
-  // Step 2: we add the value of each coef
+  // Step 2: we add the value of each coef in a single fused taskloop
   //
 
-  for(int q=0 ; q<2 ; ++q){
+  simple_mat_of_vs_vars VS_mat_0(this, 0);
+  simple_mat_of_vs_vars VS_mat_1(this, 1);
+  simple_mat_with_id my_vs_coef_0(fe_coef_a, is_slope_Q[0] ? nb_vs_Q[0] : 1, 1);
+  simple_mat_with_id my_vs_coef_1(fe_coef_b, is_slope_Q[1] ? nb_vs_Q[1] : 1, 1);
+  int *my_fe_0 = p_fe_id[0];
+  int *my_fe_1 = p_fe_id[1];
+  bool is_slope_0 = is_slope_Q[0];
+  bool is_slope_1 = is_slope_Q[1];
+  int V_0 = nb_vs_Q[0];
+  int V_1 = nb_vs_Q[1];
 
-    double *my_fe_coef = q == 0 ? fe_coef_a : fe_coef_b;
-    int *my_fe = p_fe_id[q];
-    bool is_slope = is_slope_Q[q];
-    int V = nb_vs_Q[q];
-
-    simple_mat_of_vs_vars VS_mat(this, q);
-    simple_mat_with_id my_vs_coef(my_fe_coef, nb_vs_Q[q], 1);
-
-    for(int i=0 ; i<n_obs ; ++i){
-      if(is_slope){
-        for(int v=0 ; v<V ; ++v){
-          out_N[i] += my_vs_coef(my_fe[i] - 1, v) * VS_mat(i, v);
-        }
-      } else {
-        out_N[i] += my_fe_coef[my_fe[i] - 1];
+  #pragma omp taskloop num_tasks(omp_num_tasks(n_obs)) default(shared) if(n_obs >= 20000)
+  for(int i=0 ; i<n_obs ; ++i){
+    double sum_i = 0.0;
+    if(is_slope_0){
+      for(int v=0 ; v<V_0 ; ++v){
+        sum_i += my_vs_coef_0(my_fe_0[i] - 1, v) * VS_mat_0(i, v);
       }
+    } else {
+      sum_i += fe_coef_a[my_fe_0[i] - 1];
     }
-
+    if(is_slope_1){
+      for(int v=0 ; v<V_1 ; ++v){
+        sum_i += my_vs_coef_1(my_fe_1[i] - 1, v) * VS_mat_1(i, v);
+      }
+    } else {
+      sum_i += fe_coef_b[my_fe_1[i] - 1];
+    }
+    out_N[i] += sum_i;
   }
 
 }
@@ -941,6 +1132,7 @@ bool dm_update_X_IronsTuck(int nb_coef_no_Q, vector<double> &X,
                            const vector<double> &GX, const vector<double> &GGX,
                            vector<double> &delta_GX, vector<double> &delta2_X){
 
+  #pragma omp taskloop num_tasks(omp_num_tasks(nb_coef_no_Q)) default(shared) if(nb_coef_no_Q >= 20000)
   for(int i=0 ; i<nb_coef_no_Q ; ++i){
     double GX_tmp = GX[i];
     delta_GX[i] = GGX[i] - GX_tmp;
@@ -962,6 +1154,7 @@ bool dm_update_X_IronsTuck(int nb_coef_no_Q, vector<double> &X,
     double coef = vprod/ssq;
 
     // update of X:
+    #pragma omp taskloop num_tasks(omp_num_tasks(nb_coef_no_Q)) default(shared) if(nb_coef_no_Q >= 20000)
     for(int i=0 ; i<nb_coef_no_Q ; ++i){
       X[i] = GGX[i] - coef * delta_GX[i];
     }
@@ -987,7 +1180,6 @@ void compute_fe_gnl(double *p_fe_coef_origin, double *p_fe_coef_destination,
   // Loading the variables
   //
 
-  int n_obs = args->n_obs;
   int Q = args->Q;
 
   // fe_info
@@ -997,21 +1189,8 @@ void compute_fe_gnl(double *p_fe_coef_origin, double *p_fe_coef_destination,
 
   for(int q=Q-1 ; q>=0 ; q--){
     
-    // STEP 1: we compute the sum of the other coef values
-    // Note that we need to recompute it from scratch everytime (otherwise precision issues arise)
-    std::fill_n(p_sum_other_means, n_obs, 0);
-    double *my_fe_coef;
-    for(int h=0 ; h<Q ; h++){
-      if(h == q) continue;
-
-      if(h < q){
-        my_fe_coef = p_fe_coef_origin;
-      } else {
-        my_fe_coef = p_fe_coef_destination;
-      }
-
-      FE_info.add_wfe_coef_to_mu(h, my_fe_coef, p_sum_other_means);
-    }
+    // STEP 1: we compute the sum of the other coef values in a single fused taskloop
+    FE_info.compute_sum_other_means(q, p_fe_coef_origin, p_fe_coef_destination, p_sum_other_means);
 
     // STEP 2: computing the FE coef
     FE_info.compute_fe_coef(q, p_fe_coef_destination, p_sum_other_means, p_sum_in_out);
@@ -1260,27 +1439,13 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
 
     // Other stopping criterion: change to SSR very small
     if(iter % 40 == 0){
-
-      // mu_current is the vector of means
-      vector<double> mu_current(n_obs, 0);
-      double *p_mu = mu_current.data();
-      
-      if(two_fe_algo){
-        FE_info.add_2_fe_coef_to_mu(p_GX, p_sum_other_means, p_sum_in_out, p_mu);
-      } else {
-        for(int q=0 ; q<Q ; ++q){
-          FE_info.add_fe_coef_to_mu(q, p_GX, p_mu);
-        }
-      }
-      
       double ssr_old = ssr;
 
-      // we compute the new SSR
-      ssr = 0;
-      double resid;
-      for(int i=0 ; i<n_obs ; ++i){
-        resid = input[i] - mu_current[i];
-        ssr += resid*resid;
+      // we compute the new SSR without allocating a temporary n_obs vector
+      if(two_fe_algo){
+        ssr = FE_info.compute_2_fe_ssr(p_GX, p_sum_other_means, p_sum_in_out, input);
+      } else {
+        ssr = FE_info.compute_ssr(p_GX, input);
       }
 
       if(stopping_crit(ssr_old, ssr, diffMax)){
@@ -1304,9 +1469,7 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
     FE_info.compute_fe_coef_2(p_alpha_final, p_alpha_final, p_beta_final, p_sum_in_out);
     FE_info.add_2_fe_coef_to_mu(p_alpha_final, p_beta_final, p_sum_in_out, output, false);
   } else {
-    for(int q=0 ; q<Q ; ++q){
-      FE_info.add_fe_coef_to_mu(q, p_GX, output);
-    }
+    FE_info.add_all_fe_coef_to_mu(p_GX, output);
   }  
 
   // keeping track of iterations
@@ -1379,38 +1542,6 @@ void demean_single_gnl(int v, PARAM_DEMEAN* args){
 
 }
 
-void stayIdleCheckingInterrupt(bool *stopnow, vector<int> &jobdone, int n_vars, int *counterInside){
-  // function that keeps the master thread busy until everything is done
-
-  int nbDone = 0, iter = 1;
-  bool isMaster = omp_get_thread_num() == 0;
-
-
-  while(isMaster && nbDone < n_vars && !(*stopnow)){
-    ++iter;
-
-    if(iter % 500000000 == 0){
-      if(pending_interrupt()){
-        (*counterInside)++;
-        *stopnow = true;
-        break;
-      } else {
-        // to avoid int overflow:
-        iter = 0;
-      }
-    }
-
-    if(iter % 1000000 == 0){
-      nbDone = 0;
-      for(int v=0 ; v<n_vars ; v++){
-        nbDone += jobdone[v];
-      }
-    }
-
-  }
-
-}
-
 // Loop over demean_single
 // [[Rcpp::export]]
 List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax, SEXP r_nb_id_Q,
@@ -1478,9 +1609,6 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
   SEXP output_values = PROTECT(Rf_allocVector(REALSXP, isInit ? 1 : n_total));
 
   double *p_output_origin = isInit ? init : REAL(output_values);
-  if(isInit == false){
-    std::fill_n(p_output_origin, n_total, 0);
-  }
 
   //
   // vector of pointers: input/output
@@ -1490,6 +1618,13 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
   p_output[0] = p_output_origin;
   for(int v=1 ; v<n_vars ; v++){
     p_output[v] = p_output[v - 1] + n_obs;
+  }
+
+  if(isInit == false){
+    #pragma omp parallel for num_threads(nthreads) schedule(static, 1) if(nthreads > 1 && n_total >= 20000)
+    for(int v=0 ; v<n_vars ; ++v){
+      std::fill_n(p_output[v], n_obs, 0.0);
+    }
   }
 
   vector<RealVec> p_input(n_vars);
@@ -1548,34 +1683,48 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
   int *pjobdone = jobdone.data();
   args.jobdone = pjobdone;
 
-  int counter = 0;
-  int *pcounter = &counter;
-
 
   //
   // the main loop
   //
 
-  int nthreads_current = nthreads > n_vars ? n_vars : nthreads;
-
-  // enlever les rprintf dans les nthreads jobs
-  #pragma omp parallel for num_threads(nthreads_current) schedule(static, 1)
-  for(int v = 0 ; v<(n_vars+nthreads_current) ; ++v){
-    // demean_single is the workhorse
-    // you get the "mean"
-
-    if(!*(args.stopnow)){
-      if(v < n_vars){
+  if(nthreads == 1){
+    for(int v = 0 ; v < n_vars ; ++v){
+      if(!*(args.stopnow)){
         if(Q == 1){
           demean_single_1(v, &args);
         } else {
           demean_single_gnl(v, &args);
         }
-      } else if(true && Q != 1){
-        stayIdleCheckingInterrupt(&stopnow, jobdone, n_vars, pcounter);
       }
     }
+  } else {
+    #pragma omp parallel num_threads(nthreads) default(shared)
+    {
+      #pragma omp master
+      {
+        for(int v = 1 ; v < n_vars ; ++v){
+          #pragma omp task firstprivate(v) default(shared)
+          {
+            if(!*(args.stopnow)){
+              if(Q == 1){
+                demean_single_1(v, &args);
+              } else {
+                demean_single_gnl(v, &args);
+              }
+            }
+          }
+        }
 
+        if(!*(args.stopnow)){
+          if(Q == 1){
+            demean_single_1(0, &args);
+          } else {
+            demean_single_gnl(0, &args);
+          }
+        }
+      }
+    }
   }
 
 
@@ -1583,8 +1732,6 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
     UNPROTECT(1);
     stop("cpp_demean: User interrupt.");
   }
-
-  // Rprintf("Master checking: %i\n", *pcounter);
 
   //
   // save
@@ -1596,14 +1743,15 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
   int ncol = useX ? n_vars_X : 1;
   NumericMatrix X_demean(nrow, ncol);
 
-  RealVec p_input_tmp;
-  double *p_output_tmp;
+  double *p_X_demean = REAL(X_demean);
+  #pragma omp parallel for num_threads(nthreads) if(nthreads > 1 && n_vars_X > 1)
   for(int k=0 ; k<n_vars_X ; ++k){
-    p_input_tmp = p_input[k];
-    p_output_tmp = p_output[k];
+    RealVec p_input_tmp = p_input[k];
+    double *p_output_tmp = p_output[k];
+    double *p_X_col = p_X_demean + static_cast<size_t>(k) * n_obs;
 
     for(int i=0 ; i < n_obs ; ++i){
-      X_demean(i, k) = p_input_tmp[i] - p_output_tmp[i];
+      p_X_col[i] = p_input_tmp[i] - p_output_tmp[i];
     }
   }
 
@@ -1612,17 +1760,23 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
 
   if(is_y_list && useY){
     List y_demean(n_vars_y);
+    vector<double*> p_y_demean_vec(n_vars_y);
 
     for(int v=0 ; v<n_vars_y ; ++v){
-      p_input_tmp  = p_input[n_vars_X + v];
-      p_output_tmp = p_output[n_vars_X + v];
-
       NumericVector y_demean_tmp(n_obs);
-      for(int i=0 ; i < n_obs ; ++i){
-        y_demean_tmp[i] = p_input_tmp[i] - p_output_tmp[i];
-      }
-
+      p_y_demean_vec[v] = REAL(y_demean_tmp);
       y_demean[v] = y_demean_tmp;
+    }
+
+    #pragma omp parallel for num_threads(nthreads) if(nthreads > 1 && n_vars_y > 1)
+    for(int v=0 ; v<n_vars_y ; ++v){
+      RealVec p_input_tmp  = p_input[n_vars_X + v];
+      double *p_output_tmp = p_output[n_vars_X + v];
+      double *p_y_col = p_y_demean_vec[v];
+
+      for(int i=0 ; i < n_obs ; ++i){
+        p_y_col[i] = p_input_tmp[i] - p_output_tmp[i];
+      }
     }
 
     res["y_demean"] = y_demean;
@@ -1631,10 +1785,12 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
     NumericVector y_demean(useY ? n_obs : 1);
     if(useY){
       // y is always the last variable
-      p_input_tmp = p_input[n_vars - 1];
-      p_output_tmp = p_output[n_vars - 1];
+      RealVec p_input_tmp = p_input[n_vars - 1];
+      double *p_output_tmp = p_output[n_vars - 1];
+      double *p_y_col = REAL(y_demean);
+      #pragma omp parallel for num_threads(nthreads) if(nthreads > 1 && n_obs >= 65536)
       for(int i=0 ; i < n_obs ; ++i){
-        y_demean[i] = p_input_tmp[i] - p_output_tmp[i];
+        p_y_col[i] = p_input_tmp[i] - p_output_tmp[i];
       }
     }
     res["y_demean"] = y_demean;
