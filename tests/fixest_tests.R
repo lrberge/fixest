@@ -3081,6 +3081,17 @@ fitstat(est_fe, ~ wf)
 est_weighted = feols(y ~ x1 | fe, base, weights = ~w)
 fitstat(est_weighted, ~ rmse)
 
+# https://github.com/lrberge/fixest/issues/675
+# the second-stage IV R2 uses the second-stage residuals, weighted like ssr_null
+est_iv_w = feols(y ~ x1 | x_endo_1 ~ x_inst_1, base, weights = ~w)
+y_bar_w = weighted.mean(base$y, base$w)
+r2_w = 1 - sum(base$w * est_iv_w$iv_residuals^2) / sum(base$w * (base$y - y_bar_w)^2)
+test(r2(est_iv_w, "r2"), r2_w)
+# with constant weights, the weighted R2 equals the unweighted one
+base$w_const = 2
+test(r2(feols(y ~ x1 | x_endo_1 ~ x_inst_1, base, weights = ~w_const), "r2"),
+     r2(feols(y ~ x1 | x_endo_1 ~ x_inst_1, base), "r2"))
+
 # fitstat works with `split` and `lean` (https://github.com/lrberge/fixest/issues/566)
 est_split = feols(y ~ x1, base, fsplit = ~fe)
 est_split_lean = feols(y ~ x1, base, fsplit = ~fe, lean = TRUE)
