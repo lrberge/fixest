@@ -1363,8 +1363,9 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE,
     fn = attr(fixef_id[[i]], "fixef_names")
 
     if(sorted){
-      if(all(!grepl("[^[:digit:]]", fn))) fn = as.numeric(fn)
-      my_order = order(fn)
+      # Labels made only of digits are sorted as numbers, but they keep their
+      # original text: "00001" must stay "00001" so it still matches the data (#674).
+      my_order = if(all(!grepl("[^[:digit:]]", fn))) order(as.numeric(fn)) else order(fn)
 
       cv = fixef_values[[i]][my_order]
       names(cv) = fn[my_order]

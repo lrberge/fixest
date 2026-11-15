@@ -1994,6 +1994,17 @@ test(c3, m_fe[["fe_bis[[x2]]"]][names(c3)], "~", tol = 2e-4)
 c4  = get_coef(all_coef, "fe_bis::(?=.+x3)|:x3")
 test(c4, m_fe[["fe_bis[[x3]]"]][names(c4)], "~", tol = 2e-4)
 
+# https://github.com/lrberge/fixest/issues/674
+# labels made only of digits keep their text ("00001") and are still sorted as numbers
+base_zeros = data.frame(y = base$y, unit = sprintf("%05d", c(1:9, 10, 1:9, 10)[base$fe_bis]))
+m_zeros = feols(y ~ 1 | unit, base_zeros)
+test(names(fixef(m_zeros)$unit), sprintf("%05d", sort(unique(base$fe_bis))))
+test(names(fixef(m_zeros, sorted = FALSE)$unit) %in% base_zeros$unit, rep(TRUE, 10))
+# so the fixed-effect columns of sparse_model_matrix are filled: one 1 per row
+test(sum(sparse_model_matrix(m_zeros, data = base_zeros, type = "fixef")), nrow(base_zeros))
+# numeric fixed effects are unaffected
+test(names(fixef(feols(y ~ 1 | fe_bis, base))$fe_bis), as.character(sort(unique(base$fe_bis))))
+
 
 ####
 #### To Integer ####
