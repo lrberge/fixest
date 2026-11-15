@@ -2733,6 +2733,25 @@ res_mult = feols(y1 ~ x1 | species | x2 ~ x3, base)
 m_lhs_rhs_fixef = model.matrix(res_mult, type = c("lhs", "iv.rhs2", "fixef"), na.rm = FALSE)
 test(names(m_lhs_rhs_fixef), c("y1", "fit_x2", "x1", "species"))
 
+# https://github.com/lrberge/fixest/issues/687
+# a bare i() keeps the estimation reference on new data, so the columns match
+# coef() and X %*% coef equals predict(), also when the reference is absent
+res_i = feols(mpg ~ hp + i(cyl), data = mtcars)
+nd_i = subset(mtcars, cyl != 4)
+X_i = model.matrix(res_i, data = nd_i, type = "rhs")
+test(colnames(X_i), names(coef(res_i)))
+test(drop(X_i %*% coef(res_i)), unname(predict(res_i, newdata = nd_i)))
+# with the reference present in new data, the same columns as on the original data
+test(colnames(model.matrix(res_i, data = mtcars, type = "rhs")), colnames(model.matrix(res_i)))
+# an estimated level with no row in the new data is a column of zeros
+res_i_ref = feols(mpg ~ hp + i(cyl, ref = 6), data = mtcars)
+X_i_ref = model.matrix(res_i_ref, data = nd_i, type = "rhs")
+test(colnames(X_i_ref), names(coef(res_i_ref)))
+test(all(X_i_ref[, "cyl::4"] == 0), TRUE)
+test(drop(X_i_ref %*% coef(res_i_ref)), unname(predict(res_i_ref, newdata = nd_i)))
+res_i_inter = feols(mpg ~ i(cyl, hp), data = mtcars)
+test(colnames(model.matrix(res_i_inter, data = nd_i, type = "rhs")), names(coef(res_i_inter)))
+
 ####
 #### sparse_model_matrix ####
 ####
