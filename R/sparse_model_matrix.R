@@ -140,8 +140,12 @@ sparse_model_matrix = function(object, data, type = "rhs", sample = "estimation"
     fml_parts = get_fml_parts(formula(object), parts_as_formula = TRUE)
   }  
   fml_0 = attr(stats::terms(fml_parts$exo_fml), "intercept") == 0
-  # we kick out the intercept if there is presence of fixed-effects
-  fake_intercept = !is.null(fml_parts$fe_fml) | fml_0
+  has_fe = !is.null(fml_parts$fe_fml)
+  # a literal intercept column is added only without fixed-effects and if not removed
+  add_intercept_to_mat = !has_fe & !fml_0
+  # i() calls get a reference level when an intercept is present, either for
+  # real or absorbed by the fixed-effects (as in the non-sparse model matrix)
+  has_intercept = !fml_0 || has_fe
   res = list()
 
   if ("lhs" %in% type) {
@@ -157,7 +161,8 @@ sparse_model_matrix = function(object, data, type = "rhs", sample = "estimation"
     vars = attr(stats::terms(fml), "term.labels")
     linear.mat = vars_to_sparse_mat(vars = vars, data = data, object = object, 
                                     collin.rm = collin.rm, type = "rhs", 
-                                    add_intercept = !fake_intercept)
+                                    add_intercept = add_intercept_to_mat, 
+                                    has_intercept = has_intercept)
 
     res[["rhs"]] = linear.mat
   }
@@ -315,7 +320,8 @@ sparse_model_matrix = function(object, data, type = "rhs", sample = "estimation"
     fml = .xpd(~ ..endo, ..endo = fml_parts$endo_fml)
     vars = attr(stats::terms(fml), "term.labels")
     endo.mat = vars_to_sparse_mat(vars = vars, data = data, object, 
-                                  collin.rm = collin.rm, type = "iv.endo")
+                                  collin.rm = collin.rm, type = "iv.endo", 
+                                  has_intercept = TRUE)
 
     res[["iv.endo"]] = endo.mat
   }
@@ -324,7 +330,8 @@ sparse_model_matrix = function(object, data, type = "rhs", sample = "estimation"
     fml = .xpd(~ ..inst, ..inst = fml_parts$inst_fml)
     vars = attr(stats::terms(fml), "term.labels")
     inst.mat = vars_to_sparse_mat(vars = vars, data = data, object, 
-                                  collin.rm = collin.rm, type = "iv.inst")
+                                  collin.rm = collin.rm, type = "iv.inst", 
+                                  has_intercept = TRUE)
 
     res[["iv.inst"]] = inst.mat
   }
@@ -334,7 +341,8 @@ sparse_model_matrix = function(object, data, type = "rhs", sample = "estimation"
     vars = attr(stats::terms(fml), "term.labels")
     exo.mat = vars_to_sparse_mat(vars = vars, data = data, object = object, 
                                  collin.rm = collin.rm, type = "iv.exo", 
-                                 add_intercept = !fake_intercept)
+                                 add_intercept = add_intercept_to_mat, 
+                                 has_intercept = has_intercept)
 
     res[["iv.exo"]] = exo.mat
   }
@@ -344,7 +352,8 @@ sparse_model_matrix = function(object, data, type = "rhs", sample = "estimation"
     vars = attr(stats::terms(fml), "term.labels")
     iv_rhs1 = vars_to_sparse_mat(vars = vars, data = data, object = object, 
                                     collin.rm = collin.rm, type = "iv.rhs1", 
-                                    add_intercept = !fake_intercept)
+                                    add_intercept = add_intercept_to_mat, 
+                                    has_intercept = has_intercept)
 
     res[["iv.rhs1"]] = iv_rhs1
   }
@@ -370,7 +379,8 @@ sparse_model_matrix = function(object, data, type = "rhs", sample = "estimation"
     vars = attr(stats::terms(fml), "term.labels")
     iv_rhs2 = vars_to_sparse_mat(vars = vars, data = data, object = object, 
                                  collin.rm = collin.rm, type = "iv.rhs2", 
-                                 add_intercept = !fake_intercept)
+                                 add_intercept = add_intercept_to_mat, 
+                                 has_intercept = has_intercept)
 
     res[["iv.rhs2"]] = iv_rhs2
   }
@@ -573,7 +583,8 @@ mult_sparse = function(...) {
 
 # Takes a vector of strings denoting the variables (including terms like `poly()`, `i()`, `I()`, `lag()`, etc.) and returns a sparse matrix of the variables extracted from `data`.
 vars_to_sparse_mat = function(vars, data, collin.rm = FALSE, object = NULL, 
-                              type = NULL, add_intercept = FALSE) {
+                              type = NULL, add_intercept = FALSE, 
+                              has_intercept = FALSE) {
   
   if (collin.rm & is.null(object)) {
     stop("You need to provide the 'object' argument to use 'collin.rm = TRUE'.")
@@ -592,6 +603,26 @@ vars_to_sparse_mat = function(vars, data, collin.rm = FALSE, object = NULL,
     #
 
     # Below, we evaluate all the variables in a "sparse" way
+
+    # Same reference logic as in fixest_model_matrix(): naked i() calls get a
+    # reference level when the design contains an intercept (real or via FEs).
+    # Without an intercept, all of them but the first get a reference, as in
+    # stats::model.matrix().
+    is_naked_i = vapply(vars, function(v) {
+      cl = tryCatch(str2lang(v), error = function(e) NULL)
+      !is.null(cl) && length(cl) >= 2 && identical(cl[[1]], as.name("i")) &&
+        !any(c("ref", "keep", "ref2", "keep2") %in% names(cl))
+    }, logical(1))
+
+    who_ref = which(is_naked_i)
+    if (!has_intercept && length(who_ref) > 0) {
+      who_ref = who_ref[-1]
+    }
+    for (i in who_ref) {
+      cl = str2lang(vars[i])
+      cl[["ref_special"]] = TRUE
+      vars[i] = deparse_long(cl)
+    }
 
     vars_calls = lapply(vars, mult_wrap)
 
@@ -625,6 +656,21 @@ vars_to_sparse_mat = function(vars, data, collin.rm = FALSE, object = NULL,
       xi = variables_list[[i]]
 
       if (inherits(xi, "sparse_var")) {
+        # NA values in factors are stored as missing column indexes. Since
+        # sparse matrices cannot hold NA implicit zeros, we mark the whole
+        # observation as NA, as model.matrix() does
+        na_i = which(is.na(xi$colid))
+        if (length(na_i) > 0) {
+          xi$rowid = c(xi$rowid[-na_i], rep(xi$rowid[na_i], each = xi$n_cols))
+          xi$colid = c(
+            xi$colid[-na_i],
+            rep(seq_len(xi$n_cols), times = length(na_i))
+          )
+          xi$values = c(
+            xi$values[-na_i],
+            rep(NA_real_, length(na_i) * xi$n_cols)
+          )
+        }
 
         id_all[[i]] = cbind(xi$rowid, running_cols[i] + xi$colid)
         values_all[[i]] = xi$values
@@ -716,8 +762,14 @@ vars_to_sparse_mat = function(vars, data, collin.rm = FALSE, object = NULL,
   # add intercept if needed and not already present
   # when collin.rm = TRUE, we change add_intercept depending on if it is needed
   if (add_intercept && !("(Intercept)" %in% colnames(mat))) {
-    mat = cbind(1, mat)
-    colnames(mat)[1] = "(Intercept)"
+    intercept = Matrix::Matrix(
+      1,
+      nrow(data),
+      1,
+      sparse = TRUE,
+      dimnames = list(NULL, "(Intercept)")
+    )
+    mat = if (is.null(mat)) intercept else cbind(intercept, mat)
   }
 
   return(mat)
@@ -786,7 +838,7 @@ is_rhs_only <- function(fml) {
     return(TRUE)
   }
   # e.g. fml = ~ x | t ~ z
-  if (length(fml[[2]]) == 2) {
+  if (is_operator(fml[[2]], "~") &&length(fml[[2]]) == 2) {
     return(TRUE)
   }
   return(FALSE)
@@ -802,7 +854,7 @@ sm_fml_breaker <- function(fml, op) {
     fml <- fml[[2]]
   }
 
-  if (length(fml) == 2) {
+  if (length(fml) == 2 && is_operator(fml, "~")) {
     res[[k]] <- fml[[2]]
   } else {
     res[[k]] <- fml
