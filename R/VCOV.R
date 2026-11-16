@@ -3096,13 +3096,14 @@ getFixest_ssc = function(vcov_name = NULL){
 #' This functions defines or extracts the default type of standard-errors to computed in 
 #' `fixest` [`summary`][fixest::summary.fixest], and [`vcov`][fixest::vcov.fixest].
 #'
-#' @param no_FE Character scalar equal to either: `"iid"` (default), or `"hetero"`. The type 
-#' of standard-errors to use by default for estimations without fixed-effects.
-#' @param one_FE Character scalar equal to either: `"iid"` (default), `"hetero"`, or `"cluster"`. 
+#' @param no_FE Character scalar equal to either: `"iid"` (default), `"hetero"`, `"hc2"`, 
+#' or `"hc3"`. The type of standard-errors to use by default for estimations without fixed-effects.
+#' @param one_FE Character scalar equal to either: `"iid"` (default), `"hetero"`, `"hc2"`, 
+#' `"hc3"`, or `"cluster"`. 
 #' The type of standard-errors to use by default for estimations with *one* fixed-effect.
-#' @param two_FE Character scalar equal to either: `"iid"` (default), `"hetero"`, `"cluster"`, or 
-#' `"twoway"`. The type of standard-errors to use by default for estimations with *two or more* 
-#' fixed-effects.
+#' @param two_FE Character scalar equal to either: `"iid"` (default), `"hetero"`, `"hc2"`, `"hc3"`, 
+#' `"cluster"`, or  `"twoway"`. The type of standard-errors to use by default for estimations with 
+#' *two or more* fixed-effects.
 #' @param panel Character scalar equal to either: `"iid"` (default), `"hetero"`, `"cluster"`, or 
 #' `"driscoll_kraaay"`. The type of standard-errors to use by default for estimations with the 
 #' argument `panel.id` set up. Note that panel has precedence over the presence of fixed-effects.
@@ -3145,16 +3146,16 @@ setFixest_vcov = function(no_FE = "iid", one_FE = "iid", two_FE = "iid",
   # That's why I don't allow conley SEs nor NW SEs
   # => they can be not working at times
 
-  check_set_arg(no_FE,  "match(iid, hetero)")
-  check_set_arg(one_FE, "match(iid, hetero, cluster)")
-  check_set_arg(two_FE, "match(iid, hetero, cluster, twoway)")
-  check_set_arg(panel,  "match(iid, hetero, cluster, DK, driscoll_kraay)")
+  check_set_arg(no_FE,  "match(iid, hetero, hc1, hc2, hc3)")
+  check_set_arg(one_FE, "match(iid, hetero, hc1, hc2, hc3, cluster)")
+  check_set_arg(two_FE, "match(iid, hetero, hc1, hc2, hc3, cluster, twoway)")
+  check_set_arg(panel,  "match(iid, hetero, hc1, hc2, hc3, cluster, DK, driscoll_kraay)")
   
   args = intersect(c("no_FE", "one_FE", "two_FE", "panel"), names(match.call()))
   if("no_FE" %in% args){
-    check_set_arg(all, "NULL match(iid, hetero, cluster)")
+    check_set_arg(all, "NULL match(iid, hetero, hc1, hc2, hc3, cluster)")
   } else {
-    check_set_arg(all, "NULL match(iid, hetero)")
+    check_set_arg(all, "NULL match(iid, hetero, hc1, hc2, hc3)")
   }
   
   check_set_arg(reset, "logical scalar")
