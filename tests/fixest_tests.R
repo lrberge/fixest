@@ -3316,6 +3316,3 @@ test(as.numeric(lm(y ~ 0 + x1, dm_vs)$coefficients), as.numeric(coef(est_vs)))
 
 
 
-
-
-
