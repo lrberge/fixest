@@ -1557,7 +1557,9 @@ r2 = function(x, type = "all", full_names = FALSE){
   n = nobs(x)
   
   if(isTRUE(x$is_iv) && identical(x$iv_stage, 2)){
-    x$ssr = cpp_ssq(x$iv_residuals)
+    w = 1
+    if(!is.null(x$weights)) w = x$weights
+    x$ssr = cpp_ssq(x$iv_residuals, w)
   }
 
   res = rep(NA, length(type_all))
