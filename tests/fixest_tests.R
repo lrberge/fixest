@@ -3264,6 +3264,29 @@ test(dim(fixest_data(est_mult)), dim(base))
 test(nrow(fixest_data(est_mult, "esti")), 45)
 
 
+####
+#### demean column batching ####
+####
+
+chunk("demean column batching")
+
+base_batch = setNames(iris, c("y1", "x1", "x2", "x3", "species"))
+base_batch$y2 = base_batch$y1 * 0.5 + base_batch$x1
+base_batch$fe2 = rep(1:10, 15)
+
+est_unbatched = feols(c(y1, y2) ~ x1 + x2 + I(x1 * x2) | species[x3] + fe2, base_batch)
+est_unbatched_single = feols(y1 ~ x1 + x2 + I(x1 * x2) | species[x3] + fe2, base_batch)
+old_opt = getOption("fixest_demean_mem_gb")
+options(fixest_demean_mem_gb = 1e-9)
+est_batched = feols(c(y1, y2) ~ x1 + x2 + I(x1 * x2) | species[x3] + fe2, base_batch)
+est_batched_single = feols(y1 ~ x1 + x2 + I(x1 * x2) | species[x3] + fe2, base_batch)
+options(fixest_demean_mem_gb = old_opt)
+
+test(unlist(coef(est_batched)), unlist(coef(est_unbatched)))
+test(unlist(se(est_batched)), unlist(se(est_unbatched)))
+test(est_batched_single$iterations, est_unbatched_single$iterations)
+
+
 
 
 

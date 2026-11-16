@@ -1473,24 +1473,44 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
                   slope_vars_list);
   int nb_coef_T = FE_info.nb_coef_T;
 
+  // Determine column batch size to bound the intermediate output_values buffer
+  int batch_vars = n_vars > 0 ? n_vars : 1;
+  if(!isInit && !saveInit && !save_fixef && n_vars > 1){
+    double max_mem_gb = 32.0;
+    SEXP opt_mem = Rf_GetOption1(Rf_install("fixest_demean_mem_gb"));
+    if(!Rf_isNull(opt_mem) && (TYPEOF(opt_mem) == REALSXP || TYPEOF(opt_mem) == INTSXP) && Rf_length(opt_mem) == 1){
+      double val = Rf_asReal(opt_mem);
+      if(R_FINITE(val) && val > 0){
+        max_mem_gb = val;
+      }
+    } else {
+      const char *env_mem = std::getenv("FIXEST_DEMEAN_MEM_GB");
+      if(env_mem != nullptr){
+        double val = std::atof(env_mem);
+        if(val > 0){
+          max_mem_gb = val;
+        }
+      }
+    }
+
+    double bytes_per_var = static_cast<double>(n_obs) * sizeof(double);
+    double max_bytes = max_mem_gb * 1024.0 * 1024.0 * 1024.0;
+    if(bytes_per_var * n_vars > max_bytes){
+      int max_batch = static_cast<int>(std::floor(max_bytes / bytes_per_var));
+      if(max_batch < 1) max_batch = 1;
+      if(max_batch < n_vars) batch_vars = max_batch;
+    }
+  }
+
   // output vector: (Note that if the means are provided, we use that vector and will modify it in place)
-  int64_t n_total = static_cast<int64_t>(n_obs) * n_vars;
-  SEXP output_values = PROTECT(Rf_allocVector(REALSXP, isInit ? 1 : n_total));
+  int64_t n_batch_total = static_cast<int64_t>(n_obs) * batch_vars;
+  SEXP output_values = PROTECT(Rf_allocVector(REALSXP, isInit ? 1 : n_batch_total));
 
   double *p_output_origin = isInit ? init : REAL(output_values);
-  if(isInit == false){
-    std::fill_n(p_output_origin, n_total, 0);
-  }
 
   //
-  // vector of pointers: input/output
+  // vector of pointers: input
   //
-
-  vector<double*> p_output(n_vars);
-  p_output[0] = p_output_origin;
-  for(int v=1 ; v<n_vars ; v++){
-    p_output[v] = p_output[v - 1] + n_obs;
-  }
 
   vector<RealVec> p_input(n_vars);
 
@@ -1504,18 +1524,31 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
 
   // keeping track of iterations
   vector<int> iterations_all(n_vars, 0);
-  int *p_iterations_all = iterations_all.data();
 
   // save fixef option
   if(useX && save_fixef){
+    UNPROTECT(1);
     stop("save_fixef can only be used when there is no Xs.");
   }
 
   vector<double> fixef_values(save_fixef ? nb_coef_T : 1, 0);
   double *p_fixef_values = fixef_values.data();
 
+  // Pre-allocate output containers
+  int nrow = useX ? n_obs : 1;
+  int ncol = useX ? n_vars_X : 1;
+  NumericMatrix X_demean(nrow, ncol);
+
+  List y_demean_list(is_y_list && useY ? n_vars_y : 0);
+  if(is_y_list && useY){
+    for(int v=0 ; v<n_vars_y ; ++v){
+      y_demean_list[v] = NumericVector(n_obs);
+    }
+  }
+  NumericVector y_demean_vec((!is_y_list && useY) ? n_obs : 1);
+
   //
-  // Sending variables to envir
+  // Sending variables to envir and running the (possibly batched) main loop
   //
 
   PARAM_DEMEAN args;
@@ -1525,9 +1558,6 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
   args.diffMax = diffMax;
   args.Q = Q;
   args.nb_coef_T = nb_coef_T;
-  args.p_input = p_input;
-  args.p_output = p_output;
-  args.p_iterations_all = p_iterations_all;
   args.algo_extraProj = algo_extraProj;
   args.algo_iter_warmup = algo_iter_warmup;
   args.algo_iter_projAfterAcc = algo_iter_projAfterAcc;
@@ -1541,50 +1571,93 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
   args.save_fixef = save_fixef;
   args.fixef_values = p_fixef_values;
 
-  // stopping flag + indicator that job is finished
   bool stopnow = false;
   args.stopnow = &stopnow;
-  vector<int> jobdone(n_vars, 0);
-  int *pjobdone = jobdone.data();
-  args.jobdone = pjobdone;
 
   int counter = 0;
   int *pcounter = &counter;
 
+  for(int v_start = 0 ; v_start < n_vars ; v_start += batch_vars){
+    int b_vars = (v_start + batch_vars <= n_vars) ? batch_vars : (n_vars - v_start);
+    int64_t b_total = static_cast<int64_t>(n_obs) * b_vars;
 
-  //
-  // the main loop
-  //
-
-  int nthreads_current = nthreads > n_vars ? n_vars : nthreads;
-
-  // enlever les rprintf dans les nthreads jobs
-  #pragma omp parallel for num_threads(nthreads_current) schedule(static, 1)
-  for(int v = 0 ; v<(n_vars+nthreads_current) ; ++v){
-    // demean_single is the workhorse
-    // you get the "mean"
-
-    if(!*(args.stopnow)){
-      if(v < n_vars){
-        if(Q == 1){
-          demean_single_1(v, &args);
-        } else {
-          demean_single_gnl(v, &args);
-        }
-      } else if(true && Q != 1){
-        stayIdleCheckingInterrupt(&stopnow, jobdone, n_vars, pcounter);
-      }
+    if(isInit == false){
+      std::fill_n(p_output_origin, b_total, 0);
     }
 
+    vector<double*> p_output_batch(b_vars);
+    p_output_batch[0] = p_output_origin;
+    for(int b=1 ; b<b_vars ; ++b){
+      p_output_batch[b] = p_output_batch[b - 1] + n_obs;
+    }
+
+    vector<RealVec> p_input_batch(b_vars);
+    for(int b=0 ; b<b_vars ; ++b){
+      p_input_batch[b] = p_input[v_start + b];
+    }
+
+    vector<int> iterations_batch(b_vars, 0);
+    vector<int> jobdone(b_vars, 0);
+
+    args.p_input = p_input_batch;
+    args.p_output = p_output_batch;
+    args.p_iterations_all = iterations_batch.data();
+    args.jobdone = jobdone.data();
+
+    int nthreads_current = nthreads > b_vars ? b_vars : nthreads;
+
+    // enlever les rprintf dans les nthreads jobs
+    #pragma omp parallel for num_threads(nthreads_current) schedule(static, 1)
+    for(int b = 0 ; b<(b_vars+nthreads_current) ; ++b){
+      // demean_single is the workhorse
+      // you get the "mean"
+
+      if(!*(args.stopnow)){
+        if(b < b_vars){
+          if(Q == 1){
+            demean_single_1(b, &args);
+          } else {
+            demean_single_gnl(b, &args);
+          }
+        } else if(true && Q != 1){
+          stayIdleCheckingInterrupt(&stopnow, jobdone, b_vars, pcounter);
+        }
+      }
+
+    }
+
+    if(*(args.stopnow)){
+      UNPROTECT(1);
+      stop("cpp_demean: User interrupt.");
+    }
+
+    RealVec p_input_tmp;
+    double *p_output_tmp;
+    for(int b=0 ; b<b_vars ; ++b){
+      int v = v_start + b;
+      iterations_all[v] = iterations_batch[b];
+      p_input_tmp = p_input_batch[b];
+      p_output_tmp = p_output_batch[b];
+
+      if(v < n_vars_X){
+        for(int i=0 ; i < n_obs ; ++i){
+          X_demean(i, v) = p_input_tmp[i] - p_output_tmp[i];
+        }
+      } else if(useY){
+        int vy = v - n_vars_X;
+        if(is_y_list){
+          NumericVector y_demean_tmp = y_demean_list[vy];
+          for(int i=0 ; i < n_obs ; ++i){
+            y_demean_tmp[i] = p_input_tmp[i] - p_output_tmp[i];
+          }
+        } else {
+          for(int i=0 ; i < n_obs ; ++i){
+            y_demean_vec[i] = p_input_tmp[i] - p_output_tmp[i];
+          }
+        }
+      }
+    }
   }
-
-
-  if(*(args.stopnow)){
-    UNPROTECT(1);
-    stop("cpp_demean: User interrupt.");
-  }
-
-  // Rprintf("Master checking: %i\n", *pcounter);
 
   //
   // save
@@ -1592,60 +1665,18 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
 
   List res; // a vector and a matrix
 
-  int nrow = useX ? n_obs : 1;
-  int ncol = useX ? n_vars_X : 1;
-  NumericMatrix X_demean(nrow, ncol);
-
-  RealVec p_input_tmp;
-  double *p_output_tmp;
-  for(int k=0 ; k<n_vars_X ; ++k){
-    p_input_tmp = p_input[k];
-    p_output_tmp = p_output[k];
-
-    for(int i=0 ; i < n_obs ; ++i){
-      X_demean(i, k) = p_input_tmp[i] - p_output_tmp[i];
-    }
-  }
-
   res["X_demean"] = X_demean;
 
-
   if(is_y_list && useY){
-    List y_demean(n_vars_y);
-
-    for(int v=0 ; v<n_vars_y ; ++v){
-      p_input_tmp  = p_input[n_vars_X + v];
-      p_output_tmp = p_output[n_vars_X + v];
-
-      NumericVector y_demean_tmp(n_obs);
-      for(int i=0 ; i < n_obs ; ++i){
-        y_demean_tmp[i] = p_input_tmp[i] - p_output_tmp[i];
-      }
-
-      y_demean[v] = y_demean_tmp;
-    }
-
-    res["y_demean"] = y_demean;
-
+    res["y_demean"] = y_demean_list;
   } else {
-    NumericVector y_demean(useY ? n_obs : 1);
-    if(useY){
-      // y is always the last variable
-      p_input_tmp = p_input[n_vars - 1];
-      p_output_tmp = p_output[n_vars - 1];
-      for(int i=0 ; i < n_obs ; ++i){
-        y_demean[i] = p_input_tmp[i] - p_output_tmp[i];
-      }
-    }
-    res["y_demean"] = y_demean;
+    res["y_demean"] = y_demean_vec;
   }
-
-
 
   // iterations
   IntegerVector iter_final(n_vars);
   for(int v=0 ; v<n_vars ; ++v){
-    iter_final[v] = p_iterations_all[v];
+    iter_final[v] = iterations_all[v];
   }
 
   res["iterations"] = iter_final;
