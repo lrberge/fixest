@@ -3,6 +3,8 @@
 
 ## Bug fixes
 
+- fix 32-bit integer overflows and excessive intermediate allocations in large-$N$ multi-way clustered VCOVs (`vcovClust`, `cpp_tapply_sum`, `matprod_XtX`/`matprod_Xty`, `sparse_check`, and `to_index_internal`).
+
 - fix bug in vcov(): following v0.14.0, the returned object was a matrix of class `fixest_vcov` -- which led to problem for matrix operations as it didn't inherit the matrix class. Now fixed, thanks to @strengejacke, #652.
 
 - fix bug in `xpd`: variable completion with `..` suffix now works when after an underscore (e.g. `xpd(~var_.., data = data.frame(var_1=1, var_2=2))`)

@@ -3264,6 +3264,40 @@ test(dim(fixest_data(est_mult)), dim(base))
 test(nrow(fixest_data(est_mult, "esti")), 45)
 
 
+#
+# vcov multi-way & singleton cluster fast-path ====
+#
+
+chunk("vcov multi-way fast-path")
+
+set.seed(42)
+n_vc = 300
+df_vc = data.frame(
+  y = rnorm(n_vc),
+  x1 = rnorm(n_vc),
+  x2 = rnorm(n_vc),
+  c1 = sample(1:30, n_vc, replace = TRUE),
+  c2 = sample(1:25, n_vc, replace = TRUE),
+  c3 = sample(1:20, n_vc, replace = TRUE),
+  c_id = 1:n_vc
+)
+
+est_vc = feols(y ~ x1 + x2 | c1, df_vc)
+
+# When Q == n (singleton clusters), vcovClust skips cpp_tapply_sum and matches HC1/cluster
+v_singleton = vcov(est_vc, cluster = ~c_id)
+v_hc1 = vcov(est_vc, vcov = "hc1", ssc = ssc(G.adj = TRUE))
+test(max(abs(v_singleton - v_hc1)) < 1e-12, TRUE)
+
+# 3-way clustering with high-cardinality product (> 10^14) uses to_integer
+df_vc$big1 = df_vc$c1 * 1000000L
+df_vc$big2 = df_vc$c2 * 1000000L
+df_vc$big3 = df_vc$c3 * 1000000L
+v_3way_small = vcov(est_vc, cluster = ~c1 + c2 + c3)
+v_3way_big   = vcov(est_vc, cluster = ~big1 + big2 + big3)
+test(max(abs(v_3way_small - v_3way_big)) < 1e-12, TRUE)
+
+
 
 
 
