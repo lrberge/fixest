@@ -219,16 +219,23 @@ SEXP cpp_index_table_sum(SEXP fixef_list, SEXP y, const bool save_sum_y,
           }
         }
         
-        // since we erase, we need to start from the end
+        // In-place two-pointer compaction to avoid O(N^2) successive vector::erase calls
         do_sort_obs_removed = true;
-        for(int i = n_current - 1 ; i >= 0 ; --i){
+        int write_idx = 0;
+        for(int i = 0 ; i < n_current ; ++i){
           if(removed_flag[i] == 1){
             obs_removed.push_back(obs_keep[i]);
-            obs_keep.erase(obs_keep.begin() + i);
+          } else {
+            obs_keep[write_idx] = obs_keep[i];
             if(do_sum_y){
-              y_new.erase(y_new.begin() + i);
+              y_new[write_idx] = y_new[i];
             }
+            ++write_idx;
           }
+        }
+        obs_keep.resize(write_idx);
+        if(do_sum_y){
+          y_new.resize(write_idx);
         }
         
       }
