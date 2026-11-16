@@ -619,6 +619,8 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 
     mem.clean = get("mem.clean", env)
 
+    lean = get("lean", env)
+
     demeaned = get("demeaned", env)
 
     warn = get("warn", env)
@@ -1055,6 +1057,13 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
           slope_flag = get("slope_flag", my_env)
           slope_vars = get("slope_variables", my_env)
 
+          in_place_multi = lean && mem.clean && !do_iv && !demeaned && length(rhs_group[[j]]) == 1
+          if(in_place_multi && length(lhs_group) == 1 && length(rhs_group) == 1){
+            rm(my_rhs, args_cbind, linear_core, X)
+            assign("linear.mat", NULL, env)
+            assign("linear.mat", NULL, my_env)
+          }
+
           if(mem.clean) gc()
           
           vars_demean = cpp_demean(my_lhs, X_all, weights, iterMax = fixef.iter,
@@ -1065,7 +1074,8 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
                                    algo_extraProj = fixef.algo$extraProj, 
                                    algo_iter_warmup = fixef.algo$iter_warmup, 
                                    algo_iter_projAfterAcc = fixef.algo$iter_projAfterAcc, 
-                                   algo_iter_grandAcc = fixef.algo$iter_grandAcc)
+                                   algo_iter_grandAcc = fixef.algo$iter_grandAcc,
+                                   in_place = in_place_multi)
 
           X_demean = vars_demean$X_demean
           y_demean = vars_demean$y_demean
@@ -1806,6 +1816,12 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
     slope_flag = get("slope_flag", env)
     slope_vars = get("slope_variables", env)
 
+    in_place_single = lean && mem.clean && !fromGLM && !demeaned &&
+      !isTRUE(dots$iv_call) && is.null(dots$resid_1st_stage) && !isTRUE(dots$add_fitted_demean)
+    if(in_place_single){
+      assign("linear.mat", NULL, env)
+    }
+
     if(mem.clean){
       # we can't really rm many variables... but gc can be enough
       # cpp_demean is the most mem intensive bit
@@ -1820,7 +1836,8 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
                              algo_extraProj = fixef.algo$extraProj, 
                              algo_iter_warmup = fixef.algo$iter_warmup, 
                              algo_iter_projAfterAcc = fixef.algo$iter_projAfterAcc, 
-                             algo_iter_grandAcc = fixef.algo$iter_grandAcc)
+                             algo_iter_grandAcc = fixef.algo$iter_grandAcc,
+                             in_place = in_place_single)
     
     y_demean = vars_demean$y_demean
     if(onlyFixef){
@@ -2021,7 +2038,8 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
     collin.coef[!est$is_excluded] = res$coefficients
     res$collin.coef = collin.coef
     
-    if(isFixef){
+    skip_xbeta = lean && !isTRUE(dots$iv_call) && is.null(dots$resid_1st_stage) && !isTRUE(dots$add_fitted_demean)
+    if(isFixef && !skip_xbeta){
       X = X[, !est$is_excluded, drop = FALSE]
     }
     X_demean = X_demean[, !est$is_excluded, drop = FALSE]
@@ -2065,17 +2083,21 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 
     # X_beta / fitted / sumFE
     if(isFixef){
-      x_beta = cpp_xbeta(X, coef, nthreads)
-
-      if(!is.null(resid_origin)){
-        res$sumFE = y - x_beta - resid_origin
+      if(lean && !isTRUE(dots$iv_call) && is.null(resid_origin) && !isTRUE(dots$add_fitted_demean)){
+        res$fitted.values = y - res$residuals
       } else {
-        res$sumFE = y - x_beta - res$residuals
-      }
+        x_beta = cpp_xbeta(X, coef, nthreads)
 
-      res$fitted.values = x_beta + res$sumFE
-      if(isTRUE(dots$add_fitted_demean)){
-        res$fitted.values_demean = est$fitted.values
+        if(!is.null(resid_origin)){
+          res$sumFE = y - x_beta - resid_origin
+        } else {
+          res$sumFE = y - x_beta - res$residuals
+        }
+
+        res$fitted.values = x_beta + res$sumFE
+        if(isTRUE(dots$add_fitted_demean)){
+          res$fitted.values_demean = est$fitted.values
+        }
       }
     } else {
       res$fitted.values = est$fitted.values
