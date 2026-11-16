@@ -3093,6 +3093,20 @@ test(c(length(est_iv$iv_first_stage), est_iv$iv_n_inst), c(2, 2)) # kpr relies o
 est_iv_uneven = feols(y ~ x1 | x_endo_1 ~ x_inst_1 + x_inst_2, base, cluster = "cl_var")
 fitstat(est_iv_uneven, ~ f + ivf + ivf2 + wald + ivwald + ivwald2 + wh + sargan + kpr + rmse + g + n + ll + sq.cor + r2)
 
+# Sargan with weights: n * R2 of the weighted regression of the 2SLS residuals
+# on the instruments, with the total sum of squares weighted as well
+base$w_sargan = rep(c(0.5, 1, 2), length.out = nrow(base))
+est_iv_w = feols(y ~ x1 | x_endo_1 ~ x_inst_1 + x_inst_2, base, weights = ~w_sargan)
+u = resid(est_iv_w)
+aux = lm(u ~ x1 + x_inst_1 + x_inst_2, base, weights = w_sargan)
+u_bar = weighted.mean(u, base$w_sargan)
+sargan_w = nrow(base) * (1 - sum(base$w_sargan * resid(aux)^2) / sum(base$w_sargan * (u - u_bar)^2))
+test(fitstat(est_iv_w, "sargan")$sargan$stat, sargan_w)
+# with constant weights, the weighted Sargan equals the unweighted one
+base$w_const = 2
+test(fitstat(feols(y ~ x1 | x_endo_1 ~ x_inst_1 + x_inst_2, base, weights = ~w_const), "sargan")$sargan$stat,
+     fitstat(feols(y ~ x1 | x_endo_1 ~ x_inst_1 + x_inst_2, base), "sargan")$sargan$stat)
+
 est_fe = feols(y ~ x1 | fe, base)
 fitstat(est_fe, ~ wf)
 

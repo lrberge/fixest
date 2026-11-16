@@ -1689,7 +1689,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
       }
 
       r = fit_sargan$residuals
-      stat = length(r) * (1 - cpp_ssq(r, weights) / cpp_ssr_null(resid_2nd))
+      stat = length(r) * (1 - cpp_ssq(r, weights) / cpp_ssr_null(resid_2nd, weights))
       p = pchisq(stat, df, lower.tail = FALSE)
       res_second_stage$iv_sargan = list(stat = stat, p = p, df = df)
     }
