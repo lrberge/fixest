@@ -196,6 +196,8 @@ public:
   void add_2_fe_coef_to_mu(double *fe_coef_a, double *fe_coef_b, double *in_out_C, double *out_N, bool update_beta);
 
   void compute_in_out(int q, double *in_out_C, RealVec &in_N, double *out_N);
+
+  void compute_IronsTuck_inner_products(int Q_max, const vector<double> &delta_GX, const vector<double> &delta2_X, double &vprod, double &ssq) const;
 };
 
 FEClass::FEClass(int n_obs, int Q, SEXP r_weights, SEXP fe_id_list, SEXP r_nb_id_Q, SEXP table_id_I, SEXP slope_flag_Q, SEXP slope_vars_list){
@@ -297,7 +299,7 @@ FEClass::FEClass(int n_obs, int Q, SEXP r_weights, SEXP fe_id_list, SEXP r_nb_id
 
   int nb_coef_noVS_T = 0;
   for(int q=0; q<Q ; ++q){
-    if(is_slope_Q[q] == false){
+    if(is_slope_fe_Q[q] == false){
       nb_coef_noVS_T += nb_id_Q[q];
     }
   }
@@ -308,7 +310,7 @@ FEClass::FEClass(int n_obs, int Q, SEXP r_weights, SEXP fe_id_list, SEXP r_nb_id
   p_sum_weights_noVS_C.resize(Q);
   p_sum_weights_noVS_C[0] = sum_weights_noVS_C.data();
   for(int q=1 ; q<Q ; ++q){
-    p_sum_weights_noVS_C[q] = p_sum_weights_noVS_C[q - 1] + (is_slope_Q[q - 1] == true ? 0 : nb_id_Q[q - 1]);
+    p_sum_weights_noVS_C[q] = p_sum_weights_noVS_C[q - 1] + (is_slope_fe_Q[q - 1] == true ? 0 : nb_id_Q[q - 1]);
   }
 
   // table is already computed
@@ -320,7 +322,7 @@ FEClass::FEClass(int n_obs, int Q, SEXP r_weights, SEXP fe_id_list, SEXP r_nb_id
 
 
   for(int q=0 ; q<Q ; ++q){
-    if(is_slope_Q[q] == true){
+    if(is_slope_fe_Q[q] == true){
       continue;
     }
 
@@ -411,21 +413,47 @@ FEClass::FEClass(int n_obs, int Q, SEXP r_weights, SEXP fe_id_list, SEXP r_nb_id
         }
       }
 
-
-      // Precomputing the solver coefficients
-      double my_row_coef = 0;
+      double total_w = 0;
+      const double *my_SW = is_slope_fe_Q[q] ? nullptr : p_sum_weights_noVS_C[q];
+      vector<double> global_mean_sq(V, 0);
       for(int c=0 ; c<nb_coef ; ++c){
+        double w_c = is_slope_fe_Q[q] ? my_system(c, V - 1, V - 1) : my_SW[c];
+        total_w += w_c;
         for(int v=0 ; v<V ; ++v){
-          if(my_system(c, v, v) == 0){
-            // The pivot is equal to 0 => overidentified system
-            for(int i=v + 1 ; i<V ; ++i){
+          global_mean_sq[v] += my_system(c, v, v);
+        }
+      }
+      if(total_w > 0){
+        for(int v=0 ; v<V ; ++v){
+          global_mean_sq[v] /= total_w;
+        }
+      }
+
+      // Precomputing the solver coefficients (eliminating from V - 1 down to 0
+      // so the FE intercept at V - 1, when present, is pivoted before the slopes)
+      double my_row_coef = 0;
+      vector<double> diag_init(V);
+      for(int c=0 ; c<nb_coef ; ++c){
+        double w_c = is_slope_fe_Q[q] ? my_system(c, V - 1, V - 1) : my_SW[c];
+        for(int v=0 ; v<V ; ++v){
+          diag_init[v] = my_system(c, v, v);
+        }
+        for(int v=V - 1 ; v>=0 ; --v){
+          double tol_piv = 1e-12 * diag_init[v];
+          double floor_piv = 1e-24 * w_c * global_mean_sq[v];
+          if(floor_piv > tol_piv) tol_piv = floor_piv;
+
+          if(my_system(c, v, v) <= tol_piv){
+            // The pivot is numerically 0 => overidentified system
+            my_system(c, v, v) = 0;
+            for(int i=v - 1 ; i>=0 ; --i){
               my_system(c, i, v) = 0;
             }
           } else {
-            for(int i=v + 1 ; i<V ; ++i){
+            for(int i=v - 1 ; i>=0 ; --i){
               my_row_coef = my_system(c, i, v) / my_system(c, v, v);
               my_system(c, i, v) = my_row_coef;
-              for(int j=v + 1 ; j<V ; ++j){
+              for(int j=v - 1 ; j>=0 ; --j){
                 my_system(c, i, j) -= my_row_coef * my_system(c, v, j);
               }
             }
@@ -545,8 +573,8 @@ void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single,
 
     // "Correcting" the last column
     for(int c=0 ; c<nb_id ; ++c){
-      for(int v=0 ; v<V ; ++v){
-        for(int v1=v + 1 ; v1<V ; ++v1){
+      for(int v=V - 1 ; v>=0 ; --v){
+        for(int v1=v - 1 ; v1>=0 ; --v1){
           // -= row_coef * value from the v row
           rhs(c, v1) -= my_system(c, v1, v) * rhs(c, v);
         }
@@ -557,12 +585,12 @@ void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single,
     double val = 0;
     for(int c=0 ; c<nb_id ; ++c){
       // We backward solve
-      for(int v=V - 1 ; v>=0 ; --v){
+      for(int v=0 ; v<V ; ++v){
         if(my_system(c, v, v) == 0){
           rhs(c, v) = 0;
         } else {
           val = rhs(c, v);
-          for(int v_done=v + 1 ; v_done<V ; ++v_done){
+          for(int v_done=0 ; v_done<v ; ++v_done){
             val -= rhs(c, v_done) * my_system(c, v, v_done);
           }
           rhs(c, v) = val / my_system(c, v, v);
@@ -684,8 +712,8 @@ void FEClass::compute_fe_coef_2_internal(double *fe_coef_in_out_C, double *fe_co
 
     // "Correcting" the last column
     for(int c=0 ; c<nb_id_b ; ++c){
-      for(int v=0 ; v<V_b ; ++v){
-        for(int v1=v + 1 ; v1<V_b ; ++v1){
+      for(int v=V_b - 1 ; v>=0 ; --v){
+        for(int v1=v - 1 ; v1>=0 ; --v1){
           // -= row_coef * value from the v row
           rhs_b(c, v1) -= my_system_b(c, v1, v) * rhs_b(c, v);
         }
@@ -696,12 +724,12 @@ void FEClass::compute_fe_coef_2_internal(double *fe_coef_in_out_C, double *fe_co
     double val = 0;
     for(int c=0 ; c<nb_id_b ; ++c){
       // We backward solve
-      for(int v=V_b - 1 ; v>=0 ; --v){
+      for(int v=0 ; v<V_b ; ++v){
         if(my_system_b(c, v, v) == 0){
           rhs_b(c, v) = 0;
         } else {
           val = rhs_b(c, v);
-          for(int v_done=v + 1 ; v_done<V_b ; ++v_done){
+          for(int v_done=0 ; v_done<v ; ++v_done){
             val -= rhs_b(c, v_done) * my_system_b(c, v, v_done);
           }
           rhs_b(c, v) = val / my_system_b(c, v, v);
@@ -895,6 +923,64 @@ inline double FEClass::simple_mat_of_vs_vars::operator()(int i, int k){
   return pvars[k][i];
 }
 
+void FEClass::compute_IronsTuck_inner_products(int Q_max, const vector<double> &delta_GX,
+                                               const vector<double> &delta2_X,
+                                               double &vprod, double &ssq) const {
+  vprod = 0;
+  ssq = 0;
+
+  if(!is_slope){
+    int n_max = 0;
+    for(int q=0 ; q<Q_max ; ++q) n_max += nb_coef_Q[q];
+    for(int i=0 ; i<n_max ; ++i){
+      double delta2_X_tmp = delta2_X[i];
+      vprod += delta_GX[i] * delta2_X_tmp;
+      ssq += delta2_X_tmp * delta2_X_tmp;
+    }
+    return;
+  }
+
+  for(int q=0 ; q<Q_max ; ++q){
+    int start = coef_start_Q[q];
+    if(is_slope_Q[q] == false){
+      int n_coef = nb_coef_Q[q];
+      for(int m=0 ; m<n_coef ; ++m){
+        double delta2_X_tmp = delta2_X[start + m];
+        vprod += delta_GX[start + m] * delta2_X_tmp;
+        ssq += delta2_X_tmp * delta2_X_tmp;
+      }
+    } else {
+      int V = nb_vs_Q[q];
+      int nb_id = nb_id_Q[q];
+      simple_mat_with_id my_system(p_eq_systems_VS_C[q], V);
+      const double *my_SW = is_slope_fe_Q[q] ? nullptr : p_sum_weights_noVS_C[q];
+
+      for(int c=0 ; c<nb_id ; ++c){
+        double w_c = is_slope_fe_Q[q] ? my_system(c, V - 1, V - 1) : my_SW[c];
+        if(w_c <= 0) w_c = 1.0;
+        const double *dgx_c = delta_GX.data() + start + c * V;
+        const double *d2x_c = delta2_X.data() + start + c * V;
+
+        for(int v=0 ; v<V ; ++v){
+          double d_cv = my_system(c, v, v);
+          if(d_cv > 0){
+            double u_dgx = dgx_c[v];
+            double u_d2x = d2x_c[v];
+            for(int u=0 ; u<v ; ++u){
+              double mult = my_system(c, u, v);
+              u_dgx += mult * dgx_c[u];
+              u_d2x += mult * d2x_c[u];
+            }
+            double w_scale = d_cv / w_c;
+            vprod += w_scale * u_dgx * u_d2x;
+            ssq += w_scale * u_d2x * u_d2x;
+          }
+        }
+      }
+    }
+  }
+}
+
 
 
 //
@@ -937,7 +1023,7 @@ struct PARAM_DEMEAN{
 
 
 
-bool dm_update_X_IronsTuck(int nb_coef_no_Q, vector<double> &X,
+bool dm_update_X_IronsTuck(int Q_max, const FEClass &FE_info, int nb_coef_no_Q, vector<double> &X,
                            const vector<double> &GX, const vector<double> &GGX,
                            vector<double> &delta_GX, vector<double> &delta2_X){
 
@@ -948,11 +1034,7 @@ bool dm_update_X_IronsTuck(int nb_coef_no_Q, vector<double> &X,
   }
 
   double vprod = 0, ssq = 0;
-  for(int i=0 ; i<nb_coef_no_Q ; ++i){
-    double delta2_X_tmp = delta2_X[i];
-    vprod += delta_GX[i] * delta2_X_tmp;
-    ssq += delta2_X_tmp * delta2_X_tmp;
-  }
+  FE_info.compute_IronsTuck_inner_products(Q_max, delta_GX, delta2_X, vprod, ssq);
 
   bool res = false;
 
@@ -1224,7 +1306,7 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
     compute_fe(Q, p_GX, p_GGX, p_sum_other_means, p_sum_in_out, args);
 
     // X: outcome of the acceleration
-    numconv = dm_update_X_IronsTuck(nb_coef_no_Q, X, GX, GGX, delta_GX, delta2_X);
+    numconv = dm_update_X_IronsTuck(Q - 1, FE_info, nb_coef_no_Q, X, GX, GGX, delta_GX, delta2_X);
     if(numconv) break;
     
     if(iter >= iter_projAfterAcc){
@@ -1251,7 +1333,7 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args, bool two_fe = false)
         std::memcpy(p_GY, p_GX, nb_coef_T * sizeof(double));
       } else {
         std::memcpy(p_GGY, p_GX, nb_coef_T * sizeof(double));
-        numconv = dm_update_X_IronsTuck(nb_coef_no_Q, Y, GY, GGY, delta_GX, delta2_X);
+        numconv = dm_update_X_IronsTuck(Q - 1, FE_info, nb_coef_no_Q, Y, GY, GGY, delta_GX, delta2_X);
         if(numconv) break;
         compute_fe(Q, p_Y, p_GX, p_sum_other_means, p_sum_in_out, args);
         grand_acc = 0;
