@@ -2068,7 +2068,7 @@ vcov_cluster_internal = function(bread, scores, vars, ssc, object, n, K,
   nway = length(cluster)
 
   # initialization
-  vcov_mat = bread * 0
+  vcov_mat = 0
   meat = 0
 
   for(i in 1:nway){

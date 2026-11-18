@@ -3108,6 +3108,11 @@ test(c(length(est_iv$iv_first_stage), est_iv$iv_n_inst), c(2, 2)) # kpr relies o
 est_iv_uneven = feols(y ~ x1 | x_endo_1 ~ x_inst_1 + x_inst_2, base, cluster = "cl_var")
 fitstat(est_iv_uneven, ~ f + ivf + ivf2 + wald + ivwald + ivwald2 + wh + sargan + kpr + rmse + g + n + ll + sq.cor + r2)
 
+# Clustered KP scores need not have the same number of columns as coefficients (#651)
+data(fulton)
+est_kp = feols(qty ~ 1 | price + wave3 ~ speed2 + wave2, fulton, cluster = "day")
+test(is.finite(fitstat(est_kp, "kpr")$kpr$stat), TRUE)
+
 # Sargan with weights: n * R2 of the weighted regression of the 2SLS residuals
 # on the instruments, with the total sum of squares weighted as well
 base$w_sargan = rep(c(0.5, 1, 2), length.out = nrow(base))
