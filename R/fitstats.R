@@ -1826,14 +1826,6 @@ kp_stat = function(x){
   n_endo = length(x$iv_first_stage)
   n_inst = x$iv_n_inst
   VCOV_TYPE = attr(x$cov.scaled, "vcov_type")
-  if (!identical(VCOV_TYPE, "IID") && n_inst != n_endo) {
-    warning(paste0(
-      "KP calculation is only implemented for the cases:\n",
-      " * vcov type is IID or\n",
-      " * number of endogenous variables == number of instruments"
-    ))
-    return(NA)
-  }
 
   # Necessary data
 
@@ -1850,9 +1842,6 @@ kp_stat = function(x){
   k = n_endo
   l = n_inst
 
-  # We assume l >= k
-  q = min(k, l) - 1
-
   # Let's go
 
   if(n_endo == 1){
@@ -1862,38 +1851,21 @@ kp_stat = function(x){
   }
   PI = as.matrix(PI[, colnames(PI) %in% x$iv_inst_names_xpd, drop = FALSE])
 
-  Fmat = chol(crossprod(Z_proj))
-  Gmat = chol(crossprod(X_proj))
+  weights = x[["weights"]]
+  if(is.null(weights)) weights = 1
+  Fmat = chol(crossprod(Z_proj, Z_proj * weights))
+  Gmat = chol(crossprod(X_proj, X_proj * weights))
   theta = Fmat %*% t(solve(t(Gmat)) %*% PI)
   # theta: n_inst x n_endo
 
-  if(n_inst == n_endo){
-    svd_decomp = svd(theta)
-    u = svd_decomp$u
-    vt = t(svd_decomp$v)
-  } else {
-    # we need full decomp => un optimized decomp
-    svd_decomp = mat_svd(theta)
-    u = svd_decomp$u
-    vt = svd_decomp$vt
-  }
+  # The extra left singular vectors are needed when l > k. A single SVD
+  # also keeps the signs of the left and right singular vectors consistent.
+  svd_decomp = svd(theta, nu = l, nv = k)
 
-  u_sub = u[k:l, k:l, drop = FALSE]
-  vt_sub = vt[k, k]
-
-  vt_k = vt[1:k, k, drop = FALSE]
-
-  ssign = function(x) if(x == 0) 1 else sign(x)
-
-  # There may be more sign problems here
-  if(k == l){
-    a_qq = ssign(u_sub[1]) * u[1:l, k:l, drop = FALSE]
-    b_qq = ssign(vt_sub[1]) * t(vt_k)
-  } else {
-    # u_sub %*% t(u_sub) = tcrossprod(u_sub)
-    a_qq = u[1:l, k:l] %*% (solve(u_sub) %*% mat_sqrt( tcrossprod(u_sub) ))
-    b_qq = mat_sqrt( tcrossprod(vt_sub) ) %*% (solve(t(vt_sub)) %*% t(vt_k))
-  }
+  # The Wald statistic is invariant to the nonsingular normalizations of
+  # these bases in KP. Using the orthonormal bases avoids singular subblocks.
+  a_qq = svd_decomp$u[, k:l, drop = FALSE]
+  b_qq = t(svd_decomp$v[, k, drop = FALSE])
 
   # kronecker
   kronv = kronecker(b_qq, t(a_qq))
@@ -1903,37 +1875,46 @@ kp_stat = function(x){
   # We do it the same way as it was for x
 
   if(identical(VCOV_TYPE, "IID")){
-    vlab = chol(tcrossprod(kronv) / nrow(X_proj))
+    # Use the covariance itself, not its Cholesky factor. Under IID errors,
+    # the first-stage residual df provide the usual Wald F correction.
+    n = nrow(X_proj)
+    ssc = attr(x$cov.scaled, "ssc")
+    if(isTRUE(ssc$K.adj)){
+      n = degrees_freedom(x, "resid", stage = 1, vcov = "iid", ssc = ssc)
+    }
+    vlab = tcrossprod(kronv) / n
 
   } else {
     K = t(kronecker(Gmat, Fmat))
 
-    my_scores = do.call(cbind, lapply(1:ncol(X_proj), function(i) Z_proj * X_proj[, i]))
+    my_scores = do.call(cbind, lapply(1:ncol(X_proj), function(i) Z_proj * X_proj[, i] * weights))
 
-    x_new = x
+    # The covariance correction must count first-stage regressors, including
+    # all excluded instruments, rather than second-stage regressors.
+    x_new = x$iv_first_stage[[1]]
     x_new$scores = my_scores
 
     vcov = x$summary_flags$vcov
     ssc = x$summary_flags$ssc
 
+    ## 11-19-2026 NOTE: DOF correction happens in `vcov` call
     meat = vcov(x_new, vcov = vcov, ssc = ssc, sandwich = FALSE)
     vhat = solve(K, t(solve(K, meat)))
-
-    # DOF correction now
-    n = nobs(x) - identical(VCOV_TYPE, "cluster")
-    df_resid = degrees_freedom(x, "resid", stage = 1)
-    vhat = vhat * n / df_resid
 
     vlab = kronv %*% vhat %*% t(kronv)
   }
 
-  r_kp = t(lambda) %*% solve(vlab, lambda)
-  # cat("KP r:\n") ; print(r_kp)
+  kp_df = n_inst - n_endo + 1
+  vlab_lambda = tryCatch(solve(vlab, lambda), error = function(e) NULL)
+  if(is.null(vlab_lambda)){
+    warning("The KP statistic is not available because its projected covariance matrix is singular.")
+    return(list(stat = NA_real_, p = NA_real_, df = kp_df))
+  }
+  r_kp = drop(crossprod(lambda, vlab_lambda))
 
   # Now the results
-  kp_df = n_inst - n_endo + 1
   kp_f = r_kp / n_inst
-  kp_p = pchisq(kp_f, kp_df, lower.tail = FALSE)
+  kp_p = pchisq(r_kp, kp_df, lower.tail = FALSE)
 
   list(stat = kp_f, p = kp_p, df = kp_df)
 }
@@ -2034,6 +2015,7 @@ proj_on_U = function(x, Z){
 
   U = model.matrix(x, type = "iv.exo")
   is_U = !is.null(U)
+  weights = x[["weights"]]
 
   if(!is.null(x$fixef_vars)){
     # we need to center the variables
@@ -2042,29 +2024,29 @@ proj_on_U = function(x, Z){
     if(!is.null(x$slope_flag)){
       Z_dm = demean(Z, x$fixef_id[order(x$fixef_sizes, decreasing = TRUE)],
                     slope.vars = x$slope_variables_reordered,
-                    slope.flag = x$slope_flag_reordered)
+                    slope.flag = x$slope_flag_reordered, weights = weights)
 
       if(is_U){
         U_dm = demean(U, x$fixef_id[order(x$fixef_sizes, decreasing = TRUE)],
                       slope.vars = x$slope_variables_reordered,
-                      slope.flag = x$slope_flag_reordered)
+                      slope.flag = x$slope_flag_reordered, weights = weights)
       }
 
     } else {
-      Z_dm = demean(Z, x$fixef_id)
+      Z_dm = demean(Z, x$fixef_id, weights = weights)
       if(is_U){
-        U_dm = demean(U, x$fixef_id)
+        U_dm = demean(U, x$fixef_id, weights = weights)
       }
     }
 
     if(is_U){
-      Z_proj = resid(feols.fit(Z_dm, U_dm))
+      Z_proj = resid(feols.fit(Z_dm, U_dm, weights = weights))
     } else {
       Z_proj = Z_dm
     }
 
   } else if(is_U){
-    Z_proj = resid(feols.fit(Z, U))
+    Z_proj = resid(feols.fit(Z, U, weights = weights))
   } else {
     Z_proj = Z
   }
