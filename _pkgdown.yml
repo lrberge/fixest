@@ -85,6 +85,7 @@ reference:
         - predict.fixest
         - fitted.fixest
         - hatvalues.fixest
+        - cooks.distance.fixest
         - update.fixest
         - resid.fixest
         - sigma.fixest

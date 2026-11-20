@@ -23,6 +23,10 @@
 
 - new cheat sheet vignette containing quick reference tables
 
+## New features
+
+- new method `cooks.distance.fixest`, which computes Cook's distance for `feols` and `feglm` estimations using `hatvalues`.
+
 ## Other
 
 - new README.md, with more recent benchmarks

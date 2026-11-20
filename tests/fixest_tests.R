@@ -2267,6 +2267,56 @@ glm_q_fe   = glm(y_int ~ x1 + x2 + factor(species), family = quasipoisson(), bas
 test(hatvalues(feglm_q_fe), hatvalues(glm_q_fe), tol = 1e-7)
 
 
+####
+#### cooks.distance ####
+####
+
+chunk("COOKS DISTANCE")
+
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+base$y_int = as.integer(base$y)
+base$y_bin = 1 * (base$y > mean(base$y))
+base$w = 1 + (seq_len(nrow(base)) %% 3)
+
+fm  = lm(y ~ x1 + x2, base)
+ffm = feols(y ~ x1 + x2, base)
+test(cooks.distance(ffm), cooks.distance(fm))
+test(length(cooks.distance(ffm)), nobs(ffm))
+
+glm_poi   = glm(y_int ~ x1 + x2, family = poisson(), base)
+feglm_poi = fepois(y_int ~ x1 + x2, base)
+test(cooks.distance(feglm_poi), cooks.distance(glm_poi))
+
+glm_logit   = glm(y_bin ~ x1 + x2, family = binomial(), base)
+feglm_logit = feglm(y_bin ~ x1 + x2, base, binomial())
+test(cooks.distance(feglm_logit), cooks.distance(glm_logit))
+
+# with fixed effects
+fm_fe  = lm(y ~ x1 + x2 + factor(species), base)
+ffm_fe = feols(y ~ x1 + x2 | species, base)
+test(cooks.distance(ffm_fe), cooks.distance(fm_fe))
+
+glm_fe   = glm(y_int ~ x1 + x2 + factor(species), family = poisson(), base)
+feglm_fe = fepois(y_int ~ x1 + x2 | species, base)
+test(cooks.distance(feglm_fe), cooks.distance(glm_fe), tol = 1e-7)
+
+# arguments are passed on to hatvalues()
+set.seed(1)
+test(length(cooks.distance(ffm_fe, exact = FALSE, boot.size = 100)), nobs(ffm_fe))
+
+# weighted OLS and quasi-family GLM
+test(cooks.distance(feols(y ~ x1 + x2, weights = ~w, base)),
+     cooks.distance(lm(y ~ x1 + x2, weights = w, base)))
+
+test(cooks.distance(feglm(y_int ~ x1 + x2, base, quasipoisson())),
+     cooks.distance(glm(y_int ~ x1 + x2, family = quasipoisson(), base)), tol = 1e-5)
+
+# leverage of 1 leads to NaN (matching stats::cooks.distance)
+base$species = as.character(base$species)
+base[1, "species"] = "foo"
+est_pii_singular = feols(y ~ x1 | species, base, fixef.rm = "none")
+test(is.nan(cooks.distance(est_pii_singular)[1]), TRUE)
+
 
 
 ####

@@ -126,6 +126,7 @@ S3method(deviance, fixest)
 S3method(sigma, fixest)
 S3method(weights, fixest)
 S3method(hatvalues, fixest)
+S3method(cooks.distance, fixest)
 S3method(df.residual, fixest)
 S3method(case.names, fixest)
 
@@ -168,7 +169,7 @@ importFrom(stringmagic, string_magic_alias, cat_magic_alias, message_magic_alias
 importFrom(stats, cor, dnorm, lm, nlminb, optim,
 			     pnorm, qnorm, as.formula, var, sd, formula,
 			     na.omit, model.frame, "na.pass", poisson, pt, hatvalues,
-			     quasibinomial)
+			     cooks.distance, quasibinomial)
 
 # stats methods
 importFrom(stats, model.matrix, sigma, deviance, weights, terms,
