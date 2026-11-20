@@ -4425,12 +4425,18 @@ hatvalues.fixest = function(model, exact = TRUE, boot.size = 1000, ...){
   if (is.null(model$fixef_id)) {
     if(method == "feols"){
       X = model.matrix(model)
+      if (!is.null(model$weights)){
+        X = X * sqrt(model$weights)
+      }
   
       res = cpp_diag_XUtX(X, model$cov.iid / model$sigma2)
   
     } else if(method == "feglm"){
       XW = model.matrix(model) * sqrt(model$irls_weights)
-      res = cpp_diag_XUtX(XW, model$cov.iid)
+      # cov.iid is scaled by the dispersion (only relevant for quasi families)
+      disp = model$dispersion
+      if (is.null(disp)) disp = 1
+      res = cpp_diag_XUtX(XW, model$cov.iid / disp)
   
     } else {
       # we never get here
@@ -4547,7 +4553,16 @@ hatvalues.fixest = function(model, exact = TRUE, boot.size = 1000, ...){
 
     if (!is.null(mats$rhs)) {
       tXXinv = model$cov.iid 
-      if (method == "feols") tXXinv = tXXinv / model$sigma2
+      if (method == "feols") {
+        tXXinv = tXXinv / model$sigma2
+      } else {
+        # cov.iid is scaled by the dispersion (only relevant for quasi families).
+        # This must be undone here: only the RHS component of the projection
+        # matrix is dispersion-scaled, not the FE/slope components.
+        disp = model$dispersion
+        if (is.null(disp)) disp = 1
+        tXXinv = tXXinv / disp
+      }
 
       P_ii_list$rhs = Matrix::rowSums(
         mats$rhs * Matrix::t(tXXinv %*% Matrix::t(mats$rhs))

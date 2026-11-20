@@ -13,6 +13,8 @@
 
 - ensure the code is compatible with dreamerr v1.4.0 (could lead to rare but undecipherable bugs). Reported by @MichaelChirico, #668.
 
+- fix bug in `hatvalues.fixest`: weights were not accounted for in models without fixed-effects, and the dispersion was not divided out for quasi-family GLMs. This also affected the HC2/HC3 VCOVs.
+
 ## Vignettes
 
 - consolidate the two `etable` vignettes (`exporting_tables` and `etable_new_features`) into a single document. By GMD, #648.

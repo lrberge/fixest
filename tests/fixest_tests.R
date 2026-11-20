@@ -2249,6 +2249,24 @@ test(hatvalues(est_pii_singular)[1], 1.0)
 est_pii_singleton = feols(y ~ x1 | species, base, fixef.rm = "singleton")
 test(length(hatvalues(est_pii_singleton)), nrow(base) - 1)
 
+# weights must be reflected in the hat values (fast path)
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+base$y_int = as.integer(base$y)
+base$w = 1 + (seq_len(nrow(base)) %% 3)
+ffm_w = feols(y ~ x1 + x2, weights = ~w, base)
+fm_w  = lm(y ~ x1 + x2, weights = w, base)
+test(hatvalues(ffm_w), hatvalues(fm_w))
+
+# the dispersion must be divided out, both with and without fixed effects
+feglm_q = feglm(y_int ~ x1 + x2, base, quasipoisson())
+glm_q   = glm(y_int ~ x1 + x2, family = quasipoisson(), base)
+test(hatvalues(feglm_q), hatvalues(glm_q))
+
+feglm_q_fe = feglm(y_int ~ x1 + x2 | species, base, quasipoisson())
+glm_q_fe   = glm(y_int ~ x1 + x2 + factor(species), family = quasipoisson(), base)
+test(hatvalues(feglm_q_fe), hatvalues(glm_q_fe), tol = 1e-7)
+
+
 
 
 ####
