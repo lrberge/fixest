@@ -14,6 +14,7 @@ femlm(
   fixef,
   fixef.rm = "perfect_fit",
   offset,
+  weights,
   subset,
   split,
   fsplit,
@@ -51,6 +52,7 @@ fenegbin(
   fixef,
   fixef.rm = "perfect_fit",
   offset,
+  weights,
   subset,
   split,
   fsplit,
@@ -148,6 +150,10 @@ The algorithm continues until there is no singleton/perfect-fit remaining.}
 \item{offset}{A formula or a numeric vector. An offset can be added to the estimation.
 If equal to a formula, it should be of the form (for example) \code{~0.5*x**2}. This
 offset is linearly added to the elements of the main formula 'fml'.}
+
+\item{weights}{A formula or a numeric vector. Each observation can be weighted,
+the weights must be greater than 0. If equal to a formula, it should be one-sided:
+for example \code{~ var_weight}.}
 
 \item{subset}{A vector (logical or numeric) or a one-sided formula. If provided,
 then the estimation will be performed only on the observations defined by this argument.}
@@ -372,6 +378,12 @@ This function estimates maximum likelihood models with any number of fixed-effec
 Note that the functions \code{\link{feglm}} and \code{\link{femlm}} provide the same results when using
 the same families but differ in that the latter is a direct maximum likelihood
 optimization (so the two can really have different convergence rates).
+
+Weighted estimations are supported via the argument \code{weights}. The weights enter
+the log-likelihood linearly, i.e. the objective becomes \verb{sum_i w_i * l_i}, and they
+are taken into account in the score, in the information matrix and in the
+concentration of the fixed-effects. For the negative binomial, the over-dispersion
+parameter is estimated jointly with the coefficients and is weighted too.
 }
 \section{Combining the fixed-effects}{
 

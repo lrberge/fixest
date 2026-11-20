@@ -78,7 +78,8 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
                 "nthreads", "lean", "verbose", "warn", "notes", "fixef.keep_names",
                 "start", "only.env", "mem.clean", "only.coef")
 
-  femlm_args = c("family", "theta.init", "linear.start", "opt.control", "deriv.tol", "deriv.iter")
+  femlm_args = c("family", "theta.init", "linear.start", "opt.control", "deriv.tol", 
+                 "deriv.iter", "weights")
   feNmlm_args = c("NL.fml", "NL.start", "lower", "upper", "NL.start.init", 
                   "jacobian.method", "useHessian", "hessian.args")
   feglm_args = c("family", "weights", "glm.iter", "glm.tol", "etastart", "mustart", 
@@ -116,6 +117,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
   }
 
   args_invalid = setdiff(args, valid_args)
+
   if(length(args_invalid) > 0){
     if(warn){
       warni("{'15|...'k ? deparse(mc_origin)[1]}: {$enum, is ? args_invalid} not {$(a ;)}valid argument{$s} for function {origin}()")

@@ -52,11 +52,13 @@ struct PARAM_CCC{
 	double *mu_init;
 	int *pcluster;
 	double *lhs;
+	const double *weights; // nullptr when unweighted
 
 	// vectors of pointers
 	vector<int*> pdum;
 	vector<int*> ptable;
 	vector<double*> psum_y;
+	vector<const double*> psum_w;
 	vector<int*> pobsCluster;
 	vector<int*> pcumtable;
 
@@ -106,7 +108,9 @@ bool update_X_IronsTuck(int nb_coef_no_K, vector<double> &X,
 
 void CCC_poisson(int n_obs, int nb_cluster,
                  double *cluster_coef, double *exp_mu,
-                 double *sum_y, int *dum){
+                 double *sum_y, int *dum, const double *pw){
+	// pw: the weights, nullptr when the estimation is unweighted.
+	// note that sum_y is already weighted (it is computed in R)
 	// compute cluster coef, poisson
 	// Rprintf("in gaussian\n");
 
@@ -116,8 +120,14 @@ void CCC_poisson(int n_obs, int nb_cluster,
 	}
 
 	// looping sequentially over exp_mu
-	for(int i=0 ; i<n_obs ; ++i){
-		cluster_coef[dum[i]] += exp_mu[i];
+	if(pw == nullptr){
+		for(int i=0 ; i<n_obs ; ++i){
+			cluster_coef[dum[i]] += exp_mu[i];
+		}
+	} else {
+		for(int i=0 ; i<n_obs ; ++i){
+			cluster_coef[dum[i]] += pw[i] * exp_mu[i];
+		}
 	}
 
 	// calculating cluster coef
@@ -130,7 +140,7 @@ void CCC_poisson(int n_obs, int nb_cluster,
 
 void CCC_poisson_log(int n_obs, int nb_cluster,
                      double *cluster_coef, double *mu,
-                     double *sum_y, int *dum){
+                     double *sum_y, int *dum, const double *pw){
 	// compute cluster coef, poisson
 	// This is log poisson => we are there because classic poisson did not work
 	// Thus high chance there are very high values of the cluster coefs (in abs value)
@@ -158,9 +168,16 @@ void CCC_poisson_log(int n_obs, int nb_cluster,
 	}
 
 	// looping sequentially over exp_mu
-	for(int i=0 ; i<n_obs ; ++i){
-		d = dum[i];
-		cluster_coef[d] += exp(mu[i] - mu_max[d]);
+	if(pw == nullptr){
+		for(int i=0 ; i<n_obs ; ++i){
+			d = dum[i];
+			cluster_coef[d] += exp(mu[i] - mu_max[d]);
+		}
+	} else {
+		for(int i=0 ; i<n_obs ; ++i){
+			d = dum[i];
+			cluster_coef[d] += pw[i] * exp(mu[i] - mu_max[d]);
+		}
 	}
 
 	// calculating cluster coef
@@ -174,7 +191,10 @@ void CCC_poisson_log(int n_obs, int nb_cluster,
 
 void CCC_gaussian(int n_obs, int nb_cluster,
                   double *cluster_coef, double *mu,
-                  double *sum_y, int *dum, int *table){
+                  double *sum_y, int *dum, int *table,
+                  const double *pw, const double *sum_w){
+	// weighted: the coef solves sum_i w_i (y_i - mu_i - a) = 0, hence the
+	// per-cluster sum of the weights replaces the cluster size
 	// compute cluster coef, gaussian
 
 	// initialize cluster coef
@@ -183,13 +203,25 @@ void CCC_gaussian(int n_obs, int nb_cluster,
 	}
 
 	// looping sequentially over mu
-	for(int i=0 ; i<n_obs ; ++i){
-		cluster_coef[dum[i]] += mu[i];
+	if(pw == nullptr){
+		for(int i=0 ; i<n_obs ; ++i){
+			cluster_coef[dum[i]] += mu[i];
+		}
+	} else {
+		for(int i=0 ; i<n_obs ; ++i){
+			cluster_coef[dum[i]] += pw[i] * mu[i];
+		}
 	}
 
 	// calculating cluster coef
-	for(int m=0 ; m<nb_cluster ; ++m){
-		cluster_coef[m] = (sum_y[m] - cluster_coef[m]) / table[m];
+	if(sum_w == nullptr){
+		for(int m=0 ; m<nb_cluster ; ++m){
+			cluster_coef[m] = (sum_y[m] - cluster_coef[m]) / table[m];
+		}
+	} else {
+		for(int m=0 ; m<nb_cluster ; ++m){
+			cluster_coef[m] = (sum_y[m] - cluster_coef[m]) / sum_w[m];
+		}
 	}
 
 	// "output" is the update of my_cluster_coef
@@ -197,7 +229,8 @@ void CCC_gaussian(int n_obs, int nb_cluster,
 
 void CCC_negbin(int nthreads, int nb_cluster, double theta, double diffMax_NR,
                 double *cluster_coef, double *mu,
-                double *lhs, double *sum_y, int *obsCluster, int *table, int *cumtable){
+                double *lhs, double *sum_y, int *obsCluster, int *table, int *cumtable,
+                const double *pw, const double *sum_w){
 	// compute cluster coefficients negbin
 	// This is not direct: needs to apply dichotomy+NR algorithm
 
@@ -226,7 +259,9 @@ void CCC_negbin(int nthreads, int nb_cluster, double theta, double diffMax_NR,
 		}
 
 		// computing the bounds
-		borne_inf[m] = log(sum_y[m]) - log(static_cast<double>(table[m])) - mu_max;
+		// when weighted, the number of obs. in the cluster becomes the sum of the weights
+		double n_m = (sum_w == nullptr ? static_cast<double>(table[m]) : sum_w[m]);
+		borne_inf[m] = log(sum_y[m]) - log(n_m) - mu_max;
 		borne_sup[m] = borne_inf[m] + (mu_max - mu_min);
 	}
 
@@ -263,7 +298,7 @@ void CCC_negbin(int nthreads, int nb_cluster, double theta, double diffMax_NR,
 			value = sum_y[m];
 			for(int u = u0 ; u<cumtable[m] ; ++u){
 				i = obsCluster[u];
-				value -= (theta + lhs[i]) / (1 + theta*exp(-x1 - mu[i]));
+				value -= (pw == nullptr ? 1.0 : pw[i]) * (theta + lhs[i]) / (1 + theta*exp(-x1 - mu[i]));
 			}
 
 			// update of the bounds.
@@ -283,7 +318,7 @@ void CCC_negbin(int nthreads, int nb_cluster, double theta, double diffMax_NR,
 				for(int u = u0 ; u<cumtable[m] ; ++u){
 					i = obsCluster[u];
 					exp_mu = exp(x1 + mu[i]);
-					derivee -= theta * (theta + lhs[i]) / ( (theta/exp_mu + 1) * (theta + exp_mu) );
+					derivee -= (pw == nullptr ? 1.0 : pw[i]) * theta * (theta + lhs[i]) / ( (theta/exp_mu + 1) * (theta + exp_mu) );
 				}
 
 				x1 = x0 - value / derivee;
@@ -325,7 +360,8 @@ void CCC_negbin(int nthreads, int nb_cluster, double theta, double diffMax_NR,
 
 void CCC_logit(int nthreads, int nb_cluster, double diffMax_NR,
                double *cluster_coef, double *mu,
-               double *sum_y, int *obsCluster, int *table, int *cumtable){
+               double *sum_y, int *obsCluster, int *table, int *cumtable,
+               const double *pw, const double *sum_w){
 	// compute cluster coefficients negbin
 	// This is not direct: needs to apply dichotomy+NR algorithm
 
@@ -354,7 +390,9 @@ void CCC_logit(int nthreads, int nb_cluster, double diffMax_NR,
 		}
 
 		// computing the "bornes"
-		borne_inf[m] = log(sum_y[m]) - log(table[m]-sum_y[m]) - mu_max;
+		// when weighted, the number of obs. in the cluster becomes the sum of the weights
+		double n_m = (sum_w == nullptr ? static_cast<double>(table[m]) : sum_w[m]);
+		borne_inf[m] = log(sum_y[m]) - log(n_m-sum_y[m]) - mu_max;
 		borne_sup[m] = borne_inf[m] + (mu_max - mu_min);
 	}
 
@@ -393,7 +431,7 @@ void CCC_logit(int nthreads, int nb_cluster, double diffMax_NR,
 			// computing the value of f(x)
 			value = sum_y[m];
 			for(int u = u0 ; u<cumtable[m] ; ++u){
-				value -= 1 / (1 + exp(-x1 - mu[obsCluster[u]]));
+				value -= (pw == nullptr ? 1.0 : pw[obsCluster[u]]) / (1 + exp(-x1 - mu[obsCluster[u]]));
 			}
 
 			// update of the bounds.
@@ -412,7 +450,7 @@ void CCC_logit(int nthreads, int nb_cluster, double diffMax_NR,
 				derivee = 0;
 				for(int u = u0 ; u<cumtable[m] ; ++u){
 					exp_mu = exp(x1 + mu[obsCluster[u]]);
-					derivee -= 1 / ( (1/exp_mu + 1) * (1 + exp_mu) );
+					derivee -= (pw == nullptr ? 1.0 : pw[obsCluster[u]]) / ( (1/exp_mu + 1) * (1 + exp_mu) );
 				}
 
 				x1 = x0 - value / derivee;
@@ -453,7 +491,8 @@ void CCC_logit(int nthreads, int nb_cluster, double diffMax_NR,
 void computeClusterCoef_single(int family, int n_obs, int nb_cluster, double theta, double diffMax_NR,
                                double *cluster_coef, double *mu,
                                double *lhs, double *sum_y,
-                               int *dum, int *obsCluster, int *table, int *cumtable, int nthreads){
+                               int *dum, int *obsCluster, int *table, int *cumtable, int nthreads,
+                               const double *pw, const double *sum_w){
 
 	// Leads to the appropriate function
 	// we update the cluster "in place" (ie using pointers)
@@ -467,19 +506,19 @@ void computeClusterCoef_single(int family, int n_obs, int nb_cluster, double the
 
 	switch(family){
 	case 1:
-		CCC_poisson(n_obs, nb_cluster, cluster_coef, mu, sum_y, dum);
+		CCC_poisson(n_obs, nb_cluster, cluster_coef, mu, sum_y, dum, pw);
 		break;
 	case 2: // Negbin
-		CCC_negbin(nthreads, nb_cluster, theta, diffMax_NR, cluster_coef, mu, lhs, sum_y, obsCluster, table, cumtable);
+		CCC_negbin(nthreads, nb_cluster, theta, diffMax_NR, cluster_coef, mu, lhs, sum_y, obsCluster, table, cumtable, pw, sum_w);
 		break;
 	case 3: // logit
-		CCC_logit(nthreads, nb_cluster, diffMax_NR, cluster_coef, mu, sum_y, obsCluster, table, cumtable);
+		CCC_logit(nthreads, nb_cluster, diffMax_NR, cluster_coef, mu, sum_y, obsCluster, table, cumtable, pw, sum_w);
 		break;
 	case 4: // Gaussian
-		CCC_gaussian(n_obs, nb_cluster, cluster_coef, mu, sum_y, dum, table);
+		CCC_gaussian(n_obs, nb_cluster, cluster_coef, mu, sum_y, dum, table, pw, sum_w);
 		break;
 	case 5: // log poisson
-		CCC_poisson_log(n_obs, nb_cluster, cluster_coef, mu, sum_y, dum);
+		CCC_poisson_log(n_obs, nb_cluster, cluster_coef, mu, sum_y, dum, pw);
 		break;
 	}
 
@@ -489,7 +528,8 @@ void computeClusterCoef_single(int family, int n_obs, int nb_cluster, double the
 // [[Rcpp::export]]
 SEXP compute_cluster_coef_r(int family, int nb_coef, double theta, double diffMax_NR,
                             SEXP r_mu, SEXP r_lhs, SEXP r_sum_y, SEXP r_dum,
-                            SEXP r_obsCluster, SEXP r_table, SEXP r_cumtable, int nthreads){
+                            SEXP r_obsCluster, SEXP r_table, SEXP r_cumtable, int nthreads,
+                            SEXP r_weights, SEXP r_sum_w){
 
 	int n_obs = Rf_length(r_mu);
 
@@ -502,11 +542,16 @@ SEXP compute_cluster_coef_r(int family, int nb_coef, double theta, double diffMa
 	int *table = INTEGER(r_table);
 	int *cumtable = INTEGER(r_cumtable);
 
+	// weights: R NULL means the estimation is unweighted
+	const double *pw = Rf_isNull(r_weights) ? nullptr : REAL(r_weights);
+	const double *sum_w = Rf_isNull(r_sum_w) ? nullptr : REAL(r_sum_w);
+
 	SEXP res = PROTECT(Rf_allocVector(REALSXP, nb_coef));
 	double *pcoef = REAL(res);
 
 	computeClusterCoef_single(family, n_obs, nb_coef, theta, diffMax_NR,
-                           pcoef, mu, lhs, sum_y, dum, obsCluster, table, cumtable, nthreads);
+                           pcoef, mu, lhs, sum_y, dum, obsCluster, table, cumtable, nthreads,
+                           pw, sum_w);
 
 	UNPROTECT(1);
 
@@ -516,7 +561,7 @@ SEXP compute_cluster_coef_r(int family, int nb_coef, double theta, double diffMa
 // [[Rcpp::export]]
 SEXP update_mu_single_cluster(int family, int nb_cluster, double theta, double diffMax_NR, SEXP mu_in,
                               SEXP lhs, SEXP sum_y, SEXP dum, SEXP obsCluster, SEXP table,
-                              SEXP cumtable, int nthreads){
+                              SEXP cumtable, int nthreads, SEXP weights, SEXP sum_w){
 	// Function used to compute the cluster coefficient for ONE fixed-effect only
 	// and then add it to the existing mu
 
@@ -531,11 +576,16 @@ SEXP update_mu_single_cluster(int family, int nb_cluster, double theta, double d
 	double *psum_y = REAL(sum_y);
 	double *pmu_in = REAL(mu_in);
 
+	// weights: R NULL means the estimation is unweighted
+	const double *pw = Rf_isNull(weights) ? nullptr : REAL(weights);
+	const double *psum_w = Rf_isNull(sum_w) ? nullptr : REAL(sum_w);
+
 	// The cluster coeffficients
 	vector<double> cluster_coef(nb_cluster);
 
 	computeClusterCoef_single(family, n_obs, nb_cluster, theta, diffMax_NR, cluster_coef.data(), pmu_in,
-                           plhs, psum_y, pdum, pobsCluster, ptable, pcumtable, nthreads);
+                           plhs, psum_y, pdum, pobsCluster, ptable, pcumtable, nthreads,
+                           pw, psum_w);
 
 	// the result
 	SEXP mu = PROTECT(Rf_allocVector(REALSXP, n_obs));
@@ -580,6 +630,8 @@ void computeClusterCoef(vector<double*> &pcluster_origin, vector<double*> &pclus
 	vector<int*> &pdum = args->pdum;
 	vector<int*> &ptable = args->ptable;
 	vector<double*> &psum_y = args->psum_y;
+	vector<const double*> &psum_w = args->psum_w;
+	const double *pw = args->weights;
 	vector<int*> &pobsCluster = args->pobsCluster;
 	vector<int*> &pcumtable = args->pcumtable;
 
@@ -616,6 +668,7 @@ void computeClusterCoef(vector<double*> &pcluster_origin, vector<double*> &pclus
 		double *my_cluster_coef = pcluster_destination[k];
 		int *my_table = ptable[k];
 		double *my_sum_y = psum_y[k];
+		const double *my_sum_w = psum_w[k];
 		int *my_dum = pdum[k];
 		int *my_cumtable = pcumtable[k];
 		int *my_obsCluster = pobsCluster[k];
@@ -624,7 +677,8 @@ void computeClusterCoef(vector<double*> &pcluster_origin, vector<double*> &pclus
 		// update of the cluster coefficients
 		computeClusterCoef_single(family, n_obs, nb_cluster, theta, diffMax_NR,
                             my_cluster_coef, mu_with_coef, lhs, my_sum_y,
-                            my_dum, my_obsCluster, my_table, my_cumtable, nthreads);
+                            my_dum, my_obsCluster, my_table, my_cumtable, nthreads,
+                            pw, my_sum_w);
 
 
 		// updating the value of mu_with_coef (only if necessary)
@@ -736,7 +790,8 @@ void computeClusterCoef(vector<double*> &pcluster_origin, vector<double*> &pclus
 // [[Rcpp::export]]
 List cpp_conv_acc_gnl(int family, int iterMax, double diffMax, double diffMax_NR, double theta, SEXP nb_cluster_all,
                  SEXP lhs, SEXP mu_init, SEXP dum_vector, SEXP tableCluster_vector,
-                 SEXP sum_y_vector, SEXP cumtable_vector, SEXP obsCluster_vector, int nthreads){
+                 SEXP sum_y_vector, SEXP cumtable_vector, SEXP obsCluster_vector, int nthreads,
+                 SEXP weights, SEXP sum_w_vector){
 
 	//initial variables
 	int K = Rf_length(nb_cluster_all);
@@ -760,6 +815,16 @@ List cpp_conv_acc_gnl(int family, int iterMax, double diffMax, double diffMax_NR
 	for(int k=1 ; k<K ; ++k){
 		ptable[k] = ptable[k - 1] + pcluster[k - 1];
 		psum_y[k] = psum_y[k - 1] + pcluster[k - 1];
+	}
+
+	// weights: R NULL means the estimation is unweighted
+	const double *pw = Rf_isNull(weights) ? nullptr : REAL(weights);
+	vector<const double*> psum_w(K, nullptr);
+	if(!Rf_isNull(sum_w_vector)){
+		psum_w[0] = REAL(sum_w_vector);
+		for(int k=1 ; k<K ; ++k){
+			psum_w[k] = psum_w[k - 1] + pcluster[k - 1];
+		}
 	}
 
 	// cumtable (points to nothing for non negbin/logit families)
@@ -810,6 +875,8 @@ List cpp_conv_acc_gnl(int family, int iterMax, double diffMax, double diffMax_NR
 	args.pcumtable = pcumtable;
 	args.pobsCluster = pobsCluster;
 	args.lhs = plhs;
+	args.weights = pw;
+	args.psum_w = psum_w;
 
 	// value that will be modified
 	vector<double> mu_with_coef(n_obs);
@@ -1002,7 +1069,8 @@ List cpp_conv_acc_gnl(int family, int iterMax, double diffMax, double diffMax_NR
 // [[Rcpp::export]]
 List cpp_conv_seq_gnl(int family, int iterMax, double diffMax, double diffMax_NR, double theta, SEXP nb_cluster_all,
                  SEXP lhs, SEXP mu_init, SEXP dum_vector, SEXP tableCluster_vector,
-                 SEXP sum_y_vector, SEXP cumtable_vector, SEXP obsCluster_vector, int nthreads){
+                 SEXP sum_y_vector, SEXP cumtable_vector, SEXP obsCluster_vector, int nthreads,
+                 SEXP weights, SEXP sum_w_vector){
 
 	//initial variables
 	int K = Rf_length(nb_cluster_all);
@@ -1026,6 +1094,16 @@ List cpp_conv_seq_gnl(int family, int iterMax, double diffMax, double diffMax_NR
 	for(int k=1 ; k<K ; ++k){
 		ptable[k] = ptable[k - 1] + pcluster[k - 1];
 		psum_y[k] = psum_y[k - 1] + pcluster[k - 1];
+	}
+
+	// weights: R NULL means the estimation is unweighted
+	const double *pw = Rf_isNull(weights) ? nullptr : REAL(weights);
+	vector<const double*> psum_w(K, nullptr);
+	if(!Rf_isNull(sum_w_vector)){
+		psum_w[0] = REAL(sum_w_vector);
+		for(int k=1 ; k<K ; ++k){
+			psum_w[k] = psum_w[k - 1] + pcluster[k - 1];
+		}
 	}
 
 	// cumtable (points to nothing for non negbin/logit families)
@@ -1110,6 +1188,7 @@ List cpp_conv_seq_gnl(int family, int iterMax, double diffMax, double diffMax_NR
 			int *my_table = ptable[k];
 			double *my_sum_y = psum_y[k];
 			int *my_dum = pdum[k];
+			const double *my_sum_w = psum_w[k];
 			int *my_cumtable = pcumtable[k];
 			int *my_obsCluster = pobsCluster[k];
 			int nb_cluster = pcluster[k];
@@ -1117,7 +1196,8 @@ List cpp_conv_seq_gnl(int family, int iterMax, double diffMax, double diffMax_NR
 			// update of the cluster coefficients
 			computeClusterCoef_single(family, n_obs, nb_cluster, theta, diffMax_NR,
                              my_cluster_coef, mu_with_coef.data(), plhs, my_sum_y,
-                             my_dum, my_obsCluster, my_table, my_cumtable, nthreads);
+                             my_dum, my_obsCluster, my_table, my_cumtable, nthreads,
+                             pw, my_sum_w);
 
 			//
 			// 2) Updating the value of mu
