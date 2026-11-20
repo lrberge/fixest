@@ -4229,9 +4229,9 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE,
     colnames(linear.mat) = new_names
   }
 
-  if(is.integer(linear.mat)){
-    linear.mat = 1 * linear.mat
-  }
+	if(is.integer(linear.mat) || is.logical(linear.mat)){
+  	linear.mat = 1 * linear.mat
+	}
 
   linear.mat
 }
