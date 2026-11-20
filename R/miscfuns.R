@@ -4131,6 +4131,11 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE,
       return(1)
     }
 
+    # No terms does not imply an intercept: ~0, ~-1 and ~1-1 are empty.
+    if(attr(t_fml, "intercept") == 0){
+      return(matrix(numeric(0), nrow = nrow(data), ncol = 0))
+    }
+
     res = matrix(1, nrow = nrow(data), ncol = 1, dimnames = list(NULL, "(Intercept)"))
     return(res)
   }

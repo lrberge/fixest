@@ -3914,13 +3914,17 @@ model.matrix.fixest = function(object, data = NULL, type = "rhs", sample = "esti
       fml = fml, fake_intercept = fake_intercept,
       subset = subset),
       "In 'model.matrix', the RHS could not be evaluated: ")
+    # Return NULL when there are no linear columns
+    if(length(linear.mat) == 0 || is.null(dim(linear.mat))){
+      linear.mat = NULL
+    }
     
-    if(!is.null(object$rm_variable)){
+    if(!is.null(linear.mat) && !is.null(object$rm_variable)){
       qui = which(colnames(linear.mat) %in% object$rm_variable)
       linear.mat = linear.mat[, -qui, drop = FALSE]
     }
 
-    if(collin.rm){
+    if(collin.rm && !is.null(linear.mat)){
       qui = which(colnames(linear.mat) %in% object$collin.var)
       if(length(qui) == ncol(linear.mat)){
         linear.mat = NULL
@@ -3929,7 +3933,7 @@ model.matrix.fixest = function(object, data = NULL, type = "rhs", sample = "esti
       }
 
       coefs = object$coefficients
-      if(length(coefs) == ncol(linear.mat) && any(colnames(linear.mat) != names(coefs))){
+      if(!is.null(linear.mat) && length(coefs) == ncol(linear.mat) && any(colnames(linear.mat) != names(coefs))){
         # we reorder the matrix
         # This can happen in multiple estimations, where we respect the
         # order of the user
@@ -4015,7 +4019,9 @@ model.matrix.fixest = function(object, data = NULL, type = "rhs", sample = "esti
                                                      original_data = is_original_data, fml = fml, fake_intercept = fake_intercept), 
                            "In 'model.matrix', the instruments could not be evaluated: ")
 
-    if(is.atomic(exo.mat) && length(exo.mat) == 1){
+    if(length(exo.mat) == 0){
+      exo.mat = NULL
+    } else if(is.atomic(exo.mat) && length(exo.mat) == 1){
       # This is the intercept only
       # Two cases:
       is_int = attr(terms(fml), "intercept")

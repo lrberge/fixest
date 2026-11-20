@@ -3108,6 +3108,108 @@ test(c(length(est_iv$iv_first_stage), est_iv$iv_n_inst), c(2, 2)) # kpr relies o
 est_iv_uneven = feols(y ~ x1 | x_endo_1 ~ x_inst_1 + x_inst_2, base, cluster = "cl_var")
 fitstat(est_iv_uneven, ~ f + ivf + ivf2 + wald + ivwald + ivwald2 + wh + sargan + kpr + rmse + g + n + ll + sq.cor + r2)
 
+# Clustered KP scores need not have the same number of columns as coefficients (#651)
+data(fulton)
+# Manual verification: 
+# haven::write_dta(fulton, "/tmp/kp_fulton.dta")
+# Stata: 
+# use "/tmp/kp_fulton.dta", clear
+# qui ivreg2 qty (price wave3 = speed2 wave2), cluster(day)
+#        disp %21.14f e(rkf)
+est_kp = feols(qty ~ 1 | price + wave3 ~ speed2 + wave2, fulton, cluster = "day")
+test(fitstat(est_kp, "kpr")$kpr$stat, 1.41464542781431, tol = 1e-9)
+
+# Stata: 
+# qui ivreg2 qty (price = speed2 wave2), cluster(day)
+# disp %21.14f e(rkf)
+est_kp_one = feols(qty ~ 1 | price ~ speed2 + wave2, fulton, cluster = "day")
+test(fitstat(est_kp_one, "kpr")$kpr$stat, 26.19684898146063, tol = 1e-9)
+# Stata: 
+# qui ivreg2 qty (price wave3 = speed2 wave2 speed3), cluster(day)
+# disp %21.14f e(rkf)
+est_kp_two = feols(
+  qty ~ 1 | price + wave3 ~ speed2 + wave2 + speed3,
+  fulton,
+  cluster = "day"
+)
+test(fitstat(est_kp_two, "kpr")$kpr$stat, 6.60545317405999, tol = 1e-9)
+# Stata: 
+# qui ivreg2 qty (price = speed2 wave2), robust
+# disp %21.14f e(rkf)
+test(
+  fitstat(summary(est_kp_one, vcov = "hetero"), "kpr")$kpr$stat,
+  19.98369024505745,
+  tol = 1e-9
+)
+# Stata: 
+# qui ivreg2 qty (price wave3 = speed2 wave2 speed3), robust
+# disp %21.14f e(rkf)
+test(
+  fitstat(summary(est_kp_two, vcov = "hetero"), "kpr")$kpr$stat,
+  7.20571373363488,
+  tol = 1e-9
+)
+
+# With one endogenous regressor, KP equals the first-stage joint Wald F.
+test(
+  # Stata: 
+  # qui ivreg2 qty (price = speed2 wave2), cluster(day)
+  # disp %21.14f e(rkf)
+  fitstat(est_kp_one, "kpr")$kpr$stat,
+  # Stata: 
+  # qui regress price speed2 wave2, vce(cluster day)
+  # qui test speed2 wave2
+  # disp %21.14f r(F)
+  fitstat(est_kp_one, "ivwald1")$ivwald1$stat,
+  tol = 1e-9
+)
+
+# Three endogenous regressors catch transposed right singular vectors.
+set.seed(987)
+kp_z = matrix(rnorm(400 * 4), 400)
+kp_x = kp_z %*% matrix(rnorm(12), 4) + matrix(rnorm(400 * 3), 400)
+base_kp = data.frame(
+  y = rnorm(400),
+  x1 = kp_x[, 1],
+  x2 = kp_x[, 2],
+  x3 = kp_x[, 3],
+  z1 = kp_z[, 1],
+  z2 = kp_z[, 2],
+  z3 = kp_z[, 3],
+  z4 = kp_z[, 4],
+  g = rep(1:40, each = 10)
+)
+# Manual verification: 
+# haven::write_dta(base_kp, "/tmp/kp_synthetic.dta")
+# Stata: 
+# use "/tmp/kp_synthetic.dta", clear
+# qui ivreg2 y (x1 x2 x3 = z1 z2 z3 z4), cluster(g)
+# disp %21.14f e(rkf)
+est_kp_three = feols(
+  y ~ 1 | x1 + x2 + x3 ~ z1 + z2 + z3 + z4,
+  base_kp,
+  cluster = "g"
+)
+test(fitstat(est_kp_three, "kpr")$kpr$stat, 145.64134814824516, tol = 1e-9)
+test(
+  # Stata: 
+  # qui ivreg2 y (x1 x2 x3 = z1 z2 z3 z4), robust
+  # disp %21.14f e(rkf)
+  fitstat(summary(est_kp_three, vcov = "hetero"), "kpr")$kpr$stat,
+  165.60366289016238,
+  tol = 1e-9
+)
+
+# Too few clusters for the projected covariance should warn, rather than error.
+base_kp$g_small = rep(1:2, each = 200)
+est_kp_singular = update(est_kp_three, data = base_kp, cluster = "g_small")
+test(
+  fitstat(est_kp_singular, "kpr"),
+  "projected covariance matrix is singular",
+  "warn"
+)
+test(is.na(suppressWarnings(fitstat(est_kp_singular, "kpr"))$kpr$stat), TRUE)
+
 # Sargan with weights: n * R2 of the weighted regression of the 2SLS residuals
 # on the instruments, with the total sum of squares weighted as well
 base$w_sargan = rep(c(0.5, 1, 2), length.out = nrow(base))
