@@ -194,7 +194,7 @@ on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimatio
 otherwise, \code{ivwald1} would also be displayed on the 2nd stage estimation). These types
 return the following values: \code{stat}, \code{p}, \code{df1}, \code{df2}, and \code{vcov}.}
 \item{\code{cd}: }{The Cragg-Donald test for weak instruments.}
-\item{\code{kpr}: }{The Kleibergen-Paap test for weak instruments.}
+\item{\code{kpr}: }{The Kleibergen-Paap rk Wald F statistic for weak instruments, as \code{e(rkf)} from Stata's \code{ivreg2} (with an "iid" VCOV, the Cragg-Donald F, \code{e(cdf)}). It uses the VCOV and small sample correction of the estimation: with fixed-effects nested in the clusters, use \code{ssc(K.fixef = "full")} to match \code{ivreg2}, which counts them. The p-value is that of the rk Wald test of underidentification, chi2(l - k + 1), with l excluded instruments and k endogenous regressors. When the covariance used in the statistic is singular or not positive definite (e.g. with multiway clustering and few clusters), it is \code{NA}, with a warning.}
 \item{\code{wh}: }{This statistic is specific to IV estimations. Wu-Hausman endogeneity test.
 H0 is the absence of endogeneity of the instrumented variables. It returns the following
 values: \code{stat}, \code{p}, \code{df1}, \code{df2}.}

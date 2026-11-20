@@ -528,7 +528,7 @@ fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
 #' otherwise, `ivwald1` would also be displayed on the 2nd stage estimation). These types 
 #' return the following values: `stat`, `p`, `df1`, `df2`, and `vcov`.}
 #' \item{`cd`: }{The Cragg-Donald test for weak instruments.}
-#' \item{`kpr`: }{The Kleibergen-Paap test for weak instruments.}
+#' \item{`kpr`: }{The Kleibergen-Paap rk Wald F statistic for weak instruments, as `e(rkf)` from Stata's `ivreg2` (with an "iid" VCOV, the Cragg-Donald F, `e(cdf)`). It uses the VCOV and small sample correction of the estimation: with fixed-effects nested in the clusters, use `ssc(K.fixef = "full")` to match `ivreg2`, which counts them. The p-value is that of the rk Wald test of underidentification, chi2(l - k + 1), with l excluded instruments and k endogenous regressors. When the covariance used in the statistic is singular or not positive definite (e.g. with multiway clustering and few clusters), it is `NA`, with a warning.}
 #' \item{`wh`: }{This statistic is specific to IV estimations. Wu-Hausman endogeneity test. 
 #' H0 is the absence of endogeneity of the instrumented variables. It returns the following 
 #' values: `stat`, `p`, `df1`, `df2`.}
@@ -1829,7 +1829,9 @@ kp_stat = function(x){
 
   # Necessary data
 
-  X_proj = as.matrix(resid(summary(x, stage = 1)))
+  # na.rm = TRUE: with 2+ endogenous variables the first stage is a fixest_multi,
+  # whose resid() keeps the removed observations as NA by default
+  X_proj = as.matrix(resid(summary(x, stage = 1), na.rm = TRUE))
 
   # while the projection of X has already been computed, we need to do it
   # for Z => that's a pain in the neck
@@ -1911,6 +1913,14 @@ kp_stat = function(x){
     return(list(stat = NA_real_, p = NA_real_, df = kp_df))
   }
   r_kp = drop(crossprod(lambda, vlab_lambda))
+
+  # With multiway clustering, the covariance (V1 + V2 - V12) need not be positive
+  # definite: the statistic is then not defined (it can even be negative)
+  vlab_eigen = eigen((vlab + t(vlab)) / 2, symmetric = TRUE, only.values = TRUE)$values
+  if(any(vlab_eigen < 0)){
+    warning("The KP statistic is not available because its projected covariance matrix is not positive definite (this can happen with multiway clustering).")
+    return(list(stat = NA_real_, p = NA_real_, df = kp_df))
+  }
 
   # Now the results
   kp_f = r_kp / n_inst
