@@ -2895,10 +2895,32 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
 
   coef = object$coefficients
 
+  # For IV models, the prediction is X \beta (not the first-stage projections)
+  is_iv = isTRUE(object$is_iv) && identical(object$iv_stage, 2)
+
+  if(is_iv){
+    # Only the endogenous coefficients are renamed (an exogenous variable
+    # could legitimately be named 'fit_something')
+    qui = match(object$iv_endo_names_fit, names(coef))
+    qui = qui[!is.na(qui)]
+    names(coef)[qui] = sub("^fit_", "", names(coef)[qui])
+  }
+
   value_linear = 0
   var_keep = NULL
   rhs_fml = fml_split(fml, 1)
   linear.varnames = all_vars_with_i_prefix(rhs_fml[[3]])
+
+  if(is_iv){
+    # The endogenous regressors must be included in the linear part,
+    # even when the model has no exogenous regressors
+    iv_fml = object$fml_all$iv
+    rhs_fml = .xpd(..lhs ~ ..endo + ..rhs, 
+                   ..lhs = rhs_fml[[2]], 
+                   ..endo = iv_fml[[2]], 
+                   ..rhs = rhs_fml[[3]])
+    linear.varnames = all_vars_with_i_prefix(rhs_fml[[3]])
+  }
   
   if(length(linear.varnames) == 0 && "(Intercept)" %in% names(coef)){
     # we need a specific branch
@@ -2906,16 +2928,6 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
     
   } else if(length(linear.varnames) > 0){
     # Checking all variables are there
-
-    if(isTRUE(object$is_iv) && object$iv_stage == 2){
-      names(coef) = gsub("^fit_", "", names(coef))
-      linear.varnames = c(linear.varnames, all_vars_with_i_prefix(object$fml_all$iv[[2]]))
-      iv_fml = object$fml_all$iv
-      rhs_fml = .xpd(..lhs ~ ..endo + ..rhs, 
-                     ..lhs = rhs_fml[[2]], 
-                     ..endo = iv_fml[[2]], 
-                     ..rhs = rhs_fml[[3]])
-    }
 
     varNotHere = setdiff(linear.varnames, names(newdata))
     if(length(varNotHere) > 0){
@@ -3055,6 +3067,14 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
     # The matrix has been created already
 
     V_raw = vcov(object, attr = TRUE, vcov = vcov, ssc = ssc)
+
+    if(is_iv && !is.null(rownames(V_raw))){
+      # Align the vcov names with the renamed endogenous coefficients
+      qui = match(object$iv_endo_names_fit, rownames(V_raw))
+      qui = qui[!is.na(qui)]
+      rownames(V_raw)[qui] = colnames(V_raw)[qui] = sub("^fit_", "", rownames(V_raw)[qui])
+    }
+
     V = V_raw[var_keep, var_keep, drop = FALSE]
     X = matrix_linear[, var_keep, drop = FALSE]
 
