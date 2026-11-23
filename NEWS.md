@@ -27,6 +27,8 @@
 
 - new method `cooks.distance.fixest`, which computes Cook's distance for `feols` and `feglm` estimations using `hatvalues`.
 
+- `etable`: the argument `coefstat` now accepts several statistics (e.g. `coefstat = c("se", "confint")`) which are then all displayed. The style of the brackets can be selected by wrapping the statistic in parentheses or square brackets (e.g. `coefstat = "[se]"`), see #306.
+
 ## Other
 
 - new README.md, with more recent benchmarks

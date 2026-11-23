@@ -56,8 +56,10 @@
 #' @param caption (Tex only.) Character scalar. The caption of the Latex table.
 #' @param float (Tex only.) Logical. By default, if the argument `caption` or `label` is provided, 
 #' it is set to `TRUE`. Otherwise, it is set to `FALSE`.
-#' @param se.below Logical or `NULL` (default). Should the standard-errors be displayed below the 
-#' coefficients? If `NULL`, then this is `TRUE` for Latex and `FALSE` otherwise.
+#' @param se.below Logical or `NULL` (default). Should the statistics attached to the 
+#' coefficients be displayed below the coefficients? If `NULL`, then this is `TRUE` for Latex 
+#' and `FALSE` otherwise, except when several statistics are requested in `coefstat` in which 
+#' case it is `TRUE`.
 #' @param se.row Logical scalar, default is `NULL`. Whether should be displayed the row with the 
 #' type of standard-error for each model. When `tex = FALSE`, the default is `TRUE`. 
 #' When `tex = FALSE`, the row is showed only when there is a table-footer and the types of 
@@ -217,11 +219,22 @@
 #' becomes `Species: Setosa`.
 #' @param depvar Logical, default is `TRUE`. Whether a first line containing the dependent 
 #' variables should be shown.
-#' @param coefstat One of `"se"` (default), `"tstat"`, `"pvalue"`, or `"confint"`. The statistic to report for 
-#' each coefficient: the standard-error, the t-statistics, the p-value, 
-#' or the confidence interval. You can adjust the confidence interval with the argument `ci`.
+#' @param coefstat A character vector containing one or several of `"se"` (default), `"tstat"`, 
+#' `"pvalue"`, or `"confint"`. The statistic(s) to report for each coefficient: the 
+#' standard-error, the t-statistic, the p-value, or the confidence interval. 
+#' You can adjust the level of the confidence interval with the argument `ci`.
+#' 
+#' When several statistics are requested, they are all displayed. By default, when `tex = TRUE`
+#' (and `se.below = TRUE`, the default), each statistic appears in a separate row below the 
+#' coefficient. Use `se.below = FALSE` to display them all in the same row, after the coefficient.
+#' 
+#' The style of the brackets can be selected by wrapping the statistic name in parentheses or 
+#' square brackets: e.g. `coefstat = "[se]"` displays the standard-errors in square brackets 
+#' (and `coefstat = "(se)"` is equivalent to the default `"se"`). This works for all statistics, 
+#' e.g. `coefstat = c("se", "[confint]")`. Note that by default the confidence intervals are 
+#' displayed in square brackets and the other statistics in parentheses.
 #' @param ci Level of the confidence interval, defaults to `0.95`. Only used if 
-#' `coefstat = confint`.
+#' `coefstat` contains `"confint"`.
 #' @param style.tex An object created by the function [`style.tex`]. It represents the style of the 
 #' Latex table, see the documentation of [`style.tex`].
 #' @param style.df An object created by the function [`style.df`] It represents the style of the 
@@ -302,10 +315,14 @@
 #' endogenous regressor to appear in the table is governed by `fit_format`. For instance, by 
 #' default, the prefix `"fit_"` is removed, leading to only `varname` to appear. 
 #' If `fit_format = "$\\\\hat{__var__$"}`, then `"$\\hat{varname$"}` will appear in the table.
-#' @param coef.just (DF only.) Either `"."`, `"("`, `"l"`, `"c"` or `"r"`, default is `NULL`. 
+#' @param coef.just (DF only.) Either `"."`, `"("`/`"["`, `"l"`, `"c"` or `"r"`, default is `NULL`. 
 #' How the coefficients should be justified. If `NULL` then they are right aligned if 
 #' `se.below = FALSE` and aligned to the dot if `se.below = TRUE`. The keywords stand 
-#' respectively for dot-, parenthesis-, left-, center- and right-aligned.
+#' respectively for dot-, bracket-, left-, center- and right-aligned. Both `"("` and `"["` 
+#' align the coefficients on the first opening bracket, be it a parenthesis or a square 
+#' bracket, so mixed parenthesis/bracket styles (e.g. from `coefstat = c("se", "[confint]")`) 
+#' are aligned consistently. Rows without a bracket, such as the coefficient rows when 
+#' `se.below = TRUE`, do not affect the alignment.
 #' @param meta (Tex only.) A one-sided formula that shall contain the following elements: 
 #' date or time, sys, author, comment and call. Default is `NULL`. This argument is a shortcut to 
 #' controlling the meta information that can be displayed in comments before the table. Typically 
@@ -1649,7 +1666,9 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
     caption = paste0(caption, collapse = "")
   }
   
-  check_set_arg(coefstat, "match(se, tstat, confint, pvalue)")
+  check_arg(coefstat, "character vector no na l1")
+  coefstat_specs = parse_coefstat(coefstat)
+  coefstat = sapply(coefstat_specs, function(x) x$stat)
 
 
   check_set_arg(notes, "NULL character vector no na")
@@ -1669,11 +1688,12 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
   }
 
   if(is.null(se.below)){
-    se.below = isTex
+    # By default, several statistics are displayed below the coefficient
+    se.below = isTex || length(coefstat) > 1
   }
 
   # start: coef.just
-  check_arg(coef.just, "NULL charin", .choices = c(".", "(", "l", "c", "r"))
+  check_arg(coef.just, "NULL charin", .choices = c(".", "(", "[", "l", "c", "r"))
 
   if(!isTex){
     # this parameter is only used in DF
@@ -1681,7 +1701,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
       coef.just = "."
     }
 
-    if(coefstat == "confint" && identical(coef.just, ".")){
+    if(length(coefstat) == 1 && coefstat == "confint" && identical(coef.just, ".")){
       coef.just = "c"
     }
 
@@ -2957,20 +2977,27 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
 
     coef = fun_format(a[, 1])
 
-    if(coefstat == "se"){
-      se_value = fun_format(a[, 2])
-
-    } else if(coefstat == "tstat"){
-      se_value = fun_format(a[, 3])
-
-    } else if(coefstat == "pvalue"){
-      se_value = fun_format(a[, 4])
-
-    } else if(coefstat == "confint"){
-      se_value = apply(confint(x, level = ci), 1, function(z) paste0("[", fun_format(z[1]), "; ", fun_format(z[2]), "]"))
-
-    } else {
-      stop_up("Wrong value for the argument 'coefstat': ", coefstat, " is not supported.")
+    # The statistics to display (possibly several, with custom brackets)
+    stat_values = list()
+    for(k in seq_along(coefstat_specs)){
+      sp = coefstat_specs[[k]]
+      if(sp$stat == "se"){
+        stat_raw = fun_format(a[, 2])
+      } else if(sp$stat == "tstat"){
+        stat_raw = fun_format(a[, 3])
+      } else if(sp$stat == "pvalue"){
+        stat_raw = fun_format(a[, 4])
+      } else {
+        # confint
+        if(is.null(x$coeftable)){
+          # only fixed-effects: there are no coefficients to compute
+          stat_raw = rep(NA_character_, nrow(a))
+        } else {
+          stat_raw = apply(confint(x, level = ci), 1, 
+                           function(z) paste0(fun_format(z[1]), "; ", fun_format(z[2])))
+        }
+      }
+      stat_values[[k]] = paste0(sp$left, stat_raw, sp$right)
     }
 
     if(add_signif){
@@ -2986,16 +3013,19 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
 
 
     # If the coefficient is bounded, we suppress the 'stars'
-    isBounded = grepl("bounded", se_value)
+    isBounded = grepl("bounded", fun_format(a[, 2]))
     if(any(isBounded)){
       pval[isBounded] = ""
     }
 
-    if(coefstat != "confint"){
-      structured_coef = c(paste0(coef, pval, " (", se_value, ")"))
-    } else {
-      structured_coef = c(paste0(coef, pval, " ", se_value))
+    # All the statistics in the same cell
+    inline_stats = stat_values[[1]]
+    if(length(stat_values) > 1){
+      for(k in 2:length(stat_values)){
+        inline_stats = paste(inline_stats, stat_values[[k]])
+      }
     }
+    structured_coef = c(paste0(coef, pval, " ", inline_stats))
 
     # saving the infos
     var_list[[m]] = var
@@ -3003,13 +3033,13 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
     coef_list[[m]] = structured_coef
     if(se.below){
       cb = c(paste0(coef, pval))
-      if(coefstat != "confint"){
-        sb = c(paste0("(", se_value, ")"))
-      } else {
-        sb = se_value
+      sb = stat_values
+
+      names(cb) = var
+      for(k in seq_along(sb)){
+        names(sb[[k]]) = var
       }
 
-      names(cb) = names(sb) = var
       coef_below[[m]] = cb
       sd_below[[m]] = sb
     }
@@ -3065,7 +3095,9 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
         names(coef_list[[m]]) = var_list[[m]]
         if(se.below){
           names(coef_below[[m]]) = var_list[[m]]
-          names(sd_below[[m]]) = var_list[[m]]
+          for(k in seq_along(sd_below[[m]])){
+            names(sd_below[[m]][[k]]) = var_list[[m]]
+          }
         }
 
       }
@@ -3340,7 +3372,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
              depvar = depvar, useSummary = useSummary, dict = dict, 
              coef.sub = coef.sub, yesNo = yesNo, 
              add_signif = add_signif,
-             float = float, coefstat = coefstat, ci = ci, style = style, 
+             float = float, coefstat = coefstat, coefstat_specs = coefstat_specs, 
+             ci = ci, style = style, 
              notes = notes, group = group,
              extralines = extralines, placement = placement, drop.section = drop.section,
              tex_tag = tex_tag, fun_format = fun_format, coef.just = coef.just, 
@@ -3394,6 +3427,7 @@ etable_internal_latex = function(info){
   add_signif = info$add_signif
   float = info$float
   coefstat = info$coefstat
+  coefstat_specs = info$coefstat_specs
   ci = info$ci
   style = info$style
   notes = info$notes
@@ -3691,18 +3725,27 @@ etable_internal_latex = function(info){
 
     if(se.below){
       coef_mat = c()
+      n_sub = length(sd_below[[1]])
       for(v in all_vars){
 
-        myCoef = mySd = myLine = c()
+        myCoef = c()
         for(m in 1:n_models){
           myCoef = c(myCoef, coef_below[[m]][v])
-          mySd = c(mySd, sd_below[[m]][v])
+        }
+        myCoef[is.na(myCoef)] = "  "
+
+        my_rows = list(c(coef_names[v], myCoef))
+
+        for(k in 1:n_sub){
+          mySd = c()
+          for(m in 1:n_models){
+            mySd = c(mySd, sd_below[[m]][[k]][v])
+          }
+          mySd[is.na(mySd)] = "  "
+          my_rows[[k + 1]] = c(" ", mySd)
         }
 
-        myCoef[is.na(myCoef)] = "  "
-        mySd[is.na(mySd)] = "  "
-
-        coef_mat = rbind(coef_mat, c(coef_names[v], myCoef), c(" ", mySd))
+        coef_mat = rbind(coef_mat, do.call(rbind, my_rows))
       }
 
     } else {
@@ -3717,8 +3760,9 @@ etable_internal_latex = function(info){
     }
 
 
-    coef_mat = style_apply(coef.style, coef_mat, all_vars)
-    info_mat = highlight_apply(highlight, coef_mat, all_vars)
+    n_sub_rows = if(se.below) length(coefstat_specs) else 0
+    coef_mat = style_apply(coef.style, coef_mat, all_vars, sub_rows = n_sub_rows)
+    info_mat = highlight_apply(highlight, coef_mat, all_vars, sub_rows = n_sub_rows)
     coef_mat = info_mat$coef_mat
     info_tikz = info_mat$preamble
 
@@ -3935,16 +3979,19 @@ etable_internal_latex = function(info){
         # Now we modify the names of the clusters if needed
         my_se = format_se_type_latex(my_se, dict)
 
-        if(coefstat == "se"){
-          coefstat_sentence = " standard-errors in parentheses"
-        } else if(coefstat == "tstat"){
-          coefstat_sentence = " co-variance matrix, t-stats in parentheses"
-        } else if(coefstat == "pvalue"){
-          coefstat_sentence = " co-variance matrix, p-values in parentheses"
-        } else {
-          coefstat_sentence = paste0(" co-variance matrix, ", round(ci*100), 
-                                     "\\% confidence intervals in brackets")
-        }
+        stat_label = c(se = "standard-errors", tstat = "t-stats", pvalue = "p-values")
+        parts = sapply(coefstat_specs, function(sp){
+          lab = if(sp$stat == "confint"){
+            paste0(round(ci*100), "\\% confidence intervals")
+          } else {
+            stat_label[[sp$stat]]
+          }
+          paste0(lab, " in ", if(sp$left == "(") "parentheses" else "brackets")
+        })
+
+        # Keep the historical wording for the single non-SE statistics
+        intro = if(length(coefstat_specs) == 1 && coefstat != "se") " co-variance matrix, " else " "
+        coefstat_sentence = paste0(intro, paste(parts, collapse = ", "))
         info_SE_footer = paste0(bottom_line, foot_intro, my_se,
                     coefstat_sentence, "}}\\\\\n")
 
@@ -3959,7 +4006,7 @@ etable_internal_latex = function(info){
         # Multiple types of SEs: we're more general
         all_se_type = sapply(se_type_list, format_se_type_latex, dict = dict, inline = TRUE)
 
-        if(coefstat == "se"){
+        if("se" %in% coefstat){
           coefstat_sentence = "Standard-Errors"
         } else {
           coefstat_sentence = "Co-variance"
@@ -4003,7 +4050,7 @@ etable_internal_latex = function(info){
   if(se.row){
     all_se_type = sapply(se_type_list, format_se_type_latex, dict = dict, inline = TRUE)
 
-    if(coefstat == "se"){
+    if("se" %in% coefstat){
       coefstat_sentence = "Standard-Errors"
     } else {
       coefstat_sentence = "Co-variance"
@@ -4417,23 +4464,32 @@ etable_internal_df = function(info){
     if(se.below){
       coef_below = info$coef_below
       sd_below = info$sd_below
+      n_sub = length(sd_below[[1]])
       coef_se_mat = c()
       for(v in all_vars){
-        myCoef = mySd= myLine = c()
+        myCoef = c()
         for(m in 1:n_models){
           myCoef = c(myCoef, coef_below[[m]][v])
-          mySd = c(mySd, sd_below[[m]][v])
+        }
+        myCoef[is.na(myCoef)] = "  "
+
+        my_rows = list(myCoef)
+        for(k in 1:n_sub){
+          mySd = c()
+          for(m in 1:n_models){
+            mySd = c(mySd, sd_below[[m]][[k]][v])
+          }
+          mySd[is.na(mySd)] = "  "
+          my_rows[[k + 1]] = mySd
         }
 
-        myCoef[is.na(myCoef)] = "  "
-        mySd[is.na(mySd)] = "  "
-
-        coef_se_mat = rbind(coef_se_mat, myCoef, mySd)
+        coef_se_mat = rbind(coef_se_mat, do.call(rbind, my_rows))
       }
 
       n_vars = length(all_vars)
-      my_names = character(2 * n_vars)
-      my_names[1 + 2 * 0:(n_vars - 1)] = coef_names
+      n_rows = 1 + n_sub
+      my_names = character(n_rows * n_vars)
+      my_names[1 + n_rows * 0:(n_vars - 1)] = coef_names
 
       coef_mat = cbind(my_names, coef_se_mat)
     } else {
@@ -4446,8 +4502,28 @@ etable_internal_df = function(info){
 
       if(coef.just == "."){
         align_fun = function(x) sfill(sfill(x, anchor = "."), right = TRUE)
-      } else if(coef.just == "("){
-        align_fun = function(x) sfill(sfill(x, anchor = "("), right = TRUE)
+      } else if(coef.just %in% c("(", "[")){
+        # Align on the first opening bracket, be it a parenthesis or a square bracket.
+        # Only the rows with a bracket set the anchor position, otherwise the
+        # coefficient rows (which have no bracket when se.below = TRUE) would push
+        # the statistics to the right edge of the column.
+        align_fun = function(x){
+          has_bracket = grepl("[\\[(]", x)
+
+          x_align = x
+          x_align[has_bracket] = sub("^([^\\[(]*)[\\[(]", "\\1(", x[has_bracket])
+          if(any(has_bracket)){
+            x_align[has_bracket] = sfill(x_align[has_bracket], anchor = "(")
+          }
+
+          res = sfill(x_align, right = TRUE)
+
+          # Restore the square brackets
+          is_square = has_bracket & grepl("^[^\\[(]*\\[", x)
+          res[is_square] = sub("^([^\\[(]*)\\(", "\\1[", res[is_square])
+
+          res
+        }
       } else if(coef.just == "c"){
         align_fun = function(x) format(x, justify = "centre")
       } else if(coef.just == "l"){
@@ -4762,7 +4838,7 @@ etable_internal_df = function(info){
 
   if(!isFALSE(se.row) && !"coef" %in% drop.section){
     # default is to always show the SE row
-    if(coefstat == "se"){
+    if("se" %in% coefstat){
       coefstat_sentence = "S.E. type"
     } else {
       coefstat_sentence = "VCOV type"
@@ -4892,7 +4968,8 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat,
   }
 
 
-  check_set_arg(coefstat, "match")
+  check_arg(coefstat, "character vector no na l1")
+  parse_coefstat(coefstat)
   check_arg(ci, "numeric scalar GT{0.5} LT{1}")
 
   check_arg("logical scalar", 
@@ -5181,8 +5258,6 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
 
   # To implement later:
   # fixef_sizes.where = "obs"
-  # se.par = "parentheses"
-  # check_set_arg(se.par, "match(parentheses, brackets, none)")
   # align
   # check_arg(align, "character vector no na len(,2)")
 
@@ -6150,7 +6225,74 @@ fix_pkgwdown_path = function(){
 ####
 
 
-style_apply = function(coef.style, coef_mat, coef_names){
+parse_coefstat = function(coefstat){
+  # Parses the argument 'coefstat'.
+  # Each element can be e.g. "se", "[se]" or "(confint)".
+  # Returns a list of lists, each with the elements: stat, left and right.
+
+  valid = c("se", "tstat", "pvalue", "confint")
+
+  if(length(coefstat) == 0){
+    stop_up("The argument 'coefstat' must contain at least one statistic among: ",
+            enumerate_items(valid), ".")
+  }
+
+  res = list()
+  for(i in seq_along(coefstat)){
+    cs = trimws(coefstat[i])
+
+    left = right = ""
+
+    first_char = substr(cs, 1, 1)
+    last_char = substr(cs, nchar(cs), nchar(cs))
+
+    if(first_char %in% c("(", "[") && last_char %in% c(")", "]")){
+      if(!(first_char == "(" && last_char == ")") && 
+         !(first_char == "[" && last_char == "]")){
+        stop_up("In the argument 'coefstat', the element number ", i, " (equal to ",
+                cs, ") is invalid: the opening and closing brackets do not match. ",
+                "Use either '(...)' or '[...]'.")
+      }
+      left = first_char
+      right = last_char
+      cs = trimws(substr(cs, 2, nchar(cs) - 1))
+    } else if(first_char %in% c("(", "[") || last_char %in% c(")", "]")){
+      stop_up("In the argument 'coefstat', the element number ", i, " (equal to ",
+              cs, ") is invalid: it is not correctly wrapped by brackets. ",
+              "Use either '(...)' or '[...]'.")
+    }
+
+    if(!cs %in% valid){
+      stop_up("In the argument 'coefstat', the element number ", i, " (equal to ",
+              cs, ") is invalid. Valid values are: ", enumerate_items(valid), ". ",
+              "You can also wrap them in parentheses or square brackets, ",
+              "e.g. '(se)' or '[confint]'.")
+    }
+
+    if(nchar(left) == 0){
+      if(cs == "confint"){
+        left = "["
+        right = "]"
+      } else {
+        left = "("
+        right = ")"
+      }
+    }
+
+    res[[i]] = list(stat = cs, left = left, right = right)
+  }
+
+  # Deduplication: if a statistic is requested several times, only the first occurrence is kept
+  stats = sapply(res, function(x) x$stat)
+  if(anyDuplicated(stats)){
+    res = res[!duplicated(stats)]
+  }
+
+  res
+}
+
+
+style_apply = function(coef.style, coef_mat, coef_names, sub_rows = 0){
   # applies a style to specified coefficients
 
   set_up(2)
@@ -6162,8 +6304,9 @@ style_apply = function(coef.style, coef_mat, coef_names){
   res = coef_mat
   n_models = ncol(res) - 1
 
-  has_row_se = any(" " %in% res[, 1])
-  get_row_id = function(i) if(has_row_se) 1 + 2 * (i - 1) else i
+  rows_per_coef = 1 + sub_rows
+  has_row_se = sub_rows > 0
+  get_row_id = function(i) if(has_row_se) 1 + rows_per_coef * (i - 1) else i
 
   for(i in seq_along(coef.style)){
     cs = coef.style[[i]]
@@ -6179,7 +6322,10 @@ style_apply = function(coef.style, coef_mat, coef_names){
     if(is_se){
       cs_name = sub(":coef_se:", ":coef:", cs_name, fixed = TRUE)
     }
-    add_se = function(x) if(is_se) rbind(x, x + matrix(c(1, 0), nrow(x), 2, byrow = TRUE)) else x
+    add_se = function(x){
+      if(!is_se || sub_rows == 0) return(x)
+      do.call(rbind, lapply(0:sub_rows, function(k) x + matrix(c(k, 0), nrow(x), 2, byrow = TRUE)))
+    }
 
     style_split = strsplit(cs_name, ":coef:", fixed = TRUE)[[1]]
 
@@ -6189,8 +6335,8 @@ style_apply = function(coef.style, coef_mat, coef_names){
       # we remove the row names
       id = id[id[, 2] != 1, ]
       if(!is_se && has_row_se){
-        # we remove the se row!
-        id = id[id[, 1] %% 2 == 1, ]
+        # we remove the se rows!
+        id = id[(id[, 1] - 1) %% rows_per_coef == 0, ]
       }
 
       # We apply the style
@@ -6231,7 +6377,7 @@ style_apply = function(coef.style, coef_mat, coef_names){
   return(res)
 }
 
-highlight_apply = function(highlight, coef_mat, coef_names){
+highlight_apply = function(highlight, coef_mat, coef_names, sub_rows = 0){
   # applies coefficients highlighting
 
   set_up(2)
@@ -6254,8 +6400,9 @@ highlight_apply = function(highlight, coef_mat, coef_names){
   # \definecolor{mypink1}{rgb}{0.858, 0.188, 0.478}
   # \definecolor{mypink2}{RGB}{219, 48, 122}
 
-  has_row_se = any(" " %in% res[, 1])
-  get_row_id = function(i) if(has_row_se) 1 + 2 * (i - 1) else i
+  rows_per_coef = 1 + sub_rows
+  has_row_se = sub_rows > 0
+  get_row_id = function(i) if(has_row_se) 1 + rows_per_coef * (i - 1) else i
 
   # frame id
   f_id = 0
@@ -6276,7 +6423,10 @@ highlight_apply = function(highlight, coef_mat, coef_names){
 
     # TRUE/FALSE flags
     is_se = "se" %in% hl_name && has_row_se
-    add_se = function(x) if(is_se) rbind(x, x + matrix(c(1, 0), nrow(x), 2, byrow = TRUE)) else x
+    add_se = function(x){
+      if(!is_se || sub_rows == 0) return(x)
+      do.call(rbind, lapply(0:sub_rows, function(k) x + matrix(c(k, 0), nrow(x), 2, byrow = TRUE)))
+    }
 
     is_rowcol = "rowcol" %in% hl_name
     is_round = !"square" %in% hl_name

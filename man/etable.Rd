@@ -349,20 +349,33 @@ use: \code{fitstat=c('n', 'cor2', 'ar2', 'war2')}, or \code{fitstat=~n+cor2+ar2+
 can use the dot to refer to default values:\code{ ~ . + ll} would add the log-likelihood to the
 default fit statistics.}
 
-\item{coefstat}{One of \code{"se"} (default), \code{"tstat"}, \code{"pvalue"}, or \code{"confint"}. The statistic to report for
-each coefficient: the standard-error, the t-statistics, the p-value,
-or the confidence interval. You can adjust the confidence interval with the argument \code{ci}.}
+\item{coefstat}{A character vector containing one or several of \code{"se"} (default), \code{"tstat"},
+\code{"pvalue"}, or \code{"confint"}. The statistic(s) to report for each coefficient: the
+standard-error, the t-statistic, the p-value, or the confidence interval.
+You can adjust the level of the confidence interval with the argument \code{ci}.
+
+When several statistics are requested, they are all displayed. By default, when \code{tex = TRUE}
+(and \code{se.below = TRUE}, the default), each statistic appears in a separate row below the
+coefficient. Use \code{se.below = FALSE} to display them all in the same row, after the coefficient.
+
+The style of the brackets can be selected by wrapping the statistic name in parentheses or
+square brackets: e.g. \code{coefstat = "[se]"} displays the standard-errors in square brackets
+(and \code{coefstat = "(se)"} is equivalent to the default \code{"se"}). This works for all statistics,
+e.g. \code{coefstat = c("se", "[confint]")}. Note that by default the confidence intervals are
+displayed in square brackets and the other statistics in parentheses.}
 
 \item{ci}{Level of the confidence interval, defaults to \code{0.95}. Only used if
-\code{coefstat = confint}.}
+\code{coefstat} contains \code{"confint"}.}
 
 \item{se.row}{Logical scalar, default is \code{NULL}. Whether should be displayed the row with the
 type of standard-error for each model. When \code{tex = FALSE}, the default is \code{TRUE}.
 When \code{tex = FALSE}, the row is showed only when there is a table-footer and the types of
 standard-errors differ across models.}
 
-\item{se.below}{Logical or \code{NULL} (default). Should the standard-errors be displayed below the
-coefficients? If \code{NULL}, then this is \code{TRUE} for Latex and \code{FALSE} otherwise.}
+\item{se.below}{Logical or \code{NULL} (default). Should the statistics attached to the
+coefficients be displayed below the coefficients? If \code{NULL}, then this is \code{TRUE} for Latex
+and \code{FALSE} otherwise, except when several statistics are requested in \code{coefstat} in which
+case it is \code{TRUE}.}
 
 \item{keep}{Character vector. This element is used to display only a subset of variables. This
 should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}} help for more info). Each
@@ -611,10 +624,14 @@ endogenous regressor to appear in the table is governed by \code{fit_format}. Fo
 default, the prefix \code{"fit_"} is removed, leading to only \code{varname} to appear.
 If \verb{fit_format = "$\\\\\\\\hat\{__var__$"\}}, then \verb{"$\\\\hat\{varname$"\}} will appear in the table.}
 
-\item{coef.just}{(DF only.) Either \code{"."}, \code{"("}, \code{"l"}, \code{"c"} or \code{"r"}, default is \code{NULL}.
+\item{coef.just}{(DF only.) Either \code{"."}, \code{"("}, \code{"["}, \code{"l"}, \code{"c"} or \code{"r"}, default is \code{NULL}.
 How the coefficients should be justified. If \code{NULL} then they are right aligned if
 \code{se.below = FALSE} and aligned to the dot if \code{se.below = TRUE}. The keywords stand
-respectively for dot-, parenthesis-, left-, center- and right-aligned.}
+respectively for dot-, bracket-, left-, center- and right-aligned. Both \code{"("} and \code{"["}
+align the coefficients on the first opening bracket, be it a parenthesis or a square
+bracket, so mixed parenthesis/bracket styles (e.g. from \code{coefstat = c("se", "[confint]")})
+are aligned consistently. Rows without a bracket, such as the coefficient rows when
+\code{se.below = TRUE}, do not affect the alignment.}
 
 \item{highlight}{List containing coefficients to highlight.
 Highlighting is of the form \code{.("options1" = "coefs1", "options2" = "coefs2", etc)}.
