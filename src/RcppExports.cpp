@@ -341,6 +341,24 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_check_conv
+SEXP cpp_check_conv(SEXP y, SEXP X_raw, SEXP fixef_id_list, SEXP slope_flag_Q, SEXP slope_vars_list, SEXP r_weights, bool full, int nthreads);
+RcppExport SEXP _fixest_cpp_check_conv(SEXP ySEXP, SEXP X_rawSEXP, SEXP fixef_id_listSEXP, SEXP slope_flag_QSEXP, SEXP slope_vars_listSEXP, SEXP r_weightsSEXP, SEXP fullSEXP, SEXP nthreadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type y(ySEXP);
+    Rcpp::traits::input_parameter< SEXP >::type X_raw(X_rawSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type fixef_id_list(fixef_id_listSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type slope_flag_Q(slope_flag_QSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type slope_vars_list(slope_vars_listSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type r_weights(r_weightsSEXP);
+    Rcpp::traits::input_parameter< bool >::type full(fullSEXP);
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_check_conv(y, X_raw, fixef_id_list, slope_flag_Q, slope_vars_list, r_weights, full, nthreads));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_dsb
 List cpp_dsb(SEXP Rstr);
 RcppExport SEXP _fixest_cpp_dsb(SEXP RstrSEXP) {
@@ -1183,6 +1201,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpp_derivconv_seq_2", (DL_FUNC) &_fixest_cpp_derivconv_seq_2, 12},
     {"_fixest_update_deriv_single", (DL_FUNC) &_fixest_update_deriv_single, 5},
     {"_fixest_cpp_demean", (DL_FUNC) &_fixest_cpp_demean, 17},
+    {"_fixest_cpp_check_conv", (DL_FUNC) &_fixest_cpp_check_conv, 8},
     {"_fixest_cpp_dsb", (DL_FUNC) &_fixest_cpp_dsb, 1},
     {"_fixest_cpp_dsb_full_string", (DL_FUNC) &_fixest_cpp_dsb_full_string, 1},
     {"_fixest_cpp_dsb_if_extract", (DL_FUNC) &_fixest_cpp_dsb_if_extract, 1},
