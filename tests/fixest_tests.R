@@ -1973,6 +1973,27 @@ test(c4, m_fe[["fe_bis[[x3]]"]][names(c4)], "~", tol = 2e-4)
 # This test does not pass in R 3.5.0.... why?
 # diff: 0.000239702137861342
 
+# mem.clean = "aggressive" with data.table
+if(requireNamespace("data.table", quietly = TRUE)){
+  dt_base = data.table::as.data.table(base)
+  dt_base[, extra_col := 1]
+  m_ref = feols(c(y, x1) ~ x2 + x3 | species + fe_bis, base, vcov = ~ species + fe_ter)
+  m_agg = feols(c(y, x1) ~ x2 + x3 | species + fe_bis, dt_base, vcov = ~ species + fe_ter,
+                lean = TRUE, mem.clean = "aggressive")
+  test(coef(m_agg[[1]]), coef(m_ref[[1]]), "~", tol = 1e-12)
+  test(se(m_agg[[1]]), se(m_ref[[1]]), "~", tol = 1e-12)
+  test(coef(m_agg[[2]]), coef(m_ref[[2]]), "~", tol = 1e-12)
+  test(se(m_agg[[2]]), se(m_ref[[2]]), "~", tol = 1e-12)
+  test(sort(names(dt_base)), c("fe_ter", "species"))
+
+  dt_pois = data.table::as.data.table(base)
+  dt_pois[, y_pos := round( exp(x1 / 5) )]
+  m_pois_ref = fepois(y_pos ~ x2 + x3 | species, dt_pois)
+  m_pois_agg = fepois(y_pos ~ x2 + x3 | species, dt_pois, vcov = ~ species, mem.clean = "aggressive")
+  test(coef(m_pois_agg), coef(m_pois_ref), "~", tol = 1e-10)
+  test(names(dt_pois), "species")
+}
+
 #
 # With weights
 #
