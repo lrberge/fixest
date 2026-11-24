@@ -3278,6 +3278,61 @@ test(
 )
 test(is.na(suppressWarnings(fitstat(est_kp_singular, "kpr"))$kpr$stat), TRUE)
 
+# Two endogenous regressors with removed observations: the first stage is a
+# fixest_multi, whose residuals must be taken without the removed rows
+base_kp_na = base
+base_kp_na$x_endo_2[1:3] = NA
+# Stata (base written to dta, x_endo_2 missing in rows 1-3):
+# qui ivreg2 y x1 (x_endo_1 x_endo_2 = x_inst_1 x_inst_2), robust
+# disp %21.14f e(rkf)
+test(
+  fitstat(feols(y ~ x1 | x_endo_1 + x_endo_2 ~ x_inst_1 + x_inst_2, base_kp_na, vcov = "hetero"), "kpr")$kpr$stat,
+  3.84528536938433,
+  tol = 1e-6
+)
+
+# Two-way clustering
+base_kp$g2 = rep(1:25, 16)
+# Stata: qui ivreg2 y (x1 x2 x3 = z1 z2 z3 z4), cluster(g g2)
+# disp %21.14f e(rkf)
+test(
+  fitstat(update(est_kp_three, data = base_kp, cluster = ~g + g2), "kpr")$kpr$stat,
+  94.84576428349379,
+  tol = 1e-5
+)
+
+# Fixed-effects nested in the clusters: ivreg2 counts them in the small sample
+# correction, K.fixef = "full" does the same
+fulton$t_bin = cut(fulton$t, breaks = 10)
+est_kp_nested = feols(qty ~ 1 | t_bin | price + wave3 ~ speed2 + wave2, fulton, cluster = ~t_bin)
+# Stata (t_bin_n = t_bin as integer): qui ivreg2 qty i.t_bin_n (price wave3 = speed2 wave2), cluster(t_bin_n)
+# disp %21.14f e(rkf)
+test(
+  fitstat(summary(est_kp_nested, ssc = ssc(K.fixef = "full")), "kpr")$kpr$stat,
+  1.36529003238894,
+  tol = 1e-9
+)
+# Stata (day_n = day as integer): qui ivreg2 qty i.t_bin_n (price wave3 = speed2 wave2), cluster(day_n t_bin_n)
+# disp %21.14f e(rkf)
+test(
+  fitstat(summary(est_kp_nested, cluster = ~day + t_bin, ssc = ssc(K.fixef = "full")), "kpr")$kpr$stat,
+  2.09186990607906,
+  tol = 1e-9
+)
+
+# Two-way clustering with few clusters: the covariance V1 + V2 - V12 is not
+# positive definite, the statistic would be negative => NA with a warning
+# (Stata: ivreg2 qty (price wave3 = speed2 wave2), cluster(day_n t_bin_n) gives 0)
+# (the model's own VCOV is not positive definite either and is 'fixed', with a warning)
+est_kp_nonpd = suppressWarnings(feols(qty ~ 1 | price + wave3 ~ speed2 + wave2, fulton, cluster = ~day + t_bin))
+kp_warnings = c()
+kp_nonpd = withCallingHandlers(fitstat(est_kp_nonpd, "kpr"), warning = function(w){
+  kp_warnings <<- c(kp_warnings, conditionMessage(w))
+  invokeRestart("muffleWarning")
+})
+test(any(grepl("projected covariance matrix is not positive definite", kp_warnings, fixed = TRUE)), TRUE)
+test(is.na(kp_nonpd$kpr$stat), TRUE)
+
 # Sargan with weights: n * R2 of the weighted regression of the 2SLS residuals
 # on the instruments, with the total sum of squares weighted as well
 base$w_sargan = rep(c(0.5, 1, 2), length.out = nrow(base))
