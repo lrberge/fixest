@@ -3929,14 +3929,43 @@ model.matrix.fixest = function(object, data = NULL, type = "rhs", sample = "esti
                  ..rhs = fml[[3]])
     }
 
+    # On new data, a bare i() would take the lowest level present in that data
+    # as its reference, which drops a column for an estimated coefficient when
+    # the estimation reference is absent (#687). As in predict(), build every
+    # level and keep only the i() columns that were estimated. An estimated
+    # level with no row in the new data is a column of zeros there.
     linear.mat = error_sender(fixest_model_matrix_extra(
       object = object, newdata = data, original_data = is_original_data,
       fml = fml, fake_intercept = fake_intercept,
-      subset = subset),
+      i_noref = !is_original_data, subset = subset),
       "In 'model.matrix', the RHS could not be evaluated: ")
     # Return NULL when there are no linear columns
     if(length(linear.mat) == 0 || is.null(dim(linear.mat))){
       linear.mat = NULL
+    }
+
+    if(!is.null(linear.mat) && !is_original_data && length(object$model_matrix_info) > 0){
+      i_cols = unlist(lapply(object$model_matrix_info, function(info){
+        cols = info$coef_names_full
+        if(length(cols) > 0 && (isFALSE(subset) || any(colnames(linear.mat) %in% cols))){
+          cols
+        }
+      }))
+      if(length(i_cols) > 0){
+        estimated = c(names(object$coefficients), object$collin.var)
+        qui = which(colnames(linear.mat) %in% setdiff(i_cols, estimated))
+        if(length(qui) > 0){
+          linear.mat = linear.mat[, -qui, drop = FALSE]
+        }
+        absent = setdiff(intersect(i_cols, estimated), colnames(linear.mat))
+        if(length(absent) > 0){
+          zeros = matrix(0, nrow(linear.mat), length(absent), dimnames = list(NULL, absent))
+          linear.mat = cbind(linear.mat, zeros)
+          coef_order = intersect(estimated, colnames(linear.mat))
+          other = setdiff(colnames(linear.mat), coef_order)
+          linear.mat = linear.mat[, c(coef_order, other), drop = FALSE]
+        }
+      }
     }
     
     if(!is.null(linear.mat) && !is.null(object$rm_variable)){

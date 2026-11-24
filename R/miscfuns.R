@@ -1382,6 +1382,8 @@ i = function(factor_var, var, ref = NULL, keep = NULL, bin = NULL,
 
     f_items = sapply(items_split, `[`, 1)
     var_items = sapply(items_split, `[`, 2)
+    f_items_full = f_items
+    var_items_full = var_items
   } else {
     f_items = items
   }
@@ -1457,7 +1459,7 @@ i = function(factor_var, var, ref = NULL, keep = NULL, bin = NULL,
     # mais j'ai pas trouve plus simple...
     if(IS_INTER_FACTOR){
       col_names = paste0("__CLEAN__", f_name, "::", f_items, ":", var_name, "::", var_items)
-      col_names_full = NULL
+      col_names_full = paste0(f_name, "::", f_items_full, ":", var_name, "::", var_items_full)
 
     } else if(IS_INTER_NUMERIC){
       col_names = paste0("__CLEAN__", f_name, "::", f_items, ":", var_name)
@@ -1539,21 +1541,21 @@ i = function(factor_var, var, ref = NULL, keep = NULL, bin = NULL,
       }
     }
 
-    if(is_GLOBAL && !IS_INTER_FACTOR){
+    if(is_GLOBAL){
       # NOTA:
       # if you change stuff here => change them also in sunab()
 
       info = list()
       info$coef_names_full = col_names_full
       info$items = items
-      if(!missing(ref)){
+      if(!missnull(ref)){
         info$ref_id = ref_id
         info$ref = items[ref_id]
       }
       info$is_num = is.numeric(items)
       info$f_name = f_name
       info$is_inter_num = IS_INTER_NUMERIC
-      if(IS_INTER_NUMERIC){
+      if(IS_INTER_NUMERIC || IS_INTER_FACTOR){
         info$var_name = var_name
       }
       info$is_inter_fact = IS_INTER_FACTOR
