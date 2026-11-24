@@ -19,7 +19,8 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
                       fixef.rm = "perfect_fit", nthreads = getFixest_nthreads(),
                       lean = FALSE, verbose = 0, theta.init, fixef.tol = 1e-5,
                       fixef.iter = 10000, collin.tol = 1e-14, deriv.iter = 5000,
-                      deriv.tol = 1e-4, glm.iter = 25, glm.tol = 1e-8, etastart, mustart,
+                      deriv.tol = 1e-4, glm.iter = 25, glm.tol = 1e-8, glm.continueOnWarn = FALSE, 
+                      etastart, mustart,
                       fixef.algo = NULL,
                       warn = TRUE, notes = getFixest_notes(), fixef.keep_names, demeaned = FALSE,
                       origin_bis = NULL, origin = "feNmlm", mc_origin, mc_origin_bis, mc_origin_ter,
@@ -81,8 +82,8 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
   femlm_args = c("family", "theta.init", "linear.start", "opt.control", "deriv.tol", "deriv.iter")
   feNmlm_args = c("NL.fml", "NL.start", "lower", "upper", "NL.start.init", 
                   "jacobian.method", "useHessian", "hessian.args")
-  feglm_args = c("family", "weights", "glm.iter", "glm.tol", "etastart", "mustart", 
-                 "collin.tol", "fixef.algo")
+  feglm_args = c("family", "weights", "glm.iter", "glm.tol", "glm.continueOnWarn", 
+                 "etastart", "mustart", "collin.tol", "fixef.algo")
   feols_args = c("weights", "demeaned", "collin.tol", "fixef.algo")
   internal_args = c("debug")
 
@@ -2868,9 +2869,11 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
   if(origin_type == "feglm"){
     check_arg(glm.tol, "numeric scalar gt{(1000*.Machine$double.eps)}")
     check_arg(glm.iter, "integer scalar GE{1}")
+    check_arg(glm.continueOnWarn, "logical scalar")
 
     assign("glm.iter", glm.iter, env)
     assign("glm.tol", glm.tol, env)
+    assign("glm.continueOnWarn", glm.continueOnWarn, env)
   }
 
   # other precisions
