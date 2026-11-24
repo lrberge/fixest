@@ -3409,6 +3409,31 @@ test(nrow(et1), 12)
 et2 = etable(est_onlyFE, est, se.below = TRUE)
 test(nrow(et2), 16)
 
+# coefstat: custom brackets
+tex_bracket = etable(est, tex = TRUE, coefstat = "[se]")
+test(any(grepl("& \\[0\\.1275\\]", tex_bracket)), TRUE)
+
+# coefstat: several statistics
+tex_multi = etable(est, tex = TRUE, coefstat = c("se", "[confint]"))
+test(any(grepl("& \\(0\\.1275\\)", tex_multi)), TRUE)
+test(any(grepl("& \\[-0\\.8086; -0\\.3044\\]", tex_multi)), TRUE)
+
+df_multi = etable(est, coefstat = c("se", "confint"))
+test(any(trimws(df_multi[, 2]) == "(0.1275)"), TRUE)
+test(any(trimws(df_multi[, 2]) == "[-0.8086; -0.3044]"), TRUE)
+
+# coefstat: errors
+test(etable(est, coefstat = "[se"), "err")
+test(etable(est, coefstat = "foo"), "err")
+
+# coefstat: no error when there is no coefficient
+test(nrow(etable(est_onlyFE, coefstat = c("se", "confint"))), 7)
+
+# coef.just: both parentheses and brackets align on the opening bracket
+df_mixed = etable(est, coefstat = c("(se)", "[confint]"), coef.just = "(")
+sub_rows = grepl("^\\s*[\\[(]", df_mixed[, 2])
+test(length(unique(as.integer(regexpr("[\\[(]", df_mixed[sub_rows, 2])))), 1)
+
 
 # Latex escaping
 cpp_escape_markup = fixest:::cpp_escape_markup
