@@ -18,6 +18,7 @@ demean(
   tol = 1e-06,
   fixef.reorder = TRUE,
   fixef.algo = NULL,
+  demeaner = NULL,
   na.rm = TRUE,
   as.matrix = is.atomic(X),
   im_confident = FALSE,
@@ -86,6 +87,10 @@ Only play with it if the convergence is slow, i.e. look at the slot \verb{$itera
 over 50, it may be worth playing around with it. Please read the documentation of the
 function \code{\link{demeaning_algo}}. Be aware that there is no clear guidance on how to change the
 settings, it's more a matter of try-and-see.}
+
+\item{demeaner}{\code{NULL} (default) or a demeaning backend object created by
+\code{\link{MapDemeaner}} or \code{\link{LsmrDemeaner}}. If \code{NULL}, the native MAP backend is
+used with \code{tol}, \code{iter}, and \code{fixef.algo}.}
 
 \item{na.rm}{Logical, default is \code{TRUE}. If \code{TRUE} and the input data contains any NA value,
 then any observation with NA will be discarded leading to an output with less observations than
