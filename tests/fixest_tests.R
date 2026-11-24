@@ -2751,6 +2751,23 @@ test(all(X_i_ref[, "cyl::4"] == 0), TRUE)
 test(drop(X_i_ref %*% coef(res_i_ref)), unname(predict(res_i_ref, newdata = nd_i)))
 res_i_inter = feols(mpg ~ i(cyl, hp), data = mtcars)
 test(colnames(model.matrix(res_i_inter, data = nd_i, type = "rhs")), names(coef(res_i_inter)))
+# subset = TRUE omitting an i() term does not re-add its columns
+test(colnames(model.matrix(res_i, data = mtcars["hp"], subset = TRUE)), "hp")
+test(colnames(model.matrix(res_i, data = nd_i["cyl"], subset = TRUE)), c("cyl::6", "cyl::8"))
+res_i_two = feols(mpg ~ hp + i(cyl, ref = 6) + i(gear), data = mtcars)
+X_i_two = model.matrix(res_i_two, data = nd_i[c("hp", "cyl")], subset = TRUE)
+test(colnames(X_i_two), c("hp", "cyl::4", "cyl::8"))
+test(all(X_i_two[, "cyl::4"] == 0), TRUE)
+# two-factor i() drops the estimation reference and pads absent estimated levels
+res_i_2f_ref = feols(mpg ~ hp + i(cyl, factor(am), ref = 4), data = mtcars)
+X_i_2f_ref = model.matrix(res_i_2f_ref, data = mtcars)
+test(colnames(X_i_2f_ref), names(coef(res_i_2f_ref)))
+test(drop(X_i_2f_ref %*% coef(res_i_2f_ref)), unname(predict(res_i_2f_ref, newdata = mtcars)))
+res_i_2f = feols(mpg ~ hp + i(cyl, i.am), data = mtcars)
+X_i_2f = model.matrix(res_i_2f, data = nd_i)
+test(colnames(X_i_2f), names(coef(res_i_2f)))
+test(all(X_i_2f[, "cyl::4:am::1"] == 0), TRUE)
+test(drop(X_i_2f %*% coef(res_i_2f)), unname(predict(res_i_2f, newdata = nd_i)))
 
 ####
 #### sparse_model_matrix ####
