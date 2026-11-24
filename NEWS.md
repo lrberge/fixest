@@ -1,6 +1,10 @@
 
 # fixest 0.14.2
 
+## New features
+
+- `etable`: use `/` to place custom rows in the varying slopes section, with `/^` for the top and `/_` for the bottom. Applies to `extralines`, `group`, and `fixef.group`, #487.
+
 ## Bug fixes
 
 - fix bug in vcov(): following v0.14.0, the returned object was a matrix of class `fixest_vcov` -- which led to problem for matrix operations as it didn't inherit the matrix class. Now fixed, thanks to @strengejacke, #652.
