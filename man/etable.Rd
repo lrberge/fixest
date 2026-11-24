@@ -556,7 +556,7 @@ least one of the three variables (the style of \code{TRUE}/\code{FALSE} is gover
 \code{yesNo}). You can control the placement of the new row by using 1 or 2 special characters at the
 start of the row name.
 The meaning of these special characters are: 1) \code{"^"}: coef., \code{"-"}: fixed-effect,
-\code{"_"}: stats, section; 2) \code{"^"}: 1st, \code{"_"}: last, row.
+\code{"/"}: varying slopes, \code{"_"}: stats, section; 2) \code{"^"}: 1st, \code{"_"}: last, row.
 For example: \code{group=list("_^Controls"=stuff)} will place the line at the top of the 'stats'
 section, and using \code{group=list("^_Controls"=stuff)} will make the row appear at the bottom of
 the coefficients section. For details, see the dedicated section.}
@@ -572,7 +572,7 @@ with \code{"Sub-sample"} in the leftmost cell, the vector filling the content of
 three models. You can control the placement of the new row by using 1 or 2 special characters at
 the start of the row name. The meaning of these special characters are:
 \enumerate{
-\item \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"_"}: stats, section;
+\item \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"/"}: varying slopes, \code{"_"}: stats, section;
 \item \code{"^"}: 1st, \code{"_"}: last, row.
 For example: \code{extralines=list("__Controls"=stuff)} will place the line at the bottom of the
 stats section, and using \code{extralines=list("^^Controls"=stuff)} will make the row appear at the
@@ -587,7 +587,7 @@ names. For ex. \code{fixef.group=list("Dates fixed-effects"="Month|Day")} will r
 and \code{"Day"} fixed effects from the display and replace them with a single row named
 "Dates fixed-effects". You can monitor the placement of the new row with two special characters
 telling where to place the row within a section: first in which section it should appear:
-\code{"^"} (coef.), \code{"-"} (fixed-effects), or \code{"_"} (stat.) section;
+\code{"^"} (coef.), \code{"-"} (fixed-effects), \code{"/"} (varying slopes), or \code{"_"} (stat.) section;
 then whether the row should be \code{"^"} (first), or \code{"_"} (last). These two special characters must
 appear first in the row names. Please see the dedicated section}
 
@@ -1031,8 +1031,8 @@ be used for illustration (the mechanism for \code{extralines} and \code{fixef.gr
 
 The row names accept 2 special characters at the very start.
 The first character tells in which section the line should appear:
-it can be equal to \code{"^"}, \code{"-"}, or \code{"_"}, meaning respectively
-the coefficients, the fixed-effects and the statistics section
+it can be equal to \code{"^"}, \code{"-"}, \code{"/"}, or \code{"_"}, meaning respectively
+the coefficients, the fixed-effects, the varying slopes and the statistics section
 (which typically appear at the top, mid and bottom of the table).
 The second one governs the placement of the new line within
 the section: it can be equal to \code{"^"}, meaning first line, or \code{"_"}, meaning last line.
@@ -1041,10 +1041,14 @@ Let's have some examples. Using the previous example, writing \code{"_^Controls"
 would place the new line at the top of the statistics section.
 Writing \code{"-_Controls"} places it as the last row of
 the fixed-effects section; \code{"^^Controls"} at the top row of
-the coefficients section; etc...
+the coefficients section; \code{"/^Controls"} at the top of the varying slopes section;
+\code{"/_Controls"} at the bottom of the varying slopes section.
 
 The second character is optional, the default placement being in the bottom.
-This means that \code{"_Controls"} would place it at the bottom of the statistics section.
+This means that \code{"_Controls"} would place it at the bottom of the statistics section,
+and \code{"/Controls"} at the bottom of the varying slopes section.
+Custom rows can create a section even when no model terms belong to it.
+Using \code{drop.section} hides the section's model rows and title, but keeps custom rows.
 
 The placement in \code{fixef.group} is defined similarly, only the default
 placement is different.
@@ -1197,8 +1201,8 @@ etable(est_all, est_sub1, est_sub2, est_sub3,
 
 # You can monitor the placement of the new lines with two special characters
 # at the beginning of the row name.
-# 1) "^", "-" or "_" which mean the coefficients, the fixed-effects or the
-# statistics section.
+# 1) "^", "-", "/" or "_" which mean the coefficients, fixed-effects,
+# varying slopes or statistics section.
 # 2) "^" or "_" which mean first or last line of the section
 #
 # Ex: starting with "_^" will place the line at the top of the stat. section

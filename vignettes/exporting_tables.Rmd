@@ -402,6 +402,33 @@ The most popular R IDEs like RStudio and Positron (VS Code) come with their own 
 
 Note that it can be useful to cache the PNG outputs to avoid the compilation run-time; at least if you plan on displaying the same tables multiple times in a row. Caching can be enabled with `setFixest_etable(view.cache = TRUE)`. The images are then saved in a temporary directory that the algorithm tries to find even across sessions (i.e., it should enable long-term caching). 
 
+## Adding and placing custom rows
+
+Use `extralines` to add rows whose values you supply, and `group` to replace matching coefficient rows with a row indicating whether each model includes those controls. Both arguments accept a named list. The names become row labels.
+
+The first character of a row name can select its section: `"^"` for coefficients, `"-"` for fixed effects, `"/"` for varying slopes, and `"_"` for fit statistics. An optional second character selects the top (`"^"`) or bottom (`"_"`) of that section. Without a second character, the row goes at the bottom. Without either character, it goes below the coefficients. These rules apply to console and LaTeX output, and to `fixef.group` too, although that argument defaults to the top of the fixed-effects section.
+
+For example, compare a model with a common temperature coefficient to one where the temperature slope varies by month:
+
+```{r}
+# Reset display defaults from previous sections
+setFixest_etable(reset = TRUE)
+
+est_common = feols(Ozone ~ Solar.R + Wind + Temp | Day + Month, airquality)
+est_slopes = feols(Ozone ~ Solar.R + Wind | Day + Month[Temp], airquality)
+
+etable(est_common, est_slopes,
+       extralines = list("/^Temperature specification" = c("Common", "By month")))
+```
+
+The `group` argument uses regular expressions to select coefficient rows. Here we replace the solar radiation and wind coefficients with a single control indicator at the bottom of the coefficients (`^_`):
+
+```{r}
+etable(est_common, est_slopes,
+       group = list("^_Weather controls" = "Solar|Wind"))
+```
+
+
 
 ## Custom fit statistics
 

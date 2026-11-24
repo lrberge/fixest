@@ -245,7 +245,7 @@
 #' `yesNo`). You can control the placement of the new row by using 1 or 2 special characters at the 
 #' start of the row name. 
 #' The meaning of these special characters are: 1) `"^"`: coef., `"-"`: fixed-effect, 
-#' `"_"`: stats, section; 2) `"^"`: 1st, `"_"`: last, row. 
+#' `"/"`: varying slopes, `"_"`: stats, section; 2) `"^"`: 1st, `"_"`: last, row.
 #' For example: `group=list("_^Controls"=stuff)` will place the line at the top of the 'stats' 
 #' section, and using `group=list("^_Controls"=stuff)` will make the row appear at the bottom of 
 #' the coefficients section. For details, see the dedicated section.
@@ -259,7 +259,7 @@
 #' with `"Sub-sample"` in the leftmost cell, the vector filling the content of the cells for the 
 #' three models. You can control the placement of the new row by using 1 or 2 special characters at 
 #' the start of the row name. The meaning of these special characters are: 
-#' 1) `"^"`: coef., `"-"`: fixed-effect, `"_"`: stats, section; 
+#' 1) `"^"`: coef., `"-"`: fixed-effect, `"/"`: varying slopes, `"_"`: stats, section;
 #' 2) `"^"`: 1st, `"_"`: last, row.
 #' For example: `extralines=list("__Controls"=stuff)` will place the line at the bottom of the 
 #' stats section, and using `extralines=list("^^Controls"=stuff)` will make the row appear at the 
@@ -272,7 +272,7 @@
 #' and `"Day"` fixed effects from the display and replace them with a single row named 
 #' "Dates fixed-effects". You can monitor the placement of the new row with two special characters 
 #' telling where to place the row within a section: first in which section it should appear: 
-#' `"^"` (coef.), `"-"` (fixed-effects), or `"_"` (stat.) section; 
+#' `"^"` (coef.), `"-"` (fixed-effects), `"/"` (varying slopes), or `"_"` (stat.) section;
 #' then whether the row should be `"^"` (first), or `"_"` (last). These two special characters must 
 #' appear first in the row names. Please see the dedicated section
 #' @param placement (Tex only.) Character string giving the position of the float in Latex. Default 
@@ -631,8 +631,8 @@
 #'
 #' The row names accept 2 special characters at the very start. 
 #' The first character tells in which section the line should appear: 
-#' it can be equal to `"^"`, `"-"`, or `"_"`, meaning respectively 
-#' the coefficients, the fixed-effects and the statistics section 
+#' it can be equal to `"^"`, `"-"`, `"/"`, or `"_"`, meaning respectively
+#' the coefficients, the fixed-effects, the varying slopes and the statistics section
 #' (which typically appear at the top, mid and bottom of the table). 
 #' The second one governs the placement of the new line within 
 #' the section: it can be equal to `"^"`, meaning first line, or `"_"`, meaning last line.
@@ -641,10 +641,14 @@
 #' would place the new line at the top of the statistics section. 
 #' Writing `"-_Controls"` places it as the last row of 
 #' the fixed-effects section; `"^^Controls"` at the top row of 
-#' the coefficients section; etc...
+#' the coefficients section; `"/^Controls"` at the top of the varying slopes section;
+#' `"/_Controls"` at the bottom of the varying slopes section.
 #'
 #' The second character is optional, the default placement being in the bottom. 
-#' This means that `"_Controls"` would place it at the bottom of the statistics section.
+#' This means that `"_Controls"` would place it at the bottom of the statistics section,
+#' and `"/Controls"` at the bottom of the varying slopes section.
+#' Custom rows can create a section even when no model terms belong to it.
+#' Using `drop.section` hides the section's model rows and title, but keeps custom rows.
 #'
 #' The placement in `fixef.group` is defined similarly, only the default 
 #' placement is different. 
@@ -811,8 +815,8 @@
 #'
 #' # You can monitor the placement of the new lines with two special characters
 #' # at the beginning of the row name.
-#' # 1) "^", "-" or "_" which mean the coefficients, the fixed-effects or the
-#' # statistics section.
+#' # 1) "^", "-", "/" or "_" which mean the coefficients, fixed-effects,
+#' # varying slopes or statistics section.
 #' # 2) "^" or "_" which mean first or last line of the section
 #' #
 #' # Ex: starting with "_^" will place the line at the top of the stat. section
@@ -3284,7 +3288,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
 
         # Now we create the extra line
         el_name = names(fixef.group)[i]
-        if(grepl("^(\\^|_|-)", el_name)){
+        if(grepl("^(\\^|_|-|/)", el_name)){
           # => the user specifies the placement => replaces the default
 
         } else {
@@ -4087,6 +4091,7 @@ etable_internal_latex = function(info){
   #
 
   create.fixef_title = FALSE
+  create.slopes_title = FALSE
 
   for(i in seq_along(group)){
     gi = group[[i]]
@@ -4098,8 +4103,8 @@ etable_internal_latex = function(info){
     gi_where = "coef"
 
     gi_top = FALSE
-    if(grepl("^(\\^|_|-)", gi_name)){
-      # first character: section: ^|-|_
+    if(grepl("^(\\^|_|-|/)", gi_name)){
+      # first character: section: ^|-|/|_
       # second character: the location: ^|_
 
       # sec: section
@@ -4112,7 +4117,7 @@ etable_internal_latex = function(info){
         gi_top = row == "^"
       }
 
-      gi_where = switch(sec, "^" = "coef", "-" = "fixef", "_" = "stat")
+      gi_where = switch(sec, "^" = "coef", "-" = "fixef", "/" = "slopes", "_" = "stat")
     }
 
     gi_full = paste0(gi_full, gi_name, " & ", paste0(gi_format, collapse = " & "), "\\\\\n")
@@ -4123,6 +4128,9 @@ etable_internal_latex = function(info){
       } else if(gi_where == "fixef"){
         create.fixef_title = TRUE
         FE_lines = c(gi_full, FE_lines)
+      } else if(gi_where == "slopes"){
+        create.slopes_title = TRUE
+        slope_lines = c(gi_full, slope_lines)
       } else {
         stat_lines = c(gi_full, stat_lines)
       }
@@ -4132,6 +4140,9 @@ etable_internal_latex = function(info){
       } else if(gi_where == "fixef"){
         create.fixef_title = TRUE
         FE_lines = c(FE_lines, gi_full)
+      } else if(gi_where == "slopes"){
+        create.slopes_title = TRUE
+        slope_lines = c(slope_lines, gi_full)
       } else {
         stat_lines = c(stat_lines, gi_full)
       }
@@ -4166,8 +4177,8 @@ etable_internal_latex = function(info){
     el_where = "coef"
 
     el_top = FALSE
-    if(grepl("^(\\^|_|-)", el_name)){
-      # first character: section: ^|-|_
+    if(grepl("^(\\^|_|-|/)", el_name)){
+      # first character: section: ^|-|/|_
       # second character: the location: ^|_
 
       # sec: section
@@ -4180,7 +4191,7 @@ etable_internal_latex = function(info){
         el_top = row == "^"
       }
 
-      el_where = switch(sec, "^" = "coef", "-" = "fixef", "_" = "stat")
+      el_where = switch(sec, "^" = "coef", "-" = "fixef", "/" = "slopes", "_" = "stat")
     }
 
     if(grepl(":tex:", el_name, fixed = TRUE)){
@@ -4200,6 +4211,9 @@ etable_internal_latex = function(info){
       } else if(el_where == "fixef"){
         create.fixef_title = TRUE
         FE_lines = c(el_full, FE_lines)
+      } else if(el_where == "slopes"){
+        create.slopes_title = TRUE
+        slope_lines = c(el_full, slope_lines)
       } else {
         stat_lines = c(el_full, stat_lines)
       }
@@ -4209,6 +4223,9 @@ etable_internal_latex = function(info){
       } else if(el_where == "fixef"){
         create.fixef_title = TRUE
         FE_lines = c(FE_lines, el_full)
+      } else if(el_where == "slopes"){
+        create.slopes_title = TRUE
+        slope_lines = c(slope_lines, el_full)
       } else {
         stat_lines = c(stat_lines, el_full)
       }
@@ -4223,6 +4240,16 @@ etable_internal_latex = function(info){
       fixef_title = "\\midrule "
     } else {
       fixef_title = paste0(style$fixef.title, "\\\\\n")
+    }
+  }
+
+  if(create.slopes_title && is.null(slope_intro) && !"slopes" %in% drop.section){
+    if(nchar(style$slopes.title) == 0){
+      slope_intro = ""
+    } else if(style$slopes.title == "\\midrule"){
+      slope_intro = "\\midrule "
+    } else {
+      slope_intro = paste0(style$slopes.title, "\\\\\n")
     }
   }
 
@@ -4471,6 +4498,7 @@ etable_internal_df = function(info){
 
   before_stat = after_stat = c()
   before_fixef = after_fixef = c()
+  before_slopes = after_slopes = c()
 
   for(i in seq_along(group)){
     gi = group[[i]]
@@ -4480,8 +4508,8 @@ etable_internal_df = function(info){
     gi_where = "coef"
 
     gi_top = FALSE
-    if(grepl("^(\\^|_|-)", gi_name)){
-      # first character: section: ^|-|_
+    if(grepl("^(\\^|_|-|/)", gi_name)){
+      # first character: section: ^|-|/|_
       # second character: the location: ^|_
 
       # sec: section
@@ -4494,7 +4522,7 @@ etable_internal_df = function(info){
         gi_top = row == "^"
       }
 
-      gi_where = switch(sec, "^" = "coef", "-" = "fixef", "_" = "stat")
+      gi_where = switch(sec, "^" = "coef", "-" = "fixef", "/" = "slopes", "_" = "stat")
     }
 
     my_line = c(gi_name, gi_format)
@@ -4504,6 +4532,8 @@ etable_internal_df = function(info){
         res = rbind(my_line, res)
       } else if(gi_where == "fixef"){
         before_fixef = rbind(before_fixef, my_line)
+      } else if(gi_where == "slopes"){
+        before_slopes = rbind(before_slopes, my_line)
       } else {
         before_stat = rbind(before_stat, my_line)
       }
@@ -4512,6 +4542,8 @@ etable_internal_df = function(info){
         res = rbind(res, my_line)
       } else if(gi_where == "fixef"){
         after_fixef = rbind(after_fixef, my_line)
+      } else if(gi_where == "slopes"){
+        after_slopes = rbind(after_slopes, my_line)
       } else {
         after_stat = rbind(after_stat, my_line)
       }
@@ -4547,8 +4579,8 @@ etable_internal_df = function(info){
     el_name = names(extralines)[i]
     el_top = FALSE
 
-    if(grepl("^(\\^|_|-)", el_name)){
-      # first character: section: ^|-|_
+    if(grepl("^(\\^|_|-|/)", el_name)){
+      # first character: section: ^|-|/|_
       # second character: the location: ^|_
 
       # sec: section
@@ -4561,7 +4593,7 @@ etable_internal_df = function(info){
         el_top = row == "^"
       }
 
-      el_where = switch(sec, "^" = "coef", "-" = "fixef", "_" = "stat")
+      el_where = switch(sec, "^" = "coef", "-" = "fixef", "/" = "slopes", "_" = "stat")
     }
 
     # we clean possible tex markup
@@ -4574,6 +4606,8 @@ etable_internal_df = function(info){
         res = rbind(my_line, res)
       } else if(el_where == "fixef"){
         before_fixef = rbind(before_fixef, my_line)
+      } else if(el_where == "slopes"){
+        before_slopes = rbind(before_slopes, my_line)
       } else {
         before_stat = rbind(before_stat, my_line)
       }
@@ -4582,6 +4616,8 @@ etable_internal_df = function(info){
         res = rbind(res, my_line)
       } else if(el_where == "fixef"){
         after_fixef = rbind(after_fixef, my_line)
+      } else if(el_where == "slopes"){
+        after_slopes = rbind(after_slopes, my_line)
       } else {
         after_stat = rbind(after_stat, my_line)
       }
@@ -4718,9 +4754,19 @@ etable_internal_df = function(info){
       res = rbind(res, c(style$slopes.title, sprintf("%.*s", longueur[-1], myLine)))
     }
 
-    res = rbind(res, all_slopes)
+    res = rbind(res, before_slopes, all_slopes)
 
+  } else {
+    if((length(before_slopes) > 0 || length(after_slopes) > 0) &&
+       !"slopes" %in% drop.section && nchar(style$slopes.title) > 0){
+      myLine = paste(rep(style$slopes.line, 30), collapse = "")
+      res = rbind(res, c(style$slopes.title, sprintf("%.*s", longueur[-1], myLine)))
+    }
+
+    res = rbind(res, before_slopes)
   }
+
+  res = rbind(res, after_slopes)
 
   # preamble created before because used to set the width
   if(length(preamble) > 0){

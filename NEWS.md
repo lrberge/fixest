@@ -1,6 +1,10 @@
 
 # fixest 0.14.2
 
+## New features
+
+- `etable`: use `/` to place custom rows in the varying slopes section, with `/^` for the top and `/_` for the bottom. Applies to `extralines`, `group`, and `fixef.group`, #487.
+
 ## Bug fixes
 
 - Improvements for the Kleibergen-Paap statistic: corrected IID covariance normalization, allow estimation weights, support robust and clustered IV models with more instruments than endogenous regressors, and corrected first-stage small sample adjustments and Wald rank-test p-values.
