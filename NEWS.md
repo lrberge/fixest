@@ -1,6 +1,10 @@
 
 # fixest 0.14.2
 
+## New features
+
+- `femlm`, `fenegbin` and `feNmlm` gain the argument `weights`, hence maximum likelihood estimations can now be weighted. The weights enter the log-likelihood linearly and are accounted for in the score, in the information matrix and in the concentration of the fixed-effects; for the negative binomial the over-dispersion parameter is weighted too. Note that until now the argument was silently ignored by these functions (a generic warning was raised and unweighted estimates were returned).
+
 ## Bug fixes
 
 - Improvements for the Kleibergen-Paap statistic: corrected IID covariance normalization, allow estimation weights, support robust and clustered IV models with more instruments than endogenous regressors, and corrected first-stage small sample adjustments and Wald rank-test p-values.
