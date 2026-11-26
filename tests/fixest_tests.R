@@ -3506,6 +3506,99 @@ dm_vs = demean(y + x1 ~ species[x2, x3] + fe2[x2], data = base_vs)
 test(as.numeric(lm(y ~ 0 + x1, dm_vs)$coefficients), as.numeric(coef(est_vs)))
 
 
+####
+#### Weighted demeaning convergence & scale invariance ####
+####
+
+chunk("weighted demeaning convergence")
+
+set.seed(123)
+# Construct a well-mixed high-weight core connected to a slow-mixing low-weight ladder
+# (dedicated clusters with tiny weight w = 1e-6, degree >= 4 so zero singletons)
+n1_w = 1200L
+g1_1 = sample(1:30, n1_w, replace = TRUE)
+g2_1 = sample(1:30, n1_w, replace = TRUE)
+g3_1 = sample(1:20, n1_w, replace = TRUE)
+
+L_w  = 120L
+g1_2 = rep(31:(30L + L_w), each = 4L)
+g2_2 = as.integer(rbind(31:(30L + L_w), 31:(30L + L_w), c(32:(30L + L_w), 1L), c(32:(30L + L_w), 1L)))
+g3_2 = rep(21:(20L + L_w %/% 2L), each = 8L)[seq_along(g1_2)]
+n2_w = length(g1_2)
+
+g1_w = c(g1_1, g1_2); g2_w = c(g2_1, g2_2); g3_w = c(g3_1, g3_2)
+w_w  = c(rep(1.0, n1_w), rep(1e-6, n2_w))
+n_w  = length(w_w)
+z_w  = rnorm(n_w)
+x_w  = rnorm(max(g1_w))[g1_w] + rnorm(max(g2_w))[g2_w] + rnorm(max(g3_w))[g3_w] + rnorm(n_w)
+y_w  = 1.75 * x_w + rnorm(max(g1_w))[g1_w] - rnorm(max(g2_w))[g2_w] + rnorm(max(g3_w))[g3_w] + rnorm(n_w, sd = 0.3)
+y_w[(n1_w + 1L):n_w] = y_w[(n1_w + 1L):n_w] + 20.0 * sin(seq_len(n2_w) / 15) + 5.0 * rnorm(n2_w)
+x_w[(n1_w + 1L):n_w] = x_w[(n1_w + 1L):n_w] + 20.0 * cos(seq_len(n2_w) / 15) + 5.0 * rnorm(n2_w)
+
+df_w = data.frame(y = y_w, x = x_w, g1 = factor(g1_w), g2 = factor(g2_w),
+                  g3 = factor(g3_w), z = z_w, w = w_w,
+                  w_tiny = w_w * 1e-10, w_huge = w_w * 1e10,
+                  w_const = 5.0, w_const_pow2 = 4.0)
+
+# 2-FE weighted: matches dense WLS and converges rapidly
+b2_lm = coef(lm(y ~ x + g1 + g2, data = df_w, weights = w))["x"]
+f2_w  = feols(y ~ x | g1 + g2, data = df_w, weights = ~w, fixef.rm = "none")
+test(abs(coef(f2_w)["x"] - b2_lm) < 1e-6, TRUE)
+test(max(f2_w$iterations) < 300, TRUE)
+
+# 3-FE weighted: matches dense WLS and converges rapidly
+b3_lm = coef(lm(y ~ x + g1 + g2 + g3, data = df_w, weights = w))["x"]
+f3_w  = feols(y ~ x | g1 + g2 + g3, data = df_w, weights = ~w, fixef.rm = "none")
+test(abs(coef(f3_w)["x"] - b3_lm) < 1e-6, TRUE)
+test(max(f3_w$iterations) < 300, TRUE)
+
+# Weight-rescaling invariance across 20 orders of magnitude (w -> 1e-10*w, 1e+10*w)
+f3_tiny = feols(y ~ x | g1 + g2 + g3, data = df_w, weights = ~w_tiny, fixef.rm = "none")
+f3_huge = feols(y ~ x | g1 + g2 + g3, data = df_w, weights = ~w_huge, fixef.rm = "none")
+test(f3_tiny$iterations, f3_w$iterations)
+test(f3_huge$iterations, f3_w$iterations)
+test(abs(coef(f3_tiny)["x"] - coef(f3_w)["x"]) < 1e-8, TRUE)
+test(abs(coef(f3_huge)["x"] - coef(f3_w)["x"]) < 1e-8, TRUE)
+
+# 3-FE with varying slope + extreme weights: matches dense WLS
+bs_lm = coef(lm(y ~ x + g1 + g2 + g3 + g3:z, data = df_w, weights = w))["x"]
+fs_w  = feols(y ~ x | g1 + g2 + g3[z], data = df_w, weights = ~w, fixef.rm = "none")
+test(abs(coef(fs_w)["x"] - bs_lm) < 1e-6, TRUE)
+test(max(fs_w$iterations) < 300, TRUE)
+
+# Direct demean() with exact zero-weight clusters matches WLS on positive-weight rows
+w_zero = w_w
+w_zero[(n1_w + 1L):n_w] = 0.0
+dm_z = demean(cbind(y = y_w, x = x_w),
+              list(g1 = g1_w, g2 = g2_w, g3 = g3_w),
+              weights = w_zero, im_confident = TRUE)
+b_dm_z = sum(w_zero * dm_z[, "x"] * dm_z[, "y"]) / sum(w_zero * dm_z[, "x"]^2)
+b_lm_z = coef(lm(y ~ x + g1 + g2 + g3, data = df_w[seq_len(n1_w), ]))["x"]
+test(abs(b_dm_z - b_lm_z) < 1e-10, TRUE)
+
+# Constant weights match unweighted (bit-for-bit identical for power-of-2 constant weights)
+f3_unw = feols(y ~ x | g1 + g2 + g3, data = df_w, fixef.rm = "none")
+f3_cw  = feols(y ~ x | g1 + g2 + g3, data = df_w, weights = ~w_const, fixef.rm = "none")
+f3_cw2 = feols(y ~ x | g1 + g2 + g3, data = df_w, weights = ~w_const_pow2, fixef.rm = "none")
+test(f3_cw2$iterations, f3_unw$iterations)
+test(abs(coef(f3_cw2)["x"] - coef(f3_unw)["x"]) < 1e-12, TRUE)
+test(abs(coef(f3_cw)["x"] - coef(f3_unw)["x"]) < 1e-5, TRUE)
+
+# Weighted fepois (warm-started IRLS) with extreme weights matches glm()
+set.seed(42)
+Mp = 40L
+p1 = c(rep(1:Mp, each = 4L), sample(1:Mp, 400L, replace = TRUE))
+p2 = c(as.integer(rbind(1:Mp, 1:Mp, c(2:Mp, 1L), c(2:Mp, 1L))), sample(1:Mp, 400L, replace = TRUE))
+p3 = c(rep(1:10, length.out = 4L * Mp), sample(1:10, 400L, replace = TRUE))
+pw = c(rep(1e-6, 4L * Mp), rep(1.0, 400L))
+px = rnorm(length(pw))
+py = rpois(length(pw), exp(0.5 + 0.4 * px + 0.3 * sin(p1 / 4) - 0.2 * cos(p2 / 3) + 0.1 * sin(p3)))
+df_p = data.frame(y = py, x = px, g1 = factor(p1), g2 = factor(p2), g3 = factor(p3), w = pw)
+fp_w = fepois(y ~ x | g1 + g2 + g3, data = df_p, weights = ~w, fixef.rm = "none")
+gp_w = glm(y ~ x + g1 + g2 + g3, data = df_p, weights = w, family = poisson())
+test(abs(coef(fp_w)["x"] - coef(gp_w)["x"]) < 1e-10, TRUE)
+
+
 
 
 
