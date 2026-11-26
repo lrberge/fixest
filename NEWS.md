@@ -3,6 +3,8 @@
 
 ## Bug fixes
 
+- fix 32-bit integer overflows and excessive intermediate allocations in large-$N$ multi-way clustered VCOVs (`vcovClust`, `cpp_tapply_sum`, `matprod_XtX`/`matprod_Xty`, `sparse_check`, and `to_index_internal`).
+
 - Improvements for the Kleibergen-Paap statistic: corrected IID covariance normalization, allow estimation weights, support robust and clustered IV models with more instruments than endogenous regressors, and corrected first-stage small sample adjustments and Wald rank-test p-values.
 
 - fix bug in vcov(): following v0.14.0, the returned object was a matrix of class `fixest_vcov` -- which led to problem for matrix operations as it didn't inherit the matrix class. Now fixed, thanks to @strengejacke, #652.

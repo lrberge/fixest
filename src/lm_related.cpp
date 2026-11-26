@@ -227,6 +227,7 @@ static bool sparse_check(const NumericMatrix &X){
   if(K < 5) return false;
   if(N < 1000 && K < 100) return false;
   if(N < 100) return false; // avoids corner cases where you have more vars than obs
+  if(static_cast<size_t>(N) * static_cast<size_t>(K) > 100000000ULL) return false;
 
   // Let's look at some rows
   // If there are factors, there should be 0s
@@ -379,14 +380,20 @@ void matprod_XtX(NumericMatrix &XtX, const NumericMatrix &X,
       }
     }
 
+    const double *pX = REAL(X);
+    const double *pwX = REAL(wX);
+
     #pragma omp parallel for num_threads(nthreads) schedule(static, 1)
     for(int index=0 ; index<nValues ; ++index){
       int k_row = all_i[index];
       int k_col = all_j[index];
+      const double *px_row = pX + static_cast<size_t>(k_row) * N;
+      const double *pwx_col = pwX + static_cast<size_t>(k_col) * N;
 
       double val = 0;
+      #pragma omp simd reduction(+:val)
       for(int i=0 ; i<N ; ++i){
-        val += X(i, k_row) * wX(i, k_col);
+        val += px_row[i] * pwx_col[i];
       }
 
       XtX(k_row, k_col) = val;
@@ -413,11 +420,15 @@ void matprod_Xty(NumericVector &Xty, const NumericMatrix &X, const double *y, in
     Xty[0] = value;
     
   } else  {
+    const double *pX = REAL(X);
+
     #pragma omp parallel for num_threads(nthreads)
     for(int j=0 ; j<K ; ++j){
+      const double *px_col = pX + static_cast<size_t>(j) * N;
       double val = 0;
+      #pragma omp simd reduction(+:val)
       for(int i=0 ; i<N ; ++i){
-        val += X(i, j) * y[i];
+        val += px_col[i] * y[i];
       }
 
       Xty[j] = val;
