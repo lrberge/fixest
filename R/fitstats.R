@@ -1788,13 +1788,25 @@ degrees_freedom_iid = function(x, type){
     return(0)
   }
 
+  vcov_sub = vcov[var_keep, var_keep, drop = FALSE]
+
+  # Scale by IID SEs (or VCOV diagonal) so cpp_cholesky's tol is scale-invariant
+  if(!is.null(x$cov.iid) && all(var_keep %in% rownames(x$cov.iid))){
+    scale_vec = sqrt(pmax(diag(x$cov.iid[var_keep, var_keep, drop = FALSE]), 0))
+  } else {
+    scale_vec = sqrt(pmax(diag(vcov_sub), 0))
+  }
+  scale_vec[!is.finite(scale_vec) | scale_vec == 0] = 1
+
+  vcov_norm = vcov_sub / tcrossprod(scale_vec)
+
   # To handle errors (rare but can happen)
-  eigenvalues = eigen(vcov, symmetric = TRUE, only.values = TRUE)$values
+  eigenvalues = eigen(vcov_norm, symmetric = TRUE, only.values = TRUE)$values
   if(any(eigenvalues < 0)){
-    vcov = mat_posdef_fix(vcov)
+    vcov_norm = mat_posdef_fix(vcov_norm)
   }
 
-  chol_decomp = cpp_cholesky(vcov[var_keep, var_keep, drop = FALSE])
+  chol_decomp = cpp_cholesky(vcov_norm)
   vcov_inv = chol_decomp$XtX_inv
 
   if(isTRUE(chol_decomp$all_removed)){
@@ -1803,10 +1815,12 @@ degrees_freedom_iid = function(x, type){
   }
 
   if(any(chol_decomp$id_excl)){
-    var_keep = var_keep[!chol_decomp$id_excl]
+    keep_idx = !chol_decomp$id_excl
+    var_keep = var_keep[keep_idx]
+    scale_vec = scale_vec[keep_idx]
   }
 
-  my_coef = coef[var_keep]
+  my_coef = coef[var_keep] / scale_vec
 
   stat = drop(my_coef %*% vcov_inv %*% my_coef) / length(my_coef)
 
