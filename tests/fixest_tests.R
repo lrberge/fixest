@@ -3232,6 +3232,52 @@ test(
   tol = 1e-9
 )
 
+# .wald() must be invariant to regressor/instrument scaling (#650)
+fulton_big = fulton
+fulton_big$speed2 = fulton_big$speed2 * 1e5
+est_kp_big = feols(qty ~ 1 | price ~ speed2 + wave2, fulton_big, cluster = "day")
+test(
+  fitstat(est_kp_big, "ivwald1")$ivwald1$stat,
+  fitstat(est_kp_one, "ivwald1")$ivwald1$stat,
+  tol = 1e-9
+)
+test(
+  fitstat(est_kp_big, "ivwald1")$ivwald1$stat,
+  fitstat(est_kp_big, "kpr")$kpr$stat,
+  tol = 1e-9
+)
+
+set.seed(1)
+d_scale = data.frame(
+  id = factor(rep(1:50, each = 20)),
+  x = rnorm(1000),
+  z_unit = rnorm(1000),
+  e = rnorm(1000)
+)
+d_scale$z_big = d_scale$z_unit * 1e5
+d_scale$y = d_scale$x + d_scale$e
+d_scale$x_endo = d_scale$x + 0.05 * d_scale$z_unit + rnorm(1000)
+est_iv_unit = feols(y ~ 1 | id | x_endo ~ z_unit, cluster = "id", data = d_scale)
+est_iv_big = feols(y ~ 1 | id | x_endo ~ z_big, cluster = "id", data = d_scale)
+test(
+  fitstat(est_iv_big, "ivwald1")$ivwald1$stat,
+  fitstat(est_iv_unit, "ivwald1")$ivwald1$stat,
+  tol = 1e-9
+)
+
+est_ols_unit = feols(y ~ z_unit | id, cluster = "id", data = d_scale)
+est_ols_big = feols(y ~ z_big | id, cluster = "id", data = d_scale)
+test(
+  fitstat(est_ols_big, "wald")$wald$stat,
+  fitstat(est_ols_unit, "wald")$wald$stat,
+  tol = 1e-9
+)
+
+# Indicators clustered at the same level still trigger the 1e6 fallback
+d_zero_vcov = data.frame(id = factor(rep(1:10, each = 5)), y = rnorm(50))
+est_zero_vcov = feols(y ~ 0 + i(id), cluster = "id", data = d_zero_vcov)
+test(fitstat(est_zero_vcov, "wald")$wald$stat, 1e6)
+
 # Three endogenous regressors catch transposed right singular vectors.
 set.seed(987)
 kp_z = matrix(rnorm(400 * 4), 400)
